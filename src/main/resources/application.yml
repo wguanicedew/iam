@@ -2,7 +2,7 @@ server:
   port: 8080
 
 iam:
-  issuer: http://localhost:${server.port}
+  issuer: http://localhost:${server.port}/
   token:
     lifetime: 86400
 

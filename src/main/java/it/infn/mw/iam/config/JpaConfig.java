@@ -11,6 +11,7 @@ import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.AbstractJpaVendorAdapter;
 import org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter;
@@ -47,16 +48,19 @@ public class JpaConfig extends JpaBaseConfiguration {
   @Override
   public LocalContainerEntityManagerFactoryBean entityManagerFactory(
     EntityManagerFactoryBuilder factoryBuilder) {
-
-    return factoryBuilder.dataSource(dataSource).packages("org.mitre")
+    
+    LocalContainerEntityManagerFactoryBean emf = factoryBuilder.dataSource(dataSource).packages("org.mitre")
       .persistenceUnit("defaultPersistenceUnit")
       .properties(getVendorProperties()).build();
+    
+      
+    return emf; 
 
   }
-
-  @Bean
-  public PlatformTransactionManager defaultTransactionManager() {
-
-    return new DataSourceTransactionManager(dataSource);
+  
+  @Bean(name="defaultTransactionManager")
+  public PlatformTransactionManager defaultTransactionManager(){
+    return new JpaTransactionManager();
   }
+
 }

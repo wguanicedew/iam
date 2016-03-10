@@ -148,12 +148,7 @@ public class AuthorizationServerConfig
       .requestFactory(requestFactory()).tokenGranter(tokenGranter())
       .authorizationCodeServices(authorizationCodeServices());
   }
-
-  @Override
-  public void configure(AuthorizationServerSecurityConfigurer oauthServer)
-    throws Exception {
-
-  }
+  
 
   @Override
   public void configure(ClientDetailsServiceConfigurer clients)

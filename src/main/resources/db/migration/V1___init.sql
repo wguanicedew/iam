@@ -411,7 +411,7 @@ INSERT INTO client_scope (owner_id, scope) VALUES
 
 INSERT INTO client_redirect_uri (owner_id, redirect_uri) VALUES
   (1, 'http://localhost/'),
-  (1, 'http://localhost:8080/');
+  (1, 'http://localhost:9999/');
   
 INSERT INTO client_grant_type (owner_id, grant_type) VALUES
   (1, 'authorization_code'),
