@@ -8,12 +8,17 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.AbstractJpaVendorAdapter;
 import org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
+@EnableTransactionManagement
 public class JpaConfig extends JpaBaseConfiguration {
 
   @Autowired
@@ -43,10 +48,15 @@ public class JpaConfig extends JpaBaseConfiguration {
   public LocalContainerEntityManagerFactoryBean entityManagerFactory(
     EntityManagerFactoryBuilder factoryBuilder) {
 
-    return factoryBuilder.dataSource(dataSource)
-      .packages("org.mitre")
+    return factoryBuilder.dataSource(dataSource).packages("org.mitre")
       .persistenceUnit("defaultPersistenceUnit")
       .properties(getVendorProperties()).build();
 
+  }
+
+  @Bean
+  public PlatformTransactionManager defaultTransactionManager() {
+
+    return new DataSourceTransactionManager(dataSource);
   }
 }

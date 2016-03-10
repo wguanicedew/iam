@@ -4,16 +4,6 @@
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
 
 <o:header title="Log In" />
-<script type="text/javascript">
-<!--
-
-$(document).ready(function() {
-	// select the appropriate field based on context
-	$('#<c:out value="${ login_hint != null ? 'password' : 'username' }" />').focus();
-});
-
-//-->
-</script>
 <o:topbar />
 <div class="container-fluid main">
 
@@ -23,10 +13,11 @@ $(document).ready(function() {
 		<div class="alert alert-error"><spring:message code="login.error"/></div>
 	</c:if>
 
-
-	<div class="row-fluid">
+  <c:url var="loginUrl" value="/login"/>
+	
+  <div class="row-fluid">
 		<div class="span6 offset1 well">
-			<form action="${ config.issuer }${ config.issuer.endsWith('/') ? '' : '/' }login" method="POST">
+			<form action="${loginUrl}" method="post">
 				<div>
 					<div class="input-prepend input-block-level">
 						<span class="add-on"><i class="icon-user"></i></span>

@@ -1,67 +1,55 @@
 package it.infn.mw.iam.config;
 
-import java.util.List;
+import java.util.Locale;
 
-import org.mitre.openid.connect.web.ServerConfigInterceptor;
-import org.mitre.openid.connect.web.UserInfoInterceptor;
+import org.mitre.openid.connect.config.JsonMessageSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.web.servlet.AsyncHandlerInterceptor;
+import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.view.BeanNameViewResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.JstlView;
 
 @Configuration
-@EnableWebMvc
 public class MvcConfig extends WebMvcConfigurerAdapter {
 
+  @Autowired
+  @Qualifier("mitreUserInfoInterceptor")
+  AsyncHandlerInterceptor userInfoInterceptor;
+  
+  @Autowired
+  @Qualifier("mitreServerConfigInterceptor")
+  AsyncHandlerInterceptor serverConfigInterceptor;
+  
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
 
-    registry.addInterceptor(new UserInfoInterceptor());
-    registry.addInterceptor(new ServerConfigInterceptor());
+    registry.addInterceptor(userInfoInterceptor);
+    registry.addInterceptor(serverConfigInterceptor);
 
   }
 
   @Override
   public void addResourceHandlers(ResourceHandlerRegistry registry) {
 
-    registry.addResourceHandler("/css/**")
-      .addResourceLocations("/resources/css/");
-    
-    registry.addResourceHandler("/images/**")
-      .addResourceLocations("/resources/images/");
-    
-    registry.addResourceHandler("/js/**")
-      .addResourceLocations("/resources/js/");
-  }
-
-  @Override
-  public void configureMessageConverters(
-    List<HttpMessageConverter<?>> converters) {
-
-    converters.add(new StringHttpMessageConverter());
-    converters.add(new MappingJackson2HttpMessageConverter());
-  }
-
-  @Override
-  public void configureDefaultServletHandling(
-    DefaultServletHandlerConfigurer configurer) {
-
-    configurer.enable();
+    registry.addResourceHandler("/resources/**")
+      .addResourceLocations("/resources/");
 
   }
 
   @Override
-  public void addViewControllers(final ViewControllerRegistry registry) {
+  public void addViewControllers(ViewControllerRegistry registry) {
 
     registry.addViewController("/login").setViewName("login");
     registry.addViewController("/error").setViewName("error");
@@ -72,10 +60,9 @@ public class MvcConfig extends WebMvcConfigurerAdapter {
 
     registry.viewResolver(beanNameViewResolver());
     registry.viewResolver(jspViewResolver());
-    
+
   }
-  
-  
+
   private InternalResourceViewResolver jspViewResolver() {
 
     InternalResourceViewResolver resolver = new InternalResourceViewResolver();
@@ -86,12 +73,31 @@ public class MvcConfig extends WebMvcConfigurerAdapter {
     return resolver;
   }
 
-  
   private BeanNameViewResolver beanNameViewResolver() {
 
     BeanNameViewResolver resolver = new BeanNameViewResolver();
     resolver.setOrder(1);
 
     return resolver;
+  }
+
+  
+  @Bean
+  public LocaleResolver localeResolver(){
+    SessionLocaleResolver slr = new SessionLocaleResolver();
+    slr.setDefaultLocale(Locale.US);
+    return slr;
+  }
+  
+  @Bean
+  public MessageSource messageSource() {
+
+    DefaultResourceLoader loader = new DefaultResourceLoader();
+    JsonMessageSource messageSource = new JsonMessageSource();
+    messageSource
+      .setBaseDirectory(loader.getResource("classpath:/i18n/"));
+    messageSource.setUseCodeAsDefaultMessage(true);
+
+    return messageSource;
   }
 }

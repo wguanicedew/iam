@@ -377,77 +377,14 @@ create table IF NOT EXISTS authorities (
   constraint ix_authority unique (username,authority)
 );
 
-CREATE TEMPORARY TABLE IF NOT EXISTS authorities_TEMP (
-      username varchar(50) not null,
-      authority varchar(50) not null,
-      constraint ix_authority_TEMP unique (username,authority));
-      
-CREATE TEMPORARY TABLE IF NOT EXISTS users_TEMP (
-      username varchar(50) not null primary key,
-      password varchar(50) not null,
-      enabled boolean not null);
-
-CREATE TEMPORARY TABLE IF NOT EXISTS user_info_TEMP (
-  sub VARCHAR(256) not null primary key,
-  preferred_username VARCHAR(256),
-  name VARCHAR(256),
-  given_name VARCHAR(256),
-  family_name VARCHAR(256),
-  middle_name VARCHAR(256),
-  nickname VARCHAR(256),
-  profile VARCHAR(256),
-  picture VARCHAR(256),
-  website VARCHAR(256),
-  email VARCHAR(256),
-  email_verified BOOLEAN,
-  gender VARCHAR(256),
-  zone_info VARCHAR(256),
-  locale VARCHAR(256),
-  phone_number VARCHAR(256),
-  address_id VARCHAR(256),
-  updated_time VARCHAR(256),
-  birthdate VARCHAR(256)
-);
-
-CREATE TEMPORARY TABLE IF NOT EXISTS client_details_TEMP (
-  client_description VARCHAR(256),
-  dynamically_registered BOOLEAN,
-  id_token_validity_seconds BIGINT,
+INSERT INTO system_scope(scope, description, icon, restricted, default_scope, structured, structured_param_description) VALUES
+  ('openid', 'log in using your identity', 'user', false, true, false, null),
+  ('profile', 'basic profile information', 'list-alt', false, true, false, null),
+  ('email', 'email address', 'envelope', false, true, false, null),
+  ('address', 'physical address', 'home', false, true, false, null),
+  ('phone', 'telephone number', 'bell', false, true, false, null),
+  ('offline_access', 'offline access', 'time', false, false, false, null);
   
-  client_id VARCHAR(256),
-  client_secret VARCHAR(2048),
-  access_token_validity_seconds BIGINT,
-  refresh_token_validity_seconds BIGINT,
-  allow_introspection BOOLEAN,
-  
-  client_name VARCHAR(256)
-);
-
-CREATE TEMPORARY TABLE IF NOT EXISTS client_scope_TEMP (
-  owner_id VARCHAR(256),
-  scope VARCHAR(2048)
-);
-
-CREATE TEMPORARY TABLE IF NOT EXISTS client_redirect_uri_TEMP (
-  owner_id VARCHAR(256),
-  redirect_uri VARCHAR(2048) 
-);
-
-CREATE TEMPORARY TABLE IF NOT EXISTS client_grant_type_TEMP (
-  owner_id VARCHAR(256),
-  grant_type VARCHAR(2000)
-);
-
-CREATE TEMPORARY TABLE IF NOT EXISTS system_scope_TEMP (
-  scope VARCHAR(256),
-  description VARCHAR(4096),
-  icon VARCHAR(256),
-  restricted BOOLEAN,
-  default_scope BOOLEAN,
-  structured BOOLEAN,
-  structured_param_description VARCHAR(256)
-);
-
 INSERT INTO users (username, password, enabled) VALUES
   ('admin','password',true),
   ('user','password',true);
@@ -456,3 +393,28 @@ INSERT INTO authorities(username, authority) VALUES
   ('admin','ROLE_ADMIN'),
   ('admin','ROLE_USER'),
   ('user','ROLE_USER');
+
+INSERT INTO user_info (sub, preferred_username, name, email, email_verified) VALUES
+  ('90342.ASDFJWFA','admin','Demo Admin','admin@example.com', true),
+  ('01921.FLANRJQW','user','Demo User','user@example.com', true);
+
+INSERT INTO client_details (id, client_id, client_secret, client_name, dynamically_registered, refresh_token_validity_seconds, access_token_validity_seconds, id_token_validity_seconds, allow_introspection) VALUES
+  (1, 'client', 'secret', 'Test Client', false, null, 3600, 600, true);
+
+INSERT INTO client_scope (owner_id, scope) VALUES
+  (1, 'openid'),
+  (1, 'profile'),
+  (1, 'email'),
+  (1, 'address'),
+  (1, 'phone'),
+  (1, 'offline_access');
+
+INSERT INTO client_redirect_uri (owner_id, redirect_uri) VALUES
+  (1, 'http://localhost/'),
+  (1, 'http://localhost:8080/');
+  
+INSERT INTO client_grant_type (owner_id, grant_type) VALUES
+  (1, 'authorization_code'),
+  (1, 'urn:ietf:params:oauth:grant_type:redelegate'),
+  (1, 'implicit'),
+  (1, 'refresh_token');
