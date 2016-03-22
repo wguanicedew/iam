@@ -1,8 +1,9 @@
 server:
-  port: 8080
+  port: 9090
 
 iam:
-  issuer: http://localhost:${server.port}/
+  baseUrl: http://localhost:${server.port}
+  issuer: ${iam.baseUrl}/
   token:
     lifetime: 86400
 
@@ -21,3 +22,17 @@ spring:
         show-sql: true
         generate-ddl: true
         hibernate.format_sql: true    
+
+idp:
+  baseUrl: http://mitre-srv:8080/openid-connect-server-webapp
+  issuer: ${idp.baseUrl}/
+  authorizeUrl: ${idp.baseUrl}/authorize
+  tokenUrl: ${idp.baseUrl}/token
+  userinfoUrl: ${idp.baseUrl}/userinfo
+  jwkUrl: ${idp.baseUrl}/jwk
+  client:
+    id: client_id
+    secret: client_secret
+    redirectUri: ${iam.baseUrl}/openid_connect_login
+  auth:
+    scope: openid

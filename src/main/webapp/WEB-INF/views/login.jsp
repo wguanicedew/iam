@@ -37,6 +37,17 @@
 			</form>
 		</div>
 	</div>
+	
+	<div class="row-fluid">
+		<div class="span6 offset1 well">
+			<form action="openid_connect_login" method="get">
+				<div>
+					<input type="hidden" name="identifier" value="" />
+					<input type="submit" class="btn" value="Login con IDP esterno" name="submit">
+				</div>
+			</form>
+		</div>
+	</div>
 </div>
 
 <o:footer/>

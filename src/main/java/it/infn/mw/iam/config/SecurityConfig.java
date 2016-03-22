@@ -3,6 +3,7 @@ package it.infn.mw.iam.config;
 import javax.sql.DataSource;
 
 import org.mitre.oauth2.web.CorsFilter;
+import org.mitre.openid.connect.client.OIDCAuthenticationProvider;
 import org.mitre.openid.connect.web.AuthenticationTimeStamper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -25,10 +26,13 @@ import org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHand
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
 import org.springframework.security.oauth2.provider.expression.OAuth2WebSecurityExpressionHandler;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.context.SecurityContextPersistenceFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.filter.GenericFilterBean;
+
+import it.infn.mw.iam.libs.IndigoOIDCAuthFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -53,20 +57,20 @@ public class SecurityConfig {
     private GenericFilterBean authorizationRequestFilter;
 
     @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth)
+    public void configureGlobal(final AuthenticationManagerBuilder auth)
       throws Exception {
 
       auth.jdbcAuthentication().dataSource(dataSource);
     }
 
     @Override
-    public void configure(WebSecurity web) throws Exception {
+    public void configure(final WebSecurity web) throws Exception {
 
       web.expressionHandler(oAuth2WebSecurityExpressionHandler);
     }
 
     @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    protected void configure(final HttpSecurity http) throws Exception {
 
       // @formatter:off
       
@@ -96,6 +100,7 @@ public class SecurityConfig {
 
     }
 
+    @Override
     @Bean(name = "authenticationManager")
     public AuthenticationManager authenticationManagerBean() throws Exception {
 
@@ -110,6 +115,58 @@ public class SecurityConfig {
   }
 
   @Configuration
+  @Order(5)
+  public static class ExternalLogin extends WebSecurityConfigurerAdapter {
+
+    @Autowired
+    @Qualifier("OIDCAuthenticationManager")
+    private AuthenticationManager oidcAuthManager;
+
+    @Autowired
+    OIDCAuthenticationProvider authProvider;
+
+    @Autowired
+    @Qualifier("openIdConnectAuthenticationFilter")
+    private IndigoOIDCAuthFilter oidcFilter;
+
+    @Override
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+
+      return oidcAuthManager;
+    }
+
+    @Bean(name = "ExternalAuthenticationEntryPoint")
+    public LoginUrlAuthenticationEntryPoint authenticationEntryPoint() {
+
+      return new LoginUrlAuthenticationEntryPoint("/openid_connect_login");
+    }
+
+    @Override
+    protected void configure(final AuthenticationManagerBuilder auth)
+      throws Exception {
+
+      auth.authenticationProvider(authProvider);
+    }
+
+    @Override
+    protected void configure(final HttpSecurity http) throws Exception {
+
+      //@formatter:off
+      http
+        .requestMatchers()
+          .antMatchers("/openid_connect_login**")
+          .and()
+         .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint())
+          .and()
+        .addFilterBefore(oidcFilter, SecurityContextPersistenceFilter.class)
+        .sessionManagement()
+          .enableSessionUrlRewriting(false)
+          .sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
+      //@formatter:on
+    }
+  }
+
+  @Configuration
   @Order(10)
   public static class ApiEndpointAuthorizationConfig
     extends WebSecurityConfigurerAdapter {
@@ -118,7 +175,7 @@ public class SecurityConfig {
     private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
 
     @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    protected void configure(final HttpSecurity http) throws Exception {
 
       http.requestMatchers().antMatchers("/api/**").and().exceptionHandling()
         .authenticationEntryPoint(authenticationEntryPoint).and()
@@ -139,7 +196,7 @@ public class SecurityConfig {
     private CorsFilter corsFilter;
 
     @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    protected void configure(final HttpSecurity http) throws Exception {
 
    // @formatter:off
       http
@@ -172,7 +229,7 @@ public class SecurityConfig {
     private CorsFilter corsFilter;
 
     @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    protected void configure(final HttpSecurity http) throws Exception {
 
    // @formatter:off
       http
@@ -205,7 +262,7 @@ public class SecurityConfig {
     private CorsFilter corsFilter;
 
     @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    protected void configure(final HttpSecurity http) throws Exception {
 
       // @formatter:off
       http
@@ -237,7 +294,7 @@ public class SecurityConfig {
     private CorsFilter corsFilter;
 
     @Override
-    protected void configure(AuthenticationManagerBuilder auth)
+    protected void configure(final AuthenticationManagerBuilder auth)
       throws Exception {
 
       auth.userDetailsService(userDetailsService);
@@ -253,7 +310,7 @@ public class SecurityConfig {
     }
 
     @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    protected void configure(final HttpSecurity http) throws Exception {
 
       // @formatter:off
       http
@@ -295,7 +352,7 @@ public class SecurityConfig {
     private CorsFilter corsFilter;
 
     @Override
-    protected void configure(AuthenticationManagerBuilder auth)
+    protected void configure(final AuthenticationManagerBuilder auth)
       throws Exception {
 
       auth.userDetailsService(userDetailsService);
@@ -311,7 +368,7 @@ public class SecurityConfig {
     }
 
     @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    protected void configure(final HttpSecurity http) throws Exception {
 
       // @formatter:off
       http
@@ -331,7 +388,7 @@ public class SecurityConfig {
       // @formatter:on
     }
   }
-  
+
   @Configuration
   @Order(16)
   public static class RevokeEndpointAuthorizationConfig
@@ -348,7 +405,7 @@ public class SecurityConfig {
     private CorsFilter corsFilter;
 
     @Override
-    protected void configure(AuthenticationManagerBuilder auth)
+    protected void configure(final AuthenticationManagerBuilder auth)
       throws Exception {
 
       auth.userDetailsService(userDetailsService);
@@ -364,7 +421,7 @@ public class SecurityConfig {
     }
 
     @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    protected void configure(final HttpSecurity http) throws Exception {
 
       // @formatter:off
       http
@@ -393,9 +450,9 @@ public class SecurityConfig {
 
     @Autowired
     private Http403ForbiddenEntryPoint http403ForbiddenEntryPoint;
-    
+
     @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    protected void configure(final HttpSecurity http) throws Exception {
 
       // @formatter:off
       http
@@ -414,7 +471,7 @@ public class SecurityConfig {
       // @formatter:on
     }
   }
-  
+
   @Configuration
   @Order(18)
   @Profile("dev")
@@ -422,7 +479,7 @@ public class SecurityConfig {
     extends WebSecurityConfigurerAdapter {
 
     @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    protected void configure(final HttpSecurity http) throws Exception {
 
       HttpSecurity h2Console = http.antMatcher("/h2-console**");
       h2Console.csrf().disable();

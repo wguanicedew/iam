@@ -10,7 +10,6 @@ import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.AbstractJpaVendorAdapter;
@@ -47,19 +46,20 @@ public class JpaConfig extends JpaBaseConfiguration {
 
   @Override
   public LocalContainerEntityManagerFactoryBean entityManagerFactory(
-    EntityManagerFactoryBuilder factoryBuilder) {
-    
-    LocalContainerEntityManagerFactoryBean emf = factoryBuilder.dataSource(dataSource).packages("org.mitre")
+    final EntityManagerFactoryBuilder factoryBuilder) {
+
+    LocalContainerEntityManagerFactoryBean emf = factoryBuilder
+      .dataSource(dataSource).packages("org.mitre")
       .persistenceUnit("defaultPersistenceUnit")
       .properties(getVendorProperties()).build();
-    
-      
-    return emf; 
+
+    return emf;
 
   }
-  
-  @Bean(name="defaultTransactionManager")
-  public PlatformTransactionManager defaultTransactionManager(){
+
+  @Bean(name = "defaultTransactionManager")
+  public PlatformTransactionManager defaultTransactionManager() {
+
     return new JpaTransactionManager();
   }
 
