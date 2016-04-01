@@ -5,12 +5,13 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.flyway.FlywayMigrationStrategy;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.AbstractJpaVendorAdapter;
@@ -38,9 +39,10 @@ public class JpaConfig extends JpaBaseConfiguration {
 
     map.put("eclipselink.weaving", "false");
     map.put("eclipselink.logging.level", "INFO");
-    map.put("eclipselink.logging.level.sql", "INFO");
+    map.put("eclipselink.logging.level.sql", "FINE");
     map.put("eclipselink.cache.shared.default", "false");
-
+    map.put("eclipselink.ddl-generation", "drop-and-create-tables");
+    
     return map;
 
   }
@@ -49,7 +51,7 @@ public class JpaConfig extends JpaBaseConfiguration {
   public LocalContainerEntityManagerFactoryBean entityManagerFactory(
     EntityManagerFactoryBuilder factoryBuilder) {
     
-    LocalContainerEntityManagerFactoryBean emf = factoryBuilder.dataSource(dataSource).packages("org.mitre")
+    LocalContainerEntityManagerFactoryBean emf = factoryBuilder.dataSource(dataSource).packages("org.mitre","it.infn.mw.iam.persistence")
       .persistenceUnit("defaultPersistenceUnit")
       .properties(getVendorProperties()).build();
     
@@ -63,4 +65,16 @@ public class JpaConfig extends JpaBaseConfiguration {
     return new JpaTransactionManager();
   }
 
+  @Bean
+  public FlywayMigrationStrategy flywayMigrationStrategy(){
+    return new FlywayMigrationStrategy() {
+      
+      @Override
+      public void migrate(Flyway flyway) {
+        
+        return;
+        
+      }
+    };
+  }
 }

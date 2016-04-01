@@ -11,6 +11,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 @ComponentScan(basePackages = { 
   "it.infn.mw.iam.config",
+  "it.infn.mw.iam.saml",
+  "it.infn.mw.iam.persistence",
   "org.mitre.oauth2.web",
   "org.mitre.oauth2.view",
   "org.mitre.openid.connect.web",

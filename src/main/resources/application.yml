@@ -2,7 +2,7 @@ server:
   port: 8080
 
 iam:
-  issuer: http://localhost:${server.port}/
+  issuer: http://${IAM_HOST:localhost}:${IAM_PORT:8080}/
   token:
     lifetime: 86400
 
@@ -20,4 +20,3 @@ spring:
       properties:
         show-sql: true
         generate-ddl: true
-        hibernate.format_sql: true    

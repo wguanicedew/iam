@@ -14,10 +14,11 @@ import org.mitre.openid.connect.repository.WhitelistedSiteRepository;
 import org.mitre.openid.connect.repository.impl.JpaApprovedSiteRepository;
 import org.mitre.openid.connect.repository.impl.JpaBlacklistedSiteRepository;
 import org.mitre.openid.connect.repository.impl.JpaPairwiseIdentifierRepository;
-import org.mitre.openid.connect.repository.impl.JpaUserInfoRepository;
 import org.mitre.openid.connect.repository.impl.JpaWhitelistedSiteRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import it.infn.mw.iam.persistence.repository.IamUserinfoRepository;
 
 @Configuration
 public class MitreRepositoryConfig {
@@ -31,7 +32,7 @@ public class MitreRepositoryConfig {
   @Bean
   UserInfoRepository defaultUserInfoRepository() {
 
-    return new JpaUserInfoRepository();
+    return new IamUserinfoRepository();
   }
 
   @Bean

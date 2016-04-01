@@ -466,6 +466,7 @@
 	},
 	"login": {
 		"login_with_username_and_password": "Login with Username and Password",
+		"login_with_saml": "Login with your SAML IdP",
 		"error": "The system was unable to log you in. Please try again."
 	}
 	

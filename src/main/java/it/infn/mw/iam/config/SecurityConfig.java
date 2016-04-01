@@ -1,7 +1,5 @@
 package it.infn.mw.iam.config;
 
-import javax.sql.DataSource;
-
 import org.mitre.oauth2.web.CorsFilter;
 import org.mitre.openid.connect.web.AuthenticationTimeStamper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +18,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
+import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.provider.client.ClientCredentialsTokenEndpointFilter;
 import org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler;
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
@@ -36,11 +35,8 @@ import org.springframework.web.filter.GenericFilterBean;
 public class SecurityConfig {
 
   @Configuration
-  @Order(1)
+  @Order(100)
   public static class UserLoginConfig extends WebSecurityConfigurerAdapter {
-
-    @Autowired
-    private DataSource dataSource;
 
     @Autowired
     private AuthenticationTimeStamper authenticationTimeStamper;
@@ -53,10 +49,14 @@ public class SecurityConfig {
     private GenericFilterBean authorizationRequestFilter;
 
     @Autowired
+    @Qualifier("iamUserDetailsService")
+    private UserDetailsService iamUserDetailsService;
+
+    @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth)
       throws Exception {
 
-      auth.jdbcAuthentication().dataSource(dataSource);
+      auth.userDetailsService(iamUserDetailsService);
     }
 
     @Override
@@ -112,13 +112,13 @@ public class SecurityConfig {
   @Configuration
   @Order(10)
   public static class ApiEndpointAuthorizationConfig
-    extends WebSecurityConfigurerAdapter {
+    extends ResourceServerConfigurerAdapter {
 
     @Autowired
     private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
 
     @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    public void configure(HttpSecurity http) throws Exception {
 
       http.requestMatchers().antMatchers("/api/**").and().exceptionHandling()
         .authenticationEntryPoint(authenticationEntryPoint).and()
@@ -130,7 +130,7 @@ public class SecurityConfig {
   @Configuration
   @Order(11)
   public static class ResourceEndpointAuthorizationConfig
-    extends WebSecurityConfigurerAdapter {
+    extends ResourceServerConfigurerAdapter {
 
     @Autowired
     private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
@@ -139,7 +139,7 @@ public class SecurityConfig {
     private CorsFilter corsFilter;
 
     @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    public void configure(HttpSecurity http) throws Exception {
 
    // @formatter:off
       http
@@ -163,7 +163,7 @@ public class SecurityConfig {
   @Configuration
   @Order(12)
   public static class RegisterEndpointAuthorizationConfig
-    extends WebSecurityConfigurerAdapter {
+    extends ResourceServerConfigurerAdapter {
 
     @Autowired
     private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
@@ -172,7 +172,7 @@ public class SecurityConfig {
     private CorsFilter corsFilter;
 
     @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    public void configure(HttpSecurity http) throws Exception {
 
    // @formatter:off
       http
@@ -196,7 +196,7 @@ public class SecurityConfig {
   @Configuration
   @Order(13)
   public static class UserInfoEndpointAuthorizationConfig
-    extends WebSecurityConfigurerAdapter {
+    extends ResourceServerConfigurerAdapter {
 
     @Autowired
     private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
@@ -205,7 +205,7 @@ public class SecurityConfig {
     private CorsFilter corsFilter;
 
     @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    public void configure(HttpSecurity http) throws Exception {
 
       // @formatter:off
       http
@@ -331,7 +331,7 @@ public class SecurityConfig {
       // @formatter:on
     }
   }
-  
+
   @Configuration
   @Order(16)
   public static class RevokeEndpointAuthorizationConfig
@@ -393,7 +393,7 @@ public class SecurityConfig {
 
     @Autowired
     private Http403ForbiddenEntryPoint http403ForbiddenEntryPoint;
-    
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 
@@ -414,7 +414,7 @@ public class SecurityConfig {
       // @formatter:on
     }
   }
-  
+
   @Configuration
   @Order(18)
   @Profile("dev")
