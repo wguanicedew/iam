@@ -15,7 +15,7 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 @Configuration
 @EnableScheduling
-public class TaskConfig implements SchedulingConfigurer{
+public class TaskConfig implements SchedulingConfigurer {
 
   @Autowired
   OAuth2TokenEntityService tokenEntityService;
@@ -43,7 +43,7 @@ public class TaskConfig implements SchedulingConfigurer{
   }
 
   @Override
-  public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
+  public void configureTasks(final ScheduledTaskRegistrar taskRegistrar) {
 
     taskRegistrar.setScheduler(taskScheduler());
   }

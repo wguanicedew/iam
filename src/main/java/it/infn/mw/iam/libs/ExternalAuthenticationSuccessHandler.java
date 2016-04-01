@@ -1,0 +1,135 @@
+/*******************************************************************************
+ * Copyright 2016 The MITRE Corporation
+ *   and the MIT Internet Trust Consortium
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+/**
+ * 
+ */
+package it.infn.mw.iam.libs;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.mitre.oauth2.service.impl.DefaultOAuth2AuthorizationCodeService;
+import org.mitre.openid.connect.model.OIDCAuthenticationToken;
+import org.mitre.openid.connect.model.UserInfo;
+import org.mitre.openid.connect.request.ConnectOAuth2RequestFactory;
+import org.mitre.openid.connect.service.impl.DefaultUserInfoService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.provider.AuthorizationRequest;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.OAuth2Request;
+import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
+import org.springframework.security.web.savedrequest.DefaultSavedRequest;
+import org.springframework.stereotype.Component;
+
+/**
+ * This class sets a timestamp on the current HttpSession when someone
+ * successfully authenticates.
+ * 
+ * @author jricher
+ *
+ */
+@Component("authenticationTimeStamper")
+public class ExternalAuthenticationSuccessHandler
+  extends SavedRequestAwareAuthenticationSuccessHandler {
+
+  public static final String AUTH_TIMESTAMP = "AUTH_TIMESTAMP";
+  public final static String ORIGIN_AUTH_REQUEST_SESSION_VARIABLE = "origin_auth_request";
+
+  protected final static String REDIRECT_URI_SESION_VARIABLE = "redirect_uri";
+  protected final static String STATE_SESSION_VARIABLE = "state";
+  protected final static String NONCE_SESSION_VARIABLE = "nonce";
+  protected final static String ISSUER_SESSION_VARIABLE = "issuer";
+
+  @Autowired
+  private ConnectOAuth2RequestFactory authFactory;
+
+  @Autowired
+  private DefaultOAuth2AuthorizationCodeService authCodeService;
+
+  @Autowired
+  private DefaultUserInfoService userInfoService;
+
+  @Autowired
+  private Environment env;
+
+  @Override
+  public void onAuthenticationSuccess(final HttpServletRequest request,
+    final HttpServletResponse response, final Authentication authentication)
+    throws IOException, ServletException {
+
+    if (authentication != null && authentication.isAuthenticated()
+      && authentication instanceof OIDCAuthenticationToken) {
+
+      OIDCAuthenticationToken auth = (OIDCAuthenticationToken) authentication;
+      UserInfo userInfo = auth.getUserInfo();
+      userInfo.setPreferredUsername(auth.getPrincipal().toString());
+      userInfoService.save(userInfo);
+
+      String targetUrl = env.getProperty("iam.baseUrl");
+
+      HttpSession session = request.getSession();
+      Object obj = session.getAttribute(ORIGIN_AUTH_REQUEST_SESSION_VARIABLE);
+
+      if (obj != null) {
+
+        DefaultSavedRequest originAuthRequest = (DefaultSavedRequest) obj;
+
+        Map<String, String> parameters = new HashMap<String, String>();
+        for (Map.Entry<String, String[]> entry : originAuthRequest
+          .getParameterMap().entrySet()) {
+          parameters.put(entry.getKey(), entry.getValue()[0]);
+        }
+
+        AuthorizationRequest authorizationRequest = authFactory
+          .createAuthorizationRequest(parameters);
+        authorizationRequest.setApproved(true);
+        OAuth2Request storedOAuth2Request = authFactory
+          .createOAuth2Request(authorizationRequest);
+        OAuth2Authentication combinedAuth = new OAuth2Authentication(
+          storedOAuth2Request, authentication);
+        String code = authCodeService.createAuthorizationCode(combinedAuth);
+
+        targetUrl = String.format("%s?code=%s&state=%s&nonce=%s",
+          parameters.get("redirect_uri"), code, parameters.get("state"),
+          parameters.get("nonce"));
+
+        session.setAttribute("SPRING_SECURITY_SAVED_REQUEST",
+          originAuthRequest);
+        session.setAttribute(ISSUER_SESSION_VARIABLE, parameters.get("issuer"));
+        session.setAttribute(STATE_SESSION_VARIABLE, parameters.get("state"));
+        session.setAttribute(REDIRECT_URI_SESION_VARIABLE,
+          parameters.get("redirect_uri"));
+        session.setAttribute(NONCE_SESSION_VARIABLE, parameters.get("nonce"));
+
+        targetUrl = response.encodeRedirectURL(targetUrl);
+      }
+
+      response.sendRedirect(targetUrl);
+    }
+    return;
+
+  }
+
+}

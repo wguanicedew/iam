@@ -7,12 +7,19 @@ iam:
   token:
     lifetime: 86400
 
+#spring:
+#  datasource:
+#    driverClassName: org.h2.Driver
+#    url: jdbc:h2:mem:iam;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+#    username: sa
+#    password:
+
 spring:
   datasource:
-    driverClassName: org.h2.Driver
-    url: jdbc:h2:mem:iam;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    username: sa
-    password:
+    driverClassName: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost/oic
+    username: oic
+    password: oic
      
   application:
     name: IAM 
@@ -35,4 +42,4 @@ idp:
     secret: client_secret
     redirectUri: ${iam.baseUrl}/openid_connect_login
   auth:
-    scope: openid
+    scope: openid,profile,email,address,phone

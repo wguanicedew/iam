@@ -36,8 +36,8 @@ public class JpaConfig extends JpaBaseConfiguration {
     Map<String, Object> map = new HashMap<String, Object>();
 
     map.put("eclipselink.weaving", "false");
-    map.put("eclipselink.logging.level", "INFO");
-    map.put("eclipselink.logging.level.sql", "INFO");
+    map.put("eclipselink.logging.level", "FINE");
+    map.put("eclipselink.logging.level.sql", "FINE");
     map.put("eclipselink.cache.shared.default", "false");
 
     return map;

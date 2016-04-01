@@ -34,7 +34,6 @@ import org.mitre.openid.connect.client.service.IssuerService;
 import org.mitre.openid.connect.client.service.ServerConfigurationService;
 import org.mitre.openid.connect.client.service.impl.StaticAuthRequestOptionsService;
 import org.mitre.openid.connect.config.ServerConfiguration;
-import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.mitre.openid.connect.model.PendingOIDCAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
@@ -45,6 +44,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.savedrequest.DefaultSavedRequest;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
@@ -77,49 +77,25 @@ public class IndigoOIDCAuthFilter
   protected static final String TARGET_SESSION_VARIABLE = "target";
   protected final static int HTTP_SOCKET_TIMEOUT = 30000;
 
-  protected final static String ORIGIN_REDIRECT_URI_SESSION_VARIABLE = "origin_redirect_uri";
-  protected final static String ORIGIN_STATE_SESSION_VARIABLE = "origin_state";
+  protected final static String ORIGIN_AUTH_REQUEST_SESSION_VARIABLE = "origin_auth_request";
 
   public final static String FILTER_PROCESSES_URL = "/openid_connect_login";
 
-  // Allow for time sync issues by having a window of X seconds.
   private int timeSkewAllowance = 300;
 
-  // fetches and caches public keys for servers
   @Autowired(required = false)
   private JWKSetCacheService validationServices;
 
-  // creates JWT signer/validators for symmetric keys
   @Autowired(required = false)
   private SymmetricKeyJWTValidatorCacheService symmetricCacheService;
 
-  // @Autowired
-  // private DefaultOAuth2AuthorizationCodeService authCodeService;
-
-  // signer based on keypair for this client (for outgoing auth requests)
   @Autowired(required = false)
   private JWTSigningAndValidationService authenticationSignerService;
 
-  /*
-   * Modular services to build out client filter.
-   */
-  // looks at the request and determines which issuer to use for lookup on the
-  // server
   private IssuerService issuerService;
-  // holds server information (auth URI, token URI, etc.), indexed by issuer
   private ServerConfigurationService servers;
-  // holds client information (client ID, redirect URI, etc.), indexed by issuer
-  // of the server
   private ClientConfigurationService clients;
-  // provides extra options to inject into the outbound request
-  private AuthRequestOptionsService authOptions = new StaticAuthRequestOptionsService(); // initialize
-                                                                                         // with
-                                                                                         // an
-                                                                                         // empty
-                                                                                         // set
-                                                                                         // of
-                                                                                         // options
-  // builds the actual request URI based on input from all other services
+  private AuthRequestOptionsService authOptions = new StaticAuthRequestOptionsService();
   private AuthRequestUrlBuilder authRequestBuilder;
 
   // private helpers to handle target link URLs
@@ -151,69 +127,25 @@ public class IndigoOIDCAuthFilter
     if (symmetricCacheService == null) {
       symmetricCacheService = new SymmetricKeyJWTValidatorCacheService();
     }
-
   }
 
-  /*
-   * This is the main entry point for the filter.
-   * 
-   * (non-Javadoc)
-   * 
-   * @see org.springframework.security.web.authentication.
-   * AbstractAuthenticationProcessingFilter
-   * #attemptAuthentication(javax.servlet.http.HttpServletRequest,
-   * javax.servlet.http.HttpServletResponse)
-   */
   @Override
   public Authentication attemptAuthentication(final HttpServletRequest request,
     final HttpServletResponse response)
     throws AuthenticationException, IOException, ServletException {
 
     if (!Strings.isNullOrEmpty(request.getParameter("error"))) {
-
-      // there's an error coming back from the server, need to handle this
       handleError(request, response);
       return null; // no auth, response is sent to display page or something
-
     } else if (!Strings.isNullOrEmpty(request.getParameter("code"))) {
 
       // we got back the code, need to process this to get our tokens
       Authentication auth = handleAuthorizationCodeResponse(request, response);
-      if (auth != null && auth instanceof OIDCAuthenticationToken) {
-
-        HttpSession session = request.getSession();
-
-        OIDCAuthenticationToken oidcToken = (OIDCAuthenticationToken) auth;
-        String idpIssuer = oidcToken.getIssuer();
-        String idpSubject = oidcToken.getSub();
-
-        // TODO: verificare perche' null
-        String originClientUri = getStoredSessionString(session,
-          ORIGIN_REDIRECT_URI_SESSION_VARIABLE);
-        String originState = getStoredSessionString(session,
-          ORIGIN_STATE_SESSION_VARIABLE);
-
-        // OAuth2Request storedRequest = new OAuth2Request(requestParameters,
-        // clientId, authorities, approved, scope, resourceIds, redirectUri,
-        // responseTypes, extensionProperties);
-        // OAuth2Authentication authentication = new OAuth2Authentication(
-        // storedRequest, auth);
-        // String newCode = authCodeService
-        // .createAuthorizationCode(authentication);
-
-        String newCode = "myCode";
-
-      }
-
       return auth;
 
     } else {
-
-      // not an error, not a code, must be an initial login of some type
       handleAuthorizationRequest(request, response);
-
-      return null; // no auth, response redirected to the server's Auth Endpoint
-                   // (or possibly to the account chooser)
+      return null;
     }
 
   }
@@ -234,14 +166,9 @@ public class IndigoOIDCAuthFilter
     HttpSession session = request.getSession();
 
     // backup origin redirect uri and state
-    String originRedirectUri = getStoredSessionString(session,
-      REDIRECT_URI_SESSION_VARIABLE);
-    String originState = getStoredSessionString(session,
-      STATE_SESSION_VARIABLE);
-
-    session.setAttribute(ORIGIN_REDIRECT_URI_SESSION_VARIABLE,
-      originRedirectUri);
-    session.setAttribute(ORIGIN_STATE_SESSION_VARIABLE, originState);
+    DefaultSavedRequest savedRequest = (DefaultSavedRequest) session
+      .getAttribute("SPRING_SECURITY_SAVED_REQUEST");
+    session.setAttribute(ORIGIN_AUTH_REQUEST_SESSION_VARIABLE, savedRequest);
 
     IssuerServiceResponse issResp = issuerService.getIssuer(request);
 

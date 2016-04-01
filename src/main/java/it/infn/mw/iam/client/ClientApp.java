@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.mitre.oauth2.model.ClientDetailsEntity.AuthMethod;
 import org.mitre.oauth2.model.RegisteredClient;
+import org.mitre.oauth2.service.impl.DefaultOAuth2AuthorizationCodeService;
 import org.mitre.openid.connect.client.NamedAdminAuthoritiesMapper;
 import org.mitre.openid.connect.client.OIDCAuthenticationProvider;
 import org.mitre.openid.connect.client.SubjectIssuerGrantedAuthority;
@@ -28,8 +29,10 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.web.bind.annotation.RestController;
 
+import it.infn.mw.iam.libs.ExternalAuthenticationSuccessHandler;
 import it.infn.mw.iam.libs.IndigoOIDCAuthFilter;
 
 @Configuration
@@ -51,8 +54,15 @@ public class ClientApp {
     filter.setClientConfigurationService(staticClientConfiguration());
     filter.setAuthRequestOptionsService(authOptions());
     filter.setAuthRequestUrlBuilder(authRequestBuilder());
+    filter.setAuthenticationSuccessHandler(successHandler());
 
     return filter;
+  }
+
+  @Bean
+  public AuthenticationSuccessHandler successHandler() {
+
+    return new ExternalAuthenticationSuccessHandler();
   }
 
   @Bean(name = "OIDCAuthenticationManager")
@@ -63,23 +73,27 @@ public class ClientApp {
   }
 
   @Bean
-  public NamedAdminAuthoritiesMapper namedAdminAuthMapper() {
-
-    SubjectIssuerGrantedAuthority admins = new SubjectIssuerGrantedAuthority(
-      "90342.ASDFJWFA", env.getProperty("idp.issuer"));
+  public NamedAdminAuthoritiesMapper namedAdmins() {
 
     NamedAdminAuthoritiesMapper mapper = new NamedAdminAuthoritiesMapper();
     mapper.setAdmins(
-      new LinkedHashSet<SubjectIssuerGrantedAuthority>(Arrays.asList(admins)));
+      new LinkedHashSet<SubjectIssuerGrantedAuthority>(Arrays.asList(admin())));
 
     return mapper;
+  }
+
+  @Bean
+  public SubjectIssuerGrantedAuthority admin() {
+
+    return new SubjectIssuerGrantedAuthority("90342.ASDFJWFA",
+      env.getProperty("idp.issuer"));
   }
 
   @Bean
   public OIDCAuthenticationProvider openIdConnectAuthenticationProvider() {
 
     OIDCAuthenticationProvider provider = new OIDCAuthenticationProvider();
-    provider.setAuthoritiesMapper(namedAdminAuthMapper());
+    provider.setAuthoritiesMapper(namedAdmins());
 
     return provider;
   }
@@ -168,6 +182,12 @@ public class ClientApp {
   public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter() {
 
     return new MappingJackson2HttpMessageConverter();
+  }
+
+  @Bean
+  public DefaultOAuth2AuthorizationCodeService DefaultOAuth2AuthorizationCodeService() {
+
+    return new DefaultOAuth2AuthorizationCodeService();
   }
 
 }
