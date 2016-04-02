@@ -1,7 +1,10 @@
 package it.infn.mw.iam.config;
 
+import org.h2.server.web.WebServlet;
+import org.springframework.boot.context.embedded.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 import it.infn.mw.iam.core.IamUserDetailsService;
@@ -12,6 +15,14 @@ public class IamConfig {
   @Bean(name="iamUserDetailsService")
   UserDetailsService iamUserDetailsService(){
     return new IamUserDetailsService();
+  }
+  
+  
+  @Bean
+  @Profile("dev")
+  ServletRegistrationBean h2Console(){
+    WebServlet h2Servlet = new WebServlet();
+    return new ServletRegistrationBean(h2Servlet, "/h2-console/*");
   }
 
   

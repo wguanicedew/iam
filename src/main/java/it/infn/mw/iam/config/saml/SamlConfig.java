@@ -510,8 +510,12 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
   @Override
   protected void configure(HttpSecurity http) throws Exception {
   
+    http
+    .antMatcher("/saml/**");
+    
    http.csrf().ignoringAntMatchers("/saml/**");
-   http.authorizeRequests().antMatchers("/saml/**").permitAll();
+   
+   http.authorizeRequests().antMatchers("/**").permitAll();
    
    http
    .addFilterBefore(metadataGeneratorFilter(), ChannelProcessingFilter.class)

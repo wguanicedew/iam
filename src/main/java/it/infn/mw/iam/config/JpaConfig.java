@@ -39,7 +39,7 @@ public class JpaConfig extends JpaBaseConfiguration {
 
     map.put("eclipselink.weaving", "false");
     map.put("eclipselink.logging.level", "INFO");
-    map.put("eclipselink.logging.level.sql", "FINE");
+    map.put("eclipselink.logging.level.sql", "OFF");
     map.put("eclipselink.cache.shared.default", "false");
     map.put("eclipselink.ddl-generation", "drop-and-create-tables");
     

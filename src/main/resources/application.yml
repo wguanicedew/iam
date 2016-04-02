@@ -20,3 +20,11 @@ spring:
       properties:
         show-sql: true
         generate-ddl: true
+
+  h2:
+    console:
+      enabled: false
+      
+      
+  profiles:
+    active: dev
