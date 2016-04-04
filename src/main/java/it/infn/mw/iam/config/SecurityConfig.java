@@ -318,7 +318,9 @@ public class SecurityConfig {
         .authenticationEntryPoint(authenticationEntryPoint)
         .and()
       .sessionManagement()
-        .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        .and()
+      .csrf().disable();
       // @formatter:on
     }
   }
