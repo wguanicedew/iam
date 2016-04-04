@@ -6,7 +6,6 @@ import org.mitre.openid.connect.config.ConfigurationPropertiesBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 
 @Configuration
 public class MitreConfig {
@@ -22,7 +21,7 @@ public class MitreConfig {
 
     ConfigurationPropertiesBean config = new ConfigurationPropertiesBean();
     
-    config.setLogoImageUrl("resources/images/openid_connect_small.png");
+    config.setLogoImageUrl("resources/images/indigo-logo.png");
     config.setTopbarTitle("INDIGO IAM server");
     
     config.setIssuer(issuer);

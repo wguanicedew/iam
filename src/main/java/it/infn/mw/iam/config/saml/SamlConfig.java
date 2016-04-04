@@ -1,5 +1,9 @@
 package it.infn.mw.iam.config.saml;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -12,11 +16,15 @@ import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.velocity.app.VelocityEngine;
+import org.opensaml.saml2.core.NameIDType;
+import org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider;
 import org.opensaml.saml2.metadata.provider.HTTPMetadataProvider;
 import org.opensaml.saml2.metadata.provider.MetadataProvider;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
+import org.opensaml.xml.parse.BasicParserPool;
 import org.opensaml.xml.parse.ParserPool;
 import org.opensaml.xml.parse.StaticBasicParserPool;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.MethodInvokingFactoryBean;
 import org.springframework.context.annotation.Bean;
@@ -24,6 +32,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -89,18 +98,22 @@ import it.infn.mw.iam.saml.util.SAMLUserIdentifierAccessor;
 @Order(20)
 public class SamlConfig extends WebSecurityConfigurerAdapter {
 
+  @Autowired
+  ResourceLoader resourceLoader;
+
   @Bean
-  public SAMLUserIdentifierAccessor samlUserIdAccessor(){
+  public SAMLUserIdentifierAccessor samlUserIdAccessor() {
+
     return new NameIdUserIdentifierAccessor();
   }
-  
+
   @Bean
-  public SAMLUserDetailsService samlUserDetailsService(){
+  public SAMLUserDetailsService samlUserDetailsService() {
+
     return new SAMLUserDetailsServiceImpl();
-    
+
   }
-  
-  
+
   // Initialization of the velocity engine
   @Bean
   public VelocityEngine velocityEngine() {
@@ -145,59 +158,68 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
     return samlAuthenticationProvider;
   }
 
-  
-//Provider of default SAML Context
+  // Provider of default SAML Context
   @Bean
   public SAMLContextProviderImpl contextProvider() {
-      return new SAMLContextProviderImpl();
+
+    return new SAMLContextProviderImpl();
   }
 
   // Initialization of OpenSAML library
   @Bean
   public static SAMLBootstrap sAMLBootstrap() {
-      return new SAMLBootstrap();
+
+    return new SAMLBootstrap();
   }
 
   // Logger for SAML messages and events
   @Bean
   public SAMLDefaultLogger samlLogger() {
-      return new SAMLDefaultLogger();
+
+    return new SAMLDefaultLogger();
   }
-  
-  //SAML 2.0 WebSSO Assertion Consumer
+
+  // SAML 2.0 WebSSO Assertion Consumer
   @Bean
   public WebSSOProfileConsumer webSSOprofileConsumer() {
-      return new WebSSOProfileConsumerImpl();
+
+    return new WebSSOProfileConsumerImpl();
   }
 
   // SAML 2.0 Holder-of-Key WebSSO Assertion Consumer
   @Bean
   public WebSSOProfileConsumerHoKImpl hokWebSSOprofileConsumer() {
-      return new WebSSOProfileConsumerHoKImpl();
+
+    return new WebSSOProfileConsumerHoKImpl();
   }
-  
-  //SAML 2.0 Web SSO profile
+
+  // SAML 2.0 Web SSO profile
   @Bean
   public WebSSOProfile webSSOprofile() {
-      return new WebSSOProfileImpl();
+
+    return new WebSSOProfileImpl();
   }
 
   // SAML 2.0 Holder-of-Key Web SSO profile
   @Bean
   public WebSSOProfileConsumerHoKImpl hokWebSSOProfile() {
-      return new WebSSOProfileConsumerHoKImpl();
+
+    return new WebSSOProfileConsumerHoKImpl();
   }
 
   // SAML 2.0 ECP profile
   @Bean
   public WebSSOProfileECPImpl ecpprofile() {
-      return new WebSSOProfileECPImpl();
+
+    return new WebSSOProfileECPImpl();
   }
 
   @Bean
   public SingleLogoutProfile logoutprofile() {
-      return new SingleLogoutProfileImpl();
+
+    return new SingleLogoutProfileImpl();
   }
+
   // Replace this with CANL?
   @Bean
   public KeyManager keyManager() {
@@ -246,6 +268,7 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
 
     WebSSOProfileOptions webSSOProfileOptions = new WebSSOProfileOptions();
     webSSOProfileOptions.setIncludeScoping(false);
+    webSSOProfileOptions.setNameID(NameIDType.PERSISTENT);
     return webSSOProfileOptions;
   }
 
@@ -295,14 +318,34 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
     return extendedMetadataDelegate;
   }
 
+  @Bean
+  @Qualifier("local")
+  public ExtendedMetadataDelegate localIdpMetadataProvider()
+    throws MetadataProviderException, URISyntaxException, IOException {
+
+    FilesystemMetadataProvider localIdpMetadataProvider = new FilesystemMetadataProvider(
+      new File("/tmp/idp-metadata.xml"));
+
+    localIdpMetadataProvider.setParserPool(new BasicParserPool());
+    localIdpMetadataProvider.initialize();
+
+    ExtendedMetadataDelegate extendedMetadataDelegate = new ExtendedMetadataDelegate(
+      localIdpMetadataProvider, extendedMetadata());
+    extendedMetadataDelegate.setMetadataTrustCheck(true);
+    extendedMetadataDelegate.setMetadataRequireSignature(false);
+    return extendedMetadataDelegate;
+  }
+
   // IDP Metadata configuration - paths to metadata of IDPs in circle of trust
   // is here
   @Bean
   @Qualifier("metadata")
-  public CachingMetadataManager metadata() throws MetadataProviderException {
+  public CachingMetadataManager metadata()
+    throws MetadataProviderException, URISyntaxException, IOException {
 
     List<MetadataProvider> providers = new ArrayList<MetadataProvider>();
     providers.add(ssoCircleExtendedMetadataProvider());
+    providers.add(localIdpMetadataProvider());
     return new CachingMetadataManager(providers);
   }
 
@@ -418,7 +461,6 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
       new LogoutHandler[] { logoutHandler() });
   }
 
-  
   private ArtifactResolutionProfile artifactResolutionProfile() {
 
     final ArtifactResolutionProfileImpl artifactResolutionProfile = new ArtifactResolutionProfileImpl(
@@ -506,25 +548,24 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
       new AntPathRequestMatcher("/saml/discovery/**"), samlIDPDiscovery()));
     return new FilterChainProxy(chains);
   }
-  
+
   @Override
   protected void configure(HttpSecurity http) throws Exception {
-  
+
+    http.antMatcher("/saml/**");
+
+    http.csrf().ignoringAntMatchers("/saml/**");
+
+    http.authorizeRequests().antMatchers("/**").permitAll();
+
     http
-    .antMatcher("/saml/**");
-    
-   http.csrf().ignoringAntMatchers("/saml/**");
-   
-   http.authorizeRequests().antMatchers("/**").permitAll();
-   
-   http
-   .addFilterBefore(metadataGeneratorFilter(), ChannelProcessingFilter.class)
-   .addFilterAfter(samlFilter(), BasicAuthenticationFilter.class);
+      .addFilterBefore(metadataGeneratorFilter(), ChannelProcessingFilter.class)
+      .addFilterAfter(samlFilter(), BasicAuthenticationFilter.class);
   }
 
   @Override
   protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-  
+
     auth.authenticationProvider(samlAuthenticationProvider());
   }
 }

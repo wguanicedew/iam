@@ -23,9 +23,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableAutoConfiguration(exclude={
   SecurityAutoConfiguration.class
 })
-public class MitreidConnectBootApplication {
+public class IamApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(MitreidConnectBootApplication.class, args);
+		SpringApplication.run(IamApplication.class, args);
 	}
 }

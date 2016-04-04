@@ -29,6 +29,12 @@ public class IamUserinfoRepository implements UserInfoRepository {
   @Override
   public UserInfo getByEmailAddress(String email) {
     
+    Optional<IamAccount> account = repo.findByEmail(email);
+    
+    if (account.isPresent()){
+      return account.get().getUserInfo();
+    }
+    
     return null;
   }
 

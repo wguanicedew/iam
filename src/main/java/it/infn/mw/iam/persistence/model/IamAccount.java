@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -40,6 +41,14 @@ public class IamAccount {
 
   @ManyToMany
   private Set<Authority> authorities;
+
+  @ManyToMany
+  @JoinTable(name = "iam_account_group",
+    joinColumns = @JoinColumn(name = "iam_account_id",
+      referencedColumnName = "id") ,
+    inverseJoinColumns = @JoinColumn(name = "iam_group_id",
+      referencedColumnName = "id") )
+  private Set<IamGroup> groups;
 
   @OneToOne(optional = true)
   private SamlAccount samlAccount;
@@ -115,6 +124,16 @@ public class IamAccount {
   public void setSamlAccount(SamlAccount samlAccount) {
 
     this.samlAccount = samlAccount;
+  }
+
+  public Set<IamGroup> getGroups() {
+
+    return groups;
+  }
+
+  public void setGroups(Set<IamGroup> groups) {
+
+    this.groups = groups;
   }
 
   @Override

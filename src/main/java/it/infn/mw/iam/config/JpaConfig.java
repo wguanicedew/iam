@@ -41,7 +41,12 @@ public class JpaConfig extends JpaBaseConfiguration {
     map.put("eclipselink.logging.level", "INFO");
     map.put("eclipselink.logging.level.sql", "OFF");
     map.put("eclipselink.cache.shared.default", "false");
-    map.put("eclipselink.ddl-generation", "drop-and-create-tables");
+    
+    /*
+    map.put("eclipselink.ddl-generation.output-mode", "sql-script");
+    map.put("eclipselink.ddl-generation", "create-tables");
+    map.put("eclipselink.create-ddl-jdbc-file-name", "ddl.sql");
+    */
     
     return map;
 

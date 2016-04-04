@@ -1,5 +1,7 @@
 package it.infn.mw.iam.persistence.model;
 
+import java.util.Set;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -8,11 +10,12 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.mitre.openid.connect.model.Address;
-import org.mitre.openid.connect.model.DefaultAddress;
-import org.mitre.openid.connect.model.DefaultUserInfo;
 import org.mitre.openid.connect.model.UserInfo;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+
+import it.infn.mw.iam.core.IamProperties;
 
 @Entity
 @Table(name = "iam_account_user_info")
@@ -302,6 +305,12 @@ public class IamAccountUserInfo implements UserInfo {
     this.zoneinfo = zoneinfo;
   }
 
+  
+  public Set<IamGroup> getGroups() {
+
+    return iamAccount.getGroups();
+  }
+
   @Override
   public JsonObject toJson() {
     if (src == null) {
@@ -343,7 +352,24 @@ public class IamAccountUserInfo implements UserInfo {
 
         obj.add("address", addr);
       }
-
+      
+      if (getGroups() != null){
+        JsonArray groups = new JsonArray();
+        
+        for (IamGroup g: getGroups()){
+          JsonObject group = new JsonObject();
+          group.addProperty("id", g.getUuid());
+          group.addProperty("name", g.getName());
+          
+          groups.add(group);
+          
+        }
+        
+        obj.add("groups", groups);
+      }
+      
+      obj.addProperty("organisation_name", IamProperties.INSTANCE.getOrganisationName());
+      
       return obj;
     } else {
       return src;
