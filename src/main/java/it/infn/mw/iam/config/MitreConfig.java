@@ -21,15 +21,11 @@ public class MitreConfig {
 
     ConfigurationPropertiesBean config = new ConfigurationPropertiesBean();
 
-    config.setLogoImageUrl("resources/images/openid_connect_small.png");
+    config.setLogoImageUrl("resources/images/indigo-logo.png");
     config.setTopbarTitle("INDIGO IAM server");
-
     config.setIssuer(issuer);
-
     config.setRegTokenLifeTime(tokenLifeTime);
-
     config.setForceHttps(false);
-
     config.setLocale(Locale.ENGLISH);
 
     return config;

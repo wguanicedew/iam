@@ -48,6 +48,12 @@
 			</form>
 		</div>
 	</div>
+  
+  <c:url var="samlLoginUrl" value="/saml/login" />
+  
+  <div class="row-fluid">
+    Or <a href="${samlLoginUrl}">Login with your SAML Identity Provider</a>. 
+  </div>
 </div>
 
 <o:footer/>

@@ -23,7 +23,6 @@ import org.mitre.openid.connect.service.WhitelistedSiteService;
 import org.mitre.openid.connect.service.impl.DefaultApprovedSiteService;
 import org.mitre.openid.connect.service.impl.DefaultBlacklistedSiteService;
 import org.mitre.openid.connect.service.impl.DefaultOIDCTokenService;
-import org.mitre.openid.connect.service.impl.DefaultScopeClaimTranslationService;
 import org.mitre.openid.connect.service.impl.DefaultStatsService;
 import org.mitre.openid.connect.service.impl.DefaultUserInfoService;
 import org.mitre.openid.connect.service.impl.DefaultWhitelistedSiteService;
@@ -47,6 +46,8 @@ import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
 import org.springframework.web.filter.GenericFilterBean;
 import org.springframework.web.servlet.AsyncHandlerInterceptor;
+
+import it.infn.mw.iam.core.IamScopeClaimTranslationService;
 
 @Configuration
 public class MitreServicesConfig {
@@ -140,7 +141,7 @@ public class MitreServicesConfig {
   @Bean
   ScopeClaimTranslationService defaultScopeClaimTranslationService() {
 
-    return new DefaultScopeClaimTranslationService();
+    return new IamScopeClaimTranslationService();
   }
 
   @Bean

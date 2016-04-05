@@ -9,16 +9,16 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @SpringBootApplication
 @EnableTransactionManagement
-@ComponentScan(basePackages = { "it.infn.mw.iam.config",
-  "it.infn.mw.iam.client", "org.mitre.oauth2.web", "org.mitre.oauth2.view",
+@ComponentScan(basePackages = { "it.infn.mw.iam.config", "it.infn.mw.iam.saml",
+  "it.infn.mw.iam.persistence", "org.mitre.oauth2.web", "org.mitre.oauth2.view",
   "org.mitre.openid.connect.web", "org.mitre.openid.connect.view",
   "org.mitre.discovery.web", "org.mitre.discovery.view" })
 
 @EnableAutoConfiguration(exclude = { SecurityAutoConfiguration.class })
-public class MitreidConnectBootApplication {
+public class IamApplication {
 
   public static void main(final String[] args) {
 
-    SpringApplication.run(MitreidConnectBootApplication.class, args);
+    SpringApplication.run(IamApplication.class, args);
   }
 }

@@ -1,7 +1,5 @@
 package it.infn.mw.iam.config;
 
-import javax.sql.DataSource;
-
 import org.mitre.oauth2.web.CorsFilter;
 import org.mitre.openid.connect.client.OIDCAuthenticationProvider;
 import org.mitre.openid.connect.web.AuthenticationTimeStamper;
@@ -21,6 +19,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
+import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.provider.client.ClientCredentialsTokenEndpointFilter;
 import org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler;
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
@@ -40,11 +39,8 @@ import it.infn.mw.iam.libs.IndigoOIDCAuthFilter;
 public class SecurityConfig {
 
   @Configuration
-  @Order(1)
+  @Order(100)
   public static class UserLoginConfig extends WebSecurityConfigurerAdapter {
-
-    @Autowired
-    private DataSource dataSource;
 
     @Autowired
     private AuthenticationTimeStamper authenticationTimeStamper;
@@ -57,16 +53,21 @@ public class SecurityConfig {
     private GenericFilterBean authorizationRequestFilter;
 
     @Autowired
+    @Qualifier("iamUserDetailsService")
+    private UserDetailsService iamUserDetailsService;
+
+    @Autowired
     public void configureGlobal(final AuthenticationManagerBuilder auth)
       throws Exception {
 
-      auth.jdbcAuthentication().dataSource(dataSource);
+      auth.userDetailsService(iamUserDetailsService);
     }
 
     @Override
     public void configure(final WebSecurity web) throws Exception {
 
-      web.expressionHandler(oAuth2WebSecurityExpressionHandler);
+      web.expressionHandler(oAuth2WebSecurityExpressionHandler).ignoring()
+        .antMatchers("/h2-console**");
     }
 
     @Override
@@ -169,17 +170,21 @@ public class SecurityConfig {
   @Configuration
   @Order(10)
   public static class ApiEndpointAuthorizationConfig
-    extends WebSecurityConfigurerAdapter {
+    extends ResourceServerConfigurerAdapter {
 
     @Autowired
     private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
 
     @Override
-    protected void configure(final HttpSecurity http) throws Exception {
 
-      http.requestMatchers().antMatchers("/api/**").and().exceptionHandling()
+    public void configure(final HttpSecurity http) throws Exception {
+
+      // @formatter:off
+      http.antMatcher("/api/**")
+        .exceptionHandling()
         .authenticationEntryPoint(authenticationEntryPoint).and()
         .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.NEVER);
+      // @formatter:on
 
     }
   }
@@ -187,7 +192,7 @@ public class SecurityConfig {
   @Configuration
   @Order(11)
   public static class ResourceEndpointAuthorizationConfig
-    extends WebSecurityConfigurerAdapter {
+    extends ResourceServerConfigurerAdapter {
 
     @Autowired
     private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
@@ -196,13 +201,11 @@ public class SecurityConfig {
     private CorsFilter corsFilter;
 
     @Override
-    protected void configure(final HttpSecurity http) throws Exception {
 
-   // @formatter:off
-      http
-        .requestMatchers()
-          .antMatchers("/resource/**")
-          .and()
+    public void configure(final HttpSecurity http) throws Exception {
+
+      // @formatter:off
+      http.antMatcher("/resource/**")
         .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint)
           .and()
         .addFilterBefore(corsFilter, SecurityContextPersistenceFilter.class)
@@ -210,9 +213,8 @@ public class SecurityConfig {
           .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
           .and()
         .authorizeRequests()
-          .antMatchers("/resource/**")
-          .permitAll()
-      ;
+          .antMatchers("**")
+          .permitAll();
       // @formatter:on
     }
   }
@@ -220,7 +222,7 @@ public class SecurityConfig {
   @Configuration
   @Order(12)
   public static class RegisterEndpointAuthorizationConfig
-    extends WebSecurityConfigurerAdapter {
+    extends ResourceServerConfigurerAdapter {
 
     @Autowired
     private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
@@ -229,13 +231,12 @@ public class SecurityConfig {
     private CorsFilter corsFilter;
 
     @Override
-    protected void configure(final HttpSecurity http) throws Exception {
 
-   // @formatter:off
+    public void configure(final HttpSecurity http) throws Exception {
+
+      // @formatter:off
       http
-        .requestMatchers()
-          .antMatchers("/register/**")
-          .and()
+        .antMatcher("/register/**")
         .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint)
           .and()
         .addFilterBefore(corsFilter, SecurityContextPersistenceFilter.class)
@@ -243,9 +244,8 @@ public class SecurityConfig {
           .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
           .and()
         .authorizeRequests()
-          .antMatchers("/register/**")
-          .permitAll()
-      ;
+          .antMatchers("/**")
+          .permitAll();
       // @formatter:on
     }
   }
@@ -253,7 +253,7 @@ public class SecurityConfig {
   @Configuration
   @Order(13)
   public static class UserInfoEndpointAuthorizationConfig
-    extends WebSecurityConfigurerAdapter {
+    extends ResourceServerConfigurerAdapter {
 
     @Autowired
     private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
@@ -262,13 +262,12 @@ public class SecurityConfig {
     private CorsFilter corsFilter;
 
     @Override
-    protected void configure(final HttpSecurity http) throws Exception {
+
+    public void configure(final HttpSecurity http) throws Exception {
 
       // @formatter:off
       http
-        .requestMatchers()
-          .antMatchers("/userinfo**")
-          .and()
+        .antMatcher("/userinfo**")
         .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint)
           .and()
         .addFilterBefore(corsFilter, SecurityContextPersistenceFilter.class)
@@ -314,9 +313,7 @@ public class SecurityConfig {
 
       // @formatter:off
       http
-      .requestMatchers()
-        .antMatchers("/token")
-        .and()
+        .antMatcher("/token")
       .httpBasic()
         .authenticationEntryPoint(authenticationEntryPoint)
         .and()
@@ -372,10 +369,8 @@ public class SecurityConfig {
 
       // @formatter:off
       http
-      .requestMatchers()
-        .antMatchers("/introspect**")
-        .and()
-      .httpBasic()
+       .antMatcher("/introspect**")
+       .httpBasic()
         .authenticationEntryPoint(authenticationEntryPoint)
         .and()
       .addFilterBefore(corsFilter, SecurityContextPersistenceFilter.class)
@@ -384,7 +379,9 @@ public class SecurityConfig {
         .authenticationEntryPoint(authenticationEntryPoint)
         .and()
       .sessionManagement()
-        .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        .and()
+      .csrf().disable();
       // @formatter:on
     }
   }
@@ -425,9 +422,7 @@ public class SecurityConfig {
 
       // @formatter:off
       http
-        .requestMatchers()
-          .antMatchers("/revoke**")
-          .and()
+        .antMatcher("/revoke**")
         .httpBasic()
           .authenticationEntryPoint(authenticationEntryPoint)
           .and()
@@ -437,8 +432,7 @@ public class SecurityConfig {
           .authenticationEntryPoint(authenticationEntryPoint)
           .and()
         .sessionManagement()
-          .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-      ;
+          .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
       // @formatter:on
     }
   }
@@ -456,9 +450,7 @@ public class SecurityConfig {
 
       // @formatter:off
       http
-      .requestMatchers()
-        .antMatchers("/jwk**")
-        .and()
+        .antMatcher("/jwk**")
       .exceptionHandling()
         .authenticationEntryPoint(http403ForbiddenEntryPoint)
         .and()
@@ -466,14 +458,14 @@ public class SecurityConfig {
         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .and()
     .authorizeRequests()
-      .antMatchers("/jwk**")
+      .antMatchers("/**")
       .permitAll();
       // @formatter:on
     }
   }
 
   @Configuration
-  @Order(18)
+  @Order(1)
   @Profile("dev")
   public static class H2ConsoleEndpointAuthorizationConfig
     extends WebSecurityConfigurerAdapter {
@@ -481,12 +473,12 @@ public class SecurityConfig {
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
 
-      HttpSecurity h2Console = http.antMatcher("/h2-console**");
+      HttpSecurity h2Console = http.antMatcher("/h2-console/**");
       h2Console.csrf().disable();
       h2Console.httpBasic();
-      h2Console.headers().frameOptions().sameOrigin();
+      h2Console.headers().frameOptions().disable();
 
-      h2Console.authorizeRequests().anyRequest().authenticated();
+      h2Console.authorizeRequests().anyRequest().permitAll();
     }
   }
 

@@ -5,7 +5,9 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.flyway.FlywayMigrationStrategy;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
@@ -40,16 +42,24 @@ public class JpaConfig extends JpaBaseConfiguration {
     map.put("eclipselink.logging.level.sql", "FINE");
     map.put("eclipselink.cache.shared.default", "false");
 
+    /*
+     * map.put("eclipselink.ddl-generation.output-mode", "sql-script");
+     * map.put("eclipselink.ddl-generation", "create-tables");
+     * map.put("eclipselink.create-ddl-jdbc-file-name", "ddl.sql");
+     */
+
     return map;
 
   }
 
   @Override
   public LocalContainerEntityManagerFactoryBean entityManagerFactory(
+
     final EntityManagerFactoryBuilder factoryBuilder) {
 
     LocalContainerEntityManagerFactoryBean emf = factoryBuilder
-      .dataSource(dataSource).packages("org.mitre")
+      .dataSource(dataSource)
+      .packages("org.mitre", "it.infn.mw.iam.persistence")
       .persistenceUnit("defaultPersistenceUnit")
       .properties(getVendorProperties()).build();
 
@@ -63,4 +73,17 @@ public class JpaConfig extends JpaBaseConfiguration {
     return new JpaTransactionManager();
   }
 
+  @Bean
+  public FlywayMigrationStrategy flywayMigrationStrategy() {
+
+    return new FlywayMigrationStrategy() {
+
+      @Override
+      public void migrate(final Flyway flyway) {
+
+        return;
+
+      }
+    };
+  }
 }

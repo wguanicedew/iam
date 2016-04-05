@@ -6,20 +6,22 @@ iam:
   issuer: ${iam.baseUrl}/
   token:
     lifetime: 86400
-
-#spring:
-#  datasource:
-#    driverClassName: org.h2.Driver
-#    url: jdbc:h2:mem:iam;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-#    username: sa
-#    password:
+  organisation: 
+    name: test
 
 spring:
   datasource:
-    driverClassName: com.mysql.jdbc.Driver
-    url: jdbc:mysql://localhost/oic
-    username: oic
-    password: oic
+    driverClassName: org.h2.Driver
+    url: jdbc:h2:mem:iam;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+
+#spring:
+#  datasource:
+#    driverClassName: com.mysql.jdbc.Driver
+#    url: jdbc:mysql://localhost/oic
+#    username: oic
+#    password: oic
      
   application:
     name: IAM 
@@ -30,6 +32,14 @@ spring:
         generate-ddl: true
         hibernate.format_sql: true    
 
+  h2:
+    console:
+      enabled: false
+      
+      
+  profiles:
+    active: dev
+    
 idp:
   baseUrl: http://mitre-srv:8080/openid-connect-server-webapp
   issuer: ${idp.baseUrl}/

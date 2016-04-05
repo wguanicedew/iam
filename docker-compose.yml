@@ -1,0 +1,66 @@
+http_proxy:
+  build: ./docker/httpd-proxy/
+  container_name: idptestbed
+
+idp:
+  build: ./docker/idp/
+  container_name: idp
+  environment:
+   - JETTY_MAX_HEAP=64m
+   - JETTY_BROWSER_SSL_KEYSTORE_PASSWORD=password
+   - JETTY_BACKCHANNEL_SSL_KEYSTORE_PASSWORD=password
+  expose:
+   - "4443"
+
+ldap:
+  build: ./docker/ldap/
+  container_name: ldap
+
+sp:
+  container_name: sp
+  build: ./docker/sp/
+
+iam:
+  build: .
+  dockerfile: ./docker/iam/Dockerfile
+  container_name: iam
+
+  environment:
+    IAM_JAVA_OPTS: -Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n,address=1044
+    IAM_JAR: /code/target/mitreid-connect-boot-0.0.1-SNAPSHOT.war
+    IAM_HOST: iam
+    IAM_PORT: 8080
+
+  ports:
+    - "1044:1044"
+    - "8080:8080"
+
+  volumes:
+    - .:/code:ro
+    - ./src/main/resources/saml/idp-metadata.xml:/tmp/idp-metadata.xml:ro
+
+client:
+  image: italiangrid/java-app
+  container_name: client
+
+  environment:
+    APP_JAVA_OPTS: -Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n,address=1044
+    IAM_CLIENT_ID: client
+    IAM_CLIENT_SECRET: secret
+    IAM_TOKEN_ENDPOINT: http://iam:8080/token
+    IAM_AUTHORIZATION_ENDPOINT: http://iam:8080/authorize
+    IAM_USERINFO_ENDPOINT: http://iam:8080/userinfo
+    APP_JAR: /app-code/target/spring-boot-oidc-client-0.0.1-SNAPSHOT.jar
+
+  ports:
+    - "1045:1045"
+
+  volumes:
+    - /Users/cecco/git/spring-boot-oidc-client:/app-code:ro
+
+browser:
+  image: jess/firefox
+  container_name: browser
+
+  environment:
+    DISPLAY: 172.17.8.1:0

@@ -27,13 +27,13 @@ public class MvcConfig extends WebMvcConfigurerAdapter {
   @Autowired
   @Qualifier("mitreUserInfoInterceptor")
   AsyncHandlerInterceptor userInfoInterceptor;
-  
+
   @Autowired
   @Qualifier("mitreServerConfigInterceptor")
   AsyncHandlerInterceptor serverConfigInterceptor;
-  
+
   @Override
-  public void addInterceptors(InterceptorRegistry registry) {
+  public void addInterceptors(final InterceptorRegistry registry) {
 
     registry.addInterceptor(userInfoInterceptor);
     registry.addInterceptor(serverConfigInterceptor);
@@ -41,7 +41,7 @@ public class MvcConfig extends WebMvcConfigurerAdapter {
   }
 
   @Override
-  public void addResourceHandlers(ResourceHandlerRegistry registry) {
+  public void addResourceHandlers(final ResourceHandlerRegistry registry) {
 
     registry.addResourceHandler("/resources/**")
       .addResourceLocations("/resources/");
@@ -49,14 +49,14 @@ public class MvcConfig extends WebMvcConfigurerAdapter {
   }
 
   @Override
-  public void addViewControllers(ViewControllerRegistry registry) {
+  public void addViewControllers(final ViewControllerRegistry registry) {
 
     registry.addViewController("/login").setViewName("login");
     registry.addViewController("/error").setViewName("error");
   }
 
   @Override
-  public void configureViewResolvers(ViewResolverRegistry registry) {
+  public void configureViewResolvers(final ViewResolverRegistry registry) {
 
     registry.viewResolver(beanNameViewResolver());
     registry.viewResolver(jspViewResolver());
@@ -81,21 +81,20 @@ public class MvcConfig extends WebMvcConfigurerAdapter {
     return resolver;
   }
 
-  
   @Bean
-  public LocaleResolver localeResolver(){
+  public LocaleResolver localeResolver() {
+
     SessionLocaleResolver slr = new SessionLocaleResolver();
     slr.setDefaultLocale(Locale.US);
     return slr;
   }
-  
+
   @Bean
   public MessageSource messageSource() {
 
     DefaultResourceLoader loader = new DefaultResourceLoader();
     JsonMessageSource messageSource = new JsonMessageSource();
-    messageSource
-      .setBaseDirectory(loader.getResource("classpath:/i18n/"));
+    messageSource.setBaseDirectory(loader.getResource("classpath:/i18n/"));
     messageSource.setUseCodeAsDefaultMessage(true);
 
     return messageSource;

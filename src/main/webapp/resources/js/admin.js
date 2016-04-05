@@ -338,10 +338,16 @@ var UserProfileView = Backbone.View.extend({
         
         var t = this.template;
 
+        var what = Object.prototype.toString;
+        
         _.each(this.model, function (value, key) {
         	if (key && value) {
         		
-        		if (typeof(value) === 'object') {
+        		if (what.call(value) === '[object Array]'){
+        			$('dl', this.el).append(
+        					t({key: key, value: value.map(function(group){ return group.name; }).join(', ')})
+        					);	
+        		} else if (typeof(value) === 'object') {
         			
         			var el = this.el;
         			var k = key;
@@ -351,8 +357,6 @@ var UserProfileView = Backbone.View.extend({
        	            		t({key: key, value: value, category: k})
         				);
         			});
-        		} else if (typeof(value) === 'array') {
-        			// TODO: handle array types
         		} else {
     	            $('dl', this.el).append(
     	            		t({key: key, value: value})
