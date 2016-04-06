@@ -116,7 +116,7 @@ public class SecurityConfig {
   }
 
   @Configuration
-  @Order(5)
+  @Order(105)
   public static class ExternalLogin extends WebSecurityConfigurerAdapter {
 
     @Autowired

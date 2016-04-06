@@ -24,6 +24,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <java.version>1.8</java.version>
     <eclipselink.version>2.5.2</eclipselink.version>
+    <mitreid.version>1.2.6-SNAPSHOT</mitreid.version>
   </properties>
 
   <dependencies>
@@ -121,13 +122,13 @@
     <dependency>
       <groupId>org.mitre</groupId>
       <artifactId>openid-connect-server</artifactId>
-      <version>1.2.4</version>
+      <version>${mitreid.version}</version>
     </dependency>
     
     <dependency>
       <groupId>org.mitre</groupId>
       <artifactId>openid-connect-client</artifactId>
-      <version>1.2.4</version>
+      <version>${mitreid.version}</version>
     </dependency>
 
     <!-- SAML -->

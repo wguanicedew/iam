@@ -15,7 +15,7 @@
  * limitations under the License.
  *******************************************************************************/
 /**
- * 
+ *
  */
 package it.infn.mw.iam.libs;
 
@@ -30,12 +30,15 @@ import javax.servlet.http.HttpSession;
 
 import org.mitre.oauth2.service.impl.DefaultOAuth2AuthorizationCodeService;
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
-import org.mitre.openid.connect.model.UserInfo;
 import org.mitre.openid.connect.request.ConnectOAuth2RequestFactory;
 import org.mitre.openid.connect.service.impl.DefaultUserInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
@@ -43,10 +46,12 @@ import org.springframework.security.web.authentication.SavedRequestAwareAuthenti
 import org.springframework.security.web.savedrequest.DefaultSavedRequest;
 import org.springframework.stereotype.Component;
 
+import it.infn.mw.iam.oidc.OIDCUserDetailsService;
+
 /**
  * This class sets a timestamp on the current HttpSession when someone
  * successfully authenticates.
- * 
+ *
  * @author jricher
  *
  */
@@ -72,6 +77,9 @@ public class ExternalAuthenticationSuccessHandler
   private DefaultUserInfoService userInfoService;
 
   @Autowired
+  private OIDCUserDetailsService oidcUserDetailService;
+
+  @Autowired
   private Environment env;
 
   @Override
@@ -83,9 +91,25 @@ public class ExternalAuthenticationSuccessHandler
       && authentication instanceof OIDCAuthenticationToken) {
 
       OIDCAuthenticationToken auth = (OIDCAuthenticationToken) authentication;
-      UserInfo userInfo = auth.getUserInfo();
-      userInfo.setPreferredUsername(auth.getPrincipal().toString());
-      userInfoService.save(userInfo);
+
+      // get sub & issuer
+      String subject = auth.getSub();
+      String issuer = auth.getIssuer();
+
+      // find by oidc acccount
+      Object o = oidcUserDetailService.loadUserByOIDC(subject, issuer);
+      User user = null;
+
+      if (o == null) {
+        throw new UsernameNotFoundException(String
+          .format("User [%s] not found in IAM database", auth.getPrincipal()));
+      } else {
+        user = (User) o;
+      }
+
+      UsernamePasswordAuthenticationToken userToken = new UsernamePasswordAuthenticationToken(
+        user.getUsername(), user.getPassword(), user.getAuthorities());
+      SecurityContextHolder.getContext().setAuthentication(userToken);
 
       String targetUrl = env.getProperty("iam.baseUrl");
 
@@ -108,7 +132,7 @@ public class ExternalAuthenticationSuccessHandler
         OAuth2Request storedOAuth2Request = authFactory
           .createOAuth2Request(authorizationRequest);
         OAuth2Authentication combinedAuth = new OAuth2Authentication(
-          storedOAuth2Request, authentication);
+          storedOAuth2Request, userToken);
         String code = authCodeService.createAuthorizationCode(combinedAuth);
 
         targetUrl = String.format("%s?code=%s&state=%s&nonce=%s",

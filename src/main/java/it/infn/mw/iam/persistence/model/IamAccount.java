@@ -45,13 +45,17 @@ public class IamAccount {
   @ManyToMany
   @JoinTable(name = "iam_account_group",
     joinColumns = @JoinColumn(name = "iam_account_id",
-      referencedColumnName = "id") ,
+      referencedColumnName = "id"),
     inverseJoinColumns = @JoinColumn(name = "iam_group_id",
-      referencedColumnName = "id") )
+      referencedColumnName = "id"))
   private Set<IamGroup> groups;
 
   @OneToOne(optional = true)
   private SamlAccount samlAccount;
+
+  @OneToOne(optional = true)
+  @JoinColumn(name = "oidc_account_id")
+  private OidcAccount oidcAccount;
 
   protected IamAccount() {
   }
@@ -61,7 +65,7 @@ public class IamAccount {
     return id;
   }
 
-  public void setId(Long id) {
+  public void setId(final Long id) {
 
     this.id = id;
   }
@@ -71,7 +75,7 @@ public class IamAccount {
     return uuid;
   }
 
-  public void setUuid(String uuid) {
+  public void setUuid(final String uuid) {
 
     this.uuid = uuid;
   }
@@ -81,7 +85,7 @@ public class IamAccount {
     return username;
   }
 
-  public void setUsername(String username) {
+  public void setUsername(final String username) {
 
     this.username = username;
   }
@@ -91,7 +95,7 @@ public class IamAccount {
     return password;
   }
 
-  public void setPassword(String password) {
+  public void setPassword(final String password) {
 
     this.password = password;
   }
@@ -101,7 +105,7 @@ public class IamAccount {
     return userInfo;
   }
 
-  public void setUserInfo(IamAccountUserInfo userInfo) {
+  public void setUserInfo(final IamAccountUserInfo userInfo) {
 
     this.userInfo = userInfo;
   }
@@ -111,7 +115,7 @@ public class IamAccount {
     return authorities;
   }
 
-  public void setAuthorities(Set<Authority> authorities) {
+  public void setAuthorities(final Set<Authority> authorities) {
 
     this.authorities = authorities;
   }
@@ -121,7 +125,7 @@ public class IamAccount {
     return samlAccount;
   }
 
-  public void setSamlAccount(SamlAccount samlAccount) {
+  public void setSamlAccount(final SamlAccount samlAccount) {
 
     this.samlAccount = samlAccount;
   }
@@ -131,7 +135,7 @@ public class IamAccount {
     return groups;
   }
 
-  public void setGroups(Set<IamGroup> groups) {
+  public void setGroups(final Set<IamGroup> groups) {
 
     this.groups = groups;
   }
@@ -146,7 +150,7 @@ public class IamAccount {
   }
 
   @Override
-  public boolean equals(Object obj) {
+  public boolean equals(final Object obj) {
 
     if (this == obj)
       return true;

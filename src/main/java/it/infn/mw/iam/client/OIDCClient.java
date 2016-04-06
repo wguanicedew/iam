@@ -24,8 +24,6 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
-import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client;
@@ -34,12 +32,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import it.infn.mw.iam.libs.ExternalAuthenticationSuccessHandler;
 import it.infn.mw.iam.libs.IndigoOIDCAuthFilter;
+import it.infn.mw.iam.oidc.OIDCUserDetailsService;
 
 @Configuration
 @EnableAutoConfiguration
 @EnableOAuth2Client
 @RestController
-public class ClientApp {
+public class OIDCClient {
 
   @Autowired
   private Environment env;
@@ -172,22 +171,29 @@ public class ClientApp {
     return new PlainAuthRequestUrlBuilder();
   }
 
-  @Bean
-  public StringHttpMessageConverter stringHttpMessageConverter() {
-
-    return new StringHttpMessageConverter();
-  }
-
-  @Bean
-  public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter() {
-
-    return new MappingJackson2HttpMessageConverter();
-  }
-
+  // @Bean
+  // public StringHttpMessageConverter stringHttpMessageConverter() {
+  //
+  // return new StringHttpMessageConverter();
+  // }
+  //
+  // @Bean
+  // public MappingJackson2HttpMessageConverter
+  // mappingJackson2HttpMessageConverter() {
+  //
+  // return new MappingJackson2HttpMessageConverter();
+  // }
+  //
   @Bean
   public DefaultOAuth2AuthorizationCodeService DefaultOAuth2AuthorizationCodeService() {
 
     return new DefaultOAuth2AuthorizationCodeService();
+  }
+
+  @Bean
+  public OIDCUserDetailsService oidcUserDetailService() {
+
+    return new OIDCUserDetailsService();
   }
 
 }
