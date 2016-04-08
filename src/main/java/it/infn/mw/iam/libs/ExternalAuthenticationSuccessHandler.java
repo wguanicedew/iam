@@ -20,6 +20,7 @@
 package it.infn.mw.iam.libs;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,19 +29,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.mitre.oauth2.service.impl.DefaultOAuth2AuthorizationCodeService;
+import org.apache.http.client.utils.URIBuilder;
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
-import org.mitre.openid.connect.request.ConnectOAuth2RequestFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.oauth2.provider.AuthorizationRequest;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.security.web.savedrequest.DefaultSavedRequest;
 import org.springframework.stereotype.Component;
@@ -57,12 +55,6 @@ public class ExternalAuthenticationSuccessHandler
   protected final static String STATE_SESSION_VARIABLE = "state";
   protected final static String NONCE_SESSION_VARIABLE = "nonce";
   protected final static String ISSUER_SESSION_VARIABLE = "issuer";
-
-  @Autowired
-  private ConnectOAuth2RequestFactory authFactory;
-
-  @Autowired
-  private DefaultOAuth2AuthorizationCodeService authCodeService;
 
   @Autowired
   private OIDCUserDetailsService oidcUserDetailService;
@@ -106,6 +98,7 @@ public class ExternalAuthenticationSuccessHandler
 
       if (obj != null) {
 
+        // redo authz request
         DefaultSavedRequest originAuthRequest = (DefaultSavedRequest) obj;
 
         Map<String, String> parameters = new HashMap<String, String>();
@@ -113,21 +106,6 @@ public class ExternalAuthenticationSuccessHandler
           .getParameterMap().entrySet()) {
           parameters.put(entry.getKey(), entry.getValue()[0]);
         }
-
-        // TODO: check client approve
-
-        AuthorizationRequest authorizationRequest = authFactory
-          .createAuthorizationRequest(parameters);
-        authorizationRequest.setApproved(true);
-        OAuth2Request storedOAuth2Request = authFactory
-          .createOAuth2Request(authorizationRequest);
-        OAuth2Authentication combinedAuth = new OAuth2Authentication(
-          storedOAuth2Request, userToken);
-        String code = authCodeService.createAuthorizationCode(combinedAuth);
-
-        targetUrl = String.format("%s?code=%s&state=%s&nonce=%s",
-          parameters.get("redirect_uri"), code, parameters.get("state"),
-          parameters.get("nonce"));
 
         session.setAttribute("SPRING_SECURITY_SAVED_REQUEST",
           originAuthRequest);
@@ -137,13 +115,41 @@ public class ExternalAuthenticationSuccessHandler
           parameters.get("redirect_uri"));
         session.setAttribute(NONCE_SESSION_VARIABLE, parameters.get("nonce"));
 
-        targetUrl = response.encodeRedirectURL(targetUrl);
+        targetUrl = rebuildAuthzRequestUrl(parameters.get("client_id"),
+          parameters.get("scope"), parameters.get("redirect_uri"),
+          parameters.get("nonce"), parameters.get("state"), response);
+
       }
 
       response.sendRedirect(targetUrl);
     }
     return;
 
+  }
+
+  private String rebuildAuthzRequestUrl(String clientId, String scopes,
+    String redirectUri, String nonce, String state,
+    HttpServletResponse response) throws IOException {
+
+    String authRequest = null;
+    try {
+      URIBuilder uriBuilder = new URIBuilder(
+        env.getProperty("iam.issuer") + "/authorize");
+      uriBuilder.addParameter("response_type", "code");
+      uriBuilder.addParameter("client_id", clientId);
+      uriBuilder.addParameter("scope", scopes);
+      uriBuilder.addParameter("redirect_uri", redirectUri);
+      uriBuilder.addParameter("nonce", nonce);
+      uriBuilder.addParameter("state", state);
+
+      authRequest = uriBuilder.build().toString();
+
+    } catch (URISyntaxException e) {
+      throw new AuthenticationServiceException(
+        "Malformed Authorization Endpoint Uri", e);
+    }
+
+    return authRequest;
   }
 
 }

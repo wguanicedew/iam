@@ -102,41 +102,6 @@ public class OIDCClient {
     return provider;
   }
 
-  // @Bean
-  // public IssuerService issuerService() {
-  //
-  // StaticSingleIssuerService issuer = new StaticSingleIssuerService();
-  // issuer.setIssuer(env.getProperty("idp.issuer"));
-  //
-  // return issuer;
-  // }
-
-  // @Bean
-  // public ServerConfiguration serverConfig() {
-  //
-  // ServerConfiguration config = new ServerConfiguration();
-  // config.setIssuer(env.getProperty("idp.issuer"));
-  // config.setAuthorizationEndpointUri(env.getProperty("idp.authorizeUrl"));
-  // config.setTokenEndpointUri(env.getProperty("idp.tokenUrl"));
-  // config.setUserInfoUri(env.getProperty("idp.userinfoUrl"));
-  // config.setJwksUri(env.getProperty("idp.jwkUrl"));
-  //
-  // return config;
-  // }
-
-  // @Bean
-  // public StaticServerConfigurationService staticServerConfiguration() {
-  //
-  // Map<String, ServerConfiguration> servers = new LinkedHashMap<>();
-  // servers.put(env.getProperty("idp.issuer"), serverConfig());
-  //
-  // StaticServerConfigurationService config = new
-  // StaticServerConfigurationService();
-  // config.setServers(servers);
-  //
-  // return config;
-  // }
-
   @Bean
   public DynamicServerConfigurationService dynamicServerConfiguration() {
 
@@ -197,19 +162,6 @@ public class OIDCClient {
     return new PlainAuthRequestUrlBuilder();
   }
 
-  // @Bean
-  // public StringHttpMessageConverter stringHttpMessageConverter() {
-  //
-  // return new StringHttpMessageConverter();
-  // }
-  //
-  // @Bean
-  // public MappingJackson2HttpMessageConverter
-  // mappingJackson2HttpMessageConverter() {
-  //
-  // return new MappingJackson2HttpMessageConverter();
-  // }
-  //
   @Bean
   public DefaultOAuth2AuthorizationCodeService DefaultOAuth2AuthorizationCodeService() {
 
