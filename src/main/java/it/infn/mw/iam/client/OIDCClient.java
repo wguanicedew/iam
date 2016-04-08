@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.mitre.oauth2.model.ClientDetailsEntity.AuthMethod;
 import org.mitre.oauth2.model.RegisteredClient;
@@ -12,13 +13,11 @@ import org.mitre.oauth2.service.impl.DefaultOAuth2AuthorizationCodeService;
 import org.mitre.openid.connect.client.NamedAdminAuthoritiesMapper;
 import org.mitre.openid.connect.client.OIDCAuthenticationProvider;
 import org.mitre.openid.connect.client.SubjectIssuerGrantedAuthority;
-import org.mitre.openid.connect.client.service.IssuerService;
+import org.mitre.openid.connect.client.service.impl.DynamicServerConfigurationService;
 import org.mitre.openid.connect.client.service.impl.PlainAuthRequestUrlBuilder;
 import org.mitre.openid.connect.client.service.impl.StaticAuthRequestOptionsService;
 import org.mitre.openid.connect.client.service.impl.StaticClientConfigurationService;
-import org.mitre.openid.connect.client.service.impl.StaticServerConfigurationService;
-import org.mitre.openid.connect.client.service.impl.StaticSingleIssuerService;
-import org.mitre.openid.connect.config.ServerConfiguration;
+import org.mitre.openid.connect.client.service.impl.ThirdPartyIssuerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -48,8 +47,8 @@ public class OIDCClient {
 
     IndigoOIDCAuthFilter filter = new IndigoOIDCAuthFilter();
     filter.setAuthenticationManager(authenticationManager());
-    filter.setIssuerService(issuerService());
-    filter.setServerConfigurationService(staticServerConfiguration());
+    filter.setIssuerService(accountChooser());
+    filter.setServerConfigurationService(dynamicServerConfiguration());
     filter.setClientConfigurationService(staticClientConfiguration());
     filter.setAuthRequestOptionsService(authOptions());
     filter.setAuthRequestUrlBuilder(authRequestBuilder());
@@ -75,17 +74,23 @@ public class OIDCClient {
   public NamedAdminAuthoritiesMapper namedAdmins() {
 
     NamedAdminAuthoritiesMapper mapper = new NamedAdminAuthoritiesMapper();
-    mapper.setAdmins(
-      new LinkedHashSet<SubjectIssuerGrantedAuthority>(Arrays.asList(admin())));
+    Set<SubjectIssuerGrantedAuthority> adminSet = new LinkedHashSet<SubjectIssuerGrantedAuthority>();
+
+    String[] idpList = env.getProperty("idp.list").split(",");
+
+    for (String idp : idpList) {
+      adminSet.add(admin(idp));
+    }
+
+    mapper.setAdmins(adminSet);
 
     return mapper;
   }
 
-  @Bean
-  public SubjectIssuerGrantedAuthority admin() {
+  private SubjectIssuerGrantedAuthority admin(String idp) {
 
-    return new SubjectIssuerGrantedAuthority("90342.ASDFJWFA",
-      env.getProperty("idp.issuer"));
+    return new SubjectIssuerGrantedAuthority(
+      env.getProperty("idp." + idp + ".admin"), idp);
   }
 
   @Bean
@@ -97,52 +102,69 @@ public class OIDCClient {
     return provider;
   }
 
-  @Bean
-  public IssuerService issuerService() {
+  // @Bean
+  // public IssuerService issuerService() {
+  //
+  // StaticSingleIssuerService issuer = new StaticSingleIssuerService();
+  // issuer.setIssuer(env.getProperty("idp.issuer"));
+  //
+  // return issuer;
+  // }
 
-    StaticSingleIssuerService issuer = new StaticSingleIssuerService();
-    issuer.setIssuer(env.getProperty("idp.issuer"));
+  // @Bean
+  // public ServerConfiguration serverConfig() {
+  //
+  // ServerConfiguration config = new ServerConfiguration();
+  // config.setIssuer(env.getProperty("idp.issuer"));
+  // config.setAuthorizationEndpointUri(env.getProperty("idp.authorizeUrl"));
+  // config.setTokenEndpointUri(env.getProperty("idp.tokenUrl"));
+  // config.setUserInfoUri(env.getProperty("idp.userinfoUrl"));
+  // config.setJwksUri(env.getProperty("idp.jwkUrl"));
+  //
+  // return config;
+  // }
+
+  // @Bean
+  // public StaticServerConfigurationService staticServerConfiguration() {
+  //
+  // Map<String, ServerConfiguration> servers = new LinkedHashMap<>();
+  // servers.put(env.getProperty("idp.issuer"), serverConfig());
+  //
+  // StaticServerConfigurationService config = new
+  // StaticServerConfigurationService();
+  // config.setServers(servers);
+  //
+  // return config;
+  // }
+
+  @Bean
+  public DynamicServerConfigurationService dynamicServerConfiguration() {
+
+    return new DynamicServerConfigurationService();
+  }
+
+  @Bean
+  public ThirdPartyIssuerService accountChooser() {
+
+    ThirdPartyIssuerService issuer = new ThirdPartyIssuerService();
+    issuer.setAccountChooserUrl("http://localhost/account-chooser/");
 
     return issuer;
   }
 
-  @Bean
-  public ServerConfiguration serverConfig() {
+  private RegisteredClient clientConfig(String idp) {
 
-    ServerConfiguration config = new ServerConfiguration();
-    config.setIssuer(env.getProperty("idp.issuer"));
-    config.setAuthorizationEndpointUri(env.getProperty("idp.authorizeUrl"));
-    config.setTokenEndpointUri(env.getProperty("idp.tokenUrl"));
-    config.setUserInfoUri(env.getProperty("idp.userinfoUrl"));
-    config.setJwksUri(env.getProperty("idp.jwkUrl"));
-
-    return config;
-  }
-
-  @Bean
-  public StaticServerConfigurationService staticServerConfiguration() {
-
-    Map<String, ServerConfiguration> servers = new LinkedHashMap<>();
-    servers.put(env.getProperty("idp.issuer"), serverConfig());
-
-    StaticServerConfigurationService config = new StaticServerConfigurationService();
-    config.setServers(servers);
-
-    return config;
-  }
-
-  @Bean
-  public RegisteredClient clientConfig() {
+    String prefix = String.format("idp.%s", idp);
 
     RegisteredClient config = new RegisteredClient();
-    config.setClientId(env.getProperty("idp.client.id"));
-    config.setClientSecret(env.getProperty("idp.client.secret"));
+    config.setClientId(env.getProperty(prefix + ".client.id"));
+    config.setClientSecret(env.getProperty(prefix + ".client.secret"));
 
     config.setScope(new HashSet<String>(
-      Arrays.asList(env.getProperty("idp.auth.scope").split(","))));
+      Arrays.asList(env.getProperty(prefix + ".auth.scope").split(","))));
     config.setTokenEndpointAuthMethod(AuthMethod.SECRET_BASIC);
-    config.setRedirectUris(new HashSet<String>(
-      Arrays.asList(env.getProperty("idp.client.redirectUri").split(","))));
+    config.setRedirectUris(new HashSet<String>(Arrays
+      .asList(env.getProperty(prefix + ".client.redirectUri").split(","))));
 
     return config;
   }
@@ -151,7 +173,11 @@ public class OIDCClient {
   public StaticClientConfigurationService staticClientConfiguration() {
 
     Map<String, RegisteredClient> clients = new LinkedHashMap<String, RegisteredClient>();
-    clients.put(env.getProperty("idp.issuer"), clientConfig());
+    String[] idpList = env.getProperty("idp.list").split(",");
+
+    for (String idp : idpList) {
+      clients.put(env.getProperty("idp." + idp + ".issuer"), clientConfig(idp));
+    }
 
     StaticClientConfigurationService config = new StaticClientConfigurationService();
     config.setClients(clients);

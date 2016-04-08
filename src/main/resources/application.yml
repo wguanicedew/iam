@@ -6,7 +6,7 @@ iam:
   issuer: ${iam.baseUrl}/
   token:
     lifetime: 86400
-  organisation: 
+  organisation:
     name: test
 
 spring:
@@ -22,34 +22,43 @@ spring:
 #    url: jdbc:mysql://localhost/oic
 #    username: oic
 #    password: oic
-     
+
   application:
-    name: IAM 
-    
+    name: IAM
+
   jpa:
       properties:
         show-sql: true
         generate-ddl: true
-        hibernate.format_sql: true    
+        hibernate.format_sql: true
 
   h2:
     console:
       enabled: false
-      
-      
+
+
   profiles:
     active: dev
-    
+
 idp:
-  baseUrl: http://mitre-srv:8080/openid-connect-server-webapp
-  issuer: ${idp.baseUrl}/
-  authorizeUrl: ${idp.baseUrl}/authorize
-  tokenUrl: ${idp.baseUrl}/token
-  userinfoUrl: ${idp.baseUrl}/userinfo
-  jwkUrl: ${idp.baseUrl}/jwk
-  client:
-    id: client_id
-    secret: client_secret
-    redirectUri: ${iam.baseUrl}/openid_connect_login
-  auth:
-    scope: openid,profile,email,address,phone
+  list: mitre,google
+
+  mitre:
+    issuer: http://mitre-srv:8080/openid-connect-server-webapp/
+    client:
+      id: client_id
+      secret: client_secret
+      redirectUri: ${iam.baseUrl}/openid_connect_login
+    auth:
+      scope: openid,profile,email,address,phone
+    admin: 90342.ASDFJWFA
+
+  google:
+    issuer: https://accounts.google.com
+    client:
+      id: ...
+      secret: ...
+      redirectUri: ${iam.baseUrl}/openid_connect_login
+    auth:
+      scope: openid,profile,email,address,phone
+    admin: 90342.ASDFJWFA

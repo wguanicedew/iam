@@ -31,7 +31,6 @@ import javax.servlet.http.HttpSession;
 import org.mitre.oauth2.service.impl.DefaultOAuth2AuthorizationCodeService;
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.mitre.openid.connect.request.ConnectOAuth2RequestFactory;
-import org.mitre.openid.connect.service.impl.DefaultUserInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -48,18 +47,10 @@ import org.springframework.stereotype.Component;
 
 import it.infn.mw.iam.oidc.OIDCUserDetailsService;
 
-/**
- * This class sets a timestamp on the current HttpSession when someone
- * successfully authenticates.
- *
- * @author jricher
- *
- */
-@Component("authenticationTimeStamper")
+@Component("externalAuthenticationSuccessHandler")
 public class ExternalAuthenticationSuccessHandler
   extends SavedRequestAwareAuthenticationSuccessHandler {
 
-  public static final String AUTH_TIMESTAMP = "AUTH_TIMESTAMP";
   public final static String ORIGIN_AUTH_REQUEST_SESSION_VARIABLE = "origin_auth_request";
 
   protected final static String REDIRECT_URI_SESION_VARIABLE = "redirect_uri";
@@ -72,9 +63,6 @@ public class ExternalAuthenticationSuccessHandler
 
   @Autowired
   private DefaultOAuth2AuthorizationCodeService authCodeService;
-
-  @Autowired
-  private DefaultUserInfoService userInfoService;
 
   @Autowired
   private OIDCUserDetailsService oidcUserDetailService;
@@ -125,6 +113,8 @@ public class ExternalAuthenticationSuccessHandler
           .getParameterMap().entrySet()) {
           parameters.put(entry.getKey(), entry.getValue()[0]);
         }
+
+        // TODO: check client approve
 
         AuthorizationRequest authorizationRequest = authFactory
           .createAuthorizationRequest(parameters);
