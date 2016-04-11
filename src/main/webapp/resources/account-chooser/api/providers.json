@@ -1,0 +1,12 @@
+[
+    {
+        "issuer":"http://mitre-srv:8080/openid-connect-server-webapp/",
+        "image":"http://mitre-srv:8080/openid-connect-server-webapp/resources/images/openid_connect_large.png",
+        "descriptor":"MitreID Provider"
+    },
+    {
+        "issuer":"https://accounts.google.com/",
+        "image":"https://www.google.it/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png",
+        "descriptor":"Google"
+    }
+]

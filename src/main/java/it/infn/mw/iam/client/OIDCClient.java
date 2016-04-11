@@ -112,7 +112,8 @@ public class OIDCClient {
   public ThirdPartyIssuerService accountChooser() {
 
     ThirdPartyIssuerService issuer = new ThirdPartyIssuerService();
-    issuer.setAccountChooserUrl("http://localhost/account-chooser/");
+    issuer.setAccountChooserUrl(
+      env.getProperty("iam.baseUrl") + "/resources/account-chooser/index.html");
 
     return issuer;
   }
