@@ -62,3 +62,4 @@ idp:
     auth:
       scope: openid,profile,email,address,phone
     admin: 90342.ASDFJWFA
+

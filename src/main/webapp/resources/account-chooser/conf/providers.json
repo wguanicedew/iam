@@ -1,0 +1,17 @@
+[
+    {
+        "issuer":"http://mitre-srv:8080/openid-connect-server-webapp/",
+        "cssclass": "",
+        "descriptor":"MitreID"
+    },
+    {
+        "issuer":"https://accounts.google.com/",
+        "cssclass": "google",
+        "descriptor":"Google"
+    },
+    {
+        "issuer":"https://github.com/",
+        "cssclass": "github",
+        "descriptor":"GitHub"
+    }
+]
