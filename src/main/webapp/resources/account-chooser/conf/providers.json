@@ -2,16 +2,19 @@
     {
         "issuer":"http://mitre-srv:8080/openid-connect-server-webapp/",
         "cssclass": "",
-        "descriptor":"MitreID"
+        "descriptor":"MitreID",
+        "client_uri": "http://localhost:9090/openid_connect_login"
     },
     {
         "issuer":"https://accounts.google.com/",
         "cssclass": "google",
-        "descriptor":"Google"
+        "descriptor":"Google",
+        "client_uri": "http://localhost:9090/openid_connect_login"
     },
     {
         "issuer":"https://github.com/",
         "cssclass": "github",
-        "descriptor":"GitHub"
+        "descriptor":"GitHub",
+        "client_uri": "http://localhost:9090/social_login"
     }
 ]

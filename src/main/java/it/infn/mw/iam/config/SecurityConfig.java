@@ -74,7 +74,7 @@ public class SecurityConfig {
     protected void configure(final HttpSecurity http) throws Exception {
 
       // @formatter:off
-      
+
       http
         .sessionManagement()
           .enableSessionUrlRewriting(false)
@@ -321,7 +321,7 @@ public class SecurityConfig {
         .antMatchers(HttpMethod.OPTIONS, "/token").permitAll()
         .antMatchers("/token").authenticated()
         .and()
-      .addFilterBefore(clientCredentialsEndpointFilter(), BasicAuthenticationFilter.class) 
+      .addFilterBefore(clientCredentialsEndpointFilter(), BasicAuthenticationFilter.class)
       .addFilterBefore(corsFilter, SecurityContextPersistenceFilter.class)
       .exceptionHandling()
         .authenticationEntryPoint(authenticationEntryPoint)
@@ -374,7 +374,7 @@ public class SecurityConfig {
         .authenticationEntryPoint(authenticationEntryPoint)
         .and()
       .addFilterBefore(corsFilter, SecurityContextPersistenceFilter.class)
-      .addFilterBefore(clientCredentialsEndpointFilter(), BasicAuthenticationFilter.class) 
+      .addFilterBefore(clientCredentialsEndpointFilter(), BasicAuthenticationFilter.class)
       .exceptionHandling()
         .authenticationEntryPoint(authenticationEntryPoint)
         .and()
@@ -427,7 +427,7 @@ public class SecurityConfig {
           .authenticationEntryPoint(authenticationEntryPoint)
           .and()
         .addFilterBefore(corsFilter, SecurityContextPersistenceFilter.class)
-        .addFilterBefore(clientCredentialsEndpointFilter(), BasicAuthenticationFilter.class) 
+        .addFilterBefore(clientCredentialsEndpointFilter(), BasicAuthenticationFilter.class)
         .exceptionHandling()
           .authenticationEntryPoint(authenticationEntryPoint)
           .and()

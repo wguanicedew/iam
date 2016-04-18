@@ -32,10 +32,11 @@ $(function () {
     jQuery.ajaxSetup({async:true});
 
     // get some URL parameters and persist them via cookies
-    var redirect_uri = OIDCclients[0];
     var last_issuer = $.cookie('last_issuer');
 
     $.each(OIDCproviders, function (key, button) {
+
+    	var redirect_uri = button.client_uri;
 
         // build a button and append it
     	var btn_class = (button.cssclass) ? "btn-"+button.cssclass : "";

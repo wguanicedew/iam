@@ -14,10 +14,12 @@ import org.mitre.openid.connect.client.NamedAdminAuthoritiesMapper;
 import org.mitre.openid.connect.client.OIDCAuthenticationProvider;
 import org.mitre.openid.connect.client.SubjectIssuerGrantedAuthority;
 import org.mitre.openid.connect.client.service.impl.DynamicServerConfigurationService;
+import org.mitre.openid.connect.client.service.impl.HybridServerConfigurationService;
 import org.mitre.openid.connect.client.service.impl.PlainAuthRequestUrlBuilder;
 import org.mitre.openid.connect.client.service.impl.StaticAuthRequestOptionsService;
 import org.mitre.openid.connect.client.service.impl.StaticClientConfigurationService;
 import org.mitre.openid.connect.client.service.impl.ThirdPartyIssuerService;
+import org.mitre.openid.connect.config.ServerConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -25,9 +27,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
-import org.springframework.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.web.bind.annotation.RestController;
 
 import it.infn.mw.iam.libs.ExternalAuthenticationSuccessHandler;
 import it.infn.mw.iam.libs.IndigoOIDCAuthFilter;
@@ -35,8 +35,6 @@ import it.infn.mw.iam.oidc.OIDCUserDetailsService;
 
 @Configuration
 @EnableAutoConfiguration
-@EnableOAuth2Client
-@RestController
 public class OIDCClient {
 
   @Autowired
@@ -106,6 +104,44 @@ public class OIDCClient {
   public DynamicServerConfigurationService dynamicServerConfiguration() {
 
     return new DynamicServerConfigurationService();
+  }
+
+  @Bean
+  public HybridServerConfigurationService hybridServerConfigurationService() {
+
+    HybridServerConfigurationService config = new HybridServerConfigurationService();
+    Map<String, ServerConfiguration> servers = readServerConfiguration();
+
+    config.setServers(servers);
+    return config;
+  }
+
+  private Map<String, ServerConfiguration> readServerConfiguration() {
+
+    Map<String, ServerConfiguration> servers = new LinkedHashMap<String, ServerConfiguration>();
+
+    String[] idpList = env.getProperty("idp.list").split(",");
+
+    for (String idp : idpList) {
+      String prefix = String.format("idp.%s", idp);
+      String issuer = env.getProperty(prefix + ".issuer");
+      String authzUrl = env.getProperty(prefix + ".authorizeUrl");
+      String tokenUrl = env.getProperty(prefix + ".tokenUrl");
+      String userinfoUrl = env.getProperty(prefix + ".userinfoUrl");
+
+      if (authzUrl != null && tokenUrl != null && userinfoUrl != null) {
+        ServerConfiguration config = new ServerConfiguration();
+        config.setIssuer(issuer);
+        config.setAuthorizationEndpointUri(authzUrl);
+        config.setTokenEndpointUri(tokenUrl);
+        config.setUserInfoUri(userinfoUrl);
+
+        servers.put(issuer, config);
+      }
+
+    }
+
+    return servers;
   }
 
   @Bean

@@ -36,9 +36,12 @@ spring:
     console:
       enabled: false
 
-
   profiles:
     active: dev
+
+  resources:
+    chain:
+      enabled: true
 
 idp:
   list: mitre,google
@@ -62,4 +65,22 @@ idp:
     auth:
       scope: openid,profile,email,address,phone
     admin: 90342.ASDFJWFA
+
+
+github:
+  client:
+    clientId: ...
+    clientSecret: ...
+    accessTokenUri: https://github.com/login/oauth/access_token
+    userAuthorizationUri: https://github.com/login/oauth/authorize
+    clientAuthenticationScheme: form
+    preEstablishedRedirectUri: http://localhost:9090/social_login
+    useCurrentUri: false
+    scope: user:email
+  resource:
+    userInfoUri: https://api.github.com/user
+
+logging:
+  level:
+    org.springframework.security: DEBUG
 
