@@ -34,7 +34,6 @@ import it.infn.mw.iam.oidc.AccountChooserConfigurationProvider;
 import it.infn.mw.iam.oidc.ExternalAuthenticationSuccessHandler;
 import it.infn.mw.iam.oidc.IamAccountChooserConfigurationProvider;
 import it.infn.mw.iam.oidc.IamOidcAuthenticationFilter;
-import it.infn.mw.iam.oidc.IndigoOIDCAuthFilter;
 import it.infn.mw.iam.oidc.service.OidcUserDetailsService;
 
 @Configuration

@@ -32,7 +32,6 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.filter.GenericFilterBean;
 
 import it.infn.mw.iam.oidc.IamOidcAuthenticationFilter;
-import it.infn.mw.iam.oidc.IndigoOIDCAuthFilter;
 
 @Configuration
 @EnableWebSecurity
