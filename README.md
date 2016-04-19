@@ -1,5 +1,5 @@
-# MitreID connect spring boot port
+# INDIGO IAM login service
 
-This is spring-boot-ified version of Mitre [OpenID-Connect server][mitre].
+Based on Mitre [OpenID-Connect server][mitre].
 
 [mitre]: https://github.com/mitreid-connect/OpenID-Connect-Java-Spring-Server

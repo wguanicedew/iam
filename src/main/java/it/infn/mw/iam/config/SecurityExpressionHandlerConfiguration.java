@@ -13,7 +13,8 @@ public class SecurityExpressionHandlerConfiguration
 
   @Override
   protected MethodSecurityExpressionHandler createExpressionHandler() {
-      return new OAuth2MethodSecurityExpressionHandler();
+
+    return new OAuth2MethodSecurityExpressionHandler();
   }
 
 }

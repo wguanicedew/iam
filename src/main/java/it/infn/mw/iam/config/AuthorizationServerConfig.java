@@ -46,15 +46,17 @@ public class AuthorizationServerConfig
   extends AuthorizationServerConfigurerAdapter {
 
   @Bean
-  RedirectResolver blacklistAwareRedirectResolver(){
+  RedirectResolver blacklistAwareRedirectResolver() {
+
     return new BlacklistAwareRedirectResolver();
   }
-  
+
   @Bean
-  WebResponseExceptionTranslator webResponseExceptionTranslator(){
+  WebResponseExceptionTranslator webResponseExceptionTranslator() {
+
     return new DefaultWebResponseExceptionTranslator();
   }
-  
+
   @Bean
   AbstractTokenGranter jwtAssertionTokenGranter() {
 
@@ -137,7 +139,7 @@ public class AuthorizationServerConfig
   }
 
   @Override
-  public void configure(AuthorizationServerEndpointsConfigurer endpoints)
+  public void configure(final AuthorizationServerEndpointsConfigurer endpoints)
     throws Exception {
 
     endpoints.requestValidator(requestValidator())
@@ -147,10 +149,9 @@ public class AuthorizationServerConfig
       .requestFactory(requestFactory()).tokenGranter(tokenGranter())
       .authorizationCodeServices(authorizationCodeServices());
   }
-  
 
   @Override
-  public void configure(ClientDetailsServiceConfigurer clients)
+  public void configure(final ClientDetailsServiceConfigurer clients)
     throws Exception {
 
     clients.withClientDetails(clientDetailsService());

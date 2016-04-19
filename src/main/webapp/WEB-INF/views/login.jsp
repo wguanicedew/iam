@@ -14,7 +14,7 @@
 	</c:if>
 
   <c:url var="loginUrl" value="/login"/>
-	
+
   <div class="row-fluid">
 		<div class="span6 offset1 well">
 			<form action="${loginUrl}" method="post">
@@ -37,12 +37,36 @@
 			</form>
 		</div>
 	</div>
-  
-  <c:url var="samlLoginUrl" value="/saml/login" />
-  
-  <div class="row-fluid">
-    Or <a href="${samlLoginUrl}">Login with your SAML Identity Provider</a>. 
-  </div>
-</div>
+
+
+	<div class="row-fluid">
+		<div class="span6 offset1">
+			<div id="button-container">
+	   			<h4 class="well-small">Sign in</h4>
+
+			</div>
+		</div>
+	</div>
+
+  	<c:url var="samlLoginUrl" value="/saml/login" />
+
+	<br>
+	<div class="row-fluid">
+  		<div class="span6 offset1">
+  			<div>
+  				Or <a href="${samlLoginUrl}">Login with your SAML Identity Provider</a>.
+  			</div>
+    	</div>
+  	</div>
+	</div>
+
+<script type="text/javascript" src="resources/js/lib/jquery.min.js"></script>
+<script type="text/javascript" src="resources/js/lib/jquery.cookie.js"></script>
+<script type="text/javascript" src="resources/js/lib/jquery.query.js"></script>
+<script type="text/javascript" src="resources/js/lib/purl.js"></script>
+<script type="text/javascript" src="resources/bootstrap2/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="resources/js/lib/underscore-min.js"></script>
+<script type="text/javascript" src="resources/account-chooser/app.js"></script>
+
 
 <o:footer/>

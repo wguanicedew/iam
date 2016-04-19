@@ -31,16 +31,26 @@ nginx:
   ports:
     - "443:443"
 
+  volumes:
+    - /dev/urandom:/dev/random
+
 iam:
   build: .
   dockerfile: ./docker/iam/Dockerfile
   container_name: iam
 
   environment:
-    IAM_JAVA_OPTS: -Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n,address=1044
-    IAM_JAR: /code/target/mitreid-connect-boot-0.0.1-SNAPSHOT.war
-    IAM_ISSUER: https://dev.local.io
+    IAM_JAVA_OPTS: -Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n,address=1044 -Dspring.profiles.active=oidc
+    IAM_JAR: /code/target/iam-login-service-0.0.1-SNAPSHOT.war
+    IAM_BASE_URL: https://dev.local.io
+    IAM_ISSUER: https://dev.local.io/
     IAM_USE_FORWARDED_HEADERS: "true"
+
+    IAM_GOOGLE_CLIENT_ID: ${IAM_GOOGLE_CLIENT_ID}
+    IAM_GOOGLE_CLIENT_SECRET: ${IAM_GOOGLE_CLIENT_SECRET}
+
+    IAM_GITHUB_CLIENT_ID: ${IAM_GITHUB_CLIENT_ID}
+    IAM_GITHUB_CLIENT_SECRET: ${IAM_GITHUB_CLIENT_SECRET}
 
   ports:
     - "1044:1044"
@@ -48,6 +58,7 @@ iam:
   volumes:
     - .:/code:ro
     - ./src/main/resources/saml/idp-metadata.xml:/tmp/idp-metadata.xml:ro
+    - /dev/urandom:/dev/random
 
 client:
   image: italiangrid/java-app

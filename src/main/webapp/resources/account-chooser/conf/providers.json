@@ -1,0 +1,14 @@
+[
+    {
+        "issuer":"https://accounts.google.com/",
+        "cssclass": "google",
+        "descriptor":"Google",
+        "client_uri": "https://dev.local.io/openid_connect_login"
+    },
+    {
+        "issuer":"https://github.com/",
+        "cssclass": "github",
+        "descriptor":"GitHub",
+        "client_uri": "https://dev.local.io/gh_login"
+    }
+]

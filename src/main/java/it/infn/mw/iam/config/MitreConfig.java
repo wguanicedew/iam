@@ -15,21 +15,17 @@ public class MitreConfig {
 
   @Value("${iam.token.lifetime}")
   private Long tokenLifeTime;
-  
+
   @Bean
   public ConfigurationPropertiesBean config() {
 
     ConfigurationPropertiesBean config = new ConfigurationPropertiesBean();
-    
+
     config.setLogoImageUrl("resources/images/indigo-logo.png");
     config.setTopbarTitle("INDIGO IAM server");
-    
     config.setIssuer(issuer);
-    
     config.setRegTokenLifeTime(tokenLifeTime);
-    
     config.setForceHttps(false);
-    
     config.setLocale(Locale.ENGLISH);
 
     return config;

@@ -51,54 +51,60 @@ import it.infn.mw.iam.core.IamScopeClaimTranslationService;
 
 @Configuration
 public class MitreServicesConfig {
-  
-  @Bean(name="mitreUserInfoInterceptor")
-  public AsyncHandlerInterceptor userInfoInterceptor(){
+
+  @Bean(name = "mitreUserInfoInterceptor")
+  public AsyncHandlerInterceptor userInfoInterceptor() {
+
     return new UserInfoInterceptor();
   }
-  
-  @Bean(name="mitreServerConfigInterceptor")
-  public AsyncHandlerInterceptor serverConfigInterceptor(){
+
+  @Bean(name = "mitreServerConfigInterceptor")
+  public AsyncHandlerInterceptor serverConfigInterceptor() {
+
     return new ServerConfigInterceptor();
   }
-  
-  @Bean(name="mitreAuthzRequestFilter")
-  public GenericFilterBean authorizationRequestFilter(){
+
+  @Bean(name = "mitreAuthzRequestFilter")
+  public GenericFilterBean authorizationRequestFilter() {
+
     return new AuthorizationRequestFilter();
   }
-  
+
   @Bean
-  public AuthenticationTimeStamper timestamper(){
+  public AuthenticationTimeStamper timestamper() {
+
     return new AuthenticationTimeStamper();
   }
-  
+
   @Bean
   public Http403ForbiddenEntryPoint http403ForbiddenEntryPoint() {
+
     return new Http403ForbiddenEntryPoint();
   }
-  
+
   @Bean
-  public CorsFilter corsFilter(){
+  public CorsFilter corsFilter() {
+
     return new CorsFilter();
   }
-  
-  
+
   @Bean
   public OAuth2AuthenticationEntryPoint oauth2AuthenticationEntryPoint() {
+
     OAuth2AuthenticationEntryPoint entryPoint = new OAuth2AuthenticationEntryPoint();
     entryPoint.setRealmName("openidconnect");
     return entryPoint;
   }
-  
+
   @Bean
-  public TokenEnhancer defaultTokenEnhancer(){
+  public TokenEnhancer defaultTokenEnhancer() {
+
     return new ConnectTokenEnhancer();
   }
-  
-  
-  
-  @Bean(name="clientUserDetailsService")
-  public UserDetailsService defaultClientUserDetailsService(){
+
+  @Bean(name = "clientUserDetailsService")
+  public UserDetailsService defaultClientUserDetailsService() {
+
     return new DefaultClientUserDetailsService();
   }
 

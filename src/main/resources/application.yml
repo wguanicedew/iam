@@ -1,22 +1,22 @@
 server:
   port: 8080
   tomcat:
-    accesslog: 
+    accesslog:
       enabled: true
       directory: /tmp
       pattern: "%a asdasd"
-  
-  use-forward-headers: ${IAM_USE_FORWARDED_HEADERS:-false}
-    
+
+  use-forward-headers: ${IAM_USE_FORWARDED_HEADERS:false}
 
 iam:
-  issuer: ${IAM_ISSUER:-http://localhost:8080}
+  baseUrl: ${IAM_BASE_URL:http://localhost:8080}
+  issuer: ${IAM_ISSUER:http://localhost:8080/}
   
   token:
     lifetime: 86400
-
-  organisation: 
-    name: test
+  
+  organisation:
+    name: indigo-dc
 
 spring:
   datasource:
@@ -24,19 +24,50 @@ spring:
     url: jdbc:h2:mem:iam;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     username: sa
     password:
-     
+
   application:
-    name: IAM 
-    
+    name: IAM
+
   jpa:
       properties:
         show-sql: true
         generate-ddl: true
+        hibernate.format_sql: true
 
   h2:
     console:
       enabled: false
-      
-      
+
   profiles:
-    active: dev
+    active: dev,oidc
+
+  resources:
+    chain:
+      enabled: true
+
+idp:
+  list: google
+
+  google:
+    issuer: https://accounts.google.com
+    client:
+      id: ${IAM_GOOGLE_CLIENT_ID:define_me_please}
+      secret: ${IAM_GOOGLE_CLIENT_SECRET:define_me_please}
+      redirectUri: ${iam.baseUrl}/openid_connect_login
+    auth:
+      scope: openid,profile,email,address,phone
+    admin: 90342.ASDFJWFA
+
+
+github:
+  client:
+    clientId: ${IAM_GITHUB_CLIENT_ID:define_me_please}
+    clientSecret: ${IAM_GITHUB_CLIENT_SECRET:define_me_please}
+    accessTokenUri: https://github.com/login/oauth/access_token
+    userAuthorizationUri: https://github.com/login/oauth/authorize
+    clientAuthenticationScheme: form
+    preEstablishedRedirectUri: http://${iam.baseUrl}/gh_login
+    useCurrentUri: false
+    scope: user:email
+  resource:
+    userInfoUri: https://api.github.com/user

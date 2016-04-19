@@ -6,12 +6,12 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>it.infn.mw</groupId>
-  <artifactId>mitreid-connect-boot</artifactId>
+  <artifactId>iam-login-service</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>war</packaging>
 
-  <name>mitreid-connect-boot</name>
-  <description>Demo project for Spring Boot</description>
+  <name>iam-login-service</name>
+  <description>The INDIGO IAM login service</description>
 
   <parent>
     <groupId>org.springframework.boot</groupId>
@@ -24,6 +24,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <java.version>1.8</java.version>
     <eclipselink.version>2.5.2</eclipselink.version>
+    <mitreid.version>1.2.6</mitreid.version>
   </properties>
 
   <dependencies>
@@ -121,7 +122,13 @@
     <dependency>
       <groupId>org.mitre</groupId>
       <artifactId>openid-connect-server</artifactId>
-      <version>1.2.4</version>
+      <version>${mitreid.version}</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.mitre</groupId>
+      <artifactId>openid-connect-client</artifactId>
+      <version>${mitreid.version}</version>
     </dependency>
 
     <!-- SAML -->
