@@ -5,10 +5,12 @@ server:
       enabled: true
       directory: /tmp
       pattern: "%a asdasd"
+  
+  use-forward-headers: ${IAM_USE_FORWARDED_HEADERS:-false}
     
 
 iam:
-  issuer: http://${IAM_HOST:localhost}:${IAM_PORT:8080}/
+  issuer: ${IAM_ISSUER:-http://localhost:8080}
   
   token:
     lifetime: 86400
