@@ -1,3 +1,5 @@
+security:
+  filter-order: 1 
 server:
   port: 8080
   tomcat:
@@ -8,6 +10,16 @@ server:
 
   use-forward-headers: ${IAM_USE_FORWARDED_HEADERS:false}
 
+spring:
+  application:
+    name: INDIGO IAM
+  jpa:
+    generate-ddl: true
+        
+  profiles:
+    active: google
+
+
 iam:
   baseUrl: ${IAM_BASE_URL:http://localhost:8080}
   issuer: ${IAM_ISSUER:http://localhost:8080/}
@@ -17,46 +29,21 @@ iam:
   
   organisation:
     name: indigo-dc
+  
+  keyStoreLocation: ${IAM_KEY_STORE_LOCATION:classpath:keystore.jwks}
 
-spring:
-  datasource:
-    driverClassName: org.h2.Driver
-    url: jdbc:h2:mem:iam;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    username: sa
-    password:
-
-  application:
-    name: IAM
-
-  jpa:
-      properties:
-        show-sql: true
-        generate-ddl: true
-        hibernate.format_sql: true
-
-  h2:
-    console:
-      enabled: false
-
-  profiles:
-    active: dev,oidc
-
-  resources:
-    chain:
-      enabled: true
-
-idp:
-  list: google
-
-  google:
+x509:
+  trustAnchorsDir: ${IAM_X509_TRUST_ANCHORS_DIR:/etc/grid-security/certificates}
+  trustAnchorsRefreshMsec: ${IAM_X509_TRUST_ANCHORS_REFRESH:14400} 
+  
+google:
     issuer: https://accounts.google.com
+    
     client:
-      id: ${IAM_GOOGLE_CLIENT_ID:define_me_please}
-      secret: ${IAM_GOOGLE_CLIENT_SECRET:define_me_please}
-      redirectUri: ${iam.baseUrl}/openid_connect_login
-    auth:
+      clientId: ${IAM_GOOGLE_CLIENT_ID:define_me_please}
+      clientSecret: ${IAM_GOOGLE_CLIENT_SECRET:define_me_please}
+      redirectUris: ${IAM_GOOGLE_CLIENT_REDIRECT_URIS:${iam.baseUrl}/openid_connect_login}
       scope: openid,profile,email,address,phone
-    admin: 90342.ASDFJWFA
 
 
 github:
@@ -70,4 +57,31 @@ github:
     useCurrentUri: false
     scope: user:email
   resource:
-    userInfoUri: https://api.github.com/user
+    userInfoUri: https://api.github.com/user 
+---
+spring:
+  profiles: dev
+  datasource:
+    driverClassName: org.h2.Driver
+    url: jdbc:h2:mem:iam;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+
+flyway:
+  locations:
+    - classpath:db/migration/h2
+---
+spring:
+  profiles: prod
+  datasource:
+    dataSourceClassName: com.mysql.jdbc.jdbc2.optional.MysqlDataSource
+    url: jdbc:mysql://${IAM_DB_HOST:dev.local.io}:${IAM_DB_PORT:3306}/${IAM_DB_NAME:iam}
+    username: ${IAM_DB_USERNAME:iam}
+    password: ${IAM_DB_PASSWORD:pwd} 
+  
+  jpa:
+    openInView: false
+    
+flyway:
+  locations:
+    - classpath:db/migration/mysql

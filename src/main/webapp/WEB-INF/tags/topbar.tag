@@ -61,9 +61,12 @@
         class="brand"
         href=""><img src="${ config.logoImageUrl }" />
         ${config.topbarTitle}</a>
+        
       <c:if test="${ not empty pageName }">
         <div class="nav-collapse collapse">
+          <%--
           <ul class="nav">
+            
             <c:choose>
               <c:when test="${pageName == 'Home'}">
                 <li class="active"><a
@@ -80,38 +83,7 @@
                       code="topbar.home" /></a></li>
               </c:otherwise>
             </c:choose>
-            <c:choose>
-              <c:when test="${pageName == 'About'}">
-                <li
-                  class="active"
-                  data-toggle="collapse"
-                  data-target=".nav-collapse"><a href=""><spring:message
-                      code="topbar.about" /></a></li>
-              </c:when>
-              <c:otherwise>
-                <li><a
-                  href="about"
-                  data-toggle="collapse"
-                  data-target=".nav-collapse"><spring:message
-                      code="topbar.about" /></a></li>
-              </c:otherwise>
-            </c:choose>
-            <c:choose>
-              <c:when test="${pageName == 'Statistics'}">
-                <li
-                  class="active"
-                  data-toggle="collapse"
-                  data-target=".nav-collapse"><a href=""><spring:message
-                      code="topbar.statistics" /></a></li>
-              </c:when>
-              <c:otherwise>
-                <li><a
-                  href="stats"
-                  data-toggle="collapse"
-                  data-target=".nav-collapse"><spring:message
-                      code="topbar.statistics" /></a></li>
-              </c:otherwise>
-            </c:choose>
+         
             <c:choose>
               <c:when test="${pageName == 'Contact'}">
                 <li
@@ -128,9 +100,10 @@
                       code="topbar.contact" /></a></li>
               </c:otherwise>
             </c:choose>
-
+            
           </ul>
-
+          --%>
+          
           <security:authorize access="hasRole('ROLE_USER')">
 
             <ul class="nav hidden-desktop">

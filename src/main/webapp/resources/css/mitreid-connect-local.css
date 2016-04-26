@@ -1,3 +1,35 @@
 /*
  * Overlay this file to provide local style overrides.
  */
+ 
+.absolute-center {
+  margin: auto;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+}
+
+.absolute-center.is-responsive {
+  width: 50%; 
+  height: 50%;
+  min-width: 200px;
+  max-width: 400px;
+  padding: 40px;
+}
+
+#logo-container{
+  margin: auto;
+  margin-bottom: 10px;
+  width:200px;
+  height:150px;
+  background-size: 200px;
+  background-image:url("/resources/images/indigo-logo.png");
+  background-repeat: no-repeat;
+}
+
+.social-authn {
+  text-align: center;
+}
+
+#login-form {
+  margin-bottom: 0;
+}

@@ -1,31 +1,53 @@
-http_proxy:
-  build: ./docker/httpd-proxy/
-  container_name: idptestbed
+# Test SAML IdP configuration
+#
+# http_proxy:
+#   build: ./docker/httpd-proxy/
+#   container_name: idptestbed
+#
+# idp:
+#   build: ./docker/idp/
+#   container_name: idp
+#   environment:
+#     - JETTY_MAX_HEAP=64m
+#     - JETTY_BROWSER_SSL_KEYSTORE_PASSWORD=password
+#     - JETTY_BACKCHANNEL_SSL_KEYSTORE_PASSWORD=password
+#   expose:
+#     - "4443"
+#
+# ldap:
+#   build: ./docker/ldap/
+#   container_name: ldap
+#
+# sp:
+#   container_name: sp
+#   build: ./docker/sp/
 
-idp:
-  build: ./docker/idp/
-  container_name: idp
+db_data:
+  image: busybox
+  volumes:
+    - /var/lib/mysql
+  command: /bin/true
+
+db:
+  container_name: db
+  image: mariadb:latest
+  ports:
+    - "3306:3306"
+  volumes_from:
+    - db_data
+
   environment:
-   - JETTY_MAX_HEAP=64m
-   - JETTY_BROWSER_SSL_KEYSTORE_PASSWORD=password
-   - JETTY_BACKCHANNEL_SSL_KEYSTORE_PASSWORD=password
-  expose:
-   - "4443"
+    MYSQL_ROOT_PASSWORD: pwd
+    MYSQL_USER: iam
+    MYSQL_PASSWORD: pwd
+    MYSQL_DATABASE: iam
 
-ldap:
-  build: ./docker/ldap/
-  container_name: ldap
-
-sp:
-  container_name: sp
-  build: ./docker/sp/
-
-nginx:
+iam-login-service:
   build: ./docker/nginx/
-  container_name: nginx
+  container_name: iam-login-service
 
   environment:
-    NGINX_HOST: dev.local.io
+    NGINX_HOST: iam-login-service
     NGINX_PORT: 443
 
   ports:
@@ -40,14 +62,19 @@ iam:
   container_name: iam
 
   environment:
-    IAM_JAVA_OPTS: -Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n,address=1044 -Dspring.profiles.active=oidc
+    IAM_JAVA_OPTS: -Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n,address=1044 -Dspring.profiles.active=google,prod
     IAM_JAR: /code/target/iam-login-service-0.0.1-SNAPSHOT.war
     IAM_BASE_URL: https://dev.local.io
     IAM_ISSUER: https://dev.local.io/
     IAM_USE_FORWARDED_HEADERS: "true"
 
+    IAM_DB_HOST: db
+    IAM_DB_USERNAME: iam
+    IAM_DB_PASSWORD: pwd
+
     IAM_GOOGLE_CLIENT_ID: ${IAM_GOOGLE_CLIENT_ID}
     IAM_GOOGLE_CLIENT_SECRET: ${IAM_GOOGLE_CLIENT_SECRET}
+    IAM_GOOGLE_CLIENT_REDIRECT_URIS: https://dev.local.io/openid_connect_login
 
     IAM_GITHUB_CLIENT_ID: ${IAM_GITHUB_CLIENT_ID}
     IAM_GITHUB_CLIENT_SECRET: ${IAM_GITHUB_CLIENT_SECRET}
@@ -60,28 +87,29 @@ iam:
     - ./src/main/resources/saml/idp-metadata.xml:/tmp/idp-metadata.xml:ro
     - /dev/urandom:/dev/random
 
-client:
-  image: italiangrid/java-app
-  container_name: client
-
-  environment:
-    APP_JAVA_OPTS: -Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n,address=1044
-    IAM_CLIENT_ID: client
-    IAM_CLIENT_SECRET: secret
-    IAM_TOKEN_ENDPOINT: http://iam:8080/token
-    IAM_AUTHORIZATION_ENDPOINT: http://iam:8080/authorize
-    IAM_USERINFO_ENDPOINT: http://iam:8080/userinfo
-    APP_JAR: /app-code/target/spring-boot-oidc-client-0.0.1-SNAPSHOT.jar
-
-  ports:
-    - "1045:1045"
-
-  volumes:
-    - /Users/cecco/git/spring-boot-oidc-client:/app-code:ro
-
-browser:
-  image: jess/firefox
-  container_name: browser
-
-  environment:
-    DISPLAY: 172.17.8.1:0
+# browser:
+#   image: jess/firefox
+#   container_name: browser
+# 
+#   environment:
+#     DISPLAY: 172.17.8.1:0
+# 
+# client:
+#   image: italiangrid/java-app
+#   container_name: client
+# 
+#   environment:
+#     APP_JAVA_OPTS: -Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n,address=1045
+#     IAM_CLIENT_ID: client
+#     IAM_CLIENT_SECRET: secret
+#     IAM_TOKEN_ENDPOINT: https://dev.local.io/token
+#     IAM_AUTHORIZATION_ENDPOINT: https://dev.local.io/authorize
+#     IAM_USERINFO_ENDPOINT: https://dev.local.io/userinfo
+#     APP_JAR: /app-code/target/spring-boot-oidc-client-0.0.1-SNAPSHOT.jar
+# 
+#   ports:
+#    - "1045:1045"
+# 
+#   volumes:
+#    - /Users/cecco/git/spring-boot-oidc-client:/app-code:ro
+#    - /Users/cecco/certificates:/etc/grid-security/certificates:ro

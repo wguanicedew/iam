@@ -12,6 +12,7 @@ import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.AbstractJpaVendorAdapter;
@@ -42,11 +43,11 @@ public class JpaConfig extends JpaBaseConfiguration {
     map.put("eclipselink.logging.level.sql", "OFF");
     map.put("eclipselink.cache.shared.default", "false");
 
-    /*
-     * map.put("eclipselink.ddl-generation.output-mode", "sql-script");
-     * map.put("eclipselink.ddl-generation", "create-tables");
-     * map.put("eclipselink.create-ddl-jdbc-file-name", "ddl.sql");
-     */
+    
+//    map.put("eclipselink.ddl-generation.output-mode", "sql-script");
+//    map.put("eclipselink.ddl-generation", "create-tables");
+//    map.put("eclipselink.create-ddl-jdbc-file-name", "ddl.sql");
+     
 
     return map;
 
@@ -74,6 +75,7 @@ public class JpaConfig extends JpaBaseConfiguration {
   }
 
   @Bean
+  @Profile("no-flyway")
   public FlywayMigrationStrategy flywayMigrationStrategy() {
 
     return new FlywayMigrationStrategy() {

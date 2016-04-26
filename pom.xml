@@ -117,6 +117,12 @@
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
     </dependency>
+    
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <scope>runtime</scope>
+    </dependency>
 
     <!-- Mitre -->
     <dependency>
@@ -131,6 +137,12 @@
       <version>${mitreid.version}</version>
     </dependency>
 
+    <dependency>
+      <groupId>org.italiangrid</groupId>
+      <artifactId>voms-api-java</artifactId>
+      <version>3.2.0</version>
+    </dependency>
+    
     <!-- SAML -->
     <dependency>
       <groupId>org.opensaml</groupId>

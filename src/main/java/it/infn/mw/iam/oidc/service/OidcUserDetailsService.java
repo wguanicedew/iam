@@ -10,7 +10,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
-import it.infn.mw.iam.persistence.model.Authority;
+import it.infn.mw.iam.persistence.model.IamAuthority;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.repository.IamAccountRespository;
 
@@ -22,7 +22,7 @@ public class OidcUserDetailsService {
   List<GrantedAuthority> convertAuthorities(IamAccount a) {
 
     List<GrantedAuthority> authorities = new ArrayList<>();
-    for (Authority auth : a.getAuthorities()) {
+    for (IamAuthority auth : a.getAuthorities()) {
       String data = auth.getAuthority();
       GrantedAuthority elem = null;
       if (data.startsWith("OIDC_")) {

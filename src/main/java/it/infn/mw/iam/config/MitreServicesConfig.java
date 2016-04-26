@@ -38,6 +38,7 @@ import org.mitre.openid.connect.web.AuthenticationTimeStamper;
 import org.mitre.openid.connect.web.ServerConfigInterceptor;
 import org.mitre.openid.connect.web.UserInfoInterceptor;
 import org.mitre.uma.service.ResourceSetService;
+import org.springframework.boot.context.embedded.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -63,9 +64,16 @@ public class MitreServicesConfig {
 
     return new ServerConfigInterceptor();
   }
+  
+  @Bean
+  public FilterRegistrationBean disabledMitreFilterRegistration(AuthorizationRequestFilter f){
+    FilterRegistrationBean b = new FilterRegistrationBean(f);
+    b.setEnabled(false);
+    return b;
+  }
 
   @Bean(name = "mitreAuthzRequestFilter")
-  public GenericFilterBean authorizationRequestFilter() {
+  public AuthorizationRequestFilter authorizationRequestFilter() {
 
     return new AuthorizationRequestFilter();
   }
@@ -82,6 +90,13 @@ public class MitreServicesConfig {
     return new Http403ForbiddenEntryPoint();
   }
 
+  @Bean
+  public FilterRegistrationBean disabledCorsFilterRegistration(CorsFilter c){
+    FilterRegistrationBean b = new FilterRegistrationBean(c);
+    b.setEnabled(false);
+    return b;
+  }
+  
   @Bean
   public CorsFilter corsFilter() {
 

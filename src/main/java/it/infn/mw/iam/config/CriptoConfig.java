@@ -3,22 +3,31 @@ package it.infn.mw.iam.config;
 import org.mitre.jose.keystore.JWKSetKeyStore;
 import org.mitre.jwt.encryption.service.impl.DefaultJWTEncryptionAndDecryptionService;
 import org.mitre.jwt.signer.service.impl.DefaultJWTSigningAndValidationService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 
 import com.nimbusds.jose.JWEAlgorithm;
 
 @Configuration
 public class CriptoConfig {
+  
+  @Value("${iam.keyStoreLocation}")
+  String keyStoreLocation;
+  
+  @Autowired
+  ResourceLoader resourceLoader;
 
   @Bean(name = "defaultKeyStore")
   public JWKSetKeyStore defaultKeyStore() {
 
-    Resource location = new ClassPathResource("keystore.jwks");
+    Resource keyStoreResource = resourceLoader.getResource(keyStoreLocation) ;
+    
     JWKSetKeyStore keyStore = new JWKSetKeyStore();
-    keyStore.setLocation(location);
+    keyStore.setLocation(keyStoreResource);
 
     return keyStore;
   }

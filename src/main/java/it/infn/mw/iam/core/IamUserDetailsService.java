@@ -12,7 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import it.infn.mw.iam.persistence.model.Authority;
+import it.infn.mw.iam.persistence.model.IamAuthority;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.repository.IamAccountRespository;
 
@@ -24,7 +24,7 @@ public class IamUserDetailsService implements UserDetailsService {
   
   List<GrantedAuthority> convertAuthorities(IamAccount a){
     List<GrantedAuthority> authorities = new ArrayList<>();
-    for (Authority auth: a.getAuthorities()){
+    for (IamAuthority auth: a.getAuthorities()){
       authorities.add(new SimpleGrantedAuthority(auth.getAuthority()));
     }
     return authorities;

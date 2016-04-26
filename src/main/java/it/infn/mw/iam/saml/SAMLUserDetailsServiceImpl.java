@@ -12,7 +12,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.saml.SAMLCredential;
 import org.springframework.security.saml.userdetails.SAMLUserDetailsService;
 
-import it.infn.mw.iam.persistence.model.Authority;
+import it.infn.mw.iam.persistence.model.IamAuthority;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.repository.IamAccountRespository;
 import it.infn.mw.iam.saml.util.SAMLUserIdentifierAccessor;
@@ -28,7 +28,7 @@ public class SAMLUserDetailsServiceImpl implements SAMLUserDetailsService {
   List<GrantedAuthority> convertAuthorities(IamAccount a) {
 
     List<GrantedAuthority> authorities = new ArrayList<>();
-    for (Authority auth : a.getAuthorities()) {
+    for (IamAuthority auth : a.getAuthorities()) {
       authorities.add(new SimpleGrantedAuthority(auth.getAuthority()));
     }
     return authorities;

@@ -40,7 +40,12 @@ public class IamAccount {
   private IamAccountUserInfo userInfo;
 
   @ManyToMany
-  private Set<Authority> authorities;
+  @JoinTable(name = "iam_account_authority",
+  joinColumns = @JoinColumn(name = "iam_account_id",
+    referencedColumnName = "id"),
+  inverseJoinColumns = @JoinColumn(name = "iam_authority_id",
+    referencedColumnName = "id"))
+  private Set<IamAuthority> authorities;
 
   @ManyToMany
   @JoinTable(name = "iam_account_group",
@@ -51,11 +56,11 @@ public class IamAccount {
   private Set<IamGroup> groups;
 
   @OneToOne(optional = true)
-  private SamlAccount samlAccount;
+  private IamSamlAccount samlAccount;
 
   @OneToOne(optional = true)
   @JoinColumn(name = "oidc_account_id")
-  private OidcAccount oidcAccount;
+  private IamOidcAccount oidcAccount;
 
   protected IamAccount() {
   }
@@ -110,22 +115,22 @@ public class IamAccount {
     this.userInfo = userInfo;
   }
 
-  public Set<Authority> getAuthorities() {
+  public Set<IamAuthority> getAuthorities() {
 
     return authorities;
   }
 
-  public void setAuthorities(final Set<Authority> authorities) {
+  public void setAuthorities(final Set<IamAuthority> authorities) {
 
     this.authorities = authorities;
   }
 
-  public SamlAccount getSamlAccount() {
+  public IamSamlAccount getSamlAccount() {
 
     return samlAccount;
   }
 
-  public void setSamlAccount(final SamlAccount samlAccount) {
+  public void setSamlAccount(final IamSamlAccount samlAccount) {
 
     this.samlAccount = samlAccount;
   }

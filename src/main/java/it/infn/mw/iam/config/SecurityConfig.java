@@ -1,13 +1,14 @@
 package it.infn.mw.iam.config;
 
+import org.mitre.oauth2.service.OAuth2TokenEntityService;
 import org.mitre.oauth2.web.CorsFilter;
 import org.mitre.openid.connect.client.OIDCAuthenticationProvider;
 import org.mitre.openid.connect.web.AuthenticationTimeStamper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.context.embedded.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,8 +19,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
-import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
+import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationManager;
+import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationProcessingFilter;
 import org.springframework.security.oauth2.provider.client.ClientCredentialsTokenEndpointFilter;
 import org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler;
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
@@ -28,14 +29,15 @@ import org.springframework.security.web.authentication.Http403ForbiddenEntryPoin
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.context.SecurityContextPersistenceFilter;
+import org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.filter.GenericFilterBean;
 
-import it.infn.mw.iam.oidc.IamOidcAuthenticationFilter;
+import it.infn.mw.iam.oidc.OidcAccessDeniedHandler;
+import it.infn.mw.iam.oidc.SaveRequestOidcAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
-@EnableResourceServer
 public class SecurityConfig {
 
   @Configuration
@@ -66,8 +68,7 @@ public class SecurityConfig {
     @Override
     public void configure(final WebSecurity web) throws Exception {
 
-      web.expressionHandler(oAuth2WebSecurityExpressionHandler).ignoring()
-        .antMatchers("/h2-console**");
+      web.expressionHandler(oAuth2WebSecurityExpressionHandler);
     }
 
     @Override
@@ -76,17 +77,25 @@ public class SecurityConfig {
       // @formatter:off
 
       http
+        .requestMatchers()
+          .antMatchers("/","/login**","/logout", "/authorize", "/manage/**")
+          .and()
         .sessionManagement()
           .enableSessionUrlRewriting(false)
         .and()
           .authorizeRequests()
             .antMatchers("/login**").permitAll()
+            .antMatchers("/authorize**").permitAll()
+            .antMatchers("/").authenticated()
         .and()
           .formLogin()
             .loginPage("/login")
             .failureUrl("/login?error=failure")
             .successHandler(authenticationTimeStamper)
         .and()
+          .exceptionHandling()
+            .accessDeniedHandler(new OidcAccessDeniedHandler())
+            .and()
           .addFilterBefore(authorizationRequestFilter, SecurityContextPersistenceFilter.class)
         .logout()
           .logoutUrl("/logout")
@@ -128,7 +137,7 @@ public class SecurityConfig {
 
     @Autowired
     @Qualifier("openIdConnectAuthenticationFilter")
-    private IamOidcAuthenticationFilter oidcFilter;
+    private SaveRequestOidcAuthenticationFilter oidcFilter;
 
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {
@@ -154,12 +163,15 @@ public class SecurityConfig {
 
       //@formatter:off
       http
-        .requestMatchers()
-          .antMatchers("/openid_connect_login**")
+        .antMatcher("/openid_connect_login**")
+        .exceptionHandling()
+          .authenticationEntryPoint(authenticationEntryPoint())
+          .accessDeniedHandler(new OidcAccessDeniedHandler())
           .and()
-         .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint())
+        .addFilterAfter(oidcFilter, SecurityContextPersistenceFilter.class)
+        .authorizeRequests()
+          .antMatchers("/openid_connect_login**").permitAll()
           .and()
-        .addFilterBefore(oidcFilter, SecurityContextPersistenceFilter.class)
         .sessionManagement()
           .enableSessionUrlRewriting(false)
           .sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
@@ -168,62 +180,75 @@ public class SecurityConfig {
   }
 
   @Configuration
+  @Order(9)
+  public static class OAuthResourceServerConfiguration {
+    @Autowired
+    private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
+    
+    @Autowired
+    private OAuth2TokenEntityService tokenService;
+    
+    @Bean
+    public FilterRegistrationBean disabledAutomaticFilterRegistration(OAuth2AuthenticationProcessingFilter f){
+      FilterRegistrationBean b = new FilterRegistrationBean(f);
+      b.setEnabled(false);
+      return b;
+    }
+    
+    @Bean(name="resourceServerFilter")
+    public OAuth2AuthenticationProcessingFilter oauthResourceServerFilter(){
+      
+      OAuth2AuthenticationManager manager = new OAuth2AuthenticationManager();
+      manager.setTokenServices(tokenService);
+      
+      OAuth2AuthenticationProcessingFilter filter = new OAuth2AuthenticationProcessingFilter();
+      filter.setAuthenticationEntryPoint(authenticationEntryPoint);
+      filter.setAuthenticationManager(manager);  
+      return filter;
+    }
+    
+  }
+  
+  
+  @Configuration
   @Order(10)
   public static class ApiEndpointAuthorizationConfig
-    extends ResourceServerConfigurerAdapter {
+    extends WebSecurityConfigurerAdapter {
+    
+    @Autowired
+    private OAuth2AuthenticationProcessingFilter resourceFilter;
 
     @Autowired
     private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
 
     @Override
-
     public void configure(final HttpSecurity http) throws Exception {
 
       // @formatter:off
-      http.antMatcher("/api/**")
+      http
+        .antMatcher("/api/**")
+        .addFilterBefore(resourceFilter, SecurityContextPersistenceFilter.class)
         .exceptionHandling()
         .authenticationEntryPoint(authenticationEntryPoint).and()
-        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.NEVER);
+        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.NEVER)
+        .and().csrf().disable();
       // @formatter:on
 
     }
   }
 
+  /**
+   * @author cecco
+   *
+   */
   @Configuration
   @Order(11)
   public static class ResourceEndpointAuthorizationConfig
-    extends ResourceServerConfigurerAdapter {
+    extends WebSecurityConfigurerAdapter {
 
     @Autowired
-    private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
-
-    @Autowired
-    private CorsFilter corsFilter;
-
-    @Override
-
-    public void configure(final HttpSecurity http) throws Exception {
-
-      // @formatter:off
-      http.antMatcher("/resource/**")
-        .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint)
-          .and()
-        .addFilterBefore(corsFilter, SecurityContextPersistenceFilter.class)
-        .sessionManagement()
-          .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-          .and()
-        .authorizeRequests()
-          .antMatchers("**")
-          .permitAll();
-      // @formatter:on
-    }
-  }
-
-  @Configuration
-  @Order(12)
-  public static class RegisterEndpointAuthorizationConfig
-    extends ResourceServerConfigurerAdapter {
-
+    private OAuth2AuthenticationProcessingFilter resourceFilter;
+    
     @Autowired
     private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
 
@@ -236,25 +261,75 @@ public class SecurityConfig {
 
       // @formatter:off
       http
-        .antMatcher("/register/**")
+        .antMatcher("/resource/**")
         .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint)
           .and()
-        .addFilterBefore(corsFilter, SecurityContextPersistenceFilter.class)
+        .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
+        .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
         .sessionManagement()
           .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
           .and()
         .authorizeRequests()
-          .antMatchers("/**")
-          .permitAll();
+          .antMatchers("/resource/**")
+          .permitAll()
+          .and()
+        .csrf()
+          .disable();
       // @formatter:on
     }
   }
 
+  /**
+   * @author cecco
+   *
+   */
+  @Configuration
+  @Order(12)
+  public static class RegisterEndpointAuthorizationConfig
+    extends WebSecurityConfigurerAdapter {
+
+    @Autowired
+    private OAuth2AuthenticationProcessingFilter resourceFilter;
+    
+    @Autowired
+    private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
+
+    @Autowired
+    private CorsFilter corsFilter; 
+
+    @Override
+    public void configure(final HttpSecurity http) throws Exception {
+      // @formatter:off
+      http
+        .antMatcher("/register/**")
+        .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint)
+          .and()
+        .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
+        .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
+        .sessionManagement()
+          .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+          .and()
+        .authorizeRequests()
+          .antMatchers("/register/**").permitAll()
+          .and()
+        .csrf()
+          .disable();
+      // @formatter:on
+    }
+  }
+
+  /**
+   * @author cecco
+   *
+   */
   @Configuration
   @Order(13)
   public static class UserInfoEndpointAuthorizationConfig
-    extends ResourceServerConfigurerAdapter {
-
+    extends WebSecurityConfigurerAdapter {
+    
+    @Autowired
+    private OAuth2AuthenticationProcessingFilter resourceFilter;
+    
     @Autowired
     private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
 
@@ -270,9 +345,12 @@ public class SecurityConfig {
         .antMatcher("/userinfo**")
         .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint)
           .and()
-        .addFilterBefore(corsFilter, SecurityContextPersistenceFilter.class)
-        .sessionManagement()
-          .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
+        .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
+       .sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        .and()
+       .csrf().disable();
       // @formatter:on
     }
   }
@@ -464,22 +542,22 @@ public class SecurityConfig {
     }
   }
 
-  @Configuration
-  @Order(1)
-  @Profile("dev")
-  public static class H2ConsoleEndpointAuthorizationConfig
-    extends WebSecurityConfigurerAdapter {
-
-    @Override
-    protected void configure(final HttpSecurity http) throws Exception {
-
-      HttpSecurity h2Console = http.antMatcher("/h2-console/**");
-      h2Console.csrf().disable();
-      h2Console.httpBasic();
-      h2Console.headers().frameOptions().disable();
-
-      h2Console.authorizeRequests().anyRequest().permitAll();
-    }
-  }
+//  @Configuration
+//  @Order(1)
+//  @Profile("dev")
+//  public static class H2ConsoleEndpointAuthorizationConfig
+//    extends WebSecurityConfigurerAdapter {
+//
+//    @Override
+//    protected void configure(final HttpSecurity http) throws Exception {
+//
+//      HttpSecurity h2Console = http.antMatcher("/h2-console/**");
+//      h2Console.csrf().disable();
+//      h2Console.httpBasic();
+//      h2Console.headers().frameOptions().disable();
+//
+//      h2Console.authorizeRequests().anyRequest().permitAll();
+//    }
+//  }
 
 }

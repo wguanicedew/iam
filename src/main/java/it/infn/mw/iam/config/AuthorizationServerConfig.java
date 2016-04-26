@@ -19,6 +19,7 @@ import org.mitre.openid.connect.request.ConnectOAuth2RequestFactory;
 import org.mitre.openid.connect.token.TofuUserApprovalHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
@@ -39,12 +40,21 @@ import org.springframework.security.oauth2.provider.implicit.ImplicitTokenGrante
 import org.springframework.security.oauth2.provider.refresh.RefreshTokenGranter;
 import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
+import org.springframework.security.oauth2.provider.token.TokenEnhancer;
+
+import it.infn.mw.iam.oidc.OidcTokenEnhancer;
 
 @Configuration
 @EnableAuthorizationServer
 public class AuthorizationServerConfig
   extends AuthorizationServerConfigurerAdapter {
-
+  
+  @Bean
+  @Primary
+  TokenEnhancer iamTokenEnhancer(){
+    return new OidcTokenEnhancer();
+  }
+  
   @Bean
   RedirectResolver blacklistAwareRedirectResolver() {
 
