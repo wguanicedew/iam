@@ -30,8 +30,13 @@
       <c:if test="${userNotFoundError != null}">
         <div class="alert alert-error">
           <strong>Unknown user</strong><br>
-            ${externalAuthenticationToken.userInfo.name} (${externalAuthenticationToken.userInfo.email}) is not a registered
-            user in this organisation
+            ${externalAuthenticationToken.userInfo.name} is not a registered
+            user in this organisation. Identity information:
+            <ul>
+              <li><strong>Account issuer</strong>: ${externalAuthenticationToken.issuer}</li>
+              <li><strong>Account subject</strong>: ${externalAuthenticationToken.sub}</li>
+              <li><strong>Email</strong>: ${externalAuthenticationToken.userInfo.email}</li>
+            </ul>
         </div>    
       </c:if>
       
