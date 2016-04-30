@@ -1,0 +1,21 @@
+# http_proxy:
+#   build: ./docker/httpd-proxy/
+#   container_name: idptestbed
+#
+# idp:
+#   build: ./docker/idp/
+#   container_name: idp
+#   environment:
+#     - JETTY_MAX_HEAP=64m
+#     - JETTY_BROWSER_SSL_KEYSTORE_PASSWORD=password
+#     - JETTY_BACKCHANNEL_SSL_KEYSTORE_PASSWORD=password
+#   expose:
+#     - "4443"
+#
+# ldap:
+#   build: ./docker/ldap/
+#   container_name: ldap
+#
+# sp:
+#   container_name: sp
+#   build: ./docker/sp/

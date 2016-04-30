@@ -15,9 +15,9 @@ spring:
     name: INDIGO IAM
   jpa:
     generate-ddl: true
-        
+
   profiles:
-    active: google
+    active: google,dev
 
 
 iam:

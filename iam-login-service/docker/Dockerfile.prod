@@ -1,0 +1,7 @@
+FROM java:8
+ARG JAR_VERSION
+
+RUN mkdir /indigo-iam
+WORKDIR /indigo-iam
+COPY iam-login-service-$JAR_VERSION.war /indigo-iam/
+CMD java $IAM_JAVA_OPTS -jar iam-login-service-$JAR_VERSION.war
