@@ -41,7 +41,7 @@ Check the following folders:
 - [iam-login-service](iam-login-service/docker)
 - [iam-test-client](iam-test-client/docker)
 
-## Related project
+## Related projects
 
 This project builds upon the following projects/technologies:
 
@@ -49,3 +49,4 @@ This project builds upon the following projects/technologies:
 - [MitreID OpenID-Connect client and server libraries][mitre]
 
 [mitre]: https://github.com/mitreid-connect/OpenID-Connect-Java-Spring-Server
+[spring-boot]: http://projects.spring.io/spring-boot/
