@@ -17,12 +17,25 @@
   <description>The INDIGO IAM login service</description>
 
   <properties>
-    <java.version>1.8</java.version>
     <eclipselink.version>2.5.2</eclipselink.version>
-    <mitreid.version>1.2.6</mitreid.version>
   </properties>
 
   <dependencies>
+    <dependency>
+      <groupId>it.infn.mw</groupId>
+      <artifactId>iam-persistence</artifactId>
+      <version>${project.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.hibernate</groupId>
+          <artifactId>hibernate-entitymanager</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.hibernate</groupId>
+          <artifactId>hibernate-validator</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
 
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -32,18 +45,7 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-security</artifactId>
     </dependency>
-
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-data-jpa</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>org.hibernate</groupId>
-          <artifactId>hibernate-entitymanager</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-
+    
     <dependency>
       <groupId>org.eclipse.persistence</groupId>
       <artifactId>eclipselink</artifactId>

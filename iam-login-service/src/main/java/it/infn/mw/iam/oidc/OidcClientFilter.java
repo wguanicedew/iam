@@ -243,7 +243,6 @@ public class OidcClientFilter extends OIDCAuthenticationFilter {
   @Override
   protected void handleError(HttpServletRequest request,
     HttpServletResponse response) throws IOException {
-  
     
     OidcClientError error = new OidcClientError(
       "Authentication error",

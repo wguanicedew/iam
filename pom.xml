@@ -32,8 +32,11 @@
   </properties>
 
   <modules>
+    <module>iam-common</module>
+    <module>iam-persistence</module>
     <module>iam-login-service</module>
     <module>iam-test-client</module>
+    <module>iam-test-protected-resource</module>
   </modules>
 
   <dependencyManagement>
@@ -78,6 +81,12 @@
       </dependency>
 
       <!-- Mitre -->
+      <dependency>
+        <groupId>org.mitre</groupId>
+        <artifactId>openid-connect-common</artifactId>
+        <version>${mitreid.version}</version>
+      </dependency>
+
       <dependency>
         <groupId>org.mitre</groupId>
         <artifactId>openid-connect-server</artifactId>
@@ -161,16 +170,6 @@
           <useProjectReferences>false</useProjectReferences>
           <downloadSources>true</downloadSources>
           <downloadJavadocs>true</downloadJavadocs>
-          <additionalConfig>
-            <file>
-              <name>.settings/org.eclipse.jdt.ui.prefs</name>
-              <location>${main.basedir}/eclipse/org.eclipse.jdt.ui.prefs</location>
-            </file>
-            <file>
-              <name>.settings/org.eclipse.jdt.core.prefs</name>
-              <location>${main.basedir}/eclipse/org.eclipse.jdt.core.prefs</location>
-            </file>
-          </additionalConfig>
         </configuration>
       </plugin>
 

@@ -48,11 +48,11 @@ import org.springframework.web.util.WebUtils;
 @SpringBootApplication
 @EnableAutoConfiguration(exclude = { ErrorMvcAutoConfiguration.class })
 @RestController
-public class SpringBootOidcClientApplication
+public class IamTestClientApplication
   extends WebSecurityConfigurerAdapter {
 
   public static final Logger LOG = LoggerFactory
-    .getLogger(SpringBootOidcClientApplication.class);
+    .getLogger(IamTestClientApplication.class);
 
   @Autowired
   OIDCAuthenticationFilter oidcFilter;
@@ -65,7 +65,7 @@ public class SpringBootOidcClientApplication
 
   public static void main(String[] args) {
 
-    SpringApplication.run(SpringBootOidcClientApplication.class, args);
+    SpringApplication.run(IamTestClientApplication.class, args);
   }
 
   public class SendUnauhtorizedAuthenticationEntryPoint
