@@ -10,9 +10,11 @@ INSERT INTO system_scope(scope, description, icon, restricted, default_scope, st
   ('phone', 'telephone number', 'bell', false, true, false, null),
   ('offline_access', 'offline access', 'time', false, false, false, null);
 
-INSERT INTO client_details (id, client_id, client_secret, client_name, dynamically_registered, refresh_token_validity_seconds, access_token_validity_seconds, id_token_validity_seconds, allow_introspection) VALUES
-  (1, 'client', 'secret', 'Test Client', false, null, 3600, 600, true),
-  (2, 'tasks-app', 'secret', 'Tasks App', false, null, 0, 0, true);
+INSERT INTO client_details (id, client_id, client_secret, client_name, dynamically_registered, refresh_token_validity_seconds, access_token_validity_seconds, id_token_validity_seconds, allow_introspection, token_endpoint_auth_method) VALUES
+  (1, 'client', 'secret', 'Test Client', false, null, 3600, 600, true, 'SECRET_BASIC'),
+  (2, 'tasks-app', 'secret', 'Tasks App', false, null, 0, 0, true, 'SECRET_BASIC'),
+  (3, 'post-client', 'secret', 'Post client', false, null, 3600,600, true, 'SECRET_POST'),
+  (4, 'client-cred', 'secret', 'Client credentials', false, null, 3600, 600, true, 'SECRET_BASIC');
 
 INSERT INTO client_scope (owner_id, scope) VALUES
   (1, 'openid'),
@@ -26,17 +28,31 @@ INSERT INTO client_scope (owner_id, scope) VALUES
   (2, 'openid'),
   (2, 'profile'),
   (2, 'read-tasks'),
-  (2, 'write-tasks');
+  (2, 'write-tasks'),
+  (3, 'openid'),
+  (3, 'profile'),
+  (3, 'read-tasks'),
+  (3, 'write-tasks'),
+  (4, 'openid'),
+  (4, 'profile'),
+  (4, 'read-tasks'),
+  (4, 'write-tasks');
+  
+  
   
 INSERT INTO client_redirect_uri (owner_id, redirect_uri) VALUES
   (1, 'http://localhost:9090/iam-test-client/openid_connect_login'),
-  (1, 'https://iam.local.io/iam-test-client/openid_connect_login');
+  (1, 'https://iam.local.io/iam-test-client/openid_connect_login'),
+  (3, 'http://localhost:4000/callback'),
+  (4, 'http://localhost:5000/callback');
 
 INSERT INTO client_grant_type (owner_id, grant_type) VALUES
   (1, 'authorization_code'),
   (1, 'urn:ietf:params:oauth:grant_type:redelegate'),
   (1, 'implicit'),
-  (1, 'refresh_token');
+  (1, 'refresh_token'),
+  (3, 'authorization_code'),
+  (4, 'client_credentials');
 
 INSERT INTO iam_account_user_info(ID,NAME, FAMILYNAME, EMAIL, EMAILVERIFIED) VALUES
 (1,'Administrator', 'User', 'test@test.org', true),
