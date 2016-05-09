@@ -1,95 +1,109 @@
-db_data:
-  image: busybox
-  volumes:
-    - /var/lib/mysql
-  command: /bin/true
+version: '2'
 
-db:
-  container_name: db
-  image: mariadb:latest
-  volumes_from:
-    - db_data
+services:
 
-  environment:
-    MYSQL_ROOT_PASSWORD: pwd
-    MYSQL_USER: iam
-    MYSQL_PASSWORD: pwd
-    MYSQL_DATABASE: iam
+  db_data:
+    image: busybox
+    volumes:
+      - /var/lib/mysql
+    command: /bin/true
 
-trust:
-  build: ./docker/trust-anchors
-  command: /bin/true
+  db:
+    container_name: db
+    image: mariadb:latest
+    volumes_from:
+      - db_data
 
-iam-be:
-  build: .
-  dockerfile: ./iam-login-service/docker/Dockerfile
-  container_name: iam-be
+    environment:
+      MYSQL_ROOT_PASSWORD: pwd
+      MYSQL_USER: iam
+      MYSQL_PASSWORD: pwd
+      MYSQL_DATABASE: iam
 
-  environment:
-    IAM_JAVA_OPTS: -Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n,address=1044 -Dspring.profiles.active=google,prod
-    IAM_JAR: /code/iam-login-service/target/iam-login-service-${POM_VERSION}.war
-    IAM_BASE_URL: https://iam.local.io
-    IAM_ISSUER: https://iam.local.io/
-    IAM_USE_FORWARDED_HEADERS: "true"
+  trust:
+    build:
+      context: ./docker/trust-anchors
+    command: /bin/true
 
-    IAM_DB_HOST: db
-    IAM_DB_USERNAME: iam
-    IAM_DB_PASSWORD: pwd
+  iam-be:
+    container_name: iam-be
 
-    IAM_GOOGLE_CLIENT_ID: ${IAM_GOOGLE_CLIENT_ID}
-    IAM_GOOGLE_CLIENT_SECRET: ${IAM_GOOGLE_CLIENT_SECRET}
-    IAM_GOOGLE_CLIENT_REDIRECT_URIS: https://iam.local.io/openid_connect_login
+    build:
+      context: .
+      dockerfile: ./iam-login-service/docker/Dockerfile
 
-    IAM_GITHUB_CLIENT_ID: ${IAM_GITHUB_CLIENT_ID}
-    IAM_GITHUB_CLIENT_SECRET: ${IAM_GITHUB_CLIENT_SECRET}
+    environment:
+      IAM_JAVA_OPTS: -Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n,address=1044 -Dspring.profiles.active=google,prod
+      IAM_JAR: /code/iam-login-service/target/iam-login-service-${POM_VERSION}.war
+      IAM_BASE_URL: https://iam.local.io
+      IAM_ISSUER: https://iam.local.io/
+      IAM_USE_FORWARDED_HEADERS: "true"
 
-  ports:
-    - "1044:1044"
+      IAM_DB_HOST: db
+      IAM_DB_USERNAME: iam
+      IAM_DB_PASSWORD: pwd
 
-  volumes_from:
-    - trust
+      IAM_GOOGLE_CLIENT_ID: ${IAM_GOOGLE_CLIENT_ID}
+      IAM_GOOGLE_CLIENT_SECRET: ${IAM_GOOGLE_CLIENT_SECRET}
+      IAM_GOOGLE_CLIENT_REDIRECT_URIS: https://iam.local.io/openid_connect_login
 
-  volumes:
-    - .:/code:ro
-    - /dev/urandom:/dev/random
+      IAM_GITHUB_CLIENT_ID: ${IAM_GITHUB_CLIENT_ID}
+      IAM_GITHUB_CLIENT_SECRET: ${IAM_GITHUB_CLIENT_SECRET}
 
-client:
-  build: .
-  dockerfile: ./iam-test-client/docker/Dockerfile
-  container_name: client
+    ports:
+      - "1044:1044"
 
-  environment:
-    IAM_CLIENT_PORT: 8080
-    IAM_CLIENT_JAVA_OPTS: -Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n,address=1045
-    IAM_CLIENT_ID: client
-    IAM_CLIENT_ISSUER: https://iam.local.io/
-    IAM_CLIENT_REDIRECT_URIS: https://iam.local.io/iam-test-client/openid_connect_login
-    IAM_CLIENT_USE_FORWARD_HEADERS: "true"
-    IAM_CLIENT_SECRET: secret
-    IAM_CLIENT_JAR: /code/iam-test-client/target/iam-test-client-${POM_VERSION}.jar
+    volumes_from:
+      - trust
 
-  ports:
-    - "1045:1045"
+    volumes:
+      - .:/code:ro
+      - /dev/urandom:/dev/random
 
-  volumes_from:
-    - trust
+  client:
+    build:
+      context: .
+      dockerfile: ./iam-test-client/docker/Dockerfile
 
-  volumes:
-    - .:/code:ro
+    container_name: client
 
-iam-fe:
-  build: ./docker/nginx/
-  container_name: iam-fe
+    environment:
+      IAM_CLIENT_PORT: 8080
+      IAM_CLIENT_JAVA_OPTS: -Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n,address=1045
+      IAM_CLIENT_ID: client
+      IAM_CLIENT_ISSUER: https://iam.local.io/
+      IAM_CLIENT_REDIRECT_URIS: https://iam.local.io/iam-test-client/openid_connect_login
+      IAM_CLIENT_USE_FORWARD_HEADERS: "true"
+      IAM_CLIENT_SECRET: secret
+      IAM_CLIENT_JAR: /code/iam-test-client/target/iam-test-client-${POM_VERSION}.jar
 
-  environment:
-    NGINX_HOST: iam
-    NGINX_PORT: 443
+    ports:
+      - "1045:1045"
 
-  ports:
-    - "443:443"
+    volumes_from:
+      - trust
 
-  volumes:
-    - /dev/urandom:/dev/random
+    volumes:
+      - .:/code:ro
+
+  iam-fe:
+    build:
+      context: ./docker/nginx/
+
+    depends_on:
+      - iam-be
+
+    container_name: iam-fe
+
+    environment:
+      NGINX_HOST: iam
+      NGINX_PORT: 443
+
+    ports:
+      - "443:443"
+
+    volumes:
+      - /dev/urandom:/dev/random
 
 
 # browser:
