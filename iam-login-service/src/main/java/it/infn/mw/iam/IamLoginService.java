@@ -4,6 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.oauth2.OAuth2AutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -22,7 +23,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
   "org.mitre.discovery.web", 
   "org.mitre.discovery.view" })
 
-@EnableAutoConfiguration(exclude = { SecurityAutoConfiguration.class })
+@EnableAutoConfiguration(exclude = { SecurityAutoConfiguration.class, OAuth2AutoConfiguration.class })
 public class IamLoginService {
 
   public static void main(final String[] args) {

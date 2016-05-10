@@ -2,7 +2,6 @@ package it.infn.mw.iam.config;
 
 import java.util.Locale;
 
-import org.mitre.openid.connect.config.JsonMessageSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
@@ -20,6 +19,8 @@ import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.view.BeanNameViewResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.JstlView;
+
+import it.infn.mw.iam.core.PoliteJsonMessageSource;
 
 @Configuration
 public class MvcConfig extends WebMvcConfigurerAdapter {
@@ -94,7 +95,8 @@ public class MvcConfig extends WebMvcConfigurerAdapter {
   public MessageSource messageSource() {
 
     DefaultResourceLoader loader = new DefaultResourceLoader();
-    JsonMessageSource messageSource = new JsonMessageSource();
+    
+    PoliteJsonMessageSource messageSource = new PoliteJsonMessageSource();
     messageSource.setBaseDirectory(loader.getResource("classpath:/i18n/"));
     messageSource.setUseCodeAsDefaultMessage(true);
 

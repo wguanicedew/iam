@@ -1,8 +1,12 @@
 package it.infn.mw.iam.config;
 
+import org.mitre.oauth2.repository.AuthenticationHolderRepository;
+import org.mitre.oauth2.repository.AuthorizationCodeRepository;
 import org.mitre.oauth2.repository.OAuth2ClientRepository;
 import org.mitre.oauth2.repository.OAuth2TokenRepository;
 import org.mitre.oauth2.repository.SystemScopeRepository;
+import org.mitre.oauth2.repository.impl.JpaAuthenticationHolderRepository;
+import org.mitre.oauth2.repository.impl.JpaAuthorizationCodeRepository;
 import org.mitre.oauth2.repository.impl.JpaOAuth2ClientRepository;
 import org.mitre.oauth2.repository.impl.JpaOAuth2TokenRepository;
 import org.mitre.oauth2.repository.impl.JpaSystemScopeRepository;
@@ -23,6 +27,19 @@ import it.infn.mw.iam.persistence.repository.IamUserinfoRepository;
 @Configuration
 public class MitreRepositoryConfig {
 
+  
+  @Bean
+  AuthenticationHolderRepository authenticationHolderRepository() {
+
+    return new JpaAuthenticationHolderRepository();
+  }
+  
+  @Bean
+  AuthorizationCodeRepository authorizationCodeRepository() {
+
+    return new JpaAuthorizationCodeRepository();
+  }
+  
   @Bean
   PairwiseIdentifierRepository defaultPairwiseIdentifierRepository() {
 

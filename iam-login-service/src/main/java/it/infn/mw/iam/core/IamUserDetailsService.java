@@ -12,8 +12,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import it.infn.mw.iam.persistence.model.IamAuthority;
 import it.infn.mw.iam.persistence.model.IamAccount;
+import it.infn.mw.iam.persistence.model.IamAuthority;
 import it.infn.mw.iam.persistence.repository.IamAccountRespository;
 
 public class IamUserDetailsService implements UserDetailsService {
@@ -36,6 +36,7 @@ public class IamUserDetailsService implements UserDetailsService {
     throws UsernameNotFoundException {
 
     Optional<IamAccount> account = repo.findByUsername(username);
+    
     if (account.isPresent()) {
       IamAccount a = account.get();
       
@@ -45,7 +46,7 @@ public class IamUserDetailsService implements UserDetailsService {
       return u;
     }
 
-    return null;
+    throw new UsernameNotFoundException("User '"+username+"' not found.");
   }
 
 }

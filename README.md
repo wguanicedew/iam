@@ -19,8 +19,8 @@ Build command:
 
 You will need:
 
-- Docker 1.9.1
-- Docker compose > 1.5
+- Docker 1.11.1
+- Docker compose >= 1.7
 
 You can start a development/testing environment with the following command:
 

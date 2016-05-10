@@ -3,13 +3,21 @@ package it.infn.mw.iam.config;
 import org.mitre.jwt.signer.service.impl.ClientKeyCacheService;
 import org.mitre.jwt.signer.service.impl.JWKSetCacheService;
 import org.mitre.jwt.signer.service.impl.SymmetricKeyJWTValidatorCacheService;
+import org.mitre.oauth2.service.ClientDetailsEntityService;
 import org.mitre.oauth2.service.IntrospectionResultAssembler;
+import org.mitre.oauth2.service.OAuth2TokenEntityService;
 import org.mitre.oauth2.service.SystemScopeService;
+import org.mitre.oauth2.service.impl.BlacklistAwareRedirectResolver;
 import org.mitre.oauth2.service.impl.DefaultClientUserDetailsService;
 import org.mitre.oauth2.service.impl.DefaultIntrospectionResultAssembler;
+import org.mitre.oauth2.service.impl.DefaultOAuth2AuthorizationCodeService;
+import org.mitre.oauth2.service.impl.DefaultOAuth2ClientDetailsEntityService;
+import org.mitre.oauth2.service.impl.DefaultOAuth2ProviderTokenService;
 import org.mitre.oauth2.service.impl.DefaultSystemScopeService;
+import org.mitre.oauth2.token.StructuredScopeAwareOAuth2RequestValidator;
 import org.mitre.oauth2.web.CorsFilter;
 import org.mitre.openid.connect.filter.AuthorizationRequestFilter;
+import org.mitre.openid.connect.request.ConnectOAuth2RequestFactory;
 import org.mitre.openid.connect.service.ApprovedSiteService;
 import org.mitre.openid.connect.service.BlacklistedSiteService;
 import org.mitre.openid.connect.service.ClientLogoLoadingService;
@@ -34,6 +42,7 @@ import org.mitre.openid.connect.service.impl.MITREidDataService_1_2;
 import org.mitre.openid.connect.service.impl.MatchLoginHintsAgainstUsers;
 import org.mitre.openid.connect.service.impl.UUIDPairwiseIdentiferService;
 import org.mitre.openid.connect.token.ConnectTokenEnhancer;
+import org.mitre.openid.connect.token.TofuUserApprovalHandler;
 import org.mitre.openid.connect.web.AuthenticationTimeStamper;
 import org.mitre.openid.connect.web.ServerConfigInterceptor;
 import org.mitre.openid.connect.web.UserInfoInterceptor;
@@ -42,16 +51,62 @@ import org.springframework.boot.context.embedded.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
+import org.springframework.security.oauth2.provider.OAuth2RequestValidator;
+import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
+import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
+import org.springframework.security.oauth2.provider.endpoint.RedirectResolver;
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
 import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
-import org.springframework.web.filter.GenericFilterBean;
 import org.springframework.web.servlet.AsyncHandlerInterceptor;
 
 import it.infn.mw.iam.core.IamScopeClaimTranslationService;
 
 @Configuration
 public class MitreServicesConfig {
+
+  @Bean
+  RedirectResolver blacklistAwareRedirectResolver() {
+
+    return new BlacklistAwareRedirectResolver();
+  }
+
+  @Bean
+  OAuth2RequestValidator requestValidator() {
+
+    return new StructuredScopeAwareOAuth2RequestValidator();
+  }
+
+  @Bean
+  UserApprovalHandler tofuApprovalHandler() {
+
+    return new TofuUserApprovalHandler();
+  }
+
+  @Bean
+  OAuth2RequestFactory requestFactory() {
+
+    return new ConnectOAuth2RequestFactory(clientDetailsService());
+  }
+
+  @Bean
+  ClientDetailsEntityService clientDetailsService() {
+
+    return new DefaultOAuth2ClientDetailsEntityService();
+  }
+
+  @Bean
+  OAuth2TokenEntityService tokenServices() {
+
+    return new DefaultOAuth2ProviderTokenService();
+  }
+
+  @Bean
+  AuthorizationCodeServices authorizationCodeServices() {
+
+    return new DefaultOAuth2AuthorizationCodeService();
+  }
 
   @Bean(name = "mitreUserInfoInterceptor")
   public AsyncHandlerInterceptor userInfoInterceptor() {
@@ -64,9 +119,11 @@ public class MitreServicesConfig {
 
     return new ServerConfigInterceptor();
   }
-  
+
   @Bean
-  public FilterRegistrationBean disabledMitreFilterRegistration(AuthorizationRequestFilter f){
+  public FilterRegistrationBean disabledMitreFilterRegistration(
+    AuthorizationRequestFilter f) {
+
     FilterRegistrationBean b = new FilterRegistrationBean(f);
     b.setEnabled(false);
     return b;
@@ -91,12 +148,13 @@ public class MitreServicesConfig {
   }
 
   @Bean
-  public FilterRegistrationBean disabledCorsFilterRegistration(CorsFilter c){
+  public FilterRegistrationBean disabledCorsFilterRegistration(CorsFilter c) {
+
     FilterRegistrationBean b = new FilterRegistrationBean(c);
     b.setEnabled(false);
     return b;
   }
-  
+
   @Bean
   public CorsFilter corsFilter() {
 

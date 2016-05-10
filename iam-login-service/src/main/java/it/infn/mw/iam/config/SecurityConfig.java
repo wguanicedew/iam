@@ -9,10 +9,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.embedded.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -110,12 +112,12 @@ public class SecurityConfig {
 
     }
 
-    @Override
-    @Bean(name = "authenticationManager")
-    public AuthenticationManager authenticationManagerBean() throws Exception {
-
-      return super.authenticationManagerBean();
-    }
+//    @Override
+//    @Bean(name = "authenticationManager")
+//    public AuthenticationManager authenticationManagerBean() throws Exception {
+//
+//      return super.authenticationManagerBean();
+//    }
 
     @Bean
     public OAuth2WebSecurityExpressionHandler oAuth2WebSecurityExpressionHandler() {
@@ -542,22 +544,36 @@ public class SecurityConfig {
     }
   }
 
-//  @Configuration
-//  @Order(1)
-//  @Profile("dev")
-//  public static class H2ConsoleEndpointAuthorizationConfig
-//    extends WebSecurityConfigurerAdapter {
-//
-//    @Override
-//    protected void configure(final HttpSecurity http) throws Exception {
-//
-//      HttpSecurity h2Console = http.antMatcher("/h2-console/**");
-//      h2Console.csrf().disable();
-//      h2Console.httpBasic();
-//      h2Console.headers().frameOptions().disable();
-//
-//      h2Console.authorizeRequests().anyRequest().permitAll();
-//    }
-//  }
+  @Configuration
+  @Order(1)
+  @Profile("dev")
+  public static class H2ConsoleEndpointAuthorizationConfig
+    implements WebSecurityConfigurer<WebSecurity>{
+
+        
+    protected void configure(final HttpSecurity http) throws Exception {
+
+      HttpSecurity h2Console = http.antMatcher("/h2-console/**");
+      h2Console.csrf().disable();
+      h2Console.httpBasic();
+      h2Console.headers().frameOptions().disable();
+
+      h2Console
+        .authorizeRequests()
+        .antMatchers("/h2-console/**").permitAll();
+    }
+
+
+    @Override
+    public void init(WebSecurity builder) throws Exception {
+      
+    }
+
+
+    @Override
+    public void configure(WebSecurity builder) throws Exception {
+      builder.debug(true);
+    }
+  }
 
 }

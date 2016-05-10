@@ -14,7 +14,8 @@ INSERT INTO client_details (id, client_id, client_secret, client_name, dynamical
   (1, 'client', 'secret', 'Test Client', false, null, 3600, 600, true, 'SECRET_BASIC'),
   (2, 'tasks-app', 'secret', 'Tasks App', false, null, 0, 0, true, 'SECRET_BASIC'),
   (3, 'post-client', 'secret', 'Post client', false, null, 3600,600, true, 'SECRET_POST'),
-  (4, 'client-cred', 'secret', 'Client credentials', false, null, 3600, 600, true, 'SECRET_BASIC');
+  (4, 'client-cred', 'secret', 'Client credentials', false, null, 3600, 600, true, 'SECRET_BASIC'),
+  (5, 'password-grant', 'secret', 'Password grant client', false, null, 3600, 600, true, 'SECRET_BASIC');
 
 INSERT INTO client_scope (owner_id, scope) VALUES
   (1, 'openid'),
@@ -36,7 +37,13 @@ INSERT INTO client_scope (owner_id, scope) VALUES
   (4, 'openid'),
   (4, 'profile'),
   (4, 'read-tasks'),
-  (4, 'write-tasks');
+  (4, 'write-tasks'),
+  (5, 'openid'),
+  (5, 'profile'),
+  (5, 'email'),
+  (5, 'address'),
+  (5, 'phone'),
+  (5, 'offline_access');
   
   
   
@@ -52,7 +59,8 @@ INSERT INTO client_grant_type (owner_id, grant_type) VALUES
   (1, 'implicit'),
   (1, 'refresh_token'),
   (3, 'authorization_code'),
-  (4, 'client_credentials');
+  (4, 'client_credentials'),
+  (5, 'password');
 
 INSERT INTO iam_account_user_info(ID,NAME, FAMILYNAME, EMAIL, EMAILVERIFIED) VALUES
 (1,'Administrator', 'User', 'test@test.org', true),

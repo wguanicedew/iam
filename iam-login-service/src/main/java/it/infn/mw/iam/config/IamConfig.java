@@ -6,12 +6,14 @@ import org.springframework.boot.context.embedded.FilterRegistrationBean;
 import org.springframework.boot.context.embedded.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.web.filter.CommonsRequestLoggingFilter;
+import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 
 import it.infn.mw.iam.core.IamProperties;
 import it.infn.mw.iam.core.IamUserDetailsService;
+import it.infn.mw.iam.oidc.OidcTokenEnhancer;
 import it.infn.mw.iam.util.DumpHeadersFilter;
 
 @Configuration
@@ -23,6 +25,13 @@ public class IamConfig {
   @Bean(name="iamUserDetailsService")
   UserDetailsService iamUserDetailsService(){
     return new IamUserDetailsService();
+  }
+  
+  @Bean
+  @Primary
+  TokenEnhancer iamTokenEnhancer() {
+
+    return new OidcTokenEnhancer();
   }
   
   @Bean
