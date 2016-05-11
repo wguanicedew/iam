@@ -59,6 +59,8 @@ INSERT INTO client_grant_type (owner_id, grant_type) VALUES
   (1, 'implicit'),
   (1, 'refresh_token'),
   (3, 'authorization_code'),
+  (3, 'client_credentials'),
+  (4, 'password'),
   (4, 'client_credentials'),
   (5, 'password');
 

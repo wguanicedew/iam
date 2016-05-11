@@ -125,7 +125,7 @@ public class AuthorizationServerConfig
   public void configure(AuthorizationServerSecurityConfigurer security)
     throws Exception {
 
-    
+    security.allowFormAuthenticationForClients();
 
   }
 

@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
@@ -24,7 +23,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationManager;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationProcessingFilter;
 import org.springframework.security.oauth2.provider.client.ClientCredentialsTokenEndpointFilter;
-import org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler;
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
 import org.springframework.security.oauth2.provider.expression.OAuth2WebSecurityExpressionHandler;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
@@ -112,13 +110,6 @@ public class SecurityConfig {
 
     }
 
-//    @Override
-//    @Bean(name = "authenticationManager")
-//    public AuthenticationManager authenticationManagerBean() throws Exception {
-//
-//      return super.authenticationManagerBean();
-//    }
-
     @Bean
     public OAuth2WebSecurityExpressionHandler oAuth2WebSecurityExpressionHandler() {
 
@@ -184,39 +175,41 @@ public class SecurityConfig {
   @Configuration
   @Order(9)
   public static class OAuthResourceServerConfiguration {
+
     @Autowired
     private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
-    
+
     @Autowired
     private OAuth2TokenEntityService tokenService;
-    
+
     @Bean
-    public FilterRegistrationBean disabledAutomaticFilterRegistration(OAuth2AuthenticationProcessingFilter f){
+    public FilterRegistrationBean disabledAutomaticFilterRegistration(
+      OAuth2AuthenticationProcessingFilter f) {
+
       FilterRegistrationBean b = new FilterRegistrationBean(f);
       b.setEnabled(false);
       return b;
     }
-    
-    @Bean(name="resourceServerFilter")
-    public OAuth2AuthenticationProcessingFilter oauthResourceServerFilter(){
-      
+
+    @Bean(name = "resourceServerFilter")
+    public OAuth2AuthenticationProcessingFilter oauthResourceServerFilter() {
+
       OAuth2AuthenticationManager manager = new OAuth2AuthenticationManager();
       manager.setTokenServices(tokenService);
-      
+
       OAuth2AuthenticationProcessingFilter filter = new OAuth2AuthenticationProcessingFilter();
       filter.setAuthenticationEntryPoint(authenticationEntryPoint);
-      filter.setAuthenticationManager(manager);  
+      filter.setAuthenticationManager(manager);
       return filter;
     }
-    
+
   }
-  
-  
+
   @Configuration
   @Order(10)
   public static class ApiEndpointAuthorizationConfig
     extends WebSecurityConfigurerAdapter {
-    
+
     @Autowired
     private OAuth2AuthenticationProcessingFilter resourceFilter;
 
@@ -250,7 +243,7 @@ public class SecurityConfig {
 
     @Autowired
     private OAuth2AuthenticationProcessingFilter resourceFilter;
-    
+
     @Autowired
     private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
 
@@ -292,15 +285,16 @@ public class SecurityConfig {
 
     @Autowired
     private OAuth2AuthenticationProcessingFilter resourceFilter;
-    
+
     @Autowired
     private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
 
     @Autowired
-    private CorsFilter corsFilter; 
+    private CorsFilter corsFilter;
 
     @Override
     public void configure(final HttpSecurity http) throws Exception {
+
       // @formatter:off
       http
         .antMatcher("/register/**")
@@ -328,10 +322,10 @@ public class SecurityConfig {
   @Order(13)
   public static class UserInfoEndpointAuthorizationConfig
     extends WebSecurityConfigurerAdapter {
-    
+
     @Autowired
     private OAuth2AuthenticationProcessingFilter resourceFilter;
-    
+
     @Autowired
     private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
 
@@ -353,62 +347,6 @@ public class SecurityConfig {
         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .and()
        .csrf().disable();
-      // @formatter:on
-    }
-  }
-
-  @Configuration
-  @Order(14)
-  public static class TokenEndpointAuthorizationConfig
-    extends WebSecurityConfigurerAdapter {
-
-    @Autowired
-    private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
-
-    @Autowired
-    @Qualifier("clientUserDetailsService")
-    private UserDetailsService userDetailsService;
-
-    @Autowired
-    private CorsFilter corsFilter;
-
-    @Override
-    protected void configure(final AuthenticationManagerBuilder auth)
-      throws Exception {
-
-      auth.userDetailsService(userDetailsService);
-    }
-
-    private ClientCredentialsTokenEndpointFilter clientCredentialsEndpointFilter()
-      throws Exception {
-
-      ClientCredentialsTokenEndpointFilter filter = new ClientCredentialsTokenEndpointFilter(
-        "/token");
-      filter.setAuthenticationManager(authenticationManager());
-      return filter;
-    }
-
-    @Override
-    protected void configure(final HttpSecurity http) throws Exception {
-
-      // @formatter:off
-      http
-        .antMatcher("/token")
-      .httpBasic()
-        .authenticationEntryPoint(authenticationEntryPoint)
-        .and()
-      .authorizeRequests()
-        .antMatchers(HttpMethod.OPTIONS, "/token").permitAll()
-        .antMatchers("/token").authenticated()
-        .and()
-      .addFilterBefore(clientCredentialsEndpointFilter(), BasicAuthenticationFilter.class)
-      .addFilterBefore(corsFilter, SecurityContextPersistenceFilter.class)
-      .exceptionHandling()
-        .authenticationEntryPoint(authenticationEntryPoint)
-        .accessDeniedHandler(new OAuth2AccessDeniedHandler())
-        .and()
-      .sessionManagement()
-        .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
       // @formatter:on
     }
   }
@@ -548,9 +486,8 @@ public class SecurityConfig {
   @Order(1)
   @Profile("dev")
   public static class H2ConsoleEndpointAuthorizationConfig
-    implements WebSecurityConfigurer<WebSecurity>{
+    implements WebSecurityConfigurer<WebSecurity> {
 
-        
     protected void configure(final HttpSecurity http) throws Exception {
 
       HttpSecurity h2Console = http.antMatcher("/h2-console/**");
@@ -558,20 +495,17 @@ public class SecurityConfig {
       h2Console.httpBasic();
       h2Console.headers().frameOptions().disable();
 
-      h2Console
-        .authorizeRequests()
-        .antMatchers("/h2-console/**").permitAll();
+      h2Console.authorizeRequests().antMatchers("/h2-console/**").permitAll();
     }
-
 
     @Override
     public void init(WebSecurity builder) throws Exception {
-      
-    }
 
+    }
 
     @Override
     public void configure(WebSecurity builder) throws Exception {
+
       builder.debug(true);
     }
   }

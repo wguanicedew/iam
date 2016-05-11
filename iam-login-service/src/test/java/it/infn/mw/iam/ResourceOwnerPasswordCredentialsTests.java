@@ -22,7 +22,7 @@ public class ResourceOwnerPasswordCredentialsTests {
       .port(8080)
     .when()
       .get("/.well-known/openid-configuration")
-      .then()
+    .then()
       .body("issuer", equalTo("http://localhost:8080/"));
     // @formatter:on
   }
@@ -35,8 +35,8 @@ public class ResourceOwnerPasswordCredentialsTests {
 
     // @formatter:off
     given()
-       .auth()
-       .preemptive().basic(clientId, clientSecret)
+      .auth()
+         .preemptive().basic(clientId, clientSecret)
       .port(8080)
       .param("grant_type", "password")
       .param("username", "test_user")
@@ -45,12 +45,11 @@ public class ResourceOwnerPasswordCredentialsTests {
     .expect()
       .log()
         .body(true)
-      .statusCode(200) 
+      .statusCode(200)
+      .body("scope", equalTo("openid profile"))
     .when()
-        .post("/token")
-        .then().body("scope", equalTo("openid profile"));
+        .post("/token");
     // @formatter:on
-
   }
   
   @Test
@@ -72,12 +71,10 @@ public class ResourceOwnerPasswordCredentialsTests {
       .log()
         .body(true)
       .statusCode(400) 
+      .body("error", equalTo("invalid_grant"))
+      .body("error_description", equalTo("Bad credentials"))
     .when()
-        .post("/token")
-        .then()
-          .body("error", equalTo("invalid_grant"))
-            .and()
-          .body("error_description", equalTo("Bad credentials"));
+        .post("/token");      
     // @formatter:on
 
   }
@@ -100,13 +97,11 @@ public class ResourceOwnerPasswordCredentialsTests {
     .expect()
       .log()
         .body(true)
-      .statusCode(401) 
+      .statusCode(401)
+      .body("error", equalTo("Unauthorized"))
+      .body("message", equalTo("Bad credentials"))
     .when()
-        .post("/token")
-        .then()
-          .body("error", equalTo("Unauthorized"))
-            .and()
-          .body("message", equalTo("Bad credentials"));
+        .post("/token");
     // @formatter:on
 
   }
@@ -129,13 +124,11 @@ public class ResourceOwnerPasswordCredentialsTests {
     .expect()
       .log()
         .body(true)
-      .statusCode(401) 
+      .statusCode(401)
+      .body("error", equalTo("Unauthorized"))
+      .body("message", equalTo("Client with id unknown was not found"))
     .when()
-        .post("/token")
-        .then()
-          .body("error", equalTo("Unauthorized"))
-            .and()
-          .body("message", equalTo("Client with id unknown was not found"));
+        .post("/token");
     // @formatter:on
 
   }
