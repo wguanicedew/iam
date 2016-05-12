@@ -2,6 +2,7 @@ package it.infn.mw.iam.oidc;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,6 +14,9 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.http.client.utils.URIBuilder;
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
+import org.mitre.openid.connect.web.AuthenticationTimeStamper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationServiceException;
@@ -20,6 +24,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.security.web.savedrequest.DefaultSavedRequest;
 
@@ -27,6 +32,9 @@ import it.infn.mw.iam.oidc.service.OidcUserDetailsService;
 
 public class OidcAuthenticationSuccessHandler
   extends SavedRequestAwareAuthenticationSuccessHandler {
+
+  public static final Logger LOG = LoggerFactory
+    .getLogger(OidcAuthenticationSuccessHandler.class);
 
   public final static String ORIGIN_AUTH_REQUEST_SESSION_VARIABLE = "origin_auth_request";
 
@@ -51,34 +59,43 @@ public class OidcAuthenticationSuccessHandler
 
       OIDCAuthenticationToken auth = (OIDCAuthenticationToken) authentication;
 
-      // get sub & issuer
-      String subject = auth.getSub();
-      String issuer = auth.getIssuer();
+      User user = null;
 
-      User user = (User) oidcUserDetailService.loadUserByOIDC(subject, issuer);
+      try {
+        user = (User) oidcUserDetailService.loadUserByOIDC(auth.getSub(),
+          auth.getIssuer());
+      } catch (UsernameNotFoundException e) {
 
-      if (user == null) {
-        
+        LOG.debug(e.getMessage());
+
         RequestDispatcher dispatcher = request.getRequestDispatcher("/login");
         request.setAttribute("userNotFoundError",
-          String
-          .format("User not found"));
-        
+          String.format("User not found"));
+
         request.setAttribute("externalAuthenticationToken", auth);
-        
+
         // Clear authentication
         SecurityContextHolder.getContext().setAuthentication(null);
         dispatcher.forward(request, response);
         return;
+
       }
 
       UsernamePasswordAuthenticationToken userToken = new UsernamePasswordAuthenticationToken(
         user.getUsername(), user.getPassword(), user.getAuthorities());
+
       SecurityContextHolder.getContext().setAuthentication(userToken);
 
       String targetUrl = iamBaseUrl;
 
+      // Save authentication timestamp in session
+      Date timestamp = new Date();
       HttpSession session = request.getSession();
+      session.setAttribute(AuthenticationTimeStamper.AUTH_TIMESTAMP,
+        new Date());
+
+      LOG.info("Successful OIDC authentication of {} at {}",
+        userToken.getName(), timestamp);
 
       DefaultSavedRequest originAuthRequest = (DefaultSavedRequest) session
         .getAttribute(ORIGIN_AUTH_REQUEST_SESSION_VARIABLE);

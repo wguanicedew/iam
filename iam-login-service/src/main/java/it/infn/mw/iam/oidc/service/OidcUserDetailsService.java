@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.mitre.openid.connect.client.SubjectIssuerGrantedAuthority;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import it.infn.mw.iam.persistence.model.IamAuthority;
 import it.infn.mw.iam.persistence.model.IamAccount;
+import it.infn.mw.iam.persistence.model.IamAuthority;
 import it.infn.mw.iam.persistence.repository.IamAccountRespository;
 
 public class OidcUserDetailsService {
@@ -22,16 +22,11 @@ public class OidcUserDetailsService {
   List<GrantedAuthority> convertAuthorities(IamAccount a) {
 
     List<GrantedAuthority> authorities = new ArrayList<>();
+
     for (IamAuthority auth : a.getAuthorities()) {
-      String data = auth.getAuthority();
-      GrantedAuthority elem = null;
-      if (data.startsWith("OIDC_")) {
-        String[] parts = data.split("_");
-        elem = new SubjectIssuerGrantedAuthority(parts[1], parts[2]);
-      } else {
-        elem = new SimpleGrantedAuthority(data);
-      }
-      authorities.add(elem);
+
+      authorities.add(new SimpleGrantedAuthority(auth.getAuthority()));
+
     }
     return authorities;
   }
@@ -49,9 +44,13 @@ public class OidcUserDetailsService {
 
       return u;
 
-    }
+    } else {
 
-    return null;
+      String oidcSubject = String.format("\"%s:%s\"", subject, issuer);
+
+      throw new UsernameNotFoundException(
+        "No user found linked with OpenID connect subject " + oidcSubject);
+    }
 
   }
 
