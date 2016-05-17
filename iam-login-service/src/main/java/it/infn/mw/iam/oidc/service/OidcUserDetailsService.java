@@ -33,7 +33,7 @@ public class OidcUserDetailsService {
 
   public Object loadUserByOIDC(String subject, String issuer) {
 
-    Optional<IamAccount> account = repo.findByOidcAccount(issuer, subject);
+    Optional<IamAccount> account = repo.findByOidcId(issuer, subject);
 
     if (account.isPresent()) {
 

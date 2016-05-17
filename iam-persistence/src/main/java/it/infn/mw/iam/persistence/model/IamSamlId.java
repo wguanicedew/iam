@@ -5,18 +5,20 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToOne;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="iam_saml_account")
-public class IamSamlAccount {
+@Table(name="iam_saml_id")
+public class IamSamlId {
 
   @Id
   @GeneratedValue(strategy=GenerationType.IDENTITY)
   private Long id;
 
-  @OneToOne(mappedBy="samlAccount")
+  @ManyToOne
+  @JoinColumn(name="account_id")
   IamAccount account;
 
   @Column(nullable = false, length = 256)
@@ -25,7 +27,7 @@ public class IamSamlAccount {
   @Column(nullable = false, length = 256)
   String userId;
 
-  public IamSamlAccount() {
+  public IamSamlId() {
   }
 
   public Long getId() {
@@ -88,7 +90,7 @@ public class IamSamlAccount {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    IamSamlAccount other = (IamSamlAccount) obj;
+    IamSamlId other = (IamSamlId) obj;
     if (account == null) {
       if (other.account != null)
         return false;

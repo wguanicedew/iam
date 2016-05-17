@@ -12,11 +12,19 @@ import javax.persistence.Id;
 public class IamAuthority {
 
   @Id
-  @GeneratedValue(strategy=GenerationType.IDENTITY)
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   Long id;
 
   @Column(name = "auth", length = 128, nullable = false, unique = true)
   String authority;
+
+  public IamAuthority() {
+
+  }
+
+  public IamAuthority(String authority) {
+    this.authority = authority;
+  }
 
   public Long getId() {
 

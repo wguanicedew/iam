@@ -45,7 +45,7 @@ public class SAMLUserDetailsServiceImpl implements SAMLUserDetailsService {
       throw new UsernameNotFoundException("No NameID found in SAML assertion");
     }
 
-    Optional<IamAccount> account = repo.findBySamlAccount(issuerId, userSamlId);
+    Optional<IamAccount> account = repo.findBySamlId(issuerId, userSamlId);
 
     if (account.isPresent()) {
 

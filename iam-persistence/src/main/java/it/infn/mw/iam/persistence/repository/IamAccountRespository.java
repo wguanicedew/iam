@@ -15,14 +15,16 @@ public interface IamAccountRespository
 
   Optional<IamAccount> findByUsername(@Param("username") String username);
 
-  @Query("select a from IamAccount a join a.samlAccount sa where sa.idpId = :idpId and sa.userId = :subject")
-  Optional<IamAccount> findBySamlAccount(@Param("idpId") String idpId,
+  @Query("select a from IamAccount a join a.samlIds si where si.idpId = :idpId and si.userId = :subject")
+  Optional<IamAccount> findBySamlId(@Param("idpId") String idpId,
     @Param("subject") String subject);
 
+  @Query("select a from IamAccount a join a.oidcIds oi where oi.issuer = :issuer and oi.subject = :subject")
+  Optional<IamAccount> findByOidcId(@Param("issuer") String issuer,
+    @Param("subject") String subject);
+  
   @Query("select a from IamAccount a join a.userInfo ui where ui.email = :emailAddress")
   Optional<IamAccount> findByEmail(@Param("emailAddress") String emailAddress);
 
-  @Query("select a from IamAccount a join a.oidcAccount oa where oa.issuer = :issuer and oa.subject = :subject")
-  Optional<IamAccount> findByOidcAccount(@Param("issuer") String issuer,
-    @Param("subject") String subject);
+  
 }

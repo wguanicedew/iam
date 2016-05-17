@@ -10,6 +10,7 @@ import org.springframework.boot.context.embedded.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -481,26 +482,52 @@ public class SecurityConfig {
       // @formatter:on
     }
   }
+  
+  @Configuration
+  @Order(18)
+  public static class ScimApiEndpointConfig
+    extends WebSecurityConfigurerAdapter {
+
+    @Autowired
+    private Http403ForbiddenEntryPoint http403ForbiddenEntryPoint;
+
+    @Override
+    protected void configure(final HttpSecurity http) throws Exception {
+
+      // @formatter:off
+      http
+        .antMatcher("/scim/**")
+      .exceptionHandling()
+        .authenticationEntryPoint(http403ForbiddenEntryPoint)
+        .and()
+        .csrf().disable()
+      .sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        .and()
+    .authorizeRequests()
+      .antMatchers("/scim/**")
+      .permitAll();
+      // @formatter:on
+    }
+  }
 
   @Configuration
-  @Order(1)
+  @Order(Ordered.HIGHEST_PRECEDENCE)
   @Profile("dev")
   public static class H2ConsoleEndpointAuthorizationConfig
-    implements WebSecurityConfigurer<WebSecurity> {
+    extends WebSecurityConfigurerAdapter {
 
     protected void configure(final HttpSecurity http) throws Exception {
 
-      HttpSecurity h2Console = http.antMatcher("/h2-console/**");
-      h2Console.csrf().disable();
+      HttpSecurity h2Console = http
+        .requestMatchers()
+        .antMatchers("/h2-console", "/h2-console/**")
+        .and().csrf().disable();
+      
       h2Console.httpBasic();
       h2Console.headers().frameOptions().disable();
 
-      h2Console.authorizeRequests().antMatchers("/h2-console/**").permitAll();
-    }
-
-    @Override
-    public void init(WebSecurity builder) throws Exception {
-
+      h2Console.authorizeRequests().antMatchers("/h2-console/**", "/h2-console").permitAll();
     }
 
     @Override

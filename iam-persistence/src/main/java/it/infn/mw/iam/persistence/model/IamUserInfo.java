@@ -19,8 +19,8 @@ import com.google.gson.JsonObject;
 import it.infn.mw.iam.core.IamProperties;
 
 @Entity
-@Table(name = "iam_account_user_info")
-public class IamAccountUserInfo implements UserInfo {
+@Table(name = "iam_user_info")
+public class IamUserInfo implements UserInfo {
 
   /**
    * 
@@ -28,26 +28,29 @@ public class IamAccountUserInfo implements UserInfo {
   private static final long serialVersionUID = -6656950721943983944L;
 
   @Id
-  @GeneratedValue(strategy=GenerationType.IDENTITY)
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
   @OneToOne(mappedBy = "userInfo")
   private IamAccount iamAccount;
 
-  @Column(nullable = false, length = 128)
-  private String name;
-
+  @Column(nullable = false, length = 64)
   private String givenName;
 
-  @Column(nullable = false, length = 128)
+  @Column(nullable = false, length = 64)
   private String familyName;
-  
+
+  @Column(length = 64)
   private String middleName;
+
   private String nickname;
-  private String profile;
-  private String picture;
-  private String website;
   
+  private String profile;
+  
+  private String picture;
+  
+  private String website;
+
   @Column(nullable = false, length = 128)
   private String email;
 
@@ -60,7 +63,7 @@ public class IamAccountUserInfo implements UserInfo {
 
   private Boolean phoneNumberVerified;
   private Address address;
-  private String updatedTime;
+  
   private String birthdate;
 
   private transient JsonObject src;
@@ -121,11 +124,6 @@ public class IamAccountUserInfo implements UserInfo {
     return middleName;
   }
 
-  public String getName() {
-
-    return name;
-  }
-
   public String getNickname() {
 
     return nickname;
@@ -175,7 +173,7 @@ public class IamAccountUserInfo implements UserInfo {
 
   public String getUpdatedTime() {
 
-    return updatedTime;
+    return getIamAccount().getLastUpdateTime().toString();
   }
 
   public String getWebsite() {
@@ -244,11 +242,6 @@ public class IamAccountUserInfo implements UserInfo {
     this.middleName = middleName;
   }
 
-  public void setName(String name) {
-
-    this.name = name;
-  }
-
   public void setNickname(String nickname) {
 
     this.nickname = nickname;
@@ -292,8 +285,7 @@ public class IamAccountUserInfo implements UserInfo {
   }
 
   public void setUpdatedTime(String updatedTime) {
-
-    this.updatedTime = updatedTime;
+    // NO-OP
   }
 
   public void setWebsite(String website) {
@@ -306,7 +298,6 @@ public class IamAccountUserInfo implements UserInfo {
     this.zoneinfo = zoneinfo;
   }
 
-  
   public Set<IamGroup> getGroups() {
 
     return iamAccount.getGroups();
@@ -314,6 +305,7 @@ public class IamAccountUserInfo implements UserInfo {
 
   @Override
   public JsonObject toJson() {
+
     if (src == null) {
 
       JsonObject obj = new JsonObject();
@@ -345,7 +337,8 @@ public class IamAccountUserInfo implements UserInfo {
 
         JsonObject addr = new JsonObject();
         addr.addProperty("formatted", this.getAddress().getFormatted());
-        addr.addProperty("street_address", this.getAddress().getStreetAddress());
+        addr.addProperty("street_address",
+          this.getAddress().getStreetAddress());
         addr.addProperty("locality", this.getAddress().getLocality());
         addr.addProperty("region", this.getAddress().getRegion());
         addr.addProperty("postal_code", this.getAddress().getPostalCode());
@@ -353,28 +346,54 @@ public class IamAccountUserInfo implements UserInfo {
 
         obj.add("address", addr);
       }
-      
-      if (getGroups() != null){
+
+      if (getGroups() != null) {
         JsonArray groups = new JsonArray();
-        
-        for (IamGroup g: getGroups()){
+
+        for (IamGroup g : getGroups()) {
           JsonObject group = new JsonObject();
           group.addProperty("id", g.getUuid());
           group.addProperty("name", g.getName());
-          
+
           groups.add(group);
-          
+
         }
-        
+
         obj.add("groups", groups);
       }
-      
-      obj.addProperty("organisation_name", IamProperties.INSTANCE.getOrganisationName());
-      
+
+      obj.addProperty("organisation_name",
+        IamProperties.INSTANCE.getOrganisationName());
+
       return obj;
     } else {
       return src;
     }
+
+  }
+
+  @Override
+  public String getName() {
+
+    String middleName = getMiddleName();
+    StringBuilder builder = new StringBuilder();
+    builder.append(getGivenName());
     
+    if (middleName != null){
+      builder.append(" ");
+      builder.append(middleName);
+    }
+    
+    builder.append(" ");
+    builder.append(getFamilyName());
+    return builder.toString();
+    
+  }
+
+  @Override
+  public void setName(String name) {
+
+    // NO-OP
+
   }
 }

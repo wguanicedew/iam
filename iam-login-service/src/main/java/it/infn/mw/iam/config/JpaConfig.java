@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 public class JpaConfig extends JpaBaseConfiguration {
 
+  
   @Autowired
   DataSource dataSource;
 
@@ -43,10 +44,9 @@ public class JpaConfig extends JpaBaseConfiguration {
     map.put("eclipselink.logging.level.sql", "OFF");
     map.put("eclipselink.cache.shared.default", "false");
 
-    
-//    map.put("eclipselink.ddl-generation.output-mode", "sql-script");
-//    map.put("eclipselink.ddl-generation", "create-tables");
-//    map.put("eclipselink.create-ddl-jdbc-file-name", "ddl.sql");
+    map.put("eclipselink.ddl-generation.output-mode", "sql-script");
+    map.put("eclipselink.ddl-generation", "create-tables");
+    map.put("eclipselink.create-ddl-jdbc-file-name", "ddl.sql");
      
 
     return map;
@@ -68,7 +68,7 @@ public class JpaConfig extends JpaBaseConfiguration {
 
   }
 
-  @Bean(name = "defaultTransactionManager")
+  @Bean(name = {"defaultTransactionManager", "transactionManager"})
   public PlatformTransactionManager defaultTransactionManager() {
 
     return new JpaTransactionManager();

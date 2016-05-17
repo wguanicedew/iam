@@ -1,7 +1,12 @@
 package it.infn.mw.iam.persistence.model;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -10,8 +15,11 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.TemporalType;
+import javax.persistence.Temporal;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -23,7 +31,7 @@ import javax.validation.constraints.NotNull;
 public class IamAccount {
 
   @Id
-  @GeneratedValue(strategy=GenerationType.IDENTITY)
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
   @Column(nullable = false, length = 36, unique = true)
@@ -36,34 +44,47 @@ public class IamAccount {
   @Column(length = 128)
   private String password;
 
-  @OneToOne
-  @JoinColumn(name = "iam_user_info_id")
-  private IamAccountUserInfo userInfo;
+  @Temporal(TemporalType.TIMESTAMP)
+  @Column(nullable = false)
+  Date creationTime;
+
+  @Temporal(TemporalType.TIMESTAMP)
+  @Column(nullable = false)
+  Date lastUpdateTime;
+
+  @OneToOne(cascade=CascadeType.ALL)
+  @JoinColumn(name = "user_info_id")
+  private IamUserInfo userInfo;
 
   @ManyToMany
   @JoinTable(name = "iam_account_authority",
-  joinColumns = @JoinColumn(name = "iam_account_id",
-    referencedColumnName = "id"),
-  inverseJoinColumns = @JoinColumn(name = "iam_authority_id",
-    referencedColumnName = "id"))
-  private Set<IamAuthority> authorities;
+    joinColumns = @JoinColumn(name = "account_id",
+      referencedColumnName = "id") ,
+    inverseJoinColumns = @JoinColumn(name = "authority_id",
+      referencedColumnName = "id") )
+  private Set<IamAuthority> authorities = new HashSet<>();
 
   @ManyToMany
   @JoinTable(name = "iam_account_group",
-    joinColumns = @JoinColumn(name = "iam_account_id",
-      referencedColumnName = "id"),
-    inverseJoinColumns = @JoinColumn(name = "iam_group_id",
-      referencedColumnName = "id"))
-  private Set<IamGroup> groups;
+    joinColumns = @JoinColumn(name = "account_id",
+      referencedColumnName = "id") ,
+    inverseJoinColumns = @JoinColumn(name = "group_id",
+      referencedColumnName = "id") )
+  private Set<IamGroup> groups = new HashSet<>();
 
-  @OneToOne(optional = true)
-  private IamSamlAccount samlAccount;
+  @OneToMany(mappedBy = "account", cascade=CascadeType.ALL)
+  private List<IamSamlId> samlIds = new ArrayList<>();
 
-  @OneToOne(optional = true)
-  @JoinColumn(name = "oidc_account_id")
-  private IamOidcAccount oidcAccount;
+  @OneToMany(mappedBy = "account", cascade=CascadeType.ALL)
+  private List<IamOidcId> oidcIds = new ArrayList<>();
 
-  protected IamAccount() {
+  @OneToMany(mappedBy = "account", cascade=CascadeType.ALL)
+  private List<IamSshKey> sshKeys = new ArrayList<>();
+
+  @OneToMany(mappedBy = "account", cascade=CascadeType.ALL)
+  private List<IamX509Certificate> x509Certificates = new ArrayList<>();
+
+  public IamAccount() {
   }
 
   public Long getId() {
@@ -106,12 +127,12 @@ public class IamAccount {
     this.password = password;
   }
 
-  public IamAccountUserInfo getUserInfo() {
+  public IamUserInfo getUserInfo() {
 
     return userInfo;
   }
 
-  public void setUserInfo(final IamAccountUserInfo userInfo) {
+  public void setUserInfo(final IamUserInfo userInfo) {
 
     this.userInfo = userInfo;
   }
@@ -126,16 +147,6 @@ public class IamAccount {
     this.authorities = authorities;
   }
 
-  public IamSamlAccount getSamlAccount() {
-
-    return samlAccount;
-  }
-
-  public void setSamlAccount(final IamSamlAccount samlAccount) {
-
-    this.samlAccount = samlAccount;
-  }
-
   public Set<IamGroup> getGroups() {
 
     return groups;
@@ -144,6 +155,66 @@ public class IamAccount {
   public void setGroups(final Set<IamGroup> groups) {
 
     this.groups = groups;
+  }
+
+  public Date getCreationTime() {
+
+    return creationTime;
+  }
+
+  public void setCreationTime(Date creationTime) {
+
+    this.creationTime = creationTime;
+  }
+
+  public Date getLastUpdateTime() {
+
+    return lastUpdateTime;
+  }
+
+  public void setLastUpdateTime(Date lastUpdateTime) {
+
+    this.lastUpdateTime = lastUpdateTime;
+  }
+
+  public List<IamSamlId> getSamlIds() {
+
+    return samlIds;
+  }
+
+  public void setSamlIds(List<IamSamlId> samlIds) {
+
+    this.samlIds = samlIds;
+  }
+
+  public List<IamOidcId> getOidcIds() {
+
+    return oidcIds;
+  }
+
+  public void setOidcIds(List<IamOidcId> oidcIds) {
+
+    this.oidcIds = oidcIds;
+  }
+
+  public List<IamSshKey> getSshKeys() {
+
+    return sshKeys;
+  }
+
+  public void setSshKeys(List<IamSshKey> sshKeys) {
+
+    this.sshKeys = sshKeys;
+  }
+
+  public List<IamX509Certificate> getX509Certificates() {
+
+    return x509Certificates;
+  }
+
+  public void setX509Certificates(List<IamX509Certificate> x509Certificates) {
+
+    this.x509Certificates = x509Certificates;
   }
 
   @Override
