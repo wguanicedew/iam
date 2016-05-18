@@ -2,24 +2,24 @@ package it.infn.mw.iam.api.scim.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.validation.Valid;
 
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ScimUser extends ScimResource {
 
-  interface NewUserValidation {
+  public interface NewUserValidation {
   };
 
   public static final String USER_SCHEMA = "urn:ietf:params:scim:schemas:core:2.0:User";
-  public static final String INDIGO_USER_SCHEMA = "urn:indigo-dc:scim:schemas:IndigoUser";
-
   public static final String RESOURCE_TYPE = "User";
 
   @NotBlank(groups = { NewUserValidation.class })
@@ -39,12 +39,61 @@ public class ScimUser extends ScimResource {
   private final Boolean active;
 
   @NotEmpty(groups = { NewUserValidation.class })
+  @Valid
   private final List<ScimEmail> emails;
 
   private final List<ScimAddress> addresses;
   private final List<ScimX509Certificate> certificates;
 
+  private final List<ScimGroupRef> groups;
+
   private final ScimIndigoUser indigoUser;
+
+  @JsonCreator
+  private ScimUser(@JsonProperty("id") String id,
+    @JsonProperty("externalId") String externalId,
+    @JsonProperty("meta") ScimMeta meta,
+    @JsonProperty("schemas") Set<String> schemas,
+    @JsonProperty("userName") String userName,
+    @JsonProperty("name") ScimName name,
+    @JsonProperty("displayName") String displayName,
+    @JsonProperty("nickName") String nickName,
+    @JsonProperty("profileUrl") String profileUrl,
+    @JsonProperty("title") String title,
+    @JsonProperty("userType") String userType,
+    @JsonProperty("preferredLanguage") String preferredLanguage,
+    @JsonProperty("locale") String locale,
+    @JsonProperty("timezone") String timezone,
+    @JsonProperty("active") Boolean active,
+    @JsonProperty("emails") List<ScimEmail> emails) {
+
+    super(id, externalId, meta, schemas);
+
+    this.userName = userName;
+    this.name = name;
+    this.displayName = displayName;
+    this.nickName = nickName;
+    this.profileUrl = profileUrl;
+    this.title = title;
+    this.userType = userType;
+    this.preferredLanguage = preferredLanguage;
+    this.locale = locale;
+    this.timezone = timezone;
+    this.emails = emails;
+
+    this.active = false;
+
+    this.groups = null;
+
+    // FIXME: add support for parsing certificates
+    this.certificates = null;
+
+    // FIXME: add support for parsing addresses
+    this.addresses = null;
+
+    // FIXME: add support for parsing indigoUser
+    this.indigoUser = null;
+  }
 
   private ScimUser(Builder b) {
     super(b);
@@ -63,6 +112,7 @@ public class ScimUser extends ScimResource {
     this.addresses = b.addresses;
     this.certificates = b.certificates;
     this.indigoUser = b.indigoUser;
+    this.groups = b.groups;
   }
 
   public String getUserName() {
@@ -135,13 +185,18 @@ public class ScimUser extends ScimResource {
     return certificates;
   }
 
-  @JsonProperty(value=INDIGO_USER_SCHEMA)
+  @JsonProperty(value = ScimConstants.INDIGO_USER_SCHEMA)
   public ScimIndigoUser getIndigoUser() {
 
     return indigoUser;
   }
 
-  public static class Builder extends ScimResource.Builder {
+  public List<ScimGroupRef> getGroups() {
+
+    return groups;
+  }
+
+  public static class Builder extends ScimResource.Builder<ScimUser> {
 
     private String userName;
     private ScimName name;
@@ -156,17 +211,28 @@ public class ScimUser extends ScimResource {
     private Boolean active;
 
     private List<ScimEmail> emails = new ArrayList<>();
+    private List<ScimGroupRef> groups = new ArrayList<>();
     private List<ScimAddress> addresses;
     private List<ScimX509Certificate> certificates;
     private ScimIndigoUser indigoUser;
 
-    public Builder(ScimMeta meta, String id, String userName) {
+    public Builder(String userName) {
       super();
-      addSchema(USER_SCHEMA);
-      addSchema(INDIGO_USER_SCHEMA);
-      meta(meta);
-      id(id);
+      schemas.add(USER_SCHEMA);
+      schemas.add(ScimConstants.INDIGO_USER_SCHEMA);
       this.userName = userName;
+    }
+
+    public Builder id(String uuid) {
+
+      this.id = uuid;
+      return this;
+    }
+
+    public Builder meta(ScimMeta meta) {
+
+      this.meta = meta;
+      return this;
     }
 
     public Builder name(ScimName name) {
@@ -226,6 +292,30 @@ public class ScimUser extends ScimResource {
     public Builder active(Boolean active) {
 
       this.active = active;
+      return this;
+    }
+
+    public Builder addGroup(ScimGroupRef scimGroupRef) {
+
+      groups.add(scimGroupRef);
+      return this;
+    }
+
+    public Builder buildEmail(String email) {
+
+      ScimEmail.Builder builder = new ScimEmail.Builder();
+      builder.email(email);
+      emails.add(builder.build());
+      return this;
+    }
+
+    public Builder buildName(String givenName, String familyName) {
+
+      ScimName.Builder builder = new ScimName.Builder();
+
+      builder.givenName(givenName).familyName(familyName);
+
+      name(builder.build());
       return this;
     }
 

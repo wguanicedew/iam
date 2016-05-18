@@ -3,7 +3,9 @@ package it.infn.mw.iam.api.scim.model;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotBlank;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ScimName {
@@ -26,6 +28,22 @@ public class ScimName {
   private final String honorificPrefix;
   private final String honorificSuffix;
 
+  @JsonCreator
+  private ScimName(@JsonProperty("givenName") String givenName, 
+    @JsonProperty("familyName") String familyName,
+    @JsonProperty("middleName") String middleName,
+    @JsonProperty("honorificPrefix") String honorificPrefix,
+    @JsonProperty("honorificSuffix") String honorificSuffix){
+    
+    this.givenName = givenName;
+    this.familyName = familyName;
+    this.middleName = middleName;
+    this.honorificPrefix = honorificPrefix;
+    this.honorificSuffix = honorificSuffix;
+    
+    this.formatted = null;
+  }
+  
   private ScimName(Builder b) {
     this.formatted = b.formatted;
     this.familyName = b.familyName;

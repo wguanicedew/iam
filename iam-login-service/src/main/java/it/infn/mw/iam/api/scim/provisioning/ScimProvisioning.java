@@ -4,6 +4,8 @@ public interface ScimProvisioning<T> {
 
   T getById(String id);
 
+  T create(T newScimItem);
+  
   void delete(String id);
 
 }

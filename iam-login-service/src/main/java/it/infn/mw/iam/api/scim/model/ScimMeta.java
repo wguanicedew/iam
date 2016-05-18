@@ -2,7 +2,9 @@ package it.infn.mw.iam.api.scim.model;
 
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -14,6 +16,21 @@ public class ScimMeta {
 
   private final String location;
   private final String version;
+
+  @JsonCreator
+  private ScimMeta(@JsonProperty("created") Date created,
+    @JsonProperty("lastModified") Date lastModified,
+    @JsonProperty("location") String location,
+    @JsonProperty("version") String version,
+    @JsonProperty("resourceType") String resourceType) {
+
+    this.created = created;
+    this.lastModified = lastModified;
+    this.location = location;
+    this.version = version;
+    this.resourceType = resourceType;
+
+  }
 
   private ScimMeta(Builder b) {
     this.resourceType = b.resourceType;

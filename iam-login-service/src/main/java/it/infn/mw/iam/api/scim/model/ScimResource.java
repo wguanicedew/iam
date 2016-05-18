@@ -5,7 +5,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class ScimResource {
+public abstract class ScimResource {
 
   private final String id;
   private final String externalId;
@@ -15,7 +15,19 @@ public class ScimResource {
   @JsonProperty(required = true)
   private final Set<String> schemas;
 
-  protected ScimResource(Builder b) {
+  protected ScimResource(@JsonProperty("id") String id,
+    @JsonProperty("externalId") String externalId,
+    @JsonProperty("meta") ScimMeta meta,
+    @JsonProperty("schemas") Set<String> schemas) {
+
+    this.id = id;
+    this.externalId = externalId;
+    this.meta = meta;
+    this.schemas = schemas;
+
+  }
+
+  protected ScimResource(Builder<?> b) {
     id = b.id;
     externalId = b.externalid;
     meta = b.meta;
@@ -42,45 +54,14 @@ public class ScimResource {
     return schemas;
   }
 
-  public static class Builder {
+  public static abstract class Builder<T extends ScimResource> {
 
-    private String externalid;
-    private String id;
-    private ScimMeta meta;
-    private Set<String> schemas = new HashSet<>();
+    protected String externalid;
+    protected String id;
+    protected ScimMeta meta;
+    protected Set<String> schemas = new HashSet<>();
 
-    protected Builder addSchema(String schema) {
-
-      if (schemas == null) {
-        schemas = new HashSet<>();
-      }
-      schemas.add(schema);
-
-      return this;
-    }
-
-    public Builder id(String id) {
-
-      this.id = id;
-      return this;
-    }
-
-    public Builder externalId(String id) {
-
-      this.externalid = id;
-      return this;
-    }
-
-    public Builder meta(ScimMeta meta) {
-
-      this.meta = meta;
-      return this;
-    }
-
-    public ScimResource build() {
-
-      return new ScimResource(this);
-    }
+    public abstract T build();
 
   }
 }

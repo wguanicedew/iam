@@ -70,9 +70,9 @@ INSERT INTO iam_user_info(ID,GIVENNAME,FAMILYNAME, EMAIL, EMAILVERIFIED) VALUES
 (1, 'Test', 'User', 'test@iam.test', true),
 (2, 'Admin', 'User', 'admin@iam.test', true);
 
-INSERT INTO iam_account(id, uuid, username, password, user_info_id, creationtime, lastupdatetime) VALUES
-(1, '80e5fb8d-b7c8-451a-89ba-346ae278a66f', 'test', 'password', 1, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP()),
-(2, '73f16d93-2441-4a50-88ff-85360d78c6b5', 'admin', 'password', 2, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP());
+INSERT INTO iam_account(id, uuid, username, password, user_info_id, creationtime, lastupdatetime, active) VALUES
+(1, '80e5fb8d-b7c8-451a-89ba-346ae278a66f', 'test', 'password', 1, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), true),
+(2, '73f16d93-2441-4a50-88ff-85360d78c6b5', 'admin', 'password', 2, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), true);
 
 INSERT INTO iam_oidc_id(issuer, subject, account_id) VALUES
 ('https://accounts.google.com', '105440632287425289613', 1),

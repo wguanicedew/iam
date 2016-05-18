@@ -44,6 +44,9 @@ public class IamAccount {
   @Column(length = 128)
   private String password;
 
+  @Column(name = "active", nullable = false)
+  private boolean active;
+
   @Temporal(TemporalType.TIMESTAMP)
   @Column(nullable = false)
   Date creationTime;
@@ -52,7 +55,7 @@ public class IamAccount {
   @Column(nullable = false)
   Date lastUpdateTime;
 
-  @OneToOne(cascade=CascadeType.ALL)
+  @OneToOne(cascade = CascadeType.ALL)
   @JoinColumn(name = "user_info_id")
   private IamUserInfo userInfo;
 
@@ -72,16 +75,16 @@ public class IamAccount {
       referencedColumnName = "id") )
   private Set<IamGroup> groups = new HashSet<>();
 
-  @OneToMany(mappedBy = "account", cascade=CascadeType.ALL)
+  @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
   private List<IamSamlId> samlIds = new ArrayList<>();
 
-  @OneToMany(mappedBy = "account", cascade=CascadeType.ALL)
+  @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
   private List<IamOidcId> oidcIds = new ArrayList<>();
 
-  @OneToMany(mappedBy = "account", cascade=CascadeType.ALL)
+  @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
   private List<IamSshKey> sshKeys = new ArrayList<>();
 
-  @OneToMany(mappedBy = "account", cascade=CascadeType.ALL)
+  @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
   private List<IamX509Certificate> x509Certificates = new ArrayList<>();
 
   public IamAccount() {
@@ -175,6 +178,16 @@ public class IamAccount {
   public void setLastUpdateTime(Date lastUpdateTime) {
 
     this.lastUpdateTime = lastUpdateTime;
+  }
+
+  public boolean isActive() {
+
+    return active;
+  }
+
+  public void setActive(boolean active) {
+
+    this.active = active;
   }
 
   public List<IamSamlId> getSamlIds() {

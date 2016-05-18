@@ -3,7 +3,9 @@ package it.infn.mw.iam.api.scim.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ScimIndigoUser {
@@ -11,6 +13,13 @@ public class ScimIndigoUser {
   private final List<ScimSshKey> sshKeys;
   private final List<ScimOidcId> oidcIds;
   private final List<ScimSamlId> samlIds;
+
+  @JsonCreator
+  private ScimIndigoUser(@JsonProperty("oidcIds") List<ScimOidcId> oidcIds) {
+    this.oidcIds = oidcIds;
+    samlIds = null;
+    sshKeys = null;
+  }
 
   private ScimIndigoUser(Builder b) {
     this.sshKeys = b.sshKeys;
@@ -57,7 +66,8 @@ public class ScimIndigoUser {
       return this;
     }
 
-    public ScimIndigoUser build(){
+    public ScimIndigoUser build() {
+
       return new ScimIndigoUser(this);
     }
   }

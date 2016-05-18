@@ -1,5 +1,10 @@
 package it.infn.mw.iam.api.scim.model;
 
+import org.hibernate.validator.constraints.Email;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class ScimEmail {
 
   public static enum ScimEmailType {
@@ -9,9 +14,23 @@ public class ScimEmail {
   }
 
   private final ScimEmailType type;
+  
+  @Email(groups=ScimUser.NewUserValidation.class)
   private final String value;
+  
   private final Boolean primary;
 
+  @JsonCreator
+  private ScimEmail(
+    @JsonProperty("type") ScimEmailType type,
+    @JsonProperty("value") String value, 
+    @JsonProperty("primary") Boolean primary){
+    this.type = type;
+    this.value = value;
+    this.primary = primary;
+  }
+  
+  
   private ScimEmail(Builder b) {
     this.type = b.type;
     this.value = b.value;
