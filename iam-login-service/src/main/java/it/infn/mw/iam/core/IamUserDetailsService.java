@@ -21,32 +21,31 @@ public class IamUserDetailsService implements UserDetailsService {
   @Autowired
   private IamAccountRespository repo;
 
-  
-  List<GrantedAuthority> convertAuthorities(IamAccount a){
+  List<GrantedAuthority> convertAuthorities(IamAccount a) {
+
     List<GrantedAuthority> authorities = new ArrayList<>();
-    for (IamAuthority auth: a.getAuthorities()){
+    for (IamAuthority auth : a.getAuthorities()) {
       authorities.add(new SimpleGrantedAuthority(auth.getAuthority()));
     }
     return authorities;
   }
-  
-  
+
   @Override
   public UserDetails loadUserByUsername(String username)
     throws UsernameNotFoundException {
 
     Optional<IamAccount> account = repo.findByUsername(username);
-    
+
     if (account.isPresent()) {
       IamAccount a = account.get();
-      
+
       User u = new User(a.getUsername(), a.getPassword(),
         convertAuthorities(a));
-      
+
       return u;
     }
 
-    throw new UsernameNotFoundException("User '"+username+"' not found.");
+    throw new UsernameNotFoundException("User '" + username + "' not found.");
   }
 
 }

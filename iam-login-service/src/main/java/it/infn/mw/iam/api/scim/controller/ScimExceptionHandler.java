@@ -19,8 +19,7 @@ public class ScimExceptionHandler extends ResponseEntityExceptionHandler {
 
   public static final Logger LOG = LoggerFactory
     .getLogger(ScimExceptionHandler.class);
-  
-  
+
   @ResponseStatus(code = HttpStatus.BAD_REQUEST)
   @ExceptionHandler(ScimValidationException.class)
   @ResponseBody
@@ -29,7 +28,7 @@ public class ScimExceptionHandler extends ResponseEntityExceptionHandler {
 
     return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
   }
-  
+
   @ResponseStatus(code = HttpStatus.BAD_REQUEST)
   @ExceptionHandler(IllegalArgumentException.class)
   @ResponseBody
@@ -48,7 +47,8 @@ public class ScimExceptionHandler extends ResponseEntityExceptionHandler {
     return buildErrorResponse(HttpStatus.NOT_FOUND, nfe.getMessage());
   }
 
-  private ScimErrorResponse buildErrorResponse(HttpStatus status, String message) {
+  private ScimErrorResponse buildErrorResponse(HttpStatus status,
+    String message) {
 
     return new ScimErrorResponse(status.value(), message);
   }

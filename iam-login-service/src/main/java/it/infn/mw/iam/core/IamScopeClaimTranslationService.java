@@ -8,12 +8,11 @@ import org.mitre.openid.connect.service.ScopeClaimTranslationService;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 
-
 public class IamScopeClaimTranslationService
   implements ScopeClaimTranslationService {
-  
+
   private SetMultimap<String, String> scopesToClaims = HashMultimap.create();
- 
+
   public IamScopeClaimTranslationService() {
     // Mitreid scope mappings
     scopesToClaims.put("openid", "sub");
@@ -32,7 +31,7 @@ public class IamScopeClaimTranslationService
     scopesToClaims.put("profile", "locale");
     scopesToClaims.put("profile", "updated_at");
     scopesToClaims.put("profile", "birthdate");
-    
+
     scopesToClaims.put("email", "email");
     scopesToClaims.put("email", "email_verified");
 
@@ -40,16 +39,16 @@ public class IamScopeClaimTranslationService
     scopesToClaims.put("phone", "phone_number_verified");
 
     scopesToClaims.put("address", "address");
-    
+
     // Iam scope mappings
     scopesToClaims.put("profile", "organisation_name");
     scopesToClaims.put("profile", "groups");
 
-  
   }
 
   @Override
   public Set<String> getClaimsForScope(String scope) {
+
     if (scopesToClaims.containsKey(scope)) {
       return scopesToClaims.get(scope);
     } else {

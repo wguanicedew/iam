@@ -11,7 +11,6 @@ public class AddressConverter implements Converter<ScimAddress, Address> {
   @Override
   public Address fromScim(ScimAddress scim) {
 
-    
     return null;
   }
 
@@ -21,7 +20,5 @@ public class AddressConverter implements Converter<ScimAddress, Address> {
     // TODO Auto-generated method stub
     return null;
   }
-
-  
 
 }

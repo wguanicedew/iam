@@ -10,7 +10,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
 
-
 public class OidcAccessDeniedHandler implements AccessDeniedHandler {
 
   @Override
@@ -19,8 +18,9 @@ public class OidcAccessDeniedHandler implements AccessDeniedHandler {
       throws IOException, ServletException {
 
     RequestDispatcher dispatcher = request.getRequestDispatcher("/login");
-    request.setAttribute("accessDeniedError", accessDeniedException.getMessage());
-    
+    request.setAttribute("accessDeniedError",
+      accessDeniedException.getMessage());
+
     dispatcher.forward(request, response);
 
   }

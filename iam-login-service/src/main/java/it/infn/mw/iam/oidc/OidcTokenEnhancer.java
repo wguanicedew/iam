@@ -36,10 +36,10 @@ public class OidcTokenEnhancer extends ConnectTokenEnhancer {
     UserInfo userInfo, Date issueTime) {
 
     OAuth2AccessTokenEntity token = (OAuth2AccessTokenEntity) accessToken;
-    
+
     String subject = null;
-    
-    if (userInfo == null){
+
+    if (userInfo == null) {
       subject = authentication.getName();
     } else {
       subject = userInfo.getSub();
@@ -54,7 +54,8 @@ public class OidcTokenEnhancer extends ConnectTokenEnhancer {
       .jwtID(UUID.randomUUID().toString());
     // @formatter:on
 
-    String audience = (String) authentication.getOAuth2Request().getExtensions()
+    String audience = (String) authentication.getOAuth2Request()
+      .getExtensions()
       .get("aud");
 
     if (!Strings.isNullOrEmpty(audience)) {
@@ -94,25 +95,28 @@ public class OidcTokenEnhancer extends ConnectTokenEnhancer {
       authentication, userInfo, issueTime);
 
     /**
-     * Authorization request scope MUST include "openid" in OIDC, but access token request
-     * may or may not include the scope parameter. As long as the AuthorizationRequest
-     * has the proper scope, we can consider this a valid OpenID Connect request. Otherwise,
-     * we consider it to be a vanilla OAuth2 request.
+     * Authorization request scope MUST include "openid" in OIDC, but access
+     * token request may or may not include the scope parameter. As long as the
+     * AuthorizationRequest has the proper scope, we can consider this a valid
+     * OpenID Connect request. Otherwise, we consider it to be a vanilla OAuth2
+     * request.
      * 
-     * Also, there must be a user authentication involved in the request for it to be considered
-     * OIDC and not OAuth, so we check for that as well.
+     * Also, there must be a user authentication involved in the request for it
+     * to be considered OIDC and not OAuth, so we check for that as well.
      */
-    if (originalAuthRequest.getScope().contains(SystemScopeService.OPENID_SCOPE)
+    if (originalAuthRequest.getScope()
+      .contains(SystemScopeService.OPENID_SCOPE)
       && !authentication.isClientOnly()) {
 
-      ClientDetailsEntity client = getClientService().loadClientByClientId(clientId);
+      ClientDetailsEntity client = getClientService()
+        .loadClientByClientId(clientId);
 
       OAuth2AccessTokenEntity idTokenEntity = connectTokenService.createIdToken(
-        client, originalAuthRequest,issueTime,
-        userInfo.getSub(), accessTokenEntity);
-      
+        client, originalAuthRequest, issueTime, userInfo.getSub(),
+        accessTokenEntity);
+
       accessTokenEntity.setIdToken(idTokenEntity);
-      
+
     }
 
     return accessTokenEntity;

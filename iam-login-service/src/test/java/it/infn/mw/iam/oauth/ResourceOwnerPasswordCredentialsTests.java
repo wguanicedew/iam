@@ -53,7 +53,7 @@ public class ResourceOwnerPasswordCredentialsTests {
         .post("/token");
     // @formatter:on
   }
-  
+
   @Test
   public void testInvalidResourceOwnerPasswordCredentials() {
 
@@ -80,7 +80,7 @@ public class ResourceOwnerPasswordCredentialsTests {
     // @formatter:on
 
   }
-  
+
   @Test
   public void testResourceOwnerPasswordCredentialsInvalidClientCredentials() {
 
@@ -107,7 +107,7 @@ public class ResourceOwnerPasswordCredentialsTests {
     // @formatter:on
 
   }
-  
+
   @Test
   public void testResourceOwnerPasswordCredentialsUnknownClient() {
 

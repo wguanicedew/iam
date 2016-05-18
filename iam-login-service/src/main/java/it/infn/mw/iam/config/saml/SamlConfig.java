@@ -555,9 +555,12 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
 
     http.antMatcher("/saml/**");
 
-    http.csrf().ignoringAntMatchers("/saml/**");
+    http.csrf()
+      .ignoringAntMatchers("/saml/**");
 
-    http.authorizeRequests().antMatchers("/**").permitAll();
+    http.authorizeRequests()
+      .antMatchers("/**")
+      .permitAll();
 
     http
       .addFilterBefore(metadataGeneratorFilter(), ChannelProcessingFilter.class)

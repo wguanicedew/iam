@@ -25,11 +25,11 @@ public class OidcAuthenticationFailureHandler
       throws IOException, ServletException {
 
     RequestDispatcher dispatcher = request.getRequestDispatcher("/login");
-    
+
     request.setAttribute("externalAuthenticationErrorMessage",
       helper.buildErrorMessage(exception));
     request.setAttribute("externalAuthenticationError", exception);
-    
+
     dispatcher.forward(request, response);
 
   }

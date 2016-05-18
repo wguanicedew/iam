@@ -75,7 +75,8 @@ public class OidcAuthenticationSuccessHandler
         request.setAttribute("externalAuthenticationToken", auth);
 
         // Clear authentication
-        SecurityContextHolder.getContext().setAuthentication(null);
+        SecurityContextHolder.getContext()
+          .setAuthentication(null);
         dispatcher.forward(request, response);
         return;
 
@@ -84,7 +85,8 @@ public class OidcAuthenticationSuccessHandler
       UsernamePasswordAuthenticationToken userToken = new UsernamePasswordAuthenticationToken(
         user.getUsername(), user.getPassword(), user.getAuthorities());
 
-      SecurityContextHolder.getContext().setAuthentication(userToken);
+      SecurityContextHolder.getContext()
+        .setAuthentication(userToken);
 
       String targetUrl = iamBaseUrl;
 
@@ -105,7 +107,8 @@ public class OidcAuthenticationSuccessHandler
         Map<String, String> parameters = new HashMap<String, String>();
 
         for (Map.Entry<String, String[]> entry : originAuthRequest
-          .getParameterMap().entrySet()) {
+          .getParameterMap()
+          .entrySet()) {
           parameters.put(entry.getKey(), entry.getValue()[0]);
         }
 
@@ -158,7 +161,8 @@ public class OidcAuthenticationSuccessHandler
 
       uriBuilder.addParameter("state", state);
 
-      authRequest = uriBuilder.build().toString();
+      authRequest = uriBuilder.build()
+        .toString();
 
     } catch (URISyntaxException e) {
       throw new AuthenticationServiceException(

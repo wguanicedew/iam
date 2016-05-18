@@ -30,18 +30,17 @@ import eu.emi.security.authn.x509.impl.SocketFactoryCreator;
 @Configuration
 @Profile("canl")
 public class X509TrustConfig {
-  
+
   @Value("${x509.trustAnchorsDir}")
   String trustAnchorsDir;
-  
+
   @Value("${x509.trustAnchorsRefreshMsec}")
   Long trustAnchorsRefreshInterval;
 
   @Bean
   public X509CertChainValidatorExt certificateValidator() {
 
-    return new CertificateValidatorBuilder()
-      .lazyAnchorsLoading(false)
+    return new CertificateValidatorBuilder().lazyAnchorsLoading(false)
       .trustAnchorsDir(trustAnchorsDir)
       .trustAnchorsUpdateInterval(trustAnchorsRefreshInterval.longValue())
       .build();
@@ -65,7 +64,7 @@ public class X509TrustConfig {
     }
 
   }
-  
+
   @Bean
   public HttpClient httpClient() {
 
@@ -73,7 +72,8 @@ public class X509TrustConfig {
       sslContext());
 
     Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder
-      .<ConnectionSocketFactory> create().register("https", sf)
+      .<ConnectionSocketFactory> create()
+      .register("https", sf)
       .register("http", PlainConnectionSocketFactory.getSocketFactory())
       .build();
 
@@ -82,15 +82,16 @@ public class X509TrustConfig {
     connectionManager.setMaxTotal(10);
     connectionManager.setDefaultMaxPerRoute(10);
 
-    return HttpClientBuilder.create().setConnectionManager(connectionManager)
-      .disableAuthCaching().build();
+    return HttpClientBuilder.create()
+      .setConnectionManager(connectionManager)
+      .disableAuthCaching()
+      .build();
   }
 
-  @Bean(name="canlRequestFactory")
+  @Bean(name = "canlRequestFactory")
   public ClientHttpRequestFactory httpRequestFactory() {
 
     return new HttpComponentsClientHttpRequestFactory(httpClient());
   }
-  
 
 }

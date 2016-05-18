@@ -482,7 +482,7 @@ public class SecurityConfig {
       // @formatter:on
     }
   }
-  
+
   @Configuration
   @Order(18)
   public static class ScimApiEndpointConfig
@@ -519,15 +519,20 @@ public class SecurityConfig {
 
     protected void configure(final HttpSecurity http) throws Exception {
 
-      HttpSecurity h2Console = http
-        .requestMatchers()
+      HttpSecurity h2Console = http.requestMatchers()
         .antMatchers("/h2-console", "/h2-console/**")
-        .and().csrf().disable();
-      
-      h2Console.httpBasic();
-      h2Console.headers().frameOptions().disable();
+        .and()
+        .csrf()
+        .disable();
 
-      h2Console.authorizeRequests().antMatchers("/h2-console/**", "/h2-console").permitAll();
+      h2Console.httpBasic();
+      h2Console.headers()
+        .frameOptions()
+        .disable();
+
+      h2Console.authorizeRequests()
+        .antMatchers("/h2-console/**", "/h2-console")
+        .permitAll();
     }
 
     @Override

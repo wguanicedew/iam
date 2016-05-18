@@ -37,7 +37,7 @@ public class ClientAuthenticationTests {
       .post("/token");
     //  @formatter:on
   }
-  
+
   @Test
   public void testTokenEndpointFormClientAuthenticationInvalidCredentials() {
 
@@ -60,7 +60,7 @@ public class ClientAuthenticationTests {
       .post("/token");
     //  @formatter:on
   }
-  
+
   @Test
   public void testTokenEndpointFormClientAuthenticationUnknownClient() {
 

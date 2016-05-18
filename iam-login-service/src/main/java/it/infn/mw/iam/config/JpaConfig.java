@@ -24,7 +24,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 public class JpaConfig extends JpaBaseConfiguration {
 
-  
   @Autowired
   DataSource dataSource;
 
@@ -47,7 +46,6 @@ public class JpaConfig extends JpaBaseConfiguration {
     map.put("eclipselink.ddl-generation.output-mode", "sql-script");
     map.put("eclipselink.ddl-generation", "create-tables");
     map.put("eclipselink.create-ddl-jdbc-file-name", "ddl.sql");
-     
 
     return map;
 
@@ -62,13 +60,14 @@ public class JpaConfig extends JpaBaseConfiguration {
       .dataSource(dataSource)
       .packages("org.mitre", "it.infn.mw.iam.persistence")
       .persistenceUnit("defaultPersistenceUnit")
-      .properties(getVendorProperties()).build();
+      .properties(getVendorProperties())
+      .build();
 
     return emf;
 
   }
 
-  @Bean(name = {"defaultTransactionManager", "transactionManager"})
+  @Bean(name = { "defaultTransactionManager", "transactionManager" })
   public PlatformTransactionManager defaultTransactionManager() {
 
     return new JpaTransactionManager();

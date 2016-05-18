@@ -8,7 +8,8 @@ public class OidcExceptionMessageHelper {
 
     if (e instanceof OidcClientError) {
       OidcClientError error = (OidcClientError) e;
-      if (error.getError().equals("access_denied")) {
+      if (error.getError()
+        .equals("access_denied")) {
         return "User denied access to requested identity information";
       }
       return error.getError();

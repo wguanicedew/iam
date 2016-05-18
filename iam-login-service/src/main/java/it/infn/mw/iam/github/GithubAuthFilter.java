@@ -37,7 +37,7 @@ public class GithubAuthFilter
   @Override
   public Authentication attemptAuthentication(final HttpServletRequest request,
     final HttpServletResponse response)
-    throws AuthenticationException, IOException, ServletException {
+      throws AuthenticationException, IOException, ServletException {
 
     HttpSession session = request.getSession();
 

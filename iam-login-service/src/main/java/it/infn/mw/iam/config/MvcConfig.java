@@ -52,8 +52,10 @@ public class MvcConfig extends WebMvcConfigurerAdapter {
   @Override
   public void addViewControllers(final ViewControllerRegistry registry) {
 
-    registry.addViewController("/login").setViewName("login");
-    registry.addViewController("/error").setViewName("error");
+    registry.addViewController("/login")
+      .setViewName("login");
+    registry.addViewController("/error")
+      .setViewName("error");
   }
 
   @Override
@@ -82,7 +84,6 @@ public class MvcConfig extends WebMvcConfigurerAdapter {
     return resolver;
   }
 
-  
   @Bean
   public LocaleResolver localeResolver() {
 
@@ -95,12 +96,12 @@ public class MvcConfig extends WebMvcConfigurerAdapter {
   public MessageSource messageSource() {
 
     DefaultResourceLoader loader = new DefaultResourceLoader();
-    
+
     PoliteJsonMessageSource messageSource = new PoliteJsonMessageSource();
     messageSource.setBaseDirectory(loader.getResource("classpath:/i18n/"));
     messageSource.setUseCodeAsDefaultMessage(true);
 
     return messageSource;
   }
-  
+
 }

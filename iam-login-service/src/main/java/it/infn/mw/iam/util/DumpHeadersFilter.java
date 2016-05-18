@@ -6,23 +6,22 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.web.filter.CommonsRequestLoggingFilter;
 
-
 public class DumpHeadersFilter extends CommonsRequestLoggingFilter {
 
   @Override
   protected void beforeRequest(HttpServletRequest request, String message) {
-  
+
     super.beforeRequest(request, message);
-    
+
     Enumeration<String> headerNames = request.getHeaderNames();
-    
-    while(headerNames.hasMoreElements()){
+
+    while (headerNames.hasMoreElements()) {
       String headerName = headerNames.nextElement();
-      
-      logger.debug(String.format("%s -> %s",
-        headerName, request.getHeader(headerName)));
+
+      logger.debug(
+        String.format("%s -> %s", headerName, request.getHeader(headerName)));
     }
-    
+
   }
 
 }

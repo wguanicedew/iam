@@ -42,10 +42,9 @@ import com.nimbusds.jwt.PlainJWT;
 import com.nimbusds.jwt.SignedJWT;
 
 /**
- * A slightly modified version of mitreid client filter that allows
- * to provide a custom {@link ClientHttpRequestFactory} object.
- * This is needed to accomodate SSL connections to providers that
- * use EUGridPMA certificates.
+ * A slightly modified version of mitreid client filter that allows to provide a
+ * custom {@link ClientHttpRequestFactory} object. This is needed to accomodate
+ * SSL connections to providers that use EUGridPMA certificates.
  *
  */
 public class OidcClientFilter extends OIDCAuthenticationFilter {
@@ -95,22 +94,28 @@ public class OidcClientFilter extends OIDCAuthenticationFilter {
         throws IOException {
 
         ClientHttpRequest httpRequest = super.createRequest(url, method);
-        httpRequest.getHeaders().add("Authorization",
-          String.format("Basic %s",
-            Base64.encode(String.format("%s:%s",
-              UriUtils.encodePathSegment(clientConfig.getClientId(), "UTF-8"),
-              UriUtils.encodePathSegment(clientConfig.getClientSecret(),
-                "UTF-8")))));
+        httpRequest.getHeaders()
+          .add("Authorization",
+            String
+              .format("Basic %s",
+                Base64.encode(String.format("%s:%s",
+                  UriUtils.encodePathSegment(clientConfig.getClientId(),
+                    "UTF-8"),
+                UriUtils.encodePathSegment(clientConfig.getClientSecret(),
+                  "UTF-8")))));
         return httpRequest;
       }
     };
   }
 
   private RestTemplate jwtAuthRequest(RegisteredClient clientConfig) {
-    throw new NotImplementedException("Signed JWT authN method not yet implemented");
+
+    throw new NotImplementedException(
+      "Signed JWT authN method not yet implemented");
   }
 
   private RestTemplate jwtPrivateKeyAuthRequest(RegisteredClient clientConfig) {
+
     throw new NotImplementedException("JWT authN method not yet implemented");
   }
 
@@ -120,7 +125,7 @@ public class OidcClientFilter extends OIDCAuthenticationFilter {
     requestParams.add("client_id", clientConfig.getClientId());
     requestParams.add("client_secret", clientConfig.getClientSecret());
     return new RestTemplate(httpRequestFactory);
-    
+
   }
 
   private MultiValueMap<String, String> initTokenRequestParameters(
@@ -238,18 +243,15 @@ public class OidcClientFilter extends OIDCAuthenticationFilter {
       throw new AuthenticationServiceException("ID Token parse error");
     }
   }
-  
-  
+
   @Override
   protected void handleError(HttpServletRequest request,
     HttpServletResponse response) throws IOException {
-    
-    OidcClientError error = new OidcClientError(
-      "Authentication error",
-      request.getParameter("error"), 
-      request.getParameter("error_description"),
+
+    OidcClientError error = new OidcClientError("Authentication error",
+      request.getParameter("error"), request.getParameter("error_description"),
       request.getParameter("error_uri"));
-    
+
     throw error;
   }
 
@@ -290,14 +292,16 @@ public class OidcClientFilter extends OIDCAuthenticationFilter {
     String refreshTokenValue = null;
 
     if (tokenResponse.has("access_token")) {
-      accessTokenValue = tokenResponse.get("access_token").getAsString();
+      accessTokenValue = tokenResponse.get("access_token")
+        .getAsString();
     } else {
       throw new AuthenticationServiceException(
         "Token Endpoint did not return an access_token: " + jsonString);
     }
 
     if (tokenResponse.has("id_token")) {
-      idTokenValue = tokenResponse.get("id_token").getAsString();
+      idTokenValue = tokenResponse.get("id_token")
+        .getAsString();
     } else {
       logger.error("Token Endpoint did not return an id_token");
       throw new AuthenticationServiceException(
@@ -305,7 +309,8 @@ public class OidcClientFilter extends OIDCAuthenticationFilter {
     }
 
     if (tokenResponse.has("refresh_token")) {
-      refreshTokenValue = tokenResponse.get("refresh_token").getAsString();
+      refreshTokenValue = tokenResponse.get("refresh_token")
+        .getAsString();
     }
 
     JWT idToken = parseToken(idTokenValue);
@@ -336,7 +341,8 @@ public class OidcClientFilter extends OIDCAuthenticationFilter {
   private void validateSignature(JWT idToken,
     OpenIDProviderConfiguration config) {
 
-    Algorithm tokenAlg = idToken.getHeader().getAlgorithm();
+    Algorithm tokenAlg = idToken.getHeader()
+      .getAlgorithm();
 
     Algorithm clientAlg = config.clientConfig.getIdTokenSignedResponseAlg();
 
@@ -400,7 +406,8 @@ public class OidcClientFilter extends OIDCAuthenticationFilter {
 
       throw new AuthenticationServiceException("Id Token Issuer is null");
 
-    } else if (!idClaims.getIssuer().equals(config.serverConfig.getIssuer())) {
+    } else if (!idClaims.getIssuer()
+      .equals(config.serverConfig.getIssuer())) {
       throw new AuthenticationServiceException("Issuers do not match, expected "
         + config.serverConfig.getIssuer() + " got " + idClaims.getIssuer());
     }

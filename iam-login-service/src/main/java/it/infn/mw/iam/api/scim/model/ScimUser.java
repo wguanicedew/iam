@@ -313,7 +313,8 @@ public class ScimUser extends ScimResource {
 
       ScimName.Builder builder = new ScimName.Builder();
 
-      builder.givenName(givenName).familyName(familyName);
+      builder.givenName(givenName)
+        .familyName(familyName);
 
       name(builder.build());
       return this;

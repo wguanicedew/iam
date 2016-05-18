@@ -87,7 +87,8 @@ public class ScimUserTests {
           endsWithPath("groups[1].value")))
       .body("schemas",
         contains(ScimUser.USER_SCHEMA, ScimConstants.INDIGO_USER_SCHEMA))
-      .body(ScimConstants.INDIGO_USER_SCHEMA + ".oidcIds", hasSize(greaterThan(0)))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".oidcIds",
+        hasSize(greaterThan(0)))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".oidcIds[0].issuer",
         equalTo("https://accounts.google.com"))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".oidcIds[0].subject",

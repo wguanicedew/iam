@@ -14,25 +14,25 @@ import com.nimbusds.jose.JWEAlgorithm;
 
 @Configuration
 public class CriptoConfig {
-  
+
   @Value("${iam.keyStoreLocation}")
   String keyStoreLocation;
-  
+
   @Autowired
   ResourceLoader resourceLoader;
 
   @Bean(name = "defaultKeyStore")
   public JWKSetKeyStore defaultKeyStore() {
 
-    Resource keyStoreResource = resourceLoader.getResource(keyStoreLocation) ;
-    
+    Resource keyStoreResource = resourceLoader.getResource(keyStoreLocation);
+
     JWKSetKeyStore keyStore = new JWKSetKeyStore();
     keyStore.setLocation(keyStoreResource);
 
     return keyStore;
   }
 
-  @Bean(name="defaultsignerService")
+  @Bean(name = "defaultsignerService")
   public DefaultJWTSigningAndValidationService defaultSignerService()
     throws Exception {
 
@@ -46,7 +46,7 @@ public class CriptoConfig {
     return signerService;
   }
 
-  @Bean(name="defaultEncryptionService")
+  @Bean(name = "defaultEncryptionService")
   public DefaultJWTEncryptionAndDecryptionService defaultEncryptionService()
     throws Exception {
 

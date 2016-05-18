@@ -41,7 +41,7 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser> {
     }
 
     if (id.trim()
-          .isEmpty()) {
+      .isEmpty()) {
       throw new IllegalArgumentException("id cannot be the empty string");
     }
   }
@@ -65,9 +65,9 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser> {
   public void delete(String id) {
 
     accountRepository.findByUuid(id)
-                     .ifPresent(a -> {
-                       accountRepository.delete(a);
-                     });
+      .ifPresent(a -> {
+        accountRepository.delete(a);
+      });
 
   }
 
@@ -78,7 +78,7 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser> {
 
     Date creationTime = new Date();
     String uuid = UUID.randomUUID()
-                      .toString();
+      .toString();
 
     account.setUuid(uuid);
     account.setCreationTime(creationTime);
@@ -87,20 +87,24 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser> {
     account.setActive(true);
 
     authorityRepository.findByAuthority("ROLE_USER")
-                       .map(a -> account.getAuthorities()
-                                        .add(a))
-                       .orElseThrow(() -> new IllegalStateException(
-                         "ROLE_USER not found in database. This is a bug"));
+      .map(a -> account.getAuthorities()
+        .add(a))
+      .orElseThrow(() -> new IllegalStateException(
+        "ROLE_USER not found in database. This is a bug"));
 
     IamUserInfo userInfo = new IamUserInfo();
-    userInfo.setGivenName(user.getName().getGivenName());
-    userInfo.setFamilyName(user.getName().getFamilyName());
-    
-    userInfo.setEmail(user.getEmails().get(0).getValue());
+    userInfo.setGivenName(user.getName()
+      .getGivenName());
+    userInfo.setFamilyName(user.getName()
+      .getFamilyName());
+
+    userInfo.setEmail(user.getEmails()
+      .get(0)
+      .getValue());
     account.setUserInfo(userInfo);
-    
+
     accountRepository.save(account);
-    
+
     return converter.toScim(account);
   }
 

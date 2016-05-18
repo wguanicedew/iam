@@ -9,14 +9,12 @@ public class ScimOidcId {
   public final String issuer;
   public final String subject;
 
-  private ScimOidcId(
-    @JsonProperty("issuer") String issuer,
-    @JsonProperty("subject") String subject){
+  private ScimOidcId(@JsonProperty("issuer") String issuer,
+    @JsonProperty("subject") String subject) {
     this.issuer = issuer;
     this.subject = subject;
   }
-  
-  
+
   private ScimOidcId(Builder b) {
     this.issuer = b.issuer;
     this.subject = b.subject;

@@ -100,7 +100,10 @@ public class GithubClient extends WebSecurityConfigurerAdapter {
       client.getClient(), oauth2ClientContext);
     oAuth2ClientAuthenticationFilter.setRestTemplate(oAuth2RestTemplate);
     UserInfoTokenServices tokenServices = new UserInfoTokenServices(
-      client.getResource().getUserInfoUri(), client.getClient().getClientId());
+      client.getResource()
+        .getUserInfoUri(),
+      client.getClient()
+        .getClientId());
     tokenServices.setRestTemplate(oAuth2RestTemplate);
     oAuth2ClientAuthenticationFilter.setTokenServices(tokenServices);
     return oAuth2ClientAuthenticationFilter;
@@ -113,7 +116,7 @@ public class GithubClient extends WebSecurityConfigurerAdapter {
       @Override
       protected void doFilterInternal(HttpServletRequest request,
         HttpServletResponse response, FilterChain filterChain)
-        throws ServletException, IOException {
+          throws ServletException, IOException {
 
         CsrfToken csrf = (CsrfToken) request
           .getAttribute(CsrfToken.class.getName());

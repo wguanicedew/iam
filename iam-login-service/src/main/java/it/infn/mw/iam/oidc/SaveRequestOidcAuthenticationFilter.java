@@ -21,7 +21,7 @@ public class SaveRequestOidcAuthenticationFilter extends OidcClientFilter {
     // backup original redirect uri and state
     DefaultSavedRequest savedRequest = (DefaultSavedRequest) session
       .getAttribute("SPRING_SECURITY_SAVED_REQUEST");
-    
+
     session.setAttribute(ORIGIN_AUTH_REQUEST_SESSION_VARIABLE, savedRequest);
 
     super.handleAuthorizationRequest(request, response);

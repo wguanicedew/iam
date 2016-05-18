@@ -5,10 +5,12 @@ import org.springframework.web.servlet.config.annotation.DelegatingWebMvcConfigu
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
 @Configuration
-public class WorkaroundMVCDelegatingConfiguration extends DelegatingWebMvcConfiguration{
+public class WorkaroundMVCDelegatingConfiguration
+  extends DelegatingWebMvcConfiguration {
 
   @Override
   public RequestMappingHandlerAdapter requestMappingHandlerAdapter() {
+
     RequestMappingHandlerAdapter adapter = super.requestMappingHandlerAdapter();
     adapter.setIgnoreDefaultModelOnRedirect(true);
     return adapter;

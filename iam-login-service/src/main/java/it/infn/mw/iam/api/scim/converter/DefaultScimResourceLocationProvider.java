@@ -21,8 +21,7 @@ public class DefaultScimResourceLocationProvider
   @Override
   public String groupLocation(String groupId) {
 
-    return String.format("%s%s/Groups/%s", baseUrl, SCIM_API_ENDPOINT,
-      groupId);
+    return String.format("%s%s/Groups/%s", baseUrl, SCIM_API_ENDPOINT, groupId);
   }
 
 }

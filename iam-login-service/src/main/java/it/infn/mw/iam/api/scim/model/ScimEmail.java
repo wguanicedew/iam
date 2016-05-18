@@ -14,23 +14,21 @@ public class ScimEmail {
   }
 
   private final ScimEmailType type;
-  
-  @Email(groups=ScimUser.NewUserValidation.class)
+
+  @Email(groups = ScimUser.NewUserValidation.class)
   private final String value;
-  
+
   private final Boolean primary;
 
   @JsonCreator
-  private ScimEmail(
-    @JsonProperty("type") ScimEmailType type,
-    @JsonProperty("value") String value, 
-    @JsonProperty("primary") Boolean primary){
+  private ScimEmail(@JsonProperty("type") ScimEmailType type,
+    @JsonProperty("value") String value,
+    @JsonProperty("primary") Boolean primary) {
     this.type = type;
     this.value = value;
     this.primary = primary;
   }
-  
-  
+
   private ScimEmail(Builder b) {
     this.type = b.type;
     this.value = b.value;

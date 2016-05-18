@@ -27,19 +27,18 @@ import it.infn.mw.iam.persistence.repository.IamUserinfoRepository;
 @Configuration
 public class MitreRepositoryConfig {
 
-  
   @Bean
   AuthenticationHolderRepository authenticationHolderRepository() {
 
     return new JpaAuthenticationHolderRepository();
   }
-  
+
   @Bean
   AuthorizationCodeRepository authorizationCodeRepository() {
 
     return new JpaAuthorizationCodeRepository();
   }
-  
+
   @Bean
   PairwiseIdentifierRepository defaultPairwiseIdentifierRepository() {
 

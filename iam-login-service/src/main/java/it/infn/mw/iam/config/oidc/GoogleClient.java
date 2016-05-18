@@ -38,9 +38,11 @@ public class GoogleClient {
 
   @Autowired
   private GoogleClientConfig googleClientConfig;
-  
+
   @Bean
-  public FilterRegistrationBean disabledAutomaticOidcFilterRegistration(SaveRequestOidcAuthenticationFilter f){
+  public FilterRegistrationBean disabledAutomaticOidcFilterRegistration(
+    SaveRequestOidcAuthenticationFilter f) {
+
     FilterRegistrationBean b = new FilterRegistrationBean(f);
     b.setEnabled(false);
     return b;

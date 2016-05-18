@@ -13,28 +13,30 @@ import it.infn.mw.iam.config.oidc.GoogleClientConfig;
 import it.infn.mw.iam.core.LoginPageConfiguration;
 
 @Component
-public class DefaultLoginPageConfiguration implements LoginPageConfiguration, EnvironmentAware {
+public class DefaultLoginPageConfiguration
+  implements LoginPageConfiguration, EnvironmentAware {
 
   private Environment env;
 
   private boolean googleEnabled;
   private boolean githubEnabled;
   private boolean samlEnabled;
-  
+
   @Autowired
   GoogleClientConfig googleClientConfiguration;
-  
 
   @PostConstruct
-  public void init(){
+  public void init() {
+
     googleEnabled = activeProfilesContains("google");
     githubEnabled = activeProfilesContains("github");
     samlEnabled = activeProfilesContains("saml");
   }
-  
+
   private boolean activeProfilesContains(String val) {
 
-    return Arrays.asList(env.getActiveProfiles()).contains(val);
+    return Arrays.asList(env.getActiveProfiles())
+      .contains(val);
   }
 
   @Override
@@ -59,7 +61,7 @@ public class DefaultLoginPageConfiguration implements LoginPageConfiguration, En
   public void setEnvironment(Environment environment) {
 
     this.env = environment;
-    
+
   }
 
   @Override
