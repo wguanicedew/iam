@@ -12,6 +12,7 @@ import static org.hamcrest.Matchers.startsWith;
 
 import java.util.UUID;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.SpringApplicationConfiguration;
@@ -30,6 +31,29 @@ public class ScimUserTests {
 
   public static final String SCIM_CONTENT_TYPE = "application/scim+json";
 
+  private String accessToken;
+
+  @Before
+  public void getPrivilegedAccessToken() {
+
+    String clientId = "scim-client-rw";
+    String clientSecret = "secret";
+
+    accessToken = given().port(8080)
+      .param("grant_type", "client_credentials")
+      .param("client_id", clientId)
+      .param("client_secret", clientSecret)
+      .param("scope", "scim:read scim:write")
+      .when()
+      .post("/token")
+      .then()
+      .log()
+      .all(true)
+      .statusCode(HttpStatus.OK.value())
+      .extract()
+      .path("access_token");
+  }
+
   @Test
   public void testNotFoundResponse() {
 
@@ -37,6 +61,9 @@ public class ScimUserTests {
       .toString();
 
     given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
       .when()
       .get("/scim/Users/" + randomUuid)
       .then()
@@ -57,6 +84,9 @@ public class ScimUserTests {
     String userId = "80e5fb8d-b7c8-451a-89ba-346ae278a66f";
 
     given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
       .when()
       .get("/scim/Users/" + userId)
       .then()
@@ -108,6 +138,9 @@ public class ScimUserTests {
     ScimUser user = builder.build();
 
     ScimUser createdUser = given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
       .contentType(SCIM_CONTENT_TYPE)
       .body(user)
       .log()
@@ -122,6 +155,9 @@ public class ScimUserTests {
       .as(ScimUser.class);
 
     given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
       .contentType(SCIM_CONTENT_TYPE)
       .when()
       .get(createdUser.getMeta()
@@ -150,6 +186,9 @@ public class ScimUserTests {
 
     ScimUser user = builder.build();
     given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
       .contentType(SCIM_CONTENT_TYPE)
       .body(user)
       .log()
@@ -174,6 +213,9 @@ public class ScimUserTests {
 
     ScimUser user = builder.build();
     given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
       .contentType(SCIM_CONTENT_TYPE)
       .body(user)
       .log()
@@ -199,6 +241,9 @@ public class ScimUserTests {
 
     ScimUser user = builder.build();
     given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
       .contentType(SCIM_CONTENT_TYPE)
       .body(user)
       .log()

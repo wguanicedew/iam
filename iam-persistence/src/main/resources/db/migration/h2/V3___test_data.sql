@@ -8,14 +8,18 @@ INSERT INTO system_scope(scope, description, icon, restricted, default_scope, st
   ('email', 'email address', 'envelope', false, true, false, null),
   ('address', 'physical address', 'home', false, true, false, null),
   ('phone', 'telephone number', 'bell', false, true, false, null),
-  ('offline_access', 'offline access', 'time', false, false, false, null);
+  ('offline_access', 'offline access', 'time', false, false, false, null),
+  ('scim:read','read access to SCIM user and groups', null, true, false, false, null),
+  ('scim:write','write access to SCIM user and groups', null, true, false, false, null);
 
 INSERT INTO client_details (id, client_id, client_secret, client_name, dynamically_registered, refresh_token_validity_seconds, access_token_validity_seconds, id_token_validity_seconds, allow_introspection, token_endpoint_auth_method) VALUES
   (1, 'client', 'secret', 'Test Client', false, null, 3600, 600, true, 'SECRET_BASIC'),
   (2, 'tasks-app', 'secret', 'Tasks App', false, null, 0, 0, true, 'SECRET_BASIC'),
   (3, 'post-client', 'secret', 'Post client', false, null, 3600,600, true, 'SECRET_POST'),
   (4, 'client-cred', 'secret', 'Client credentials', false, null, 3600, 600, true, 'SECRET_BASIC'),
-  (5, 'password-grant', 'secret', 'Password grant client', false, null, 3600, 600, true, 'SECRET_BASIC');
+  (5, 'password-grant', 'secret', 'Password grant client', false, null, 3600, 600, true, 'SECRET_BASIC'),
+  (6, 'scim-client-ro', 'secret', 'SCIM client (read-only)', false, null, 3600, 600, true, 'SECRET_POST'),
+  (7, 'scim-client-rw', 'secret', 'SCIM client (read-write)', false, null, 3600, 600, true, 'SECRET_POST');
 
 INSERT INTO client_scope (owner_id, scope) VALUES
   (1, 'openid'),
@@ -43,7 +47,23 @@ INSERT INTO client_scope (owner_id, scope) VALUES
   (5, 'email'),
   (5, 'address'),
   (5, 'phone'),
-  (5, 'offline_access');
+  (5, 'offline_access'),
+  (6, 'openid'),
+  (6, 'profile'),
+  (6, 'email'),
+  (6, 'address'),
+  (6, 'phone'),
+  (6, 'offline_access'),
+  (6, 'scim:read'),
+  (7, 'openid'),
+  (7, 'profile'),
+  (7, 'email'),
+  (7, 'address'),
+  (7, 'phone'),
+  (7, 'offline_access'),
+  (7, 'scim:read'),
+  (7, 'scim:write');
+  
   
 INSERT INTO client_redirect_uri (owner_id, redirect_uri) VALUES
   (1, 'http://localhost:9090/iam-test-client/openid_connect_login'),
@@ -60,7 +80,9 @@ INSERT INTO client_redirect_uri (owner_id, redirect_uri) VALUES
   (3, 'client_credentials'),
   (4, 'password'),
   (4, 'client_credentials'),
-  (5, 'password');
+  (5, 'password'),
+  (6, 'client_credentials'),
+  (7, 'client_credentials');
   
 INSERT INTO iam_authority(ID, AUTH) VALUES
 (1, 'ROLE_ADMIN'),

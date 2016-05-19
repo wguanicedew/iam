@@ -14,7 +14,6 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -489,24 +488,33 @@ public class SecurityConfig {
     extends WebSecurityConfigurerAdapter {
 
     @Autowired
-    private Http403ForbiddenEntryPoint http403ForbiddenEntryPoint;
+    private OAuth2AuthenticationProcessingFilter resourceFilter;
 
+    @Autowired
+    private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
+
+    @Autowired
+    private CorsFilter corsFilter;
+    
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
 
       // @formatter:off
       http
         .antMatcher("/scim/**")
-      .exceptionHandling()
-        .authenticationEntryPoint(http403ForbiddenEntryPoint)
-        .and()
-        .csrf().disable()
-      .sessionManagement()
-        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-        .and()
-    .authorizeRequests()
-      .antMatchers("/scim/**")
-      .permitAll();
+        .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint)
+          .and()
+        .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
+        .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
+        .sessionManagement()
+          .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+          .and()
+        .authorizeRequests()
+          .antMatchers("/scim/**")
+          .authenticated()
+          .and()
+        .csrf()
+          .disable();
       // @formatter:on
     }
   }
