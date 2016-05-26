@@ -1,5 +1,6 @@
 package it.infn.mw.iam.api.scim.controller;
 
+import org.apache.commons.lang.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,15 @@ public class ScimExceptionHandler extends ResponseEntityExceptionHandler {
 
   public static final Logger LOG = LoggerFactory
     .getLogger(ScimExceptionHandler.class);
+
+  @ResponseStatus(code = HttpStatus.NOT_IMPLEMENTED)
+  @ExceptionHandler(NotImplementedException.class)
+  @ResponseBody
+  public ScimErrorResponse handleNotImplementedException(
+    NotImplementedException e) {
+
+    return buildErrorResponse(HttpStatus.NOT_IMPLEMENTED, e.getMessage());
+  }
 
   @ResponseStatus(code = HttpStatus.BAD_REQUEST)
   @ExceptionHandler(ScimValidationException.class)

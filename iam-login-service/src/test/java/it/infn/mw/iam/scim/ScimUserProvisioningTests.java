@@ -3,6 +3,7 @@ package it.infn.mw.iam.scim;
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.matcher.ResponseAwareMatcherComposer.and;
 import static com.jayway.restassured.matcher.RestAssuredMatchers.endsWithPath;
+import static it.infn.mw.iam.api.scim.model.ScimConstants.SCIM_CONTENT_TYPE;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
@@ -13,6 +14,7 @@ import static org.hamcrest.Matchers.startsWith;
 import java.util.UUID;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.SpringApplicationConfiguration;
@@ -27,31 +29,21 @@ import it.infn.mw.iam.api.scim.model.ScimUser;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = IamLoginService.class)
 @WebIntegrationTest
-public class ScimUserTests {
-
-  public static final String SCIM_CONTENT_TYPE = "application/scim+json";
+public class ScimUserProvisioningTests {
 
   private String accessToken;
 
+  @BeforeClass
+  public static void init() {
+
+    TestUtils.initRestAssured();
+  }
+
   @Before
-  public void getPrivilegedAccessToken() {
+  public void initAccessToken() {
 
-    String clientId = "scim-client-rw";
-    String clientSecret = "secret";
-
-    accessToken = given().port(8080)
-      .param("grant_type", "client_credentials")
-      .param("client_id", clientId)
-      .param("client_secret", clientSecret)
-      .param("scope", "scim:read scim:write")
-      .when()
-      .post("/token")
-      .then()
-      .log()
-      .all(true)
-      .statusCode(HttpStatus.OK.value())
-      .extract()
-      .path("access_token");
+    accessToken = TestUtils.getAccessToken("scim-client-rw", "secret",
+      "scim:read scim:write");
   }
 
   @Test

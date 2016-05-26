@@ -1,6 +1,5 @@
 package it.infn.mw.iam.api.scim.converter;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,11 +13,13 @@ import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.model.IamOidcId;
+import it.infn.mw.iam.persistence.model.IamUserInfo;
 
 @Service
 public class UserConverter implements Converter<ScimUser, IamAccount> {
 
   private final ScimResourceLocationProvider resourceLocationProvider;
+
   private final AddressConverter addressConverter;
 
   @Autowired
@@ -30,7 +31,26 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
   @Override
   public IamAccount fromScim(ScimUser scim) {
 
-    throw new NotImplementedException();
+    IamAccount account = new IamAccount();
+    IamUserInfo userInfo = new IamUserInfo();
+
+    account.setUuid(scim.getId());
+    account.setActive(scim.getActive());
+    account.setUsername(scim.getUserName());
+
+    userInfo.setEmail(scim.getEmails()
+      .get(0)
+      .getValue());
+    userInfo.setGivenName(scim.getName()
+      .getGivenName());
+    userInfo.setFamilyName(scim.getName()
+      .getFamilyName());
+
+    account.setUserInfo(userInfo);
+
+    // TODO: handle addresses and other fields
+    
+    return account;
 
   }
 

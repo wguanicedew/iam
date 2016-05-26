@@ -10,14 +10,15 @@ import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonFilter("attributeFilter")
 public class ScimUser extends ScimResource {
 
-  public interface NewUserValidation {
-  };
+  public interface NewUserValidation {}
 
   public static final String USER_SCHEMA = "urn:ietf:params:scim:schemas:core:2.0:User";
   public static final String RESOURCE_TYPE = "User";
@@ -196,6 +197,10 @@ public class ScimUser extends ScimResource {
     return groups;
   }
 
+  public static Builder builder(String userName){
+    return new Builder(userName);
+  }
+  
   public static class Builder extends ScimResource.Builder<ScimUser> {
 
     private String userName;

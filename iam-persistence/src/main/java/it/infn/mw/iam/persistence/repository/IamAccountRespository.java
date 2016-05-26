@@ -11,6 +11,9 @@ import it.infn.mw.iam.persistence.model.IamAccount;
 public interface IamAccountRespository
   extends PagingAndSortingRepository<IamAccount, Long> {
 
+  @Query("select count(a) from IamAccount a")
+  int countAllUsers();
+
   Optional<IamAccount> findByUuid(@Param("uuid") String uuid);
 
   Optional<IamAccount> findByUsername(@Param("username") String username);
@@ -22,9 +25,12 @@ public interface IamAccountRespository
   @Query("select a from IamAccount a join a.oidcIds oi where oi.issuer = :issuer and oi.subject = :subject")
   Optional<IamAccount> findByOidcId(@Param("issuer") String issuer,
     @Param("subject") String subject);
-  
+
   @Query("select a from IamAccount a join a.userInfo ui where ui.email = :emailAddress")
   Optional<IamAccount> findByEmail(@Param("emailAddress") String emailAddress);
 
-  
+  @Query("select a from IamAccount a where a.username = :username and a.uuid != :uuid")
+  Optional<IamAccount> findByUsernameWithDifferentId(
+    @Param("username") String username, @Param("uuid") String uuid);
+
 }

@@ -507,7 +507,7 @@ public class SecurityConfig {
         .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
         .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
         .sessionManagement()
-          .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+          .sessionCreationPolicy(SessionCreationPolicy.NEVER)
           .and()
         .authorizeRequests()
           .antMatchers("/scim/**")
