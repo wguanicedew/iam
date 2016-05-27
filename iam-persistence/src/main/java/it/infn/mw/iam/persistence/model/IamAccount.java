@@ -230,6 +230,11 @@ public class IamAccount {
     this.x509Certificates = x509Certificates;
   }
 
+  public void touch() {
+
+    setLastUpdateTime(new Date());
+  }
+
   @Override
   public int hashCode() {
 
@@ -255,6 +260,16 @@ public class IamAccount {
     } else if (!uuid.equals(other.uuid))
       return false;
     return true;
+  }
+
+  @Override
+  public String toString() {
+
+    return "IamAccount [id=" + id + ", uuid=" + uuid + ", username=" + username
+      + ", active=" + active + ", userInfo=" + userInfo + ", authorities="
+      + authorities + ", groups=" + groups + ", samlIds=" + samlIds
+      + ", oidcIds=" + oidcIds + ", sshKeys=" + sshKeys + ", x509Certificates="
+      + x509Certificates + "]";
   }
 
 }

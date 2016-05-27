@@ -44,11 +44,11 @@ public class IamUserInfo implements UserInfo {
   private String middleName;
 
   private String nickname;
-  
+
   private String profile;
-  
+
   private String picture;
-  
+
   private String website;
 
   @Column(nullable = false, length = 128)
@@ -63,7 +63,7 @@ public class IamUserInfo implements UserInfo {
 
   private Boolean phoneNumberVerified;
   private Address address;
-  
+
   private String birthdate;
 
   private transient JsonObject src;
@@ -173,7 +173,8 @@ public class IamUserInfo implements UserInfo {
 
   public String getUpdatedTime() {
 
-    return getIamAccount().getLastUpdateTime().toString();
+    return getIamAccount().getLastUpdateTime()
+      .toString();
   }
 
   public String getWebsite() {
@@ -285,6 +286,7 @@ public class IamUserInfo implements UserInfo {
   }
 
   public void setUpdatedTime(String updatedTime) {
+
     // NO-OP
   }
 
@@ -336,13 +338,18 @@ public class IamUserInfo implements UserInfo {
       if (this.getAddress() != null) {
 
         JsonObject addr = new JsonObject();
-        addr.addProperty("formatted", this.getAddress().getFormatted());
-        addr.addProperty("street_address",
-          this.getAddress().getStreetAddress());
-        addr.addProperty("locality", this.getAddress().getLocality());
-        addr.addProperty("region", this.getAddress().getRegion());
-        addr.addProperty("postal_code", this.getAddress().getPostalCode());
-        addr.addProperty("country", this.getAddress().getCountry());
+        addr.addProperty("formatted", this.getAddress()
+          .getFormatted());
+        addr.addProperty("street_address", this.getAddress()
+          .getStreetAddress());
+        addr.addProperty("locality", this.getAddress()
+          .getLocality());
+        addr.addProperty("region", this.getAddress()
+          .getRegion());
+        addr.addProperty("postal_code", this.getAddress()
+          .getPostalCode());
+        addr.addProperty("country", this.getAddress()
+          .getCountry());
 
         obj.add("address", addr);
       }
@@ -378,16 +385,16 @@ public class IamUserInfo implements UserInfo {
     String middleName = getMiddleName();
     StringBuilder builder = new StringBuilder();
     builder.append(getGivenName());
-    
-    if (middleName != null){
+
+    if (middleName != null) {
       builder.append(" ");
       builder.append(middleName);
     }
-    
+
     builder.append(" ");
     builder.append(getFamilyName());
     return builder.toString();
-    
+
   }
 
   @Override
@@ -396,4 +403,12 @@ public class IamUserInfo implements UserInfo {
     // NO-OP
 
   }
+
+  @Override
+  public String toString() {
+
+    return "IamUserInfo [givenName=" + givenName + ", familyName=" + familyName
+      + ", email=" + email + "]";
+  }
+
 }

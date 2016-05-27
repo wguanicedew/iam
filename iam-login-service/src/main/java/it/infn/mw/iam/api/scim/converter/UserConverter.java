@@ -1,8 +1,10 @@
 package it.infn.mw.iam.api.scim.converter;
 
+import org.mitre.openid.connect.model.DefaultAddress;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import it.infn.mw.iam.api.scim.model.ScimAddress;
 import it.infn.mw.iam.api.scim.model.ScimEmail;
 import it.infn.mw.iam.api.scim.model.ScimGroupRef;
 import it.infn.mw.iam.api.scim.model.ScimIndigoUser;
@@ -29,27 +31,42 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
   }
 
   @Override
-  public IamAccount fromScim(ScimUser scim) {
+  public IamAccount fromScim(ScimUser scimUser) {
 
     IamAccount account = new IamAccount();
     IamUserInfo userInfo = new IamUserInfo();
 
-    account.setUuid(scim.getId());
-    account.setActive(scim.getActive());
-    account.setUsername(scim.getUserName());
+    account.setUuid(scimUser.getId());
 
-    userInfo.setEmail(scim.getEmails()
+    if (scimUser.getActive() != null) {
+      account.setActive(scimUser.getActive());
+    }
+
+    account.setUsername(scimUser.getUserName());
+
+    userInfo.setEmail(scimUser.getEmails()
       .get(0)
       .getValue());
-    userInfo.setGivenName(scim.getName()
+    userInfo.setGivenName(scimUser.getName()
       .getGivenName());
-    userInfo.setFamilyName(scim.getName()
+    userInfo.setFamilyName(scimUser.getName()
       .getFamilyName());
 
     account.setUserInfo(userInfo);
 
-    // TODO: handle addresses and other fields
+    if (scimUser.getAddresses() != null && scimUser.getAddresses()
+      .size() > 0) {
+
+      userInfo.setAddress(addressConverter.fromScim(scimUser.getAddresses()
+        .get(0)));
+
+    }
     
+    if (scimUser.getIndigoUser() != null){
+      
+      
+    }
+
     return account;
 
   }

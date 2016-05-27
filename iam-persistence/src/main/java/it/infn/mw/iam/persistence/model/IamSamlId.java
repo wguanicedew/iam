@@ -10,15 +10,15 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="iam_saml_id")
+@Table(name = "iam_saml_id")
 public class IamSamlId {
 
   @Id
-  @GeneratedValue(strategy=GenerationType.IDENTITY)
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
   @ManyToOne
-  @JoinColumn(name="account_id")
+  @JoinColumn(name = "account_id")
   IamAccount account;
 
   @Column(nullable = false, length = 256)
@@ -107,6 +107,13 @@ public class IamSamlId {
     } else if (!userId.equals(other.userId))
       return false;
     return true;
+  }
+
+  @Override
+  public String toString() {
+
+    return "IamSamlId [id=" + id + ", idpId=" + idpId + ", userId=" + userId
+      + "]";
   }
 
 }

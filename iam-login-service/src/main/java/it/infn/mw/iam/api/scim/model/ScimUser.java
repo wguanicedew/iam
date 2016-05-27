@@ -82,8 +82,9 @@ public class ScimUser extends ScimResource {
     this.timezone = timezone;
     this.emails = emails;
 
-    this.active = false;
+    this.active = active;
 
+    // FIXME: add support for parsing groups
     this.groups = null;
 
     // FIXME: add support for parsing certificates

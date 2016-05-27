@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,7 +69,7 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser> {
   public void delete(String id) {
 
     idSanityChecks(id);
-    
+
     IamAccount account = accountRepository.findByUuid(id)
       .orElseThrow(() -> new ResourceNotFoundException(
         "No user mapped to id '" + id + "'"));
@@ -141,23 +140,29 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser> {
   @Override
   public ScimUser replace(String id, ScimUser scimItemToBeUpdated) {
 
-    Optional<IamAccount> existingAccount = accountRepository.findByUuid(id);
-
-    if (!existingAccount.isPresent()) {
-      throw new ResourceNotFoundException("No user mapped to id '" + id + "'");
-    }
+    IamAccount existingAccount = accountRepository.findByUuid(id)
+      .orElseThrow(() -> new ResourceNotFoundException(
+        "No user mapped to id '" + id + "'"));
 
     if (accountRepository.findByUsernameWithDifferentId(
-      scimItemToBeUpdated.getUserName(), scimItemToBeUpdated.getId())
+      scimItemToBeUpdated.getUserName(), id)
       .isPresent()) {
       throw new IllegalArgumentException(
         "userName is already mappped to another user");
     }
 
     IamAccount updatedAccount = converter.fromScim(scimItemToBeUpdated);
-    updatedAccount.setId(existingAccount.get()
-      .getId());
 
+    updatedAccount.setId(existingAccount.getId());
+    updatedAccount.setUuid(existingAccount.getUuid());
+    updatedAccount.setCreationTime(existingAccount.getCreationTime());
+    
+    if (scimItemToBeUpdated.getActive() == null){
+      updatedAccount.setActive(existingAccount.isActive());
+    }
+    
+    updatedAccount.touch();
+    
     accountRepository.save(updatedAccount);
     return converter.toScim(updatedAccount);
 

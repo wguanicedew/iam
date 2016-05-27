@@ -5,13 +5,20 @@ import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Preconditions;
+
+import it.infn.mw.iam.api.scim.controller.utils.JsonDateSerializer;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ScimMeta {
 
   private final String resourceType;
+  
+  @JsonSerialize(using = JsonDateSerializer.class)
   private final Date created;
+  
+  @JsonSerialize(using = JsonDateSerializer.class)
   private final Date lastModified;
 
   private final String location;

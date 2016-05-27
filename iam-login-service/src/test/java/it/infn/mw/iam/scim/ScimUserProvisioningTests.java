@@ -13,6 +13,8 @@ import static org.hamcrest.Matchers.startsWith;
 
 import java.util.UUID;
 
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -31,6 +33,9 @@ import it.infn.mw.iam.api.scim.model.ScimUser;
 @WebIntegrationTest
 public class ScimUserProvisioningTests {
 
+  private final DateTimeFormatter dateTimeFormatter = ISODateTimeFormat
+    .dateTime();
+
   private String accessToken;
 
   @BeforeClass
@@ -47,7 +52,7 @@ public class ScimUserProvisioningTests {
   }
 
   @Test
-  public void testNotFoundResponse() {
+  public void testGetUserNotFoundResponse() {
 
     String randomUuid = UUID.randomUUID()
       .toString();
@@ -58,6 +63,35 @@ public class ScimUserProvisioningTests {
       .oauth2(accessToken)
       .when()
       .get("/scim/Users/" + randomUuid)
+      .then()
+      .log()
+      .body(true)
+      .statusCode(HttpStatus.NOT_FOUND.value())
+      .body("status", equalTo("404"))
+      .body("detail", equalTo("No user mapped to id '" + randomUuid + "'"))
+      .contentType(SCIM_CONTENT_TYPE);
+
+  }
+
+  @Test
+  public void testUpdateUserNotFoundResponse() {
+
+    ScimUser user = ScimUser.builder("john_lennon")
+      .buildEmail("lennon@email.test")
+      .buildName("John", "Lennon")
+      .build();
+
+    String randomUuid = UUID.randomUUID()
+      .toString();
+
+    given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
+      .contentType(SCIM_CONTENT_TYPE)
+      .body(user)
+      .when()
+      .put("/scim/Users/" + randomUuid)
       .then()
       .log()
       .body(true)
@@ -248,6 +282,183 @@ public class ScimUserProvisioningTests {
       .log()
       .all(true)
       .statusCode(HttpStatus.BAD_REQUEST.value());
+
+  }
+
+  @Test
+  public void testUserUpdateChangeUsername() {
+
+    ScimUser user = ScimUser.builder("john_lennon")
+      .buildEmail("lennon@email.test")
+      .buildName("John", "Lennon")
+      .build();
+
+    ScimUser createdUser = given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
+      .contentType(SCIM_CONTENT_TYPE)
+      .body(user)
+      .log()
+      .all(true)
+      .when()
+      .post("/scim/Users/")
+      .then()
+      .log()
+      .all(true)
+      .statusCode(HttpStatus.CREATED.value())
+      .extract()
+      .as(ScimUser.class);
+
+    ScimUser updatedUser = new ScimUser.Builder("j.lennon")
+      .buildEmail("lennon@email.test")
+      .buildName("John", "Lennon")
+      .active(true)
+      .build();
+
+    given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
+      .contentType(SCIM_CONTENT_TYPE)
+      .body(updatedUser)
+      .log()
+      .all(true)
+      .when()
+      .put(createdUser.getMeta()
+        .getLocation())
+      .then()
+      .log()
+      .all(true)
+      .statusCode(HttpStatus.OK.value())
+      .body("id", equalTo(createdUser.getId()))
+      .body("userName", equalTo("j.lennon"))
+      .body("emails[0].value", equalTo(createdUser.getEmails()
+        .get(0)
+        .getValue()))
+      .body("meta.created",
+        equalTo(dateTimeFormatter.print(createdUser.getMeta()
+          .getCreated()
+          .getTime())))
+      .body("active", equalTo(true));
+  }
+
+  @Test
+  public void testUpdateUserValidation() {
+
+    ScimUser.Builder builder = new ScimUser.Builder("john_lennon");
+    builder.buildEmail("lennon@email.test");
+    builder.buildName("John", "Lennon");
+
+    ScimUser user = builder.build();
+
+    ScimUser createdUser = given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
+      .contentType(SCIM_CONTENT_TYPE)
+      .body(user)
+      .log()
+      .all(true)
+      .when()
+      .post("/scim/Users/")
+      .then()
+      .log()
+      .all(true)
+      .statusCode(HttpStatus.CREATED.value())
+      .extract()
+      .as(ScimUser.class);
+
+    ScimUser updatedUser = new ScimUser.Builder("j.lennon").active(true)
+      .build();
+
+    given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
+      .contentType(SCIM_CONTENT_TYPE)
+      .body(updatedUser)
+      .log()
+      .all(true)
+      .when()
+      .put(createdUser.getMeta()
+        .getLocation())
+      .then()
+      .log()
+      .all(true)
+      .statusCode(HttpStatus.BAD_REQUEST.value())
+      .body("detail", containsString("scimUser.emails : may not be empty"));
+
+  }
+
+  @Test
+  public void testUpdateUsernameChecksValidation() {
+
+    ScimUser lennon = ScimUser.builder("john_lennon1")
+      .buildEmail("lennon@email.test")
+      .buildName("John", "Lennon")
+      .build();
+
+    ScimUser lennonCreationResult = given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
+      .contentType(SCIM_CONTENT_TYPE)
+      .body(lennon)
+      .log()
+      .all(true)
+      .when()
+      .post("/scim/Users/")
+      .then()
+      .log()
+      .all(true)
+      .statusCode(HttpStatus.CREATED.value())
+      .extract()
+      .as(ScimUser.class);
+
+    ScimUser mccartney = ScimUser.builder("paul_mccartney1")
+      .buildEmail("test@email.test")
+      .buildName("Paul", "McCartney")
+      .build();
+
+    ScimUser mccartneyCreationResult = given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
+      .contentType(SCIM_CONTENT_TYPE)
+      .body(mccartney)
+      .log()
+      .all(true)
+      .when()
+      .post("/scim/Users/")
+      .then()
+      .log()
+      .all(true)
+      .statusCode(HttpStatus.CREATED.value())
+      .extract()
+      .as(ScimUser.class);
+
+    ScimUser lennonWantsToBeMcCartney = ScimUser.builder("paul_mccartney1")
+      .buildEmail("lennon@email.test")
+      .buildName("John", "Lennon")
+      .build();
+
+    given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
+      .contentType(SCIM_CONTENT_TYPE)
+      .body(lennonWantsToBeMcCartney)
+      .log()
+      .all(true)
+      .when()
+      .put(lennonCreationResult.getMeta()
+        .getLocation())
+      .then()
+      .log()
+      .all(true)
+      .statusCode(HttpStatus.BAD_REQUEST.value())
+      .body("detail", equalTo("userName is already mappped to another user"));
 
   }
 

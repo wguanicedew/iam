@@ -139,4 +139,19 @@ public class UserController {
     return result;
   }
 
+  @PreAuthorize("#oauth2.hasScope('scim:write') or hasRole('ADMIN')")
+  @RequestMapping(value = "/{id}", method = RequestMethod.PUT,
+    consumes = ScimConstants.SCIM_CONTENT_TYPE,
+    produces = ScimConstants.SCIM_CONTENT_TYPE)
+  @ResponseStatus(HttpStatus.OK)
+  public ScimUser replaceUser(@PathVariable final String id,
+    @RequestBody @Validated(ScimUser.NewUserValidation.class) ScimUser user,
+    BindingResult validationResult) {
+
+    handleValidationError("Invalid Scim User", validationResult);
+
+    return userProvisioningService.replace(id, user);
+
+  }
+
 }

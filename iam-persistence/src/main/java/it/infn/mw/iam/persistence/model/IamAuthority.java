@@ -73,4 +73,10 @@ public class IamAuthority {
     return true;
   }
 
+  @Override
+  public String toString() {
+
+    return "IamAuthority [authority=" + authority + "]";
+  }
+
 }
