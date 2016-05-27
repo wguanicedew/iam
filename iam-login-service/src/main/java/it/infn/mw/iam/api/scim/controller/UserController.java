@@ -153,5 +153,12 @@ public class UserController {
     return userProvisioningService.replace(id, user);
 
   }
+  
+  @PreAuthorize("#oauth2.hasScope('scim:write') or hasRole('ADMIN')")
+  @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void deleteUser(@PathVariable final String id){
+    userProvisioningService.delete(id);
+  }
 
 }

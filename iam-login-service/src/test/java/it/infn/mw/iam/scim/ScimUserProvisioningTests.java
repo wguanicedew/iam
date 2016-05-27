@@ -13,6 +13,8 @@ import static org.hamcrest.Matchers.startsWith;
 
 import java.util.UUID;
 
+import javax.transaction.Transactional;
+
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.junit.Before;
@@ -30,6 +32,7 @@ import it.infn.mw.iam.api.scim.model.ScimUser;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = IamLoginService.class)
+@Transactional
 @WebIntegrationTest
 public class ScimUserProvisioningTests {
 
@@ -49,6 +52,28 @@ public class ScimUserProvisioningTests {
 
     accessToken = TestUtils.getAccessToken("scim-client-rw", "secret",
       "scim:read scim:write");
+  }
+
+  private void deleteUser(String userLocation) {
+
+    given().port(8080)
+    .auth()
+    .preemptive()
+    .oauth2(accessToken)
+    .contentType(SCIM_CONTENT_TYPE)
+    .when()
+    .delete(userLocation)
+    .then().statusCode(HttpStatus.NO_CONTENT.value());
+    
+    given().port(8080)
+    .auth()
+    .preemptive()
+    .oauth2(accessToken)
+    .contentType(SCIM_CONTENT_TYPE)
+    .when()
+    .get(userLocation)
+    .then().statusCode(HttpStatus.NOT_FOUND.value());
+
   }
 
   @Test
@@ -153,7 +178,7 @@ public class ScimUserProvisioningTests {
   }
 
   @Test
-  public void testUserCreation() {
+  public void testUserCreationAccessDeletion() {
 
     String username = "paul_mccartney";
 
@@ -199,6 +224,8 @@ public class ScimUserProvisioningTests {
         .get(0)
         .getValue()));
 
+    deleteUser(createdUser.getMeta()
+      .getLocation());
   }
 
   @Test
@@ -341,6 +368,10 @@ public class ScimUserProvisioningTests {
           .getCreated()
           .getTime())))
       .body("active", equalTo(true));
+
+    deleteUser(createdUser.getMeta()
+      .getLocation());
+
   }
 
   @Test
@@ -389,12 +420,15 @@ public class ScimUserProvisioningTests {
       .statusCode(HttpStatus.BAD_REQUEST.value())
       .body("detail", containsString("scimUser.emails : may not be empty"));
 
+    deleteUser(createdUser.getMeta()
+      .getLocation());
+
   }
 
   @Test
   public void testUpdateUsernameChecksValidation() {
 
-    ScimUser lennon = ScimUser.builder("john_lennon1")
+    ScimUser lennon = ScimUser.builder("john_lennon")
       .buildEmail("lennon@email.test")
       .buildName("John", "Lennon")
       .build();
@@ -416,7 +450,7 @@ public class ScimUserProvisioningTests {
       .extract()
       .as(ScimUser.class);
 
-    ScimUser mccartney = ScimUser.builder("paul_mccartney1")
+    ScimUser mccartney = ScimUser.builder("paul_mccartney")
       .buildEmail("test@email.test")
       .buildName("Paul", "McCartney")
       .build();
@@ -438,7 +472,7 @@ public class ScimUserProvisioningTests {
       .extract()
       .as(ScimUser.class);
 
-    ScimUser lennonWantsToBeMcCartney = ScimUser.builder("paul_mccartney1")
+    ScimUser lennonWantsToBeMcCartney = ScimUser.builder("paul_mccartney")
       .buildEmail("lennon@email.test")
       .buildName("John", "Lennon")
       .build();
@@ -459,6 +493,11 @@ public class ScimUserProvisioningTests {
       .all(true)
       .statusCode(HttpStatus.BAD_REQUEST.value())
       .body("detail", equalTo("userName is already mappped to another user"));
+
+    deleteUser(lennonCreationResult.getMeta()
+      .getLocation());
+    deleteUser(mccartneyCreationResult.getMeta()
+      .getLocation());
 
   }
 
