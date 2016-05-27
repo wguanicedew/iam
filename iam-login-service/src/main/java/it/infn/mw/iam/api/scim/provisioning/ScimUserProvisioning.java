@@ -13,7 +13,7 @@ import it.infn.mw.iam.api.scim.exception.ResourceNotFoundException;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamUserInfo;
-import it.infn.mw.iam.persistence.repository.IamAccountRespository;
+import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamAuthoritiesRepository;
 
 @Service
@@ -21,13 +21,13 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser> {
 
   private final UserConverter converter;
 
-  private final IamAccountRespository accountRepository;
+  private final IamAccountRepository accountRepository;
 
   private final IamAuthoritiesRepository authorityRepository;
 
   @Autowired
   public ScimUserProvisioning(UserConverter converter,
-    IamAccountRespository accountRepo, IamAuthoritiesRepository authorityRepo) {
+    IamAccountRepository accountRepo, IamAuthoritiesRepository authorityRepo) {
     this.converter = converter;
     this.accountRepository = accountRepo;
     this.authorityRepository = authorityRepo;

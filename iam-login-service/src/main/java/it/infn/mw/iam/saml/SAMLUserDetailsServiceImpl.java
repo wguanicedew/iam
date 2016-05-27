@@ -14,7 +14,7 @@ import org.springframework.security.saml.userdetails.SAMLUserDetailsService;
 
 import it.infn.mw.iam.persistence.model.IamAuthority;
 import it.infn.mw.iam.persistence.model.IamAccount;
-import it.infn.mw.iam.persistence.repository.IamAccountRespository;
+import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.saml.util.SAMLUserIdentifierAccessor;
 
 public class SAMLUserDetailsServiceImpl implements SAMLUserDetailsService {
@@ -23,7 +23,7 @@ public class SAMLUserDetailsServiceImpl implements SAMLUserDetailsService {
   SAMLUserIdentifierAccessor userIdAccessor;
 
   @Autowired
-  IamAccountRespository repo;
+  IamAccountRepository repo;
 
   List<GrantedAuthority> convertAuthorities(IamAccount a) {
 

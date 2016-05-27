@@ -12,7 +12,7 @@ import it.infn.mw.iam.persistence.model.IamAccount;
 public class IamUserinfoRepository implements UserInfoRepository {
 
   @Autowired
-  private IamAccountRespository repo;
+  private IamAccountRepository repo;
 
   @Override
   public UserInfo getByUsername(String username) {
