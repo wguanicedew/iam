@@ -10,6 +10,8 @@ import it.infn.mw.iam.api.scim.converter.GroupConverter;
 import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
 import it.infn.mw.iam.api.scim.exception.ResourceNotFoundException;
 import it.infn.mw.iam.api.scim.model.ScimGroup;
+import it.infn.mw.iam.api.scim.model.ScimListResponse;
+import it.infn.mw.iam.api.scim.provisioning.paging.ScimPageRequest;
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamGroupRepository;
@@ -75,6 +77,20 @@ public class ScimGroupProvisioning implements ScimProvisioning<ScimGroup> {
 	groupRepository.findByUuid(id).ifPresent(a -> {
 	  groupRepository.delete(a);
 	});
+  }
+
+  @Override
+  public ScimGroup replace(String id, ScimGroup scimItemToBeUpdated) {
+
+	// TODO Auto-generated method stub
+	return null;
+  }
+
+  @Override
+  public ScimListResponse<ScimGroup> list(ScimPageRequest params) {
+
+	// TODO Auto-generated method stub
+	return null;
   }
 
 }

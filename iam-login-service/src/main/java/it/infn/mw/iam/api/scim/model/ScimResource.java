@@ -9,7 +9,6 @@ public abstract class ScimResource {
 
   private final String id;
   private final String externalId;
-
   private final ScimMeta meta;
 
   @JsonProperty(required = true)

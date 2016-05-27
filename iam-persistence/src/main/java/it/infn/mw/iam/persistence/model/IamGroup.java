@@ -15,7 +15,7 @@ import javax.persistence.Table;
 public class IamGroup {
 
   @Id
-  @GeneratedValue(strategy=GenerationType.IDENTITY)
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
   @Column(nullable = false, length = 36, unique = true)
@@ -27,7 +27,7 @@ public class IamGroup {
   @Column(nullable = true, length = 512)
   private String description;
 
-  @ManyToMany(mappedBy="groups")
+  @ManyToMany(mappedBy = "groups")
   private Set<IamAccount> accounts;
 
   public IamGroup() {
@@ -109,6 +109,13 @@ public class IamGroup {
     } else if (!uuid.equals(other.uuid))
       return false;
     return true;
+  }
+
+  @Override
+  public String toString() {
+
+    return "IamGroup [id=" + id + ", uuid=" + uuid + ", name=" + name
+      + ", description=" + description + "]";
   }
 
 }

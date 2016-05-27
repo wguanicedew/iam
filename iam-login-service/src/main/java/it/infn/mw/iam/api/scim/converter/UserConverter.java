@@ -1,9 +1,10 @@
 package it.infn.mw.iam.api.scim.converter;
 
-import org.apache.commons.lang.NotImplementedException;
+import org.mitre.openid.connect.model.DefaultAddress;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import it.infn.mw.iam.api.scim.model.ScimAddress;
 import it.infn.mw.iam.api.scim.model.ScimEmail;
 import it.infn.mw.iam.api.scim.model.ScimGroupRef;
 import it.infn.mw.iam.api.scim.model.ScimIndigoUser;
@@ -14,11 +15,13 @@ import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.model.IamOidcId;
+import it.infn.mw.iam.persistence.model.IamUserInfo;
 
 @Service
 public class UserConverter implements Converter<ScimUser, IamAccount> {
 
   private final ScimResourceLocationProvider resourceLocationProvider;
+
   private final AddressConverter addressConverter;
 
   @Autowired
@@ -28,9 +31,43 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
   }
 
   @Override
-  public IamAccount fromScim(ScimUser scim) {
+  public IamAccount fromScim(ScimUser scimUser) {
 
-    throw new NotImplementedException();
+    IamAccount account = new IamAccount();
+    IamUserInfo userInfo = new IamUserInfo();
+
+    account.setUuid(scimUser.getId());
+
+    if (scimUser.getActive() != null) {
+      account.setActive(scimUser.getActive());
+    }
+
+    account.setUsername(scimUser.getUserName());
+
+    userInfo.setEmail(scimUser.getEmails()
+      .get(0)
+      .getValue());
+    userInfo.setGivenName(scimUser.getName()
+      .getGivenName());
+    userInfo.setFamilyName(scimUser.getName()
+      .getFamilyName());
+
+    account.setUserInfo(userInfo);
+
+    if (scimUser.getAddresses() != null && scimUser.getAddresses()
+      .size() > 0) {
+
+      userInfo.setAddress(addressConverter.fromScim(scimUser.getAddresses()
+        .get(0)));
+
+    }
+    
+    if (scimUser.getIndigoUser() != null){
+      
+      
+    }
+
+    return account;
 
   }
 

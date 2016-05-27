@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
   "org.mitre.discovery.view" })
 
 @EnableAutoConfiguration(exclude = { SecurityAutoConfiguration.class,
-  OAuth2AutoConfiguration.class, H2ConsoleAutoConfiguration.class })
+  OAuth2AutoConfiguration.class, H2ConsoleAutoConfiguration.class})
 public class IamLoginService {
 
   public static void main(final String[] args) {
