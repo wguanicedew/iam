@@ -100,6 +100,7 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser> {
         "ROLE_USER not found in database. This is a bug"));
 
     IamUserInfo userInfo = new IamUserInfo();
+    
     userInfo.setGivenName(user.getName()
       .getGivenName());
     userInfo.setFamilyName(user.getName()

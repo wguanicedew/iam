@@ -5,6 +5,7 @@ import java.util.Set;
 
 import javax.transaction.Transactional;
 
+import org.apache.commons.lang.NotImplementedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.json.MappingJacksonValue;
@@ -153,11 +154,26 @@ public class UserController {
     return userProvisioningService.replace(id, user);
 
   }
-  
+
+  @PreAuthorize("#oauth2.hasScope('scim:write') or hasRole('ADMIN')")
+  @RequestMapping(value = "/{id}", method = RequestMethod.PATCH,
+    consumes = ScimConstants.SCIM_CONTENT_TYPE,
+    produces = ScimConstants.SCIM_CONTENT_TYPE)
+  @ResponseStatus(HttpStatus.OK)
+  public ScimUser updateUser(@PathVariable final String id,
+    @RequestBody @Validated(ScimUser.NewUserValidation.class) ScimUser user,
+    BindingResult validationResult) {
+
+    throw new NotImplementedException(
+      "User update functionality is not currently " + "implemented.");
+
+  }
+
   @PreAuthorize("#oauth2.hasScope('scim:write') or hasRole('ADMIN')")
   @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void deleteUser(@PathVariable final String id){
+  public void deleteUser(@PathVariable final String id) {
+
     userProvisioningService.delete(id);
   }
 

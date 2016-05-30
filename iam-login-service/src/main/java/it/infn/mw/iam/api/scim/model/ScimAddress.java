@@ -5,8 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ScimAddress {
 
-  private static final long serialVersionUID = 2731087785568277294L;
-
   public static enum ScimAddressType {
     work,
     home,

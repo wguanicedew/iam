@@ -1,10 +1,8 @@
 package it.infn.mw.iam.api.scim.converter;
 
-import org.mitre.openid.connect.model.DefaultAddress;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import it.infn.mw.iam.api.scim.model.ScimAddress;
 import it.infn.mw.iam.api.scim.model.ScimEmail;
 import it.infn.mw.iam.api.scim.model.ScimGroupRef;
 import it.infn.mw.iam.api.scim.model.ScimIndigoUser;
@@ -60,11 +58,6 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
       userInfo.setAddress(addressConverter.fromScim(scimUser.getAddresses()
         .get(0)));
 
-    }
-    
-    if (scimUser.getIndigoUser() != null){
-      
-      
     }
 
     return account;

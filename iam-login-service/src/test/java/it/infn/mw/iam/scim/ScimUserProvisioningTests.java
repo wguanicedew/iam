@@ -57,22 +57,24 @@ public class ScimUserProvisioningTests {
   private void deleteUser(String userLocation) {
 
     given().port(8080)
-    .auth()
-    .preemptive()
-    .oauth2(accessToken)
-    .contentType(SCIM_CONTENT_TYPE)
-    .when()
-    .delete(userLocation)
-    .then().statusCode(HttpStatus.NO_CONTENT.value());
-    
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
+      .contentType(SCIM_CONTENT_TYPE)
+      .when()
+      .delete(userLocation)
+      .then()
+      .statusCode(HttpStatus.NO_CONTENT.value());
+
     given().port(8080)
-    .auth()
-    .preemptive()
-    .oauth2(accessToken)
-    .contentType(SCIM_CONTENT_TYPE)
-    .when()
-    .get(userLocation)
-    .then().statusCode(HttpStatus.NOT_FOUND.value());
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
+      .contentType(SCIM_CONTENT_TYPE)
+      .when()
+      .get(userLocation)
+      .then()
+      .statusCode(HttpStatus.NOT_FOUND.value());
 
   }
 
@@ -423,6 +425,25 @@ public class ScimUserProvisioningTests {
     deleteUser(createdUser.getMeta()
       .getLocation());
 
+  }
+
+  @Test
+  public void testNonExistentUserDeletionReturns404() {
+
+    String randomUserLocation = "http://localhost:8080/scim/Users/"
+      + UUID.randomUUID()
+        .toString();
+    
+    given().port(8080)
+    .auth()
+    .preemptive()
+    .oauth2(accessToken)
+    .contentType(SCIM_CONTENT_TYPE)
+    .when()
+    .delete(randomUserLocation)
+    .then()
+    .statusCode(HttpStatus.NOT_FOUND.value());
+    
   }
 
   @Test
