@@ -347,6 +347,12 @@
                             <%-($.inArray("urn:ietf:params:oauth:grant_type:redelegate", grantTypes) > -1 ? 'checked' : '')%>> 
                         <label for="grantTypes-redelegate" class="checkbox" data-i18n="client.client-form.redelegation">redelegate</label>
                     </div>
+
+					<div>
+                        <input id="grantTypes-token_exchange" type="checkbox"
+                            <%-($.inArray("urn:ietf:params:oauth:grant-type:token-exchange", grantTypes) > -1 ? 'checked' : '')%>> 
+                        <label for="grantTypes-token_exchange" class="checkbox" data-i18n="client.client-form.token-exchange">token exchange</label>
+                    </div>
                 </div>
             </div>
 

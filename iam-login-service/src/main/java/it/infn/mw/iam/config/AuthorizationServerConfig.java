@@ -35,6 +35,8 @@ import org.springframework.security.oauth2.provider.implicit.ImplicitTokenGrante
 import org.springframework.security.oauth2.provider.password.ResourceOwnerPasswordTokenGranter;
 import org.springframework.security.oauth2.provider.refresh.RefreshTokenGranter;
 
+import it.infn.mw.iam.core.TokenExchangeTokenGranter;
+
 @Configuration
 @EnableAuthorizationServer
 public class AuthorizationServerConfig
@@ -97,6 +99,8 @@ public class AuthorizationServerConfig
       new JWTAssertionTokenGranter(tokenServices, clientDetailsService,
         requestFactory),
       new ChainedTokenGranter(tokenServices, clientDetailsService,
+        requestFactory),
+      new TokenExchangeTokenGranter(tokenServices, clientDetailsService,
         requestFactory)));
   }
 
@@ -122,7 +126,7 @@ public class AuthorizationServerConfig
   }
 
   @Override
-  public void configure(AuthorizationServerSecurityConfigurer security)
+  public void configure(final AuthorizationServerSecurityConfigurer security)
     throws Exception {
 
     security.allowFormAuthenticationForClients();
