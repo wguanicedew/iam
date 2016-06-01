@@ -25,20 +25,7 @@ public class TokenExchangeTests {
   private final String TOKEN_TYPE = "urn:ietf:params:oauth:token-type:jwt";
 
   @Test
-  public void testDiscoveryEndpoint() {
-
-    // @formatter:off
-    given()
-      .port(8080)
-    .when()
-      .get("/.well-known/openid-configuration")
-    .then()
-      .body("issuer", equalTo("http://localhost:8080/"));
-    // @formatter:on
-  }
-
-  @Test
-  public void testTokenExchangeFlow() {
+  public void testImpersonationFlow() {
 
     String clientId = "token-exchange-subject";
     String clientSecret = "secret";
@@ -119,32 +106,32 @@ public class TokenExchangeTests {
     String audClientId = "client";
 
     String accessToken = TestUtils.getAccessToken(clientId, clientSecret,
-      "openid profile offline_access");
+      "openid offline_access");
 
     // @formatter:off
     // get refresh token
     String refreshToken = given()
-    .auth()
-       .preemptive().basic(actorClientId, actorClientSecret)
-    .port(8080)
-    .param("grant_type", GRANT_TYPE)
-    .param("audience", audClientId)
-    .param("subject_token", accessToken)
-    .param("subject_token_type", TOKEN_TYPE)
-    .param("scope", "openid offline_access")
-  .when()
-    .post("/token")
-  .then()
-    .log()
-      .body(true)
-    .statusCode(200)
-    .body("scope", equalTo("openid offline_access"))
-    .body("issued_token_type", equalTo(TOKEN_TYPE))
-    .body("token_type", equalTo("Bearer"))
-    .body("access_token", notNullValue())
-    .body("refresh_token", notNullValue())
-    .extract()
-      .path("refresh_token");
+      .auth()
+         .preemptive().basic(actorClientId, actorClientSecret)
+      .port(8080)
+      .param("grant_type", GRANT_TYPE)
+      .param("audience", audClientId)
+      .param("subject_token", accessToken)
+      .param("subject_token_type", TOKEN_TYPE)
+      .param("scope", "openid offline_access read-tasks")
+    .when()
+      .post("/token")
+    .then()
+      .log()
+        .body(true)
+      .statusCode(200)
+      .body("scope", equalTo("read-tasks openid offline_access"))
+      .body("issued_token_type", equalTo(TOKEN_TYPE))
+      .body("token_type", equalTo("Bearer"))
+      .body("access_token", notNullValue())
+      .body("refresh_token", notNullValue())
+      .extract()
+        .path("refresh_token");
     
     // use refresh token
     given()
@@ -162,8 +149,81 @@ public class TokenExchangeTests {
         .body(true)
       .statusCode(200)
       .body("access_token", notNullValue());
-    
     // @formatter:on
   }
 
+  @Test
+  public void testRequestRefreshTokenWithInvalidScope() {
+
+    String clientId = "token-exchange-subject";
+    String clientSecret = "secret";
+
+    String actorClientId = "token-exchange-actor";
+    String actorClientSecret = "secret";
+
+    String audClientId = "client";
+
+    String accessToken = TestUtils.getAccessToken(clientId, clientSecret,
+      "openid");
+
+    // @formatter:off
+    given()
+      .auth()
+         .preemptive().basic(actorClientId, actorClientSecret)
+      .port(8080)
+      .param("grant_type", GRANT_TYPE)
+      .param("audience", audClientId)
+      .param("subject_token", accessToken)
+      .param("subject_token_type", TOKEN_TYPE)
+      .param("scope", "openid offline_access")
+    .when()
+      .post("/token")
+    .then()
+      .log()
+        .body(true)
+      .statusCode(400)
+      .body("error", equalTo("invalid_scope"));
+    // @formatter:on
+  }
+
+  @Test
+  public void testDelegationFlow() {
+
+    String clientId = "token-exchange-subject";
+    String clientSecret = "secret";
+
+    String actorClientId = "token-exchange-actor";
+    String actorClientSecret = "secret";
+
+    String audClientId = "client";
+
+    String subjectToken = TestUtils.getAccessToken(clientId, clientSecret,
+      "openid");
+
+    String actorToken = TestUtils.getAccessToken(actorClientId,
+      actorClientSecret, "openid");
+
+    // @formatter:off
+    given()
+      .auth()
+         .preemptive().basic(actorClientId, actorClientSecret)
+      .port(8080)
+      .param("grant_type", GRANT_TYPE)
+      .param("audience", audClientId)
+      .param("subject_token", subjectToken)
+      .param("subject_token_type", TOKEN_TYPE)
+      .param("actor_token", actorToken)
+      .param("actor_token_type", TOKEN_TYPE)
+      .param("want_composite", "true")
+      .param("scope", "read-tasks")
+    .when()
+      .post("/token")
+    .then()
+      .log()
+        .body(true)
+      .statusCode(400)
+      .body("error", equalTo("invalid_request"))
+      .body("error_description", Matchers.stringContainsInOrder(Arrays.asList("not yet supported")));
+    // @formatter:on
+  }
 }

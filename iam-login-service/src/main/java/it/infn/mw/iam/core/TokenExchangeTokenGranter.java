@@ -1,11 +1,15 @@
 package it.infn.mw.iam.core;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 import org.mitre.oauth2.model.ClientDetailsEntity;
 import org.mitre.oauth2.model.OAuth2AccessTokenEntity;
 import org.mitre.oauth2.service.ClientDetailsEntityService;
 import org.mitre.oauth2.service.OAuth2TokenEntityService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
@@ -22,8 +26,13 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 
+import it.infn.mw.iam.oidc.OidcAuthenticationSuccessHandler;
+
 @Component("tokenExchangeTokenGranter")
 public class TokenExchangeTokenGranter extends AbstractTokenGranter {
+
+  public static final Logger LOG = LoggerFactory
+    .getLogger(OidcAuthenticationSuccessHandler.class);
 
   private static final String GRANT_TYPE = "urn:ietf:params:oauth:grant-type:token-exchange";
   private static final String TOKEN_TYPE = "urn:ietf:params:oauth:token-type:jwt";
@@ -45,6 +54,12 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
   protected OAuth2Authentication getOAuth2Authentication(
     final ClientDetails client, final TokenRequest tokenRequest)
     throws AuthenticationException, InvalidTokenException {
+
+    if (tokenRequest.getRequestParameters().get("actor_token") != null
+      || tokenRequest.getRequestParameters().get("want_composite") != null) {
+      throw new InvalidRequestException(
+        "Delegation not yet supported in Token Exchange");
+    }
 
     // read and load up the existing token
     String incomingTokenValue = tokenRequest.getRequestParameters()
@@ -68,10 +83,25 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
     // check for scoping in the request, can't up-scope with a chained request
     Set<String> requestedScopes = tokenRequest.getScope();
     Set<String> targetClientScopes = targetClient.getScope();
+    Set<String> incomingTokenScopes = incomingToken.getScope();
 
     // if our scopes are a valid subset of what's allowed, we can continue
     if (targetClientScopes.containsAll(requestedScopes)) {
 
+      LOG.info(
+        "Client with id [{}] requests token exchange for audience [{}] with scopes {}",
+        client.getClientId(), incomingAudience, requestedScopes);
+
+      // check "special" scopes
+      List<String> specialScopes = Arrays.asList("openid", "offline_access");
+
+      for (String scope : specialScopes) {
+        if (requestedScopes.contains(scope)
+          && !incomingTokenScopes.contains(scope)) {
+          throw new InvalidScopeException(String
+            .format("Subject Token MUST contain requested scope [%s]", scope));
+        }
+      }
       tokenRequest
         .setScope(Sets.intersection(requestedScopes, targetClientScopes));
 
@@ -87,8 +117,8 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
       return authentication;
 
     } else {
-      throw new InvalidScopeException(
-        "Invalid scope requested in Token Exchange request", requestedScopes);
+      throw new InvalidScopeException("Invalid scope in Token Exchange request",
+        requestedScopes);
     }
 
   }
