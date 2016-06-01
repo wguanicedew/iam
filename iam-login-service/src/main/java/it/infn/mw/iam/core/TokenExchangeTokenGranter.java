@@ -37,6 +37,9 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
   private static final String GRANT_TYPE = "urn:ietf:params:oauth:grant-type:token-exchange";
   private static final String TOKEN_TYPE = "urn:ietf:params:oauth:token-type:jwt";
 
+  private static final List<String> SPECIAL_SCOPES = Arrays.asList("openid",
+    "profile", "email", "address", "phone", "offline_access");
+
   // keep down-cast versions so we can get to the right queries
   private OAuth2TokenEntityService tokenServices;
   private ClientDetailsEntityService clientDetailsService;
@@ -93,9 +96,7 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
         client.getClientId(), incomingAudience, requestedScopes);
 
       // check "special" scopes
-      List<String> specialScopes = Arrays.asList("openid", "offline_access");
-
-      for (String scope : specialScopes) {
+      for (String scope : SPECIAL_SCOPES) {
         if (requestedScopes.contains(scope)
           && !incomingTokenScopes.contains(scope)) {
           throw new InvalidScopeException(String
