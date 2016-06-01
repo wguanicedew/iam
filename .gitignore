@@ -4,4 +4,4 @@ target/
 .settings
 .springBeans
 .factoryPath
-*/.factorypath
+iam-login-service/ddl.sql
