@@ -108,7 +108,6 @@ services:
     volumes:
       - /dev/urandom:/dev/random
 
-
 # browser:
 #   image: jess/firefox
 #   container_name: browser
