@@ -12,12 +12,12 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamAuthority;
-import it.infn.mw.iam.persistence.repository.IamAccountRespository;
+import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
 public class OidcUserDetailsService {
 
   @Autowired
-  IamAccountRespository repo;
+  IamAccountRepository repo;
 
   List<GrantedAuthority> convertAuthorities(IamAccount a) {
 

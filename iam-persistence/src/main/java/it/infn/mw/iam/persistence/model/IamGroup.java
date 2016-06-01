@@ -1,5 +1,6 @@
 package it.infn.mw.iam.persistence.model;
 
+import java.util.Date;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -9,6 +10,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 @Entity
 @Table(name = "iam_group")
@@ -26,6 +29,14 @@ public class IamGroup {
 
   @Column(nullable = true, length = 512)
   private String description;
+
+  @Temporal(TemporalType.TIMESTAMP)
+  @Column(nullable = false)
+  Date creationTime;
+
+  @Temporal(TemporalType.TIMESTAMP)
+  @Column(nullable = false)
+  Date lastUpdateTime;
 
   @ManyToMany(mappedBy = "groups")
   private Set<IamAccount> accounts;
@@ -74,6 +85,26 @@ public class IamGroup {
     this.description = description;
   }
 
+  public Date getCreationTime() {
+
+    return creationTime;
+  }
+
+  public void setCreationTime(Date creationTime) {
+
+    this.creationTime = creationTime;
+  }
+
+  public Date getLastUpdateTime() {
+
+    return lastUpdateTime;
+  }
+
+  public void setLastUpdateTime(Date lastUpdateTime) {
+
+    this.lastUpdateTime = lastUpdateTime;
+  }
+
   public Set<IamAccount> getAccounts() {
 
     return accounts;
@@ -83,39 +114,45 @@ public class IamGroup {
 
     this.accounts = accounts;
   }
+  
+  public void touch() {
+
+    setLastUpdateTime(new Date());
+  }
 
   @Override
   public int hashCode() {
 
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
-    return result;
+	final int prime = 31;
+	int result = 1;
+	result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
+	return result;
   }
 
   @Override
   public boolean equals(Object obj) {
 
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (getClass() != obj.getClass())
-      return false;
-    IamGroup other = (IamGroup) obj;
-    if (uuid == null) {
-      if (other.uuid != null)
-        return false;
-    } else if (!uuid.equals(other.uuid))
-      return false;
-    return true;
+	if (this == obj)
+	  return true;
+	if (obj == null)
+	  return false;
+	if (getClass() != obj.getClass())
+	  return false;
+	IamGroup other = (IamGroup) obj;
+	if (uuid == null) {
+	  if (other.uuid != null)
+		return false;
+	} else if (!uuid.equals(other.uuid))
+	  return false;
+	return true;
   }
 
   @Override
   public String toString() {
 
-    return "IamGroup [id=" + id + ", uuid=" + uuid + ", name=" + name
-      + ", description=" + description + "]";
+	return "IamGroup [id=" + id + ", uuid=" + uuid + ", name=" + name
+	  + ", description=" + description + ", creationTime=" + creationTime
+	  + ", lastUpdateTime=" + lastUpdateTime + ", accounts=" + accounts + "]";
   }
 
 }

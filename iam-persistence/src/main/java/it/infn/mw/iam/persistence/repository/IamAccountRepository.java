@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 import it.infn.mw.iam.persistence.model.IamAccount;
 
-public interface IamAccountRespository
+public interface IamAccountRepository
   extends PagingAndSortingRepository<IamAccount, Long> {
 
   @Query("select count(a) from IamAccount a")
@@ -33,4 +33,6 @@ public interface IamAccountRespository
   Optional<IamAccount> findByUsernameWithDifferentId(
     @Param("username") String username, @Param("uuid") String uuid);
 
+  @Query("select a from IamAccount a join a.groups ag where ag.id = :groupId")
+  Optional<IamAccount> findByGroupId(@Param("groupId") String groupId);
 }
