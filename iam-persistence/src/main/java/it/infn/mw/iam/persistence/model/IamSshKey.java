@@ -20,11 +20,14 @@ public class IamSshKey {
   @Column(nullable = false, length = 36, unique = true)
   private String label;
 
-  @Column(name="is_primary")
+  @Column(name = "is_primary")
   boolean primary;
 
+  @Column(name = "fingerprint", length = 48, unique = true, nullable = false)
+  private String fingerprint;
+
   @Lob
-  @Column(length = 3072, unique = true)
+  @Column(name = "val", length = 3072)
   private String value;
 
   @ManyToOne
@@ -64,6 +67,16 @@ public class IamSshKey {
     this.value = value;
   }
 
+  public String getFingerprint() {
+
+    return fingerprint;
+  }
+
+  public void setFingerprint(String fingerprint) {
+
+    this.fingerprint = fingerprint;
+  }
+
   public IamAccount getAccount() {
 
     return account;
@@ -89,8 +102,8 @@ public class IamSshKey {
 
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((label == null) ? 0 : label.hashCode());
-    result = prime * result + ((value == null) ? 0 : value.hashCode());
+    result = prime * result
+      + ((fingerprint == null) ? 0 : fingerprint.hashCode());
     return result;
   }
 
@@ -104,15 +117,10 @@ public class IamSshKey {
     if (getClass() != obj.getClass())
       return false;
     IamSshKey other = (IamSshKey) obj;
-    if (label == null) {
-      if (other.label != null)
+    if (fingerprint == null) {
+      if (other.fingerprint != null)
         return false;
-    } else if (!label.equals(other.label))
-      return false;
-    if (value == null) {
-      if (other.value != null)
-        return false;
-    } else if (!value.equals(other.value))
+    } else if (!fingerprint.equals(other.fingerprint))
       return false;
     return true;
   }

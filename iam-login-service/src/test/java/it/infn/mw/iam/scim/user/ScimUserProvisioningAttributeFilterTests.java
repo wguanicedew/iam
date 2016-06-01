@@ -9,6 +9,8 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 
+import javax.transaction.Transactional;
+
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,6 +28,7 @@ import it.infn.mw.iam.scim.TestUtils;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = IamLoginService.class)
 @WebIntegrationTest
+@Transactional
 public class ScimUserProvisioningAttributeFilterTests {
 
   String accessToken;
