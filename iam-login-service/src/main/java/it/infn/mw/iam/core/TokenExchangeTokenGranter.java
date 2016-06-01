@@ -26,19 +26,23 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 
-import it.infn.mw.iam.oidc.OidcAuthenticationSuccessHandler;
-
 @Component("tokenExchangeTokenGranter")
 public class TokenExchangeTokenGranter extends AbstractTokenGranter {
 
   public static final Logger LOG = LoggerFactory
-    .getLogger(OidcAuthenticationSuccessHandler.class);
+    .getLogger(TokenExchangeTokenGranter.class);
 
   private static final String GRANT_TYPE = "urn:ietf:params:oauth:grant-type:token-exchange";
   private static final String TOKEN_TYPE = "urn:ietf:params:oauth:token-type:jwt";
 
-  private static final List<String> SPECIAL_SCOPES = Arrays.asList("openid",
-    "profile", "email", "address", "phone", "offline_access");
+  /**
+   * These scopes, in order to be "exchanged" across services, need to be
+   * present in the set of scopes linked to the subject token that is presented
+   * for the exchange.
+   */
+  private static final List<String> CHAINED_SCOPES = Arrays.asList("openid",
+    "profile", "email", "address", "phone", "offline_access", "scim:read",
+    "scim:write");
 
   // keep down-cast versions so we can get to the right queries
   private OAuth2TokenEntityService tokenServices;
@@ -56,10 +60,12 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
   @Override
   protected OAuth2Authentication getOAuth2Authentication(
     final ClientDetails client, final TokenRequest tokenRequest)
-    throws AuthenticationException, InvalidTokenException {
+      throws AuthenticationException, InvalidTokenException {
 
-    if (tokenRequest.getRequestParameters().get("actor_token") != null
-      || tokenRequest.getRequestParameters().get("want_composite") != null) {
+    if (tokenRequest.getRequestParameters()
+      .get("actor_token") != null
+      || tokenRequest.getRequestParameters()
+        .get("want_composite") != null) {
       throw new InvalidRequestException(
         "Delegation not yet supported in Token Exchange");
     }
@@ -95,14 +101,15 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
         "Client with id [{}] requests token exchange for audience [{}] with scopes {}",
         client.getClientId(), incomingAudience, requestedScopes);
 
-      // check "special" scopes
-      for (String scope : SPECIAL_SCOPES) {
+      // check chained scopes
+      for (String scope : CHAINED_SCOPES) {
         if (requestedScopes.contains(scope)
           && !incomingTokenScopes.contains(scope)) {
           throw new InvalidScopeException(String
             .format("Subject Token MUST contain requested scope [%s]", scope));
         }
       }
+      
       tokenRequest
         .setScope(Sets.intersection(requestedScopes, targetClientScopes));
 
@@ -111,9 +118,11 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
       // create a new access token
       OAuth2Authentication authentication = new OAuth2Authentication(
         getRequestFactory().createOAuth2Request(client, tokenRequest),
-        incomingToken.getAuthenticationHolder().getAuthentication()
+        incomingToken.getAuthenticationHolder()
+          .getAuthentication()
           .getUserAuthentication());
-      authentication.getOAuth2Request().getExtensions();
+      authentication.getOAuth2Request()
+        .getExtensions();
 
       return authentication;
 
@@ -130,7 +139,8 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
 
     OAuth2Authentication auth = getOAuth2Authentication(client, tokenRequest);
     OAuth2AccessToken accessToken = tokenServices.createAccessToken(auth);
-    accessToken.getAdditionalInformation().put("issued_token_type", TOKEN_TYPE);
+    accessToken.getAdditionalInformation()
+      .put("issued_token_type", TOKEN_TYPE);
 
     return accessToken;
   }

@@ -4,7 +4,9 @@ INSERT INTO system_scope(scope, description, icon, restricted, default_scope, st
   ('email', 'email address', 'envelope', false, true, false, null),
   ('address', 'physical address', 'home', false, true, false, null),
   ('phone', 'telephone number', 'bell', false, true, false, null),
-  ('offline_access', 'offline access', 'time', false, false, false, null);
+  ('offline_access', 'offline access', 'time', false, false, false, null),
+  ('scim:read','read access to SCIM user and groups', null, true, false, false, null),
+  ('scim:write','write access to SCIM user and groups', null, true, false, false, null);
 
 INSERT INTO iam_authority(ID, AUTH) VALUES
 (1, 'ROLE_ADMIN'),
