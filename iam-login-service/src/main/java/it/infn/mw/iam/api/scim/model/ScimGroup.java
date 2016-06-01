@@ -20,9 +20,7 @@ public final class ScimGroup extends ScimResource {
   public static final String GROUP_SCHEMA = "urn:ietf:params:scim:schemas:core:2.0:Group";
   public static final String RESOURCE_TYPE = "Group";
 
-  public interface NewGroupValidation {}
-
-  @NotBlank(groups = { NewGroupValidation.class })
+  @NotBlank
   private final String displayName;
 
   private final Set<ScimMemberRef> members;

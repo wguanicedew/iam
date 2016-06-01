@@ -3,7 +3,6 @@ package it.infn.mw.iam.scim.group;
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.matcher.ResponseAwareMatcherComposer.and;
 import static com.jayway.restassured.matcher.RestAssuredMatchers.endsWithPath;
-import static it.infn.mw.iam.api.scim.model.ScimConstants.SCIM_CONTENT_TYPE;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
@@ -23,7 +22,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.scim.model.ScimGroup;
-import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.scim.TestUtils;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -190,6 +188,40 @@ public class ScimGroupProvisioningTests {
 	  .body("detail", containsString("scimGroup.displayName : may not be empty"))
 	  .log().all(true).statusCode(HttpStatus.BAD_REQUEST.value());
 
+  }
+  
+  @Test
+  public void testGroupUpdateChangeWithInvalidDisplayname() {
+
+	String uuid = UUID.randomUUID().toString();
+
+	ScimGroup group = ScimGroup.builder("engineers")
+	  .id(uuid)
+	  .build();
+
+	ScimGroup createdGroup = given().port(8080).auth().preemptive()
+	  .oauth2(accessToken).contentType(SCIM_CONTENT_TYPE).body(group).log()
+	  .all(true).when().post("/scim/Groups/").then().log().all(true)
+	  .statusCode(HttpStatus.CREATED.value()).extract().as(ScimGroup.class);
+
+	given().port(8080).auth().preemptive().oauth2(accessToken)
+	  .contentType(SCIM_CONTENT_TYPE).when()
+	  .get(createdGroup.getMeta().getLocation()).then().log().all(true)
+	  .statusCode(HttpStatus.OK.value())
+	  .body("id", equalTo(createdGroup.getId()))
+	  .body("displayName", equalTo(createdGroup.getDisplayName()));
+
+	ScimGroup updatedGroup = ScimGroup.builder("")
+	  .id(uuid)
+	  .meta(createdGroup.getMeta())
+	  .build();
+
+	given().port(8080).auth().preemptive().oauth2(accessToken)
+	  .contentType(SCIM_CONTENT_TYPE).body(updatedGroup).log().all(true).when()
+	  .put(updatedGroup.getMeta().getLocation()).then().log().all(true)
+	  .statusCode(HttpStatus.BAD_REQUEST.value());
+
+	deleteGroup(createdGroup.getMeta().getLocation());
   }
   
 }

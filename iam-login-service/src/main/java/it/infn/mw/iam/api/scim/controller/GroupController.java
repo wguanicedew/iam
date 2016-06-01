@@ -128,7 +128,7 @@ public class GroupController {
 	produces = ScimConstants.SCIM_CONTENT_TYPE)
   @ResponseStatus(HttpStatus.CREATED)
   public ScimGroup create(
-	@RequestBody @Validated(ScimGroup.NewGroupValidation.class) ScimGroup group,
+	@RequestBody @Validated ScimGroup group,
 	BindingResult validationResult) {
 
 	handleValidationError("Invalid Scim Group", validationResult);
@@ -142,7 +142,7 @@ public class GroupController {
 	produces = ScimConstants.SCIM_CONTENT_TYPE)
   @ResponseStatus(HttpStatus.OK)
   public ScimGroup replaceGroup(@PathVariable final String id,
-	@RequestBody @Validated(ScimGroup.NewGroupValidation.class) ScimGroup group,
+	@RequestBody @Validated ScimGroup group,
 	BindingResult validationResult) {
 
 	handleValidationError("Invalid Scim Group", validationResult);
