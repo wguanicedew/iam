@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.hibernate.validator.constraints.NotBlank;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -20,6 +22,7 @@ public final class ScimGroup extends ScimResource {
 
   public interface NewGroupValidation {}
 
+  @NotBlank(groups = { NewGroupValidation.class })
   private final String displayName;
 
   private final Set<ScimMemberRef> members;
