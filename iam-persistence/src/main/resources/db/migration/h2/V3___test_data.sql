@@ -19,7 +19,9 @@ INSERT INTO client_details (id, client_id, client_secret, client_name, dynamical
   (4, 'client-cred', 'secret', 'Client credentials', false, null, 3600, 600, true, 'SECRET_BASIC'),
   (5, 'password-grant', 'secret', 'Password grant client', false, null, 3600, 600, true, 'SECRET_BASIC'),
   (6, 'scim-client-ro', 'secret', 'SCIM client (read-only)', false, null, 3600, 600, true, 'SECRET_POST'),
-  (7, 'scim-client-rw', 'secret', 'SCIM client (read-write)', false, null, 3600, 600, true, 'SECRET_POST');
+  (7, 'scim-client-rw', 'secret', 'SCIM client (read-write)', false, null, 3600, 600, true, 'SECRET_POST'),
+  (8, 'token-exchange-actor', 'secret', 'Token Exchange grant client actor', false, null, 3600, 600, true, 'SECRET_POST'),
+  (9, 'token-exchange-subject', 'secret', 'Token Exchange grant client subject', false, null, 3600, 600, true, 'SECRET_POST');
 
 INSERT INTO client_scope (owner_id, scope) VALUES
   (1, 'openid'),
@@ -62,7 +64,17 @@ INSERT INTO client_scope (owner_id, scope) VALUES
   (7, 'phone'),
   (7, 'offline_access'),
   (7, 'scim:read'),
-  (7, 'scim:write');
+  (7, 'scim:write'),
+  (8, 'openid'),
+  (8, 'profile'),
+  (8, 'email'),
+  (8, 'address'),
+  (8, 'phone'),
+  (8, 'offline_access'),
+  (8, 'read-tasks'),
+  (9, 'openid'),
+  (9, 'profile'),
+  (9, 'offline_access');
   
   
 INSERT INTO client_redirect_uri (owner_id, redirect_uri) VALUES
@@ -82,7 +94,12 @@ INSERT INTO client_redirect_uri (owner_id, redirect_uri) VALUES
   (4, 'client_credentials'),
   (5, 'password'),
   (6, 'client_credentials'),
-  (7, 'client_credentials');
+  (7, 'client_credentials'),
+  (8, 'urn:ietf:params:oauth:grant-type:token-exchange'),
+  (8, 'client_credentials'),
+  (8, 'refresh_token'),
+  (9, 'client_credentials'),
+  (9, 'refresh_token');
   
 INSERT INTO iam_authority(ID, AUTH) VALUES
 (1, 'ROLE_ADMIN'),
