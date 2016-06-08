@@ -654,6 +654,7 @@ INSERT INTO iam_account(id, uuid, username, password, user_info_id, creationtime
 (345, 'd3c489ae-3f03-48fe-9248-927a8bb3297f', 'test_345', 'password', 345, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), true),
 (346, '18764a4e-8b01-478e-80b3-217cc37d49c7', 'test_346', 'password', 346, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), true),
 (347, '00075d1c-f486-41a0-98f8-06f0354b8416', 'test_347', 'password', 347, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), true);
+
 INSERT into iam_account_authority(account_id, authority_id) VALUES
 (100,1),
 (101,1),

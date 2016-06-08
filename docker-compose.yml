@@ -1,7 +1,6 @@
 version: '2'
 
 services:
-
   db_data:
     image: busybox
     volumes:
@@ -20,8 +19,8 @@ services:
       MYSQL_PASSWORD: pwd
       MYSQL_DATABASE: iam
 
-    ports:
-      - "3306:3306"
+#    ports:
+#      - "3306:3306"
 
   trust:
     build:
@@ -38,8 +37,8 @@ services:
     environment:
       IAM_JAVA_OPTS: -Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n,address=1044 -Dspring.profiles.active=google,prod
       IAM_JAR: /code/iam-login-service/target/iam-login-service-${POM_VERSION}.war
-      IAM_BASE_URL: https://iam.local.io
-      IAM_ISSUER: https://iam.local.io/
+      IAM_BASE_URL: https://iam
+      IAM_ISSUER: https://iam/
       IAM_USE_FORWARDED_HEADERS: "true"
 
       IAM_DB_HOST: db
@@ -74,10 +73,10 @@ services:
       IAM_CLIENT_PORT: 8080
       IAM_CLIENT_JAVA_OPTS: -Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n,address=1045
       IAM_CLIENT_ID: client
-      IAM_CLIENT_ISSUER: https://iam.local.io/
-      IAM_CLIENT_REDIRECT_URIS: https://iam.local.io/iam-test-client/openid_connect_login
-      IAM_CLIENT_USE_FORWARD_HEADERS: "true"
       IAM_CLIENT_SECRET: secret
+      IAM_CLIENT_ISSUER: https://iam/
+      IAM_CLIENT_REDIRECT_URIS: https://iam/iam-test-client/openid_connect_login
+      IAM_CLIENT_USE_FORWARD_HEADERS: "true"
       IAM_CLIENT_JAR: /code/iam-test-client/target/iam-test-client-${POM_VERSION}.jar
 
     ports:
@@ -89,14 +88,14 @@ services:
     volumes:
       - .:/code:ro
 
-  iam-fe:
+  iam:
     build:
       context: ./docker/nginx/
 
     depends_on:
       - iam-be
 
-    container_name: iam-fe
+    container_name: iam
 
     environment:
       NGINX_HOST: iam
