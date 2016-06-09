@@ -1,25 +1,29 @@
 package it.infn.mw.iam.api.scim.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public final class ScimMemberRef {
 
-  public static enum ScimMemberRefType {
-	direct, indirect;
-  }
-
-  private final ScimMemberRefType type;
-
   private final String value;
   private final String display;
-
   private final String ref;
 
+  @JsonCreator
+  private ScimMemberRef(
+	@JsonProperty("display") String display,
+	@JsonProperty("value") String value,
+	@JsonProperty("$ref") String ref) {
+	
+	this.display = display;
+	this.value = value;
+	this.ref = ref;
+  }
+  
   private ScimMemberRef(Builder builder) {
 
-	type = builder.type;
 	value = builder.value;
 	display = builder.display;
 	ref = builder.ref;
@@ -41,14 +45,13 @@ public final class ScimMemberRef {
 	return display;
   }
 
-  public ScimMemberRefType getType() {
-
-	return type;
+  public static Builder builder() {
+	
+	return new Builder();
   }
-
+  
   public static class Builder {
 
-	private ScimMemberRefType type = ScimMemberRefType.direct;
 	private String value;
 	private String display;
 	private String ref;

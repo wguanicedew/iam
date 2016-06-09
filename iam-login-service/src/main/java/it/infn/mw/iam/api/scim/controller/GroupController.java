@@ -31,6 +31,7 @@ import it.infn.mw.iam.api.scim.controller.utils.ValidationErrorMessageHelper;
 import it.infn.mw.iam.api.scim.exception.ScimValidationException;
 import it.infn.mw.iam.api.scim.model.ScimConstants;
 import it.infn.mw.iam.api.scim.model.ScimGroup;
+import it.infn.mw.iam.api.scim.model.ScimGroupPatchRequest;
 import it.infn.mw.iam.api.scim.model.ScimListResponse;
 import it.infn.mw.iam.api.scim.provisioning.ScimGroupProvisioning;
 import it.infn.mw.iam.api.scim.provisioning.paging.DefaultScimPageRequest;
@@ -149,6 +150,15 @@ public class GroupController {
 
 	return groupProvisioningService.replace(id, group);
 
+  }
+
+  @PreAuthorize("#oauth2.hasScope('scim:write') or hasRole('ADMIN')")
+  @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = ScimConstants.SCIM_CONTENT_TYPE)
+  @ResponseStatus(HttpStatus.OK)
+  public void updateGroup(@PathVariable final String id, 
+	@RequestBody ScimGroupPatchRequest groupPatchRequest) {
+
+      groupProvisioningService.update(id, groupPatchRequest.getOperations());
   }
 
   @PreAuthorize("#oauth2.hasScope('scim:write') or hasRole('ADMIN')")

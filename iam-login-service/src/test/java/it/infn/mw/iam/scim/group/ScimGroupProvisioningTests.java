@@ -9,6 +9,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.startsWith;
 
+import java.text.ParseException;
 import java.util.UUID;
 
 import org.junit.Before;
@@ -139,13 +140,11 @@ public class ScimGroupProvisioningTests {
   }
 
   @Test
-  public void testGroupUpdateChangeDisplayname() {
+  public void testGroupUpdateChangeDisplayname() throws ParseException {
 
 	String uuid = UUID.randomUUID().toString();
 
-	ScimGroup group = ScimGroup.builder("engineers")
-	  .id(uuid)
-	  .build();
+	ScimGroup group = ScimGroup.builder("engineers").id(uuid).build();
 
 	ScimGroup createdGroup = given().port(8080).auth().preemptive()
 	  .oauth2(accessToken).contentType(SCIM_CONTENT_TYPE).body(group).log()
@@ -159,10 +158,8 @@ public class ScimGroupProvisioningTests {
 	  .body("id", equalTo(createdGroup.getId()))
 	  .body("displayName", equalTo(createdGroup.getDisplayName()));
 
-	ScimGroup updatedGroup = ScimGroup.builder("engineers_updated")
-	  .id(uuid)
-	  .meta(createdGroup.getMeta())
-	  .build();
+	ScimGroup updatedGroup = ScimGroup.builder("engineers_updated").id(uuid)
+	  .meta(createdGroup.getMeta()).build();
 
 	given().port(8080).auth().preemptive().oauth2(accessToken)
 	  .contentType(SCIM_CONTENT_TYPE).body(updatedGroup).log().all(true).when()
@@ -185,19 +182,18 @@ public class ScimGroupProvisioningTests {
 	given().port(8080).auth().preemptive().oauth2(accessToken)
 	  .contentType(SCIM_CONTENT_TYPE).body(group).log().all(true).when()
 	  .post("/scim/Groups/").then()
-	  .body("detail", containsString("scimGroup.displayName : may not be empty"))
+	  .body("detail",
+		containsString("scimGroup.displayName : may not be empty"))
 	  .log().all(true).statusCode(HttpStatus.BAD_REQUEST.value());
 
   }
-  
+
   @Test
   public void testGroupUpdateChangeWithInvalidDisplayname() {
 
 	String uuid = UUID.randomUUID().toString();
 
-	ScimGroup group = ScimGroup.builder("engineers")
-	  .id(uuid)
-	  .build();
+	ScimGroup group = ScimGroup.builder("engineers").id(uuid).build();
 
 	ScimGroup createdGroup = given().port(8080).auth().preemptive()
 	  .oauth2(accessToken).contentType(SCIM_CONTENT_TYPE).body(group).log()
@@ -211,10 +207,8 @@ public class ScimGroupProvisioningTests {
 	  .body("id", equalTo(createdGroup.getId()))
 	  .body("displayName", equalTo(createdGroup.getDisplayName()));
 
-	ScimGroup updatedGroup = ScimGroup.builder("")
-	  .id(uuid)
-	  .meta(createdGroup.getMeta())
-	  .build();
+	ScimGroup updatedGroup = ScimGroup.builder("").id(uuid)
+	  .meta(createdGroup.getMeta()).build();
 
 	given().port(8080).auth().preemptive().oauth2(accessToken)
 	  .contentType(SCIM_CONTENT_TYPE).body(updatedGroup).log().all(true).when()
@@ -223,5 +217,5 @@ public class ScimGroupProvisioningTests {
 
 	deleteGroup(createdGroup.getMeta().getLocation());
   }
-  
+
 }
