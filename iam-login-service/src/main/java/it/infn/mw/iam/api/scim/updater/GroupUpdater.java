@@ -7,15 +7,15 @@ import org.springframework.stereotype.Component;
 
 import it.infn.mw.iam.api.scim.exception.ScimPatchOperationNotSupported;
 import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
+import it.infn.mw.iam.api.scim.exception.ScimValidationException;
 import it.infn.mw.iam.api.scim.model.ScimMemberRef;
 import it.infn.mw.iam.api.scim.model.ScimPatchOperation;
-import it.infn.mw.iam.api.scim.model.ScimPatchOperationMembers;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
 @Component
-public class GroupUpdater implements Updater<IamGroup> {
+public class GroupUpdater implements Updater<IamGroup, List<ScimMemberRef>> {
 
   private final IamAccountRepository accountRepository;
 
@@ -26,45 +26,73 @@ public class GroupUpdater implements Updater<IamGroup> {
   }
 
   public void update(IamGroup group,
-	List<? extends ScimPatchOperation> operations) {
+	List<ScimPatchOperation<List<ScimMemberRef>>> operations) {
 
-	for (ScimPatchOperation patchOp : operations) {
+	for (ScimPatchOperation<List<ScimMemberRef>> op : operations) {
 
-	  if (!(patchOp instanceof ScimPatchOperationMembers)) {
-
-		throw new ScimPatchOperationNotSupported(
-		  "Patch operation class not supported: "
-			+ patchOp.getClass().getName());
+	  if (!op.getPath().equals("members")) {
+		
+		throw new ScimPatchOperationNotSupported("Expected 'members' as path value");
 	  }
 	  
-	  ScimPatchOperationMembers op = (ScimPatchOperationMembers) patchOp;
+	  switch (op.getOp()) {
 
-	  for (ScimMemberRef ref : op.getValue()) {
+	  case add:
 
-		IamAccount account = accountRepository.findByUuid(ref.getValue())
-		  .orElseThrow(() -> new ScimResourceNotFoundException(
-			"No user mapped to id '" + ref.getValue() + "'"));
-
-		switch (op.getOp()) {
-		case add:
-		  account.getGroups().add(group);
-		  break;
-		case remove:
-		  account.getGroups().remove(group);
-		  break;
-		case replace:
-		  account.getGroups().add(group);
-		  break;
-		default:
-		  break;
+		// value cannot be null
+		if (op.getValue() == null) {
+		  throw new ScimValidationException(
+			"Expected patch operation value not null");
 		}
-		account.touch();
-		
-		accountRepository.save(account);
+		for (ScimMemberRef ref : op.getValue()) {
+
+		  IamAccount account = accountRepository.findByUuid(ref.getValue())
+			.orElseThrow(() -> new ScimResourceNotFoundException(
+			  "No user mapped to id '" + ref.getValue() + "'"));
+
+		  account.getGroups().add(group);
+		  account.touch();
+
+		  accountRepository.save(account);
+		}
+
+		break;
+	  case remove:
+		// value can be null >> remove all
+		if (op.getValue() == null) {
+
+		  for (IamAccount account : group.getAccounts()) {
+
+			account.getGroups().remove(group);
+			account.touch();
+
+			accountRepository.save(account);
+		  }
+		} else {
+
+		  for (ScimMemberRef ref : op.getValue()) {
+
+			IamAccount account = accountRepository.findByUuid(ref.getValue())
+			  .orElseThrow(() -> new ScimResourceNotFoundException(
+				"No user mapped to id '" + ref.getValue() + "'"));
+
+			account.getGroups().remove(group);
+			account.touch();
+
+			accountRepository.save(account);
+		  }
+		}
+
+		break;
+	  case replace:
+		// ??
+		break;
+	  default:
+		break;
 	  }
 	}
 	return;
 
   }
-
+  
 }

@@ -11,17 +11,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(Include.NON_EMPTY)
-public class ScimGroupPatchRequest implements ScimPatchRequest {
+public class ScimGroupPatchRequest {
 
   public static final String PATCHOP_SCHEMA = "urn:ietf:params:scim:api:messages:2.0:PatchOp";
 
   private final Set<String> schemas;
-  private final List<ScimPatchOperationMembers> operations;
+  private final List<ScimPatchOperation<List<ScimMemberRef>>> operations;
 
   @JsonCreator
   private ScimGroupPatchRequest(
 	@JsonProperty("schemas") Set<String> schemas,
-	@JsonProperty("operations") List<ScimPatchOperationMembers> operations) {
+	@JsonProperty("operations") List<ScimPatchOperation<List<ScimMemberRef>>> operations) {
 
 	this.schemas = schemas;
 	if (operations == null) {
@@ -41,32 +41,32 @@ public class ScimGroupPatchRequest implements ScimPatchRequest {
 	return schemas;
   }
 
-  public List<ScimPatchOperationMembers> getOperations() {
+  public List<ScimPatchOperation<List<ScimMemberRef>>> getOperations() {
 
 	return operations;
   }
-  
+
   public static Builder builder() {
-	
+
 	return new Builder();
   }
-  
+
   public static class Builder {
 
 	private Set<String> schemas = new HashSet<String>();
-	private List<ScimPatchOperationMembers> operations = new ArrayList<ScimPatchOperationMembers>();
+	private List<ScimPatchOperation<List<ScimMemberRef>>> operations = new ArrayList<ScimPatchOperation<List<ScimMemberRef>>>();
 
 	public Builder() {
 	  schemas.add(PATCHOP_SCHEMA);
 	}
 
-	public Builder setOperations(List<ScimPatchOperationMembers> operations) {
+	public Builder setOperations(List<ScimPatchOperation<List<ScimMemberRef>>> operations) {
 
 	  this.operations = operations;
 	  return this;
 	}
 
-	public Builder addOperation(ScimPatchOperationMembers operation) {
+	public Builder addOperation(ScimPatchOperation<List<ScimMemberRef>> operation) {
 
 	  operations.add(operation);
 	  return this;

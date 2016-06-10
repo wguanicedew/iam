@@ -6,7 +6,7 @@ import it.infn.mw.iam.api.scim.model.ScimListResponse;
 import it.infn.mw.iam.api.scim.model.ScimPatchOperation;
 import it.infn.mw.iam.api.scim.provisioning.paging.ScimPageRequest;
 
-public interface ScimProvisioning<T> {
+public interface ScimProvisioning<T, E> {
 
   T getById(String id);
 
@@ -14,7 +14,7 @@ public interface ScimProvisioning<T> {
   
   T replace(String id, T scimItemToBeReplaced);
 
-  void update(String id, List<? extends ScimPatchOperation> operations);
+  void update(String id, List<ScimPatchOperation<E>> operations);
 
   void delete(String id);
   

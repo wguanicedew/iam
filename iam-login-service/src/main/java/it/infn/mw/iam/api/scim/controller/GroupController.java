@@ -156,7 +156,7 @@ public class GroupController {
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = ScimConstants.SCIM_CONTENT_TYPE)
   @ResponseStatus(HttpStatus.OK)
   public void updateGroup(@PathVariable final String id, 
-	@RequestBody ScimGroupPatchRequest groupPatchRequest) {
+	@RequestBody @Validated ScimGroupPatchRequest groupPatchRequest) {
 
       groupProvisioningService.update(id, groupPatchRequest.getOperations());
   }

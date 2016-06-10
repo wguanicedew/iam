@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import it.infn.mw.iam.api.scim.converter.UserConverter;
 import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
-import it.infn.mw.iam.api.scim.exception.ScimPatchOperationNotSupported;
 import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
 import it.infn.mw.iam.api.scim.model.ScimListResponse;
 import it.infn.mw.iam.api.scim.model.ScimPatchOperation;
@@ -25,7 +24,7 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamAuthoritiesRepository;
 
 @Service
-public class ScimUserProvisioning implements ScimProvisioning<ScimUser> {
+public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser> {
 
   private final UserConverter converter;
 
@@ -172,9 +171,10 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser> {
   }
 
   @Override
-  public void update(String id, List<? extends ScimPatchOperation> operations) {
+  public void update(String id, List<ScimPatchOperation<ScimUser>> operations) {
 
-	throw new ScimPatchOperationNotSupported("No patch operations are currently supported for a User");
+	// TODO Auto-generated method stub
+	
   }
 
 }

@@ -17,6 +17,7 @@ import it.infn.mw.iam.api.scim.exception.ScimResourceExistsException;
 import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
 import it.infn.mw.iam.api.scim.model.ScimGroup;
 import it.infn.mw.iam.api.scim.model.ScimListResponse;
+import it.infn.mw.iam.api.scim.model.ScimMemberRef;
 import it.infn.mw.iam.api.scim.model.ScimPatchOperation;
 import it.infn.mw.iam.api.scim.provisioning.paging.OffsetPageable;
 import it.infn.mw.iam.api.scim.provisioning.paging.ScimPageRequest;
@@ -26,7 +27,7 @@ import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.repository.IamGroupRepository;
 
 @Service
-public class ScimGroupProvisioning implements ScimProvisioning<ScimGroup> {
+public class ScimGroupProvisioning implements ScimProvisioning<ScimGroup, List<ScimMemberRef>> {
 
   private final GroupConverter converter;
   private final GroupUpdater updater;
@@ -144,8 +145,7 @@ public class ScimGroupProvisioning implements ScimProvisioning<ScimGroup> {
 	  resources.size(), op.getOffset() + 1);
   }
 
-  @Override
-  public void update(String id, List<? extends ScimPatchOperation> operations) {
+  public void update(String id, List<ScimPatchOperation<List<ScimMemberRef>>> operations) {
 
 	IamGroup iamGroup = groupRepository.findByUuid(id)
 	  .orElseThrow(() -> new ScimResourceNotFoundException(

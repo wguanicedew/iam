@@ -1,5 +1,6 @@
 package it.infn.mw.iam.persistence.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.Query;
@@ -34,5 +35,5 @@ public interface IamAccountRepository
     @Param("username") String username, @Param("uuid") String uuid);
 
   @Query("select a from IamAccount a join a.groups ag where ag.id = :groupId")
-  Optional<IamAccount> findByGroupId(@Param("groupId") String groupId);
+  List<IamAccount> findByGroupId(@Param("groupId") String groupId);
 }
