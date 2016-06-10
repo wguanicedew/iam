@@ -59,7 +59,7 @@ public class ScimExceptionHandler extends ResponseEntityExceptionHandler {
     return buildErrorResponse(HttpStatus.NOT_FOUND, nfe.getMessage());
   }
 
-  @ResponseStatus(HttpStatus.CONFLICT)
+  @ResponseStatus(code = HttpStatus.CONFLICT)
   @ExceptionHandler(ScimResourceExistsException.class)
   @ResponseBody
   public ScimErrorResponse handleResourceExists(ScimResourceExistsException e) {

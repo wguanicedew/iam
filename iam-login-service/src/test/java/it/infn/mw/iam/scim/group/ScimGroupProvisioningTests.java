@@ -217,5 +217,36 @@ public class ScimGroupProvisioningTests {
 
 	deleteGroup(createdGroup.getMeta().getLocation());
   }
+  
+  @Test
+  public void testGroupReplaceWithAlreadyUsedDisplayname() {
+
+	String engineers_uuid = UUID.randomUUID().toString();
+	String artists_uuid = UUID.randomUUID().toString();
+
+	ScimGroup engineers = null;
+	ScimGroup artists = null;
+
+	engineers = given().port(8080).auth().preemptive().oauth2(accessToken)
+	  .contentType(SCIM_CONTENT_TYPE)
+	  .body(ScimGroup.builder("engineers").id(engineers_uuid).build()).log()
+	  .all(true).when().post("/scim/Groups/").then().log().all(true)
+	  .statusCode(HttpStatus.CREATED.value()).extract().as(ScimGroup.class);
+
+	artists = given().port(8080).auth().preemptive().oauth2(accessToken)
+	  .contentType(SCIM_CONTENT_TYPE)
+	  .body(ScimGroup.builder("artists").id(artists_uuid).build()).log()
+	  .all(true).when().post("/scim/Groups/").then().log().all(true)
+	  .statusCode(HttpStatus.CREATED.value()).extract().as(ScimGroup.class);
+
+	given().port(8080).auth().preemptive().oauth2(accessToken)
+	  .contentType(SCIM_CONTENT_TYPE)
+	  .body(ScimGroup.builder("artists").id(engineers_uuid).build()).log()
+	  .all(true).when().put(engineers.getMeta().getLocation()).then().log()
+	  .all(true).statusCode(HttpStatus.CONFLICT.value());
+
+	deleteGroup(engineers.getMeta().getLocation());
+	deleteGroup(artists.getMeta().getLocation());
+  }
 
 }
