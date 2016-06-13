@@ -153,8 +153,9 @@ public class GroupController {
   }
 
   @PreAuthorize("#oauth2.hasScope('scim:write') or hasRole('ADMIN')")
-  @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = ScimConstants.SCIM_CONTENT_TYPE)
-  @ResponseStatus(HttpStatus.OK)
+  @RequestMapping(value = "/{id}", method = RequestMethod.PATCH,
+	consumes = ScimConstants.SCIM_CONTENT_TYPE)
+  @ResponseStatus(HttpStatus.NO_CONTENT)
   public void updateGroup(@PathVariable final String id, 
 	@RequestBody @Validated ScimGroupPatchRequest groupPatchRequest) {
 
