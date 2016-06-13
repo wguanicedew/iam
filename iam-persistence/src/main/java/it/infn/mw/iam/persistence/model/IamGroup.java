@@ -30,6 +30,9 @@ public class IamGroup {
   @Column(nullable = true, length = 512)
   private String description;
 
+  @ManyToMany(mappedBy = "groups")
+  private Set<IamAccount> accounts;
+
   @Temporal(TemporalType.TIMESTAMP)
   @Column(nullable = false)
   Date creationTime;
@@ -38,86 +41,83 @@ public class IamGroup {
   @Column(nullable = false)
   Date lastUpdateTime;
 
-  @ManyToMany(mappedBy = "groups")
-  private Set<IamAccount> accounts;
-
   public IamGroup() {
 
   }
 
   public Long getId() {
 
-    return id;
+	return id;
   }
 
   public void setId(Long id) {
 
-    this.id = id;
+	this.id = id;
   }
 
   public String getUuid() {
 
-    return uuid;
+	return uuid;
   }
 
   public void setUuid(String uuid) {
 
-    this.uuid = uuid;
+	this.uuid = uuid;
   }
 
   public String getName() {
 
-    return name;
+	return name;
   }
 
   public void setName(String name) {
 
-    this.name = name;
+	this.name = name;
   }
 
   public String getDescription() {
 
-    return description;
+	return description;
   }
 
   public void setDescription(String description) {
 
-    this.description = description;
-  }
-
-  public Date getCreationTime() {
-
-    return creationTime;
-  }
-
-  public void setCreationTime(Date creationTime) {
-
-    this.creationTime = creationTime;
-  }
-
-  public Date getLastUpdateTime() {
-
-    return lastUpdateTime;
-  }
-
-  public void setLastUpdateTime(Date lastUpdateTime) {
-
-    this.lastUpdateTime = lastUpdateTime;
+	this.description = description;
   }
 
   public Set<IamAccount> getAccounts() {
 
-    return accounts;
+	return accounts;
   }
 
   public void setAccounts(Set<IamAccount> accounts) {
 
-    this.accounts = accounts;
+	this.accounts = accounts;
   }
-  
+
+  public Date getCreationTime() {
+
+	return creationTime;
+  }
+
+  public void setCreationTime(Date creationTime) {
+
+	this.creationTime = creationTime;
+  }
+
+  public Date getLastUpdateTime() {
+
+	return lastUpdateTime;
+  }
+
+  public void setLastUpdateTime(Date lastUpdateTime) {
+
+	this.lastUpdateTime = lastUpdateTime;
+  }
+
   public void touch() {
 
-    setLastUpdateTime(new Date());
+	setLastUpdateTime(new Date());
   }
 
   @Override

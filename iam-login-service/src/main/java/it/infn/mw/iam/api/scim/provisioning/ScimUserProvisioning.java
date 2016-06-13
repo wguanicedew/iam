@@ -12,8 +12,9 @@ import org.springframework.stereotype.Service;
 
 import it.infn.mw.iam.api.scim.converter.UserConverter;
 import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
-import it.infn.mw.iam.api.scim.exception.ResourceNotFoundException;
+import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
 import it.infn.mw.iam.api.scim.model.ScimListResponse;
+import it.infn.mw.iam.api.scim.model.ScimPatchOperation;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.provisioning.paging.OffsetPageable;
 import it.infn.mw.iam.api.scim.provisioning.paging.ScimPageRequest;
@@ -23,7 +24,7 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamAuthoritiesRepository;
 
 @Service
-public class ScimUserProvisioning implements ScimProvisioning<ScimUser> {
+public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser> {
 
   private final UserConverter converter;
 
@@ -58,7 +59,7 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser> {
     idSanityChecks(id);
 
     IamAccount account = accountRepository.findByUuid(id)
-      .orElseThrow(() -> new ResourceNotFoundException(
+      .orElseThrow(() -> new ScimResourceNotFoundException(
         "No user mapped to id '" + id + "'"));
 
     return converter.toScim(account);
@@ -71,7 +72,7 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser> {
     idSanityChecks(id);
 
     IamAccount account = accountRepository.findByUuid(id)
-      .orElseThrow(() -> new ResourceNotFoundException(
+      .orElseThrow(() -> new ScimResourceNotFoundException(
         "No user mapped to id '" + id + "'"));
 
     accountRepository.delete(account);
@@ -142,7 +143,7 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser> {
   public ScimUser replace(String id, ScimUser scimItemToBeUpdated) {
 
     IamAccount existingAccount = accountRepository.findByUuid(id)
-      .orElseThrow(() -> new ResourceNotFoundException(
+      .orElseThrow(() -> new ScimResourceNotFoundException(
         "No user mapped to id '" + id + "'"));
 
     if (accountRepository.findByUsernameWithDifferentId(
@@ -167,6 +168,13 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser> {
     accountRepository.save(updatedAccount);
     return converter.toScim(updatedAccount);
 
+  }
+
+  @Override
+  public void update(String id, List<ScimPatchOperation<ScimUser>> operations) {
+
+	// TODO Auto-generated method stub
+	
   }
 
 }

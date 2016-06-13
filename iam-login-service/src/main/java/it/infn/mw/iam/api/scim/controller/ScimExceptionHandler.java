@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
-import it.infn.mw.iam.api.scim.exception.ResourceNotFoundException;
+import it.infn.mw.iam.api.scim.exception.ScimPatchOperationNotSupported;
+import it.infn.mw.iam.api.scim.exception.ScimResourceExistsException;
+import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
 import it.infn.mw.iam.api.scim.exception.ScimValidationException;
 import it.infn.mw.iam.api.scim.model.ScimErrorResponse;
 
@@ -49,12 +51,28 @@ public class ScimExceptionHandler extends ResponseEntityExceptionHandler {
   }
 
   @ResponseStatus(code = HttpStatus.NOT_FOUND)
-  @ExceptionHandler(ResourceNotFoundException.class)
+  @ExceptionHandler(ScimResourceNotFoundException.class)
   @ResponseBody
   public ScimErrorResponse handleResourceNotFoundException(
-    ResourceNotFoundException nfe) {
+    ScimResourceNotFoundException nfe) {
 
     return buildErrorResponse(HttpStatus.NOT_FOUND, nfe.getMessage());
+  }
+
+  @ResponseStatus(code = HttpStatus.CONFLICT)
+  @ExceptionHandler(ScimResourceExistsException.class)
+  @ResponseBody
+  public ScimErrorResponse handleResourceExists(ScimResourceExistsException e) {
+      return buildErrorResponse(HttpStatus.CONFLICT, e.getMessage());
+  }
+
+  @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(ScimPatchOperationNotSupported.class)
+  @ResponseBody
+  public ScimErrorResponse handleInvalidArgumentException(
+	ScimPatchOperationNotSupported e) {
+
+    return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
   }
 
   private ScimErrorResponse buildErrorResponse(HttpStatus status,
