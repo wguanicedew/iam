@@ -50,6 +50,11 @@ public class ScimEmail {
     return primary;
   }
 
+  public static Builder builder() {
+
+    return new Builder();
+  }
+
   public static class Builder {
 
     private ScimEmailType type;

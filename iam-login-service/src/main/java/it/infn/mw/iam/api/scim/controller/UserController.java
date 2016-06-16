@@ -5,7 +5,6 @@ import java.util.Set;
 
 import javax.transaction.Transactional;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.json.MappingJacksonValue;
@@ -33,6 +32,7 @@ import it.infn.mw.iam.api.scim.exception.ScimValidationException;
 import it.infn.mw.iam.api.scim.model.ScimConstants;
 import it.infn.mw.iam.api.scim.model.ScimListResponse;
 import it.infn.mw.iam.api.scim.model.ScimUser;
+import it.infn.mw.iam.api.scim.model.ScimUserPatchRequest;
 import it.infn.mw.iam.api.scim.provisioning.ScimUserProvisioning;
 import it.infn.mw.iam.api.scim.provisioning.paging.DefaultScimPageRequest;
 import it.infn.mw.iam.api.scim.provisioning.paging.ScimPageRequest;
@@ -157,15 +157,12 @@ public class UserController {
 
   @PreAuthorize("#oauth2.hasScope('scim:write') or hasRole('ADMIN')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH,
-    consumes = ScimConstants.SCIM_CONTENT_TYPE,
-    produces = ScimConstants.SCIM_CONTENT_TYPE)
-  @ResponseStatus(HttpStatus.OK)
-  public ScimUser updateUser(@PathVariable final String id,
-    @RequestBody @Validated(ScimUser.NewUserValidation.class) ScimUser user,
-    BindingResult validationResult) {
+    consumes = ScimConstants.SCIM_CONTENT_TYPE)
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void updateUser(@PathVariable final String id,
+    @RequestBody ScimUserPatchRequest patchRequest) {
 
-    throw new NotImplementedException(
-      "User update functionality is not currently " + "implemented.");
+    userProvisioningService.update(id, patchRequest.getOperations());
 
   }
 

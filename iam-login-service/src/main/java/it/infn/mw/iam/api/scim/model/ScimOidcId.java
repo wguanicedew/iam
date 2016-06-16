@@ -1,5 +1,6 @@
 package it.infn.mw.iam.api.scim.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -8,11 +9,13 @@ public class ScimOidcId {
 
   public final String issuer;
   public final String subject;
-
+  
+  @JsonCreator
   private ScimOidcId(@JsonProperty("issuer") String issuer,
-    @JsonProperty("subject") String subject) {
-    this.issuer = issuer;
-    this.subject = subject;
+	@JsonProperty("subject") String subject) {
+
+	this.issuer = issuer;
+	this.subject = subject;
   }
 
   private ScimOidcId(Builder b) {
@@ -28,6 +31,11 @@ public class ScimOidcId {
   public String getSubject() {
 
     return subject;
+  }
+
+  public static Builder builder() {
+    
+    return new Builder();
   }
 
   public static class Builder {

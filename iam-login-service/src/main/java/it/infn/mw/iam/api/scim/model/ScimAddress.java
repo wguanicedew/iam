@@ -93,9 +93,11 @@ public class ScimAddress {
     return primary;
   }
 
-  public static Builder builder(){
+  public static Builder builder() {
+
     return new Builder();
   }
+
   public static class Builder {
 
     private ScimAddressType type = ScimAddressType.work;
@@ -107,7 +109,7 @@ public class ScimAddress {
     private String postalCode;
     private String country;
     private boolean primary = true;
-    
+
     public Builder() {
 
     }

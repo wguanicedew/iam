@@ -42,11 +42,16 @@ public class ScimIndigoUser {
     return samlIds;
   }
 
+  public static Builder builder() {
+
+    return new Builder();
+  }
+
   public static class Builder {
 
-    private List<ScimSshKey> sshKeys = new ArrayList<>();
-    private List<ScimOidcId> oidcIds = new ArrayList<>();
-    private List<ScimSamlId> samlIds = new ArrayList<>();
+    private List<ScimSshKey> sshKeys = new ArrayList<ScimSshKey>();
+    private List<ScimOidcId> oidcIds = new ArrayList<ScimOidcId>();
+    private List<ScimSamlId> samlIds = new ArrayList<ScimSamlId>();
 
     public Builder addSshKey(ScimSshKey sshKey) {
 

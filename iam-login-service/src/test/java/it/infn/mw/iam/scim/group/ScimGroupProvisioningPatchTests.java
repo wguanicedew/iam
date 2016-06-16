@@ -38,325 +38,579 @@ public class ScimGroupProvisioningPatchTests {
   @BeforeClass
   public static void init() {
 
-	TestUtils.initRestAssured();
+    TestUtils.initRestAssured();
   }
 
   @Before
   public void initAccessToken() {
 
-	accessToken = TestUtils.getAccessToken("scim-client-rw", "secret",
-	  "scim:read scim:write");
+    accessToken = TestUtils.getAccessToken("scim-client-rw", "secret",
+      "scim:read scim:write");
   }
 
   private ScimGroup addTestGroup(String displayName) {
 
-	String uuid = UUID.randomUUID().toString();
+    String uuid = UUID.randomUUID()
+      .toString();
 
-	ScimGroup group = ScimGroup.builder(displayName).id(uuid).build();
+    ScimGroup group = ScimGroup.builder(displayName)
+      .id(uuid)
+      .build();
 
-	return given().port(8080).auth().preemptive().oauth2(accessToken)
-	  .contentType(SCIM_CONTENT_TYPE).body(group).log().all(true).when()
-	  .post("/scim/Groups/").then().log().all(true)
-	  .statusCode(HttpStatus.CREATED.value()).extract().as(ScimGroup.class);
+    return given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
+      .contentType(SCIM_CONTENT_TYPE)
+      .body(group)
+      .log()
+      .all(true)
+      .when()
+      .post("/scim/Groups/")
+      .then()
+      .log()
+      .all(true)
+      .statusCode(HttpStatus.CREATED.value())
+      .extract()
+      .as(ScimGroup.class);
   }
 
   private ScimUser addTestUser(String userName, String email, String firstName,
-	String LastName) {
+    String LastName) {
 
-	ScimUser lennon = ScimUser.builder(userName).buildEmail(email)
-	  .buildName(firstName, LastName).build();
+    ScimUser lennon = ScimUser.builder(userName)
+      .buildEmail(email)
+      .buildName(firstName, LastName)
+      .build();
 
-	return given().port(8080).auth().preemptive().oauth2(accessToken)
-	  .contentType(SCIM_CONTENT_TYPE).body(lennon).log().all(true).when()
-	  .post("/scim/Users/").then().log().all(true)
-	  .statusCode(HttpStatus.CREATED.value()).extract().as(ScimUser.class);
+    return given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
+      .contentType(SCIM_CONTENT_TYPE)
+      .body(lennon)
+      .log()
+      .all(true)
+      .when()
+      .post("/scim/Users/")
+      .then()
+      .log()
+      .all(true)
+      .statusCode(HttpStatus.CREATED.value())
+      .extract()
+      .as(ScimUser.class);
   }
 
   private ScimMemberRef getMemberRef(ScimUser user) {
 
-	return ScimMemberRef.builder().display(user.getDisplayName())
-	  .ref(user.getMeta().getLocation()).value(user.getId()).build();
+    return ScimMemberRef.builder()
+      .display(user.getDisplayName())
+      .ref(user.getMeta()
+        .getLocation())
+      .value(user.getId())
+      .build();
   }
 
   private ScimGroupPatchRequest getPatchRequest(ScimPatchOperationType op,
-	List<ScimUser> users) {
+    List<ScimUser> users) {
 
-	List<ScimMemberRef> membersRefs = new ArrayList<ScimMemberRef>();
-	for (ScimUser u : users) {
-	  membersRefs.add(getMemberRef(u));
-	}
+    List<ScimMemberRef> membersRefs = new ArrayList<ScimMemberRef>();
+    for (ScimUser u : users) {
+      membersRefs.add(getMemberRef(u));
+    }
 
-	ScimPatchOperation<List<ScimMemberRef>> membersOp = (new ScimPatchOperation.Builder<List<ScimMemberRef>>())
-	  .op(op).path("members").value(membersRefs).build();
+    ScimPatchOperation<List<ScimMemberRef>> membersOp = (new ScimPatchOperation.Builder<List<ScimMemberRef>>())
+      .op(op)
+      .path("members")
+      .value(membersRefs)
+      .build();
 
-	return ScimGroupPatchRequest.builder().addOperation(membersOp).build();
+    return ScimGroupPatchRequest.builder()
+      .addOperation(membersOp)
+      .build();
   }
 
   private ScimGroupPatchRequest getPatchRemoveAllMembersRequest() {
 
-	ScimPatchOperation<List<ScimMemberRef>> membersOp = (new ScimPatchOperation.Builder<List<ScimMemberRef>>())
-	  .op(ScimPatchOperationType.remove).path("members").value(null).build();
+    ScimPatchOperation<List<ScimMemberRef>> membersOp = (new ScimPatchOperation.Builder<List<ScimMemberRef>>())
+      .op(ScimPatchOperationType.remove)
+      .path("members")
+      .value(null)
+      .build();
 
-	return ScimGroupPatchRequest.builder().addOperation(membersOp).build();
+    return ScimGroupPatchRequest.builder()
+      .addOperation(membersOp)
+      .build();
   }
 
   private void deleteGroup(String groupLocation) {
 
-	given().port(8080).auth().preemptive().oauth2(accessToken)
-	  .contentType(SCIM_CONTENT_TYPE).when().delete(groupLocation).then()
-	  .statusCode(HttpStatus.NO_CONTENT.value());
+    given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
+      .contentType(SCIM_CONTENT_TYPE)
+      .when()
+      .delete(groupLocation)
+      .then()
+      .statusCode(HttpStatus.NO_CONTENT.value());
 
-	given().port(8080).auth().preemptive().oauth2(accessToken)
-	  .contentType(SCIM_CONTENT_TYPE).when().get(groupLocation).then()
-	  .statusCode(HttpStatus.NOT_FOUND.value());
+    given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
+      .contentType(SCIM_CONTENT_TYPE)
+      .when()
+      .get(groupLocation)
+      .then()
+      .statusCode(HttpStatus.NOT_FOUND.value());
 
   }
 
   private void deleteUser(String userLocation) {
 
-	given().port(8080).auth().preemptive().oauth2(accessToken)
-	  .contentType(SCIM_CONTENT_TYPE).when().delete(userLocation).then()
-	  .statusCode(HttpStatus.NO_CONTENT.value());
+    given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
+      .contentType(SCIM_CONTENT_TYPE)
+      .when()
+      .delete(userLocation)
+      .then()
+      .statusCode(HttpStatus.NO_CONTENT.value());
 
-	given().port(8080).auth().preemptive().oauth2(accessToken)
-	  .contentType(SCIM_CONTENT_TYPE).when().get(userLocation).then()
-	  .statusCode(HttpStatus.NOT_FOUND.value());
+    given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
+      .contentType(SCIM_CONTENT_TYPE)
+      .when()
+      .get(userLocation)
+      .then()
+      .statusCode(HttpStatus.NOT_FOUND.value());
 
   }
 
   @Test
   public void testAddMemberToGroup() {
 
-	ScimGroup engineers = addTestGroup("engineers");
+    ScimGroup engineers = addTestGroup("engineers");
 
-	List<ScimUser> members = new ArrayList<ScimUser>();
-	ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John",
-	  "Lennon");
-	members.add(lennon);
+    List<ScimUser> members = new ArrayList<ScimUser>();
+    ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John",
+      "Lennon");
+    members.add(lennon);
 
-	ScimGroupPatchRequest patchReq = getPatchRequest(ScimPatchOperationType.add,
-	  members);
+    ScimGroupPatchRequest patchReq = getPatchRequest(ScimPatchOperationType.add,
+      members);
 
-	given().port(8080).auth().preemptive().oauth2(accessToken)
-	  .contentType(SCIM_CONTENT_TYPE).body(patchReq).log().all(true).when()
-	  .patch(engineers.getMeta().getLocation()).then().log().all(true)
-	  .statusCode(HttpStatus.NO_CONTENT.value());
+    given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
+      .contentType(SCIM_CONTENT_TYPE)
+      .body(patchReq)
+      .log()
+      .all(true)
+      .when()
+      .patch(engineers.getMeta()
+        .getLocation())
+      .then()
+      .log()
+      .all(true)
+      .statusCode(HttpStatus.NO_CONTENT.value());
 
-	given().port(8080).auth().preemptive().oauth2(accessToken)
-	  .contentType(SCIM_CONTENT_TYPE).when()
-	  .get(engineers.getMeta().getLocation()).then().log().all(true)
-	  .statusCode(HttpStatus.OK.value()).body("id", equalTo(engineers.getId()))
-	  .body("displayName", equalTo(engineers.getDisplayName()))
-	  .body("members", hasSize(equalTo(1)))
-	  .body("members[0].display", equalTo(lennon.getDisplayName()))
-	  .body("members[0].value", equalTo(lennon.getId()))
-	  .body("members[0].$ref", equalTo(lennon.getMeta().getLocation()));
+    given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
+      .contentType(SCIM_CONTENT_TYPE)
+      .when()
+      .get(engineers.getMeta()
+        .getLocation())
+      .then()
+      .log()
+      .all(true)
+      .statusCode(HttpStatus.OK.value())
+      .body("id", equalTo(engineers.getId()))
+      .body("displayName", equalTo(engineers.getDisplayName()))
+      .body("members", hasSize(equalTo(1)))
+      .body("members[0].display", equalTo(lennon.getDisplayName()))
+      .body("members[0].value", equalTo(lennon.getId()))
+      .body("members[0].$ref", equalTo(lennon.getMeta()
+        .getLocation()));
 
-	deleteUser(lennon.getMeta().getLocation());
-	deleteGroup(engineers.getMeta().getLocation());
+    deleteUser(lennon.getMeta()
+      .getLocation());
+    deleteGroup(engineers.getMeta()
+      .getLocation());
   }
 
   @Test
   public void testRemoveNonMemberFromGroup() {
 
-	ScimGroup engineers = addTestGroup("engineers");
+    ScimGroup engineers = addTestGroup("engineers");
 
-	List<ScimUser> members = new ArrayList<ScimUser>();
-	ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John",
-	  "Lennon");
-	members.add(lennon);
+    List<ScimUser> members = new ArrayList<ScimUser>();
+    ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John",
+      "Lennon");
+    members.add(lennon);
 
-	ScimGroupPatchRequest patchReq = getPatchRequest(
-	  ScimPatchOperationType.remove, members);
+    ScimGroupPatchRequest patchReq = getPatchRequest(
+      ScimPatchOperationType.remove, members);
 
-	given().port(8080).auth().preemptive().oauth2(accessToken)
-	  .contentType(SCIM_CONTENT_TYPE).body(patchReq).log().all(true).when()
-	  .patch(engineers.getMeta().getLocation()).then().log().all(true)
-	  .statusCode(HttpStatus.NO_CONTENT.value());
+    given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
+      .contentType(SCIM_CONTENT_TYPE)
+      .body(patchReq)
+      .log()
+      .all(true)
+      .when()
+      .patch(engineers.getMeta()
+        .getLocation())
+      .then()
+      .log()
+      .all(true)
+      .statusCode(HttpStatus.NO_CONTENT.value());
 
-	deleteUser(lennon.getMeta().getLocation());
-	deleteGroup(engineers.getMeta().getLocation());
+    deleteUser(lennon.getMeta()
+      .getLocation());
+    deleteGroup(engineers.getMeta()
+      .getLocation());
   }
 
   @Test
   public void testAddAndRemoveMultipleMembersToGroup() {
 
-	ScimGroup engineers = addTestGroup("engineers");
+    ScimGroup engineers = addTestGroup("engineers");
 
-	List<ScimUser> members = new ArrayList<ScimUser>();
-	ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John",
-	  "Lennon");
-	ScimUser lincoln = addTestUser("abhram_lincoln", "lincoln@email.test",
-	  "Abhram", "Lincoln");
-	members.add(lennon);
-	members.add(lincoln);
+    List<ScimUser> members = new ArrayList<ScimUser>();
+    ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John",
+      "Lennon");
+    ScimUser lincoln = addTestUser("abraham_lincoln", "lincoln@email.test",
+      "Abraham", "Lincoln");
+    members.add(lennon);
+    members.add(lincoln);
 
-	ScimGroupPatchRequest patchAddReq = getPatchRequest(
-	  ScimPatchOperationType.add, members);
+    ScimGroupPatchRequest patchAddReq = getPatchRequest(
+      ScimPatchOperationType.add, members);
 
-	given().port(8080).auth().preemptive().oauth2(accessToken)
-	  .contentType(SCIM_CONTENT_TYPE).body(patchAddReq).log().all(true).when()
-	  .patch(engineers.getMeta().getLocation()).then().log().all(true)
-	  .statusCode(HttpStatus.NO_CONTENT.value());
+    given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
+      .contentType(SCIM_CONTENT_TYPE)
+      .body(patchAddReq)
+      .log()
+      .all(true)
+      .when()
+      .patch(engineers.getMeta()
+        .getLocation())
+      .then()
+      .log()
+      .all(true)
+      .statusCode(HttpStatus.NO_CONTENT.value());
 
-	given().port(8080).auth().preemptive().oauth2(accessToken)
-	  .contentType(SCIM_CONTENT_TYPE).when()
-	  .get(engineers.getMeta().getLocation()).then().log().all(true)
-	  .statusCode(HttpStatus.OK.value()).body("id", equalTo(engineers.getId()))
-	  .body("displayName", equalTo(engineers.getDisplayName()))
-	  .body("members", hasSize(equalTo(2)));
+    given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
+      .contentType(SCIM_CONTENT_TYPE)
+      .when()
+      .get(engineers.getMeta()
+        .getLocation())
+      .then()
+      .log()
+      .all(true)
+      .statusCode(HttpStatus.OK.value())
+      .body("id", equalTo(engineers.getId()))
+      .body("displayName", equalTo(engineers.getDisplayName()))
+      .body("members", hasSize(equalTo(2)));
 
-	ScimGroupPatchRequest patchRemoveReq = getPatchRequest(
-	  ScimPatchOperationType.remove, members);
+    ScimGroupPatchRequest patchRemoveReq = getPatchRequest(
+      ScimPatchOperationType.remove, members);
 
-	given().port(8080).auth().preemptive().oauth2(accessToken)
-	  .contentType(SCIM_CONTENT_TYPE).body(patchRemoveReq).log().all(true)
-	  .when().patch(engineers.getMeta().getLocation()).then().log().all(true)
-	  .statusCode(HttpStatus.NO_CONTENT.value());
+    given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
+      .contentType(SCIM_CONTENT_TYPE)
+      .body(patchRemoveReq)
+      .log()
+      .all(true)
+      .when()
+      .patch(engineers.getMeta()
+        .getLocation())
+      .then()
+      .log()
+      .all(true)
+      .statusCode(HttpStatus.NO_CONTENT.value());
 
-	given().port(8080).auth().preemptive().oauth2(accessToken)
-	  .contentType(SCIM_CONTENT_TYPE).when()
-	  .get(engineers.getMeta().getLocation()).then().log().all(true)
-	  .statusCode(HttpStatus.OK.value()).body("id", equalTo(engineers.getId()))
-	  .body("displayName", equalTo(engineers.getDisplayName()))
-	  .body("members", equalTo(null));
+    given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
+      .contentType(SCIM_CONTENT_TYPE)
+      .when()
+      .get(engineers.getMeta()
+        .getLocation())
+      .then()
+      .log()
+      .all(true)
+      .statusCode(HttpStatus.OK.value())
+      .body("id", equalTo(engineers.getId()))
+      .body("displayName", equalTo(engineers.getDisplayName()))
+      .body("members", equalTo(null));
 
-	deleteUser(lennon.getMeta().getLocation());
-	deleteUser(lincoln.getMeta().getLocation());
-	deleteGroup(engineers.getMeta().getLocation());
+    deleteUser(lennon.getMeta()
+      .getLocation());
+    deleteUser(lincoln.getMeta()
+      .getLocation());
+    deleteGroup(engineers.getMeta()
+      .getLocation());
   }
 
   @Test
   public void testAddMultipleMembersToGroup() {
 
-	ScimGroup engineers = addTestGroup("engineers");
+    ScimGroup engineers = addTestGroup("engineers");
 
-	List<ScimUser> members = new ArrayList<ScimUser>();
-	ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John",
-	  "Lennon");
-	ScimUser lincoln = addTestUser("abhram_lincoln", "lincoln@email.test",
-	  "Abhram", "Lincoln");
-	deleteUser(lincoln.getMeta().getLocation());
-	members.add(lennon);
-	members.add(lincoln);
+    List<ScimUser> members = new ArrayList<ScimUser>();
+    ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John",
+      "Lennon");
+    ScimUser lincoln = addTestUser("abhram_lincoln", "lincoln@email.test",
+      "Abhram", "Lincoln");
+    deleteUser(lincoln.getMeta()
+      .getLocation());
+    members.add(lennon);
+    members.add(lincoln);
 
-	ScimGroupPatchRequest patchAddReq = getPatchRequest(
-	  ScimPatchOperationType.add, members);
+    ScimGroupPatchRequest patchAddReq = getPatchRequest(
+      ScimPatchOperationType.add, members);
 
-	given().port(8080).auth().preemptive().oauth2(accessToken)
-	  .contentType(SCIM_CONTENT_TYPE).body(patchAddReq).log().all(true).when()
-	  .patch(engineers.getMeta().getLocation()).then().log().all(true)
-	  .statusCode(HttpStatus.NOT_FOUND.value());
+    given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
+      .contentType(SCIM_CONTENT_TYPE)
+      .body(patchAddReq)
+      .log()
+      .all(true)
+      .when()
+      .patch(engineers.getMeta()
+        .getLocation())
+      .then()
+      .log()
+      .all(true)
+      .statusCode(HttpStatus.NOT_FOUND.value());
 
-	given().port(8080).auth().preemptive().oauth2(accessToken)
-	  .contentType(SCIM_CONTENT_TYPE).when()
-	  .get(engineers.getMeta().getLocation()).then().log().all(true)
-	  .statusCode(HttpStatus.OK.value()).body("id", equalTo(engineers.getId()))
-	  .body("displayName", equalTo(engineers.getDisplayName()))
-	  .body("members", equalTo(null));
+    given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
+      .contentType(SCIM_CONTENT_TYPE)
+      .when()
+      .get(engineers.getMeta()
+        .getLocation())
+      .then()
+      .log()
+      .all(true)
+      .statusCode(HttpStatus.OK.value())
+      .body("id", equalTo(engineers.getId()))
+      .body("displayName", equalTo(engineers.getDisplayName()))
+      .body("members", equalTo(null));
 
-	deleteUser(lennon.getMeta().getLocation());
-	deleteGroup(engineers.getMeta().getLocation());
+    deleteUser(lennon.getMeta()
+      .getLocation());
+    deleteGroup(engineers.getMeta()
+      .getLocation());
   }
 
   @Test
   public void testRemoveMultipleMembersToGroup() {
 
-	ScimGroup engineers = addTestGroup("engineers");
+    ScimGroup engineers = addTestGroup("engineers");
 
-	List<ScimUser> members = new ArrayList<ScimUser>();
-	ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John",
-	  "Lennon");
-	ScimUser lincoln = addTestUser("abhram_lincoln", "lincoln@email.test",
-	  "Abhram", "Lincoln");
-	members.add(lennon);
-	members.add(lincoln);
+    List<ScimUser> members = new ArrayList<ScimUser>();
+    ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John",
+      "Lennon");
+    ScimUser lincoln = addTestUser("abhram_lincoln", "lincoln@email.test",
+      "Abhram", "Lincoln");
+    members.add(lennon);
+    members.add(lincoln);
 
-	ScimGroupPatchRequest patchAddReq = getPatchRequest(
-	  ScimPatchOperationType.add, members);
+    ScimGroupPatchRequest patchAddReq = getPatchRequest(
+      ScimPatchOperationType.add, members);
 
-	given().port(8080).auth().preemptive().oauth2(accessToken)
-	  .contentType(SCIM_CONTENT_TYPE).body(patchAddReq).log().all(true).when()
-	  .patch(engineers.getMeta().getLocation()).then().log().all(true)
-	  .statusCode(HttpStatus.NO_CONTENT.value());
+    given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
+      .contentType(SCIM_CONTENT_TYPE)
+      .body(patchAddReq)
+      .log()
+      .all(true)
+      .when()
+      .patch(engineers.getMeta()
+        .getLocation())
+      .then()
+      .log()
+      .all(true)
+      .statusCode(HttpStatus.NO_CONTENT.value());
 
-	given().port(8080).auth().preemptive().oauth2(accessToken)
-	  .contentType(SCIM_CONTENT_TYPE).when()
-	  .get(engineers.getMeta().getLocation()).then().log().all(true)
-	  .statusCode(HttpStatus.OK.value()).body("id", equalTo(engineers.getId()))
-	  .body("displayName", equalTo(engineers.getDisplayName()))
-	  .body("members", hasSize(equalTo(2)));
+    given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
+      .contentType(SCIM_CONTENT_TYPE)
+      .when()
+      .get(engineers.getMeta()
+        .getLocation())
+      .then()
+      .log()
+      .all(true)
+      .statusCode(HttpStatus.OK.value())
+      .body("id", equalTo(engineers.getId()))
+      .body("displayName", equalTo(engineers.getDisplayName()))
+      .body("members", hasSize(equalTo(2)));
 
-	ScimGroupPatchRequest patchRemoveReq = getPatchRemoveAllMembersRequest();
+    ScimGroupPatchRequest patchRemoveReq = getPatchRemoveAllMembersRequest();
 
-	given().port(8080).auth().preemptive().oauth2(accessToken)
-	  .contentType(SCIM_CONTENT_TYPE).body(patchRemoveReq).log().all(true)
-	  .when().patch(engineers.getMeta().getLocation()).then().log().all(true)
-	  .statusCode(HttpStatus.NO_CONTENT.value());
+    given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
+      .contentType(SCIM_CONTENT_TYPE)
+      .body(patchRemoveReq)
+      .log()
+      .all(true)
+      .when()
+      .patch(engineers.getMeta()
+        .getLocation())
+      .then()
+      .log()
+      .all(true)
+      .statusCode(HttpStatus.NO_CONTENT.value());
 
-	given().port(8080).auth().preemptive().oauth2(accessToken)
-	  .contentType(SCIM_CONTENT_TYPE).when()
-	  .get(engineers.getMeta().getLocation()).then().log().all(true)
-	  .statusCode(HttpStatus.OK.value()).body("id", equalTo(engineers.getId()))
-	  .body("displayName", equalTo(engineers.getDisplayName()))
-	  .body("members", equalTo(null));
+    given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
+      .contentType(SCIM_CONTENT_TYPE)
+      .when()
+      .get(engineers.getMeta()
+        .getLocation())
+      .then()
+      .log()
+      .all(true)
+      .statusCode(HttpStatus.OK.value())
+      .body("id", equalTo(engineers.getId()))
+      .body("displayName", equalTo(engineers.getDisplayName()))
+      .body("members", equalTo(null));
 
-	deleteUser(lennon.getMeta().getLocation());
-	deleteUser(lincoln.getMeta().getLocation());
-	deleteGroup(engineers.getMeta().getLocation());
+    deleteUser(lennon.getMeta()
+      .getLocation());
+    deleteUser(lincoln.getMeta()
+      .getLocation());
+    deleteGroup(engineers.getMeta()
+      .getLocation());
   }
-  
+
   @Test
   public void testReplaceMember() {
 
-	ScimGroup engineers = addTestGroup("engineers");
+    ScimGroup engineers = addTestGroup("engineers");
 
-	List<ScimUser> members = new ArrayList<ScimUser>();
-	ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John",
-	  "Lennon");
-	members.add(lennon);
-	
-	List<ScimUser> replacedMembers = new ArrayList<ScimUser>();
-	ScimUser lincoln = addTestUser("abhram_lincoln", "lincoln@email.test",
-	  "Abhram", "Lincoln");
-	replacedMembers.add(lincoln);
+    List<ScimUser> members = new ArrayList<ScimUser>();
+    ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John",
+      "Lennon");
+    members.add(lennon);
 
-	ScimGroupPatchRequest patchAddReq = getPatchRequest(
-	  ScimPatchOperationType.add, members);
+    List<ScimUser> replacedMembers = new ArrayList<ScimUser>();
+    ScimUser lincoln = addTestUser("abhram_lincoln", "lincoln@email.test",
+      "Abhram", "Lincoln");
+    replacedMembers.add(lincoln);
 
-	given().port(8080).auth().preemptive().oauth2(accessToken)
-	  .contentType(SCIM_CONTENT_TYPE).body(patchAddReq).log().all(true).when()
-	  .patch(engineers.getMeta().getLocation()).then().log().all(true)
-	  .statusCode(HttpStatus.NO_CONTENT.value());
+    ScimGroupPatchRequest patchAddReq = getPatchRequest(
+      ScimPatchOperationType.add, members);
 
-	given().port(8080).auth().preemptive().oauth2(accessToken)
-	  .contentType(SCIM_CONTENT_TYPE).when()
-	  .get(engineers.getMeta().getLocation()).then().log().all(true)
-	  .statusCode(HttpStatus.OK.value()).body("id", equalTo(engineers.getId()))
-	  .body("displayName", equalTo(engineers.getDisplayName()))
-	  .body("members", hasSize(equalTo(1)))
-	  .body("members[0].display", equalTo(lennon.getUserName()));
+    given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
+      .contentType(SCIM_CONTENT_TYPE)
+      .body(patchAddReq)
+      .log()
+      .all(true)
+      .when()
+      .patch(engineers.getMeta()
+        .getLocation())
+      .then()
+      .log()
+      .all(true)
+      .statusCode(HttpStatus.NO_CONTENT.value());
 
-	
-	ScimGroupPatchRequest patchReplaceReq = getPatchRequest(
-	  ScimPatchOperationType.replace, replacedMembers);
+    given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
+      .contentType(SCIM_CONTENT_TYPE)
+      .when()
+      .get(engineers.getMeta()
+        .getLocation())
+      .then()
+      .log()
+      .all(true)
+      .statusCode(HttpStatus.OK.value())
+      .body("id", equalTo(engineers.getId()))
+      .body("displayName", equalTo(engineers.getDisplayName()))
+      .body("members", hasSize(equalTo(1)))
+      .body("members[0].display", equalTo(lennon.getUserName()));
 
-	given().port(8080).auth().preemptive().oauth2(accessToken)
-	  .contentType(SCIM_CONTENT_TYPE).body(patchReplaceReq).log().all(true)
-	  .when().patch(engineers.getMeta().getLocation()).then().log().all(true)
-	  .statusCode(HttpStatus.NO_CONTENT.value());
+    ScimGroupPatchRequest patchReplaceReq = getPatchRequest(
+      ScimPatchOperationType.replace, replacedMembers);
 
-	given().port(8080).auth().preemptive().oauth2(accessToken)
-	  .contentType(SCIM_CONTENT_TYPE).when()
-	  .get(engineers.getMeta().getLocation()).then().log().all(true)
-	  .statusCode(HttpStatus.OK.value()).body("id", equalTo(engineers.getId()))
-	  .body("displayName", equalTo(engineers.getDisplayName()))
-	  .body("members", hasSize(equalTo(1)))
-	  .body("members[0].display", equalTo(lincoln.getUserName()));
+    given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
+      .contentType(SCIM_CONTENT_TYPE)
+      .body(patchReplaceReq)
+      .log()
+      .all(true)
+      .when()
+      .patch(engineers.getMeta()
+        .getLocation())
+      .then()
+      .log()
+      .all(true)
+      .statusCode(HttpStatus.NO_CONTENT.value());
 
-	deleteUser(lennon.getMeta().getLocation());
-	deleteUser(lincoln.getMeta().getLocation());
-	deleteGroup(engineers.getMeta().getLocation());
+    given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
+      .contentType(SCIM_CONTENT_TYPE)
+      .when()
+      .get(engineers.getMeta()
+        .getLocation())
+      .then()
+      .log()
+      .all(true)
+      .statusCode(HttpStatus.OK.value())
+      .body("id", equalTo(engineers.getId()))
+      .body("displayName", equalTo(engineers.getDisplayName()))
+      .body("members", hasSize(equalTo(1)))
+      .body("members[0].display", equalTo(lincoln.getUserName()));
+
+    deleteUser(lennon.getMeta()
+      .getLocation());
+    deleteUser(lincoln.getMeta()
+      .getLocation());
+    deleteGroup(engineers.getMeta()
+      .getLocation());
   }
 
 }

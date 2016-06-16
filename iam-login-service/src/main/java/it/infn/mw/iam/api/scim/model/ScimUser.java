@@ -18,7 +18,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonFilter("attributeFilter")
 public class ScimUser extends ScimResource {
 
-  public interface NewUserValidation {}
+  public interface NewUserValidation {
+  }
 
   public static final String USER_SCHEMA = "urn:ietf:params:scim:schemas:core:2.0:User";
   public static final String RESOURCE_TYPE = "User";
@@ -66,7 +67,10 @@ public class ScimUser extends ScimResource {
     @JsonProperty("locale") String locale,
     @JsonProperty("timezone") String timezone,
     @JsonProperty("active") Boolean active,
-    @JsonProperty("emails") List<ScimEmail> emails) {
+    @JsonProperty("emails") List<ScimEmail> emails,
+    @JsonProperty("addresses") List<ScimAddress> addresses,
+    @JsonProperty("groups") List<ScimGroupRef> groups,
+    @JsonProperty("urn:indigo-dc:scim:schemas:IndigoUser") ScimIndigoUser indigoUser) {
 
     super(id, externalId, meta, schemas);
 
@@ -81,20 +85,14 @@ public class ScimUser extends ScimResource {
     this.locale = locale;
     this.timezone = timezone;
     this.emails = emails;
-
     this.active = active;
-
-    // FIXME: add support for parsing groups
-    this.groups = null;
+    this.groups = groups;
+    this.addresses = addresses;
+    this.indigoUser = indigoUser;
 
     // FIXME: add support for parsing certificates
     this.certificates = null;
 
-    // FIXME: add support for parsing addresses
-    this.addresses = null;
-
-    // FIXME: add support for parsing indigoUser
-    this.indigoUser = null;
   }
 
   private ScimUser(Builder b) {
@@ -198,10 +196,16 @@ public class ScimUser extends ScimResource {
     return groups;
   }
 
-  public static Builder builder(String userName){
-    return new Builder(userName);
+  public static Builder builder(String uuid) {
+
+    return new Builder(uuid);
   }
-  
+
+  public static Builder builder() {
+
+    return new Builder();
+  }
+
   public static class Builder extends ScimResource.Builder<ScimUser> {
 
     private String userName;
@@ -218,15 +222,25 @@ public class ScimUser extends ScimResource {
 
     private List<ScimEmail> emails = new ArrayList<>();
     private List<ScimGroupRef> groups = new ArrayList<>();
-    private List<ScimAddress> addresses;
+    private List<ScimAddress> addresses = new ArrayList<>();
     private List<ScimX509Certificate> certificates;
     private ScimIndigoUser indigoUser;
 
-    public Builder(String userName) {
+    public Builder() {
       super();
+    }
+
+    public Builder(String userName) {
+      this();
       schemas.add(USER_SCHEMA);
       schemas.add(ScimConstants.INDIGO_USER_SCHEMA);
       this.userName = userName;
+    }
+
+    public Builder userName(String userName) {
+
+      this.userName = userName;
+      return this;
     }
 
     public Builder id(String uuid) {
@@ -335,6 +349,12 @@ public class ScimUser extends ScimResource {
     public Builder indigoUserInfo(ScimIndigoUser indigoUser) {
 
       this.indigoUser = indigoUser;
+      return this;
+    }
+
+    public Builder addAddress(ScimAddress scimAddress) {
+
+      addresses.add(scimAddress);
       return this;
     }
 

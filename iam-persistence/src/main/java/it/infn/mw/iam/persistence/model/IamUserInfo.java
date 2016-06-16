@@ -1,5 +1,7 @@
 package it.infn.mw.iam.persistence.model;
 
+import static it.infn.mw.iam.core.NameUtils.getFormatted;
+
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -382,19 +384,7 @@ public class IamUserInfo implements UserInfo {
   @Override
   public String getName() {
 
-    String middleName = getMiddleName();
-    StringBuilder builder = new StringBuilder();
-    builder.append(getGivenName());
-
-    if (middleName != null) {
-      builder.append(" ");
-      builder.append(middleName);
-    }
-
-    builder.append(" ");
-    builder.append(getFamilyName());
-    return builder.toString();
-
+    return getFormatted(this.givenName, this.middleName, this.familyName);
   }
 
   @Override

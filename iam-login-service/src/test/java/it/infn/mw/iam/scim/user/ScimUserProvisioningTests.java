@@ -185,11 +185,11 @@ public class ScimUserProvisioningTests {
 
     String username = "paul_mccartney";
 
-    ScimUser.Builder builder = new ScimUser.Builder(username);
-    builder.buildEmail("test@email.test");
-    builder.buildName("Paul", "McCartney");
-
-    ScimUser user = builder.build();
+    ScimUser user = ScimUser.builder()
+      .userName(username)
+      .buildEmail("test@email.test")
+      .buildName("Paul", "McCartney")
+      .build();
 
     ScimUser createdUser = given().port(8080)
       .auth()
@@ -236,11 +236,11 @@ public class ScimUserProvisioningTests {
 
     String username = "";
 
-    ScimUser.Builder builder = new ScimUser.Builder(username);
-    builder.buildEmail("test@email.test");
-    builder.buildName("Paul", "McCartney");
+    ScimUser user = ScimUser.builder(username)
+      .buildEmail("test@email.test")
+      .buildName("Paul", "McCartney")
+      .build();
 
-    ScimUser user = builder.build();
     given().port(8080)
       .auth()
       .preemptive()
@@ -262,12 +262,10 @@ public class ScimUserProvisioningTests {
   @Test
   public void testEmptyEmailValidationError() {
 
-    String username = "paul";
+    ScimUser user = ScimUser.builder("paul")
+      .buildName("Paul", "McCartney")
+      .build();
 
-    ScimUser.Builder builder = new ScimUser.Builder(username);
-    builder.buildName("Paul", "McCartney");
-
-    ScimUser user = builder.build();
     given().port(8080)
       .auth()
       .preemptive()
@@ -289,13 +287,11 @@ public class ScimUserProvisioningTests {
   @Test
   public void testInvalidEmailValidationError() {
 
-    String username = "paul";
+    ScimUser user = ScimUser.builder("paul")
+      .buildEmail("this_is_not_an_email")
+      .buildName("Paul", "McCartney")
+      .build();
 
-    ScimUser.Builder builder = new ScimUser.Builder(username);
-    builder.buildEmail("this_is_not_an_email");
-    builder.buildName("Paul", "McCartney");
-
-    ScimUser user = builder.build();
     given().port(8080)
       .auth()
       .preemptive()
@@ -340,7 +336,8 @@ public class ScimUserProvisioningTests {
       .extract()
       .as(ScimUser.class);
 
-    ScimUser updatedUser = new ScimUser.Builder("j.lennon")
+    ScimUser updatedUser = ScimUser.builder("j.lennon")
+      .id(user.getId())
       .buildEmail("lennon@email.test")
       .buildName("John", "Lennon")
       .active(true)
@@ -380,11 +377,10 @@ public class ScimUserProvisioningTests {
   @Test
   public void testUpdateUserValidation() {
 
-    ScimUser.Builder builder = new ScimUser.Builder("john_lennon");
-    builder.buildEmail("lennon@email.test");
-    builder.buildName("John", "Lennon");
-
-    ScimUser user = builder.build();
+    ScimUser user = ScimUser.builder("john_lennon")
+      .buildEmail("lennon@email.test")
+      .buildName("John", "Lennon")
+      .build();
 
     ScimUser createdUser = given().port(8080)
       .auth()
@@ -403,7 +399,9 @@ public class ScimUserProvisioningTests {
       .extract()
       .as(ScimUser.class);
 
-    ScimUser updatedUser = new ScimUser.Builder("j.lennon").active(true)
+    ScimUser updatedUser = ScimUser.builder("j.lennon")
+      .id(user.getId())
+      .active(true)
       .build();
 
     given().port(8080)
@@ -425,7 +423,6 @@ public class ScimUserProvisioningTests {
 
     deleteUser(createdUser.getMeta()
       .getLocation());
-
   }
 
   @Test
@@ -495,6 +492,7 @@ public class ScimUserProvisioningTests {
       .as(ScimUser.class);
 
     ScimUser lennonWantsToBeMcCartney = ScimUser.builder("paul_mccartney")
+      .id(lennon.getId())
       .buildEmail("lennon@email.test")
       .buildName("John", "Lennon")
       .build();

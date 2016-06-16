@@ -18,24 +18,29 @@ import it.infn.mw.iam.api.scim.model.ScimPatchOperation;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.provisioning.paging.OffsetPageable;
 import it.infn.mw.iam.api.scim.provisioning.paging.ScimPageRequest;
+import it.infn.mw.iam.api.scim.updater.UserUpdater;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamUserInfo;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamAuthoritiesRepository;
 
 @Service
-public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser> {
+public class ScimUserProvisioning
+  implements ScimProvisioning<ScimUser, ScimUser> {
 
   private final UserConverter converter;
+  private final UserUpdater updater;
 
   private final IamAccountRepository accountRepository;
 
   private final IamAuthoritiesRepository authorityRepository;
 
   @Autowired
-  public ScimUserProvisioning(UserConverter converter,
+  public ScimUserProvisioning(UserConverter converter, UserUpdater updater,
     IamAccountRepository accountRepo, IamAuthoritiesRepository authorityRepo) {
+
     this.converter = converter;
+    this.updater = updater;
     this.accountRepository = accountRepo;
     this.authorityRepository = authorityRepo;
 
@@ -101,7 +106,7 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
         "ROLE_USER not found in database. This is a bug"));
 
     IamUserInfo userInfo = new IamUserInfo();
-    
+
     userInfo.setGivenName(user.getName()
       .getGivenName());
     userInfo.setFamilyName(user.getName()
@@ -146,8 +151,8 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
       .orElseThrow(() -> new ScimResourceNotFoundException(
         "No user mapped to id '" + id + "'"));
 
-    if (accountRepository.findByUsernameWithDifferentId(
-      scimItemToBeUpdated.getUserName(), id)
+    if (accountRepository
+      .findByUsernameWithDifferentId(scimItemToBeUpdated.getUserName(), id)
       .isPresent()) {
       throw new IllegalArgumentException(
         "userName is already mappped to another user");
@@ -158,13 +163,13 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
     updatedAccount.setId(existingAccount.getId());
     updatedAccount.setUuid(existingAccount.getUuid());
     updatedAccount.setCreationTime(existingAccount.getCreationTime());
-    
-    if (scimItemToBeUpdated.getActive() == null){
+
+    if (scimItemToBeUpdated.getActive() == null) {
       updatedAccount.setActive(existingAccount.isActive());
     }
-    
+
     updatedAccount.touch();
-    
+
     accountRepository.save(updatedAccount);
     return converter.toScim(updatedAccount);
 
@@ -173,8 +178,12 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
   @Override
   public void update(String id, List<ScimPatchOperation<ScimUser>> operations) {
 
-	// TODO Auto-generated method stub
-	
+    IamAccount iamAccount = accountRepository.findByUuid(id)
+      .orElseThrow(() -> new ScimResourceNotFoundException(
+        "No user mapped to id '" + id + "'"));
+
+    updater.update(iamAccount, operations);
+
   }
 
 }

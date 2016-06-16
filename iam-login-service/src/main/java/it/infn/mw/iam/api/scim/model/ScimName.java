@@ -7,6 +7,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import it.infn.mw.iam.core.NameUtils;
+
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ScimName {
 
@@ -89,6 +91,11 @@ public class ScimName {
     return honorificSuffix;
   }
 
+  public static Builder builder() {
+    
+    return new Builder();
+  }
+
   public static class Builder {
 
     private String formatted;
@@ -97,12 +104,6 @@ public class ScimName {
     private String middleName;
     private String honorificPrefix;
     private String honorificSuffix;
-
-    public Builder formatted(String formatted) {
-
-      this.formatted = formatted;
-      return this;
-    }
 
     public Builder givenName(String givenName) {
 
@@ -136,6 +137,7 @@ public class ScimName {
 
     public ScimName build() {
 
+      this.formatted = NameUtils.getFormatted(givenName, middleName, familyName);
       return new ScimName(this);
     }
   }

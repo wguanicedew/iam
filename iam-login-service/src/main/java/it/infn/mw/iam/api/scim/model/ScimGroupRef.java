@@ -1,82 +1,80 @@
 package it.infn.mw.iam.api.scim.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ScimGroupRef {
 
-  public static enum ScimGroupRefType {
-    direct,
-    indirect;
-  }
-
-  private final ScimGroupRefType type;
-
   private final String value;
   private final String display;
-
   private final String ref;
 
-  public ScimGroupRef(Builder b) {
-    type = b.type;
-    value = b.value;
-    display = b.display;
-    ref = b.ref;
+  @JsonCreator
+  private ScimGroupRef(@JsonProperty("display") String display,
+	@JsonProperty("value") String value, @JsonProperty("$ref") String ref) {
 
+	this.display = display;
+	this.value = value;
+	this.ref = ref;
   }
 
-  public ScimGroupRefType getType() {
+  public ScimGroupRef(Builder b) {
 
-    return type;
+	value = b.value;
+	display = b.display;
+	ref = b.ref;
   }
 
   public String getValue() {
 
-    return value;
+	return value;
   }
 
   public String getDisplay() {
 
-    return display;
+	return display;
   }
 
   @JsonProperty("$ref")
   public String getRef() {
 
-    return ref;
+	return ref;
+  }
+
+  public static Builder builder() {
+
+	return new Builder();
   }
 
   public static class Builder {
 
-    private ScimGroupRefType type = ScimGroupRefType.direct;
-    private String value;
-    private String display;
-    private String ref;
+	private String value;
+	private String display;
+	private String ref;
 
-    public Builder value(String value) {
+	public Builder value(String value) {
 
-      this.value = value;
-      return this;
-    }
+	  this.value = value;
+	  return this;
+	}
 
-    public Builder display(String display) {
+	public Builder display(String display) {
 
-      this.display = display;
-      return this;
-    }
+	  this.display = display;
+	  return this;
+	}
 
-    public Builder ref(String ref) {
+	public Builder ref(String ref) {
 
-      this.ref = ref;
-      return this;
-    }
+	  this.ref = ref;
+	  return this;
+	}
 
-    public ScimGroupRef build() {
+	public ScimGroupRef build() {
 
-      return new ScimGroupRef(this);
-    }
-
+	  return new ScimGroupRef(this);
+	}
   }
-
 }

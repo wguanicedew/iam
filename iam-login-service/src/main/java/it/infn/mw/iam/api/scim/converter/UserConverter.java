@@ -49,6 +49,10 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
       .getGivenName());
     userInfo.setFamilyName(scimUser.getName()
       .getFamilyName());
+    userInfo.setMiddleName(scimUser.getName()
+      .getMiddleName());
+    userInfo.setName(scimUser.getName()
+      .getFormatted());
 
     account.setUserInfo(userInfo);
 
@@ -78,9 +82,7 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
       .familyName(entity.getUserInfo()
         .getFamilyName())
       .middleName(entity.getUserInfo()
-        .getMiddleName())
-      .formatted(entity.getUserInfo()
-        .getName());
+        .getMiddleName());
 
     ScimIndigoUser.Builder indigoUserBuilder = new ScimIndigoUser.Builder();
 
@@ -94,8 +96,9 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
 
     }
 
-    ScimEmail email = new ScimEmail.Builder().email(entity.getUserInfo()
-      .getEmail())
+    ScimEmail email = ScimEmail.builder()
+      .email(entity.getUserInfo()
+        .getEmail())
       .build();
 
     ScimIndigoUser indigoUser = indigoUserBuilder.build();
@@ -125,6 +128,13 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
         .getZoneinfo())
       .addEmail(email)
       .indigoUserInfo(indigoUser);
+
+    if (entity.getUserInfo()
+      .getAddress() != null) {
+
+      builder.addAddress(addressConverter.toScim(entity.getUserInfo()
+        .getAddress()));
+    }
 
     for (IamGroup group : entity.getGroups()) {
       ScimGroupRef groupRef = new ScimGroupRef.Builder().value(group.getUuid())

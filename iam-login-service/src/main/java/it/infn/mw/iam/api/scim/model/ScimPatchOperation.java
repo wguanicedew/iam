@@ -64,6 +64,8 @@ public class ScimPatchOperation<T> {
 	T value;
 
 	public Builder() {
+	  op = ScimPatchOperationType.add;
+	  path = "";
 	}
 
 	public Builder<T> op(ScimPatchOperationType op) {
