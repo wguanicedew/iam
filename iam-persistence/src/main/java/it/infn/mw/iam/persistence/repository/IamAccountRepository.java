@@ -35,4 +35,7 @@ public interface IamAccountRepository
 
   @Query("select a from IamAccount a join a.groups ag where ag.id = :groupId")
   Optional<IamAccount> findByGroupId(@Param("groupId") String groupId);
+
+  Optional<IamAccount> findByConfirmationKey(
+    @Param("confirmationKey") String confirmationKey);
 }

@@ -32,15 +32,16 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser> {
   private final IamAuthoritiesRepository authorityRepository;
 
   @Autowired
-  public ScimUserProvisioning(UserConverter converter,
-    IamAccountRepository accountRepo, IamAuthoritiesRepository authorityRepo) {
+  public ScimUserProvisioning(final UserConverter converter,
+    final IamAccountRepository accountRepo,
+    final IamAuthoritiesRepository authorityRepo) {
     this.converter = converter;
     this.accountRepository = accountRepo;
     this.authorityRepository = authorityRepo;
 
   }
 
-  private void idSanityChecks(String id) {
+  private void idSanityChecks(final String id) {
 
     if (id == null) {
       throw new IllegalArgumentException("id cannot be null");
@@ -53,7 +54,7 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser> {
   }
 
   @Override
-  public ScimUser getById(String id) {
+  public ScimUser getById(final String id) {
 
     idSanityChecks(id);
 
@@ -66,7 +67,7 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser> {
   }
 
   @Override
-  public void delete(String id) {
+  public void delete(final String id) {
 
     idSanityChecks(id);
 
@@ -78,8 +79,7 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser> {
 
   }
 
-  @Override
-  public ScimUser create(ScimUser user) {
+  public IamAccount createAccount(final ScimUser user) {
 
     IamAccount account = new IamAccount();
 
@@ -91,7 +91,7 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser> {
     account.setCreationTime(creationTime);
     account.setLastUpdateTime(creationTime);
     account.setUsername(user.getUserName());
-    account.setActive(true);
+    account.setActive((user.getActive() == null ? false : user.getActive()));
 
     authorityRepository.findByAuthority("ROLE_USER")
       .map(a -> account.getAuthorities()
@@ -100,7 +100,7 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser> {
         "ROLE_USER not found in database. This is a bug"));
 
     IamUserInfo userInfo = new IamUserInfo();
-    
+
     userInfo.setGivenName(user.getName()
       .getGivenName());
     userInfo.setFamilyName(user.getName()
@@ -113,11 +113,19 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser> {
 
     accountRepository.save(account);
 
+    return account;
+  }
+
+  @Override
+  public ScimUser create(final ScimUser user) {
+
+    IamAccount account = createAccount(user);
+
     return converter.toScim(account);
   }
 
   @Override
-  public ScimListResponse<ScimUser> list(ScimPageRequest params) {
+  public ScimListResponse<ScimUser> list(final ScimPageRequest params) {
 
     if (params.getCount() == 0) {
       int userCount = accountRepository.countAllUsers();
@@ -139,14 +147,14 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser> {
   }
 
   @Override
-  public ScimUser replace(String id, ScimUser scimItemToBeUpdated) {
+  public ScimUser replace(final String id, final ScimUser scimItemToBeUpdated) {
 
     IamAccount existingAccount = accountRepository.findByUuid(id)
       .orElseThrow(() -> new ResourceNotFoundException(
         "No user mapped to id '" + id + "'"));
 
-    if (accountRepository.findByUsernameWithDifferentId(
-      scimItemToBeUpdated.getUserName(), id)
+    if (accountRepository
+      .findByUsernameWithDifferentId(scimItemToBeUpdated.getUserName(), id)
       .isPresent()) {
       throw new IllegalArgumentException(
         "userName is already mappped to another user");
@@ -157,13 +165,13 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser> {
     updatedAccount.setId(existingAccount.getId());
     updatedAccount.setUuid(existingAccount.getUuid());
     updatedAccount.setCreationTime(existingAccount.getCreationTime());
-    
-    if (scimItemToBeUpdated.getActive() == null){
+
+    if (scimItemToBeUpdated.getActive() == null) {
       updatedAccount.setActive(existingAccount.isActive());
     }
-    
+
     updatedAccount.touch();
-    
+
     accountRepository.save(updatedAccount);
     return converter.toScim(updatedAccount);
 

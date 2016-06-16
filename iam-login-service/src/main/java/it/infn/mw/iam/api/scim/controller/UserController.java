@@ -1,5 +1,7 @@
 package it.infn.mw.iam.api.scim.controller;
 
+import static it.infn.mw.iam.api.scim.controller.utils.ValidationHelper.handleValidationError;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -28,8 +30,6 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 
-import it.infn.mw.iam.api.scim.controller.utils.ValidationErrorMessageHelper;
-import it.infn.mw.iam.api.scim.exception.ScimValidationException;
 import it.infn.mw.iam.api.scim.model.ScimConstants;
 import it.infn.mw.iam.api.scim.model.ScimListResponse;
 import it.infn.mw.iam.api.scim.model.ScimUser;
@@ -47,7 +47,7 @@ public class UserController {
   @Autowired
   ScimUserProvisioning userProvisioningService;
 
-  private Set<String> parseAttributes(String attributesParameter) {
+  private Set<String> parseAttributes(final String attributesParameter) {
 
     Set<String> result = new HashSet<>();
     if (!Strings.isNullOrEmpty(attributesParameter)) {
@@ -59,15 +59,6 @@ public class UserController {
     result.add("schemas");
     result.add("id");
     return result;
-  }
-
-  private void handleValidationError(String message,
-    BindingResult validationResult) {
-
-    if (validationResult.hasErrors()) {
-      throw new ScimValidationException(ValidationErrorMessageHelper
-        .buildValidationErrorMessage(message, validationResult));
-    }
   }
 
   private ScimPageRequest buildPageRequest(Integer count, Integer startIndex) {
@@ -96,9 +87,9 @@ public class UserController {
   @RequestMapping(method = RequestMethod.GET,
     produces = ScimConstants.SCIM_CONTENT_TYPE)
   public MappingJacksonValue listUsers(
-    @RequestParam(required = false) Integer count,
-    @RequestParam(required = false) Integer startIndex,
-    @RequestParam(required = false) String attributes) {
+    @RequestParam(required = false) final Integer count,
+    @RequestParam(required = false) final Integer startIndex,
+    @RequestParam(required = false) final String attributes) {
 
     ScimPageRequest pr = buildPageRequest(count, startIndex);
     ScimListResponse<ScimUser> result = userProvisioningService.list(pr);
@@ -132,8 +123,8 @@ public class UserController {
     produces = ScimConstants.SCIM_CONTENT_TYPE)
   @ResponseStatus(HttpStatus.CREATED)
   public ScimUser create(
-    @RequestBody @Validated(ScimUser.NewUserValidation.class) ScimUser user,
-    BindingResult validationResult) {
+    @RequestBody @Validated(ScimUser.NewUserValidation.class) final ScimUser user,
+    final BindingResult validationResult) {
 
     handleValidationError("Invalid Scim User", validationResult);
     ScimUser result = userProvisioningService.create(user);
@@ -146,8 +137,8 @@ public class UserController {
     produces = ScimConstants.SCIM_CONTENT_TYPE)
   @ResponseStatus(HttpStatus.OK)
   public ScimUser replaceUser(@PathVariable final String id,
-    @RequestBody @Validated(ScimUser.NewUserValidation.class) ScimUser user,
-    BindingResult validationResult) {
+    @RequestBody @Validated(ScimUser.NewUserValidation.class) final ScimUser user,
+    final BindingResult validationResult) {
 
     handleValidationError("Invalid Scim User", validationResult);
 
@@ -161,8 +152,8 @@ public class UserController {
     produces = ScimConstants.SCIM_CONTENT_TYPE)
   @ResponseStatus(HttpStatus.OK)
   public ScimUser updateUser(@PathVariable final String id,
-    @RequestBody @Validated(ScimUser.NewUserValidation.class) ScimUser user,
-    BindingResult validationResult) {
+    @RequestBody @Validated(ScimUser.NewUserValidation.class) final ScimUser user,
+    final BindingResult validationResult) {
 
     throw new NotImplementedException(
       "User update functionality is not currently " + "implemented.");
