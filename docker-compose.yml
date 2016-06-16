@@ -19,8 +19,8 @@ services:
       MYSQL_PASSWORD: pwd
       MYSQL_DATABASE: iam
 
-#    ports:
-#      - "3306:3306"
+    ports:
+      - "3306:3306"
 
   trust:
     build:

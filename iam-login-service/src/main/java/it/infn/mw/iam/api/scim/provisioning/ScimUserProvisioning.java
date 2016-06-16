@@ -90,6 +90,7 @@ public class ScimUserProvisioning
     IamAccount account = new IamAccount();
 
     Date creationTime = new Date();
+    
     String uuid = UUID.randomUUID()
       .toString();
 
