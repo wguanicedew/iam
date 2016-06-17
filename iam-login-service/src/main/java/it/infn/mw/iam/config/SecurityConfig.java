@@ -170,6 +170,7 @@ public class SecurityConfig {
       OAuth2AuthenticationProcessingFilter filter = new OAuth2AuthenticationProcessingFilter();
       filter.setAuthenticationEntryPoint(authenticationEntryPoint);
       filter.setAuthenticationManager(manager);
+      filter.setStateless(false);
       return filter;
     }
 
@@ -180,17 +181,22 @@ public class SecurityConfig {
   public static class ApiEndpointAuthorizationConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
+    @Qualifier("resourceServerFilter")
     private OAuth2AuthenticationProcessingFilter resourceFilter;
 
     @Autowired
     private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
+    
+    @Autowired
+    private CorsFilter corsFilter;
 
     @Override
     public void configure(final HttpSecurity http) throws Exception {
 
       // @formatter:off
       http.antMatcher("/api/**")
-          .addFilterBefore(resourceFilter, SecurityContextPersistenceFilter.class)
+          .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
+          .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
           .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint).and()
           .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.NEVER).and().csrf()
           .disable();
