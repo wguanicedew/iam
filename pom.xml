@@ -280,6 +280,9 @@
               <!-- Exclude persistence code (mainly interfaces and model classes) -->
               <exclude>it/infn/mw/iam/persistence//**/*.class</exclude>
               
+              <!-- Exclude Github support code (still not supported) -->
+              <exclude>it/infn/mw/github/**/*.class</exclude>
+              
               <!-- Exclude test client app code -->
               <exclude>it/infn/mw/tc/**/*.class</exclude>
               
