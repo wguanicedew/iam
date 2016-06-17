@@ -12,8 +12,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.saml.SAMLCredential;
 import org.springframework.security.saml.userdetails.SAMLUserDetailsService;
 
-import it.infn.mw.iam.persistence.model.IamAuthority;
 import it.infn.mw.iam.persistence.model.IamAccount;
+import it.infn.mw.iam.persistence.model.IamAuthority;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.saml.util.SAMLUserIdentifierAccessor;
 
