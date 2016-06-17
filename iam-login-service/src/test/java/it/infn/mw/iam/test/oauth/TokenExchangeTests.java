@@ -36,29 +36,15 @@ public class TokenExchangeTests {
     String audClientId = "tasks-app";
 
     // get access token
-    String accessToken = TestUtils.getAccessToken(clientId, clientSecret,
-      "openid profile");
+    String accessToken = TestUtils.getAccessToken(clientId, clientSecret, "openid profile");
 
     // @formatter:off
-    given()
-      .auth()
-         .preemptive().basic(actorClientId, actorClientSecret)
-      .port(8080)
-      .param("grant_type", GRANT_TYPE)
-      .param("audience", audClientId)
-      .param("subject_token", accessToken)
-      .param("subject_token_type", TOKEN_TYPE)
-      .param("scope", "read-tasks")
-    .when()
-      .post("/token")
-    .then()
-      .log()
-        .body(true)
-      .statusCode(200)
-      .body("scope", equalTo("read-tasks"))
-      .body("issued_token_type", equalTo(TOKEN_TYPE))
-      .body("token_type", equalTo("Bearer"))
-      .body("access_token", notNullValue());
+    given().auth().preemptive().basic(actorClientId, actorClientSecret).port(8080)
+        .param("grant_type", GRANT_TYPE).param("audience", audClientId)
+        .param("subject_token", accessToken).param("subject_token_type", TOKEN_TYPE)
+        .param("scope", "read-tasks").when().post("/token").then().log().body(true).statusCode(200)
+        .body("scope", equalTo("read-tasks")).body("issued_token_type", equalTo(TOKEN_TYPE))
+        .body("token_type", equalTo("Bearer")).body("access_token", notNullValue());
     // @formatter:on
   }
 
@@ -70,27 +56,15 @@ public class TokenExchangeTests {
 
     String audClientId = "tasks-app";
 
-    String accessToken = TestUtils.getAccessToken(clientId, clientSecret,
-      "openid profile");
+    String accessToken = TestUtils.getAccessToken(clientId, clientSecret, "openid profile");
 
     // @formatter:off
-    given()
-      .auth()
-        .preemptive().basic(clientId, clientSecret)
-      .port(8080)
-      .param("grant_type", GRANT_TYPE)
-      .param("audience", audClientId)
-      .param("subject_token", accessToken)
-      .param("subject_token_type", TOKEN_TYPE)
-      .param("scope", "read-tasks")
-    .when()
-      .post("/token")
-    .then()
-      .log()
-        .body(true)
-      .statusCode(401)
-      .body("error", equalTo("invalid_client"))
-      .body("error_description", Matchers.stringContainsInOrder(Arrays.asList("Unauthorized grant type")) );
+    given().auth().preemptive().basic(clientId, clientSecret).port(8080)
+        .param("grant_type", GRANT_TYPE).param("audience", audClientId)
+        .param("subject_token", accessToken).param("subject_token_type", TOKEN_TYPE)
+        .param("scope", "read-tasks").when().post("/token").then().log().body(true).statusCode(401)
+        .body("error", equalTo("invalid_client")).body("error_description",
+            Matchers.stringContainsInOrder(Arrays.asList("Unauthorized grant type")));
     // @formatter:on
   }
 
@@ -105,50 +79,25 @@ public class TokenExchangeTests {
 
     String audClientId = "client";
 
-    String accessToken = TestUtils.getAccessToken(clientId, clientSecret,
-      "openid offline_access");
+    String accessToken = TestUtils.getAccessToken(clientId, clientSecret, "openid offline_access");
 
     // @formatter:off
     // get refresh token
-    String refreshToken = given()
-      .auth()
-         .preemptive().basic(actorClientId, actorClientSecret)
-      .port(8080)
-      .param("grant_type", GRANT_TYPE)
-      .param("audience", audClientId)
-      .param("subject_token", accessToken)
-      .param("subject_token_type", TOKEN_TYPE)
-      .param("scope", "openid offline_access read-tasks")
-    .when()
-      .post("/token")
-    .then()
-      .log()
-        .body(true)
-      .statusCode(200)
-      .body("scope", equalTo("read-tasks openid offline_access"))
-      .body("issued_token_type", equalTo(TOKEN_TYPE))
-      .body("token_type", equalTo("Bearer"))
-      .body("access_token", notNullValue())
-      .body("refresh_token", notNullValue())
-      .extract()
+    String refreshToken = given().auth().preemptive().basic(actorClientId, actorClientSecret)
+        .port(8080).param("grant_type", GRANT_TYPE).param("audience", audClientId)
+        .param("subject_token", accessToken).param("subject_token_type", TOKEN_TYPE)
+        .param("scope", "openid offline_access read-tasks").when().post("/token").then().log()
+        .body(true).statusCode(200).body("scope", equalTo("read-tasks openid offline_access"))
+        .body("issued_token_type", equalTo(TOKEN_TYPE)).body("token_type", equalTo("Bearer"))
+        .body("access_token", notNullValue()).body("refresh_token", notNullValue()).extract()
         .path("refresh_token");
-    
+
     // use refresh token
-    given()
-      .auth()
-        .preemptive().basic(actorClientId, actorClientSecret)
-      .port(8080)
-      .param("grant_type", "refresh_token")
-      .param("refresh_token", refreshToken)
-      .param("client_id", actorClientId)
-      .param("client_secret", actorClientSecret)
-    .when()
-      .post("/token")
-    .then()
-      .log()
-        .body(true)
-      .statusCode(200)
-      .body("access_token", notNullValue());
+    given().auth().preemptive().basic(actorClientId, actorClientSecret).port(8080)
+        .param("grant_type", "refresh_token").param("refresh_token", refreshToken)
+        .param("client_id", actorClientId).param("client_secret", actorClientSecret).when()
+        .post("/token").then().log().body(true).statusCode(200)
+        .body("access_token", notNullValue());
     // @formatter:on
   }
 
@@ -163,26 +112,14 @@ public class TokenExchangeTests {
 
     String audClientId = "client";
 
-    String accessToken = TestUtils.getAccessToken(clientId, clientSecret,
-      "openid");
+    String accessToken = TestUtils.getAccessToken(clientId, clientSecret, "openid");
 
     // @formatter:off
-    given()
-      .auth()
-         .preemptive().basic(actorClientId, actorClientSecret)
-      .port(8080)
-      .param("grant_type", GRANT_TYPE)
-      .param("audience", audClientId)
-      .param("subject_token", accessToken)
-      .param("subject_token_type", TOKEN_TYPE)
-      .param("scope", "openid offline_access")
-    .when()
-      .post("/token")
-    .then()
-      .log()
-        .body(true)
-      .statusCode(400)
-      .body("error", equalTo("invalid_scope"));
+    given().auth().preemptive().basic(actorClientId, actorClientSecret).port(8080)
+        .param("grant_type", GRANT_TYPE).param("audience", audClientId)
+        .param("subject_token", accessToken).param("subject_token_type", TOKEN_TYPE)
+        .param("scope", "openid offline_access").when().post("/token").then().log().body(true)
+        .statusCode(400).body("error", equalTo("invalid_scope"));
     // @formatter:on
   }
 
@@ -197,33 +134,19 @@ public class TokenExchangeTests {
 
     String audClientId = "client";
 
-    String subjectToken = TestUtils.getAccessToken(clientId, clientSecret,
-      "openid");
+    String subjectToken = TestUtils.getAccessToken(clientId, clientSecret, "openid");
 
-    String actorToken = TestUtils.getAccessToken(actorClientId,
-      actorClientSecret, "openid");
+    String actorToken = TestUtils.getAccessToken(actorClientId, actorClientSecret, "openid");
 
     // @formatter:off
-    given()
-      .auth()
-         .preemptive().basic(actorClientId, actorClientSecret)
-      .port(8080)
-      .param("grant_type", GRANT_TYPE)
-      .param("audience", audClientId)
-      .param("subject_token", subjectToken)
-      .param("subject_token_type", TOKEN_TYPE)
-      .param("actor_token", actorToken)
-      .param("actor_token_type", TOKEN_TYPE)
-      .param("want_composite", "true")
-      .param("scope", "read-tasks")
-    .when()
-      .post("/token")
-    .then()
-      .log()
-        .body(true)
-      .statusCode(400)
-      .body("error", equalTo("invalid_request"))
-      .body("error_description", Matchers.stringContainsInOrder(Arrays.asList("not yet supported")));
+    given().auth().preemptive().basic(actorClientId, actorClientSecret).port(8080)
+        .param("grant_type", GRANT_TYPE).param("audience", audClientId)
+        .param("subject_token", subjectToken).param("subject_token_type", TOKEN_TYPE)
+        .param("actor_token", actorToken).param("actor_token_type", TOKEN_TYPE)
+        .param("want_composite", "true").param("scope", "read-tasks").when().post("/token").then()
+        .log().body(true).statusCode(400).body("error", equalTo("invalid_request"))
+        .body("error_description",
+            Matchers.stringContainsInOrder(Arrays.asList("not yet supported")));
     // @formatter:on
   }
 }

@@ -8,18 +8,17 @@ import org.springframework.data.repository.query.Param;
 
 import it.infn.mw.iam.persistence.model.IamGroup;
 
-public interface IamGroupRepository
-  extends PagingAndSortingRepository<IamGroup, Long> {
+public interface IamGroupRepository extends PagingAndSortingRepository<IamGroup, Long> {
 
   @Query("select count(g) from IamGroup g")
   int countAllGroups();
-  
+
   Optional<IamGroup> findByUuid(@Param("uuid") String uuid);
 
   Optional<IamGroup> findByName(@Param("name") String name);
 
   @Query("select g from IamGroup g where g.name = :name and g.uuid != :uuid")
   Optional<IamGroup> findByNameWithDifferentId(@Param("name") String name,
-	@Param("uuid") String uuid);
+      @Param("uuid") String uuid);
 
 }

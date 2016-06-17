@@ -19,62 +19,62 @@ public class ScimGroupPatchRequest {
   private final List<ScimPatchOperation<List<ScimMemberRef>>> operations;
 
   @JsonCreator
-  private ScimGroupPatchRequest(
-	@JsonProperty("schemas") Set<String> schemas,
-	@JsonProperty("operations") List<ScimPatchOperation<List<ScimMemberRef>>> operations) {
+  private ScimGroupPatchRequest(@JsonProperty("schemas") Set<String> schemas,
+      @JsonProperty("operations") List<ScimPatchOperation<List<ScimMemberRef>>> operations) {
 
-	this.schemas = schemas;
-	if (operations == null) {
-	  throw new IllegalArgumentException("Operations list is null");
-	}
-	this.operations = operations;
+    this.schemas = schemas;
+    if (operations == null) {
+      throw new IllegalArgumentException("Operations list is null");
+    }
+    this.operations = operations;
   }
 
   private ScimGroupPatchRequest(Builder b) {
 
-	this.schemas = b.schemas;
-	this.operations = b.operations;
+    this.schemas = b.schemas;
+    this.operations = b.operations;
   }
 
   public Set<String> getSchemas() {
 
-	return schemas;
+    return schemas;
   }
 
   public List<ScimPatchOperation<List<ScimMemberRef>>> getOperations() {
 
-	return operations;
+    return operations;
   }
 
   public static Builder builder() {
 
-	return new Builder();
+    return new Builder();
   }
 
   public static class Builder {
 
-	private Set<String> schemas = new HashSet<String>();
-	private List<ScimPatchOperation<List<ScimMemberRef>>> operations = new ArrayList<ScimPatchOperation<List<ScimMemberRef>>>();
+    private Set<String> schemas = new HashSet<String>();
+    private List<ScimPatchOperation<List<ScimMemberRef>>> operations =
+        new ArrayList<ScimPatchOperation<List<ScimMemberRef>>>();
 
-	public Builder() {
-	  schemas.add(PATCHOP_SCHEMA);
-	}
+    public Builder() {
+      schemas.add(PATCHOP_SCHEMA);
+    }
 
-	public Builder setOperations(List<ScimPatchOperation<List<ScimMemberRef>>> operations) {
+    public Builder setOperations(List<ScimPatchOperation<List<ScimMemberRef>>> operations) {
 
-	  this.operations = operations;
-	  return this;
-	}
+      this.operations = operations;
+      return this;
+    }
 
-	public Builder addOperation(ScimPatchOperation<List<ScimMemberRef>> operation) {
+    public Builder addOperation(ScimPatchOperation<List<ScimMemberRef>> operation) {
 
-	  operations.add(operation);
-	  return this;
-	}
+      operations.add(operation);
+      return this;
+    }
 
-	public ScimGroupPatchRequest build() {
+    public ScimGroupPatchRequest build() {
 
-	  return new ScimGroupPatchRequest(this);
-	}
+      return new ScimGroupPatchRequest(this);
+    }
   }
 }

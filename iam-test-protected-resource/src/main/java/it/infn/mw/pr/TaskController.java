@@ -32,27 +32,26 @@ public class TaskController {
   @RequestMapping(value = "/", method = RequestMethod.GET)
   public ResponseEntity<Collection<Task>> getAllTasks() {
 
-    return new ResponseEntity<Collection<Task>>(taskService.getTasks(),
-      HttpStatus.OK);
+    return new ResponseEntity<Collection<Task>>(taskService.getTasks(), HttpStatus.OK);
   }
 
   @PreAuthorize("#oauth2.hasScope('write-tasks') and hasRole('API')")
   @RequestMapping(value = "/{id}", method = RequestMethod.POST)
-  public ResponseEntity<Task> completeTask(@PathVariable("id") String id){
+  public ResponseEntity<Task> completeTask(@PathVariable("id") String id) {
     Task t = taskService.getTaskById(id);
-    if (t == null){
+    if (t == null) {
       return new ResponseEntity<Task>(HttpStatus.NOT_FOUND);
     }
-    
+
     t.complete();
     return new ResponseEntity<Task>(t, HttpStatus.OK);
   }
-  
+
   @PreAuthorize("#oauth2.hasScope('write-tasks') and hasRole('API')")
   @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
-  public ResponseEntity<Task> deleteTask(@PathVariable("id") String id){
+  public ResponseEntity<Task> deleteTask(@PathVariable("id") String id) {
     Task t = taskService.removeTaskById(id);
-    if (t == null){
+    if (t == null) {
       return new ResponseEntity<Task>(HttpStatus.NOT_FOUND);
     }
     return new ResponseEntity<Task>(t, HttpStatus.OK);

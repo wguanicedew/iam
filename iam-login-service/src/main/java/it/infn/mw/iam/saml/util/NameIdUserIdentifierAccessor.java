@@ -5,8 +5,7 @@ import org.springframework.security.saml.SAMLCredential;
 
 import com.google.common.base.Verify;
 
-public class NameIdUserIdentifierAccessor
-  implements SAMLUserIdentifierAccessor {
+public class NameIdUserIdentifierAccessor implements SAMLUserIdentifierAccessor {
 
   @Override
   public String getUserIdentifier(SAMLCredential samlCredential) {

@@ -14,10 +14,10 @@ import it.infn.mw.iam.api.scim.controller.utils.JsonDateSerializer;
 public class ScimMeta {
 
   private final String resourceType;
-  
+
   @JsonSerialize(using = JsonDateSerializer.class)
   private final Date created;
-  
+
   @JsonSerialize(using = JsonDateSerializer.class)
   private final Date lastModified;
 
@@ -26,10 +26,8 @@ public class ScimMeta {
 
   @JsonCreator
   private ScimMeta(@JsonProperty("created") Date created,
-    @JsonProperty("lastModified") Date lastModified,
-    @JsonProperty("location") String location,
-    @JsonProperty("version") String version,
-    @JsonProperty("resourceType") String resourceType) {
+      @JsonProperty("lastModified") Date lastModified, @JsonProperty("location") String location,
+      @JsonProperty("version") String version, @JsonProperty("resourceType") String resourceType) {
 
     this.created = created;
     this.lastModified = lastModified;

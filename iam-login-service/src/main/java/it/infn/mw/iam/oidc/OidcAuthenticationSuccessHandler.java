@@ -31,10 +31,9 @@ import org.springframework.security.web.savedrequest.DefaultSavedRequest;
 import it.infn.mw.iam.oidc.service.OidcUserDetailsService;
 
 public class OidcAuthenticationSuccessHandler
-  extends SavedRequestAwareAuthenticationSuccessHandler {
+    extends SavedRequestAwareAuthenticationSuccessHandler {
 
-  public static final Logger LOG = LoggerFactory
-    .getLogger(OidcAuthenticationSuccessHandler.class);
+  public static final Logger LOG = LoggerFactory.getLogger(OidcAuthenticationSuccessHandler.class);
 
   public final static String ORIGIN_AUTH_REQUEST_SESSION_VARIABLE = "origin_auth_request";
 
@@ -51,82 +50,71 @@ public class OidcAuthenticationSuccessHandler
 
   @Override
   public void onAuthenticationSuccess(final HttpServletRequest request,
-    final HttpServletResponse response, final Authentication authentication)
-      throws IOException, ServletException {
+      final HttpServletResponse response, final Authentication authentication)
+          throws IOException, ServletException {
 
     if (authentication != null && authentication.isAuthenticated()
-      && authentication instanceof OIDCAuthenticationToken) {
+        && authentication instanceof OIDCAuthenticationToken) {
 
       OIDCAuthenticationToken auth = (OIDCAuthenticationToken) authentication;
 
       User user = null;
 
       try {
-        user = (User) oidcUserDetailService.loadUserByOIDC(auth.getSub(),
-          auth.getIssuer());
+        user = (User) oidcUserDetailService.loadUserByOIDC(auth.getSub(), auth.getIssuer());
       } catch (UsernameNotFoundException e) {
 
         LOG.debug(e.getMessage());
 
         RequestDispatcher dispatcher = request.getRequestDispatcher("/login");
-        request.setAttribute("userNotFoundError",
-          String.format("User not found"));
+        request.setAttribute("userNotFoundError", String.format("User not found"));
 
         request.setAttribute("externalAuthenticationToken", auth);
 
         // Clear authentication
-        SecurityContextHolder.getContext()
-          .setAuthentication(null);
+        SecurityContextHolder.getContext().setAuthentication(null);
         dispatcher.forward(request, response);
         return;
 
       }
 
       UsernamePasswordAuthenticationToken userToken = new UsernamePasswordAuthenticationToken(
-        user.getUsername(), user.getPassword(), user.getAuthorities());
+          user.getUsername(), user.getPassword(), user.getAuthorities());
 
-      SecurityContextHolder.getContext()
-        .setAuthentication(userToken);
+      SecurityContextHolder.getContext().setAuthentication(userToken);
 
       String targetUrl = iamBaseUrl;
 
       // Save authentication timestamp in session
       Date timestamp = new Date();
       HttpSession session = request.getSession();
-      session.setAttribute(AuthenticationTimeStamper.AUTH_TIMESTAMP,
-        new Date());
+      session.setAttribute(AuthenticationTimeStamper.AUTH_TIMESTAMP, new Date());
 
-      LOG.info("Successful OIDC authentication of {} at {}",
-        userToken.getName(), timestamp);
+      LOG.info("Successful OIDC authentication of {} at {}", userToken.getName(), timestamp);
 
-      DefaultSavedRequest originAuthRequest = (DefaultSavedRequest) session
-        .getAttribute(ORIGIN_AUTH_REQUEST_SESSION_VARIABLE);
+      DefaultSavedRequest originAuthRequest =
+          (DefaultSavedRequest) session.getAttribute(ORIGIN_AUTH_REQUEST_SESSION_VARIABLE);
 
       if (originAuthRequest != null) {
 
         Map<String, String> parameters = new HashMap<String, String>();
 
-        for (Map.Entry<String, String[]> entry : originAuthRequest
-          .getParameterMap()
-          .entrySet()) {
+        for (Map.Entry<String, String[]> entry : originAuthRequest.getParameterMap().entrySet()) {
           parameters.put(entry.getKey(), entry.getValue()[0]);
         }
 
-        session.setAttribute("SPRING_SECURITY_SAVED_REQUEST",
-          originAuthRequest);
+        session.setAttribute("SPRING_SECURITY_SAVED_REQUEST", originAuthRequest);
 
         if (!parameters.isEmpty()) {
 
-          session.setAttribute(ISSUER_SESSION_VARIABLE,
-            parameters.get("issuer"));
+          session.setAttribute(ISSUER_SESSION_VARIABLE, parameters.get("issuer"));
           session.setAttribute(STATE_SESSION_VARIABLE, parameters.get("state"));
-          session.setAttribute(REDIRECT_URI_SESION_VARIABLE,
-            parameters.get("redirect_uri"));
+          session.setAttribute(REDIRECT_URI_SESION_VARIABLE, parameters.get("redirect_uri"));
           session.setAttribute(NONCE_SESSION_VARIABLE, parameters.get("nonce"));
 
-          targetUrl = rebuildAuthzRequestUrl(parameters.get("client_id"),
-            parameters.get("scope"), parameters.get("redirect_uri"),
-            parameters.get("nonce"), parameters.get("state"), response);
+          targetUrl = rebuildAuthzRequestUrl(parameters.get("client_id"), parameters.get("scope"),
+              parameters.get("redirect_uri"), parameters.get("nonce"), parameters.get("state"),
+              response);
         }
 
       }
@@ -137,9 +125,8 @@ public class OidcAuthenticationSuccessHandler
 
   }
 
-  private String rebuildAuthzRequestUrl(String clientId, String scopes,
-    String redirectUri, String nonce, String state,
-    HttpServletResponse response) throws IOException {
+  private String rebuildAuthzRequestUrl(String clientId, String scopes, String redirectUri,
+      String nonce, String state, HttpServletResponse response) throws IOException {
 
     String authRequest = null;
     try {
@@ -161,12 +148,10 @@ public class OidcAuthenticationSuccessHandler
 
       uriBuilder.addParameter("state", state);
 
-      authRequest = uriBuilder.build()
-        .toString();
+      authRequest = uriBuilder.build().toString();
 
     } catch (URISyntaxException e) {
-      throw new AuthenticationServiceException(
-        "Malformed Authorization Endpoint Uri", e);
+      throw new AuthenticationServiceException("Malformed Authorization Endpoint Uri", e);
     }
 
     return authRequest;

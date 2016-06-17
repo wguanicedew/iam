@@ -27,8 +27,7 @@ public class IamOidcId {
   @Column(nullable = false, length = 256)
   String subject;
 
-  public IamOidcId() {
-  }
+  public IamOidcId() {}
 
   public Long getId() {
 
@@ -112,8 +111,7 @@ public class IamOidcId {
   @Override
   public String toString() {
 
-    return "IamOidcId [id=" + id + ", issuer=" + issuer + ", subject=" + subject
-      + "]";
+    return "IamOidcId [id=" + id + ", issuer=" + issuer + ", subject=" + subject + "]";
   }
 
 }

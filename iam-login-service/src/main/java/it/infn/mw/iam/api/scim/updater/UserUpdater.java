@@ -29,9 +29,8 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
   private final AddressConverter addressConverter;
 
   @Autowired
-  public UserUpdater(IamAccountRepository accountRepository,
-    IamOidcIdRepository oidcIdRepository, OidcIdConverter oidcIdConverter,
-    AddressConverter addressConverter) {
+  public UserUpdater(IamAccountRepository accountRepository, IamOidcIdRepository oidcIdRepository,
+      OidcIdConverter oidcIdConverter, AddressConverter addressConverter) {
 
     this.accountRepository = accountRepository;
     this.oidcIdRepository = oidcIdRepository;
@@ -39,24 +38,23 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
     this.addressConverter = addressConverter;
   }
 
-  public void update(IamAccount account,
-    List<ScimPatchOperation<ScimUser>> operations) {
+  public void update(IamAccount account, List<ScimPatchOperation<ScimUser>> operations) {
 
     for (ScimPatchOperation<ScimUser> op : operations) {
 
       switch (op.getOp()) {
 
-      case add:
-        addNotNullInfo(account, op.getValue());
-        break;
-      case remove:
-        removeNotNullInfo(account, op.getValue());
-        break;
-      case replace:
-        replaceNotNullInfo(account, op.getValue());
-        break;
-      default:
-        break;
+        case add:
+          addNotNullInfo(account, op.getValue());
+          break;
+        case remove:
+          removeNotNullInfo(account, op.getValue());
+          break;
+        case replace:
+          replaceNotNullInfo(account, op.getValue());
+          break;
+        default:
+          break;
       }
     }
     return;
@@ -72,18 +70,15 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
 
     if (u.getIndigoUser() != null) {
 
-      addOidcIdsIfNotNull(a, u.getIndigoUser()
-        .getOidcIds());
+      addOidcIdsIfNotNull(a, u.getIndigoUser().getOidcIds());
     }
   }
 
-  private void updateAddressIfNotNull(IamAccount a,
-    List<ScimAddress> addresses) {
+  private void updateAddressIfNotNull(IamAccount a, List<ScimAddress> addresses) {
 
     if (addresses != null && !addresses.isEmpty()) {
 
-      a.getUserInfo()
-        .setAddress(addressConverter.fromScim(addresses.get(0)));
+      a.getUserInfo().setAddress(addressConverter.fromScim(addresses.get(0)));
       a.touch();
       accountRepository.save(a);
     }
@@ -105,8 +100,7 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
 
     if (u.getIndigoUser() != null) {
 
-      removeOidcIdsIfNotNull(a, u.getIndigoUser()
-        .getOidcIds());
+      removeOidcIdsIfNotNull(a, u.getIndigoUser().getOidcIds());
     }
   }
 
@@ -133,22 +127,14 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
 
     if (name != null) {
 
+      a.getUserInfo().setFamilyName(
+          name.getFamilyName() != null ? name.getFamilyName() : a.getUserInfo().getFamilyName());
+      a.getUserInfo().setGivenName(
+          name.getGivenName() != null ? name.getGivenName() : a.getUserInfo().getGivenName());
+      a.getUserInfo().setMiddleName(
+          name.getMiddleName() != null ? name.getMiddleName() : a.getUserInfo().getGivenName());
       a.getUserInfo()
-        .setFamilyName(
-          name.getFamilyName() != null ? name.getFamilyName() : a.getUserInfo()
-            .getFamilyName());
-      a.getUserInfo()
-        .setGivenName(
-          name.getGivenName() != null ? name.getGivenName() : a.getUserInfo()
-            .getGivenName());
-      a.getUserInfo()
-        .setMiddleName(
-          name.getMiddleName() != null ? name.getMiddleName() : a.getUserInfo()
-            .getGivenName());
-      a.getUserInfo()
-        .setName(
-          name.getFormatted() != null ? name.getFormatted() : a.getUserInfo()
-            .getName());
+          .setName(name.getFormatted() != null ? name.getFormatted() : a.getUserInfo().getName());
       a.touch();
       accountRepository.save(a);
     }
@@ -158,9 +144,7 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
 
     if (emails != null && !emails.isEmpty()) {
 
-      a.getUserInfo()
-        .setEmail(emails.get(0)
-          .getValue());
+      a.getUserInfo().setEmail(emails.get(0).getValue());
       a.touch();
       accountRepository.save(a);
     }
@@ -188,17 +172,14 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
         current.setAccount(a);
         oidcIdRepository.save(current);
 
-        a.getOidcIds()
-          .add(current);
+        a.getOidcIds().add(current);
         a.touch();
         accountRepository.save(a);
 
-      } else if (current.getAccount()
-        .getUuid() != a.getUuid()) {
+      } else if (current.getAccount().getUuid() != a.getUuid()) {
 
-        throw new ScimResourceExistsException(
-          "Cannot add OpenID Connect account to user " + a.getUsername()
-            + " because it's already associated to another user");
+        throw new ScimResourceExistsException("Cannot add OpenID Connect account to user "
+            + a.getUsername() + " because it's already associated to another user");
       }
     }
   }
@@ -220,20 +201,17 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
 
       IamOidcId current = oidcIdConverter.fromScim(oidcId);
 
-      if (current.getAccount() != null && current.getAccount()
-        .getUuid() == a.getUuid()) {
+      if (current.getAccount() != null && current.getAccount().getUuid() == a.getUuid()) {
 
-        a.getOidcIds()
-          .remove(current);
+        a.getOidcIds().remove(current);
         a.touch();
         accountRepository.save(a);
 
         oidcIdRepository.delete(current);
 
       } else {
-        throw new ScimResourceNotFoundException(
-          "User " + a.getUsername() + " has no (" + oidcId.issuer + ", "
-            + oidcId.subject + ") oidc account to remove!");
+        throw new ScimResourceNotFoundException("User " + a.getUsername() + " has no ("
+            + oidcId.issuer + ", " + oidcId.subject + ") oidc account to remove!");
       }
     }
   }

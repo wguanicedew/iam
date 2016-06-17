@@ -47,112 +47,112 @@ public class IamGroup {
 
   public Long getId() {
 
-	return id;
+    return id;
   }
 
   public void setId(Long id) {
 
-	this.id = id;
+    this.id = id;
   }
 
   public String getUuid() {
 
-	return uuid;
+    return uuid;
   }
 
   public void setUuid(String uuid) {
 
-	this.uuid = uuid;
+    this.uuid = uuid;
   }
 
   public String getName() {
 
-	return name;
+    return name;
   }
 
   public void setName(String name) {
 
-	this.name = name;
+    this.name = name;
   }
 
   public String getDescription() {
 
-	return description;
+    return description;
   }
 
   public void setDescription(String description) {
 
-	this.description = description;
+    this.description = description;
   }
 
   public Set<IamAccount> getAccounts() {
 
-	return accounts;
+    return accounts;
   }
 
   public void setAccounts(Set<IamAccount> accounts) {
 
-	this.accounts = accounts;
+    this.accounts = accounts;
   }
 
   public Date getCreationTime() {
 
-	return creationTime;
+    return creationTime;
   }
 
   public void setCreationTime(Date creationTime) {
 
-	this.creationTime = creationTime;
+    this.creationTime = creationTime;
   }
 
   public Date getLastUpdateTime() {
 
-	return lastUpdateTime;
+    return lastUpdateTime;
   }
 
   public void setLastUpdateTime(Date lastUpdateTime) {
 
-	this.lastUpdateTime = lastUpdateTime;
+    this.lastUpdateTime = lastUpdateTime;
   }
 
   public void touch() {
 
-	setLastUpdateTime(new Date());
+    setLastUpdateTime(new Date());
   }
 
   @Override
   public int hashCode() {
 
-	final int prime = 31;
-	int result = 1;
-	result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
-	return result;
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
+    return result;
   }
 
   @Override
   public boolean equals(Object obj) {
 
-	if (this == obj)
-	  return true;
-	if (obj == null)
-	  return false;
-	if (getClass() != obj.getClass())
-	  return false;
-	IamGroup other = (IamGroup) obj;
-	if (uuid == null) {
-	  if (other.uuid != null)
-		return false;
-	} else if (!uuid.equals(other.uuid))
-	  return false;
-	return true;
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    IamGroup other = (IamGroup) obj;
+    if (uuid == null) {
+      if (other.uuid != null)
+        return false;
+    } else if (!uuid.equals(other.uuid))
+      return false;
+    return true;
   }
 
   @Override
   public String toString() {
 
-	return "IamGroup [id=" + id + ", uuid=" + uuid + ", name=" + name
-	  + ", description=" + description + ", creationTime=" + creationTime
-	  + ", lastUpdateTime=" + lastUpdateTime + ", accounts=" + accounts + "]";
+    return "IamGroup [id=" + id + ", uuid=" + uuid + ", name=" + name + ", description="
+        + description + ", creationTime=" + creationTime + ", lastUpdateTime=" + lastUpdateTime
+        + ", accounts=" + accounts + "]";
   }
 
 }

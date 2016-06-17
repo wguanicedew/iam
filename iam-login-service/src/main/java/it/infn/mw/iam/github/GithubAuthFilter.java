@@ -12,8 +12,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.client.filter.OAuth2ClientAuthenticationProcessingFilter;
 import org.springframework.security.web.savedrequest.DefaultSavedRequest;
 
-public class GithubAuthFilter
-  extends OAuth2ClientAuthenticationProcessingFilter {
+public class GithubAuthFilter extends OAuth2ClientAuthenticationProcessingFilter {
 
   protected final static String REDIRECT_URI_SESSION_VARIABLE = "redirect_uri";
   protected final static String STATE_SESSION_VARIABLE = "state";
@@ -36,14 +35,14 @@ public class GithubAuthFilter
 
   @Override
   public Authentication attemptAuthentication(final HttpServletRequest request,
-    final HttpServletResponse response)
-      throws AuthenticationException, IOException, ServletException {
+      final HttpServletResponse response)
+          throws AuthenticationException, IOException, ServletException {
 
     HttpSession session = request.getSession();
 
     // backup origin redirect uri and state
-    DefaultSavedRequest savedRequest = (DefaultSavedRequest) session
-      .getAttribute("SPRING_SECURITY_SAVED_REQUEST");
+    DefaultSavedRequest savedRequest =
+        (DefaultSavedRequest) session.getAttribute("SPRING_SECURITY_SAVED_REQUEST");
     session.setAttribute(ORIGIN_AUTH_REQUEST_SESSION_VARIABLE, savedRequest);
 
     return super.attemptAuthentication(request, response);

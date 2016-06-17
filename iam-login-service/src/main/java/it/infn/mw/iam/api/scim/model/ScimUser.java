@@ -24,7 +24,7 @@ public class ScimUser extends ScimResource {
   public static final String USER_SCHEMA = "urn:ietf:params:scim:schemas:core:2.0:User";
   public static final String RESOURCE_TYPE = "User";
 
-  @NotBlank(groups = { NewUserValidation.class })
+  @NotBlank(groups = {NewUserValidation.class})
   private final String userName;
 
   @Valid
@@ -40,7 +40,7 @@ public class ScimUser extends ScimResource {
   private final String timezone;
   private final Boolean active;
 
-  @NotEmpty(groups = { NewUserValidation.class })
+  @NotEmpty(groups = {NewUserValidation.class})
   @Valid
   private final List<ScimEmail> emails;
 
@@ -52,25 +52,18 @@ public class ScimUser extends ScimResource {
   private final ScimIndigoUser indigoUser;
 
   @JsonCreator
-  private ScimUser(@JsonProperty("id") String id,
-    @JsonProperty("externalId") String externalId,
-    @JsonProperty("meta") ScimMeta meta,
-    @JsonProperty("schemas") Set<String> schemas,
-    @JsonProperty("userName") String userName,
-    @JsonProperty("name") ScimName name,
-    @JsonProperty("displayName") String displayName,
-    @JsonProperty("nickName") String nickName,
-    @JsonProperty("profileUrl") String profileUrl,
-    @JsonProperty("title") String title,
-    @JsonProperty("userType") String userType,
-    @JsonProperty("preferredLanguage") String preferredLanguage,
-    @JsonProperty("locale") String locale,
-    @JsonProperty("timezone") String timezone,
-    @JsonProperty("active") Boolean active,
-    @JsonProperty("emails") List<ScimEmail> emails,
-    @JsonProperty("addresses") List<ScimAddress> addresses,
-    @JsonProperty("groups") List<ScimGroupRef> groups,
-    @JsonProperty("urn:indigo-dc:scim:schemas:IndigoUser") ScimIndigoUser indigoUser) {
+  private ScimUser(@JsonProperty("id") String id, @JsonProperty("externalId") String externalId,
+      @JsonProperty("meta") ScimMeta meta, @JsonProperty("schemas") Set<String> schemas,
+      @JsonProperty("userName") String userName, @JsonProperty("name") ScimName name,
+      @JsonProperty("displayName") String displayName, @JsonProperty("nickName") String nickName,
+      @JsonProperty("profileUrl") String profileUrl, @JsonProperty("title") String title,
+      @JsonProperty("userType") String userType,
+      @JsonProperty("preferredLanguage") String preferredLanguage,
+      @JsonProperty("locale") String locale, @JsonProperty("timezone") String timezone,
+      @JsonProperty("active") Boolean active, @JsonProperty("emails") List<ScimEmail> emails,
+      @JsonProperty("addresses") List<ScimAddress> addresses,
+      @JsonProperty("groups") List<ScimGroupRef> groups,
+      @JsonProperty("urn:indigo-dc:scim:schemas:IndigoUser") ScimIndigoUser indigoUser) {
 
     super(id, externalId, meta, schemas);
 
@@ -333,8 +326,7 @@ public class ScimUser extends ScimResource {
 
       ScimName.Builder builder = new ScimName.Builder();
 
-      builder.givenName(givenName)
-        .familyName(familyName);
+      builder.givenName(givenName).familyName(familyName);
 
       name(builder.build());
       return this;

@@ -33,13 +33,11 @@ public class CriptoConfig {
   }
 
   @Bean(name = "defaultsignerService")
-  public DefaultJWTSigningAndValidationService defaultSignerService()
-    throws Exception {
+  public DefaultJWTSigningAndValidationService defaultSignerService() throws Exception {
 
     DefaultJWTSigningAndValidationService signerService = null;
 
-    signerService = new DefaultJWTSigningAndValidationService(
-      defaultKeyStore());
+    signerService = new DefaultJWTSigningAndValidationService(defaultKeyStore());
     signerService.setDefaultSignerKeyId("rsa1");
     signerService.setDefaultSigningAlgorithmName("RS256");
 
@@ -47,12 +45,10 @@ public class CriptoConfig {
   }
 
   @Bean(name = "defaultEncryptionService")
-  public DefaultJWTEncryptionAndDecryptionService defaultEncryptionService()
-    throws Exception {
+  public DefaultJWTEncryptionAndDecryptionService defaultEncryptionService() throws Exception {
 
     DefaultJWTEncryptionAndDecryptionService encryptionService = null;
-    encryptionService = new DefaultJWTEncryptionAndDecryptionService(
-      defaultKeyStore());
+    encryptionService = new DefaultJWTEncryptionAndDecryptionService(defaultKeyStore());
     encryptionService.setDefaultAlgorithm(JWEAlgorithm.RSA1_5);
     encryptionService.setDefaultDecryptionKeyId("rsa1");
     encryptionService.setDefaultEncryptionKeyId("rsa1");

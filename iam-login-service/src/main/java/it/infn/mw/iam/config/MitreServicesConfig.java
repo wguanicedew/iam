@@ -121,8 +121,7 @@ public class MitreServicesConfig {
   }
 
   @Bean
-  public FilterRegistrationBean disabledMitreFilterRegistration(
-    AuthorizationRequestFilter f) {
+  public FilterRegistrationBean disabledMitreFilterRegistration(AuthorizationRequestFilter f) {
 
     FilterRegistrationBean b = new FilterRegistrationBean(f);
     b.setEnabled(false);

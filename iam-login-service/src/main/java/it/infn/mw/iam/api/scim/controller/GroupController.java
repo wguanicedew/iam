@@ -46,23 +46,22 @@ public class GroupController {
 
   private Set<String> parseAttributes(String attributesParameter) {
 
-	Set<String> result = new HashSet<>();
-	if (!Strings.isNullOrEmpty(attributesParameter)) {
-	  result = Sets.newHashSet(Splitter.on(CharMatcher.anyOf(".,"))
-		.trimResults().omitEmptyStrings().split(attributesParameter));
-	}
-	result.add("schemas");
-	result.add("id");
-	return result;
+    Set<String> result = new HashSet<>();
+    if (!Strings.isNullOrEmpty(attributesParameter)) {
+      result = Sets.newHashSet(Splitter.on(CharMatcher.anyOf(".,")).trimResults().omitEmptyStrings()
+          .split(attributesParameter));
+    }
+    result.add("schemas");
+    result.add("id");
+    return result;
   }
 
-  private void handleValidationError(String message,
-	BindingResult validationResult) {
+  private void handleValidationError(String message, BindingResult validationResult) {
 
-	if (validationResult.hasErrors()) {
-	  throw new ScimValidationException(ValidationErrorMessageHelper
-		.buildValidationErrorMessage(message, validationResult));
-	}
+    if (validationResult.hasErrors()) {
+      throw new ScimValidationException(
+          ValidationErrorMessageHelper.buildValidationErrorMessage(message, validationResult));
+    }
   }
 
   @Autowired
@@ -70,96 +69,88 @@ public class GroupController {
 
   private ScimPageRequest buildPageRequest(Integer count, Integer startIndex) {
 
-	if (count == null || count > SCIM_MAX_PAGE_SIZE) {
-	  count = SCIM_MAX_PAGE_SIZE;
-	}
+    if (count == null || count > SCIM_MAX_PAGE_SIZE) {
+      count = SCIM_MAX_PAGE_SIZE;
+    }
 
-	if (count < 0) {
-	  count = 0;
-	}
+    if (count < 0) {
+      count = 0;
+    }
 
-	// SCIM pages index is 1-based
-	if (startIndex == null || startIndex < 1) {
-	  startIndex = 1;
-	}
+    // SCIM pages index is 1-based
+    if (startIndex == null || startIndex < 1) {
+      startIndex = 1;
+    }
 
-	ScimPageRequest pr = new DefaultScimPageRequest.Builder().count(count)
-	  .startIndex(startIndex - 1).build();
+    ScimPageRequest pr =
+        new DefaultScimPageRequest.Builder().count(count).startIndex(startIndex - 1).build();
 
-	return pr;
+    return pr;
   }
 
   @PreAuthorize("#oauth2.hasScope('scim:read') or hasRole('ADMIN')")
   @RequestMapping(value = "/{id}", method = RequestMethod.GET,
-	produces = ScimConstants.SCIM_CONTENT_TYPE)
+      produces = ScimConstants.SCIM_CONTENT_TYPE)
   public ScimGroup getGroup(@PathVariable final String id) {
 
-	return groupProvisioningService.getById(id);
+    return groupProvisioningService.getById(id);
   }
 
   @PreAuthorize("#oauth2.hasScope('scim:read') or hasRole('ADMIN')")
-  @RequestMapping(method = RequestMethod.GET,
-	produces = ScimConstants.SCIM_CONTENT_TYPE)
-  public MappingJacksonValue listGroups(
-	@RequestParam(required = false) Integer count,
-	@RequestParam(required = false) Integer startIndex,
-	@RequestParam(required = false) String attributes) {
+  @RequestMapping(method = RequestMethod.GET, produces = ScimConstants.SCIM_CONTENT_TYPE)
+  public MappingJacksonValue listGroups(@RequestParam(required = false) Integer count,
+      @RequestParam(required = false) Integer startIndex,
+      @RequestParam(required = false) String attributes) {
 
-	ScimPageRequest pr = buildPageRequest(count, startIndex);
-	ScimListResponse<ScimGroup> result = groupProvisioningService.list(pr);
+    ScimPageRequest pr = buildPageRequest(count, startIndex);
+    ScimListResponse<ScimGroup> result = groupProvisioningService.list(pr);
 
-	MappingJacksonValue wrapper = new MappingJacksonValue(result);
+    MappingJacksonValue wrapper = new MappingJacksonValue(result);
 
-	if (attributes != null) {
-	  Set<String> includeAttributes = parseAttributes(attributes);
+    if (attributes != null) {
+      Set<String> includeAttributes = parseAttributes(attributes);
 
-	  FilterProvider filterProvider = new SimpleFilterProvider().addFilter(
-		"attributeFilter",
-		SimpleBeanPropertyFilter.filterOutAllExcept(includeAttributes));
+      FilterProvider filterProvider = new SimpleFilterProvider().addFilter("attributeFilter",
+          SimpleBeanPropertyFilter.filterOutAllExcept(includeAttributes));
 
-	  wrapper.setFilters(filterProvider);
-	}
+      wrapper.setFilters(filterProvider);
+    }
 
-	return wrapper;
+    return wrapper;
   }
 
   @PreAuthorize("#oauth2.hasScope('scim:write') or hasRole('ADMIN')")
-  @RequestMapping(method = RequestMethod.POST,
-	consumes = ScimConstants.SCIM_CONTENT_TYPE,
-	produces = ScimConstants.SCIM_CONTENT_TYPE)
+  @RequestMapping(method = RequestMethod.POST, consumes = ScimConstants.SCIM_CONTENT_TYPE,
+      produces = ScimConstants.SCIM_CONTENT_TYPE)
   @ResponseStatus(HttpStatus.CREATED)
-  public ScimGroup create(
-	@RequestBody @Validated ScimGroup group,
-	BindingResult validationResult) {
+  public ScimGroup create(@RequestBody @Validated ScimGroup group, BindingResult validationResult) {
 
-	handleValidationError("Invalid Scim Group", validationResult);
-	ScimGroup result = groupProvisioningService.create(group);
-	return result;
+    handleValidationError("Invalid Scim Group", validationResult);
+    ScimGroup result = groupProvisioningService.create(group);
+    return result;
   }
 
   @PreAuthorize("#oauth2.hasScope('scim:write') or hasRole('ADMIN')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PUT,
-	consumes = ScimConstants.SCIM_CONTENT_TYPE,
-	produces = ScimConstants.SCIM_CONTENT_TYPE)
+      consumes = ScimConstants.SCIM_CONTENT_TYPE, produces = ScimConstants.SCIM_CONTENT_TYPE)
   @ResponseStatus(HttpStatus.OK)
   public ScimGroup replaceGroup(@PathVariable final String id,
-	@RequestBody @Validated ScimGroup group,
-	BindingResult validationResult) {
+      @RequestBody @Validated ScimGroup group, BindingResult validationResult) {
 
-	handleValidationError("Invalid Scim Group", validationResult);
+    handleValidationError("Invalid Scim Group", validationResult);
 
-	return groupProvisioningService.replace(id, group);
+    return groupProvisioningService.replace(id, group);
 
   }
 
   @PreAuthorize("#oauth2.hasScope('scim:write') or hasRole('ADMIN')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH,
-	consumes = ScimConstants.SCIM_CONTENT_TYPE)
+      consumes = ScimConstants.SCIM_CONTENT_TYPE)
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void updateGroup(@PathVariable final String id, 
-	@RequestBody @Validated ScimGroupPatchRequest groupPatchRequest) {
+  public void updateGroup(@PathVariable final String id,
+      @RequestBody @Validated ScimGroupPatchRequest groupPatchRequest) {
 
-      groupProvisioningService.update(id, groupPatchRequest.getOperations());
+    groupProvisioningService.update(id, groupPatchRequest.getOperations());
   }
 
   @PreAuthorize("#oauth2.hasScope('scim:write') or hasRole('ADMIN')")
@@ -167,6 +158,6 @@ public class GroupController {
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void deleteGroup(@PathVariable final String id) {
 
-	groupProvisioningService.delete(id);
+    groupProvisioningService.delete(id);
   }
 }

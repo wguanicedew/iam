@@ -61,16 +61,14 @@ public class IamAccount {
 
   @ManyToMany
   @JoinTable(name = "iam_account_authority",
-	joinColumns = @JoinColumn(name = "account_id", referencedColumnName = "id"),
-	inverseJoinColumns = @JoinColumn(name = "authority_id",
-	  referencedColumnName = "id"))
+      joinColumns = @JoinColumn(name = "account_id", referencedColumnName = "id") ,
+      inverseJoinColumns = @JoinColumn(name = "authority_id", referencedColumnName = "id") )
   private Set<IamAuthority> authorities = new HashSet<>();
 
   @ManyToMany
   @JoinTable(name = "iam_account_group",
-	joinColumns = @JoinColumn(name = "account_id", referencedColumnName = "id"),
-	inverseJoinColumns = @JoinColumn(name = "group_id",
-	  referencedColumnName = "id"))
+      joinColumns = @JoinColumn(name = "account_id", referencedColumnName = "id") ,
+      inverseJoinColumns = @JoinColumn(name = "group_id", referencedColumnName = "id") )
   private Set<IamGroup> groups = new HashSet<>();
 
   @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
@@ -85,189 +83,187 @@ public class IamAccount {
   @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
   private List<IamX509Certificate> x509Certificates = new ArrayList<>();
 
-  public IamAccount() {
-  }
+  public IamAccount() {}
 
   public Long getId() {
 
-	return id;
+    return id;
   }
 
   public void setId(final Long id) {
 
-	this.id = id;
+    this.id = id;
   }
 
   public String getUuid() {
 
-	return uuid;
+    return uuid;
   }
 
   public void setUuid(final String uuid) {
 
-	this.uuid = uuid;
+    this.uuid = uuid;
   }
 
   public String getUsername() {
 
-	return username;
+    return username;
   }
 
   public void setUsername(final String username) {
 
-	this.username = username;
+    this.username = username;
   }
 
   public String getPassword() {
 
-	return password;
+    return password;
   }
 
   public void setPassword(final String password) {
 
-	this.password = password;
+    this.password = password;
   }
 
   public IamUserInfo getUserInfo() {
 
-	return userInfo;
+    return userInfo;
   }
 
   public void setUserInfo(final IamUserInfo userInfo) {
 
-	this.userInfo = userInfo;
+    this.userInfo = userInfo;
   }
 
   public Set<IamAuthority> getAuthorities() {
 
-	return authorities;
+    return authorities;
   }
 
   public void setAuthorities(final Set<IamAuthority> authorities) {
 
-	this.authorities = authorities;
+    this.authorities = authorities;
   }
 
   public Set<IamGroup> getGroups() {
 
-	return groups;
+    return groups;
   }
 
   public void setGroups(final Set<IamGroup> groups) {
 
-	this.groups = groups;
+    this.groups = groups;
   }
 
   public Date getCreationTime() {
 
-	return creationTime;
+    return creationTime;
   }
 
   public void setCreationTime(Date creationTime) {
 
-	this.creationTime = creationTime;
+    this.creationTime = creationTime;
   }
 
   public Date getLastUpdateTime() {
 
-	return lastUpdateTime;
+    return lastUpdateTime;
   }
 
   public void setLastUpdateTime(Date lastUpdateTime) {
 
-	this.lastUpdateTime = lastUpdateTime;
+    this.lastUpdateTime = lastUpdateTime;
   }
 
   public boolean isActive() {
 
-	return active;
+    return active;
   }
 
   public void setActive(boolean active) {
 
-	this.active = active;
+    this.active = active;
   }
 
   public List<IamSamlId> getSamlIds() {
 
-	return samlIds;
+    return samlIds;
   }
 
   public void setSamlIds(List<IamSamlId> samlIds) {
 
-	this.samlIds = samlIds;
+    this.samlIds = samlIds;
   }
 
   public List<IamOidcId> getOidcIds() {
 
-	return oidcIds;
+    return oidcIds;
   }
 
   public void setOidcIds(List<IamOidcId> oidcIds) {
 
-	this.oidcIds = oidcIds;
+    this.oidcIds = oidcIds;
   }
 
   public List<IamSshKey> getSshKeys() {
 
-	return sshKeys;
+    return sshKeys;
   }
 
   public void setSshKeys(List<IamSshKey> sshKeys) {
 
-	this.sshKeys = sshKeys;
+    this.sshKeys = sshKeys;
   }
 
   public List<IamX509Certificate> getX509Certificates() {
 
-	return x509Certificates;
+    return x509Certificates;
   }
 
   public void setX509Certificates(List<IamX509Certificate> x509Certificates) {
 
-	this.x509Certificates = x509Certificates;
+    this.x509Certificates = x509Certificates;
   }
 
   public void touch() {
 
-	setLastUpdateTime(new Date());
+    setLastUpdateTime(new Date());
   }
 
   @Override
   public int hashCode() {
 
-	final int prime = 31;
-	int result = 1;
-	result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
-	return result;
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
+    return result;
   }
 
   @Override
   public boolean equals(final Object obj) {
 
-	if (this == obj)
-	  return true;
-	if (obj == null)
-	  return false;
-	if (getClass() != obj.getClass())
-	  return false;
-	IamAccount other = (IamAccount) obj;
-	if (uuid == null) {
-	  if (other.uuid != null)
-		return false;
-	} else if (!uuid.equals(other.uuid))
-	  return false;
-	return true;
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    IamAccount other = (IamAccount) obj;
+    if (uuid == null) {
+      if (other.uuid != null)
+        return false;
+    } else if (!uuid.equals(other.uuid))
+      return false;
+    return true;
   }
 
   @Override
   public String toString() {
 
-	return "IamAccount [id=" + id + ", uuid=" + uuid + ", username=" + username
-	  + ", active=" + active + ", userInfo=" + userInfo + ", authorities="
-	  + authorities + ", groups=" + groups + ", samlIds=" + samlIds
-	  + ", oidcIds=" + oidcIds + ", sshKeys=" + sshKeys + ", x509Certificates="
-	  + x509Certificates + "]";
+    return "IamAccount [id=" + id + ", uuid=" + uuid + ", username=" + username + ", active="
+        + active + ", userInfo=" + userInfo + ", authorities=" + authorities + ", groups=" + groups
+        + ", samlIds=" + samlIds + ", oidcIds=" + oidcIds + ", sshKeys=" + sshKeys
+        + ", x509Certificates=" + x509Certificates + "]";
   }
 
 }

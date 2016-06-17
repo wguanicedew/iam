@@ -14,12 +14,10 @@ public class OidcAccessDeniedHandler implements AccessDeniedHandler {
 
   @Override
   public void handle(HttpServletRequest request, HttpServletResponse response,
-    AccessDeniedException accessDeniedException)
-      throws IOException, ServletException {
+      AccessDeniedException accessDeniedException) throws IOException, ServletException {
 
     RequestDispatcher dispatcher = request.getRequestDispatcher("/login");
-    request.setAttribute("accessDeniedError",
-      accessDeniedException.getMessage());
+    request.setAttribute("accessDeniedError", accessDeniedException.getMessage());
 
     dispatcher.forward(request, response);
 

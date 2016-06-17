@@ -11,8 +11,7 @@ public class OffsetPageable implements Pageable {
   private final int count;
 
   public OffsetPageable(int offset, int count) {
-    Preconditions.checkArgument(offset >= 0,
-      "offset must be greater or equal to 0");
+    Preconditions.checkArgument(offset >= 0, "offset must be greater or equal to 0");
 
     Preconditions.checkArgument(count >= 1, "count must be a positive integer");
 

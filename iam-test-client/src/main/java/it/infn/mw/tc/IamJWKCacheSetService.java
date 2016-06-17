@@ -23,31 +23,30 @@ public class IamJWKCacheSetService extends JWKSetCacheService {
 
   public IamJWKCacheSetService(ClientHttpRequestFactory rf) {
     requestFactory = rf;
-    validators = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.HOURS)
-      .maximumSize(100).build(new Fetcher(requestFactory));
+    validators = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).maximumSize(100)
+        .build(new Fetcher(requestFactory));
 
   }
 
-  
+
   public LoadingCache<String, JWTSigningAndValidationService> getValidators() {
 
     return validators;
   }
-  
-  
+
+
   @Override
   public JWTSigningAndValidationService getValidator(String jwksUri) {
-  
+
     try {
       return validators.get(jwksUri);
     } catch (ExecutionException e) {
       return null;
     }
   }
-  
-  
-  private class Fetcher
-    extends CacheLoader<String, JWTSigningAndValidationService> {
+
+
+  private class Fetcher extends CacheLoader<String, JWTSigningAndValidationService> {
 
     private final RestTemplate restTemplate;
 
@@ -64,8 +63,7 @@ public class IamJWKCacheSetService extends JWKSetCacheService {
 
       JWKSetKeyStore keyStore = new JWKSetKeyStore(jwkSet);
 
-      JWTSigningAndValidationService service = new DefaultJWTSigningAndValidationService(
-        keyStore);
+      JWTSigningAndValidationService service = new DefaultJWTSigningAndValidationService(keyStore);
 
       return service;
 

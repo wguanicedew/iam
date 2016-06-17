@@ -1,9 +1,9 @@
 package it.infn.mw.iam.core;
 
 public enum IamProperties {
-  
+
   INSTANCE;
-  
+
   private String organisationName;
 
   private IamProperties() {

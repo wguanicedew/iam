@@ -13,8 +13,8 @@ public class OidcAuthenticationError extends AuthenticationException {
   private final String errorDescription;
   private final String errorUri;
 
-  public OidcAuthenticationError(String msg, String error,
-    String errorDescription, String errorUri) {
+  public OidcAuthenticationError(String msg, String error, String errorDescription,
+      String errorUri) {
     super(msg);
     this.error = error;
     this.errorDescription = errorDescription;

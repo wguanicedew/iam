@@ -31,9 +31,8 @@ public class OidcTokenEnhancer extends ConnectTokenEnhancer {
   @Autowired
   private OIDCTokenService connectTokenService;
 
-  protected OAuth2AccessTokenEntity buildAccessToken(
-    OAuth2AccessToken accessToken, OAuth2Authentication authentication,
-    UserInfo userInfo, Date issueTime) {
+  protected OAuth2AccessTokenEntity buildAccessToken(OAuth2AccessToken accessToken,
+      OAuth2Authentication authentication, UserInfo userInfo, Date issueTime) {
 
     OAuth2AccessTokenEntity token = (OAuth2AccessTokenEntity) accessToken;
 
@@ -46,17 +45,12 @@ public class OidcTokenEnhancer extends ConnectTokenEnhancer {
     }
 
     // @formatter:off
-    Builder builder = new JWTClaimsSet.Builder()
-      .issuer(getConfigBean().getIssuer())
-      .issueTime(issueTime)
-      .expirationTime(token.getExpiration())
-      .subject(subject)
-      .jwtID(UUID.randomUUID().toString());
+    Builder builder = new JWTClaimsSet.Builder().issuer(getConfigBean().getIssuer())
+        .issueTime(issueTime).expirationTime(token.getExpiration()).subject(subject)
+        .jwtID(UUID.randomUUID().toString());
     // @formatter:on
 
-    String audience = (String) authentication.getOAuth2Request()
-      .getExtensions()
-      .get("aud");
+    String audience = (String) authentication.getOAuth2Request().getExtensions().get("aud");
 
     if (!Strings.isNullOrEmpty(audience)) {
       builder.audience(Lists.newArrayList(audience));
@@ -65,9 +59,8 @@ public class OidcTokenEnhancer extends ConnectTokenEnhancer {
     JWTClaimsSet claims = builder.build();
 
     JWSAlgorithm signingAlg = getJwtService().getDefaultSigningAlgorithm();
-    JWSHeader header = new JWSHeader(signingAlg, null, null, null, null, null,
-      null, null, null, null, getJwtService().getDefaultSignerKeyId(), null,
-      null);
+    JWSHeader header = new JWSHeader(signingAlg, null, null, null, null, null, null, null, null,
+        null, getJwtService().getDefaultSignerKeyId(), null, null);
     SignedJWT signed = new SignedJWT(header, claims);
 
     getJwtService().signJwt(signed);
@@ -80,40 +73,35 @@ public class OidcTokenEnhancer extends ConnectTokenEnhancer {
 
   @Override
   public OAuth2AccessToken enhance(OAuth2AccessToken accessToken,
-    OAuth2Authentication authentication) {
+      OAuth2Authentication authentication) {
 
     OAuth2Request originalAuthRequest = authentication.getOAuth2Request();
 
     String username = authentication.getName();
     String clientId = originalAuthRequest.getClientId();
 
-    UserInfo userInfo = userInfoService.getByUsernameAndClientId(username,
-      clientId);
+    UserInfo userInfo = userInfoService.getByUsernameAndClientId(username, clientId);
 
     Date issueTime = new Date();
-    OAuth2AccessTokenEntity accessTokenEntity = buildAccessToken(accessToken,
-      authentication, userInfo, issueTime);
+    OAuth2AccessTokenEntity accessTokenEntity =
+        buildAccessToken(accessToken, authentication, userInfo, issueTime);
 
     /**
-     * Authorization request scope MUST include "openid" in OIDC, but access
-     * token request may or may not include the scope parameter. As long as the
-     * AuthorizationRequest has the proper scope, we can consider this a valid
-     * OpenID Connect request. Otherwise, we consider it to be a vanilla OAuth2
-     * request.
+     * Authorization request scope MUST include "openid" in OIDC, but access token request may or
+     * may not include the scope parameter. As long as the AuthorizationRequest has the proper
+     * scope, we can consider this a valid OpenID Connect request. Otherwise, we consider it to be a
+     * vanilla OAuth2 request.
      * 
-     * Also, there must be a user authentication involved in the request for it
-     * to be considered OIDC and not OAuth, so we check for that as well.
+     * Also, there must be a user authentication involved in the request for it to be considered
+     * OIDC and not OAuth, so we check for that as well.
      */
-    if (originalAuthRequest.getScope()
-      .contains(SystemScopeService.OPENID_SCOPE)
-      && !authentication.isClientOnly()) {
+    if (originalAuthRequest.getScope().contains(SystemScopeService.OPENID_SCOPE)
+        && !authentication.isClientOnly()) {
 
-      ClientDetailsEntity client = getClientService()
-        .loadClientByClientId(clientId);
+      ClientDetailsEntity client = getClientService().loadClientByClientId(clientId);
 
-      OAuth2AccessTokenEntity idTokenEntity = connectTokenService.createIdToken(
-        client, originalAuthRequest, issueTime, userInfo.getSub(),
-        accessTokenEntity);
+      OAuth2AccessTokenEntity idTokenEntity = connectTokenService.createIdToken(client,
+          originalAuthRequest, issueTime, userInfo.getSub(), accessTokenEntity);
 
       accessTokenEntity.setIdToken(idTokenEntity);
 

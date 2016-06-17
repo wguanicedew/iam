@@ -46,20 +46,18 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.WebUtils;
 
 @SpringBootApplication
-@EnableAutoConfiguration(exclude = { ErrorMvcAutoConfiguration.class })
+@EnableAutoConfiguration(exclude = {ErrorMvcAutoConfiguration.class})
 @RestController
-public class IamTestClientApplication
-  extends WebSecurityConfigurerAdapter {
+public class IamTestClientApplication extends WebSecurityConfigurerAdapter {
 
-  public static final Logger LOG = LoggerFactory
-    .getLogger(IamTestClientApplication.class);
+  public static final Logger LOG = LoggerFactory.getLogger(IamTestClientApplication.class);
 
   @Autowired
   OIDCAuthenticationFilter oidcFilter;
-  
+
   @Autowired
   IamClientConfig clientConfig;
-  
+
   @Autowired
   ClientHttpRequestFactory requestFactory;
 
@@ -68,13 +66,11 @@ public class IamTestClientApplication
     SpringApplication.run(IamTestClientApplication.class, args);
   }
 
-  public class SendUnauhtorizedAuthenticationEntryPoint
-    implements AuthenticationEntryPoint {
+  public class SendUnauhtorizedAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
     @Override
-    public void commence(HttpServletRequest request,
-      HttpServletResponse response, AuthenticationException authException)
-        throws IOException, ServletException {
+    public void commence(HttpServletRequest request, HttpServletResponse response,
+        AuthenticationException authException) throws IOException, ServletException {
 
       response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 
@@ -86,24 +82,14 @@ public class IamTestClientApplication
   protected void configure(HttpSecurity http) throws Exception {
 
     // @formatter:off
-    http
-      .antMatcher("/**")
-        .authorizeRequests()
-          .antMatchers("/", "/user", "/error", "/openid_connect_login**", "/webjars/**").permitAll()
-          .anyRequest().authenticated()
-          .and()
-       .exceptionHandling()
-         .authenticationEntryPoint(new SendUnauhtorizedAuthenticationEntryPoint())
-         .and()
-       .logout()
-         .logoutSuccessUrl("/").permitAll()
-         .and()
-       .csrf().csrfTokenRepository(csrfTokenRepository())
-         .and()
-       .addFilterAfter(csrfHeaderFilter(), CsrfFilter.class)
-       .addFilterAfter(oidcFilter, SecurityContextPersistenceFilter.class)
-       .sessionManagement().enableSessionUrlRewriting(false)
-       .sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
+    http.antMatcher("/**").authorizeRequests()
+        .antMatchers("/", "/user", "/error", "/openid_connect_login**", "/webjars/**").permitAll()
+        .anyRequest().authenticated().and().exceptionHandling()
+        .authenticationEntryPoint(new SendUnauhtorizedAuthenticationEntryPoint()).and().logout()
+        .logoutSuccessUrl("/").permitAll().and().csrf().csrfTokenRepository(csrfTokenRepository())
+        .and().addFilterAfter(csrfHeaderFilter(), CsrfFilter.class)
+        .addFilterAfter(oidcFilter, SecurityContextPersistenceFilter.class).sessionManagement()
+        .enableSessionUrlRewriting(false).sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
     // @formatter:on
   }
 
@@ -112,17 +98,14 @@ public class IamTestClientApplication
     return new OncePerRequestFilter() {
 
       @Override
-      protected void doFilterInternal(HttpServletRequest request,
-        HttpServletResponse response, FilterChain filterChain)
-          throws ServletException, IOException {
+      protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+          FilterChain filterChain) throws ServletException, IOException {
 
-        CsrfToken csrf = (CsrfToken) request
-          .getAttribute(CsrfToken.class.getName());
+        CsrfToken csrf = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
         if (csrf != null) {
           Cookie cookie = WebUtils.getCookie(request, "XSRF-TOKEN");
           String token = csrf.getToken();
-          if (cookie == null
-            || token != null && !token.equals(cookie.getValue())) {
+          if (cookie == null || token != null && !token.equals(cookie.getValue())) {
             cookie = new Cookie("XSRF-TOKEN", token);
             cookie.setPath("/");
             response.addCookie(cookie);
@@ -155,46 +138,48 @@ public class IamTestClientApplication
 
     return null;
   }
-  
+
   @RequestMapping("/introspect")
-  public String  introspect(Principal principal, Model model) {
+  public String introspect(Principal principal, Model model) {
 
     if (principal instanceof AnonymousAuthenticationToken) {
       return null;
     }
 
 
-    if (principal == null || principal instanceof AnonymousAuthenticationToken){
+    if (principal == null || principal instanceof AnonymousAuthenticationToken) {
       model.addAttribute("error", "User is not authenticated.");
       return "index";
     }
-    
+
     OIDCAuthenticationToken token = (OIDCAuthenticationToken) principal;
     String accessToken = token.getAccessTokenValue();
-    
-    String plainCreds = String.format("%s:%s", clientConfig.getClientId(), 
-      clientConfig.getClientSecret());
-    
+
+    String plainCreds =
+        String.format("%s:%s", clientConfig.getClientId(), clientConfig.getClientSecret());
+
     String base64Creds = new String(Base64.encode(plainCreds.getBytes()));
-    
+
     HttpHeaders headers = new HttpHeaders();
     headers.add("Authorization", "Basic " + base64Creds);
-    
+
     // Create the request body as a MultiValueMap
     MultiValueMap<String, String> body = new LinkedMultiValueMap<String, String>();
     body.add("token", accessToken);
-    
+
     HttpEntity<?> request = new HttpEntity<Object>(body, headers);
-    
+
     RestTemplate rt = new RestTemplate(requestFactory);
-    String iamIntrospectUrl = clientConfig.getIssuer()+"/introspect";
-    ResponseEntity<String> response = rt.exchange(iamIntrospectUrl, HttpMethod.POST, request,  String.class);
-    
-    if (response.getStatusCode().is4xxClientError() || response.getStatusCode().is5xxServerError() ){
-      model.addAttribute("error", "Introspect call returned an error: "+response.getBody());
+    String iamIntrospectUrl = clientConfig.getIssuer() + "/introspect";
+    ResponseEntity<String> response =
+        rt.exchange(iamIntrospectUrl, HttpMethod.POST, request, String.class);
+
+    if (response.getStatusCode().is4xxClientError()
+        || response.getStatusCode().is5xxServerError()) {
+      model.addAttribute("error", "Introspect call returned an error: " + response.getBody());
       return null;
     }
-    
+
     return response.getBody();
   }
 

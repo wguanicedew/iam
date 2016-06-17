@@ -18,15 +18,14 @@ public class SaveAuhenticationError implements AuthenticationFailureHandler {
   }
 
   @Override
-  public void onAuthenticationFailure(HttpServletRequest request,
-    HttpServletResponse response, AuthenticationException exception)
-      throws IOException, ServletException {
+  public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
+      AuthenticationException exception) throws IOException, ServletException {
 
     request.setAttribute("authnException", exception);
-    
+
     RequestDispatcher dispatcher = request.getRequestDispatcher("/error");
     dispatcher.forward(request, response);
-    
+
 
   }
 

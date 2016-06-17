@@ -41,9 +41,8 @@ public class X509TrustConfig {
   public X509CertChainValidatorExt certificateValidator() {
 
     return new CertificateValidatorBuilder().lazyAnchorsLoading(false)
-      .trustAnchorsDir(trustAnchorsDir)
-      .trustAnchorsUpdateInterval(trustAnchorsRefreshInterval.longValue())
-      .build();
+        .trustAnchorsDir(trustAnchorsDir)
+        .trustAnchorsUpdateInterval(trustAnchorsRefreshInterval.longValue()).build();
   }
 
   @Bean
@@ -52,10 +51,9 @@ public class X509TrustConfig {
     try {
       SSLContext context = SSLContext.getInstance("TLSv1");
 
-      X509TrustManager tm = SocketFactoryCreator
-        .getSSLTrustManager(certificateValidator());
+      X509TrustManager tm = SocketFactoryCreator.getSSLTrustManager(certificateValidator());
       SecureRandom r = new SecureRandom();
-      context.init(null, new TrustManager[] { tm }, r);
+      context.init(null, new TrustManager[] {tm}, r);
 
       return context;
 
@@ -68,24 +66,19 @@ public class X509TrustConfig {
   @Bean
   public HttpClient httpClient() {
 
-    SSLConnectionSocketFactory sf = new SSLConnectionSocketFactory(
-      sslContext());
+    SSLConnectionSocketFactory sf = new SSLConnectionSocketFactory(sslContext());
 
-    Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder
-      .<ConnectionSocketFactory> create()
-      .register("https", sf)
-      .register("http", PlainConnectionSocketFactory.getSocketFactory())
-      .build();
+    Registry<ConnectionSocketFactory> socketFactoryRegistry =
+        RegistryBuilder.<ConnectionSocketFactory>create().register("https", sf)
+            .register("http", PlainConnectionSocketFactory.getSocketFactory()).build();
 
-    PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(
-      socketFactoryRegistry);
+    PoolingHttpClientConnectionManager connectionManager =
+        new PoolingHttpClientConnectionManager(socketFactoryRegistry);
     connectionManager.setMaxTotal(10);
     connectionManager.setDefaultMaxPerRoute(10);
 
-    return HttpClientBuilder.create()
-      .setConnectionManager(connectionManager)
-      .disableAuthCaching()
-      .build();
+    return HttpClientBuilder.create().setConnectionManager(connectionManager).disableAuthCaching()
+        .build();
   }
 
   @Bean(name = "canlRequestFactory")

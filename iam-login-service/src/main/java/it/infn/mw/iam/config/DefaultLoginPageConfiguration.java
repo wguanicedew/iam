@@ -13,8 +13,7 @@ import it.infn.mw.iam.config.oidc.GoogleClientConfig;
 import it.infn.mw.iam.core.LoginPageConfiguration;
 
 @Component
-public class DefaultLoginPageConfiguration
-  implements LoginPageConfiguration, EnvironmentAware {
+public class DefaultLoginPageConfiguration implements LoginPageConfiguration, EnvironmentAware {
 
   private Environment env;
 
@@ -35,8 +34,7 @@ public class DefaultLoginPageConfiguration
 
   private boolean activeProfilesContains(String val) {
 
-    return Arrays.asList(env.getActiveProfiles())
-      .contains(val);
+    return Arrays.asList(env.getActiveProfiles()).contains(val);
   }
 
   @Override

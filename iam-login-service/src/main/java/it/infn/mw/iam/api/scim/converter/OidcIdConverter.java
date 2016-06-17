@@ -17,35 +17,34 @@ public class OidcIdConverter implements Converter<ScimOidcId, IamOidcId> {
   @Autowired
   public OidcIdConverter(IamOidcIdRepository oidcIdRepository) {
 
-	this.oidcIdRepository = oidcIdRepository;
+    this.oidcIdRepository = oidcIdRepository;
   }
 
   @Override
   public IamOidcId fromScim(ScimOidcId scim) {
 
-	/* Try loading from persistence the OpenID Connect id */
-	Optional<IamOidcId> oidcId = oidcIdRepository
-	  .findByIssuerAndSubject(scim.issuer, scim.subject);
+    /* Try loading from persistence the OpenID Connect id */
+    Optional<IamOidcId> oidcId = oidcIdRepository.findByIssuerAndSubject(scim.issuer, scim.subject);
 
-	if (oidcId.isPresent()) {
-	  return oidcId.get();
-	}
+    if (oidcId.isPresent()) {
+      return oidcId.get();
+    }
 
-	/* It's a new OpenID Connect id */
-	IamOidcId oidcIdNew = new IamOidcId();
-	oidcIdNew.setIssuer(scim.issuer);
-	oidcIdNew.setSubject(scim.subject);
-	oidcIdNew.setAccount(null);
-	return oidcIdNew;
+    /* It's a new OpenID Connect id */
+    IamOidcId oidcIdNew = new IamOidcId();
+    oidcIdNew.setIssuer(scim.issuer);
+    oidcIdNew.setSubject(scim.subject);
+    oidcIdNew.setAccount(null);
+    return oidcIdNew;
   }
 
   @Override
   public ScimOidcId toScim(IamOidcId entity) {
 
-	ScimOidcId.Builder builder = ScimOidcId.builder().issuer(entity.getIssuer())
-	  .subject(entity.getSubject());
+    ScimOidcId.Builder builder =
+        ScimOidcId.builder().issuer(entity.getIssuer()).subject(entity.getSubject());
 
-	return builder.build();
+    return builder.build();
   }
 
 }

@@ -14,13 +14,13 @@ public class SaveRequestOidcAuthenticationFilter extends OidcClientFilter {
 
   @Override
   protected void handleAuthorizationRequest(HttpServletRequest request,
-    HttpServletResponse response) throws IOException {
+      HttpServletResponse response) throws IOException {
 
     HttpSession session = request.getSession();
 
     // backup original redirect uri and state
-    DefaultSavedRequest savedRequest = (DefaultSavedRequest) session
-      .getAttribute("SPRING_SECURITY_SAVED_REQUEST");
+    DefaultSavedRequest savedRequest =
+        (DefaultSavedRequest) session.getAttribute("SPRING_SECURITY_SAVED_REQUEST");
 
     session.setAttribute(ORIGIN_AUTH_REQUEST_SESSION_VARIABLE, savedRequest);
 

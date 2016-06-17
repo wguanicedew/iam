@@ -23,7 +23,7 @@ public class OpenIDAuthentication {
     accessToken = token.getAccessTokenValue();
     refreshToken = token.getRefreshTokenValue();
     idToken = token.getIdToken().getParsedString();
-    
+
 
     name = token.getUserInfo().getName();
     familyName = token.getUserInfo().getFamilyName();

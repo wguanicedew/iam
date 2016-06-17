@@ -23,64 +23,62 @@ public class GroupConverter implements Converter<ScimGroup, IamGroup> {
   private final IamAccountRepository accountRepository;
 
   @Autowired
-  public GroupConverter(ScimResourceLocationProvider rlp,
-	IamGroupRepository groupRepository,
-	IamAccountRepository accountRepository) {
+  public GroupConverter(ScimResourceLocationProvider rlp, IamGroupRepository groupRepository,
+      IamAccountRepository accountRepository) {
 
-	this.resourceLocationProvider = rlp;
-	this.groupRepository = groupRepository;
-	this.accountRepository = accountRepository;
+    this.resourceLocationProvider = rlp;
+    this.groupRepository = groupRepository;
+    this.accountRepository = accountRepository;
   }
 
   @Override
   public IamGroup fromScim(ScimGroup scimGroup) {
 
-	IamGroup group = groupRepository.findByUuid(scimGroup.getId())
-	  .orElse(new IamGroup());
+    IamGroup group = groupRepository.findByUuid(scimGroup.getId()).orElse(new IamGroup());
 
-	/*
-	 * Replace fields. Note: description field is null or read from repository
-	 */
-	group.setUuid(scimGroup.getId());
-	group.setCreationTime(scimGroup.getMeta().getCreated());
-	group.setLastUpdateTime(scimGroup.getMeta().getLastModified());
-	group.setName(scimGroup.getDisplayName());
+    /*
+     * Replace fields. Note: description field is null or read from repository
+     */
+    group.setUuid(scimGroup.getId());
+    group.setCreationTime(scimGroup.getMeta().getCreated());
+    group.setLastUpdateTime(scimGroup.getMeta().getLastModified());
+    group.setName(scimGroup.getDisplayName());
 
-	Set<IamAccount> accounts = new HashSet<IamAccount>();
+    Set<IamAccount> accounts = new HashSet<IamAccount>();
 
-	for (ScimMemberRef member : scimGroup.getMembers()) {
+    for (ScimMemberRef member : scimGroup.getMembers()) {
 
-	  accounts.add(accountRepository.findByUuid(member.getValue())
-		.orElseThrow(() -> new ScimResourceNotFoundException(
-		  "No account mapped to id '" + member.getValue() + "'")));
-	}
-	group.setAccounts(accounts);
+      accounts.add(accountRepository.findByUuid(member.getValue())
+          .orElseThrow(() -> new ScimResourceNotFoundException(
+              "No account mapped to id '" + member.getValue() + "'")));
+    }
+    group.setAccounts(accounts);
 
-	return group;
+    return group;
   }
 
   @Override
   public ScimGroup toScim(IamGroup entity) {
 
-	ScimMeta.Builder metaBuilder = new ScimMeta.Builder(
-	  entity.getCreationTime(), entity.getLastUpdateTime())
-		.location(resourceLocationProvider.groupLocation(entity.getUuid()))
-		.resourceType(ScimGroup.RESOURCE_TYPE);
+    ScimMeta.Builder metaBuilder =
+        new ScimMeta.Builder(entity.getCreationTime(), entity.getLastUpdateTime())
+            .location(resourceLocationProvider.groupLocation(entity.getUuid()))
+            .resourceType(ScimGroup.RESOURCE_TYPE);
 
-	ScimGroup.Builder groupBuilder = new ScimGroup.Builder(entity.getName())
-	  .id(entity.getUuid().toString()).meta(metaBuilder.build());
+    ScimGroup.Builder groupBuilder = new ScimGroup.Builder(entity.getName())
+        .id(entity.getUuid().toString()).meta(metaBuilder.build());
 
-	Set<ScimMemberRef> members = new HashSet<>();
+    Set<ScimMemberRef> members = new HashSet<>();
 
-	for (IamAccount account : entity.getAccounts()) {
-	  ScimMemberRef memberRef = new ScimMemberRef.Builder()
-		.value(account.getUuid()).display(account.getUsername())
-		.ref(resourceLocationProvider.userLocation(account.getUuid())).build();
-	  members.add(memberRef);
-	}
-	groupBuilder.setMembers(members);
+    for (IamAccount account : entity.getAccounts()) {
+      ScimMemberRef memberRef =
+          new ScimMemberRef.Builder().value(account.getUuid()).display(account.getUsername())
+              .ref(resourceLocationProvider.userLocation(account.getUuid())).build();
+      members.add(memberRef);
+    }
+    groupBuilder.setMembers(members);
 
-	return groupBuilder.build();
+    return groupBuilder.build();
   }
 
 }

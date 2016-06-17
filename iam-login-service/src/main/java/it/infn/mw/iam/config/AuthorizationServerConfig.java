@@ -39,8 +39,7 @@ import it.infn.mw.iam.core.TokenExchangeTokenGranter;
 
 @Configuration
 @EnableAuthorizationServer
-public class AuthorizationServerConfig
-  extends AuthorizationServerConfigurerAdapter {
+public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
 
   @Autowired
   @Qualifier("iamUserDetailsService")
@@ -75,8 +74,7 @@ public class AuthorizationServerConfig
 
     DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
     provider.setUserDetailsService(iamUserDetailsService);
-    return new ProviderManager(
-      Collections.<AuthenticationProvider> singletonList(provider));
+    return new ProviderManager(Collections.<AuthenticationProvider>singletonList(provider));
 
   }
 
@@ -85,49 +83,38 @@ public class AuthorizationServerConfig
 
     AuthenticationManager authenticationManager = authenticationManager();
 
-    return new CompositeTokenGranter(Arrays.<TokenGranter> asList(
-      new AuthorizationCodeTokenGranter(tokenServices,
-        authorizationCodeServices, clientDetailsService, requestFactory),
-      new ImplicitTokenGranter(tokenServices, clientDetailsService,
-        requestFactory),
-      new RefreshTokenGranter(tokenServices, clientDetailsService,
-        requestFactory),
-      new ClientCredentialsTokenGranter(tokenServices, clientDetailsService,
-        requestFactory),
-      new ResourceOwnerPasswordTokenGranter(authenticationManager,
-        tokenServices, clientDetailsService, requestFactory),
-      new JWTAssertionTokenGranter(tokenServices, clientDetailsService,
-        requestFactory),
-      new ChainedTokenGranter(tokenServices, clientDetailsService,
-        requestFactory),
-      new TokenExchangeTokenGranter(tokenServices, clientDetailsService,
-        requestFactory)));
+    return new CompositeTokenGranter(Arrays.<TokenGranter>asList(
+        new AuthorizationCodeTokenGranter(tokenServices, authorizationCodeServices,
+            clientDetailsService, requestFactory),
+        new ImplicitTokenGranter(tokenServices, clientDetailsService, requestFactory),
+        new RefreshTokenGranter(tokenServices, clientDetailsService, requestFactory),
+        new ClientCredentialsTokenGranter(tokenServices, clientDetailsService, requestFactory),
+        new ResourceOwnerPasswordTokenGranter(authenticationManager, tokenServices,
+            clientDetailsService, requestFactory),
+        new JWTAssertionTokenGranter(tokenServices, clientDetailsService, requestFactory),
+        new ChainedTokenGranter(tokenServices, clientDetailsService, requestFactory),
+        new TokenExchangeTokenGranter(tokenServices, clientDetailsService, requestFactory)));
   }
 
   @Override
-  public void configure(final AuthorizationServerEndpointsConfigurer endpoints)
-    throws Exception {
+  public void configure(final AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
 
     // @formatter:off
-    endpoints.requestValidator(requestValidator)
-      .pathMapping("/oauth/token", "/token")
-      .pathMapping("/oauth/authorize", "/authorize")
-      .tokenServices(tokenServices).userApprovalHandler(approvalHandler)
-      .requestFactory(requestFactory).tokenGranter(tokenGranter())
-      .authorizationCodeServices(authorizationCodeServices);    
-   // @formatter:on
+    endpoints.requestValidator(requestValidator).pathMapping("/oauth/token", "/token")
+        .pathMapping("/oauth/authorize", "/authorize").tokenServices(tokenServices)
+        .userApprovalHandler(approvalHandler).requestFactory(requestFactory)
+        .tokenGranter(tokenGranter()).authorizationCodeServices(authorizationCodeServices);
+    // @formatter:on
   }
 
   @Override
-  public void configure(final ClientDetailsServiceConfigurer clients)
-    throws Exception {
+  public void configure(final ClientDetailsServiceConfigurer clients) throws Exception {
 
     clients.withClientDetails(clientDetailsService);
   }
 
   @Override
-  public void configure(final AuthorizationServerSecurityConfigurer security)
-    throws Exception {
+  public void configure(final AuthorizationServerSecurityConfigurer security) throws Exception {
 
     security.allowFormAuthenticationForClients();
 

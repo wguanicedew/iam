@@ -16,15 +16,13 @@ public class ScimListResponse<T> {
   private long itemsPerPage;
   private long startIndex;
 
-  private Set<String> schemas = new HashSet<>(
-    Collections.singletonList(SCHEMA));
+  private Set<String> schemas = new HashSet<>(Collections.singletonList(SCHEMA));
   private List<T> resources = new ArrayList<>();
 
-  ScimListResponse() {
-  }
+  ScimListResponse() {}
 
-  public ScimListResponse(List<T> resources, long totalResults,
-    long itemsPerPage, long startIndex) {
+  public ScimListResponse(List<T> resources, long totalResults, long itemsPerPage,
+      long startIndex) {
     this.resources = resources;
     this.totalResults = totalResults;
     this.itemsPerPage = itemsPerPage;
@@ -56,5 +54,5 @@ public class ScimListResponse<T> {
 
     return resources;
   }
-  
+
 }

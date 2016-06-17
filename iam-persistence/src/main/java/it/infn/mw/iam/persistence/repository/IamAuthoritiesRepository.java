@@ -7,8 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import it.infn.mw.iam.persistence.model.IamAuthority;
 
-public interface IamAuthoritiesRepository
-  extends CrudRepository<IamAuthority, Long> {
+public interface IamAuthoritiesRepository extends CrudRepository<IamAuthority, Long> {
 
   Optional<IamAuthority> findByAuthority(@Param("authority") String authority);
 

@@ -43,9 +43,9 @@ public class JpaConfig extends JpaBaseConfiguration {
     map.put("eclipselink.logging.level.sql", "OFF");
     map.put("eclipselink.cache.shared.default", "false");
 
-//    map.put("eclipselink.ddl-generation.output-mode", "sql-script");
-//    map.put("eclipselink.ddl-generation", "create-tables");
-//    map.put("eclipselink.create-ddl-jdbc-file-name", "ddl.sql");
+    // map.put("eclipselink.ddl-generation.output-mode", "sql-script");
+    // map.put("eclipselink.ddl-generation", "create-tables");
+    // map.put("eclipselink.create-ddl-jdbc-file-name", "ddl.sql");
 
     return map;
 
@@ -54,20 +54,17 @@ public class JpaConfig extends JpaBaseConfiguration {
   @Override
   public LocalContainerEntityManagerFactoryBean entityManagerFactory(
 
-    final EntityManagerFactoryBuilder factoryBuilder) {
+      final EntityManagerFactoryBuilder factoryBuilder) {
 
-    LocalContainerEntityManagerFactoryBean emf = factoryBuilder
-      .dataSource(dataSource)
-      .packages("org.mitre", "it.infn.mw.iam.persistence")
-      .persistenceUnit("defaultPersistenceUnit")
-      .properties(getVendorProperties())
-      .build();
+    LocalContainerEntityManagerFactoryBean emf =
+        factoryBuilder.dataSource(dataSource).packages("org.mitre", "it.infn.mw.iam.persistence")
+            .persistenceUnit("defaultPersistenceUnit").properties(getVendorProperties()).build();
 
     return emf;
 
   }
 
-  @Bean(name = { "defaultTransactionManager", "transactionManager" })
+  @Bean(name = {"defaultTransactionManager", "transactionManager"})
   public PlatformTransactionManager defaultTransactionManager() {
 
     return new JpaTransactionManager();

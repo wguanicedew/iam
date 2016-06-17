@@ -102,8 +102,7 @@ public class IamSshKey {
 
     final int prime = 31;
     int result = 1;
-    result = prime * result
-      + ((fingerprint == null) ? 0 : fingerprint.hashCode());
+    result = prime * result + ((fingerprint == null) ? 0 : fingerprint.hashCode());
     return result;
   }
 

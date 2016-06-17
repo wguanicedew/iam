@@ -29,8 +29,7 @@ import com.google.gson.JsonParser;
 
 public class IamUserInfoFetcher extends UserInfoFetcher {
 
-  private static final Logger logger = LoggerFactory
-    .getLogger(IamUserInfoFetcher.class);
+  private static final Logger logger = LoggerFactory.getLogger(IamUserInfoFetcher.class);
 
   private LoadingCache<PendingOIDCAuthenticationToken, UserInfo> cache;
   private ClientHttpRequestFactory requestFactory;
@@ -42,7 +41,7 @@ public class IamUserInfoFetcher extends UserInfoFetcher {
                                                                           // hour
                                                                           // after
                                                                           // fetch
-      .maximumSize(100).build(new Loader());
+        .maximumSize(100).build(new Loader());
   }
 
   @Override
@@ -56,12 +55,10 @@ public class IamUserInfoFetcher extends UserInfoFetcher {
 
   }
 
-  private class Loader
-    extends CacheLoader<PendingOIDCAuthenticationToken, UserInfo> {
+  private class Loader extends CacheLoader<PendingOIDCAuthenticationToken, UserInfo> {
 
     @Override
-    public UserInfo load(PendingOIDCAuthenticationToken token)
-      throws Exception {
+    public UserInfo load(PendingOIDCAuthenticationToken token) throws Exception {
 
       ServerConfiguration serverConfiguration = token.getServerConfiguration();
 
@@ -80,47 +77,41 @@ public class IamUserInfoFetcher extends UserInfoFetcher {
         String userInfoString = null;
 
         if (serverConfiguration.getUserInfoTokenMethod() == null
-          || serverConfiguration.getUserInfoTokenMethod()
-            .equals(UserInfoTokenMethod.HEADER)) {
+            || serverConfiguration.getUserInfoTokenMethod().equals(UserInfoTokenMethod.HEADER)) {
           RestTemplate restTemplate = new RestTemplate(requestFactory) {
 
             @Override
-            protected ClientHttpRequest createRequest(URI url,
-              HttpMethod method) throws IOException {
+            protected ClientHttpRequest createRequest(URI url, HttpMethod method)
+                throws IOException {
 
               ClientHttpRequest httpRequest = super.createRequest(url, method);
               httpRequest.getHeaders().add("Authorization",
-                String.format("Bearer %s", token.getAccessTokenValue()));
+                  String.format("Bearer %s", token.getAccessTokenValue()));
               return httpRequest;
             }
           };
 
-          userInfoString = restTemplate
-            .getForObject(serverConfiguration.getUserInfoUri(), String.class);
+          userInfoString =
+              restTemplate.getForObject(serverConfiguration.getUserInfoUri(), String.class);
 
-        } else if (serverConfiguration.getUserInfoTokenMethod()
-          .equals(UserInfoTokenMethod.FORM)) {
+        } else if (serverConfiguration.getUserInfoTokenMethod().equals(UserInfoTokenMethod.FORM)) {
           MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
           form.add("access_token", token.getAccessTokenValue());
 
           RestTemplate restTemplate = new RestTemplate(requestFactory);
-          userInfoString = restTemplate.postForObject(
-            serverConfiguration.getUserInfoUri(), form, String.class);
-        } else if (serverConfiguration.getUserInfoTokenMethod()
-          .equals(UserInfoTokenMethod.QUERY)) {
-          URIBuilder builder = new URIBuilder(
-            serverConfiguration.getUserInfoUri());
+          userInfoString =
+              restTemplate.postForObject(serverConfiguration.getUserInfoUri(), form, String.class);
+        } else if (serverConfiguration.getUserInfoTokenMethod().equals(UserInfoTokenMethod.QUERY)) {
+          URIBuilder builder = new URIBuilder(serverConfiguration.getUserInfoUri());
           builder.setParameter("access_token", token.getAccessTokenValue());
 
           RestTemplate restTemplate = new RestTemplate(requestFactory);
-          userInfoString = restTemplate.getForObject(builder.toString(),
-            String.class);
+          userInfoString = restTemplate.getForObject(builder.toString(), String.class);
         }
 
         if (!Strings.isNullOrEmpty(userInfoString)) {
 
-          JsonObject userInfoJson = new JsonParser().parse(userInfoString)
-            .getAsJsonObject();
+          JsonObject userInfoJson = new JsonParser().parse(userInfoString).getAsJsonObject();
 
           UserInfo userInfo = fromJson(userInfoJson);
 

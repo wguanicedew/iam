@@ -22,14 +22,13 @@ public class IamX509Certificate {
   @Column(nullable = false, length = 128, unique = true)
   private String certificateSubject;
 
-  @Column(name="is_primary")
+  @Column(name = "is_primary")
   private boolean primary;
 
   @ManyToOne
   private IamAccount account;
 
-  public IamX509Certificate() {
-  }
+  public IamX509Certificate() {}
 
   @Override
   public boolean equals(Object obj) {
@@ -79,8 +78,7 @@ public class IamX509Certificate {
 
     final int prime = 31;
     int result = 1;
-    result = prime * result
-      + ((certificateSubject == null) ? 0 : certificateSubject.hashCode());
+    result = prime * result + ((certificateSubject == null) ? 0 : certificateSubject.hashCode());
     result = prime * result + ((label == null) ? 0 : label.hashCode());
     return result;
   }

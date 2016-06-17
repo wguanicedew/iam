@@ -24,28 +24,16 @@ public class ScimMeEndpointTests {
   @Before
   public void initAccessToken() {
 
-    accessToken = TestUtils.getAccessToken("scim-client-rw", "secret",
-      "scim:read");
+    accessToken = TestUtils.getAccessToken("scim-client-rw", "secret", "scim:read");
   }
 
   @Test
   public void meEndpointReturns501() {
 
-    given().port(8080)
-      .auth()
-      .preemptive()
-      .oauth2(accessToken)
-      .accept(SCIM_CONTENT_TYPE)
-      .log()
-      .all(true)
-      .when()
-      .get("/scim/Me")
-      .then()
-      .log()
-      .all(true)
-      .statusCode(HttpStatus.NOT_IMPLEMENTED.value())
-      .body("status", equalTo("501"))
-      .body("detail", equalTo("The /scim/Me endpoint is not implemented"));
+    given().port(8080).auth().preemptive().oauth2(accessToken).accept(SCIM_CONTENT_TYPE).log()
+        .all(true).when().get("/scim/Me").then().log().all(true)
+        .statusCode(HttpStatus.NOT_IMPLEMENTED.value()).body("status", equalTo("501"))
+        .body("detail", equalTo("The /scim/Me endpoint is not implemented"));
 
   }
 

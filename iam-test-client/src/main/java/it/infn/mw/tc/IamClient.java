@@ -46,9 +46,10 @@ public class IamClient {
 
   @Autowired
   private IamClientConfig iamClientConfig;
-  
+
   @Bean
-  public FilterRegistrationBean disabledAutomaticOidcFilterRegistration(OIDCAuthenticationFilter f){
+  public FilterRegistrationBean disabledAutomaticOidcFilterRegistration(
+      OIDCAuthenticationFilter f) {
     FilterRegistrationBean b = new FilterRegistrationBean(f);
     b.setEnabled(false);
     return b;
@@ -59,23 +60,22 @@ public class IamClient {
 
     ClientHttpRequestFactory rf = httpRequestFactory();
     IamOIDCClientFilter filter = new IamOIDCClientFilter();
-    
+
     filter.setAuthenticationManager(authenticationManager());
     filter.setIssuerService(iamIssuerService());
-    
+
     filter.setServerConfigurationService(new IamDynamicServerConfigurationService(rf));
     filter.setValidationServices(new IamJWKCacheSetService(rf));
-    
+
     filter.setClientConfigurationService(staticClientConfiguration());
     filter.setAuthRequestOptionsService(authOptions());
     filter.setAuthRequestUrlBuilder(new PlainAuthRequestUrlBuilder());
     filter.setHttpRequestFactory(httpRequestFactory());
-    
-    
-    
-    
+
+
+
     filter.setAuthenticationFailureHandler(new SaveAuhenticationError());
-    
+
 
     return filter;
   }
@@ -83,8 +83,7 @@ public class IamClient {
   @Bean(name = "OIDCAuthenticationManager")
   public AuthenticationManager authenticationManager() {
 
-    return new ProviderManager(
-      Arrays.asList(openIdConnectAuthenticationProvider()));
+    return new ProviderManager(Arrays.asList(openIdConnectAuthenticationProvider()));
   }
 
   @Bean
@@ -92,7 +91,7 @@ public class IamClient {
 
     OIDCAuthenticationProvider provider = new OIDCAuthenticationProvider();
     provider.setUserInfoFetcher(new IamUserInfoFetcher(httpRequestFactory()));
-    
+
     return provider;
   }
 
@@ -138,10 +137,9 @@ public class IamClient {
     try {
       SSLContext context = SSLContext.getInstance("TLSv1");
 
-      X509TrustManager tm = SocketFactoryCreator
-        .getSSLTrustManager(certificateValidator());
+      X509TrustManager tm = SocketFactoryCreator.getSSLTrustManager(certificateValidator());
       SecureRandom r = new SecureRandom();
-      context.init(null, new TrustManager[] { tm }, r);
+      context.init(null, new TrustManager[] {tm}, r);
 
       return context;
 
@@ -154,21 +152,19 @@ public class IamClient {
   @Bean
   public HttpClient httpClient() {
 
-    SSLConnectionSocketFactory sf = new SSLConnectionSocketFactory(
-      sslContext());
+    SSLConnectionSocketFactory sf = new SSLConnectionSocketFactory(sslContext());
 
-    Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder
-      .<ConnectionSocketFactory> create().register("https", sf)
-      .register("http", PlainConnectionSocketFactory.getSocketFactory())
-      .build();
+    Registry<ConnectionSocketFactory> socketFactoryRegistry =
+        RegistryBuilder.<ConnectionSocketFactory>create().register("https", sf)
+            .register("http", PlainConnectionSocketFactory.getSocketFactory()).build();
 
-    PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(
-      socketFactoryRegistry);
+    PoolingHttpClientConnectionManager connectionManager =
+        new PoolingHttpClientConnectionManager(socketFactoryRegistry);
     connectionManager.setMaxTotal(10);
     connectionManager.setDefaultMaxPerRoute(10);
 
-    return HttpClientBuilder.create().setConnectionManager(connectionManager)
-      .disableAuthCaching().build();
+    return HttpClientBuilder.create().setConnectionManager(connectionManager).disableAuthCaching()
+        .build();
   }
 
   @Bean
@@ -177,6 +173,6 @@ public class IamClient {
     return new HttpComponentsClientHttpRequestFactory(httpClient());
   }
 
-  
- 
+
+
 }

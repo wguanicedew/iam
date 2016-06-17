@@ -20,17 +20,14 @@ public class ScimName {
 
   private final String formatted;
 
-  @Length(groups = { NewUserValidation.class, UpdateUserValidation.class },
-    max = 64)
+  @Length(groups = {NewUserValidation.class, UpdateUserValidation.class}, max = 64)
   private final String familyName;
 
-  @NotBlank(groups = { NewUserValidation.class })
-  @Length(groups = { NewUserValidation.class, UpdateUserValidation.class },
-    max = 64)
+  @NotBlank(groups = {NewUserValidation.class})
+  @Length(groups = {NewUserValidation.class, UpdateUserValidation.class}, max = 64)
   private final String givenName;
 
-  @Length(groups = { NewUserValidation.class, UpdateUserValidation.class },
-    max = 64)
+  @Length(groups = {NewUserValidation.class, UpdateUserValidation.class}, max = 64)
   private final String middleName;
 
   private final String honorificPrefix;
@@ -38,10 +35,9 @@ public class ScimName {
 
   @JsonCreator
   private ScimName(@JsonProperty("givenName") String givenName,
-    @JsonProperty("familyName") String familyName,
-    @JsonProperty("middleName") String middleName,
-    @JsonProperty("honorificPrefix") String honorificPrefix,
-    @JsonProperty("honorificSuffix") String honorificSuffix) {
+      @JsonProperty("familyName") String familyName, @JsonProperty("middleName") String middleName,
+      @JsonProperty("honorificPrefix") String honorificPrefix,
+      @JsonProperty("honorificSuffix") String honorificSuffix) {
 
     this.givenName = givenName;
     this.familyName = familyName;
@@ -92,7 +88,7 @@ public class ScimName {
   }
 
   public static Builder builder() {
-    
+
     return new Builder();
   }
 

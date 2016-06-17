@@ -10,6 +10,6 @@ import it.infn.mw.iam.persistence.model.IamOidcId;
 public interface IamOidcIdRepository extends CrudRepository<IamOidcId, Long> {
 
   Optional<IamOidcId> findByIssuerAndSubject(@Param("issuer") String issuer,
-    @Param("subject") String subject);
+      @Param("subject") String subject);
 
 }
