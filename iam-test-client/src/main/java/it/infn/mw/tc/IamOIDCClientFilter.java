@@ -1,4 +1,4 @@
-package it.infn.mw;
+package it.infn.mw.tc;
 
 import java.io.IOException;
 import java.net.URI;

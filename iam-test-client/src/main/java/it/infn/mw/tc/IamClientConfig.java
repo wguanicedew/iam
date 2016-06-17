@@ -1,4 +1,4 @@
-package it.infn.mw;
+package it.infn.mw.tc;
 
 import org.mitre.oauth2.model.ClientDetailsEntity.AuthMethod;
 import org.mitre.oauth2.model.RegisteredClient;

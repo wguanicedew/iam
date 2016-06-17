@@ -1,4 +1,4 @@
-package it.infn.mw;
+package it.infn.mw.tc;
 
 import static org.mitre.util.JsonUtils.getAsBoolean;
 import static org.mitre.util.JsonUtils.getAsEncryptionMethodList;

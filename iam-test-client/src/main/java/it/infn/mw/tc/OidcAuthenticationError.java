@@ -1,4 +1,4 @@
-package it.infn.mw;
+package it.infn.mw.tc;
 
 import org.springframework.security.core.AuthenticationException;
 
