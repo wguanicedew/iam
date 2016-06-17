@@ -273,11 +273,12 @@
             <format>xml</format>
           </formats>
           <instrumentation>
-            <excludes>
-							<!--
-              <exclude>com/example/dullcode/**/*.class</exclude>
-              <exclude>com/example/**/*Test.class</exclude>
-							-->
+            <excludes>				
+              <!-- Exclude tests -->
+              <exclude>it/infn/mw/iam/test/**/*.class</exclude>
+              
+              <!-- Exclude persistence code (mainly interfaces and model classes) -->
+              <exclude>it/infn/mw/iam/persistence//**/*.class</exclude>
             </excludes>
           </instrumentation>
         </configuration>

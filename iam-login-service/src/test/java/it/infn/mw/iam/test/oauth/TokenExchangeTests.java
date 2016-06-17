@@ -1,4 +1,4 @@
-package it.infn.mw.iam.oauth;
+package it.infn.mw.iam.test.oauth;
 
 import static com.jayway.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
@@ -14,7 +14,7 @@ import org.springframework.boot.test.WebIntegrationTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import it.infn.mw.iam.IamLoginService;
-import it.infn.mw.iam.scim.TestUtils;
+import it.infn.mw.iam.test.scim.TestUtils;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = IamLoginService.class)

@@ -1,4 +1,4 @@
-package it.infn.mw.iam.oauth;
+package it.infn.mw.iam.test.oauth;
 
 import static com.jayway.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;

@@ -1,12 +1,10 @@
-package it.infn.mw.iam.scim.user;
+package it.infn.mw.iam.test.scim.group;
 
 import static com.jayway.restassured.RestAssured.given;
 import static it.infn.mw.iam.api.scim.model.ScimConstants.SCIM_CONTENT_TYPE;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-
-import javax.transaction.Transactional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -18,13 +16,12 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.scim.model.ScimListResponse;
-import it.infn.mw.iam.scim.TestUtils;
+import it.infn.mw.iam.test.scim.TestUtils;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = IamLoginService.class)
 @WebIntegrationTest
-@Transactional
-public class ScimUserProvisioningListTests {
+public class ScimGroupProvisioningListTests {
 
   String accessToken;
   
@@ -47,20 +44,20 @@ public class ScimUserProvisioningListTests {
       .log()
       .all(true)
       .when()
-      .get("/scim/Users")
+      .get("/scim/Groups")
       .then()
       .log()
       .all(true)
       .statusCode(HttpStatus.OK.value())
-      .body("totalResults", equalTo(250))
-      .body("itemsPerPage", equalTo(100))
+      .body("totalResults", equalTo(22))
+      .body("itemsPerPage", equalTo(10))
       .body("startIndex", equalTo(1))
       .body("schemas", contains(ScimListResponse.SCHEMA))
-      .body("Resources", hasSize(equalTo(100)));
+      .body("Resources", hasSize(equalTo(10)));
   }
   
   @Test
-  public void testCountAs10Returns10Items() {
+  public void testCountAs8Returns8Items() {
 
     given().port(8080)
       .auth()
@@ -69,18 +66,18 @@ public class ScimUserProvisioningListTests {
       .accept(SCIM_CONTENT_TYPE)
       .log()
       .all(true)
-      .param("count", 10)
+      .param("count", 8)
       .when()
-      .get("/scim/Users")
+      .get("/scim/Groups")
       .then()
       .log()
       .all(true)
       .statusCode(HttpStatus.OK.value())
-      .body("totalResults", equalTo(250))
-      .body("itemsPerPage", equalTo(10))
+      .body("totalResults", equalTo(22))
+      .body("itemsPerPage", equalTo(8))
       .body("startIndex", equalTo(1))
       .body("schemas", contains(ScimListResponse.SCHEMA))
-      .body("Resources", hasSize(equalTo(10)));
+      .body("Resources", hasSize(equalTo(8)));
   }
   
   @Test
@@ -95,12 +92,12 @@ public class ScimUserProvisioningListTests {
       .all(true)
       .param("count", 1)
       .when()
-      .get("/scim/Users")
+      .get("/scim/Groups")
       .then()
       .log()
       .all(true)
       .statusCode(HttpStatus.OK.value())
-      .body("totalResults", equalTo(250))
+      .body("totalResults", equalTo(22))
       .body("itemsPerPage", equalTo(1))
       .body("startIndex", equalTo(1))
       .body("schemas", contains(ScimListResponse.SCHEMA))
@@ -108,7 +105,7 @@ public class ScimUserProvisioningListTests {
   }
   
   @Test
-  public void testCountShouldBeLimitedToOneHundred() {
+  public void testCountShouldBeLimitedToTen() {
 
     given().port(8080)
       .auth()
@@ -117,18 +114,18 @@ public class ScimUserProvisioningListTests {
       .accept(SCIM_CONTENT_TYPE)
       .log()
       .all(true)
-      .param("count", 1000)
+      .param("count", 30)
       .when()
-      .get("/scim/Users")
+      .get("/scim/Groups")
       .then()
       .log()
       .all(true)
       .statusCode(HttpStatus.OK.value())
-      .body("totalResults", equalTo(250))
-      .body("itemsPerPage", equalTo(100))
+      .body("totalResults", equalTo(22))
+      .body("itemsPerPage", equalTo(10))
       .body("startIndex", equalTo(1))
       .body("schemas", contains(ScimListResponse.SCHEMA))
-      .body("Resources", hasSize(equalTo(100)));
+      .body("Resources", hasSize(equalTo(10)));
   }
   
   @Test
@@ -143,12 +140,12 @@ public class ScimUserProvisioningListTests {
       .all(true)
       .param("count", -10)
       .when()
-      .get("/scim/Users")
+      .get("/scim/Groups")
       .then()
       .log()
       .all(true)
       .statusCode(HttpStatus.OK.value())
-      .body("totalResults", equalTo(250))
+      .body("totalResults", equalTo(22))
       .body("itemsPerPage", equalTo(0))
       .body("startIndex", equalTo(1))
       .body("schemas", contains(ScimListResponse.SCHEMA))
@@ -165,16 +162,16 @@ public class ScimUserProvisioningListTests {
       .accept(SCIM_CONTENT_TYPE)
       .log()
       .all(true)
-      .param("startIndex",251)
+      .param("startIndex",23)
       .when()
-      .get("/scim/Users")
+      .get("/scim/Groups")
       .then()
       .log()
       .all(true)
       .statusCode(HttpStatus.OK.value())
-      .body("totalResults", equalTo(250))
+      .body("totalResults", equalTo(22))
       .body("itemsPerPage", equalTo(0))
-      .body("startIndex", equalTo(251))
+      .body("startIndex", equalTo(23))
       .body("schemas", contains(ScimListResponse.SCHEMA))
       .body("Resources", hasSize(equalTo(0)));
   }
@@ -189,17 +186,17 @@ public class ScimUserProvisioningListTests {
       .accept(SCIM_CONTENT_TYPE)
       .log()
       .all(true)
-      .param("startIndex",245)
+      .param("startIndex",17)
       .param("count",10)
       .when()
-      .get("/scim/Users")
+      .get("/scim/Groups")
       .then()
       .log()
       .all(true)
       .statusCode(HttpStatus.OK.value())
-      .body("totalResults", equalTo(250))
+      .body("totalResults", equalTo(22))
       .body("itemsPerPage", equalTo(6))
-      .body("startIndex", equalTo(245))
+      .body("startIndex", equalTo(17))
       .body("schemas", contains(ScimListResponse.SCHEMA))
       .body("Resources", hasSize(equalTo(6)));
   }
@@ -214,17 +211,17 @@ public class ScimUserProvisioningListTests {
       .accept(SCIM_CONTENT_TYPE)
       .log()
       .all(true)
-      .param("startIndex",250)
+      .param("startIndex",22)
       .param("count",2)
       .when()
-      .get("/scim/Users")
+      .get("/scim/Groups")
       .then()
       .log()
       .all(true)
       .statusCode(HttpStatus.OK.value())
-      .body("totalResults", equalTo(250))
+      .body("totalResults", equalTo(22))
       .body("itemsPerPage", equalTo(1))
-      .body("startIndex", equalTo(250))
+      .body("startIndex", equalTo(22))
       .body("schemas", contains(ScimListResponse.SCHEMA))
       .body("Resources", hasSize(equalTo(1)));
   }
@@ -242,12 +239,12 @@ public class ScimUserProvisioningListTests {
       .param("startIndex",1)
       .param("count",5)
       .when()
-      .get("/scim/Users")
+      .get("/scim/Groups")
       .then()
       .log()
       .all(true)
       .statusCode(HttpStatus.OK.value())
-      .body("totalResults", equalTo(250))
+      .body("totalResults", equalTo(22))
       .body("itemsPerPage", equalTo(5))
       .body("startIndex", equalTo(1))
       .body("schemas", contains(ScimListResponse.SCHEMA))
