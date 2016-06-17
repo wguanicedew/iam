@@ -282,12 +282,16 @@
               
               <!-- Exclude Github support code (still not supported) -->
               <exclude>it/infn/mw/iam/github/**/*.class</exclude>
-              
+              <exclude>it/infn/mw/iam/config/github/**/*.class</exclude>
+
               <!-- Exclude test client app code -->
               <exclude>it/infn/mw/tc/**/*.class</exclude>
               
               <!-- Exclude protected resource test app code -->
               <exclude>it/infn/mw/pr/**/*.class</exclude>
+
+              <!-- Exclude unused code -->
+              <exclude>it/infn/mw/core/time/**.class</exclude>
             </excludes>
           </instrumentation>
         </configuration>
