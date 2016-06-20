@@ -20,7 +20,6 @@ import it.infn.mw.iam.api.scim.provisioning.paging.OffsetPageable;
 import it.infn.mw.iam.api.scim.provisioning.paging.ScimPageRequest;
 import it.infn.mw.iam.api.scim.updater.UserUpdater;
 import it.infn.mw.iam.persistence.model.IamAccount;
-import it.infn.mw.iam.persistence.model.IamUserInfo;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamAuthoritiesRepository;
 
@@ -83,30 +82,23 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
   @Override
   public ScimUser create(ScimUser user) {
 
-    IamAccount account = new IamAccount();
-
     Date creationTime = new Date();
-
     String uuid = UUID.randomUUID().toString();
 
+
+    IamAccount account = converter.fromScim(user);
     account.setUuid(uuid);
     account.setCreationTime(creationTime);
     account.setLastUpdateTime(creationTime);
-    account.setUsername(user.getUserName());
-    account.setActive(true);
+
+    if (account.getPassword() == null){
+      account.setPassword(UUID.randomUUID().toString());
+    }
 
     authorityRepository.findByAuthority("ROLE_USER").map(a -> account.getAuthorities().add(a))
         .orElseThrow(
             () -> new IllegalStateException("ROLE_USER not found in database. This is a bug"));
-
-    IamUserInfo userInfo = new IamUserInfo();
-
-    userInfo.setGivenName(user.getName().getGivenName());
-    userInfo.setFamilyName(user.getName().getFamilyName());
-
-    userInfo.setEmail(user.getEmails().get(0).getValue());
-    account.setUserInfo(userInfo);
-
+    
     accountRepository.save(account);
 
     return converter.toScim(account);
@@ -149,8 +141,14 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
     updatedAccount.setUuid(existingAccount.getUuid());
     updatedAccount.setCreationTime(existingAccount.getCreationTime());
 
+    // If the active field was not provided in the input scim user,
+    // use the value that was formerly set in the database
     if (scimItemToBeUpdated.getActive() == null) {
       updatedAccount.setActive(existingAccount.isActive());
+    }
+
+    if (scimItemToBeUpdated.getPassword() != null) {
+
     }
 
     updatedAccount.touch();

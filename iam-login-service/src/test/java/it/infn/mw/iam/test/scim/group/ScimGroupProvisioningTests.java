@@ -23,7 +23,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.scim.model.ScimGroup;
-import it.infn.mw.iam.test.scim.TestUtils;
+import it.infn.mw.iam.test.TestUtils;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = IamLoginService.class)

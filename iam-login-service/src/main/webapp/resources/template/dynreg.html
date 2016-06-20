@@ -237,6 +237,12 @@
                     </div>
 
                     <div>
+                        <input id="grantTypes-password" type="radio" name="grantTypes"
+                            <%-($.inArray("password", client.grant_types) > -1 ? 'checked' : '')%>>
+                        <label for="grantTypes-password" class="radio" data-i18n="client.client-form.password">password</label>
+                    </div>
+
+                    <div>
                         <input id="grantTypes-implicit" type="radio" name="grantTypes"
                             <%-($.inArray("implicit", client.grant_types) > -1 ? 'checked' : '')%>> 
                         <label for="grantTypes-implicit" class="radio" data-i18n="client.client-form.implicit">implicit</label>

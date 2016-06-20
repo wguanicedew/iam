@@ -3,6 +3,7 @@ package it.infn.mw.iam.api.scim.converter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import it.infn.mw.iam.api.scim.exception.ScimResourceExistsException;
 import it.infn.mw.iam.api.scim.model.ScimEmail;
 import it.infn.mw.iam.api.scim.model.ScimGroupRef;
 import it.infn.mw.iam.api.scim.model.ScimIndigoUser;
@@ -22,10 +23,15 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
 
   private final AddressConverter addressConverter;
 
+  private final OidcIdConverter oidcIdConverter;
+
+
   @Autowired
-  public UserConverter(ScimResourceLocationProvider rlp, AddressConverter ac) {
+  public UserConverter(ScimResourceLocationProvider rlp, AddressConverter ac,
+      OidcIdConverter oidc) {
     this.resourceLocationProvider = rlp;
     this.addressConverter = ac;
+    this.oidcIdConverter = oidc;
   }
 
   @Override
@@ -42,6 +48,10 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
 
     account.setUsername(scimUser.getUserName());
 
+    if (scimUser.getPassword() != null) {
+      account.setPassword(scimUser.getPassword());
+    }
+
     userInfo.setEmail(scimUser.getEmails().get(0).getValue());
     userInfo.setGivenName(scimUser.getName().getGivenName());
     userInfo.setFamilyName(scimUser.getName().getFamilyName());
@@ -54,6 +64,23 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
 
       userInfo.setAddress(addressConverter.fromScim(scimUser.getAddresses().get(0)));
 
+    }
+
+    if (scimUser.getIndigoUser() != null) {
+      for (ScimOidcId oidcId : scimUser.getIndigoUser().getOidcIds()) {
+        IamOidcId iamOidcId = oidcIdConverter.fromScim(oidcId);
+
+        if (iamOidcId.getAccount() != null) {
+          if (account.getUuid() != iamOidcId.getAccount().getUuid()) {
+
+            String errorMessage = String.format("OIDC id %s,%s is already mapped to another user",
+                iamOidcId.getIssuer(), iamOidcId.getSubject());
+
+            throw new ScimResourceExistsException(errorMessage);
+          }
+        }
+        account.addOidcId(iamOidcId);
+      }
     }
 
     return account;
@@ -111,7 +138,8 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
       builder.addGroup(groupRef);
     }
 
-    return builder.build();
+    ScimUser retval = builder.build();
+    return retval;
   }
 
 }

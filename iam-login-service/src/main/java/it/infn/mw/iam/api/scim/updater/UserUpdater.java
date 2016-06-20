@@ -67,20 +67,27 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
     updateNameIfNotNull(a, u.getName());
     updateEmailIfNotNull(a, u.getEmails());
     updateAddressIfNotNull(a, u.getAddresses());
+    updatePasswordIfNotNull(a, u.getPassword());
 
     if (u.getIndigoUser() != null) {
 
       addOidcIdsIfNotNull(a, u.getIndigoUser().getOidcIds());
     }
+    
+    accountRepository.save(a);
   }
 
+  private void updatePasswordIfNotNull(IamAccount a, String password){
+    if (password != null) {
+      a.setPassword(password);
+    }
+  }
   private void updateAddressIfNotNull(IamAccount a, List<ScimAddress> addresses) {
 
     if (addresses != null && !addresses.isEmpty()) {
 
       a.getUserInfo().setAddress(addressConverter.fromScim(addresses.get(0)));
       a.touch();
-      accountRepository.save(a);
     }
   }
 
@@ -91,7 +98,6 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
 
         a.setActive(active);
         a.touch();
-        accountRepository.save(a);
       }
     }
   }
@@ -119,7 +125,6 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
 
       a.setUsername(userName);
       a.touch();
-      accountRepository.save(a);
     }
   }
 
@@ -136,7 +141,7 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
       a.getUserInfo()
           .setName(name.getFormatted() != null ? name.getFormatted() : a.getUserInfo().getName());
       a.touch();
-      accountRepository.save(a);
+      
     }
   }
 
@@ -146,7 +151,6 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
 
       a.getUserInfo().setEmail(emails.get(0).getValue());
       a.touch();
-      accountRepository.save(a);
     }
   }
 

@@ -4,12 +4,14 @@ import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.matcher.ResponseAwareMatcherComposer.and;
 import static com.jayway.restassured.matcher.RestAssuredMatchers.endsWithPath;
 import static it.infn.mw.iam.api.scim.model.ScimConstants.SCIM_CONTENT_TYPE;
+import static it.infn.mw.iam.test.TestUtils.passwordTokenGetter;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.startsWith;
+import static org.junit.Assert.assertNull;
 
 import java.util.UUID;
 
@@ -29,7 +31,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.scim.model.ScimConstants;
 import it.infn.mw.iam.api.scim.model.ScimUser;
-import it.infn.mw.iam.test.scim.TestUtils;
+import it.infn.mw.iam.test.TestUtils;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = IamLoginService.class)
@@ -268,6 +270,120 @@ public class ScimUserProvisioningTests {
 
     deleteUser(lennonCreationResult.getMeta().getLocation());
     deleteUser(mccartneyCreationResult.getMeta().getLocation());
+
+  }
+
+
+  @Test
+  public void testUserCreationWithPassword() {
+    ScimUser user = ScimUser.builder("user_with_password").buildEmail("up@test.org")
+        .buildName("User", "With Password").password("a_password").active(true).build();
+
+    ScimUser creationResult = given().port(8080).auth().preemptive().oauth2(accessToken)
+        .contentType(SCIM_CONTENT_TYPE).body(user).log().all(true).when().post("/scim/Users/")
+        .then().log().all(true).statusCode(HttpStatus.CREATED.value()).extract().as(ScimUser.class);
+
+    assertNull(creationResult.getPassword());
+
+    passwordTokenGetter().scope("openid").username("user_with_password").password("a_password")
+        .getAccessToken();
+
+    deleteUser(creationResult.getMeta().getLocation());
+  }
+
+  @Test
+  public void testUserCreationWithOidcAccount() {
+    ScimUser user = ScimUser.builder("user_with_oidc").buildEmail("test_user@test.org")
+        .buildName("User", "With OIDC Account").buildOidcId("urn:oidc:test:issuer", "1234")
+        .active(true).build();
+
+    //@formatter:off
+    ScimUser creationResult = 
+    given()
+      .port(8080)
+      .auth().preemptive().oauth2(accessToken)
+      .contentType(SCIM_CONTENT_TYPE)
+      .body(user)
+      .log()
+        .all(true)
+    .when()
+      .post("/scim/Users/")
+    .then()
+      .log().all(true)
+      .statusCode(HttpStatus.CREATED.value())
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".oidcIds", hasSize(equalTo(1)))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".oidcIds[0].issuer",
+          equalTo("urn:oidc:test:issuer"))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".oidcIds[0].subject", equalTo("1234"))
+      .extract().as(ScimUser.class);
+    
+    given()
+      .port(8080)
+      .auth().preemptive().oauth2(accessToken)
+      .log()
+        .all(true)
+    .when()
+      .get(creationResult.getMeta().getLocation())
+    .then()
+      .log()
+        .all(true)
+      .statusCode(HttpStatus.OK.value())
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".oidcIds", hasSize(equalTo(1)))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".oidcIds[0].issuer",
+        equalTo("urn:oidc:test:issuer"))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".oidcIds[0].subject", equalTo("1234"));
+    
+    deleteUser(creationResult.getMeta().getLocation());
+    // @formatter:on
+
+  }
+
+  @Test
+  public void testUserCreationWithStolenOidcAccountFailure() {
+    ScimUser user = ScimUser.builder("user_with_oidc").buildEmail("test_user@test.org")
+        .buildName("User", "With OIDC Account").buildOidcId("urn:oidc:test:issuer", "1234")
+        .active(true).build();
+
+    //@formatter:off
+    ScimUser creationResult = 
+    given()
+      .port(8080)
+      .auth().preemptive().oauth2(accessToken)
+      .contentType(SCIM_CONTENT_TYPE)
+      .body(user)
+      .log()
+        .all(true)
+    .when()
+      .post("/scim/Users/")
+    .then()
+      .log().all(true)
+      .statusCode(HttpStatus.CREATED.value())
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".oidcIds", hasSize(equalTo(1)))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".oidcIds[0].issuer",
+          equalTo("urn:oidc:test:issuer"))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".oidcIds[0].subject", equalTo("1234"))
+      .extract().as(ScimUser.class);
+    
+    ScimUser anotherUser = ScimUser.builder("another_user_with_oidc").buildEmail("another_test_user@test.org")
+        .buildName("Another User", "With OIDC Account").buildOidcId("urn:oidc:test:issuer", "1234")
+        .active(true).build();
+    
+    given()
+      .port(8080)
+      .auth().preemptive().oauth2(accessToken)
+      .contentType(SCIM_CONTENT_TYPE)
+      .body(anotherUser)
+      .log()
+        .all(true)
+    .when()
+      .post("/scim/Users/")
+    .then()
+      .log().all(true)
+      .statusCode(HttpStatus.CONFLICT.value())
+      .body("detail", equalTo("OIDC id urn:oidc:test:issuer,1234 is already mapped to another user"));
+    
+    deleteUser(creationResult.getMeta().getLocation());
+    // @formatter:on
 
   }
 

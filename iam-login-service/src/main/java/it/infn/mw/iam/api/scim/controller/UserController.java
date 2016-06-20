@@ -47,6 +47,11 @@ public class UserController {
   @Autowired
   ScimUserProvisioning userProvisioningService;
 
+  FilterProvider excludePasswordFilter = 
+      new SimpleFilterProvider()
+      .addFilter("passwordFilter",
+      SimpleBeanPropertyFilter.serializeAllExcept("password"));
+  
   private Set<String> parseAttributes(String attributesParameter) {
 
     Set<String> result = new HashSet<>();
@@ -123,12 +128,15 @@ public class UserController {
   @RequestMapping(method = RequestMethod.POST, consumes = ScimConstants.SCIM_CONTENT_TYPE,
       produces = ScimConstants.SCIM_CONTENT_TYPE)
   @ResponseStatus(HttpStatus.CREATED)
-  public ScimUser create(@RequestBody @Validated(ScimUser.NewUserValidation.class) ScimUser user,
+  public MappingJacksonValue create(@RequestBody @Validated(ScimUser.NewUserValidation.class) ScimUser user,
       BindingResult validationResult) {
 
     handleValidationError("Invalid Scim User", validationResult);
     ScimUser result = userProvisioningService.create(user);
-    return result;
+    
+    MappingJacksonValue wrapper = new MappingJacksonValue(result);
+    
+    return wrapper;
   }
 
   @PreAuthorize("#oauth2.hasScope('scim:write') or hasRole('ADMIN')")

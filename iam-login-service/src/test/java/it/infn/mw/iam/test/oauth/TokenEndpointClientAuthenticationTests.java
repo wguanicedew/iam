@@ -14,7 +14,7 @@ import it.infn.mw.iam.IamLoginService;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = IamLoginService.class)
 @WebIntegrationTest
-public class ClientAuthenticationTests {
+public class TokenEndpointClientAuthenticationTests {
 
   @Test
   public void testTokenEndpointFormClientAuthentication() {

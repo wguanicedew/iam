@@ -24,7 +24,7 @@ import it.infn.mw.iam.api.scim.model.ScimMemberRef;
 import it.infn.mw.iam.api.scim.model.ScimPatchOperation;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.model.ScimPatchOperation.ScimPatchOperationType;
-import it.infn.mw.iam.test.scim.TestUtils;
+import it.infn.mw.iam.test.TestUtils;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = IamLoginService.class)

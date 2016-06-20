@@ -1,17 +1,22 @@
 #!/bin/bash
 set -ex
 
+if [[ ! -r ${IAM_TEST_CLIENT_JAR} ]]; then
+  echo "Please set the IAM_TEST_CLIENT_JAR env variable"
+  exit 1
+fi
+
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}"  )" && pwd  )"
-cd ${DIR}/../..
-pwd
-POM_VERSION=$(sh utils/print-pom-version.sh) 
 
-mvn clean package
-cp iam-test-client/target/iam-test-client-${POM_VERSION}.jar ${DIR}
+# Default name for iam login service docker image
+default_image_name="indigoiam/iam-test-client"
 
+IAM_TEST_CLIENT_IMAGE=${IAM_TEST_CLIENT_IMAGE:-${default_image_name}}
 cd ${DIR}
+cp ${IAM_TEST_CLIENT_JAR} iam-test-client.jar
 
-docker build -f Dockerfile.prod --build-arg JAR_VERSION=${POM_VERSION} --rm=true \
-  --no-cache=true -t italiangrid/iam-test-client .
+docker build -f Dockerfile.prod \
+  --rm=true --no-cache=true \
+  -t ${IAM_TEST_CLIENT_IMAGE} .
 
-rm ${DIR}/iam-test-client-${POM_VERSION}.jar
+rm iam-test-client.jar

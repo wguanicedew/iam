@@ -44,6 +44,7 @@ INSERT INTO client_scope (owner_id, scope) VALUES
   (4, 'profile'),
   (4, 'read-tasks'),
   (4, 'write-tasks'),
+  (4, 'offline_access'),
   (5, 'openid'),
   (5, 'profile'),
   (5, 'email'),

@@ -1,6 +1,7 @@
 package it.infn.mw.iam.test.oauth;
 
 import static com.jayway.restassured.RestAssured.given;
+import static it.infn.mw.iam.test.TestUtils.clientCredentialsTokenGetter;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 
@@ -14,7 +15,7 @@ import org.springframework.boot.test.WebIntegrationTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import it.infn.mw.iam.IamLoginService;
-import it.infn.mw.iam.test.scim.TestUtils;
+import it.infn.mw.iam.test.TestUtils;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = IamLoginService.class)
@@ -134,9 +135,11 @@ public class TokenExchangeTests {
 
     String audClientId = "client";
 
-    String subjectToken = TestUtils.getAccessToken(clientId, clientSecret, "openid");
+    String subjectToken =
+        clientCredentialsTokenGetter(clientId, clientSecret).scope("openid").getAccessToken();
 
-    String actorToken = TestUtils.getAccessToken(actorClientId, actorClientSecret, "openid");
+    String actorToken = clientCredentialsTokenGetter(actorClientId, actorClientSecret)
+        .scope("openid").getAccessToken();
 
     // @formatter:off
     given().auth().preemptive().basic(actorClientId, actorClientSecret).port(8080)

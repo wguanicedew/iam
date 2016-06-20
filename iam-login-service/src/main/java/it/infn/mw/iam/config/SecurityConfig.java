@@ -318,27 +318,19 @@ public class SecurityConfig {
 
       auth.userDetailsService(userDetailsService);
     }
-
-    private ClientCredentialsTokenEndpointFilter clientCredentialsEndpointFilter()
-        throws Exception {
-
-      ClientCredentialsTokenEndpointFilter filter =
-          new ClientCredentialsTokenEndpointFilter("/introspect");
-      filter.setAuthenticationManager(authenticationManager());
-      return filter;
-    }
-
+    
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
 
       // @formatter:off
-      http.antMatcher("/introspect**").httpBasic()
+      http.antMatcher("/introspect/**").httpBasic()
           .authenticationEntryPoint(authenticationEntryPoint).and()
           .addFilterBefore(corsFilter, SecurityContextPersistenceFilter.class)
-          .addFilterBefore(clientCredentialsEndpointFilter(), BasicAuthenticationFilter.class)
-          .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint).and()
-          .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().csrf()
-          .disable();
+          .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint)
+          .and()
+            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+          .and().csrf().disable()
+          .authorizeRequests().anyRequest().fullyAuthenticated();
       // @formatter:on
     }
   }

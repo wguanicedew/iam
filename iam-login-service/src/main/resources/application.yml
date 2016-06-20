@@ -93,6 +93,7 @@ spring:
 flyway:
   locations:
     - classpath:db/migration/mysql
+    - classpath:db/migration/prod
 ---
 spring:
   profiles: mysql-test
