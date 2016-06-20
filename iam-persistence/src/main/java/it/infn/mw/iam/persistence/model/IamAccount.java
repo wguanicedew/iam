@@ -91,6 +91,9 @@ public class IamAccount {
   @Column(name = "reset_key", unique = true, length = 36)
   private String resetKey;
 
+  @OneToOne(cascade = CascadeType.REMOVE, mappedBy = "account")
+  private IamRegistrationRequest registrationRequest;
+
   public IamAccount() {
   }
 
@@ -253,6 +256,17 @@ public class IamAccount {
   public void setResetKey(final String resetKey) {
 
     this.resetKey = resetKey;
+  }
+
+  public IamRegistrationRequest getRegistrationRequest() {
+
+    return registrationRequest;
+  }
+
+  public void setRegistrationRequest(
+    final IamRegistrationRequest registrationRequest) {
+
+    this.registrationRequest = registrationRequest;
   }
 
   public void touch() {

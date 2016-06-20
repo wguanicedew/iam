@@ -30,6 +30,8 @@ public class RegistrationConverter {
     item.setEmail(request.getAccount()
       .getUserInfo()
       .getEmail());
+    item.setAccountId(request.getAccount()
+      .getUuid());
 
     return item;
   }
@@ -45,6 +47,7 @@ public class RegistrationConverter {
     IamAccount account = new IamAccount();
     account.setUsername(request.getUsername());
     account.setUserInfo(userInfo);
+    account.setUuid(request.getAccountId());
 
     IamRegistrationRequest entity = new IamRegistrationRequest();
     entity.setUuid(request.getUuid());

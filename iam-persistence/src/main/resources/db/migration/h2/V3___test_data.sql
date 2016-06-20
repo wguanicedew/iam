@@ -81,7 +81,9 @@ INSERT INTO client_scope (owner_id, scope) VALUES
   (10, 'openid'),
   (10, 'profile'),
   (10, 'registration:list'),
-  (10, 'registration:update');
+  (10, 'registration:update'),
+  (10, 'scim:write'),
+  (10, 'scim:read');
   
   
 INSERT INTO client_redirect_uri (owner_id, redirect_uri) VALUES

@@ -20,6 +20,7 @@ public class RegistrationRequestDto {
   private String familyname;
   private String email;
   private String birthdate;
+  private String accountId;
 
   public RegistrationRequestDto() {
   }
@@ -35,7 +36,8 @@ public class RegistrationRequestDto {
     @JsonProperty("givename") final String givenname,
     @JsonProperty("familyname") final String familyname,
     @JsonProperty("email") final String email,
-    @JsonProperty("birthdate") final String birthdate) {
+    @JsonProperty("birthdate") final String birthdate,
+    @JsonProperty("accountid") final String accountId) {
     super();
     this.username = username;
     this.password = password;
@@ -48,6 +50,7 @@ public class RegistrationRequestDto {
     this.status = status;
     this.approver = approver;
     this.lastUpdateTime = lastUpdateTime;
+    this.accountId = accountId;
   }
 
   public String getUuid() {
@@ -158,6 +161,16 @@ public class RegistrationRequestDto {
   public void setBirthdate(final String birthdate) {
 
     this.birthdate = birthdate;
+  }
+
+  public String getAccountId() {
+
+    return accountId;
+  }
+
+  public void setAccountId(final String accountId) {
+
+    this.accountId = accountId;
   }
 
 }

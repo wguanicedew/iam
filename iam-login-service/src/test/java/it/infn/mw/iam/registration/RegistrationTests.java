@@ -1,6 +1,7 @@
 package it.infn.mw.iam.registration;
 
 import static com.jayway.restassured.RestAssured.given;
+import static it.infn.mw.iam.api.scim.model.ScimConstants.SCIM_CONTENT_TYPE;
 
 import org.hamcrest.Matchers;
 import org.junit.BeforeClass;
@@ -36,9 +37,11 @@ public class RegistrationTests {
   @Test
   public void testCreateRequest() {
 
-    String uuid = createRegistrationRequest("test_create");
+    RegistrationRequestDto reg = createRegistrationRequest("test_create");
 
-    Assert.notNull(uuid);
+    Assert.notNull(reg);
+
+    deleteUser(reg.getAccountId());
   }
 
   @Test
@@ -47,7 +50,7 @@ public class RegistrationTests {
     String accessToken = TestUtils.getAccessToken("registration-client",
       "secret", "registration:list");
 
-    createRegistrationRequest("test_list_new");
+    RegistrationRequestDto reg = createRegistrationRequest("test_list_new");
 
     // @formatter:off
     given()
@@ -65,6 +68,8 @@ public class RegistrationTests {
       .body("size()", Matchers.greaterThanOrEqualTo(1))
     ;
     // @formatter:on
+
+    deleteUser(reg.getAccountId());
   }
 
   @Test
@@ -87,18 +92,20 @@ public class RegistrationTests {
   @Test
   public void testConfirmRequest() {
 
-    createRegistrationRequest("test_confirm");
+    RegistrationRequestDto reg = createRegistrationRequest("test_confirm");
 
     String token = generator.getLastToken();
     Assert.notNull(token);
 
     confirmRegistrationRequest(token);
+
+    deleteUser(reg.getAccountId());
   }
 
   @Test
   public void testConfirmRequestFailureWithWrongToken() {
 
-    createRegistrationRequest("test_confirm_fail");
+    RegistrationRequestDto reg = createRegistrationRequest("test_confirm_fail");
 
     String badToken = "abcdefghilmnopqrstuvz";
 
@@ -113,6 +120,8 @@ public class RegistrationTests {
         .body(true)
       .statusCode(HttpStatus.NOT_FOUND.value());
     // @formatter:on
+
+    deleteUser(reg.getAccountId());
   }
 
   @Test
@@ -122,8 +131,8 @@ public class RegistrationTests {
       "secret", "registration:update");
 
     // create new request
-    String uuid = createRegistrationRequest("test_approve");
-    Assert.notNull(uuid);
+    RegistrationRequestDto reg = createRegistrationRequest("test_approve");
+    Assert.notNull(reg);
 
     String token = generator.getLastToken();
     Assert.notNull(token);
@@ -139,7 +148,7 @@ public class RegistrationTests {
           .preemptive()
           .oauth2(accessToken)
       .param("decision", IamRegistrationRequestStatus.APPROVED.name())
-      .pathParam("uuid", uuid)
+      .pathParam("uuid", reg.getUuid())
     .when()
       .post("/registration/{uuid}")
     .then()
@@ -147,9 +156,11 @@ public class RegistrationTests {
         .body(true)
       .statusCode(HttpStatus.OK.value())
       .body("status", Matchers.equalTo(IamRegistrationRequestStatus.APPROVED.name()))
-      .body("uuid", Matchers.equalTo(uuid))
+      .body("uuid", Matchers.equalTo(reg.getUuid()))
     ;
     // @formatter:on
+
+    deleteUser(reg.getAccountId());
   }
 
   @Test
@@ -159,8 +170,8 @@ public class RegistrationTests {
       "secret", "registration:update");
 
     // create new request
-    String uuid = createRegistrationRequest("test_reject");
-    Assert.notNull(uuid);
+    RegistrationRequestDto reg = createRegistrationRequest("test_reject");
+    Assert.notNull(reg);
 
     String token = generator.getLastToken();
     Assert.notNull(token);
@@ -176,7 +187,7 @@ public class RegistrationTests {
           .preemptive()
           .oauth2(accessToken)
       .param("decision", IamRegistrationRequestStatus.REJECTED.name())
-      .pathParam("uuid", uuid)
+      .pathParam("uuid", reg.getUuid())
     .when()
       .post("/registration/{uuid}")
     .then()
@@ -184,12 +195,116 @@ public class RegistrationTests {
         .body(true)
       .statusCode(HttpStatus.OK.value())
       .body("status", Matchers.equalTo(IamRegistrationRequestStatus.REJECTED.name()))
-      .body("uuid", Matchers.equalTo(uuid))
+      .body("uuid", Matchers.equalTo(reg.getUuid()))
     ;
     // @formatter:on
+
+    deleteUser(reg.getAccountId());
   }
 
-  private String createRegistrationRequest(final String username) {
+  @Test
+  public void testApproveRequestNotConfirmedFailure() {
+
+    String accessToken = TestUtils.getAccessToken("registration-client",
+      "secret", "registration:update");
+
+    // create new request
+    RegistrationRequestDto reg = createRegistrationRequest("test_approve_fail");
+    Assert.notNull(reg);
+
+    // @formatter:off
+    // approve it without confirm
+    given()
+      .port(8080)
+        .auth()
+          .preemptive()
+          .oauth2(accessToken)
+      .param("decision", IamRegistrationRequestStatus.APPROVED.name())
+      .pathParam("uuid", reg.getUuid())
+    .when()
+      .post("/registration/{uuid}")
+    .then()
+      .log()
+        .body(true)
+      .statusCode(HttpStatus.BAD_REQUEST.value())
+    ;
+    // @formatter:on
+
+    deleteUser(reg.getAccountId());
+  }
+
+  @Test
+  public void testApproveRequestUnauthorized() {
+
+    // create new request
+    RegistrationRequestDto reg = createRegistrationRequest(
+      "test_approve_unauth");
+    Assert.notNull(reg);
+
+    String token = generator.getLastToken();
+    Assert.notNull(token);
+
+    // confirm
+    confirmRegistrationRequest(token);
+
+    // approve it
+    // @formatter:off
+    given()
+      .port(8080)
+      .param("decision", IamRegistrationRequestStatus.APPROVED.name())
+      .pathParam("uuid", reg.getUuid())
+    .when()
+      .post("/registration/{uuid}")
+    .then()
+      .log()
+        .body(true)
+      .statusCode(HttpStatus.UNAUTHORIZED.value())
+    ;
+    // @formatter:on
+
+    deleteUser(reg.getAccountId());
+  }
+
+  @Test
+  public void testWrongDecisionFailure() {
+
+    String accessToken = TestUtils.getAccessToken("registration-client",
+      "secret", "registration:update");
+
+    // create new request
+    RegistrationRequestDto reg = createRegistrationRequest(
+      "test_wrong_decision");
+    Assert.notNull(reg);
+
+    String token = generator.getLastToken();
+    Assert.notNull(token);
+
+    // confirm
+    confirmRegistrationRequest(token);
+
+    // approve it
+    // @formatter:off
+    given()
+      .port(8080)
+        .auth()
+          .preemptive()
+          .oauth2(accessToken)
+      .param("decision", "wrong")
+      .pathParam("uuid", reg.getUuid())
+    .when()
+      .post("/registration/{uuid}")
+    .then()
+      .log()
+        .body(true)
+      .statusCode(HttpStatus.BAD_REQUEST.value())
+    ;
+    // @formatter:on
+
+    deleteUser(reg.getAccountId());
+  }
+
+  private RegistrationRequestDto createRegistrationRequest(
+    final String username) {
 
     String email = username + "@example.org";
 
@@ -198,7 +313,7 @@ public class RegistrationTests {
       .build();
 
     // @formatter:off
-    String uuid = given()
+    RegistrationRequestDto reg = given()
       .port(8080)
       .contentType(ScimConstants.SCIM_CONTENT_TYPE)
       .body(user)
@@ -211,11 +326,11 @@ public class RegistrationTests {
         .body(true)
       .statusCode(HttpStatus.OK.value())
       .extract()
-      .path("uuid");
+      .as(RegistrationRequestDto.class);
       ;
     // @formatter:on
 
-    return uuid;
+    return reg;
   }
 
   private void confirmRegistrationRequest(final String token) {
@@ -231,6 +346,35 @@ public class RegistrationTests {
         .body(true)
       .statusCode(HttpStatus.OK.value())
       .body("status", Matchers.equalTo(IamRegistrationRequestStatus.CONFIRMED.name()));
+    // @formatter:on
+  }
+
+  private void deleteUser(final String userId) {
+
+    String accessToken = TestUtils.getAccessToken("registration-client",
+      "secret", "scim:write scim:read");
+
+    String location = "/scim/Users/" + userId;
+    // @formatter:off
+    given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
+      .contentType(SCIM_CONTENT_TYPE)
+      .when()
+      .delete(location)
+      .then()
+      .statusCode(HttpStatus.NO_CONTENT.value());
+
+    given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
+      .contentType(SCIM_CONTENT_TYPE)
+      .when()
+      .get(location)
+      .then()
+      .statusCode(HttpStatus.NOT_FOUND.value());
     // @formatter:on
   }
 
