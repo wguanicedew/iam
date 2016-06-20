@@ -1,10 +1,9 @@
 #!/bin/bash
 set -ex
 
-if [[ -z ${IAM_LOGIN_SERVICE_IMAGE} ]]; then
-  echo "Please set the IAM_LOGIN_SERVICE_IMAGE env variable"
-  exit 1
-fi
+default_image_name="indigoiam/iam-login-service"
+
+IAM_LOGIN_SERVICE_IMAGE=${IAM_LOGIN_SERVICE_IMAGE:-${default_image_name}}
 
 if [[ -n ${DOCKER_REGISTRY_HOST} ]]; then
   docker tag ${IAM_LOGIN_SERVICE_IMAGE} ${DOCKER_REGISTRY_HOST}/${IAM_LOGIN_SERVICE_IMAGE}

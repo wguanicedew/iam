@@ -17,19 +17,11 @@ default_image_name="indigoiam/iam-login-service"
 # Env variable setting the IAM Login service image name
 IAM_LOGIN_SERVICE_IMAGE=${IAM_LOGIN_SERVICE_IMAGE:-${default_image_name}}
 
-# If a tag is provided with the IAM_LOGIN_SERVICE_IMAGE_TAG, we add
-# it to the tag name
-if [[ -n ${IAM_LOGIN_SERVICE_IMAGE_TAG} ]]; then
-  tag_name=${IAM_LOGIN_SERVICE_IMAGE}:${IAM_LOGIN_SERVICE_IMAGE_TAG}
-else
-  tag_name=${IAM_LOGIN_SERVICE_IMAGE}
-fi
-
 cd ${DIR}
 cp ${IAM_LOGIN_SERVICE_WAR} iam-login-service.war
 
 docker build -f Dockerfile.prod \
   --rm=true --no-cache=true \
-  -t ${tag_name} .
+  -t ${IAM_LOGIN_SERVICE_IMAGE} .
 
 rm iam-login-service.war
