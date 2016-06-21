@@ -8,6 +8,9 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+import it.infn.mw.iam.api.scim.model.ScimPatchOperation.ScimPatchOperationType;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonInclude(Include.NON_EMPTY)
@@ -71,6 +74,18 @@ public class ScimUserPatchRequest {
       operations.add(operation);
       return this;
     }
+
+    
+    public Builder buildAddOperation(ScimUser user) {
+
+      ScimPatchOperation<ScimUser> op =
+          ScimPatchOperation.<ScimUser>builder().op(ScimPatchOperationType.add).value(user).build();
+      
+      addOperation(op);
+      return this;
+    }
+    
+    
 
     public ScimUserPatchRequest build() {
 

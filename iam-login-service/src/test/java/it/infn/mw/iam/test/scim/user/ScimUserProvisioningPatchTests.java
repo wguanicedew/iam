@@ -1,8 +1,11 @@
 package it.infn.mw.iam.test.scim.user;
 
 import static com.jayway.restassured.RestAssured.given;
+import static it.infn.mw.iam.api.scim.model.ScimConstants.SCIM_CONTENT_TYPE;
+import static it.infn.mw.iam.test.TestUtils.passwordTokenGetter;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.assertNull;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -81,7 +84,7 @@ public class ScimUserProvisioningPatchTests {
   }
 
   @Test
-  public void patchUserInfo() {
+  public void testPatchUserInfo() {
 
     ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John", "Lennon");
 
@@ -125,7 +128,7 @@ public class ScimUserProvisioningPatchTests {
   }
 
   @Test
-  public void patchAddRessignAndRemoveOidcId() {
+  public void testPatchAddRessignAndRemoveOidcId() {
 
     ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John", "Lennon");
     ScimUser lincoln = addTestUser("abraham_lincoln", "lincoln@email.test", "Abraham", "Lincoln");
@@ -166,7 +169,7 @@ public class ScimUserProvisioningPatchTests {
   }
 
   @Test
-  public void patchRemoveNotExistingOidcId() {
+  public void testPatchRemoveNotExistingOidcId() {
 
     ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John", "Lennon");
 
@@ -183,6 +186,32 @@ public class ScimUserProvisioningPatchTests {
     doPatch(req, lennon.getMeta().getLocation(), HttpStatus.NOT_FOUND);
 
     deleteUser(lennon.getMeta().getLocation());
+  }
+  
+  @Test
+  public void testPatchUserPassword() {
+    ScimUser user = ScimUser.builder("user_with_password").buildEmail("up@test.org")
+        .buildName("User", "With Password").password("a_password").active(true).build();
+
+    ScimUser creationResult = given().port(8080).auth().preemptive().oauth2(accessToken)
+        .contentType(SCIM_CONTENT_TYPE).body(user).log().all(true).when().post("/scim/Users/")
+        .then().log().all(true).statusCode(HttpStatus.CREATED.value()).extract().as(ScimUser.class);
+
+    assertNull(creationResult.getPassword());
+
+    passwordTokenGetter().scope("openid").username("user_with_password").password("a_password")
+        .getAccessToken();
+    
+    ScimUser patchedPasswordUser = ScimUser.builder().password("new_password").build();
+
+    doPatch(ScimUserPatchRequest.builder().buildAddOperation(patchedPasswordUser).build(), 
+        creationResult.getMeta().getLocation(), 
+        HttpStatus.NO_CONTENT);
+    
+    passwordTokenGetter().scope("openid").username("user_with_password").password("new_password")
+      .getAccessToken();
+    
+    deleteUser(creationResult.getMeta().getLocation());
   }
 
 }

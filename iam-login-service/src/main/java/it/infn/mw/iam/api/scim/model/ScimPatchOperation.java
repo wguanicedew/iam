@@ -54,6 +54,10 @@ public class ScimPatchOperation<T> {
     return path;
   }
 
+  public static <T> Builder<T> builder() {
+    return new Builder<T>();
+  }
+
   public static class Builder<T> {
 
     ScimPatchOperationType op;
