@@ -36,123 +36,121 @@ public class ScimGroupProvisioning implements ScimProvisioning<ScimGroup, List<S
 
   @Autowired
   public ScimGroupProvisioning(GroupConverter converter, GroupUpdater updater,
-	IamGroupRepository groupRepository) {
+      IamGroupRepository groupRepository) {
 
-	this.updater = updater;
-	this.converter = converter;
-	this.groupRepository = groupRepository;
+    this.updater = updater;
+    this.converter = converter;
+    this.groupRepository = groupRepository;
   }
 
   private void idSanityChecks(String id) {
 
-	if (id == null) {
-	  throw new IllegalArgumentException("id cannot be null");
-	}
+    if (id == null) {
+      throw new IllegalArgumentException("id cannot be null");
+    }
 
-	if (id.trim().isEmpty()) {
-	  throw new IllegalArgumentException("id cannot be the empty string");
-	}
+    if (id.trim().isEmpty()) {
+      throw new IllegalArgumentException("id cannot be the empty string");
+    }
   }
 
   @Override
   public ScimGroup getById(String id) {
 
-	idSanityChecks(id);
+    idSanityChecks(id);
 
-	Optional<IamGroup> group = groupRepository.findByUuid(id);
+    Optional<IamGroup> group = groupRepository.findByUuid(id);
 
-	if (group.isPresent()) {
-	  return converter.toScim(group.get());
-	}
+    if (group.isPresent()) {
+      return converter.toScim(group.get());
+    }
 
-	throw new ScimResourceNotFoundException("No group mapped to id '" + id + "'");
+    throw new ScimResourceNotFoundException("No group mapped to id '" + id + "'");
   }
 
   @Override
   public ScimGroup create(ScimGroup group) {
 
-	IamGroup iamGroup = new IamGroup();
+    IamGroup iamGroup = new IamGroup();
 
-	Date creationTime = new Date();
+    Date creationTime = new Date();
 
-	iamGroup.setUuid(group.getId());
-	iamGroup.setName(group.getDisplayName());
-	iamGroup.setCreationTime(creationTime);
-	iamGroup.setLastUpdateTime(creationTime);
-	iamGroup.setAccounts(new HashSet<IamAccount>());
+    iamGroup.setUuid(group.getId());
+    iamGroup.setName(group.getDisplayName());
+    iamGroup.setCreationTime(creationTime);
+    iamGroup.setLastUpdateTime(creationTime);
+    iamGroup.setAccounts(new HashSet<IamAccount>());
 
-	groupRepository.save(iamGroup);
+    groupRepository.save(iamGroup);
 
-	return converter.toScim(iamGroup);
+    return converter.toScim(iamGroup);
   }
 
   @Override
   public void delete(String id) {
 
-	idSanityChecks(id);
+    idSanityChecks(id);
 
-	IamGroup group = groupRepository.findByUuid(id)
-	  .orElseThrow(() -> new ScimResourceNotFoundException(
-		"No group mapped to id '" + id + "'"));
+    IamGroup group = groupRepository.findByUuid(id)
+        .orElseThrow(() -> new ScimResourceNotFoundException("No group mapped to id '" + id + "'"));
 
-	groupRepository.delete(group);
+    groupRepository.delete(group);
   }
 
   @Override
   public ScimGroup replace(String id, ScimGroup scimItemToBeReplaced) {
 
-	IamGroup existingGroup = groupRepository.findByUuid(id)
-	  .orElseThrow(() -> new ScimResourceNotFoundException(
-		"No group mapped to id '" + id + "'"));
+    IamGroup existingGroup = groupRepository.findByUuid(id)
+        .orElseThrow(() -> new ScimResourceNotFoundException("No group mapped to id '" + id + "'"));
 
-	String displayName = scimItemToBeReplaced.getDisplayName();
+    /* displayname is required */
+    String displayName = scimItemToBeReplaced.getDisplayName();
 
-	if (groupRepository.findByNameWithDifferentId(displayName, id)
-	  .isPresent()) {
-	  throw new ScimResourceExistsException(
-		displayName + " is already mappped to another group");
-	}
+    if (groupRepository.findByNameWithDifferentId(displayName, id).isPresent()) {
+      throw new ScimResourceExistsException(displayName + " is already mappped to another group");
+    }
 
-	IamGroup updatedGroup = converter.fromScim(scimItemToBeReplaced);
-	/* SCIM resource identifiers cannot be replaced by PUT */
-	updatedGroup.setId(existingGroup.getId());
-	updatedGroup.setUuid(existingGroup.getUuid());
-	/* description is not mapped into SCIM group */
-	updatedGroup.setDescription(existingGroup.getDescription());
+    IamGroup updatedGroup = converter.fromScim(scimItemToBeReplaced);
+    /* SCIM resource identifiers cannot be replaced by PUT */
+    updatedGroup.setId(existingGroup.getId());
+    updatedGroup.setUuid(existingGroup.getUuid());
+    updatedGroup.setCreationTime(existingGroup.getCreationTime());
+    updatedGroup.setAccounts(existingGroup.getAccounts());
+    /* description is not mapped into SCIM group */
+    updatedGroup.setDescription(existingGroup.getDescription());
 
-	groupRepository.save(updatedGroup);
-	return converter.toScim(updatedGroup);
+    updatedGroup.touch();
+    groupRepository.save(updatedGroup);
+    return converter.toScim(updatedGroup);
   }
 
   @Override
   public ScimListResponse<ScimGroup> list(ScimPageRequest params) {
 
-	if (params.getCount() == 0) {
-	  int groupCount = groupRepository.countAllGroups();
-	  return new ScimListResponse<>(Collections.emptyList(), groupCount, 0, 1);
-	}
+    if (params.getCount() == 0) {
+      int groupCount = groupRepository.countAllGroups();
+      return new ScimListResponse<>(Collections.emptyList(), groupCount, 0, 1);
+    }
 
-	OffsetPageable op = new OffsetPageable(params.getStartIndex(),
-	  params.getCount());
+    OffsetPageable op = new OffsetPageable(params.getStartIndex(), params.getCount());
 
-	Page<IamGroup> results = groupRepository.findAll(op);
+    Page<IamGroup> results = groupRepository.findAll(op);
 
-	List<ScimGroup> resources = new ArrayList<>();
+    List<ScimGroup> resources = new ArrayList<>();
 
-	results.getContent().forEach(g -> resources.add(converter.toScim(g)));
+    results.getContent().forEach(g -> resources.add(converter.toScim(g)));
 
-	return new ScimListResponse<>(resources, results.getTotalElements(),
-	  resources.size(), op.getOffset() + 1);
+    return new ScimListResponse<>(resources, results.getTotalElements(), resources.size(),
+        op.getOffset() + 1);
   }
 
   public void update(String id, List<ScimPatchOperation<List<ScimMemberRef>>> operations) {
 
-	IamGroup iamGroup = groupRepository.findByUuid(id)
-	  .orElseThrow(() -> new ScimResourceNotFoundException(
-		"No group mapped to id '" + id + "'"));
+    IamGroup iamGroup = groupRepository.findByUuid(id)
+        .orElseThrow(() -> new ScimResourceNotFoundException("No group mapped to id '" + id + "'"));
 
-	updater.update(iamGroup, operations);
-	
+    updater.update(iamGroup, operations);
+
   }
 
 }

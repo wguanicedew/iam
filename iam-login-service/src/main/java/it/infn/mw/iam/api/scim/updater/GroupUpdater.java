@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import it.infn.mw.iam.api.scim.exception.ScimPatchOperationNotSupported;
 import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
 import it.infn.mw.iam.api.scim.exception.ScimValidationException;
 import it.infn.mw.iam.api.scim.model.ScimMemberRef;
@@ -22,103 +21,92 @@ public class GroupUpdater implements Updater<IamGroup, List<ScimMemberRef>> {
   @Autowired
   public GroupUpdater(IamAccountRepository accountRepository) {
 
-	this.accountRepository = accountRepository;
+    this.accountRepository = accountRepository;
   }
 
-  public void update(IamGroup group,
-	List<ScimPatchOperation<List<ScimMemberRef>>> operations) {
+  public void update(IamGroup group, List<ScimPatchOperation<List<ScimMemberRef>>> operations) {
 
-	for (ScimPatchOperation<List<ScimMemberRef>> op : operations) {
+    for (ScimPatchOperation<List<ScimMemberRef>> op : operations) {
 
-	  if (!op.getPath().equals("members")) {
+      switch (op.getOp()) {
 
-		throw new ScimPatchOperationNotSupported(
-		  "Expected 'members' as path value");
-	  }
+        case add:
 
-	  switch (op.getOp()) {
+          // value cannot be null
+          if (op.getValue() == null) {
+            throw new ScimValidationException("Expected patch operation value not null");
+          }
 
-	  case add:
+          for (ScimMemberRef ref : op.getValue()) {
+            addMembership(ref.getValue(), group);
+          }
+          break;
+        case remove:
 
-		// value cannot be null
-		if (op.getValue() == null) {
-		  throw new ScimValidationException(
-			"Expected patch operation value not null");
-		}
+          // value can be null >> remove all
+          if (op.getValue() == null) {
+            removeAllMembers(group);
+            break;
+          }
 
-		for (ScimMemberRef ref : op.getValue()) {
-		  addMembership(ref.getValue(), group);
-		}
-		break;
-	  case remove:
+          for (ScimMemberRef ref : op.getValue()) {
+            removeMembership(ref.getValue(), group);
+          }
+          break;
+        case replace:
 
-		// value can be null >> remove all
-		if (op.getValue() == null) {
-		  removeAllMembers(group);
-		  break;
-		} 
-		
-		for (ScimMemberRef ref : op.getValue()) {
-			removeMembership(ref.getValue(), group);
-		}
-		break;
-	  case replace:
-		
-		// value cannot be null
-		if (op.getValue() == null) {
-		  throw new ScimValidationException(
-			"Expected patch operation value not null");
-		}
+          // value cannot be null
+          if (op.getValue() == null) {
+            throw new ScimValidationException("Expected patch operation value not null");
+          }
 
-		// replace step 1: clean all memberships
-		removeAllMembers(group);
-		for (ScimMemberRef ref : op.getValue()) {
-		  //replace step 2: add new members
-		  addMembership(ref.getValue(), group);
-		}
-		break;
-	  default:
-		break;
-	  }
-	}
-	return;
+          // replace step 1: clean all memberships
+          removeAllMembers(group);
+          for (ScimMemberRef ref : op.getValue()) {
+            // replace step 2: add new members
+            addMembership(ref.getValue(), group);
+          }
+          break;
+        default:
+          break;
+      }
+    }
+    return;
 
   }
 
   private void removeAllMembers(IamGroup group) {
 
-	for (IamAccount account : group.getAccounts()) {
+    for (IamAccount account : group.getAccounts()) {
 
-	  account.getGroups().remove(group);
-	  account.touch();
+      account.getGroups().remove(group);
+      account.touch();
 
-	  accountRepository.save(account);
-	}
+      accountRepository.save(account);
+    }
   }
 
   private void addMembership(String uuid, IamGroup group) {
 
-	IamAccount account = accountRepository.findByUuid(uuid)
-	  .orElseThrow(() -> new ScimResourceNotFoundException(
-		"No user mapped to id '" + uuid + "'"));
+    IamAccount account = accountRepository.findByUuid(uuid).orElseThrow(
+        () -> new ScimResourceNotFoundException("No user mapped to id '" + uuid + "'"));
 
-	account.getGroups().add(group);
-	account.touch();
+    account.getGroups().add(group);
+    account.touch();
 
-	accountRepository.save(account);
+    accountRepository.save(account);
 
   }
 
   private void removeMembership(String uuid, IamGroup group) {
 
-	IamAccount account = accountRepository.findByUuid(uuid)
-	  .orElseThrow(() -> new ScimResourceNotFoundException(
-		"No user mapped to id '" + uuid + "'"));
+    IamAccount account = accountRepository.findByUuid(uuid).orElseThrow(
+        () -> new ScimResourceNotFoundException("No user mapped to id '" + uuid + "'"));
 
-	account.getGroups().remove(group);
-	account.touch();
+    account.getGroups().remove(group);
+    account.touch();
 
-	accountRepository.save(account);
+    accountRepository.save(account);
 
   }
 }

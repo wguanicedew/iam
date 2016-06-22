@@ -1,95 +1,102 @@
 package it.infn.mw.iam.api.scim.model;
 
-import org.hibernate.validator.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
-
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ScimPatchOperation<T> {
 
   public static enum ScimPatchOperationType {
-	add, remove, replace
+    add, remove, replace
   }
 
   private final ScimPatchOperationType op;
-  @NotBlank
   private final String path;
+  @NotNull
   private final T value;
-  
+
   @JsonCreator
-  private ScimPatchOperation(
-	@JsonProperty("op") ScimPatchOperationType op,
-	@JsonProperty("path") String path,
-	@JsonProperty("value") T value) {
-	
-	this.op = op;
-	this.path = path;
-	this.value = value;
+  private ScimPatchOperation(@JsonProperty("op") ScimPatchOperationType op,
+      @JsonProperty("path") String path, @JsonProperty("value") T value) {
+
+    this.op = op;
+    this.path = path;
+    this.value = value;
   }
-  
+
   public ScimPatchOperation(Builder<T> builder) {
-	
-	this.op = builder.op;
-	if (builder.path == null) {
-	  throw new IllegalArgumentException(
-		"scim patch operation path cannot be null");
-	}
-	this.path = builder.path;
-	this.value = builder.value;
+
+    this.op = builder.op;
+    this.path = builder.path;
+    this.value = builder.value;
   }
 
   public ScimPatchOperationType getOp() {
-	
-	return op;
+
+    return op;
   }
 
   public T getValue() {
-	
-	return value;
+
+    return value;
   }
 
   public String getPath() {
-	
-	return path;
+
+    return path;
   }
 
   public static class Builder<T> {
 
-	ScimPatchOperationType op;
-	String path;
-	T value;
+    ScimPatchOperationType op;
+    String path;
+    T value;
 
-	public Builder() {
-	  op = ScimPatchOperationType.add;
-	  path = "";
-	}
+    public Builder() {}
 
-	public Builder<T> op(ScimPatchOperationType op) {
+    public Builder<T> op(ScimPatchOperationType op) {
 
-	  this.op = op;
-	  return this;
-	}
+      this.op = op;
+      return this;
+    }
 
-	public Builder<T> path(String path) {
+    public Builder<T> path(String path) {
 
-	  this.path = path;
-	  return this;
-	}
+      this.path = path;
+      return this;
+    }
 
-	public Builder<T> value(T val) {
+    public Builder<T> value(T val) {
 
-	  this.value = val;
-	  return this;
-	}
-	
-	public ScimPatchOperation<T> build() {
+      this.value = val;
+      return this;
+    }
 
-	  return new ScimPatchOperation<T>(this);
-	}
+    public Builder<T> add() {
+
+      this.op = ScimPatchOperationType.add;
+      return this;
+    }
+
+    public Builder<T> remove() {
+
+      this.op = ScimPatchOperationType.remove;
+      return this;
+    }
+
+    public Builder<T> replace() {
+
+      this.op = ScimPatchOperationType.replace;
+      return this;
+    }
+
+    public ScimPatchOperation<T> build() {
+
+      return new ScimPatchOperation<T>(this);
+    }
   }
 
 }

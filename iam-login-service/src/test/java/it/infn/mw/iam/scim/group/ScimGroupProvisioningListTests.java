@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.SpringApplicationConfiguration;
@@ -16,6 +17,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.scim.model.ScimListResponse;
+import it.infn.mw.iam.scim.ScimRestUtils;
 import it.infn.mw.iam.scim.TestUtils;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -23,42 +25,38 @@ import it.infn.mw.iam.scim.TestUtils;
 @WebIntegrationTest
 public class ScimGroupProvisioningListTests {
 
-  String accessToken;
-  
+  private String accessToken;
+  private ScimRestUtils restUtils;
+
+  @BeforeClass
+  public static void init() {
+
+    TestUtils.initRestAssured();
+  }
+
   @Before
   public void initAccessToken() {
 
-    accessToken = TestUtils.getAccessToken("scim-client-rw", "secret",
-      "scim:read");
+    accessToken = TestUtils.getAccessToken("scim-client-rw", "secret", "scim:read scim:write");
+    restUtils = ScimRestUtils.getInstance(accessToken);
+
   }
 
-  
   @Test
   public void testNoParameterListRequest() {
 
-    given().port(8080)
-      .auth()
-      .preemptive()
-      .oauth2(accessToken)
-      .accept(SCIM_CONTENT_TYPE)
-      .log()
-      .all(true)
-      .when()
-      .get("/scim/Groups")
-      .then()
-      .log()
-      .all(true)
-      .statusCode(HttpStatus.OK.value())
+    restUtils.doGet("/scim/Groups")
       .body("totalResults", equalTo(22))
       .body("itemsPerPage", equalTo(10))
       .body("startIndex", equalTo(1))
       .body("schemas", contains(ScimListResponse.SCHEMA))
       .body("Resources", hasSize(equalTo(10)));
   }
-  
+
   @Test
   public void testCountAs8Returns8Items() {
 
+    /** @formatter:off */
     given().port(8080)
       .auth()
       .preemptive()
@@ -78,11 +76,13 @@ public class ScimGroupProvisioningListTests {
       .body("startIndex", equalTo(1))
       .body("schemas", contains(ScimListResponse.SCHEMA))
       .body("Resources", hasSize(equalTo(8)));
+    /** @formatter:on */
   }
-  
+
   @Test
   public void testCount1Returns1Item() {
 
+    /** @formatter:off */
     given().port(8080)
       .auth()
       .preemptive()
@@ -102,11 +102,13 @@ public class ScimGroupProvisioningListTests {
       .body("startIndex", equalTo(1))
       .body("schemas", contains(ScimListResponse.SCHEMA))
       .body("Resources", hasSize(equalTo(1)));
+    /** @formatter:on */
   }
-  
+
   @Test
   public void testCountShouldBeLimitedToTen() {
 
+    /** @formatter:off */
     given().port(8080)
       .auth()
       .preemptive()
@@ -126,11 +128,13 @@ public class ScimGroupProvisioningListTests {
       .body("startIndex", equalTo(1))
       .body("schemas", contains(ScimListResponse.SCHEMA))
       .body("Resources", hasSize(equalTo(10)));
+    /** @formatter:on */
   }
-  
+
   @Test
   public void testNegativeCountBecomesZero() {
 
+    /** @formatter:off */
     given().port(8080)
       .auth()
       .preemptive()
@@ -150,11 +154,13 @@ public class ScimGroupProvisioningListTests {
       .body("startIndex", equalTo(1))
       .body("schemas", contains(ScimListResponse.SCHEMA))
       .body("Resources", hasSize(equalTo(0)));
+    /** @formatter:on */
   }
-  
+
   @Test
   public void testInvalidStartIndex() {
 
+    /** @formatter:off */
     given().port(8080)
       .auth()
       .preemptive()
@@ -174,11 +180,13 @@ public class ScimGroupProvisioningListTests {
       .body("startIndex", equalTo(23))
       .body("schemas", contains(ScimListResponse.SCHEMA))
       .body("Resources", hasSize(equalTo(0)));
+    /** @formatter:on */
   }
-  
+
   @Test
   public void testRightEndPagination() {
 
+    /** @formatter:off */
     given().port(8080)
       .auth()
       .preemptive()
@@ -199,11 +207,13 @@ public class ScimGroupProvisioningListTests {
       .body("startIndex", equalTo(17))
       .body("schemas", contains(ScimListResponse.SCHEMA))
       .body("Resources", hasSize(equalTo(6)));
+    /** @formatter:on */
   }
-  
+
   @Test
   public void testLastElementPagination() {
 
+    /** @formatter:off */
     given().port(8080)
       .auth()
       .preemptive()
@@ -224,11 +234,13 @@ public class ScimGroupProvisioningListTests {
       .body("startIndex", equalTo(22))
       .body("schemas", contains(ScimListResponse.SCHEMA))
       .body("Resources", hasSize(equalTo(1)));
+    /** @formatter:on */
   }
-  
+
   @Test
   public void testFirstElementPagination() {
 
+    /** @formatter:off */
     given().port(8080)
       .auth()
       .preemptive()
@@ -249,5 +261,6 @@ public class ScimGroupProvisioningListTests {
       .body("startIndex", equalTo(1))
       .body("schemas", contains(ScimListResponse.SCHEMA))
       .body("Resources", hasSize(equalTo(5)));
+    /** @formatter:on */
   }
 }

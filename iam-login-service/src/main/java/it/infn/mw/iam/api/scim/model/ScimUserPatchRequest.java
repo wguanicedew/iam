@@ -12,70 +12,76 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(Include.NON_EMPTY)
 public class ScimUserPatchRequest {
-  
+
   public static final String PATCHOP_SCHEMA = "urn:ietf:params:scim:api:messages:2.0:PatchOp";
 
   private final Set<String> schemas;
   private final List<ScimPatchOperation<ScimUser>> operations;
-  
-  @JsonCreator
-  private ScimUserPatchRequest(
-	@JsonProperty("schemas") Set<String> schemas,
-	@JsonProperty("operations") List<ScimPatchOperation<ScimUser>> operations) {
 
-	this.schemas = schemas;
-	if (operations == null) {
-	  throw new IllegalArgumentException("Operations list is null");
-	}
-	this.operations = operations;
+  @JsonCreator
+  private ScimUserPatchRequest(@JsonProperty("schemas") Set<String> schemas,
+      @JsonProperty("operations") List<ScimPatchOperation<ScimUser>> operations) {
+
+    this.schemas = schemas;
+    if (operations == null) {
+      throw new IllegalArgumentException("Operations list is null");
+    }
+    this.operations = operations;
   }
-  
+
   private ScimUserPatchRequest(Builder b) {
 
-	this.schemas = b.schemas;
-	this.operations = b.operations;
+    this.schemas = b.schemas;
+    this.operations = b.operations;
   }
 
   public Set<String> getSchemas() {
 
-	return schemas;
+    return schemas;
   }
 
   public List<ScimPatchOperation<ScimUser>> getOperations() {
 
-	return operations;
+    return operations;
   }
 
   public static Builder builder() {
 
-	return new Builder();
+    return new Builder();
   }
 
   public static class Builder {
 
-	private Set<String> schemas = new HashSet<String>();
-	private List<ScimPatchOperation<ScimUser>> operations = new ArrayList<ScimPatchOperation<ScimUser>>();
+    private Set<String> schemas = new HashSet<String>();
+    private List<ScimPatchOperation<ScimUser>> operations =
+        new ArrayList<ScimPatchOperation<ScimUser>>();
 
-	public Builder() {
-	  schemas.add(PATCHOP_SCHEMA);
-	}
+    public Builder() {
+      schemas.add(PATCHOP_SCHEMA);
+    }
 
-	public Builder setOperations(List<ScimPatchOperation<ScimUser>> operations) {
+    public Builder add(ScimUser user) {
 
-	  this.operations = operations;
-	  return this;
-	}
+      operations.add((new ScimPatchOperation.Builder<ScimUser>()).add().value(user).build());
+      return this;
+    }
 
-	public Builder addOperation(ScimPatchOperation<ScimUser> operation) {
+    public Builder remove(ScimUser user) {
 
-	  operations.add(operation);
-	  return this;
-	}
+      operations.add((new ScimPatchOperation.Builder<ScimUser>()).remove().value(user).build());
+      return this;
+    }
 
-	public ScimUserPatchRequest build() {
+    public Builder replace(ScimUser user) {
 
-	  return new ScimUserPatchRequest(this);
-	}
+      operations.add((new ScimPatchOperation.Builder<ScimUser>()).remove().value(user).build());
+      return this;
+    }
+
+    public ScimUserPatchRequest build() {
+
+      return new ScimUserPatchRequest(this);
+    }
   }
 
 }

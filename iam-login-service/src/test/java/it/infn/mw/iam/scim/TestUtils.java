@@ -14,13 +14,11 @@ import com.jayway.restassured.mapper.factory.Jackson2ObjectMapperFactory;
 
 public class TestUtils {
 
-  private TestUtils() {
-  }
+  private TestUtils() {}
 
   public static ObjectMapper createJacksonObjectMapper() {
 
-    FilterProvider filters = new SimpleFilterProvider()
-      .setFailOnUnknownId(false);
+    FilterProvider filters = new SimpleFilterProvider().setFailOnUnknownId(false);
 
     ObjectMapper mapper = new ObjectMapper();
     mapper.setFilterProvider(filters);
@@ -33,8 +31,7 @@ public class TestUtils {
     return new Jackson2ObjectMapperFactory() {
 
       @Override
-      public ObjectMapper create(@SuppressWarnings("rawtypes") Class cls,
-        String charset) {
+      public ObjectMapper create(@SuppressWarnings("rawtypes") Class cls, String charset) {
 
         return createJacksonObjectMapper();
       }
@@ -43,14 +40,12 @@ public class TestUtils {
 
   public static void initRestAssured() {
 
-    RestAssured.config = RestAssuredConfig
-      .config().objectMapperConfig(new ObjectMapperConfig()
-        .jackson2ObjectMapperFactory(getJacksonObjectMapperFactory()));
-
+    RestAssured.config = RestAssuredConfig.config().objectMapperConfig(
+        new ObjectMapperConfig().jackson2ObjectMapperFactory(getJacksonObjectMapperFactory()));
+    RestAssured.port = 8080;
   }
 
-  public static String getAccessToken(String clientId, String clientSecret,
-    String scopes) {
+  public static String getAccessToken(String clientId, String clientSecret, String scopes) {
 
     String accessToken = given().port(8080)
       .param("grant_type", "client_credentials")

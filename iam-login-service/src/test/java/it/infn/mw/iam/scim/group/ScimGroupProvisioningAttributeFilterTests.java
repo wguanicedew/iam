@@ -32,13 +32,13 @@ public class ScimGroupProvisioningAttributeFilterTests {
   @Before
   public void initAccessToken() {
 
-    accessToken = TestUtils.getAccessToken("scim-client-rw", "secret",
-      "scim:read");
+    accessToken = TestUtils.getAccessToken("scim-client-rw", "secret", "scim:read");
   }
 
   @Test
   public void testReuturnOnlyDisplayNameRequest() {
 
+    /** @formatter:off */
     given().port(8080)
       .auth()
       .preemptive()
@@ -62,11 +62,13 @@ public class ScimGroupProvisioningAttributeFilterTests {
       .body("Resources[0].id", is(Matchers.not(nullValue())))
       .body("Resources[0].schemas", is(Matchers.not(nullValue())))
       .body("Resources[0].displayName", is(Matchers.not(nullValue())));
+    /** @formatter:on */
   }
-  
+
   @Test
   public void testMultipleAttrsRequest() {
 
+    /** @formatter:off */
     given().port(8080)
       .auth()
       .preemptive()
@@ -90,7 +92,7 @@ public class ScimGroupProvisioningAttributeFilterTests {
       .body("Resources[0].id", is(Matchers.not(nullValue())))
       .body("Resources[0].schemas", is(not(nullValue())))
       .body("Resources[0].displayName", is(not(nullValue())));
-
+    /** @formatter:on */
   }
 
 }

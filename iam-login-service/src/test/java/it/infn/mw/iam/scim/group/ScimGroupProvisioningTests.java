@@ -1,6 +1,5 @@
 package it.infn.mw.iam.scim.group;
 
-import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.matcher.ResponseAwareMatcherComposer.and;
 import static com.jayway.restassured.matcher.RestAssuredMatchers.endsWithPath;
 import static org.hamcrest.Matchers.contains;
@@ -9,7 +8,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.startsWith;
 
-import java.text.ParseException;
 import java.util.UUID;
 
 import org.junit.Before;
@@ -23,6 +21,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.scim.model.ScimGroup;
+import it.infn.mw.iam.scim.ScimRestUtils;
 import it.infn.mw.iam.scim.TestUtils;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -30,223 +29,155 @@ import it.infn.mw.iam.scim.TestUtils;
 @WebIntegrationTest
 public class ScimGroupProvisioningTests {
 
-  public static final String SCIM_CONTENT_TYPE = "application/scim+json";
-
   private String accessToken;
+  private ScimRestUtils restUtils;
 
   @BeforeClass
   public static void init() {
 
-	TestUtils.initRestAssured();
+    TestUtils.initRestAssured();
   }
 
   @Before
   public void initAccessToken() {
 
-	accessToken = TestUtils.getAccessToken("scim-client-rw", "secret",
-	  "scim:read scim:write");
-  }
-
-  private void deleteGroup(String groupLocation) {
-
-	given().port(8080).auth().preemptive().oauth2(accessToken)
-	  .contentType(SCIM_CONTENT_TYPE).when().delete(groupLocation).then()
-	  .statusCode(HttpStatus.NO_CONTENT.value());
-
-	given().port(8080).auth().preemptive().oauth2(accessToken)
-	  .contentType(SCIM_CONTENT_TYPE).when().get(groupLocation).then()
-	  .statusCode(HttpStatus.NOT_FOUND.value());
+    accessToken = TestUtils.getAccessToken("scim-client-rw", "secret", "scim:read scim:write");
+    restUtils = ScimRestUtils.getInstance(accessToken);
 
   }
 
   @Test
   public void testGetGroupNotFoundResponse() {
 
-	String randomUuid = UUID.randomUUID().toString();
+    String randomUuid = UUID.randomUUID().toString();
 
-	given().port(8080).auth().preemptive().oauth2(accessToken).when()
-	  .get("/scim/Groups/" + randomUuid).then().log().body(true)
-	  .statusCode(HttpStatus.NOT_FOUND.value()).body("status", equalTo("404"))
-	  .body("detail", equalTo("No group mapped to id '" + randomUuid + "'"))
-	  .contentType(SCIM_CONTENT_TYPE);
-
+    restUtils.doGet("/scim/Groups/" + randomUuid, HttpStatus.NOT_FOUND)
+      .body("status", equalTo("404"))
+      .body("detail", equalTo("No group mapped to id '" + randomUuid + "'"))
+      .contentType(ScimRestUtils.SCIM_CONTENT_TYPE);
   }
 
   @Test
   public void testUpdateGroupNotFoundResponse() {
 
-	ScimGroup group = ScimGroup.builder("engineers").build();
+    String randomUuid = UUID.randomUUID().toString();
 
-	String randomUuid = UUID.randomUUID().toString();
+    ScimGroup group = ScimGroup.builder("engineers").id(randomUuid).build();
 
-	given().port(8080).auth().preemptive().oauth2(accessToken)
-	  .contentType(SCIM_CONTENT_TYPE).body(group).when()
-	  .put("/scim/Groups/" + randomUuid).then().log().body(true)
-	  .statusCode(HttpStatus.NOT_FOUND.value()).body("status", equalTo("404"))
-	  .body("detail", equalTo("No group mapped to id '" + randomUuid + "'"))
-	  .contentType(SCIM_CONTENT_TYPE);
-
+    restUtils.doPut("/scim/Groups/" + randomUuid, group, HttpStatus.NOT_FOUND)
+      .body("status", equalTo("404"))
+      .body("detail", equalTo("No group mapped to id '" + randomUuid + "'"))
+      .contentType(ScimRestUtils.SCIM_CONTENT_TYPE);
   }
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testExistingGroupAccess() {
+  public void testGetExistingGroup() {
 
-	// Some existing group as defined in the test db
-	String groupId = "c617d586-54e6-411d-8e38-64967798fa8a";
+    // Some existing group as defined in the test db
+    String groupId = "c617d586-54e6-411d-8e38-64967798fa8a";
 
-	given().port(8080).auth().preemptive().oauth2(accessToken).when()
-	  .get("/scim/Groups/" + groupId).then().contentType(SCIM_CONTENT_TYPE)
-	  .log().body(true).statusCode(HttpStatus.OK.value())
-	  .body("id", equalTo(groupId)).body("displayName", equalTo("Production"))
-	  .body("meta.resourceType", equalTo("Group"))
-	  .body("meta.location",
-		equalTo("http://localhost:8080/scim/Groups/" + groupId))
-	  .body("members", hasSize(equalTo(2)))
-	  .body("members[0].$ref",
-		and(startsWith("http://localhost:8080/scim/Users/"),
-		  endsWithPath("members[0].value")))
-	  .body("members[1].$ref",
-		and(startsWith("http://localhost:8080/scim/Users/"),
-		  endsWithPath("members[1].value")))
-	  .body("schemas", contains(ScimGroup.GROUP_SCHEMA));
+    restUtils.doGet("/scim/Groups/" + groupId)
+      .body("id", equalTo(groupId))
+      .body("displayName", equalTo("Production"))
+      .body("meta.resourceType", equalTo("Group"))
+      .body("meta.location", equalTo("http://localhost:8080/scim/Groups/" + groupId))
+      .body("members", hasSize(equalTo(2)))
+      .body("members[0].$ref",
+          and(startsWith("http://localhost:8080/scim/Users/"), endsWithPath("members[0].value")))
+      .body("members[1].$ref",
+          and(startsWith("http://localhost:8080/scim/Users/"), endsWithPath("members[1].value")))
+      .body("schemas", contains(ScimGroup.GROUP_SCHEMA));
 
   }
 
   @Test
-  public void testGroupCreationAccessDeletion() {
+  public void testCreateAndDeleteGroupSuccessResponse() {
 
-	String name = "engineers";
-	String uuid = UUID.randomUUID().toString();
+    String name = "engineers";
+    String uuid = UUID.randomUUID().toString();
 
-	ScimGroup.Builder builder = new ScimGroup.Builder(name);
-	builder.id(uuid);
+    ScimGroup group = ScimGroup.builder(name).id(uuid).build();
 
-	ScimGroup group = builder.build();
+    ScimGroup createdGroup = restUtils.doPost("/scim/Groups/", group).extract().as(ScimGroup.class);
 
-	ScimGroup createdGroup = given().port(8080).auth().preemptive()
-	  .oauth2(accessToken).contentType(SCIM_CONTENT_TYPE).body(group).log()
-	  .all(true).when().post("/scim/Groups/").then().log().all(true)
-	  .statusCode(HttpStatus.CREATED.value()).extract().as(ScimGroup.class);
+    restUtils.doGet(createdGroup.getMeta().getLocation())
+      .body("id", equalTo(uuid))
+      .body("displayName", equalTo(name));
 
-	given().port(8080).auth().preemptive().oauth2(accessToken)
-	  .contentType(SCIM_CONTENT_TYPE).when()
-	  .get(createdGroup.getMeta().getLocation()).then().log().all(true)
-	  .statusCode(HttpStatus.OK.value())
-	  .body("id", equalTo(createdGroup.getId()))
-	  .body("displayName", equalTo(createdGroup.getDisplayName()));
-
-	deleteGroup(createdGroup.getMeta().getLocation());
+    restUtils.doDelete(createdGroup.getMeta().getLocation(), HttpStatus.NO_CONTENT);
   }
 
   @Test
-  public void testGroupUpdateChangeDisplayname() throws ParseException {
+  public void testUpdateGroupDisplaynameSuccessResponse() {
 
-	String uuid = UUID.randomUUID().toString();
+    String uuid = UUID.randomUUID().toString();
 
-	ScimGroup group = ScimGroup.builder("engineers").id(uuid).build();
+    ScimGroup requestedGroup = ScimGroup.builder("engineers").id(uuid).build();
 
-	ScimGroup createdGroup = given().port(8080).auth().preemptive()
-	  .oauth2(accessToken).contentType(SCIM_CONTENT_TYPE).body(group).log()
-	  .all(true).when().post("/scim/Groups/").then().log().all(true)
-	  .statusCode(HttpStatus.CREATED.value()).extract().as(ScimGroup.class);
+    ScimGroup createdGroup =
+        restUtils.doPost("/scim/Groups/", requestedGroup).extract().as(ScimGroup.class);
 
-	given().port(8080).auth().preemptive().oauth2(accessToken)
-	  .contentType(SCIM_CONTENT_TYPE).when()
-	  .get(createdGroup.getMeta().getLocation()).then().log().all(true)
-	  .statusCode(HttpStatus.OK.value())
-	  .body("id", equalTo(createdGroup.getId()))
-	  .body("displayName", equalTo(createdGroup.getDisplayName()));
+    requestedGroup = ScimGroup.builder("engineers_updated").id(uuid).build();
 
-	ScimGroup updatedGroup = ScimGroup.builder("engineers_updated").id(uuid)
-	  .meta(createdGroup.getMeta()).build();
+    restUtils.doPut(createdGroup.getMeta().getLocation(), requestedGroup)
+      .body("id", equalTo(createdGroup.getId()))
+      .body("displayName", equalTo(requestedGroup.getDisplayName()));
 
-	given().port(8080).auth().preemptive().oauth2(accessToken)
-	  .contentType(SCIM_CONTENT_TYPE).body(updatedGroup).log().all(true).when()
-	  .put(updatedGroup.getMeta().getLocation()).then().log().all(true)
-	  .statusCode(HttpStatus.OK.value())
-	  .body("id", equalTo(updatedGroup.getId()))
-	  .body("displayName", equalTo(updatedGroup.getDisplayName()));
-
-	deleteGroup(createdGroup.getMeta().getLocation());
+    restUtils.doDelete(createdGroup.getMeta().getLocation(), HttpStatus.NO_CONTENT);
   }
 
   @Test
-  public void testEmptyDisplayNameValidationError() {
+  public void testCreateGroupEmptyDisplayNameValidationError() {
 
-	String displayName = "";
-	String uuid = UUID.randomUUID().toString();
+    String displayName = "";
+    String uuid = UUID.randomUUID().toString();
 
-	ScimGroup group = ScimGroup.builder(displayName).id(uuid).build();
+    ScimGroup group = ScimGroup.builder(displayName).id(uuid).build();
 
-	given().port(8080).auth().preemptive().oauth2(accessToken)
-	  .contentType(SCIM_CONTENT_TYPE).body(group).log().all(true).when()
-	  .post("/scim/Groups/").then()
-	  .body("detail",
-		containsString("scimGroup.displayName : may not be empty"))
-	  .log().all(true).statusCode(HttpStatus.BAD_REQUEST.value());
+    restUtils.doPost("/scim/Groups/", group, HttpStatus.BAD_REQUEST).body("detail",
+        containsString("scimGroup.displayName : may not be empty"));
 
   }
 
   @Test
-  public void testGroupUpdateChangeWithInvalidDisplayname() {
+  public void testUpdateGroupEmptyDisplayNameValidationErro() {
 
-	String uuid = UUID.randomUUID().toString();
+    String uuid = UUID.randomUUID().toString();
 
-	ScimGroup group = ScimGroup.builder("engineers").id(uuid).build();
+    ScimGroup requestedGroup = ScimGroup.builder("engineers").id(uuid).build();
 
-	ScimGroup createdGroup = given().port(8080).auth().preemptive()
-	  .oauth2(accessToken).contentType(SCIM_CONTENT_TYPE).body(group).log()
-	  .all(true).when().post("/scim/Groups/").then().log().all(true)
-	  .statusCode(HttpStatus.CREATED.value()).extract().as(ScimGroup.class);
+    ScimGroup createdGroup =
+        restUtils.doPost("/scim/Groups/", requestedGroup).extract().as(ScimGroup.class);
 
-	given().port(8080).auth().preemptive().oauth2(accessToken)
-	  .contentType(SCIM_CONTENT_TYPE).when()
-	  .get(createdGroup.getMeta().getLocation()).then().log().all(true)
-	  .statusCode(HttpStatus.OK.value())
-	  .body("id", equalTo(createdGroup.getId()))
-	  .body("displayName", equalTo(createdGroup.getDisplayName()));
+    requestedGroup = ScimGroup.builder("").id(uuid).build();
 
-	ScimGroup updatedGroup = ScimGroup.builder("").id(uuid)
-	  .meta(createdGroup.getMeta()).build();
+    restUtils.doPut(createdGroup.getMeta().getLocation(), requestedGroup, HttpStatus.BAD_REQUEST);
 
-	given().port(8080).auth().preemptive().oauth2(accessToken)
-	  .contentType(SCIM_CONTENT_TYPE).body(updatedGroup).log().all(true).when()
-	  .put(updatedGroup.getMeta().getLocation()).then().log().all(true)
-	  .statusCode(HttpStatus.BAD_REQUEST.value());
-
-	deleteGroup(createdGroup.getMeta().getLocation());
+    restUtils.doDelete(createdGroup.getMeta().getLocation(), HttpStatus.NO_CONTENT);
   }
-  
+
   @Test
-  public void testGroupReplaceWithAlreadyUsedDisplayname() {
+  public void testUpdateGroupAlreadyUsedDisplaynameError() {
 
-	String engineers_uuid = UUID.randomUUID().toString();
-	String artists_uuid = UUID.randomUUID().toString();
+    String engineers_uuid = UUID.randomUUID().toString();
+    String artists_uuid = UUID.randomUUID().toString();
 
-	ScimGroup engineers = null;
-	ScimGroup artists = null;
+    ScimGroup engineers =
+        restUtils.doPost("/scim/Groups/", ScimGroup.builder("engineers").id(engineers_uuid).build())
+          .extract()
+          .as(ScimGroup.class);
 
-	engineers = given().port(8080).auth().preemptive().oauth2(accessToken)
-	  .contentType(SCIM_CONTENT_TYPE)
-	  .body(ScimGroup.builder("engineers").id(engineers_uuid).build()).log()
-	  .all(true).when().post("/scim/Groups/").then().log().all(true)
-	  .statusCode(HttpStatus.CREATED.value()).extract().as(ScimGroup.class);
+    ScimGroup artists =
+        restUtils.doPost("/scim/Groups/", ScimGroup.builder("artists").id(artists_uuid).build())
+          .extract()
+          .as(ScimGroup.class);
 
-	artists = given().port(8080).auth().preemptive().oauth2(accessToken)
-	  .contentType(SCIM_CONTENT_TYPE)
-	  .body(ScimGroup.builder("artists").id(artists_uuid).build()).log()
-	  .all(true).when().post("/scim/Groups/").then().log().all(true)
-	  .statusCode(HttpStatus.CREATED.value()).extract().as(ScimGroup.class);
+    restUtils.doPut(engineers.getMeta().getLocation(),
+        ScimGroup.builder("artists").id(engineers_uuid).build(), HttpStatus.CONFLICT);
 
-	given().port(8080).auth().preemptive().oauth2(accessToken)
-	  .contentType(SCIM_CONTENT_TYPE)
-	  .body(ScimGroup.builder("artists").id(engineers_uuid).build()).log()
-	  .all(true).when().put(engineers.getMeta().getLocation()).then().log()
-	  .all(true).statusCode(HttpStatus.CONFLICT.value());
-
-	deleteGroup(engineers.getMeta().getLocation());
-	deleteGroup(artists.getMeta().getLocation());
+    restUtils.doDelete(engineers.getMeta().getLocation(), HttpStatus.NO_CONTENT);
+    restUtils.doDelete(artists.getMeta().getLocation(), HttpStatus.NO_CONTENT);
   }
 
 }

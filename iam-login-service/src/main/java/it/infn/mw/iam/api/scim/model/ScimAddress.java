@@ -1,14 +1,14 @@
 package it.infn.mw.iam.api.scim.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ScimAddress {
 
   public static enum ScimAddressType {
-    work,
-    home,
-    other;
+    work, home, other;
   }
 
   private final ScimAddressType type;
@@ -24,13 +24,11 @@ public class ScimAddress {
 
   @JsonCreator
   private ScimAddress(@JsonProperty("type") ScimAddressType type,
-    @JsonProperty("formatted") String formatted,
-    @JsonProperty("streetAddress") String streetAddress,
-    @JsonProperty("locality") String locality,
-    @JsonProperty("region") String region,
-    @JsonProperty("postalCode") String postalCode,
-    @JsonProperty("country") String country,
-    @JsonProperty("primary") Boolean primary) {
+      @JsonProperty("formatted") String formatted,
+      @JsonProperty("streetAddress") String streetAddress,
+      @JsonProperty("locality") String locality, @JsonProperty("region") String region,
+      @JsonProperty("postalCode") String postalCode, @JsonProperty("country") String country,
+      @JsonProperty("primary") Boolean primary) {
 
     this.type = type;
     this.formatted = formatted;

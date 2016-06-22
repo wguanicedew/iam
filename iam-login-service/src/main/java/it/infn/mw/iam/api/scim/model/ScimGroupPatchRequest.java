@@ -8,6 +8,7 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(Include.NON_EMPTY)
@@ -19,62 +20,71 @@ public class ScimGroupPatchRequest {
   private final List<ScimPatchOperation<List<ScimMemberRef>>> operations;
 
   @JsonCreator
-  private ScimGroupPatchRequest(
-	@JsonProperty("schemas") Set<String> schemas,
-	@JsonProperty("operations") List<ScimPatchOperation<List<ScimMemberRef>>> operations) {
+  private ScimGroupPatchRequest(@JsonProperty("schemas") Set<String> schemas,
+      @JsonProperty("operations") List<ScimPatchOperation<List<ScimMemberRef>>> operations) {
 
-	this.schemas = schemas;
-	if (operations == null) {
-	  throw new IllegalArgumentException("Operations list is null");
-	}
-	this.operations = operations;
+    this.schemas = schemas;
+    if (operations == null) {
+      throw new IllegalArgumentException("Operations list is null");
+    }
+    this.operations = operations;
   }
 
   private ScimGroupPatchRequest(Builder b) {
 
-	this.schemas = b.schemas;
-	this.operations = b.operations;
+    this.schemas = b.schemas;
+    this.operations = b.operations;
   }
 
   public Set<String> getSchemas() {
 
-	return schemas;
+    return schemas;
   }
 
   public List<ScimPatchOperation<List<ScimMemberRef>>> getOperations() {
 
-	return operations;
+    return operations;
   }
 
   public static Builder builder() {
 
-	return new Builder();
+    return new Builder();
   }
 
   public static class Builder {
 
-	private Set<String> schemas = new HashSet<String>();
-	private List<ScimPatchOperation<List<ScimMemberRef>>> operations = new ArrayList<ScimPatchOperation<List<ScimMemberRef>>>();
+    private Set<String> schemas = new HashSet<String>();
+    private List<ScimPatchOperation<List<ScimMemberRef>>> operations =
+        new ArrayList<ScimPatchOperation<List<ScimMemberRef>>>();
 
-	public Builder() {
-	  schemas.add(PATCHOP_SCHEMA);
-	}
+    public Builder() {
+      schemas.add(PATCHOP_SCHEMA);
+    }
 
-	public Builder setOperations(List<ScimPatchOperation<List<ScimMemberRef>>> operations) {
+    public Builder add(List<ScimMemberRef> members) {
 
-	  this.operations = operations;
-	  return this;
-	}
+      operations.add((new ScimPatchOperation.Builder<List<ScimMemberRef>>()).add().path("members")
+          .value(members).build());
+      return this;
+    }
 
-	public Builder addOperation(ScimPatchOperation<List<ScimMemberRef>> operation) {
+    public Builder remove(List<ScimMemberRef> members) {
 
-	  operations.add(operation);
-	  return this;
-	}
+      operations.add((new ScimPatchOperation.Builder<List<ScimMemberRef>>()).remove()
+          .path("members").value(members).build());
+      return this;
+    }
 
-	public ScimGroupPatchRequest build() {
+    public Builder replace(List<ScimMemberRef> members) {
 
-	  return new ScimGroupPatchRequest(this);
-	}
+      operations.add((new ScimPatchOperation.Builder<List<ScimMemberRef>>()).replace()
+          .path("members").value(members).build());
+      return this;
+    }
+
+    public ScimGroupPatchRequest build() {
+
+      return new ScimGroupPatchRequest(this);
+    }
   }
 }
