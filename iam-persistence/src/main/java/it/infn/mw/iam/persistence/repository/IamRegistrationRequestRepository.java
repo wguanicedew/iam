@@ -11,15 +11,15 @@ import it.infn.mw.iam.core.IamRegistrationRequestStatus;
 import it.infn.mw.iam.persistence.model.IamRegistrationRequest;
 
 public interface IamRegistrationRequestRepository
-  extends PagingAndSortingRepository<IamRegistrationRequest, Long> {
+    extends PagingAndSortingRepository<IamRegistrationRequest, Long> {
 
   Optional<List<IamRegistrationRequest>> findByStatus(
-    @Param("status") IamRegistrationRequestStatus status);
+      @Param("status") IamRegistrationRequestStatus status);
 
   Optional<IamRegistrationRequest> findByUuid(@Param("uuid") String uuid);
 
   @Query("select r from IamRegistrationRequest r join r.account a where a.confirmationKey = :confirmationKey")
   Optional<IamRegistrationRequest> findByAccountConfirmationKey(
-    @Param("confirmationKey") String confirmationKey);
+      @Param("confirmationKey") String confirmationKey);
 
 }

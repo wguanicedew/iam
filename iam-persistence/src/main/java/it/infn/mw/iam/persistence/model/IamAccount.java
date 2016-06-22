@@ -61,16 +61,14 @@ public class IamAccount {
 
   @ManyToMany
   @JoinTable(name = "iam_account_authority",
-    joinColumns = @JoinColumn(name = "account_id", referencedColumnName = "id"),
-    inverseJoinColumns = @JoinColumn(name = "authority_id",
-      referencedColumnName = "id"))
+      joinColumns = @JoinColumn(name = "account_id", referencedColumnName = "id"),
+      inverseJoinColumns = @JoinColumn(name = "authority_id", referencedColumnName = "id"))
   private Set<IamAuthority> authorities = new HashSet<>();
 
   @ManyToMany
   @JoinTable(name = "iam_account_group",
-    joinColumns = @JoinColumn(name = "account_id", referencedColumnName = "id"),
-    inverseJoinColumns = @JoinColumn(name = "group_id",
-      referencedColumnName = "id"))
+      joinColumns = @JoinColumn(name = "account_id", referencedColumnName = "id"),
+      inverseJoinColumns = @JoinColumn(name = "group_id", referencedColumnName = "id"))
   private Set<IamGroup> groups = new HashSet<>();
 
   @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
@@ -94,8 +92,7 @@ public class IamAccount {
   @OneToOne(cascade = CascadeType.REMOVE, mappedBy = "account")
   private IamRegistrationRequest registrationRequest;
 
-  public IamAccount() {
-  }
+  public IamAccount() {}
 
   public Long getId() {
 
@@ -232,8 +229,7 @@ public class IamAccount {
     return x509Certificates;
   }
 
-  public void setX509Certificates(
-    final List<IamX509Certificate> x509Certificates) {
+  public void setX509Certificates(final List<IamX509Certificate> x509Certificates) {
 
     this.x509Certificates = x509Certificates;
   }
@@ -263,8 +259,7 @@ public class IamAccount {
     return registrationRequest;
   }
 
-  public void setRegistrationRequest(
-    final IamRegistrationRequest registrationRequest) {
+  public void setRegistrationRequest(final IamRegistrationRequest registrationRequest) {
 
     this.registrationRequest = registrationRequest;
   }
@@ -304,11 +299,10 @@ public class IamAccount {
   @Override
   public String toString() {
 
-    return "IamAccount [id=" + id + ", uuid=" + uuid + ", username=" + username
-      + ", active=" + active + ", userInfo=" + userInfo + ", authorities="
-      + authorities + ", groups=" + groups + ", samlIds=" + samlIds
-      + ", oidcIds=" + oidcIds + ", sshKeys=" + sshKeys + ", x509Certificates="
-      + x509Certificates + "]";
+    return "IamAccount [id=" + id + ", uuid=" + uuid + ", username=" + username + ", active="
+        + active + ", userInfo=" + userInfo + ", authorities=" + authorities + ", groups=" + groups
+        + ", samlIds=" + samlIds + ", oidcIds=" + oidcIds + ", sshKeys=" + sshKeys
+        + ", x509Certificates=" + x509Certificates + "]";
   }
 
 }

@@ -32,9 +32,8 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser> {
   private final IamAuthoritiesRepository authorityRepository;
 
   @Autowired
-  public ScimUserProvisioning(final UserConverter converter,
-    final IamAccountRepository accountRepo,
-    final IamAuthoritiesRepository authorityRepo) {
+  public ScimUserProvisioning(final UserConverter converter, final IamAccountRepository accountRepo,
+      final IamAuthoritiesRepository authorityRepo) {
     this.converter = converter;
     this.accountRepository = accountRepo;
     this.authorityRepository = authorityRepo;
@@ -47,8 +46,7 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser> {
       throw new IllegalArgumentException("id cannot be null");
     }
 
-    if (id.trim()
-      .isEmpty()) {
+    if (id.trim().isEmpty()) {
       throw new IllegalArgumentException("id cannot be the empty string");
     }
   }
@@ -59,8 +57,7 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser> {
     idSanityChecks(id);
 
     IamAccount account = accountRepository.findByUuid(id)
-      .orElseThrow(() -> new ResourceNotFoundException(
-        "No user mapped to id '" + id + "'"));
+        .orElseThrow(() -> new ResourceNotFoundException("No user mapped to id '" + id + "'"));
 
     return converter.toScim(account);
 
@@ -72,8 +69,7 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser> {
     idSanityChecks(id);
 
     IamAccount account = accountRepository.findByUuid(id)
-      .orElseThrow(() -> new ResourceNotFoundException(
-        "No user mapped to id '" + id + "'"));
+        .orElseThrow(() -> new ResourceNotFoundException("No user mapped to id '" + id + "'"));
 
     accountRepository.delete(account);
 
@@ -84,8 +80,7 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser> {
     IamAccount account = new IamAccount();
 
     Date creationTime = new Date();
-    String uuid = UUID.randomUUID()
-      .toString();
+    String uuid = UUID.randomUUID().toString();
 
     account.setUuid(uuid);
     account.setCreationTime(creationTime);
@@ -93,22 +88,16 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser> {
     account.setUsername(user.getUserName());
     account.setActive((user.getActive() == null ? false : user.getActive()));
 
-    authorityRepository.findByAuthority("ROLE_USER")
-      .map(a -> account.getAuthorities()
-        .add(a))
-      .orElseThrow(() -> new IllegalStateException(
-        "ROLE_USER not found in database. This is a bug"));
+    authorityRepository.findByAuthority("ROLE_USER").map(a -> account.getAuthorities().add(a))
+        .orElseThrow(
+            () -> new IllegalStateException("ROLE_USER not found in database. This is a bug"));
 
     IamUserInfo userInfo = new IamUserInfo();
 
-    userInfo.setGivenName(user.getName()
-      .getGivenName());
-    userInfo.setFamilyName(user.getName()
-      .getFamilyName());
+    userInfo.setGivenName(user.getName().getGivenName());
+    userInfo.setFamilyName(user.getName().getFamilyName());
 
-    userInfo.setEmail(user.getEmails()
-      .get(0)
-      .getValue());
+    userInfo.setEmail(user.getEmails().get(0).getValue());
     account.setUserInfo(userInfo);
 
     accountRepository.save(account);
@@ -132,32 +121,27 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser> {
       return new ScimListResponse<>(Collections.emptyList(), userCount, 0, 1);
     }
 
-    OffsetPageable op = new OffsetPageable(params.getStartIndex(),
-      params.getCount());
+    OffsetPageable op = new OffsetPageable(params.getStartIndex(), params.getCount());
 
     Page<IamAccount> results = accountRepository.findAll(op);
 
     List<ScimUser> resources = new ArrayList<>();
 
-    results.getContent()
-      .forEach(a -> resources.add(converter.toScim(a)));
+    results.getContent().forEach(a -> resources.add(converter.toScim(a)));
 
-    return new ScimListResponse<>(resources, results.getTotalElements(),
-      resources.size(), op.getOffset() + 1);
+    return new ScimListResponse<>(resources, results.getTotalElements(), resources.size(),
+        op.getOffset() + 1);
   }
 
   @Override
   public ScimUser replace(final String id, final ScimUser scimItemToBeUpdated) {
 
     IamAccount existingAccount = accountRepository.findByUuid(id)
-      .orElseThrow(() -> new ResourceNotFoundException(
-        "No user mapped to id '" + id + "'"));
+        .orElseThrow(() -> new ResourceNotFoundException("No user mapped to id '" + id + "'"));
 
-    if (accountRepository
-      .findByUsernameWithDifferentId(scimItemToBeUpdated.getUserName(), id)
-      .isPresent()) {
-      throw new IllegalArgumentException(
-        "userName is already mappped to another user");
+    if (accountRepository.findByUsernameWithDifferentId(scimItemToBeUpdated.getUserName(), id)
+        .isPresent()) {
+      throw new IllegalArgumentException("userName is already mappped to another user");
     }
 
     IamAccount updatedAccount = converter.fromScim(scimItemToBeUpdated);

@@ -51,10 +51,8 @@ public class UserController {
 
     Set<String> result = new HashSet<>();
     if (!Strings.isNullOrEmpty(attributesParameter)) {
-      result = Sets.newHashSet(Splitter.on(CharMatcher.anyOf(".,"))
-        .trimResults()
-        .omitEmptyStrings()
-        .split(attributesParameter));
+      result = Sets.newHashSet(Splitter.on(CharMatcher.anyOf(".,")).trimResults().omitEmptyStrings()
+          .split(attributesParameter));
     }
     result.add("schemas");
     result.add("id");
@@ -76,20 +74,17 @@ public class UserController {
       startIndex = 1;
     }
 
-    ScimPageRequest pr = new DefaultScimPageRequest.Builder().count(count)
-      .startIndex(startIndex - 1)
-      .build();
+    ScimPageRequest pr =
+        new DefaultScimPageRequest.Builder().count(count).startIndex(startIndex - 1).build();
 
     return pr;
   }
 
   @PreAuthorize("#oauth2.hasScope('scim:read') or hasRole('ADMIN')")
-  @RequestMapping(method = RequestMethod.GET,
-    produces = ScimConstants.SCIM_CONTENT_TYPE)
-  public MappingJacksonValue listUsers(
-    @RequestParam(required = false) final Integer count,
-    @RequestParam(required = false) final Integer startIndex,
-    @RequestParam(required = false) final String attributes) {
+  @RequestMapping(method = RequestMethod.GET, produces = ScimConstants.SCIM_CONTENT_TYPE)
+  public MappingJacksonValue listUsers(@RequestParam(required = false) final Integer count,
+      @RequestParam(required = false) final Integer startIndex,
+      @RequestParam(required = false) final String attributes) {
 
     ScimPageRequest pr = buildPageRequest(count, startIndex);
     ScimListResponse<ScimUser> result = userProvisioningService.list(pr);
@@ -99,9 +94,8 @@ public class UserController {
     if (attributes != null) {
       Set<String> includeAttributes = parseAttributes(attributes);
 
-      FilterProvider filterProvider = new SimpleFilterProvider().addFilter(
-        "attributeFilter",
-        SimpleBeanPropertyFilter.filterOutAllExcept(includeAttributes));
+      FilterProvider filterProvider = new SimpleFilterProvider().addFilter("attributeFilter",
+          SimpleBeanPropertyFilter.filterOutAllExcept(includeAttributes));
 
       wrapper.setFilters(filterProvider);
     }
@@ -111,20 +105,19 @@ public class UserController {
 
   @PreAuthorize("#oauth2.hasScope('scim:read') or hasRole('ADMIN')")
   @RequestMapping(value = "/{id}", method = RequestMethod.GET,
-    produces = ScimConstants.SCIM_CONTENT_TYPE)
+      produces = ScimConstants.SCIM_CONTENT_TYPE)
   public ScimUser getUser(@PathVariable final String id) {
 
     return userProvisioningService.getById(id);
   }
 
   @PreAuthorize("#oauth2.hasScope('scim:write') or hasRole('ADMIN')")
-  @RequestMapping(method = RequestMethod.POST,
-    consumes = ScimConstants.SCIM_CONTENT_TYPE,
-    produces = ScimConstants.SCIM_CONTENT_TYPE)
+  @RequestMapping(method = RequestMethod.POST, consumes = ScimConstants.SCIM_CONTENT_TYPE,
+      produces = ScimConstants.SCIM_CONTENT_TYPE)
   @ResponseStatus(HttpStatus.CREATED)
   public ScimUser create(
-    @RequestBody @Validated(ScimUser.NewUserValidation.class) final ScimUser user,
-    final BindingResult validationResult) {
+      @RequestBody @Validated(ScimUser.NewUserValidation.class) final ScimUser user,
+      final BindingResult validationResult) {
 
     handleValidationError("Invalid Scim User", validationResult);
     ScimUser result = userProvisioningService.create(user);
@@ -133,12 +126,11 @@ public class UserController {
 
   @PreAuthorize("#oauth2.hasScope('scim:write') or hasRole('ADMIN')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PUT,
-    consumes = ScimConstants.SCIM_CONTENT_TYPE,
-    produces = ScimConstants.SCIM_CONTENT_TYPE)
+      consumes = ScimConstants.SCIM_CONTENT_TYPE, produces = ScimConstants.SCIM_CONTENT_TYPE)
   @ResponseStatus(HttpStatus.OK)
   public ScimUser replaceUser(@PathVariable final String id,
-    @RequestBody @Validated(ScimUser.NewUserValidation.class) final ScimUser user,
-    final BindingResult validationResult) {
+      @RequestBody @Validated(ScimUser.NewUserValidation.class) final ScimUser user,
+      final BindingResult validationResult) {
 
     handleValidationError("Invalid Scim User", validationResult);
 
@@ -148,15 +140,14 @@ public class UserController {
 
   @PreAuthorize("#oauth2.hasScope('scim:write') or hasRole('ADMIN')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH,
-    consumes = ScimConstants.SCIM_CONTENT_TYPE,
-    produces = ScimConstants.SCIM_CONTENT_TYPE)
+      consumes = ScimConstants.SCIM_CONTENT_TYPE, produces = ScimConstants.SCIM_CONTENT_TYPE)
   @ResponseStatus(HttpStatus.OK)
   public ScimUser updateUser(@PathVariable final String id,
-    @RequestBody @Validated(ScimUser.NewUserValidation.class) final ScimUser user,
-    final BindingResult validationResult) {
+      @RequestBody @Validated(ScimUser.NewUserValidation.class) final ScimUser user,
+      final BindingResult validationResult) {
 
     throw new NotImplementedException(
-      "User update functionality is not currently " + "implemented.");
+        "User update functionality is not currently " + "implemented.");
 
   }
 

@@ -7,11 +7,11 @@ import it.infn.mw.iam.api.scim.exception.ScimValidationException;
 public class ValidationHelper {
 
   public static void handleValidationError(final String message,
-    final BindingResult validationResult) {
+      final BindingResult validationResult) {
 
     if (validationResult.hasErrors()) {
-      throw new ScimValidationException(ValidationErrorMessageHelper
-        .buildValidationErrorMessage(message, validationResult));
+      throw new ScimValidationException(
+          ValidationErrorMessageHelper.buildValidationErrorMessage(message, validationResult));
     }
   }
 

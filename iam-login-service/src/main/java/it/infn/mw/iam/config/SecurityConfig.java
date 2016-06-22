@@ -550,6 +550,8 @@ public class SecurityConfig {
         .authorizeRequests()
           .antMatchers(HttpMethod.POST, "/registration")
             .permitAll()
+          .antMatchers(HttpMethod.GET, "/registration/add")
+            .permitAll()
           .antMatchers(HttpMethod.POST, "/registration/confirm/**")
             .permitAll()
           .antMatchers("/registration**")

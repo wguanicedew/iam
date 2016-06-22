@@ -44,8 +44,7 @@ public class IamRegistrationRequest {
   @Column(nullable = true)
   private Date lastUpdateTime;
 
-  public IamRegistrationRequest() {
-  }
+  public IamRegistrationRequest() {}
 
   public Long getId() {
 
@@ -139,9 +138,8 @@ public class IamRegistrationRequest {
   @Override
   public String toString() {
 
-    return "IamRegRequest [id=" + id + ", account=" + account
-      + ", creationTime=" + creationTime + ", status=" + status
-      + ", lastUpdateTime=" + lastUpdateTime + "]";
+    return "IamRegRequest [id=" + id + ", account=" + account + ", creationTime=" + creationTime
+        + ", status=" + status + ", lastUpdateTime=" + lastUpdateTime + "]";
   }
 
 }

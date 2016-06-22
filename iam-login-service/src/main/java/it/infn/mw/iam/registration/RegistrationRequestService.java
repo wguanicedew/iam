@@ -7,13 +7,11 @@ import it.infn.mw.iam.core.IamRegistrationRequestStatus;
 
 public interface RegistrationRequestService {
 
-  public RegistrationRequestDto create(final ScimUser user);
+  public RegistrationRequestDto create(ScimUser user);
 
-  public List<RegistrationRequestDto> list(
-    final IamRegistrationRequestStatus status);
+  public List<RegistrationRequestDto> list(IamRegistrationRequestStatus status);
 
-  public RegistrationRequestDto updateStatus(String uuid,
-    IamRegistrationRequestStatus status);
+  public RegistrationRequestDto updateStatus(String uuid, IamRegistrationRequestStatus status);
 
   public RegistrationRequestDto confirmRequest(String confirmationKey);
 

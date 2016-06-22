@@ -22,22 +22,19 @@ public class RegistrationRequestDto {
   private String birthdate;
   private String accountId;
 
-  public RegistrationRequestDto() {
-  }
+  public RegistrationRequestDto() {}
 
   @JsonCreator
   public RegistrationRequestDto(@JsonProperty("uuid") final String uuid,
-    @JsonProperty("creationdate") final Date creationTime,
-    @JsonProperty("status") final String status,
-    @JsonProperty("approver") final String approver,
-    @JsonProperty("lastupdatetime") final Date lastUpdateTime,
-    @JsonProperty("username") final String username,
-    @JsonProperty("password") final String password,
-    @JsonProperty("givename") final String givenname,
-    @JsonProperty("familyname") final String familyname,
-    @JsonProperty("email") final String email,
-    @JsonProperty("birthdate") final String birthdate,
-    @JsonProperty("accountid") final String accountId) {
+      @JsonProperty("creationdate") final Date creationTime,
+      @JsonProperty("status") final String status, @JsonProperty("approver") final String approver,
+      @JsonProperty("lastupdatetime") final Date lastUpdateTime,
+      @JsonProperty("username") final String username,
+      @JsonProperty("password") final String password,
+      @JsonProperty("givename") final String givenname,
+      @JsonProperty("familyname") final String familyname,
+      @JsonProperty("email") final String email, @JsonProperty("birthdate") final String birthdate,
+      @JsonProperty("accountid") final String accountId) {
     super();
     this.username = username;
     this.password = password;

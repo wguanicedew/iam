@@ -121,6 +121,11 @@
           Provider</a>.
         
       </c:if>
+      
+      <div style="text-align: center; padding-top: 5mm;">
+      	<a href="/registration/add">Register new account</a>
+      </div>
+      
     </div>
   </div>
 </div>

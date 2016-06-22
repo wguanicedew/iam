@@ -47,10 +47,8 @@ public class GroupController {
 
     Set<String> result = new HashSet<>();
     if (!Strings.isNullOrEmpty(attributesParameter)) {
-      result = Sets.newHashSet(Splitter.on(CharMatcher.anyOf(".,"))
-        .trimResults()
-        .omitEmptyStrings()
-        .split(attributesParameter));
+      result = Sets.newHashSet(Splitter.on(CharMatcher.anyOf(".,")).trimResults().omitEmptyStrings()
+          .split(attributesParameter));
     }
     result.add("schemas");
     result.add("id");
@@ -75,28 +73,25 @@ public class GroupController {
       startIndex = 1;
     }
 
-    ScimPageRequest pr = new DefaultScimPageRequest.Builder().count(count)
-      .startIndex(startIndex - 1)
-      .build();
+    ScimPageRequest pr =
+        new DefaultScimPageRequest.Builder().count(count).startIndex(startIndex - 1).build();
 
     return pr;
   }
 
   @PreAuthorize("#oauth2.hasScope('scim:read') or hasRole('ADMIN')")
   @RequestMapping(value = "/{id}", method = RequestMethod.GET,
-    produces = ScimConstants.SCIM_CONTENT_TYPE)
+      produces = ScimConstants.SCIM_CONTENT_TYPE)
   public ScimGroup getGroup(@PathVariable final String id) {
 
     return groupProvisioningService.getById(id);
   }
 
   @PreAuthorize("#oauth2.hasScope('scim:read') or hasRole('ADMIN')")
-  @RequestMapping(method = RequestMethod.GET,
-    produces = ScimConstants.SCIM_CONTENT_TYPE)
-  public MappingJacksonValue listGroups(
-    @RequestParam(required = false) final Integer count,
-    @RequestParam(required = false) final Integer startIndex,
-    @RequestParam(required = false) final String attributes) {
+  @RequestMapping(method = RequestMethod.GET, produces = ScimConstants.SCIM_CONTENT_TYPE)
+  public MappingJacksonValue listGroups(@RequestParam(required = false) final Integer count,
+      @RequestParam(required = false) final Integer startIndex,
+      @RequestParam(required = false) final String attributes) {
 
     ScimPageRequest pr = buildPageRequest(count, startIndex);
     ScimListResponse<ScimGroup> result = groupProvisioningService.list(pr);
@@ -106,9 +101,8 @@ public class GroupController {
     if (attributes != null) {
       Set<String> includeAttributes = parseAttributes(attributes);
 
-      FilterProvider filterProvider = new SimpleFilterProvider().addFilter(
-        "attributeFilter",
-        SimpleBeanPropertyFilter.filterOutAllExcept(includeAttributes));
+      FilterProvider filterProvider = new SimpleFilterProvider().addFilter("attributeFilter",
+          SimpleBeanPropertyFilter.filterOutAllExcept(includeAttributes));
 
       wrapper.setFilters(filterProvider);
     }
@@ -117,12 +111,11 @@ public class GroupController {
   }
 
   @PreAuthorize("#oauth2.hasScope('scim:write') or hasRole('ADMIN')")
-  @RequestMapping(method = RequestMethod.POST,
-    consumes = ScimConstants.SCIM_CONTENT_TYPE,
-    produces = ScimConstants.SCIM_CONTENT_TYPE)
+  @RequestMapping(method = RequestMethod.POST, consumes = ScimConstants.SCIM_CONTENT_TYPE,
+      produces = ScimConstants.SCIM_CONTENT_TYPE)
   @ResponseStatus(HttpStatus.CREATED)
   public ScimGroup create(@RequestBody @Validated final ScimGroup group,
-    final BindingResult validationResult) {
+      final BindingResult validationResult) {
 
     handleValidationError("Invalid Scim Group", validationResult);
     ScimGroup result = groupProvisioningService.create(group);
@@ -131,12 +124,10 @@ public class GroupController {
 
   @PreAuthorize("#oauth2.hasScope('scim:write') or hasRole('ADMIN')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PUT,
-    consumes = ScimConstants.SCIM_CONTENT_TYPE,
-    produces = ScimConstants.SCIM_CONTENT_TYPE)
+      consumes = ScimConstants.SCIM_CONTENT_TYPE, produces = ScimConstants.SCIM_CONTENT_TYPE)
   @ResponseStatus(HttpStatus.OK)
   public ScimGroup replaceGroup(@PathVariable final String id,
-    @RequestBody @Validated final ScimGroup group,
-    final BindingResult validationResult) {
+      @RequestBody @Validated final ScimGroup group, final BindingResult validationResult) {
 
     handleValidationError("Invalid Scim Group", validationResult);
 

@@ -10,28 +10,18 @@ import it.infn.mw.iam.persistence.model.IamUserInfo;
 @Service
 public class RegistrationConverter {
 
-  public RegistrationRequestDto fromEntity(
-    final IamRegistrationRequest request) {
+  public RegistrationRequestDto fromEntity(final IamRegistrationRequest request) {
 
     RegistrationRequestDto item = new RegistrationRequestDto();
     item.setUuid(request.getUuid());
     item.setCreationTime(request.getCreationTime());
-    item.setStatus(request.getStatus()
-      .name());
+    item.setStatus(request.getStatus().name());
     item.setLastUpdateTime(request.getLastUpdateTime());
-    item.setUsername(request.getAccount()
-      .getUsername());
-    item.setGivenname(request.getAccount()
-      .getUserInfo()
-      .getGivenName());
-    item.setFamilyname(request.getAccount()
-      .getUserInfo()
-      .getFamilyName());
-    item.setEmail(request.getAccount()
-      .getUserInfo()
-      .getEmail());
-    item.setAccountId(request.getAccount()
-      .getUuid());
+    item.setUsername(request.getAccount().getUsername());
+    item.setGivenname(request.getAccount().getUserInfo().getGivenName());
+    item.setFamilyname(request.getAccount().getUserInfo().getFamilyName());
+    item.setEmail(request.getAccount().getUserInfo().getEmail());
+    item.setAccountId(request.getAccount().getUuid());
 
     return item;
   }
