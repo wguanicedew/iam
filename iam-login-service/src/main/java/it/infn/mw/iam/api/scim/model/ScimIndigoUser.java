@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -25,6 +26,12 @@ public class ScimIndigoUser {
     this.sshKeys = b.sshKeys;
     this.oidcIds = b.oidcIds;
     this.samlIds = b.samlIds;
+  }
+
+  @JsonIgnore
+  public boolean isEmpty() {
+
+    return sshKeys.isEmpty() && oidcIds.isEmpty() && samlIds.isEmpty();
   }
 
   public List<ScimSshKey> getSshKeys() {

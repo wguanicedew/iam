@@ -92,7 +92,7 @@ public class ScimGroupProvisioning implements ScimProvisioning<ScimGroup, List<S
     idSanityChecks(id);
 
     IamGroup group = groupRepository.findByUuid(id)
-        .orElseThrow(() -> new ScimResourceNotFoundException("No group mapped to id '" + id + "'"));
+      .orElseThrow(() -> new ScimResourceNotFoundException("No group mapped to id '" + id + "'"));
 
     groupRepository.delete(group);
   }
@@ -101,8 +101,9 @@ public class ScimGroupProvisioning implements ScimProvisioning<ScimGroup, List<S
   public ScimGroup replace(String id, ScimGroup scimItemToBeReplaced) {
 
     IamGroup existingGroup = groupRepository.findByUuid(id)
-        .orElseThrow(() -> new ScimResourceNotFoundException("No group mapped to id '" + id + "'"));
+      .orElseThrow(() -> new ScimResourceNotFoundException("No group mapped to id '" + id + "'"));
 
+    /* displayname is required */
     String displayName = scimItemToBeReplaced.getDisplayName();
 
     if (groupRepository.findByNameWithDifferentId(displayName, id).isPresent()) {
@@ -113,8 +114,12 @@ public class ScimGroupProvisioning implements ScimProvisioning<ScimGroup, List<S
     /* SCIM resource identifiers cannot be replaced by PUT */
     updatedGroup.setId(existingGroup.getId());
     updatedGroup.setUuid(existingGroup.getUuid());
+    updatedGroup.setCreationTime(existingGroup.getCreationTime());
+    updatedGroup.setAccounts(existingGroup.getAccounts());
     /* description is not mapped into SCIM group */
     updatedGroup.setDescription(existingGroup.getDescription());
+
+    updatedGroup.touch();
 
     groupRepository.save(updatedGroup);
     return converter.toScim(updatedGroup);
@@ -143,7 +148,7 @@ public class ScimGroupProvisioning implements ScimProvisioning<ScimGroup, List<S
   public void update(String id, List<ScimPatchOperation<List<ScimMemberRef>>> operations) {
 
     IamGroup iamGroup = groupRepository.findByUuid(id)
-        .orElseThrow(() -> new ScimResourceNotFoundException("No group mapped to id '" + id + "'"));
+      .orElseThrow(() -> new ScimResourceNotFoundException("No group mapped to id '" + id + "'"));
 
     updater.update(iamGroup, operations);
 

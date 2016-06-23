@@ -38,27 +38,57 @@ public class ScimGroupProvisioningAttributeFilterTests {
   @Test
   public void testReuturnOnlyDisplayNameRequest() {
 
-    given().port(8080).auth().preemptive().oauth2(accessToken).accept(SCIM_CONTENT_TYPE).log()
-        .all(true).param("count", 1).param("attributes", "displayName").when().get("/scim/Groups")
-        .then().log().all(true).statusCode(HttpStatus.OK.value()).body("totalResults", equalTo(22))
-        .body("itemsPerPage", equalTo(1)).body("startIndex", equalTo(1))
-        .body("schemas", contains(ScimListResponse.SCHEMA)).body("Resources", hasSize(equalTo(1)))
-        .body("Resources[0].id", is(Matchers.not(nullValue())))
-        .body("Resources[0].schemas", is(Matchers.not(nullValue())))
-        .body("Resources[0].displayName", is(Matchers.not(nullValue())));
+    given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
+      .accept(SCIM_CONTENT_TYPE)
+      .log()
+      .all(true)
+      .param("count", 1)
+      .param("attributes", "displayName")
+      .when()
+      .get("/scim/Groups")
+      .then()
+      .log()
+      .all(true)
+      .statusCode(HttpStatus.OK.value())
+      .body("totalResults", equalTo(22))
+      .body("itemsPerPage", equalTo(1))
+      .body("startIndex", equalTo(1))
+      .body("schemas", contains(ScimListResponse.SCHEMA))
+      .body("Resources", hasSize(equalTo(1)))
+      .body("Resources[0].id", is(Matchers.not(nullValue())))
+      .body("Resources[0].schemas", is(Matchers.not(nullValue())))
+      .body("Resources[0].displayName", is(Matchers.not(nullValue())));
   }
 
   @Test
   public void testMultipleAttrsRequest() {
 
-    given().port(8080).auth().preemptive().oauth2(accessToken).accept(SCIM_CONTENT_TYPE).log()
-        .all(true).param("count", 2).param("attributes", "displayName").when().get("/scim/Groups")
-        .then().log().all(true).statusCode(HttpStatus.OK.value()).body("totalResults", equalTo(22))
-        .body("itemsPerPage", equalTo(2)).body("startIndex", equalTo(1))
-        .body("schemas", contains(ScimListResponse.SCHEMA)).body("Resources", hasSize(equalTo(2)))
-        .body("Resources[0].id", is(Matchers.not(nullValue())))
-        .body("Resources[0].schemas", is(not(nullValue())))
-        .body("Resources[0].displayName", is(not(nullValue())));
+    given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
+      .accept(SCIM_CONTENT_TYPE)
+      .log()
+      .all(true)
+      .param("count", 2)
+      .param("attributes", "displayName")
+      .when()
+      .get("/scim/Groups")
+      .then()
+      .log()
+      .all(true)
+      .statusCode(HttpStatus.OK.value())
+      .body("totalResults", equalTo(22))
+      .body("itemsPerPage", equalTo(2))
+      .body("startIndex", equalTo(1))
+      .body("schemas", contains(ScimListResponse.SCHEMA))
+      .body("Resources", hasSize(equalTo(2)))
+      .body("Resources[0].id", is(Matchers.not(nullValue())))
+      .body("Resources[0].schemas", is(not(nullValue())))
+      .body("Resources[0].displayName", is(not(nullValue())));
 
   }
 

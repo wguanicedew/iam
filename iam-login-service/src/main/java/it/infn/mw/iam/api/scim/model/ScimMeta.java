@@ -70,6 +70,11 @@ public class ScimMeta {
     return version;
   }
 
+  public static Builder builder(Date created, Date lastModified) {
+
+    return new Builder(created, lastModified);
+  }
+
   public static class Builder {
 
     private final Date created;

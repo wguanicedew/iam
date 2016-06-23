@@ -9,8 +9,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
-import it.infn.mw.iam.api.scim.model.ScimPatchOperation.ScimPatchOperationType;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonInclude(Include.NON_EMPTY)
@@ -63,29 +61,23 @@ public class ScimUserPatchRequest {
       schemas.add(PATCHOP_SCHEMA);
     }
 
-    public Builder setOperations(List<ScimPatchOperation<ScimUser>> operations) {
+    public Builder add(ScimUser user) {
 
-      this.operations = operations;
+      operations.add((new ScimPatchOperation.Builder<ScimUser>()).add().value(user).build());
       return this;
     }
 
-    public Builder addOperation(ScimPatchOperation<ScimUser> operation) {
+    public Builder remove(ScimUser user) {
 
-      operations.add(operation);
+      operations.add((new ScimPatchOperation.Builder<ScimUser>()).remove().value(user).build());
       return this;
     }
 
-    
-    public Builder buildAddOperation(ScimUser user) {
+    public Builder replace(ScimUser user) {
 
-      ScimPatchOperation<ScimUser> op =
-          ScimPatchOperation.<ScimUser>builder().op(ScimPatchOperationType.add).value(user).build();
-      
-      addOperation(op);
+      operations.add((new ScimPatchOperation.Builder<ScimUser>()).remove().value(user).build());
       return this;
     }
-    
-    
 
     public ScimUserPatchRequest build() {
 

@@ -1,8 +1,10 @@
 package it.infn.mw.iam.api.scim.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ScimAddress {
 
   public static enum ScimAddressType {
