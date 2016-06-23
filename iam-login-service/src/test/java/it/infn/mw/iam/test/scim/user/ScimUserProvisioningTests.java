@@ -351,37 +351,17 @@ public class ScimUserProvisioningTests {
 
   @Test
   public void testUniqueUsernameCreationCheck() {
-    ScimUser user = ScimUser.builder("user1").buildEmail("user1@test.org").buildName("User", "1")
-        .active(true).build();
+    ScimUser user = ScimUser.builder("user1")
+      .buildEmail("user1@test.org")
+      .buildName("User", "1")
+      .active(true)
+      .build();
 
-    //@formatter:off
-    ScimUser creationResult = 
-    given()
-      .port(8080)
-      .auth().preemptive().oauth2(accessToken)
-      .contentType(SCIM_CONTENT_TYPE)
-      .body(user)
-      .log()
-        .all(true)
-    .when()
-      .post("/scim/Users/")
-    .then()
-      .statusCode(HttpStatus.CREATED.value())
-      .extract().as(ScimUser.class);
-    
-     given()
-          .port(8080)
-          .auth().preemptive().oauth2(accessToken)
-          .contentType(SCIM_CONTENT_TYPE)
-          .body(user)
-          .log()
-            .all(true)
-        .when()
-          .post("/scim/Users/")
-        .then()
-          .statusCode(HttpStatus.CONFLICT.value());
-     
-     deleteUser(creationResult.getMeta().getLocation());
+    ScimUser creationResult = restUtils.doPost("/scim/Users", user).extract().as(ScimUser.class);
+
+
+    restUtils.doPost("/scim/Users", user, HttpStatus.CONFLICT);
+    restUtils.doDelete(creationResult.getMeta().getLocation());
   }
 
 }
