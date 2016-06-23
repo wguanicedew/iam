@@ -72,7 +72,7 @@ public class ScimUserProvisioningPatchTests {
   }
 
   @Test
-  public void patchUserInfo() {
+  public void testPatchUserInfo() {
 
     ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John", "Lennon");
 
@@ -127,7 +127,7 @@ public class ScimUserProvisioningPatchTests {
   }
 
   @Test
-  public void patchAddRessignAndRemoveOidcId() {
+  public void testAddRessignAndRemoveOidcId() {
 
     ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John", "Lennon");
     ScimUser lincoln = addTestUser("abraham_lincoln", "lincoln@email.test", "Abraham", "Lincoln");
@@ -165,7 +165,7 @@ public class ScimUserProvisioningPatchTests {
   }
 
   @Test
-  public void patchRemoveNotExistingOidcId() {
+  public void testRemoveNotExistingOidcId() {
 
     ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John", "Lennon");
 
@@ -183,7 +183,7 @@ public class ScimUserProvisioningPatchTests {
   }
 
   @Test
-  public void patchAddInvalidBase64X509Certificate() {
+  public void testAddInvalidBase64X509Certificate() {
 
     ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John", "Lennon");
 
@@ -204,7 +204,7 @@ public class ScimUserProvisioningPatchTests {
   }
   
   @Test
-  public void patchAddInvalidX509Certificate() {
+  public void testAddInvalidX509Certificate() {
 
     ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John", "Lennon");
 
@@ -227,7 +227,7 @@ public class ScimUserProvisioningPatchTests {
   }
 
   @Test
-  public void patchAddAndRemoveX509Certificate() {
+  public void testAddAndRemoveX509Certificate() {
 
     ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John", "Lennon");
 
