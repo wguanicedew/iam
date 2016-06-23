@@ -1,5 +1,6 @@
 package it.infn.mw.iam.api.scim.model;
 
+import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotBlank;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -11,7 +12,9 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 @JsonInclude(Include.NON_EMPTY)
 public class ScimX509Certificate {
 
+  @Length(max = 36)
   private final String display;
+  
   private final Boolean primary;
 
   @NotBlank

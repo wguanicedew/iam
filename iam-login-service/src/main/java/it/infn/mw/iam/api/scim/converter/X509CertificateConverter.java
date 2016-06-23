@@ -1,21 +1,15 @@
 package it.infn.mw.iam.api.scim.converter;
 
-import java.io.ByteArrayInputStream;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-import java.util.Base64;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
-import it.infn.mw.iam.api.scim.exception.ScimValidationException;
 import it.infn.mw.iam.api.scim.model.ScimMemberRef;
 import it.infn.mw.iam.api.scim.model.ScimX509Certificate;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamX509Certificate;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
+import it.infn.mw.iam.util.X509Utils;
 
 @Service
 public class X509CertificateConverter
@@ -62,7 +56,7 @@ public class X509CertificateConverter
       cert.setAccount(null);
     }
 
-    cert.setCertificateSubject(getX509Certificate(scim.getValue()).getSubjectDN().getName());
+    cert.setCertificateSubject(X509Utils.getCertificateSubject(scim.getValue()));
 
     return cert;
   }
@@ -70,35 +64,21 @@ public class X509CertificateConverter
   @Override
   public ScimX509Certificate toScim(IamX509Certificate entity) {
 
-    return ScimX509Certificate.builder().primary(entity.isPrimary()).display(entity.getLabel())
-        .value(entity.getCertificate())
-        .accountRef(ScimMemberRef.builder().display(entity.getAccount().getUsername())
-            .value(entity.getAccount().getUuid())
-            .ref(resourceLocationProvider.userLocation(entity.getAccount().getUuid())).build())
-        .build();
+    return ScimX509Certificate.builder()
+      .primary(entity.isPrimary())
+      .display(entity.getLabel())
+      .value(entity.getCertificate())
+      .accountRef(ScimMemberRef.builder()
+        .display(entity.getAccount().getUsername())
+        .value(entity.getAccount().getUuid())
+        .ref(resourceLocationProvider.userLocation(entity.getAccount().getUuid()))
+        .build())
+      .build();
   }
 
   private IamAccount getAccount(String uuid) {
 
     return accountRepository.findByUuid(uuid).orElseThrow(
         () -> new ScimResourceNotFoundException("No account mapped to id '" + uuid + "'"));
-  }
-
-  public X509Certificate getX509Certificate(String certValue) throws ScimValidationException {
-
-    try {
-
-      return (X509Certificate) CertificateFactory.getInstance("X.509")
-          .generateCertificate(new ByteArrayInputStream(Base64.getDecoder().decode(certValue)));
-
-    } catch (IllegalArgumentException e) {
-
-      throw new ScimValidationException("Certificate invalid, it's not Base64 encoded");
-
-    } catch (CertificateException ce) {
-
-      throw new ScimValidationException(ce.getMessage());
-    }
-
   }
 }
