@@ -6,11 +6,10 @@ import org.springframework.validation.ObjectError;
 
 public class ValidationErrorMessageHelper {
 
-  private ValidationErrorMessageHelper() {
-  }
+  private ValidationErrorMessageHelper() {}
 
   public static String buildValidationErrorMessage(String errorMessage,
-    BindingResult validationResult) {
+      BindingResult validationResult) {
 
     StringBuilder validationError = new StringBuilder();
     validationError.append(errorMessage + ": ");
@@ -26,14 +25,13 @@ public class ValidationErrorMessageHelper {
       if (error instanceof FieldError) {
         FieldError fieldError = (FieldError) error;
 
-        validationError
-          .append(String.format("[%s.%s : %s]", fieldError.getObjectName(),
+        validationError.append(String.format("[%s.%s : %s]", fieldError.getObjectName(),
             fieldError.getField(), fieldError.getDefaultMessage()));
 
       } else {
 
-        validationError.append(String.format("[%s : %s]", error.getObjectName(),
-          error.getDefaultMessage()));
+        validationError
+            .append(String.format("[%s : %s]", error.getObjectName(), error.getDefaultMessage()));
       }
 
       first = false;

@@ -10,8 +10,8 @@ package it.infn.mw.iam.api.scim.converter;
 public interface Converter<S, E> {
 
   /**
-   * Converts a SCIM object in an entity object @param scim the SCIM object to
-   * be converted @return an Entity object
+   * Converts a SCIM object in an entity object @param scim the SCIM object to be converted @return
+   * an Entity object
    */
   E fromScim(S scim);
 

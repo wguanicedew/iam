@@ -263,6 +263,46 @@
           <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
         </configuration>
       </plugin>
+			<plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>cobertura-maven-plugin</artifactId>
+        <version>2.7</version>
+        <configuration>
+          <formats>
+            <format>html</format>
+            <format>xml</format>
+          </formats>
+          <instrumentation>
+            <excludes>				
+              <!-- Exclude tests -->
+              <exclude>it/infn/mw/iam/test/**/*.class</exclude>
+              
+              <!-- Exclude persistence code (mainly interfaces and model classes) -->
+              <exclude>it/infn/mw/iam/persistence//**/*.class</exclude>
+              
+              <!-- Exclude Github support code (still not supported) -->
+              <exclude>it/infn/mw/iam/github/**/*.class</exclude>
+              <exclude>it/infn/mw/iam/config/github/**/*.class</exclude>
+
+              <!-- Exclude test client app code -->
+              <exclude>it/infn/mw/tc/**/*.class</exclude>
+              
+              <!-- Exclude protected resource test app code -->
+              <exclude>it/infn/mw/pr/**/*.class</exclude>
+
+              <!-- Exclude unused code -->
+              <exclude>it/infn/mw/core/time/**.class</exclude>
+            </excludes>
+          </instrumentation>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>clean</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 </project>

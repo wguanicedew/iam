@@ -10,7 +10,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonInclude(Include.NON_EMPTY)
@@ -26,79 +25,76 @@ public final class ScimGroup extends ScimResource {
   private final Set<ScimMemberRef> members;
 
   @JsonCreator
-  private ScimGroup(@JsonProperty("id") String id,
-	@JsonProperty("externalId") String externalId,
-	@JsonProperty("meta") ScimMeta meta,
-	@JsonProperty("schemas") Set<String> schemas,
-	@JsonProperty("displayName") String displayName,
-	@JsonProperty("members") Set<ScimMemberRef> members) {
+  private ScimGroup(@JsonProperty("id") String id, @JsonProperty("externalId") String externalId,
+      @JsonProperty("meta") ScimMeta meta, @JsonProperty("schemas") Set<String> schemas,
+      @JsonProperty("displayName") String displayName,
+      @JsonProperty("members") Set<ScimMemberRef> members) {
 
-	super(id, externalId, meta, schemas);
-	this.displayName = displayName;
-	this.members = (members != null ? members
-	  : Collections.<ScimMemberRef> emptySet());
+    super(id, externalId, meta, schemas);
+    this.displayName = displayName;
+    this.members = (members != null ? members : Collections.<ScimMemberRef>emptySet());
   }
 
   private ScimGroup(Builder b) {
 
-	super(b);
-	this.displayName = b.displayName;
-	this.members = b.members;
+    super(b);
+    this.displayName = b.displayName;
+    this.members = b.members;
   }
 
   public String getDisplayName() {
 
-	return displayName;
+    return displayName;
   }
 
   public Set<ScimMemberRef> getMembers() {
 
-	return members;
+    return members;
   }
 
-  public static Builder builder(String groupName){
-	
-	return new Builder(groupName);
+  public static Builder builder(String groupName) {
+
+    return new Builder(groupName);
   }
 
   public static class Builder extends ScimResource.Builder<ScimGroup> {
 
-	private String displayName;
-	private Set<ScimMemberRef> members = new HashSet<ScimMemberRef>();
+    private String displayName;
+    private Set<ScimMemberRef> members = new HashSet<ScimMemberRef>();
 
-	public Builder(String displayName) {
-	  super();
-	  schemas.add(GROUP_SCHEMA);
-	  this.displayName = displayName;
-	}
+    public Builder(String displayName) {
+      super();
+      schemas.add(GROUP_SCHEMA);
+      this.displayName = displayName;
+    }
 
-	public Builder id(String id) {
+    public Builder id(String id) {
 
-	  this.id = id;
-	  return this;
-	}
+      this.id = id;
+      return this;
+    }
 
-	public Builder meta(ScimMeta meta) {
+    public Builder meta(ScimMeta meta) {
 
-	  this.meta = meta;
-	  return this;
-	}
+      this.meta = meta;
+      return this;
+    }
 
-	public Builder setMembers(Set<ScimMemberRef> members) {
+    public Builder setMembers(Set<ScimMemberRef> members) {
 
-	  this.members = members;
-	  return this;
-	}
+      this.members = members;
+      return this;
+    }
 
-	public Builder addMember(ScimMemberRef member) {
+    public Builder addMember(ScimMemberRef member) {
 
-	  members.add(member);
-	  return this;
-	}
+      members.add(member);
+      return this;
+    }
 
-	public ScimGroup build() {
+    public ScimGroup build() {
 
-	  return new ScimGroup(this);
-	}
+      return new ScimGroup(this);
+    }
   }
 }

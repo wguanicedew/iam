@@ -3,6 +3,7 @@ package it.infn.mw.iam.api.scim.converter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import it.infn.mw.iam.api.scim.exception.ScimResourceExistsException;
 import it.infn.mw.iam.api.scim.model.ScimAddress;
 import it.infn.mw.iam.api.scim.model.ScimEmail;
 import it.infn.mw.iam.api.scim.model.ScimGroupRef;
@@ -26,13 +27,17 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
   private final AddressConverter addressConverter;
   private final X509CertificateConverter certificateConverter;
 
+  private final OidcIdConverter oidcIdConverter;
+
+
   @Autowired
   public UserConverter(ScimResourceLocationProvider rlp, AddressConverter ac,
-      X509CertificateConverter cc) {
+      X509CertificateConverter cc, OidcIdConverter oidc) {
 
-    resourceLocationProvider = rlp;
-    addressConverter = ac;
-    certificateConverter = cc;
+    this.resourceLocationProvider = rlp;
+    this.addressConverter = ac;
+    this.certificateConverter = cc;
+    this.oidcIdConverter = oidc;
   }
 
   @Override
@@ -49,6 +54,10 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
 
     account.setUsername(scimUser.getUserName());
 
+    if (scimUser.getPassword() != null) {
+      account.setPassword(scimUser.getPassword());
+    }
+
     userInfo.setEmail(scimUser.getEmails().get(0).getValue());
     userInfo.setGivenName(scimUser.getName().getGivenName());
     userInfo.setFamilyName(scimUser.getName().getFamilyName());
@@ -61,6 +70,23 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
 
       userInfo.setAddress(addressConverter.fromScim(scimUser.getAddresses().get(0)));
 
+    }
+
+    if (scimUser.getIndigoUser() != null) {
+      for (ScimOidcId oidcId : scimUser.getIndigoUser().getOidcIds()) {
+        IamOidcId iamOidcId = oidcIdConverter.fromScim(oidcId);
+
+        if (iamOidcId.getAccount() != null) {
+          if (account.getUuid() != iamOidcId.getAccount().getUuid()) {
+
+            String errorMessage = String.format("OIDC id %s,%s is already mapped to another user",
+                iamOidcId.getIssuer(), iamOidcId.getSubject());
+
+            throw new ScimResourceExistsException(errorMessage);
+          }
+        }
+        account.addOidcId(iamOidcId);
+      }
     }
 
     return account;
@@ -76,10 +102,16 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
     ScimAddress address = getScimAddress(entity);
 
     ScimUser.Builder builder = new ScimUser.Builder(entity.getUsername()).id(entity.getUuid())
-        .meta(meta).name(name).active(entity.isActive()).displayName(entity.getUsername())
-        .locale(entity.getUserInfo().getLocale()).nickName(entity.getUserInfo().getNickname())
-        .profileUrl(entity.getUserInfo().getProfile()).timezone(entity.getUserInfo().getZoneinfo())
-        .addEmail(getScimEmail(entity)).indigoUserInfo(indigoUser);
+      .meta(meta)
+      .name(name)
+      .active(entity.isActive())
+      .displayName(entity.getUsername())
+      .locale(entity.getUserInfo().getLocale())
+      .nickName(entity.getUserInfo().getNickname())
+      .profileUrl(entity.getUserInfo().getProfile())
+      .timezone(entity.getUserInfo().getZoneinfo())
+      .addEmail(getScimEmail(entity))
+      .indigoUserInfo(indigoUser);
 
     if (address != null) {
 
@@ -101,15 +133,18 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
   private ScimMeta getScimMeta(IamAccount entity) {
 
     return ScimMeta.builder(entity.getCreationTime(), entity.getLastUpdateTime())
-        .location(resourceLocationProvider.userLocation(entity.getUuid()))
-        .resourceType(ScimUser.RESOURCE_TYPE).build();
+      .location(resourceLocationProvider.userLocation(entity.getUuid()))
+      .resourceType(ScimUser.RESOURCE_TYPE)
+      .build();
   }
 
   private ScimName getScimName(IamAccount entity) {
 
-    return ScimName.builder().givenName(entity.getUserInfo().getGivenName())
-        .familyName(entity.getUserInfo().getFamilyName())
-        .middleName(entity.getUserInfo().getMiddleName()).build();
+    return ScimName.builder()
+      .givenName(entity.getUserInfo().getGivenName())
+      .familyName(entity.getUserInfo().getFamilyName())
+      .middleName(entity.getUserInfo().getMiddleName())
+      .build();
   }
 
   private ScimEmail getScimEmail(IamAccount entity) {
@@ -136,8 +171,11 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
 
   private ScimGroupRef getScimGroupRef(IamGroup group) {
 
-    return ScimGroupRef.builder().value(group.getUuid()).display(group.getName())
-        .ref(resourceLocationProvider.groupLocation(group.getUuid())).build();
+    return ScimGroupRef.builder()
+      .value(group.getUuid())
+      .display(group.getName())
+      .ref(resourceLocationProvider.groupLocation(group.getUuid()))
+      .build();
   }
 
   private ScimAddress getScimAddress(IamAccount entity) {

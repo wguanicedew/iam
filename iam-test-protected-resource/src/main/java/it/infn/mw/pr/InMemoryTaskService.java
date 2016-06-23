@@ -32,12 +32,12 @@ public class InMemoryTaskService implements TaskService {
 
   @Override
   public Task removeTaskById(String id) {
-  
+
     Task t = taskStore.get(id);
-    if (t == null){
+    if (t == null) {
       return null;
     }
-    
+
     taskStore.remove(id);
     return t;
   }

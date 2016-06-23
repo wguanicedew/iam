@@ -27,6 +27,9 @@ public class ScimUser extends ScimResource {
   @NotBlank(groups = {NewUserValidation.class})
   private final String userName;
 
+  @JsonFilter("passwordFilter")
+  private final String password;
+
   @Valid
   private final ScimName name;
 
@@ -53,8 +56,11 @@ public class ScimUser extends ScimResource {
 
   @JsonCreator
   private ScimUser(@JsonProperty("id") String id, @JsonProperty("externalId") String externalId,
-      @JsonProperty("meta") ScimMeta meta, @JsonProperty("schemas") Set<String> schemas,
-      @JsonProperty("userName") String userName, @JsonProperty("name") ScimName name,
+      @JsonProperty("meta") ScimMeta meta, 
+      @JsonProperty("schemas") Set<String> schemas,
+      @JsonProperty("userName") String userName, 
+      @JsonProperty("password") String password,
+      @JsonProperty("name") ScimName name,
       @JsonProperty("displayName") String displayName, @JsonProperty("nickName") String nickName,
       @JsonProperty("profileUrl") String profileUrl, @JsonProperty("title") String title,
       @JsonProperty("userType") String userType,
@@ -69,6 +75,7 @@ public class ScimUser extends ScimResource {
     super(id, externalId, meta, schemas);
 
     this.userName = userName;
+    this.password = password;
     this.name = name;
     this.displayName = displayName;
     this.nickName = nickName;
@@ -105,11 +112,16 @@ public class ScimUser extends ScimResource {
     this.x509Certificates = b.x509Certificates;
     this.indigoUser = b.indigoUser;
     this.groups = b.groups;
+    this.password = b.password;
   }
 
   public String getUserName() {
 
     return userName;
+  }
+
+  public String getPassword() {
+    return password;
   }
 
   public ScimName getName() {
@@ -201,6 +213,7 @@ public class ScimUser extends ScimResource {
   public static class Builder extends ScimResource.Builder<ScimUser> {
 
     private String userName;
+    private String password;
     private ScimName name;
     private String displayName;
     private String nickName;
@@ -232,6 +245,11 @@ public class ScimUser extends ScimResource {
     public Builder userName(String userName) {
 
       this.userName = userName;
+      return this;
+    }
+
+    public Builder password(String password) {
+      this.password = password;
       return this;
     }
 
@@ -352,6 +370,17 @@ public class ScimUser extends ScimResource {
     public Builder addX509Certificate(ScimX509Certificate x509Certificate) {
 
       x509Certificates.add(x509Certificate);
+      return this;
+    }
+
+    public Builder buildOidcId(String issuer, String subject) {
+      if (indigoUser == null) {
+        indigoUser = ScimIndigoUser.builder().build();
+      }
+
+      ScimOidcId oidcId = ScimOidcId.builder().subject(subject).issuer(issuer).build();
+
+      indigoUser.getOidcIds().add(oidcId);
       return this;
     }
 

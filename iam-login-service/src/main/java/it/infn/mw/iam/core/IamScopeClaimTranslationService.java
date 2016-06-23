@@ -8,8 +8,7 @@ import org.mitre.openid.connect.service.ScopeClaimTranslationService;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 
-public class IamScopeClaimTranslationService
-  implements ScopeClaimTranslationService {
+public class IamScopeClaimTranslationService implements ScopeClaimTranslationService {
 
   private SetMultimap<String, String> scopesToClaims = HashMultimap.create();
 

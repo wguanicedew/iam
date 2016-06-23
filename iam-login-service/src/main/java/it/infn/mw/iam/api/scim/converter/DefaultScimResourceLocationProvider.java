@@ -4,8 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
-public class DefaultScimResourceLocationProvider
-  implements ScimResourceLocationProvider {
+public class DefaultScimResourceLocationProvider implements ScimResourceLocationProvider {
 
   public static final String SCIM_API_ENDPOINT = "/scim";
 

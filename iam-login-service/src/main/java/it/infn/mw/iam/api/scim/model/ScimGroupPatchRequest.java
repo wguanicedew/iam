@@ -7,9 +7,8 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonInclude(Include.NON_EMPTY)
 public class ScimGroupPatchRequest {
@@ -63,22 +62,28 @@ public class ScimGroupPatchRequest {
 
     public Builder add(List<ScimMemberRef> members) {
 
-      operations.add((new ScimPatchOperation.Builder<List<ScimMemberRef>>()).add().path("members")
-          .value(members).build());
+      operations.add((new ScimPatchOperation.Builder<List<ScimMemberRef>>()).add()
+        .path("members")
+        .value(members)
+        .build());
       return this;
     }
 
     public Builder remove(List<ScimMemberRef> members) {
 
       operations.add((new ScimPatchOperation.Builder<List<ScimMemberRef>>()).remove()
-          .path("members").value(members).build());
+        .path("members")
+        .value(members)
+        .build());
       return this;
     }
 
     public Builder replace(List<ScimMemberRef> members) {
 
       operations.add((new ScimPatchOperation.Builder<List<ScimMemberRef>>()).replace()
-          .path("members").value(members).build());
+        .path("members")
+        .value(members)
+        .build());
       return this;
     }
 

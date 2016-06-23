@@ -47,26 +47,28 @@ public class UserController {
   @Autowired
   ScimUserProvisioning userProvisioningService;
 
+  FilterProvider excludePasswordFilter = 
+      new SimpleFilterProvider()
+      .addFilter("passwordFilter",
+      SimpleBeanPropertyFilter.serializeAllExcept("password"));
+  
   private Set<String> parseAttributes(String attributesParameter) {
 
     Set<String> result = new HashSet<>();
     if (!Strings.isNullOrEmpty(attributesParameter)) {
-      result = Sets.newHashSet(Splitter.on(CharMatcher.anyOf(".,"))
-        .trimResults()
-        .omitEmptyStrings()
-        .split(attributesParameter));
+      result = Sets.newHashSet(Splitter.on(CharMatcher.anyOf(".,")).trimResults().omitEmptyStrings()
+          .split(attributesParameter));
     }
     result.add("schemas");
     result.add("id");
     return result;
   }
 
-  private void handleValidationError(String message,
-    BindingResult validationResult) {
+  private void handleValidationError(String message, BindingResult validationResult) {
 
     if (validationResult.hasErrors()) {
-      throw new ScimValidationException(ValidationErrorMessageHelper
-        .buildValidationErrorMessage(message, validationResult));
+      throw new ScimValidationException(
+          ValidationErrorMessageHelper.buildValidationErrorMessage(message, validationResult));
     }
   }
 
@@ -85,20 +87,17 @@ public class UserController {
       startIndex = 1;
     }
 
-    ScimPageRequest pr = new DefaultScimPageRequest.Builder().count(count)
-      .startIndex(startIndex - 1)
-      .build();
+    ScimPageRequest pr =
+        new DefaultScimPageRequest.Builder().count(count).startIndex(startIndex - 1).build();
 
     return pr;
   }
 
   @PreAuthorize("#oauth2.hasScope('scim:read') or hasRole('ADMIN')")
-  @RequestMapping(method = RequestMethod.GET,
-    produces = ScimConstants.SCIM_CONTENT_TYPE)
-  public MappingJacksonValue listUsers(
-    @RequestParam(required = false) Integer count,
-    @RequestParam(required = false) Integer startIndex,
-    @RequestParam(required = false) String attributes) {
+  @RequestMapping(method = RequestMethod.GET, produces = ScimConstants.SCIM_CONTENT_TYPE)
+  public MappingJacksonValue listUsers(@RequestParam(required = false) Integer count,
+      @RequestParam(required = false) Integer startIndex,
+      @RequestParam(required = false) String attributes) {
 
     ScimPageRequest pr = buildPageRequest(count, startIndex);
     ScimListResponse<ScimUser> result = userProvisioningService.list(pr);
@@ -108,9 +107,8 @@ public class UserController {
     if (attributes != null) {
       Set<String> includeAttributes = parseAttributes(attributes);
 
-      FilterProvider filterProvider = new SimpleFilterProvider().addFilter(
-        "attributeFilter",
-        SimpleBeanPropertyFilter.filterOutAllExcept(includeAttributes));
+      FilterProvider filterProvider = new SimpleFilterProvider().addFilter("attributeFilter",
+          SimpleBeanPropertyFilter.filterOutAllExcept(includeAttributes));
 
       wrapper.setFilters(filterProvider);
     }
@@ -120,34 +118,34 @@ public class UserController {
 
   @PreAuthorize("#oauth2.hasScope('scim:read') or hasRole('ADMIN')")
   @RequestMapping(value = "/{id}", method = RequestMethod.GET,
-    produces = ScimConstants.SCIM_CONTENT_TYPE)
+      produces = ScimConstants.SCIM_CONTENT_TYPE)
   public ScimUser getUser(@PathVariable final String id) {
 
     return userProvisioningService.getById(id);
   }
 
   @PreAuthorize("#oauth2.hasScope('scim:write') or hasRole('ADMIN')")
-  @RequestMapping(method = RequestMethod.POST,
-    consumes = ScimConstants.SCIM_CONTENT_TYPE,
-    produces = ScimConstants.SCIM_CONTENT_TYPE)
+  @RequestMapping(method = RequestMethod.POST, consumes = ScimConstants.SCIM_CONTENT_TYPE,
+      produces = ScimConstants.SCIM_CONTENT_TYPE)
   @ResponseStatus(HttpStatus.CREATED)
-  public ScimUser create(
-    @RequestBody @Validated(ScimUser.NewUserValidation.class) ScimUser user,
-    BindingResult validationResult) {
+  public MappingJacksonValue create(@RequestBody @Validated(ScimUser.NewUserValidation.class) ScimUser user,
+      BindingResult validationResult) {
 
     handleValidationError("Invalid Scim User", validationResult);
     ScimUser result = userProvisioningService.create(user);
-    return result;
+    
+    MappingJacksonValue wrapper = new MappingJacksonValue(result);
+    
+    return wrapper;
   }
 
   @PreAuthorize("#oauth2.hasScope('scim:write') or hasRole('ADMIN')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PUT,
-    consumes = ScimConstants.SCIM_CONTENT_TYPE,
-    produces = ScimConstants.SCIM_CONTENT_TYPE)
+      consumes = ScimConstants.SCIM_CONTENT_TYPE, produces = ScimConstants.SCIM_CONTENT_TYPE)
   @ResponseStatus(HttpStatus.OK)
   public ScimUser replaceUser(@PathVariable final String id,
-    @RequestBody @Validated(ScimUser.NewUserValidation.class) ScimUser user,
-    BindingResult validationResult) {
+      @RequestBody @Validated(ScimUser.NewUserValidation.class) ScimUser user,
+      BindingResult validationResult) {
 
     handleValidationError("Invalid Scim User", validationResult);
 
@@ -157,10 +155,10 @@ public class UserController {
 
   @PreAuthorize("#oauth2.hasScope('scim:write') or hasRole('ADMIN')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH,
-    consumes = ScimConstants.SCIM_CONTENT_TYPE)
+      consumes = ScimConstants.SCIM_CONTENT_TYPE)
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void updateUser(@PathVariable final String id,
-    @RequestBody ScimUserPatchRequest patchRequest) {
+      @RequestBody ScimUserPatchRequest patchRequest) {
 
     userProvisioningService.update(id, patchRequest.getOperations());
 

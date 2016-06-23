@@ -18,8 +18,7 @@ public class DumpHeadersFilter extends CommonsRequestLoggingFilter {
     while (headerNames.hasMoreElements()) {
       String headerName = headerNames.nextElement();
 
-      logger.debug(
-        String.format("%s -> %s", headerName, request.getHeader(headerName)));
+      logger.debug(String.format("%s -> %s", headerName, request.getHeader(headerName)));
     }
 
   }

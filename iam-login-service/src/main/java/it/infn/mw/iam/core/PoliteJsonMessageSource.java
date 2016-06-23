@@ -26,16 +26,14 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 
 /**
- * This is a more polite {@link
- * org.mitre.openid.connect.config.JsonMessageSource} that does not log errors
- * for unsupported locales.
+ * This is a more polite {@link org.mitre.openid.connect.config.JsonMessageSource} that does not log
+ * errors for unsupported locales.
  *
  */
 public class PoliteJsonMessageSource extends AbstractMessageSource {
 
   // Logger for this class
-  private static final Logger logger = LoggerFactory
-    .getLogger(PoliteJsonMessageSource.class);
+  private static final Logger logger = LoggerFactory.getLogger(PoliteJsonMessageSource.class);
 
   private Resource baseDirectory;
 
@@ -71,8 +69,8 @@ public class PoliteJsonMessageSource extends AbstractMessageSource {
   }
 
   /**
-   * Get a value from the set of maps, taking the first match in order @param
-   * code @param langs @return
+   * Get a value from the set of maps, taking the first match in order @param code @param
+   * langs @return
    */
   private String getValue(String code, List<JsonObject> langs) {
 
@@ -106,8 +104,7 @@ public class PoliteJsonMessageSource extends AbstractMessageSource {
 
     JsonElement e = lang;
 
-    Iterable<String> parts = Splitter.on('.')
-      .split(code);
+    Iterable<String> parts = Splitter.on('.').split(code);
     Iterator<String> it = parts.iterator();
 
     String value = null;
@@ -147,16 +144,15 @@ public class PoliteJsonMessageSource extends AbstractMessageSource {
       try {
         List<JsonObject> set = new ArrayList<>();
         for (String namespace : config.getLanguageNamespaces()) {
-          String filename = locale.getLanguage() + File.separator + namespace
-            + ".json";
+          String filename = locale.getLanguage() + File.separator + namespace + ".json";
 
           Resource r = getBaseDirectory().createRelative(filename);
 
           logger.info("No locale loaded, trying to load from " + r);
 
           JsonParser parser = new JsonParser();
-          JsonObject obj = (JsonObject) parser
-            .parse(new InputStreamReader(r.getInputStream(), "UTF-8"));
+          JsonObject obj =
+              (JsonObject) parser.parse(new InputStreamReader(r.getInputStream(), "UTF-8"));
 
           set.add(obj);
         }

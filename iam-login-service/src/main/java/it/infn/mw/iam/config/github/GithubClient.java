@@ -50,15 +50,12 @@ public class GithubClient extends WebSecurityConfigurerAdapter {
   protected void configure(HttpSecurity http) throws Exception {
 
     // @formatter:off
-    http.antMatcher("/gh_login**")
-    .authorizeRequests()
-        .antMatchers("/", "/gh_login**").permitAll()
-        .anyRequest().authenticated()
-    .and().exceptionHandling().authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/"))
-    .and().logout().logoutSuccessUrl("/").permitAll()
-    .and().csrf().csrfTokenRepository(csrfTokenRepository())
-    .and().addFilterAfter(csrfHeaderFilter(), CsrfFilter.class)
-    .addFilterBefore(ssoGitHubFilter(), BasicAuthenticationFilter.class);
+    http.antMatcher("/gh_login**").authorizeRequests().antMatchers("/", "/gh_login**").permitAll()
+        .anyRequest().authenticated().and().exceptionHandling()
+        .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/")).and().logout()
+        .logoutSuccessUrl("/").permitAll().and().csrf().csrfTokenRepository(csrfTokenRepository())
+        .and().addFilterAfter(csrfHeaderFilter(), CsrfFilter.class)
+        .addFilterBefore(ssoGitHubFilter(), BasicAuthenticationFilter.class);
 
     // @formatter:on
   }
@@ -70,8 +67,7 @@ public class GithubClient extends WebSecurityConfigurerAdapter {
   }
 
   @Bean
-  public FilterRegistrationBean oauth2ClientFilterRegistration(
-    OAuth2ClientContextFilter filter) {
+  public FilterRegistrationBean oauth2ClientFilterRegistration(OAuth2ClientContextFilter filter) {
 
     FilterRegistrationBean registration = new FilterRegistrationBean();
     registration.setFilter(filter);
@@ -94,16 +90,13 @@ public class GithubClient extends WebSecurityConfigurerAdapter {
 
   private Filter ssoFilter(ClientResources client, String path) {
 
-    OAuth2ClientAuthenticationProcessingFilter oAuth2ClientAuthenticationFilter = new OAuth2ClientAuthenticationProcessingFilter(
-      path);
-    OAuth2RestTemplate oAuth2RestTemplate = new OAuth2RestTemplate(
-      client.getClient(), oauth2ClientContext);
+    OAuth2ClientAuthenticationProcessingFilter oAuth2ClientAuthenticationFilter =
+        new OAuth2ClientAuthenticationProcessingFilter(path);
+    OAuth2RestTemplate oAuth2RestTemplate =
+        new OAuth2RestTemplate(client.getClient(), oauth2ClientContext);
     oAuth2ClientAuthenticationFilter.setRestTemplate(oAuth2RestTemplate);
     UserInfoTokenServices tokenServices = new UserInfoTokenServices(
-      client.getResource()
-        .getUserInfoUri(),
-      client.getClient()
-        .getClientId());
+        client.getResource().getUserInfoUri(), client.getClient().getClientId());
     tokenServices.setRestTemplate(oAuth2RestTemplate);
     oAuth2ClientAuthenticationFilter.setTokenServices(tokenServices);
     return oAuth2ClientAuthenticationFilter;
@@ -114,17 +107,14 @@ public class GithubClient extends WebSecurityConfigurerAdapter {
     return new OncePerRequestFilter() {
 
       @Override
-      protected void doFilterInternal(HttpServletRequest request,
-        HttpServletResponse response, FilterChain filterChain)
-          throws ServletException, IOException {
+      protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+          FilterChain filterChain) throws ServletException, IOException {
 
-        CsrfToken csrf = (CsrfToken) request
-          .getAttribute(CsrfToken.class.getName());
+        CsrfToken csrf = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
         if (csrf != null) {
           Cookie cookie = WebUtils.getCookie(request, "XSRF-TOKEN");
           String token = csrf.getToken();
-          if (cookie == null
-            || token != null && !token.equals(cookie.getValue())) {
+          if (cookie == null || token != null && !token.equals(cookie.getValue())) {
             cookie = new Cookie("XSRF-TOKEN", token);
             cookie.setPath("/");
             response.addCookie(cookie);
@@ -143,6 +133,7 @@ public class GithubClient extends WebSecurityConfigurerAdapter {
   }
 
 }
+
 
 class ClientResources {
 

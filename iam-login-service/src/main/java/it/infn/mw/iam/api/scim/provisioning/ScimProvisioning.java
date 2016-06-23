@@ -11,13 +11,13 @@ public interface ScimProvisioning<T, E> {
   T getById(String id);
 
   T create(T newScimItem);
-  
+
   T replace(String id, T scimItemToBeReplaced);
 
   void update(String id, List<ScimPatchOperation<E>> operations);
 
   void delete(String id);
-  
+
   ScimListResponse<T> list(ScimPageRequest params);
 
 }

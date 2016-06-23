@@ -12,6 +12,9 @@ public class MitreConfig {
 
   @Value("${iam.issuer}")
   private String issuer;
+  
+  @Value("${iam.baseUrl}")
+  private String baseUrl;
 
   @Value("${iam.token.lifetime}")
   private Long tokenLifeTime;
@@ -23,6 +26,11 @@ public class MitreConfig {
 
     config.setLogoImageUrl("resources/images/indigo-logo.png");
     config.setTopbarTitle("INDIGO IAM server");
+    
+    if (!issuer.endsWith("/")){
+      issuer = issuer + "/";
+    }
+    
     config.setIssuer(issuer);
     config.setRegTokenLifeTime(tokenLifeTime);
     config.setForceHttps(false);

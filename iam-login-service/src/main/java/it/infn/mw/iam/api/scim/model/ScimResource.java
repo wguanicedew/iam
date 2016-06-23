@@ -15,9 +15,8 @@ public abstract class ScimResource {
   private final Set<String> schemas;
 
   protected ScimResource(@JsonProperty("id") String id,
-    @JsonProperty("externalId") String externalId,
-    @JsonProperty("meta") ScimMeta meta,
-    @JsonProperty("schemas") Set<String> schemas) {
+      @JsonProperty("externalId") String externalId, @JsonProperty("meta") ScimMeta meta,
+      @JsonProperty("schemas") Set<String> schemas) {
 
     this.id = id;
     this.externalId = externalId;

@@ -27,8 +27,7 @@ public class IamSamlId {
   @Column(nullable = false, length = 256)
   String userId;
 
-  public IamSamlId() {
-  }
+  public IamSamlId() {}
 
   public Long getId() {
 
@@ -112,8 +111,7 @@ public class IamSamlId {
   @Override
   public String toString() {
 
-    return "IamSamlId [id=" + id + ", idpId=" + idpId + ", userId=" + userId
-      + "]";
+    return "IamSamlId [id=" + id + ", idpId=" + idpId + ", userId=" + userId + "]";
   }
 
 }

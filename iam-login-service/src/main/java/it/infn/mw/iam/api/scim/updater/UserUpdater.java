@@ -2,6 +2,7 @@ package it.infn.mw.iam.api.scim.updater;
 
 import java.util.List;
 
+import org.junit.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +16,7 @@ import it.infn.mw.iam.api.scim.model.ScimEmail;
 import it.infn.mw.iam.api.scim.model.ScimName;
 import it.infn.mw.iam.api.scim.model.ScimOidcId;
 import it.infn.mw.iam.api.scim.model.ScimPatchOperation;
+import it.infn.mw.iam.api.scim.model.ScimPatchOperation.ScimPatchOperationType;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.model.ScimX509Certificate;
 import it.infn.mw.iam.persistence.model.IamAccount;
@@ -51,10 +53,8 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
 
   public void update(IamAccount account, List<ScimPatchOperation<ScimUser>> operations) {
 
-    for (ScimPatchOperation<ScimUser> op : operations) {
-
+    operations.forEach(op -> {
       switch (op.getOp()) {
-
         case add:
           addNotNullInfo(account, op.getValue());
           break;
@@ -67,151 +67,148 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
         default:
           break;
       }
-    }
-    return;
+      accountRepository.save(account);
+    });
   }
 
   private void addNotNullInfo(IamAccount a, ScimUser u) {
 
-    addOrReplaceUserNameIfNotNull(a, u.getUserName());
-    setActiveIfNotNull(a, u.getActive());
-    addOrReplaceNameIfNotNull(a, u.getName());
-    addOrReplaceEmailIfNotNull(a, u.getEmails());
-    addOrReplaceAddressIfNotNull(a, u.getAddresses());
-
-    if (u.getX509Certificates() != null) {
-      addX509Certificates(a, u.getX509Certificates());
-    }
+    patchUserName(a, u.getUserName());
+    patchActive(a, u.getActive());
+    patchName(a, u.getName());
+    patchEmail(a, u.getEmails());
+    patchAddress(a, u.getAddresses());
+    patchPassword(a, u.getPassword());
+    patchX509Certificates(a, u.getX509Certificates(), ScimPatchOperationType.add);
 
     if (u.getIndigoUser() != null) {
 
       addOidcIdsIfNotNull(a, u.getIndigoUser().getOidcIds());
     }
-  }
 
-  private void addX509Certificates(IamAccount a, List<ScimX509Certificate> x509Certificates) {
-
-    if (x509Certificates != null) {
-
-      for (ScimX509Certificate cert : x509Certificates) {
-
-        addX509CertificateIfNotNull(a, cert);
-      }
-    }
-  }
-
-  private void removeX509Certificates(IamAccount a, List<ScimX509Certificate> x509Certificates) {
-
-    if (x509Certificates != null) {
-
-      for (ScimX509Certificate cert : x509Certificates) {
-
-        removeX509CertificateIfNotNull(a, cert);
-      }
-    }
-
-  }
-
-  private void addX509CertificateIfNotNull(IamAccount a, ScimX509Certificate cert) {
-
-    if (cert != null) {
-
-      IamX509Certificate current = certificateConverter.fromScim(cert);
-
-      if (current.getAccount() == null) {
-
-        current.setAccount(a);
-        x509CertificateRepository.save(current);
-
-        a.getX509Certificates().add(current);
-        a.touch();
-        accountRepository.save(a);
-
-      } else if (current.getAccount().getUuid() != a.getUuid()) {
-
-        throw new ScimResourceExistsException("Cannot add x509 certificate to user "
-            + a.getUsername() + " because it's already associated to another user");
-      }
-    }
-
-  }
-
-  private void removeX509CertificateIfNotNull(IamAccount a, ScimX509Certificate cert) {
-
-    if (cert != null) {
-
-      IamX509Certificate current = x509CertificateRepository.findByCertificate(cert.getValue())
-          .orElseThrow(() -> new ScimResourceNotFoundException("No x509 certificate found"));
-
-      if (current.getAccount().getUuid().equals(a.getUuid())) {
-
-        a.getX509Certificates().remove(current);
-        a.touch();
-        accountRepository.save(a);
-        x509CertificateRepository.delete(current);
-
-      } else {
-
-        throw new ScimResourceExistsException("Cannot remove x509 certificate to user "
-            + a.getUsername() + " because it's owned by another user");
-      }
-    }
-
-  }
-
-  private void addOrReplaceAddressIfNotNull(IamAccount a, List<ScimAddress> addresses) {
-
-    if (addresses != null && !addresses.isEmpty()) {
-
-      a.getUserInfo().setAddress(addressConverter.fromScim(addresses.get(0)));
-      a.touch();
-      accountRepository.save(a);
-    }
-  }
-
-  private void setActiveIfNotNull(IamAccount a, Boolean active) {
-
-    if (active != null) {
-      if (a.isActive() ^ active) {
-
-        a.setActive(active);
-        a.touch();
-        accountRepository.save(a);
-      }
-    }
+    a.touch();
+    accountRepository.save(a);
   }
 
   private void removeNotNullInfo(IamAccount a, ScimUser u) {
 
-    removeX509Certificates(a, u.getX509Certificates());
+    patchX509Certificates(a, u.getX509Certificates(), ScimPatchOperationType.remove);
 
     if (u.getIndigoUser() != null) {
 
       removeOidcIdsIfNotNull(a, u.getIndigoUser().getOidcIds());
     }
+
+    a.touch();
+    accountRepository.save(a);
   }
 
   private void replaceNotNullInfo(IamAccount a, ScimUser u) {
 
-    addOrReplaceUserNameIfNotNull(a, u.getUserName());
-    setActiveIfNotNull(a, u.getActive());
-    addOrReplaceNameIfNotNull(a, u.getName());
-    addOrReplaceEmailIfNotNull(a, u.getEmails());
-    addOrReplaceAddressIfNotNull(a, u.getAddresses());
+    patchUserName(a, u.getUserName());
+    patchActive(a, u.getActive());
+    patchName(a, u.getName());
+    patchEmail(a, u.getEmails());
+    patchAddress(a, u.getAddresses());
+    patchPassword(a, u.getPassword());
+
+    a.touch();
+    accountRepository.save(a);
 
   }
 
-  private void addOrReplaceUserNameIfNotNull(IamAccount a, String userName) {
+  private void patchPassword(IamAccount a, String password) {
+
+    a.setPassword(password != null ? password : a.getPassword());
+
+  }
+
+  private void patchX509Certificates(IamAccount a, List<ScimX509Certificate> x509Certificates, ScimPatchOperationType action) {
+
+    if (x509Certificates != null) {
+
+      for (ScimX509Certificate cert : x509Certificates) {
+
+        patchX509Certificate(a, cert, action);
+      }
+    }
+
+  }
+
+  private void patchX509Certificate(IamAccount a, ScimX509Certificate cert,
+      ScimPatchOperationType action) {
+
+    Assert.assertNotNull("X509Certificate is null", cert);
+
+    switch (action) {
+
+      case add:
+
+        IamX509Certificate toAdd = certificateConverter.fromScim(cert);
+
+        if (toAdd.getAccount() == null) {
+
+          toAdd.setAccount(a);
+          x509CertificateRepository.save(toAdd);
+
+          a.getX509Certificates().add(toAdd);
+
+        } else if (toAdd.getAccount().getUuid() != a.getUuid()) {
+
+          throw new ScimResourceExistsException("Cannot add x509 certificate to user "
+              + a.getUsername() + " because it's already associated to another user");
+        }
+        break;
+      case remove:
+
+        IamX509Certificate toRemove = x509CertificateRepository.findByCertificate(cert.getValue())
+          .orElseThrow(() -> new ScimResourceNotFoundException("No x509 certificate found"));
+
+        if (toRemove.getAccount().getUuid().equals(a.getUuid())) {
+
+          x509CertificateRepository.delete(toRemove);
+          a.getX509Certificates().remove(toRemove);
+
+        } else {
+
+          throw new ScimResourceExistsException("Cannot remove x509 certificate to user "
+              + a.getUsername() + " because it's owned by another user");
+        }
+
+        break;
+      default:
+        break;
+    }
+
+  }
+
+  private void patchAddress(IamAccount a, List<ScimAddress> addresses) {
+
+    if (addresses != null && !addresses.isEmpty()) {
+
+      a.getUserInfo().setAddress(addressConverter.fromScim(addresses.get(0)));
+    }
+  }
+
+  private void patchActive(IamAccount a, Boolean active) {
+
+    if (active != null) {
+      if (a.isActive() ^ active) {
+
+        a.setActive(active);
+      }
+    }
+  }
+
+  private void patchUserName(IamAccount a, String userName) {
 
     if (userName != null) {
 
       a.setUsername(userName);
-      a.touch();
-      accountRepository.save(a);
     }
   }
 
-  private void addOrReplaceNameIfNotNull(IamAccount a, ScimName name) {
+  private void patchName(IamAccount a, ScimName name) {
 
     if (name != null) {
 
@@ -222,19 +219,16 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
       a.getUserInfo().setMiddleName(
           name.getMiddleName() != null ? name.getMiddleName() : a.getUserInfo().getGivenName());
       a.getUserInfo()
-          .setName(name.getFormatted() != null ? name.getFormatted() : a.getUserInfo().getName());
-      a.touch();
-      accountRepository.save(a);
+        .setName(name.getFormatted() != null ? name.getFormatted() : a.getUserInfo().getName());
+
     }
   }
 
-  private void addOrReplaceEmailIfNotNull(IamAccount a, List<ScimEmail> emails) {
+  private void patchEmail(IamAccount a, List<ScimEmail> emails) {
 
     if (emails != null && !emails.isEmpty()) {
 
       a.getUserInfo().setEmail(emails.get(0).getValue());
-      a.touch();
-      accountRepository.save(a);
     }
   }
 
@@ -261,8 +255,6 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
         oidcIdRepository.save(current);
 
         a.getOidcIds().add(current);
-        a.touch();
-        accountRepository.save(a);
 
       } else if (current.getAccount().getUuid() != a.getUuid()) {
 
@@ -291,11 +283,8 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
 
       if (current.getAccount() != null && current.getAccount().getUuid() == a.getUuid()) {
 
-        a.getOidcIds().remove(current);
-        a.touch();
-        accountRepository.save(a);
-
         oidcIdRepository.delete(current);
+        a.getOidcIds().remove(current);
 
       } else {
         throw new ScimResourceNotFoundException("User " + a.getUsername() + " has no ("

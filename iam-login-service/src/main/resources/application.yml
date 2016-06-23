@@ -17,12 +17,11 @@ spring:
     generate-ddl: true
 
   profiles:
-    active: google,dev
-
+    active: google,h2,dev
 
 iam:
   baseUrl: ${IAM_BASE_URL:http://localhost:8080}
-  issuer: ${IAM_ISSUER:http://localhost:8080/}
+  issuer: ${IAM_ISSUER:http://localhost:8080}
   
   token:
     lifetime: 86400
@@ -60,7 +59,7 @@ github:
     userInfoUri: https://api.github.com/user 
 ---
 spring:
-  profiles: dev
+  profiles: h2
   datasource:
     driverClassName: org.h2.Driver
     url: jdbc:h2:mem:iam;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
@@ -73,7 +72,31 @@ flyway:
     - classpath:db/migration/test
 ---
 spring:
-  profiles: dev-mysql
+  profiles: mysql
+
+  datasource:
+    dataSourceClassName: com.mysql.jdbc.jdbc2.optional.MysqlDataSource
+    url: jdbc:mysql://${IAM_DB_HOST:dev.local.io}:${IAM_DB_PORT:3306}/${IAM_DB_NAME:iam}
+    username: ${IAM_DB_USERNAME:iam}
+    password: ${IAM_DB_PASSWORD:pwd}
+    max-active: ${IAM_DB_MAX_ACTIVE:20}
+    initial-size: ${IAM_DB_INITIAL_SIZE:8}
+    test-while-idle: ${IAM_DB_TEST_WHILE_IDLE:true}
+    test-on-borrow: ${IAM_DB_TEST_ON_BORROW:true}
+    validation-query: ${IAM_DB_VALIDATION_QUERY:SELECT 1}
+    time-between-eviction-runs-millis: ${IAM_DB_TIME_BETWEEN_EVICTION_RUNS_MILLIS:5000}
+    min-evictable-idle-time-millis: ${IAM_DB_MIN_EVICTABLE_IDLE_TIME_MILLIS:60000}
+  
+  jpa:
+    openInView: false
+
+flyway:
+  locations:
+    - classpath:db/migration/mysql
+    - classpath:db/migration/prod
+---
+spring:
+  profiles: mysql-test
 
   datasource:
     dataSourceClassName: com.mysql.jdbc.jdbc2.optional.MysqlDataSource
@@ -97,7 +120,8 @@ flyway:
     - classpath:db/migration/test
 ---
 spring:
-  profiles: prod
+  profiles: mysql-import
+
   datasource:
     dataSourceClassName: com.mysql.jdbc.jdbc2.optional.MysqlDataSource
     url: jdbc:mysql://${IAM_DB_HOST:dev.local.io}:${IAM_DB_PORT:3306}/${IAM_DB_NAME:iam}
@@ -113,8 +137,8 @@ spring:
   
   jpa:
     openInView: false
-    
+
 flyway:
   locations:
     - classpath:db/migration/mysql
-    - classpath:db/migration/prod
+    - classpath:db/migration/import

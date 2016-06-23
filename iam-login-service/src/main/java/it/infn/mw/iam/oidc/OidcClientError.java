@@ -13,8 +13,7 @@ public class OidcClientError extends AuthenticationServiceException {
   private final String errorDescription;
   private final String errorUri;
 
-  public OidcClientError(String message, String error, String errorDescription,
-    String errorUri) {
+  public OidcClientError(String message, String error, String errorDescription, String errorUri) {
     super(message);
     this.error = error;
     this.errorDescription = errorDescription;

@@ -39,8 +39,7 @@ public class OidcUserDetailsService {
 
       IamAccount a = account.get();
 
-      User u = new User(a.getUsername(), a.getPassword(),
-        convertAuthorities(a));
+      User u = new User(a.getUsername(), a.getPassword(), convertAuthorities(a));
 
       return u;
 
@@ -49,7 +48,7 @@ public class OidcUserDetailsService {
       String oidcSubject = String.format("\"%s:%s\"", subject, issuer);
 
       throw new UsernameNotFoundException(
-        "No user found linked with OpenID connect subject " + oidcSubject);
+          "No user found linked with OpenID connect subject " + oidcSubject);
     }
 
   }

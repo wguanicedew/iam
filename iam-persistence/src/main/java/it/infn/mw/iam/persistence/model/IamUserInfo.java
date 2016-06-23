@@ -175,8 +175,7 @@ public class IamUserInfo implements UserInfo {
 
   public String getUpdatedTime() {
 
-    return getIamAccount().getLastUpdateTime()
-      .toString();
+    return getIamAccount().getLastUpdateTime().toString();
   }
 
   public String getWebsite() {
@@ -340,18 +339,12 @@ public class IamUserInfo implements UserInfo {
       if (this.getAddress() != null) {
 
         JsonObject addr = new JsonObject();
-        addr.addProperty("formatted", this.getAddress()
-          .getFormatted());
-        addr.addProperty("street_address", this.getAddress()
-          .getStreetAddress());
-        addr.addProperty("locality", this.getAddress()
-          .getLocality());
-        addr.addProperty("region", this.getAddress()
-          .getRegion());
-        addr.addProperty("postal_code", this.getAddress()
-          .getPostalCode());
-        addr.addProperty("country", this.getAddress()
-          .getCountry());
+        addr.addProperty("formatted", this.getAddress().getFormatted());
+        addr.addProperty("street_address", this.getAddress().getStreetAddress());
+        addr.addProperty("locality", this.getAddress().getLocality());
+        addr.addProperty("region", this.getAddress().getRegion());
+        addr.addProperty("postal_code", this.getAddress().getPostalCode());
+        addr.addProperty("country", this.getAddress().getCountry());
 
         obj.add("address", addr);
       }
@@ -371,8 +364,7 @@ public class IamUserInfo implements UserInfo {
         obj.add("groups", groups);
       }
 
-      obj.addProperty("organisation_name",
-        IamProperties.INSTANCE.getOrganisationName());
+      obj.addProperty("organisation_name", IamProperties.INSTANCE.getOrganisationName());
 
       return obj;
     } else {
@@ -397,8 +389,8 @@ public class IamUserInfo implements UserInfo {
   @Override
   public String toString() {
 
-    return "IamUserInfo [givenName=" + givenName + ", familyName=" + familyName
-      + ", email=" + email + "]";
+    return "IamUserInfo [givenName=" + givenName + ", familyName=" + familyName + ", email=" + email
+        + "]";
   }
 
 }

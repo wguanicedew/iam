@@ -35,7 +35,9 @@ services:
       dockerfile: ./iam-login-service/docker/Dockerfile
 
     environment:
-      IAM_JAVA_OPTS: -Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n,address=1044 -Dspring.profiles.active=google,prod
+      IAM_JAVA_OPTS: -Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n,address=1044 -Dspring.profiles.active=google,mysql,dev 
+        # Uncomment and join the lines below to enable debug loggers
+        # -Dlogging.level.org.springframework.security=DEBUG -Dlogging.level.org.springframework.mvc=DEBUG
       IAM_JAR: /code/iam-login-service/target/iam-login-service-${POM_VERSION}.war
       IAM_BASE_URL: https://iam
       IAM_ISSUER: https://iam/

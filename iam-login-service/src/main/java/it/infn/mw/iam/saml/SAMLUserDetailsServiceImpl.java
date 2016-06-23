@@ -12,8 +12,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.saml.SAMLCredential;
 import org.springframework.security.saml.userdetails.SAMLUserDetailsService;
 
-import it.infn.mw.iam.persistence.model.IamAuthority;
 import it.infn.mw.iam.persistence.model.IamAccount;
+import it.infn.mw.iam.persistence.model.IamAuthority;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.saml.util.SAMLUserIdentifierAccessor;
 
@@ -35,8 +35,7 @@ public class SAMLUserDetailsServiceImpl implements SAMLUserDetailsService {
   }
 
   @Override
-  public Object loadUserBySAML(SAMLCredential credential)
-    throws UsernameNotFoundException {
+  public Object loadUserBySAML(SAMLCredential credential) throws UsernameNotFoundException {
 
     String issuerId = credential.getRemoteEntityID();
     String userSamlId = userIdAccessor.getUserIdentifier(credential);
@@ -51,8 +50,7 @@ public class SAMLUserDetailsServiceImpl implements SAMLUserDetailsService {
 
       IamAccount a = account.get();
 
-      User u = new User(a.getUsername(), a.getPassword(),
-        convertAuthorities(a));
+      User u = new User(a.getUsername(), a.getPassword(), convertAuthorities(a));
 
       return u;
 

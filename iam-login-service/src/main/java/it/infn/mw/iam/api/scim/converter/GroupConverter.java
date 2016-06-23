@@ -37,6 +37,7 @@ public class GroupConverter implements Converter<ScimGroup, IamGroup> {
     IamGroup group = new IamGroup();
 
     group.setName(scimGroup.getDisplayName());
+
     return group;
   }
 
@@ -44,20 +45,25 @@ public class GroupConverter implements Converter<ScimGroup, IamGroup> {
   public ScimGroup toScim(IamGroup entity) {
 
     ScimMeta meta = ScimMeta.builder(entity.getCreationTime(), entity.getLastUpdateTime())
-        .location(resourceLocationProvider.groupLocation(entity.getUuid()))
-        .resourceType(ScimGroup.RESOURCE_TYPE).build();
+      .location(resourceLocationProvider.groupLocation(entity.getUuid()))
+      .resourceType(ScimGroup.RESOURCE_TYPE)
+      .build();
 
     Set<ScimMemberRef> members = new HashSet<>();
 
     for (IamAccount account : entity.getAccounts()) {
-      ScimMemberRef memberRef =
-          new ScimMemberRef.Builder().value(account.getUuid()).display(account.getUsername())
-              .ref(resourceLocationProvider.userLocation(account.getUuid())).build();
+      ScimMemberRef memberRef = new ScimMemberRef.Builder().value(account.getUuid())
+        .display(account.getUsername())
+        .ref(resourceLocationProvider.userLocation(account.getUuid()))
+        .build();
       members.add(memberRef);
     }
 
-    return ScimGroup.builder(entity.getName()).id(entity.getUuid()).meta(meta).setMembers(members)
-        .build();
+    return ScimGroup.builder(entity.getName())
+      .id(entity.getUuid())
+      .meta(meta)
+      .setMembers(members)
+      .build();
   }
 
 }

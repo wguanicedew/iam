@@ -20,14 +20,12 @@ import it.infn.mw.iam.api.scim.model.ScimErrorResponse;
 @ControllerAdvice
 public class ScimExceptionHandler extends ResponseEntityExceptionHandler {
 
-  public static final Logger LOG = LoggerFactory
-    .getLogger(ScimExceptionHandler.class);
+  public static final Logger LOG = LoggerFactory.getLogger(ScimExceptionHandler.class);
 
   @ResponseStatus(code = HttpStatus.NOT_IMPLEMENTED)
   @ExceptionHandler(NotImplementedException.class)
   @ResponseBody
-  public ScimErrorResponse handleNotImplementedException(
-    NotImplementedException e) {
+  public ScimErrorResponse handleNotImplementedException(NotImplementedException e) {
 
     return buildErrorResponse(HttpStatus.NOT_IMPLEMENTED, e.getMessage());
   }
@@ -35,8 +33,7 @@ public class ScimExceptionHandler extends ResponseEntityExceptionHandler {
   @ResponseStatus(code = HttpStatus.BAD_REQUEST)
   @ExceptionHandler(ScimValidationException.class)
   @ResponseBody
-  public ScimErrorResponse handleScimValidationException(
-    ScimValidationException e) {
+  public ScimErrorResponse handleScimValidationException(ScimValidationException e) {
 
     return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
   }
@@ -44,8 +41,7 @@ public class ScimExceptionHandler extends ResponseEntityExceptionHandler {
   @ResponseStatus(code = HttpStatus.BAD_REQUEST)
   @ExceptionHandler(IllegalArgumentException.class)
   @ResponseBody
-  public ScimErrorResponse handleInvalidArgumentException(
-    IllegalArgumentException e) {
+  public ScimErrorResponse handleInvalidArgumentException(IllegalArgumentException e) {
 
     return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
   }
@@ -53,8 +49,7 @@ public class ScimExceptionHandler extends ResponseEntityExceptionHandler {
   @ResponseStatus(code = HttpStatus.NOT_FOUND)
   @ExceptionHandler(ScimResourceNotFoundException.class)
   @ResponseBody
-  public ScimErrorResponse handleResourceNotFoundException(
-    ScimResourceNotFoundException nfe) {
+  public ScimErrorResponse handleResourceNotFoundException(ScimResourceNotFoundException nfe) {
 
     return buildErrorResponse(HttpStatus.NOT_FOUND, nfe.getMessage());
   }
@@ -63,20 +58,18 @@ public class ScimExceptionHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(ScimResourceExistsException.class)
   @ResponseBody
   public ScimErrorResponse handleResourceExists(ScimResourceExistsException e) {
-      return buildErrorResponse(HttpStatus.CONFLICT, e.getMessage());
+    return buildErrorResponse(HttpStatus.CONFLICT, e.getMessage());
   }
 
   @ResponseStatus(code = HttpStatus.BAD_REQUEST)
   @ExceptionHandler(ScimPatchOperationNotSupported.class)
   @ResponseBody
-  public ScimErrorResponse handleInvalidArgumentException(
-	ScimPatchOperationNotSupported e) {
+  public ScimErrorResponse handleInvalidArgumentException(ScimPatchOperationNotSupported e) {
 
     return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
   }
 
-  private ScimErrorResponse buildErrorResponse(HttpStatus status,
-    String message) {
+  private ScimErrorResponse buildErrorResponse(HttpStatus status, String message) {
 
     return new ScimErrorResponse(status.value(), message);
   }

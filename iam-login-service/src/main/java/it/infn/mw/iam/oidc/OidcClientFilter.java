@@ -42,17 +42,16 @@ import com.nimbusds.jwt.PlainJWT;
 import com.nimbusds.jwt.SignedJWT;
 
 /**
- * A slightly modified version of mitreid client filter that allows to provide a
- * custom {@link ClientHttpRequestFactory} object. This is needed to accomodate
- * SSL connections to providers that use EUGridPMA certificates.
+ * A slightly modified version of mitreid client filter that allows to provide a custom {@link
+ * ClientHttpRequestFactory} object. This is needed to accomodate SSL connections to providers that
+ * use EUGridPMA certificates.
  *
  */
 public class OidcClientFilter extends OIDCAuthenticationFilter {
 
   private static class OpenIDProviderConfiguration {
 
-    public OpenIDProviderConfiguration(ServerConfiguration sc,
-      RegisteredClient cc) {
+    public OpenIDProviderConfiguration(ServerConfiguration sc, RegisteredClient cc) {
       this.serverConfig = sc;
       this.clientConfig = cc;
     }
@@ -61,16 +60,14 @@ public class OidcClientFilter extends OIDCAuthenticationFilter {
     RegisteredClient clientConfig;
   };
 
-  public static final Logger LOG = LoggerFactory
-    .getLogger(OidcClientFilter.class);
+  public static final Logger LOG = LoggerFactory.getLogger(OidcClientFilter.class);
 
   ClientHttpRequestFactory httpRequestFactory;
 
   // Allow for time sync issues by having a window of X seconds.
   private int timeSkewAllowance = 300;
 
-  private void validateState(HttpServletRequest request,
-    HttpServletResponse response) {
+  private void validateState(HttpServletRequest request, HttpServletResponse response) {
 
     HttpSession session = request.getSession();
 
@@ -80,8 +77,7 @@ public class OidcClientFilter extends OIDCAuthenticationFilter {
 
     if (storedState == null || !storedState.equals(requestState)) {
       throw new AuthenticationServiceException(
-        "State parameter mismatch on return. Expected " + storedState + " got "
-          + requestState);
+          "State parameter mismatch on return. Expected " + storedState + " got " + requestState);
     }
   }
 
@@ -90,19 +86,14 @@ public class OidcClientFilter extends OIDCAuthenticationFilter {
     return new RestTemplate(httpRequestFactory) {
 
       @Override
-      protected ClientHttpRequest createRequest(URI url, HttpMethod method)
-        throws IOException {
+      protected ClientHttpRequest createRequest(URI url, HttpMethod method) throws IOException {
 
         ClientHttpRequest httpRequest = super.createRequest(url, method);
-        httpRequest.getHeaders()
-          .add("Authorization",
-            String
-              .format("Basic %s",
+        httpRequest.getHeaders().add("Authorization",
+            String.format("Basic %s",
                 Base64.encode(String.format("%s:%s",
-                  UriUtils.encodePathSegment(clientConfig.getClientId(),
-                    "UTF-8"),
-                UriUtils.encodePathSegment(clientConfig.getClientSecret(),
-                  "UTF-8")))));
+                    UriUtils.encodePathSegment(clientConfig.getClientId(), "UTF-8"),
+                    UriUtils.encodePathSegment(clientConfig.getClientSecret(), "UTF-8")))));
         return httpRequest;
       }
     };
@@ -110,8 +101,7 @@ public class OidcClientFilter extends OIDCAuthenticationFilter {
 
   private RestTemplate jwtAuthRequest(RegisteredClient clientConfig) {
 
-    throw new NotImplementedException(
-      "Signed JWT authN method not yet implemented");
+    throw new NotImplementedException("Signed JWT authN method not yet implemented");
   }
 
   private RestTemplate jwtPrivateKeyAuthRequest(RegisteredClient clientConfig) {
@@ -120,7 +110,7 @@ public class OidcClientFilter extends OIDCAuthenticationFilter {
   }
 
   private RestTemplate formAuthRequest(RegisteredClient clientConfig,
-    MultiValueMap<String, String> requestParams) {
+      MultiValueMap<String, String> requestParams) {
 
     requestParams.add("client_id", clientConfig.getClientId());
     requestParams.add("client_secret", clientConfig.getClientSecret());
@@ -128,18 +118,17 @@ public class OidcClientFilter extends OIDCAuthenticationFilter {
 
   }
 
-  private MultiValueMap<String, String> initTokenRequestParameters(
-    HttpServletRequest request, OpenIDProviderConfiguration config) {
+  private MultiValueMap<String, String> initTokenRequestParameters(HttpServletRequest request,
+      OpenIDProviderConfiguration config) {
 
     MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
     form.add("grant_type", "authorization_code");
     form.add("code", request.getParameter("code"));
 
-    form.setAll(getAuthRequestOptionsService()
-      .getTokenOptions(config.serverConfig, config.clientConfig, request));
+    form.setAll(getAuthRequestOptionsService().getTokenOptions(config.serverConfig,
+        config.clientConfig, request));
 
-    String redirectUri = getStoredSessionString(request.getSession(),
-      REDIRECT_URI_SESION_VARIABLE);
+    String redirectUri = getStoredSessionString(request.getSession(), REDIRECT_URI_SESION_VARIABLE);
 
     if (redirectUri != null) {
       form.add("redirect_uri", redirectUri);
@@ -149,43 +138,41 @@ public class OidcClientFilter extends OIDCAuthenticationFilter {
 
   }
 
-  private RestTemplate prepareTokenRequest(HttpServletRequest request,
-    RegisteredClient client, MultiValueMap<String, String> requestParams) {
+  private RestTemplate prepareTokenRequest(HttpServletRequest request, RegisteredClient client,
+      MultiValueMap<String, String> requestParams) {
 
     RestTemplate tokenRequest = null;
 
     switch (client.getTokenEndpointAuthMethod()) {
 
-    case SECRET_BASIC:
-      tokenRequest = basicAuthRequest(client);
-      break;
-    case SECRET_JWT:
-      tokenRequest = jwtAuthRequest(client);
-      break;
-    case PRIVATE_KEY:
-      tokenRequest = jwtPrivateKeyAuthRequest(client);
-      break;
-    case SECRET_POST:
-      tokenRequest = formAuthRequest(client, requestParams);
-      break;
-    case NONE:
-      tokenRequest = new RestTemplate(httpRequestFactory);
+      case SECRET_BASIC:
+        tokenRequest = basicAuthRequest(client);
+        break;
+      case SECRET_JWT:
+        tokenRequest = jwtAuthRequest(client);
+        break;
+      case PRIVATE_KEY:
+        tokenRequest = jwtPrivateKeyAuthRequest(client);
+        break;
+      case SECRET_POST:
+        tokenRequest = formAuthRequest(client, requestParams);
+        break;
+      case NONE:
+        tokenRequest = new RestTemplate(httpRequestFactory);
     }
 
     if (tokenRequest == null) {
-      throw new AuthenticationServiceException(
-        "Unsupported token endpoint authentication method");
+      throw new AuthenticationServiceException("Unsupported token endpoint authentication method");
     }
 
     return tokenRequest;
   }
 
   /**
-   * Get the named stored session variable as a string. Return null if not found
-   * or not a string. @param session @param key @return
+   * Get the named stored session variable as a string. Return null if not found or not a
+   * string. @param session @param key @return
    */
-  private static String getStoredSessionString(HttpSession session,
-    String key) {
+  private static String getStoredSessionString(HttpSession session, String key) {
 
     Object o = session.getAttribute(key);
     if (o != null && o instanceof String) {
@@ -195,28 +182,25 @@ public class OidcClientFilter extends OIDCAuthenticationFilter {
     }
   }
 
-  private OpenIDProviderConfiguration lookupProvider(
-    HttpServletRequest request) {
+  private OpenIDProviderConfiguration lookupProvider(HttpServletRequest request) {
 
-    String issuer = getStoredSessionString(request.getSession(),
-      ISSUER_SESSION_VARIABLE);
+    String issuer = getStoredSessionString(request.getSession(), ISSUER_SESSION_VARIABLE);
     if (issuer == null) {
       throw new AuthenticationServiceException("Issuser not found in session.");
     }
-    ServerConfiguration serverConfig = getServerConfigurationService()
-      .getServerConfiguration(issuer);
+    ServerConfiguration serverConfig =
+        getServerConfigurationService().getServerConfiguration(issuer);
 
     if (serverConfig == null) {
-      throw new AuthenticationServiceException(
-        "Unknow OpenID provider :" + issuer);
+      throw new AuthenticationServiceException("Unknow OpenID provider :" + issuer);
     }
 
-    RegisteredClient clientConfig = getClientConfigurationService()
-      .getClientConfiguration(serverConfig);
+    RegisteredClient clientConfig =
+        getClientConfigurationService().getClientConfiguration(serverConfig);
 
     if (clientConfig == null) {
       throw new AuthenticationServiceException(
-        "Client configuration not found for OpenID provider :" + issuer);
+          "Client configuration not found for OpenID provider :" + issuer);
     }
 
     return new OpenIDProviderConfiguration(serverConfig, clientConfig);
@@ -228,7 +212,7 @@ public class OidcClientFilter extends OIDCAuthenticationFilter {
     JsonElement jsonRoot = new JsonParser().parse(jsonString);
     if (!jsonRoot.isJsonObject()) {
       throw new AuthenticationServiceException(
-        "Token Endpoint did not return a JSON object: " + jsonRoot);
+          "Token Endpoint did not return a JSON object: " + jsonRoot);
     }
 
     return jsonRoot.getAsJsonObject();
@@ -245,42 +229,39 @@ public class OidcClientFilter extends OIDCAuthenticationFilter {
   }
 
   @Override
-  protected void handleError(HttpServletRequest request,
-    HttpServletResponse response) throws IOException {
+  protected void handleError(HttpServletRequest request, HttpServletResponse response)
+      throws IOException {
 
-    OidcClientError error = new OidcClientError("Authentication error",
-      request.getParameter("error"), request.getParameter("error_description"),
-      request.getParameter("error_uri"));
+    OidcClientError error =
+        new OidcClientError("Authentication error", request.getParameter("error"),
+            request.getParameter("error_description"), request.getParameter("error_uri"));
 
     throw error;
   }
 
   @Override
-  protected Authentication handleAuthorizationCodeResponse(
-    HttpServletRequest request, HttpServletResponse response) {
+  protected Authentication handleAuthorizationCodeResponse(HttpServletRequest request,
+      HttpServletResponse response) {
 
     validateState(request, response);
 
     OpenIDProviderConfiguration config = lookupProvider(request);
 
-    MultiValueMap<String, String> requestParams = initTokenRequestParameters(
-      request, config);
+    MultiValueMap<String, String> requestParams = initTokenRequestParameters(request, config);
 
-    RestTemplate tokenRequest = prepareTokenRequest(request,
-      config.clientConfig, requestParams);
+    RestTemplate tokenRequest = prepareTokenRequest(request, config.clientConfig, requestParams);
 
     String jsonString = null;
 
     try {
-      jsonString = tokenRequest.postForObject(
-        config.serverConfig.getTokenEndpointUri(), requestParams, String.class);
+      jsonString = tokenRequest.postForObject(config.serverConfig.getTokenEndpointUri(),
+          requestParams, String.class);
     } catch (RestClientException e) {
 
       // Handle error
       LOG.error("Token Endpoint error response:  {}", e.getMessage(), e);
 
-      throw new AuthenticationServiceException(
-        "Unable to obtain Access Token: " + e.getMessage());
+      throw new AuthenticationServiceException("Unable to obtain Access Token: " + e.getMessage());
     }
 
     LOG.debug("Token Endpoint returned string: {}", jsonString);
@@ -292,25 +273,21 @@ public class OidcClientFilter extends OIDCAuthenticationFilter {
     String refreshTokenValue = null;
 
     if (tokenResponse.has("access_token")) {
-      accessTokenValue = tokenResponse.get("access_token")
-        .getAsString();
+      accessTokenValue = tokenResponse.get("access_token").getAsString();
     } else {
       throw new AuthenticationServiceException(
-        "Token Endpoint did not return an access_token: " + jsonString);
+          "Token Endpoint did not return an access_token: " + jsonString);
     }
 
     if (tokenResponse.has("id_token")) {
-      idTokenValue = tokenResponse.get("id_token")
-        .getAsString();
+      idTokenValue = tokenResponse.get("id_token").getAsString();
     } else {
       logger.error("Token Endpoint did not return an id_token");
-      throw new AuthenticationServiceException(
-        "Token Endpoint did not return an id_token");
+      throw new AuthenticationServiceException("Token Endpoint did not return an id_token");
     }
 
     if (tokenResponse.has("refresh_token")) {
-      refreshTokenValue = tokenResponse.get("refresh_token")
-        .getAsString();
+      refreshTokenValue = tokenResponse.get("refresh_token").getAsString();
     }
 
     JWT idToken = parseToken(idTokenValue);
@@ -319,9 +296,9 @@ public class OidcClientFilter extends OIDCAuthenticationFilter {
     validateSignature(idToken, config);
     validateClaims(request.getSession(), idToken, idClaims, config);
 
-    PendingOIDCAuthenticationToken oidcToken = new PendingOIDCAuthenticationToken(
-      idClaims.getSubject(), idClaims.getIssuer(), config.serverConfig, idToken,
-      accessTokenValue, refreshTokenValue);
+    PendingOIDCAuthenticationToken oidcToken =
+        new PendingOIDCAuthenticationToken(idClaims.getSubject(), idClaims.getIssuer(),
+            config.serverConfig, idToken, accessTokenValue, refreshTokenValue);
 
     return getAuthenticationManager().authenticate(oidcToken);
 
@@ -332,17 +309,14 @@ public class OidcClientFilter extends OIDCAuthenticationFilter {
     try {
       return idToken.getJWTClaimsSet();
     } catch (ParseException e) {
-      throw new AuthenticationServiceException(
-        "Error parsing JWT claims: " + e.getMessage());
+      throw new AuthenticationServiceException("Error parsing JWT claims: " + e.getMessage());
     }
 
   }
 
-  private void validateSignature(JWT idToken,
-    OpenIDProviderConfiguration config) {
+  private void validateSignature(JWT idToken, OpenIDProviderConfiguration config) {
 
-    Algorithm tokenAlg = idToken.getHeader()
-      .getAlgorithm();
+    Algorithm tokenAlg = idToken.getHeader().getAlgorithm();
 
     Algorithm clientAlg = config.clientConfig.getIdTokenSignedResponseAlg();
 
@@ -350,8 +324,8 @@ public class OidcClientFilter extends OIDCAuthenticationFilter {
 
     if (clientAlg != null) {
       if (!clientAlg.equals(tokenAlg)) {
-        throw new AuthenticationServiceException("Token algorithm " + tokenAlg
-          + " does not match expected algorithm " + clientAlg);
+        throw new AuthenticationServiceException(
+            "Token algorithm " + tokenAlg + " does not match expected algorithm " + clientAlg);
       }
     }
 
@@ -359,100 +333,90 @@ public class OidcClientFilter extends OIDCAuthenticationFilter {
 
       if (clientAlg == null) {
         throw new AuthenticationServiceException(
-          "Unsigned ID tokens can only be used if explicitly configured in client.");
+            "Unsigned ID tokens can only be used if explicitly configured in client.");
       }
 
       if (tokenAlg != null && !tokenAlg.equals(Algorithm.NONE)) {
         throw new AuthenticationServiceException(
-          "Unsigned token received, expected signature with " + tokenAlg);
+            "Unsigned token received, expected signature with " + tokenAlg);
       }
     } else if (idToken instanceof SignedJWT) {
 
       SignedJWT signedIdToken = (SignedJWT) idToken;
 
-      if (tokenAlg.equals(JWSAlgorithm.HS256)
-        || tokenAlg.equals(JWSAlgorithm.HS384)
-        || tokenAlg.equals(JWSAlgorithm.HS512)) {
+      if (tokenAlg.equals(JWSAlgorithm.HS256) || tokenAlg.equals(JWSAlgorithm.HS384)
+          || tokenAlg.equals(JWSAlgorithm.HS512)) {
 
         // generate one based on client secret
-        jwtValidator = getSymmetricCacheService()
-          .getSymmetricValidtor(config.clientConfig.getClient());
+        jwtValidator =
+            getSymmetricCacheService().getSymmetricValidtor(config.clientConfig.getClient());
       } else {
         // otherwise load from the server's public key
-        jwtValidator = getValidationServices()
-          .getValidator(config.serverConfig.getJwksUri());
+        jwtValidator = getValidationServices().getValidator(config.serverConfig.getJwksUri());
       }
 
       if (jwtValidator != null) {
         if (!jwtValidator.validateSignature(signedIdToken)) {
-          throw new AuthenticationServiceException(
-            "Signature validation failed");
+          throw new AuthenticationServiceException("Signature validation failed");
         }
       } else {
-        logger
-          .error("No validation service found. Skipping signature validation");
+        logger.error("No validation service found. Skipping signature validation");
         throw new AuthenticationServiceException(
-          "Unable to find an appropriate signature validator for ID Token.");
+            "Unable to find an appropriate signature validator for ID Token.");
       }
     }
 
   }
 
-  private void validateClaims(HttpSession session, JWT idToken,
-    JWTClaimsSet idClaims, OpenIDProviderConfiguration config) {
+  private void validateClaims(HttpSession session, JWT idToken, JWTClaimsSet idClaims,
+      OpenIDProviderConfiguration config) {
 
     // check the issuer
     if (idClaims.getIssuer() == null) {
 
       throw new AuthenticationServiceException("Id Token Issuer is null");
 
-    } else if (!idClaims.getIssuer()
-      .equals(config.serverConfig.getIssuer())) {
+    } else if (!idClaims.getIssuer().equals(config.serverConfig.getIssuer())) {
       throw new AuthenticationServiceException("Issuers do not match, expected "
-        + config.serverConfig.getIssuer() + " got " + idClaims.getIssuer());
+          + config.serverConfig.getIssuer() + " got " + idClaims.getIssuer());
     }
 
     // check expiration
     if (idClaims.getExpirationTime() == null) {
 
-      throw new AuthenticationServiceException(
-        "Id Token does not have required expiration claim");
+      throw new AuthenticationServiceException("Id Token does not have required expiration claim");
 
     } else {
 
-      Date now = new Date(
-        System.currentTimeMillis() - (timeSkewAllowance * 1000));
+      Date now = new Date(System.currentTimeMillis() - (timeSkewAllowance * 1000));
 
       if (now.after(idClaims.getExpirationTime())) {
         throw new AuthenticationServiceException(
-          "Id Token is expired: " + idClaims.getExpirationTime());
+            "Id Token is expired: " + idClaims.getExpirationTime());
       }
     }
 
     // check not before
     if (idClaims.getNotBeforeTime() != null) {
 
-      Date now = new Date(
-        System.currentTimeMillis() + (timeSkewAllowance * 1000));
+      Date now = new Date(System.currentTimeMillis() + (timeSkewAllowance * 1000));
 
       if (now.before(idClaims.getNotBeforeTime())) {
         throw new AuthenticationServiceException(
-          "Id Token not valid until: " + idClaims.getNotBeforeTime());
+            "Id Token not valid until: " + idClaims.getNotBeforeTime());
       }
     }
 
     // check issued at
     if (idClaims.getIssueTime() == null) {
-      throw new AuthenticationServiceException(
-        "Id Token does not have required issued-at claim");
+      throw new AuthenticationServiceException("Id Token does not have required issued-at claim");
     } else {
       // since it's not null, see if it was issued in the future
-      Date now = new Date(
-        System.currentTimeMillis() + (timeSkewAllowance * 1000));
+      Date now = new Date(System.currentTimeMillis() + (timeSkewAllowance * 1000));
 
       if (now.before(idClaims.getIssueTime())) {
         throw new AuthenticationServiceException(
-          "Id Token was issued in the future: " + idClaims.getIssueTime());
+            "Id Token was issued in the future: " + idClaims.getIssueTime());
       }
 
     }
@@ -462,12 +426,10 @@ public class OidcClientFilter extends OIDCAuthenticationFilter {
 
       throw new AuthenticationServiceException("Id token audience is null");
 
-    } else if (!idClaims.getAudience()
-      .contains(config.clientConfig.getClientId())) {
+    } else if (!idClaims.getAudience().contains(config.clientConfig.getClientId())) {
 
-      throw new AuthenticationServiceException(
-        "Audience does not match, expected " + config.clientConfig.getClientId()
-          + " got " + idClaims.getAudience());
+      throw new AuthenticationServiceException("Audience does not match, expected "
+          + config.clientConfig.getClientId() + " got " + idClaims.getAudience());
     }
 
     // compare the nonce to our stored claim
@@ -476,30 +438,27 @@ public class OidcClientFilter extends OIDCAuthenticationFilter {
     try {
       nonce = idClaims.getStringClaim("nonce");
     } catch (ParseException e) {
-      throw new AuthenticationServiceException(
-        "nonce claim parse error : " + e.getMessage());
+      throw new AuthenticationServiceException("nonce claim parse error : " + e.getMessage());
     }
 
     if (Strings.isNullOrEmpty(nonce)) {
 
       logger.error("ID token did not contain a nonce claim.");
 
-      throw new AuthenticationServiceException(
-        "ID token did not contain a nonce claim.");
+      throw new AuthenticationServiceException("ID token did not contain a nonce claim.");
     }
 
     String storedNonce = getStoredNonce(session);
 
     if (!nonce.equals(storedNonce)) {
-      logger.error(
-        "Possible replay attack detected! The comparison of the nonce in the returned "
-          + "ID Token to the session " + NONCE_SESSION_VARIABLE
-          + " failed. Expected " + storedNonce + " got " + nonce + ".");
+      logger.error("Possible replay attack detected! The comparison of the nonce in the returned "
+          + "ID Token to the session " + NONCE_SESSION_VARIABLE + " failed. Expected " + storedNonce
+          + " got " + nonce + ".");
 
       throw new AuthenticationServiceException(
-        "Possible replay attack detected! The comparison of the nonce in the returned "
-          + "ID Token to the session " + NONCE_SESSION_VARIABLE
-          + " failed. Expected " + storedNonce + " got " + nonce + ".");
+          "Possible replay attack detected! The comparison of the nonce in the returned "
+              + "ID Token to the session " + NONCE_SESSION_VARIABLE + " failed. Expected "
+              + storedNonce + " got " + nonce + ".");
     }
   }
 
@@ -508,8 +467,7 @@ public class OidcClientFilter extends OIDCAuthenticationFilter {
     return httpRequestFactory;
   }
 
-  public void setHttpRequestFactory(
-    ClientHttpRequestFactory httpRequestFactory) {
+  public void setHttpRequestFactory(ClientHttpRequestFactory httpRequestFactory) {
 
     this.httpRequestFactory = httpRequestFactory;
   }

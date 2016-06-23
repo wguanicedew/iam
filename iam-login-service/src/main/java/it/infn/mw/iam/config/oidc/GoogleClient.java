@@ -41,7 +41,7 @@ public class GoogleClient {
 
   @Bean
   public FilterRegistrationBean disabledAutomaticOidcFilterRegistration(
-    SaveRequestOidcAuthenticationFilter f) {
+      SaveRequestOidcAuthenticationFilter f) {
 
     FilterRegistrationBean b = new FilterRegistrationBean(f);
     b.setEnabled(false);
@@ -61,7 +61,7 @@ public class GoogleClient {
     filter.setAuthenticationSuccessHandler(successHandler());
     filter.setHttpRequestFactory(new HttpComponentsClientHttpRequestFactory());
     filter.setAuthenticationFailureHandler(
-      new OidcAuthenticationFailureHandler(new OidcExceptionMessageHelper()));
+        new OidcAuthenticationFailureHandler(new OidcExceptionMessageHelper()));
 
     return filter;
   }
@@ -75,8 +75,7 @@ public class GoogleClient {
   @Bean(name = "OIDCAuthenticationManager")
   public AuthenticationManager authenticationManager() {
 
-    return new ProviderManager(
-      Arrays.asList(openIdConnectAuthenticationProvider()));
+    return new ProviderManager(Arrays.asList(openIdConnectAuthenticationProvider()));
   }
 
   @Bean

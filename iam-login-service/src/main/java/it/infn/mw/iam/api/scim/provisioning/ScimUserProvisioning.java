@@ -88,17 +88,20 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
   @Override
   public ScimUser create(ScimUser user) {
 
-    IamAccount account = new IamAccount();
-
     Date creationTime = new Date();
 
     String uuid = UUID.randomUUID().toString();
 
+    IamAccount account = converter.fromScim(user);
     account.setUuid(uuid);
     account.setCreationTime(creationTime);
     account.setLastUpdateTime(creationTime);
     account.setUsername(user.getUserName());
     account.setActive(user.getActive() == null ? true : user.getActive());
+
+    if (account.getPassword() == null){
+      account.setPassword(UUID.randomUUID().toString());
+    }
 
     authorityRepository.findByAuthority("ROLE_USER").map(a -> account.getAuthorities().add(a))
         .orElseThrow(
@@ -163,8 +166,14 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
     updatedAccount.setUuid(existingAccount.getUuid());
     updatedAccount.setCreationTime(existingAccount.getCreationTime());
 
+    // If the active field was not provided in the input scim user,
+    // use the value that was formerly set in the database
     if (scimItemToBeUpdated.getActive() == null) {
       updatedAccount.setActive(existingAccount.isActive());
+    }
+
+    if (scimItemToBeUpdated.getPassword() != null) {
+
     }
 
     updatedAccount.touch();

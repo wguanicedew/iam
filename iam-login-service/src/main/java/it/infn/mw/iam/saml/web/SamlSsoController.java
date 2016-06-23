@@ -21,8 +21,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Profile("saml")
 public class SamlSsoController {
 
-  public static final Logger LOG = LoggerFactory
-    .getLogger(SamlSsoController.class);
+  public static final Logger LOG = LoggerFactory.getLogger(SamlSsoController.class);
 
   @Autowired
   MetadataManager metadata;
@@ -31,7 +30,7 @@ public class SamlSsoController {
   public String idpSelection(HttpServletRequest request, Model model) {
 
     if (!(SecurityContextHolder.getContext()
-      .getAuthentication() instanceof AnonymousAuthenticationToken)) {
+        .getAuthentication() instanceof AnonymousAuthenticationToken)) {
       LOG.warn("The current user is already logged.");
       return "redirect:/";
     } else {

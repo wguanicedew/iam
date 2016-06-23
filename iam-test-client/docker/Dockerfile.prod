@@ -1,8 +1,7 @@
 FROM java:8
-ARG JAR_VERSION
 
 RUN mkdir /app
 WORKDIR /app
 
-COPY iam-test-client-$JAR_VERSION.jar /app/
-CMD java $IAM_CLIENT_JAVA_OPTS -jar iam-test-client-$JAR_VERSION.jar
+COPY iam-test-client.jar /app/
+CMD java $IAM_CLIENT_JAVA_OPTS -jar iam-test-client.jar

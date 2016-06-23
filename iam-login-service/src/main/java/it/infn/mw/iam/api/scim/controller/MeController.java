@@ -9,10 +9,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/scim/Me")
 public class MeController {
 
-  @RequestMapping(method=RequestMethod.GET)
+  @RequestMapping(method = RequestMethod.GET)
   public void index() {
-    throw new NotImplementedException(
-      "The /scim/Me endpoint is not implemented");
+    throw new NotImplementedException("The /scim/Me endpoint is not implemented");
   }
 
 }

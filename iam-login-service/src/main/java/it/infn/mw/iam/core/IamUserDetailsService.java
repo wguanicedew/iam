@@ -31,16 +31,14 @@ public class IamUserDetailsService implements UserDetailsService {
   }
 
   @Override
-  public UserDetails loadUserByUsername(String username)
-    throws UsernameNotFoundException {
+  public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
     Optional<IamAccount> account = repo.findByUsername(username);
 
     if (account.isPresent()) {
       IamAccount a = account.get();
 
-      User u = new User(a.getUsername(), a.getPassword(),
-        convertAuthorities(a));
+      User u = new User(a.getUsername(), a.getPassword(), convertAuthorities(a));
 
       return u;
     }

@@ -12,69 +12,69 @@ public class ScimGroupRef {
   private final String ref;
 
   @JsonCreator
-  private ScimGroupRef(@JsonProperty("display") String display,
-	@JsonProperty("value") String value, @JsonProperty("$ref") String ref) {
+  private ScimGroupRef(@JsonProperty("display") String display, @JsonProperty("value") String value,
+      @JsonProperty("$ref") String ref) {
 
-	this.display = display;
-	this.value = value;
-	this.ref = ref;
+    this.display = display;
+    this.value = value;
+    this.ref = ref;
   }
 
   public ScimGroupRef(Builder b) {
 
-	value = b.value;
-	display = b.display;
-	ref = b.ref;
+    value = b.value;
+    display = b.display;
+    ref = b.ref;
   }
 
   public String getValue() {
 
-	return value;
+    return value;
   }
 
   public String getDisplay() {
 
-	return display;
+    return display;
   }
 
   @JsonProperty("$ref")
   public String getRef() {
 
-	return ref;
+    return ref;
   }
 
   public static Builder builder() {
 
-	return new Builder();
+    return new Builder();
   }
 
   public static class Builder {
 
-	private String value;
-	private String display;
-	private String ref;
+    private String value;
+    private String display;
+    private String ref;
 
-	public Builder value(String value) {
+    public Builder value(String value) {
 
-	  this.value = value;
-	  return this;
-	}
+      this.value = value;
+      return this;
+    }
 
-	public Builder display(String display) {
+    public Builder display(String display) {
 
-	  this.display = display;
-	  return this;
-	}
+      this.display = display;
+      return this;
+    }
 
-	public Builder ref(String ref) {
+    public Builder ref(String ref) {
 
-	  this.ref = ref;
-	  return this;
-	}
+      this.ref = ref;
+      return this;
+    }
 
-	public ScimGroupRef build() {
+    public ScimGroupRef build() {
 
-	  return new ScimGroupRef(this);
-	}
+      return new ScimGroupRef(this);
+    }
   }
 }

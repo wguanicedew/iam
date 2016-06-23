@@ -8,9 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class ScimEmail {
 
   public static enum ScimEmailType {
-    work,
-    home,
-    other;
+    work, home, other;
   }
 
   private final ScimEmailType type;
@@ -21,9 +19,8 @@ public class ScimEmail {
   private final Boolean primary;
 
   @JsonCreator
-  private ScimEmail(@JsonProperty("type") ScimEmailType type,
-    @JsonProperty("value") String value,
-    @JsonProperty("primary") Boolean primary) {
+  private ScimEmail(@JsonProperty("type") ScimEmailType type, @JsonProperty("value") String value,
+      @JsonProperty("primary") Boolean primary) {
     this.type = type;
     this.value = value;
     this.primary = primary;

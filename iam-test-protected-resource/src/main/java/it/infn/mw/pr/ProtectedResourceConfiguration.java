@@ -19,8 +19,7 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Res
 @Configuration
 @EnableResourceServer
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-public class ProtectedResourceConfiguration
-  extends ResourceServerConfigurerAdapter {
+public class ProtectedResourceConfiguration extends ResourceServerConfigurerAdapter {
 
   @Autowired
   ResourceServerProperties props;
@@ -33,8 +32,8 @@ public class ProtectedResourceConfiguration
 
   @Value("${iam.token-info-uri}")
   String iamTokenInfoUri;
-  
-  public SimpleIntrospectionAuthorityGranter authorityGranter(){
+
+  public SimpleIntrospectionAuthorityGranter authorityGranter() {
     return new SimpleIntrospectionAuthorityGranter();
   }
 
@@ -66,15 +65,13 @@ public class ProtectedResourceConfiguration
   @Override
   public void configure(HttpSecurity http) throws Exception {
 
-    http.authorizeRequests().anyRequest().authenticated().and().csrf().disable()
-      .sessionManagement()
-      .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+    http.authorizeRequests().anyRequest().authenticated().and().csrf().disable().sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
   }
 
   @Override
-  public void configure(ResourceServerSecurityConfigurer resources)
-    throws Exception {
+  public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
 
     resources.tokenServices(tokenService());
 

@@ -18,23 +18,23 @@ public class IamUserinfoRepository implements UserInfoRepository {
   public UserInfo getByUsername(String username) {
 
     Optional<IamAccount> account = repo.findByUsername(username);
-    
-    if (account.isPresent()){
+
+    if (account.isPresent()) {
       return account.get().getUserInfo();
     }
-    
+
     return null;
   }
 
   @Override
   public UserInfo getByEmailAddress(String email) {
-    
+
     Optional<IamAccount> account = repo.findByEmail(email);
-    
-    if (account.isPresent()){
+
+    if (account.isPresent()) {
       return account.get().getUserInfo();
     }
-    
+
     return null;
   }
 

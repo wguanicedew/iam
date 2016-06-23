@@ -9,13 +9,13 @@ public class ScimOidcId {
 
   public final String issuer;
   public final String subject;
-  
+
   @JsonCreator
   private ScimOidcId(@JsonProperty("issuer") String issuer,
-	@JsonProperty("subject") String subject) {
+      @JsonProperty("subject") String subject) {
 
-	this.issuer = issuer;
-	this.subject = subject;
+    this.issuer = issuer;
+    this.subject = subject;
   }
 
   private ScimOidcId(Builder b) {
@@ -34,7 +34,7 @@ public class ScimOidcId {
   }
 
   public static Builder builder() {
-    
+
     return new Builder();
   }
 
