@@ -60,15 +60,30 @@ public class ScimGroupPatchRequest {
       schemas.add(PATCHOP_SCHEMA);
     }
 
-    public Builder setOperations(List<ScimPatchOperation<List<ScimMemberRef>>> operations) {
+    public Builder add(List<ScimMemberRef> members) {
 
-      this.operations = operations;
+      operations.add((new ScimPatchOperation.Builder<List<ScimMemberRef>>()).add()
+        .path("members")
+        .value(members)
+        .build());
       return this;
     }
 
-    public Builder addOperation(ScimPatchOperation<List<ScimMemberRef>> operation) {
+    public Builder remove(List<ScimMemberRef> members) {
 
-      operations.add(operation);
+      operations.add((new ScimPatchOperation.Builder<List<ScimMemberRef>>()).remove()
+        .path("members")
+        .value(members)
+        .build());
+      return this;
+    }
+
+    public Builder replace(List<ScimMemberRef> members) {
+
+      operations.add((new ScimPatchOperation.Builder<List<ScimMemberRef>>()).replace()
+        .path("members")
+        .value(members)
+        .build());
       return this;
     }
 

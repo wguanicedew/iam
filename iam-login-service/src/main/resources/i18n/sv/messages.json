@@ -25,7 +25,6 @@
             "access-token-no-timeout": "Access-token har oändlig livslängd",
             "acr-values": "Default ACR-värden",
             "acr-values-placeholder": "nytt ACR-värde",
-            "token-timeout-help": "Ange tiden i sekunder, timmar eller minuter.",
             "allow-introspection": "Tillåt anrop till introspektionsfunktionen?",
             "authorization-code": "auktoriseringskod",
             "authentication-method": "Autentiseringsmetod för att hämta ut nycklar (token endpoint)",

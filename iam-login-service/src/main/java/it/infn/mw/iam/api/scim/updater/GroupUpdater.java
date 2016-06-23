@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import it.infn.mw.iam.api.scim.exception.ScimPatchOperationNotSupported;
 import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
 import it.infn.mw.iam.api.scim.exception.ScimValidationException;
 import it.infn.mw.iam.api.scim.model.ScimMemberRef;
@@ -29,24 +28,18 @@ public class GroupUpdater implements Updater<IamGroup, List<ScimMemberRef>> {
 
     for (ScimPatchOperation<List<ScimMemberRef>> op : operations) {
 
-      if (!op.getPath().equals("members")) {
-
-        throw new ScimPatchOperationNotSupported("Expected 'members' as path value");
-      }
-
       switch (op.getOp()) {
-
         case add:
 
           // value cannot be null
           if (op.getValue() == null) {
             throw new ScimValidationException("Expected patch operation value not null");
           }
-
           for (ScimMemberRef ref : op.getValue()) {
             addMembership(ref.getValue(), group);
           }
           break;
+
         case remove:
 
           // value can be null >> remove all
@@ -54,18 +47,17 @@ public class GroupUpdater implements Updater<IamGroup, List<ScimMemberRef>> {
             removeAllMembers(group);
             break;
           }
-
           for (ScimMemberRef ref : op.getValue()) {
             removeMembership(ref.getValue(), group);
           }
           break;
+
         case replace:
 
           // value cannot be null
           if (op.getValue() == null) {
             throw new ScimValidationException("Expected patch operation value not null");
           }
-
           // replace step 1: clean all memberships
           removeAllMembers(group);
           for (ScimMemberRef ref : op.getValue()) {
@@ -73,12 +65,12 @@ public class GroupUpdater implements Updater<IamGroup, List<ScimMemberRef>> {
             addMembership(ref.getValue(), group);
           }
           break;
+
         default:
           break;
       }
     }
     return;
-
   }
 
   private void removeAllMembers(IamGroup group) {
@@ -94,8 +86,8 @@ public class GroupUpdater implements Updater<IamGroup, List<ScimMemberRef>> {
 
   private void addMembership(String uuid, IamGroup group) {
 
-    IamAccount account = accountRepository.findByUuid(uuid).orElseThrow(
-        () -> new ScimResourceNotFoundException("No user mapped to id '" + uuid + "'"));
+    IamAccount account = accountRepository.findByUuid(uuid)
+      .orElseThrow(() -> new ScimResourceNotFoundException("No user mapped to id '" + uuid + "'"));
 
     account.getGroups().add(group);
     account.touch();
@@ -106,8 +98,8 @@ public class GroupUpdater implements Updater<IamGroup, List<ScimMemberRef>> {
 
   private void removeMembership(String uuid, IamGroup group) {
 
-    IamAccount account = accountRepository.findByUuid(uuid).orElseThrow(
-        () -> new ScimResourceNotFoundException("No user mapped to id '" + uuid + "'"));
+    IamAccount account = accountRepository.findByUuid(uuid)
+      .orElseThrow(() -> new ScimResourceNotFoundException("No user mapped to id '" + uuid + "'"));
 
     account.getGroups().remove(group);
     account.touch();

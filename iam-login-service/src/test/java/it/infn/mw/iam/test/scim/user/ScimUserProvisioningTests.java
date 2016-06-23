@@ -1,9 +1,7 @@
 package it.infn.mw.iam.test.scim.user;
 
-import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.matcher.ResponseAwareMatcherComposer.and;
 import static com.jayway.restassured.matcher.RestAssuredMatchers.endsWithPath;
-import static it.infn.mw.iam.api.scim.model.ScimConstants.SCIM_CONTENT_TYPE;
 import static it.infn.mw.iam.test.TestUtils.passwordTokenGetter;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
@@ -31,6 +29,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.scim.model.ScimConstants;
 import it.infn.mw.iam.api.scim.model.ScimUser;
+import it.infn.mw.iam.test.ScimRestUtils;
 import it.infn.mw.iam.test.TestUtils;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -42,6 +41,7 @@ public class ScimUserProvisioningTests {
   private final DateTimeFormatter dateTimeFormatter = ISODateTimeFormat.dateTime();
 
   private String accessToken;
+  private ScimRestUtils restUtils;
 
   @BeforeClass
   public static void init() {
@@ -53,16 +53,7 @@ public class ScimUserProvisioningTests {
   public void initAccessToken() {
 
     accessToken = TestUtils.getAccessToken("scim-client-rw", "secret", "scim:read scim:write");
-  }
-
-  private void deleteUser(String userLocation) {
-
-    given().port(8080).auth().preemptive().oauth2(accessToken).contentType(SCIM_CONTENT_TYPE).when()
-        .delete(userLocation).then().statusCode(HttpStatus.NO_CONTENT.value());
-
-    given().port(8080).auth().preemptive().oauth2(accessToken).contentType(SCIM_CONTENT_TYPE).when()
-        .get(userLocation).then().statusCode(HttpStatus.NOT_FOUND.value());
-
+    restUtils = ScimRestUtils.getInstance(accessToken);
   }
 
   @Test
@@ -70,28 +61,25 @@ public class ScimUserProvisioningTests {
 
     String randomUuid = UUID.randomUUID().toString();
 
-    given().port(8080).auth().preemptive().oauth2(accessToken).when()
-        .get("/scim/Users/" + randomUuid).then().log().body(true)
-        .statusCode(HttpStatus.NOT_FOUND.value()).body("status", equalTo("404"))
-        .body("detail", equalTo("No user mapped to id '" + randomUuid + "'"))
-        .contentType(SCIM_CONTENT_TYPE);
-
+    restUtils.doGet("/scim/Users/" + randomUuid, HttpStatus.NOT_FOUND)
+      .body("status", equalTo("404"))
+      .body("detail", equalTo("No user mapped to id '" + randomUuid + "'"));
   }
 
   @Test
   public void testUpdateUserNotFoundResponse() {
 
-    ScimUser user = ScimUser.builder("john_lennon").buildEmail("lennon@email.test")
-        .buildName("John", "Lennon").build();
-
     String randomUuid = UUID.randomUUID().toString();
 
-    given().port(8080).auth().preemptive().oauth2(accessToken).contentType(SCIM_CONTENT_TYPE)
-        .body(user).when().put("/scim/Users/" + randomUuid).then().log().body(true)
-        .statusCode(HttpStatus.NOT_FOUND.value()).body("status", equalTo("404"))
-        .body("detail", equalTo("No user mapped to id '" + randomUuid + "'"))
-        .contentType(SCIM_CONTENT_TYPE);
+    ScimUser user = ScimUser.builder("john_lennon")
+      .buildEmail("lennon@email.test")
+      .buildName("John", "Lennon")
+      .id(randomUuid)
+      .build();
 
+    restUtils.doPut("/scim/Users/" + randomUuid, user, HttpStatus.NOT_FOUND)
+      .body("status", equalTo("404"))
+      .body("detail", equalTo("No user mapped to id '" + randomUuid + "'"));
   }
 
   @SuppressWarnings("unchecked")
@@ -101,27 +89,31 @@ public class ScimUserProvisioningTests {
     // Some existing user as defined in the test db
     String userId = "80e5fb8d-b7c8-451a-89ba-346ae278a66f";
 
-    given().port(8080).auth().preemptive().oauth2(accessToken).when().get("/scim/Users/" + userId)
-        .then().contentType(SCIM_CONTENT_TYPE).log().body(true).statusCode(HttpStatus.OK.value())
-        .body("id", equalTo(userId)).body("userName", equalTo("test"))
-        .body("displayName", equalTo("test")).body("active", equalTo(true))
-        .body("name.formatted", equalTo("Test User")).body("name.givenName", equalTo("Test"))
-        .body("name.familyName", equalTo("User")).body("meta.resourceType", equalTo("User"))
-        .body("meta.location", equalTo("http://localhost:8080/scim/Users/" + userId))
-        .body("emails", hasSize(equalTo(1))).body("emails[0].value", equalTo("test@iam.test"))
-        .body("emails[0].type", equalTo("work")).body("emails[0].primary", equalTo(true))
-        .body("groups", hasSize(equalTo(2)))
-        .body("groups[0].$ref",
-            and(startsWith("http://localhost:8080/scim/Groups/"), endsWithPath("groups[0].value")))
-        .body("groups[1].$ref",
-            and(startsWith("http://localhost:8080/scim/Groups/"), endsWithPath("groups[1].value")))
-        .body("schemas", contains(ScimUser.USER_SCHEMA, ScimConstants.INDIGO_USER_SCHEMA))
-        .body(ScimConstants.INDIGO_USER_SCHEMA + ".oidcIds", hasSize(greaterThan(0)))
-        .body(ScimConstants.INDIGO_USER_SCHEMA + ".oidcIds[0].issuer",
-            equalTo("https://accounts.google.com"))
-        .body(ScimConstants.INDIGO_USER_SCHEMA + ".oidcIds[0].subject",
-            equalTo("105440632287425289613"));
-
+    restUtils.doGet("/scim/Users/" + userId)
+      .body("id", equalTo(userId))
+      .body("userName", equalTo("test"))
+      .body("displayName", equalTo("test"))
+      .body("active", equalTo(true))
+      .body("name.formatted", equalTo("Test User"))
+      .body("name.givenName", equalTo("Test"))
+      .body("name.familyName", equalTo("User"))
+      .body("meta.resourceType", equalTo("User"))
+      .body("meta.location", equalTo("http://localhost:8080/scim/Users/" + userId))
+      .body("emails", hasSize(equalTo(1)))
+      .body("emails[0].value", equalTo("test@iam.test"))
+      .body("emails[0].type", equalTo("work"))
+      .body("emails[0].primary", equalTo(true))
+      .body("groups", hasSize(equalTo(2)))
+      .body("groups[0].$ref",
+          and(startsWith("http://localhost:8080/scim/Groups/"), endsWithPath("groups[0].value")))
+      .body("groups[1].$ref",
+          and(startsWith("http://localhost:8080/scim/Groups/"), endsWithPath("groups[1].value")))
+      .body("schemas", contains(ScimUser.USER_SCHEMA, ScimConstants.INDIGO_USER_SCHEMA))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".oidcIds", hasSize(greaterThan(0)))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".oidcIds[0].issuer",
+          equalTo("https://accounts.google.com"))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".oidcIds[0].subject",
+          equalTo("105440632287425289613"));
   }
 
   @Test
@@ -129,20 +121,24 @@ public class ScimUserProvisioningTests {
 
     String username = "paul_mccartney";
 
-    ScimUser user = ScimUser.builder().userName(username).buildEmail("test@email.test")
-        .buildName("Paul", "McCartney").build();
+    ScimUser user = ScimUser.builder()
+      .userName(username)
+      .buildEmail("test@email.test")
+      .buildName("Paul", "McCartney")
+      .build();
 
-    ScimUser createdUser = given().port(8080).auth().preemptive().oauth2(accessToken)
-        .contentType(SCIM_CONTENT_TYPE).body(user).log().all(true).when().post("/scim/Users/")
-        .then().log().all(true).statusCode(HttpStatus.CREATED.value()).extract().as(ScimUser.class);
+    ScimUser createdUser = restUtils.doPost("/scim/Users/", user)
+      .statusCode(HttpStatus.CREATED.value())
+      .extract()
+      .as(ScimUser.class);
 
-    given().port(8080).auth().preemptive().oauth2(accessToken).contentType(SCIM_CONTENT_TYPE).when()
-        .get(createdUser.getMeta().getLocation()).then().log().all(true)
-        .statusCode(HttpStatus.OK.value()).body("id", equalTo(createdUser.getId()))
-        .body("userName", equalTo(createdUser.getUserName())).body("emails", hasSize(equalTo(1)))
-        .body("emails[0].value", equalTo(createdUser.getEmails().get(0).getValue()));
+    restUtils.doGet(createdUser.getMeta().getLocation())
+      .body("id", equalTo(createdUser.getId()))
+      .body("userName", equalTo(createdUser.getUserName()))
+      .body("emails", hasSize(equalTo(1)))
+      .body("emails[0].value", equalTo(createdUser.getEmails().get(0).getValue()));
 
-    deleteUser(createdUser.getMeta().getLocation());
+    restUtils.doDelete(createdUser.getMeta().getLocation());
   }
 
   @Test
@@ -150,14 +146,13 @@ public class ScimUserProvisioningTests {
 
     String username = "";
 
-    ScimUser user = ScimUser.builder(username).buildEmail("test@email.test")
-        .buildName("Paul", "McCartney").build();
+    ScimUser user = ScimUser.builder(username)
+      .buildEmail("test@email.test")
+      .buildName("Paul", "McCartney")
+      .build();
 
-    given().port(8080).auth().preemptive().oauth2(accessToken).contentType(SCIM_CONTENT_TYPE)
-        .body(user).log().all(true).when().post("/scim/Users/").then()
-        .body("detail", containsString("scimUser.userName : may not be empty")).log().all(true)
-        .statusCode(HttpStatus.BAD_REQUEST.value());
-
+    restUtils.doPost("/scim/Users/", user, HttpStatus.BAD_REQUEST).body("detail",
+        containsString("scimUser.userName : may not be empty"));
   }
 
   @Test
@@ -165,71 +160,67 @@ public class ScimUserProvisioningTests {
 
     ScimUser user = ScimUser.builder("paul").buildName("Paul", "McCartney").build();
 
-    given().port(8080).auth().preemptive().oauth2(accessToken).contentType(SCIM_CONTENT_TYPE)
-        .body(user).log().all(true).when().post("/scim/Users/").then()
-        .body("detail", containsString("scimUser.emails : may not be empty")).log().all(true)
-        .statusCode(HttpStatus.BAD_REQUEST.value());
-
+    restUtils.doPost("/scim/Users/", user, HttpStatus.BAD_REQUEST).body("detail",
+        containsString("scimUser.emails : may not be empty"));
   }
 
   @Test
   public void testInvalidEmailValidationError() {
 
-    ScimUser user = ScimUser.builder("paul").buildEmail("this_is_not_an_email")
-        .buildName("Paul", "McCartney").build();
+    ScimUser user = ScimUser.builder("paul")
+      .buildEmail("this_is_not_an_email")
+      .buildName("Paul", "McCartney")
+      .build();
 
-    given().port(8080).auth().preemptive().oauth2(accessToken).contentType(SCIM_CONTENT_TYPE)
-        .body(user).log().all(true).when().post("/scim/Users/").then()
-        .body("detail",
-            containsString("scimUser.emails[0].value : not a well-formed email address"))
-        .log().all(true).statusCode(HttpStatus.BAD_REQUEST.value());
-
+    restUtils.doPost("/scim/Users/", user, HttpStatus.BAD_REQUEST).body("detail",
+        containsString("scimUser.emails[0].value : not a well-formed email address"));
   }
 
   @Test
   public void testUserUpdateChangeUsername() {
 
-    ScimUser user = ScimUser.builder("john_lennon").buildEmail("lennon@email.test")
-        .buildName("John", "Lennon").build();
+    ScimUser user = ScimUser.builder("john_lennon")
+      .buildEmail("lennon@email.test")
+      .buildName("John", "Lennon")
+      .build();
 
-    ScimUser createdUser = given().port(8080).auth().preemptive().oauth2(accessToken)
-        .contentType(SCIM_CONTENT_TYPE).body(user).log().all(true).when().post("/scim/Users/")
-        .then().log().all(true).statusCode(HttpStatus.CREATED.value()).extract().as(ScimUser.class);
+    ScimUser createdUser = restUtils.doPost("/scim/Users/", user).extract().as(ScimUser.class);
 
-    ScimUser updatedUser = ScimUser.builder("j.lennon").id(user.getId())
-        .buildEmail("lennon@email.test").buildName("John", "Lennon").active(true).build();
+    ScimUser updatedUser = ScimUser.builder("j.lennon")
+      .id(user.getId())
+      .buildEmail("lennon@email.test")
+      .buildName("John", "Lennon")
+      .active(true)
+      .build();
 
-    given().port(8080).auth().preemptive().oauth2(accessToken).contentType(SCIM_CONTENT_TYPE)
-        .body(updatedUser).log().all(true).when().put(createdUser.getMeta().getLocation()).then()
-        .log().all(true).statusCode(HttpStatus.OK.value()).body("id", equalTo(createdUser.getId()))
-        .body("userName", equalTo("j.lennon"))
-        .body("emails[0].value", equalTo(createdUser.getEmails().get(0).getValue()))
-        .body("meta.created",
-            equalTo(dateTimeFormatter.print(createdUser.getMeta().getCreated().getTime())))
-        .body("active", equalTo(true));
+    restUtils.doPut(createdUser.getMeta().getLocation(), updatedUser)
+      .body("id", equalTo(createdUser.getId()))
+      .body("userName", equalTo("j.lennon"))
+      .body("emails[0].value", equalTo(createdUser.getEmails().get(0).getValue()))
+      .body("meta.created",
+          equalTo(dateTimeFormatter.print(createdUser.getMeta().getCreated().getTime())))
+      .body("active", equalTo(true));
 
-    deleteUser(createdUser.getMeta().getLocation());
+    restUtils.doDelete(createdUser.getMeta().getLocation());
 
   }
 
   @Test
   public void testUpdateUserValidation() {
 
-    ScimUser user = ScimUser.builder("john_lennon").buildEmail("lennon@email.test")
-        .buildName("John", "Lennon").build();
+    ScimUser user = ScimUser.builder("john_lennon")
+      .buildEmail("lennon@email.test")
+      .buildName("John", "Lennon")
+      .build();
 
-    ScimUser createdUser = given().port(8080).auth().preemptive().oauth2(accessToken)
-        .contentType(SCIM_CONTENT_TYPE).body(user).log().all(true).when().post("/scim/Users/")
-        .then().log().all(true).statusCode(HttpStatus.CREATED.value()).extract().as(ScimUser.class);
+    ScimUser createdUser = restUtils.doPost("/scim/Users/", user).extract().as(ScimUser.class);
 
     ScimUser updatedUser = ScimUser.builder("j.lennon").id(user.getId()).active(true).build();
 
-    given().port(8080).auth().preemptive().oauth2(accessToken).contentType(SCIM_CONTENT_TYPE)
-        .body(updatedUser).log().all(true).when().put(createdUser.getMeta().getLocation()).then()
-        .log().all(true).statusCode(HttpStatus.BAD_REQUEST.value())
-        .body("detail", containsString("scimUser.emails : may not be empty"));
+    restUtils.doPut(createdUser.getMeta().getLocation(), updatedUser, HttpStatus.BAD_REQUEST)
+      .body("detail", containsString("scimUser.emails : may not be empty"));
 
-    deleteUser(createdUser.getMeta().getLocation());
+    restUtils.doDelete(createdUser.getMeta().getLocation());
   }
 
   @Test
@@ -237,156 +228,122 @@ public class ScimUserProvisioningTests {
 
     String randomUserLocation = "http://localhost:8080/scim/Users/" + UUID.randomUUID().toString();
 
-    given().port(8080).auth().preemptive().oauth2(accessToken).contentType(SCIM_CONTENT_TYPE).when()
-        .delete(randomUserLocation).then().statusCode(HttpStatus.NOT_FOUND.value());
+    restUtils.doDelete(randomUserLocation, HttpStatus.NOT_FOUND);
 
   }
 
   @Test
   public void testUpdateUsernameChecksValidation() {
 
-    ScimUser lennon = ScimUser.builder("john_lennon").buildEmail("lennon@email.test")
-        .buildName("John", "Lennon").build();
+    ScimUser lennon = ScimUser.builder("john_lennon")
+      .buildEmail("lennon@email.test")
+      .buildName("John", "Lennon")
+      .build();
 
-    ScimUser lennonCreationResult = given().port(8080).auth().preemptive().oauth2(accessToken)
-        .contentType(SCIM_CONTENT_TYPE).body(lennon).log().all(true).when().post("/scim/Users/")
-        .then().log().all(true).statusCode(HttpStatus.CREATED.value()).extract().as(ScimUser.class);
+    ScimUser lennonCreationResult =
+        restUtils.doPost("/scim/Users/", lennon).extract().as(ScimUser.class);
 
-    ScimUser mccartney = ScimUser.builder("paul_mccartney").buildEmail("test@email.test")
-        .buildName("Paul", "McCartney").build();
+    ScimUser mccartney = ScimUser.builder("paul_mccartney")
+      .buildEmail("test@email.test")
+      .buildName("Paul", "McCartney")
+      .build();
 
-    ScimUser mccartneyCreationResult = given().port(8080).auth().preemptive().oauth2(accessToken)
-        .contentType(SCIM_CONTENT_TYPE).body(mccartney).log().all(true).when().post("/scim/Users/")
-        .then().log().all(true).statusCode(HttpStatus.CREATED.value()).extract().as(ScimUser.class);
+    ScimUser mccartneyCreationResult =
+        restUtils.doPost("/scim/Users/", mccartney).extract().as(ScimUser.class);
 
-    ScimUser lennonWantsToBeMcCartney = ScimUser.builder("paul_mccartney").id(lennon.getId())
-        .buildEmail("lennon@email.test").buildName("John", "Lennon").build();
+    ScimUser lennonWantsToBeMcCartney = ScimUser.builder("paul_mccartney")
+      .id(lennon.getId())
+      .buildEmail("lennon@email.test")
+      .buildName("John", "Lennon")
+      .build();
 
-    given().port(8080).auth().preemptive().oauth2(accessToken).contentType(SCIM_CONTENT_TYPE)
-        .body(lennonWantsToBeMcCartney).log().all(true).when()
-        .put(lennonCreationResult.getMeta().getLocation()).then().log().all(true)
-        .statusCode(HttpStatus.BAD_REQUEST.value())
-        .body("detail", equalTo("userName is already mappped to another user"));
+    restUtils
+      .doPut(lennonCreationResult.getMeta().getLocation(), lennonWantsToBeMcCartney,
+          HttpStatus.BAD_REQUEST)
+      .body("detail", equalTo("userName is already mappped to another user"));
 
-    deleteUser(lennonCreationResult.getMeta().getLocation());
-    deleteUser(mccartneyCreationResult.getMeta().getLocation());
+    restUtils.doDelete(lennonCreationResult.getMeta().getLocation());
+    restUtils.doDelete(mccartneyCreationResult.getMeta().getLocation());
 
   }
-
 
   @Test
   public void testUserCreationWithPassword() {
-    ScimUser user = ScimUser.builder("user_with_password").buildEmail("up@test.org")
-        .buildName("User", "With Password").password("a_password").active(true).build();
+    ScimUser user = ScimUser.builder("user_with_password")
+      .buildEmail("up@test.org")
+      .buildName("User", "With Password")
+      .password("a_password")
+      .active(true)
+      .build();
 
-    ScimUser creationResult = given().port(8080).auth().preemptive().oauth2(accessToken)
-        .contentType(SCIM_CONTENT_TYPE).body(user).log().all(true).when().post("/scim/Users/")
-        .then().log().all(true).statusCode(HttpStatus.CREATED.value()).extract().as(ScimUser.class);
+    ScimUser creationResult = restUtils.doPost("/scim/Users/", user).extract().as(ScimUser.class);
 
     assertNull(creationResult.getPassword());
 
-    passwordTokenGetter().scope("openid").username("user_with_password").password("a_password")
-        .getAccessToken();
+    passwordTokenGetter().scope("openid")
+      .username("user_with_password")
+      .password("a_password")
+      .getAccessToken();
 
-    deleteUser(creationResult.getMeta().getLocation());
+    restUtils.doDelete(creationResult.getMeta().getLocation());
   }
-  
-  
-  
 
   @Test
   public void testUserCreationWithOidcAccount() {
-    ScimUser user = ScimUser.builder("user_with_oidc").buildEmail("test_user@test.org")
-        .buildName("User", "With OIDC Account").buildOidcId("urn:oidc:test:issuer", "1234")
-        .active(true).build();
 
-    //@formatter:off
-    ScimUser creationResult = 
-    given()
-      .port(8080)
-      .auth().preemptive().oauth2(accessToken)
-      .contentType(SCIM_CONTENT_TYPE)
-      .body(user)
-      .log()
-        .all(true)
-    .when()
-      .post("/scim/Users/")
-    .then()
-      .log().all(true)
-      .statusCode(HttpStatus.CREATED.value())
+    ScimUser user = ScimUser.builder("user_with_oidc")
+      .buildEmail("test_user@test.org")
+      .buildName("User", "With OIDC Account")
+      .buildOidcId("urn:oidc:test:issuer", "1234")
+      .active(true)
+      .build();
+
+    ScimUser creationResult = restUtils.doPost("/scim/Users/", user)
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".oidcIds", hasSize(equalTo(1)))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".oidcIds[0].issuer",
           equalTo("urn:oidc:test:issuer"))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".oidcIds[0].subject", equalTo("1234"))
-      .extract().as(ScimUser.class);
-    
-    given()
-      .port(8080)
-      .auth().preemptive().oauth2(accessToken)
-      .log()
-        .all(true)
-    .when()
-      .get(creationResult.getMeta().getLocation())
-    .then()
-      .log()
-        .all(true)
-      .statusCode(HttpStatus.OK.value())
+      .extract()
+      .as(ScimUser.class);
+
+    restUtils.doGet(creationResult.getMeta().getLocation())
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".oidcIds", hasSize(equalTo(1)))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".oidcIds[0].issuer",
-        equalTo("urn:oidc:test:issuer"))
+          equalTo("urn:oidc:test:issuer"))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".oidcIds[0].subject", equalTo("1234"));
-    
-    deleteUser(creationResult.getMeta().getLocation());
-    // @formatter:on
 
+    restUtils.doDelete(creationResult.getMeta().getLocation());
   }
 
   @Test
   public void testUserCreationWithStolenOidcAccountFailure() {
-    ScimUser user = ScimUser.builder("user_with_oidc").buildEmail("test_user@test.org")
-        .buildName("User", "With OIDC Account").buildOidcId("urn:oidc:test:issuer", "1234")
-        .active(true).build();
 
-    //@formatter:off
-    ScimUser creationResult = 
-    given()
-      .port(8080)
-      .auth().preemptive().oauth2(accessToken)
-      .contentType(SCIM_CONTENT_TYPE)
-      .body(user)
-      .log()
-        .all(true)
-    .when()
-      .post("/scim/Users/")
-    .then()
-      .log().all(true)
-      .statusCode(HttpStatus.CREATED.value())
+    ScimUser user = ScimUser.builder("user_with_oidc")
+      .buildEmail("test_user@test.org")
+      .buildName("User", "With OIDC Account")
+      .buildOidcId("urn:oidc:test:issuer", "1234")
+      .active(true)
+      .build();
+
+    ScimUser creationResult = restUtils.doPost("/scim/Users/", user)
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".oidcIds", hasSize(equalTo(1)))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".oidcIds[0].issuer",
           equalTo("urn:oidc:test:issuer"))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".oidcIds[0].subject", equalTo("1234"))
-      .extract().as(ScimUser.class);
-    
-    ScimUser anotherUser = ScimUser.builder("another_user_with_oidc").buildEmail("another_test_user@test.org")
-        .buildName("Another User", "With OIDC Account").buildOidcId("urn:oidc:test:issuer", "1234")
-        .active(true).build();
-    
-    given()
-      .port(8080)
-      .auth().preemptive().oauth2(accessToken)
-      .contentType(SCIM_CONTENT_TYPE)
-      .body(anotherUser)
-      .log()
-        .all(true)
-    .when()
-      .post("/scim/Users/")
-    .then()
-      .log().all(true)
-      .statusCode(HttpStatus.CONFLICT.value())
-      .body("detail", equalTo("OIDC id urn:oidc:test:issuer,1234 is already mapped to another user"));
-    
-    deleteUser(creationResult.getMeta().getLocation());
-    // @formatter:on
+      .extract()
+      .as(ScimUser.class);
+
+    ScimUser anotherUser = ScimUser.builder("another_user_with_oidc")
+      .buildEmail("another_test_user@test.org")
+      .buildName("Another User", "With OIDC Account")
+      .buildOidcId("urn:oidc:test:issuer", "1234")
+      .active(true)
+      .build();
+
+    restUtils.doPost("/scim/Users/", anotherUser, HttpStatus.CONFLICT).body("detail",
+        equalTo("OIDC id urn:oidc:test:issuer,1234 is already mapped to another user"));
+
+    restUtils.doDelete(creationResult.getMeta().getLocation());
 
   }
 

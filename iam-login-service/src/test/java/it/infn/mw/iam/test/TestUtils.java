@@ -2,6 +2,9 @@ package it.infn.mw.iam.test;
 
 import static com.jayway.restassured.RestAssured.given;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,6 +14,9 @@ import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.config.ObjectMapperConfig;
 import com.jayway.restassured.config.RestAssuredConfig;
 import com.jayway.restassured.mapper.factory.Jackson2ObjectMapperFactory;
+
+import it.infn.mw.iam.api.scim.model.ScimMemberRef;
+import it.infn.mw.iam.api.scim.model.ScimUser;
 
 public class TestUtils {
 
@@ -50,6 +56,52 @@ public class TestUtils {
 
   }
 
+  public static ScimMemberRef getMemberRef(ScimUser user) {
+
+    return ScimMemberRef.builder()
+      .display(user.getDisplayName())
+      .ref(user.getMeta().getLocation())
+      .value(user.getId())
+      .build();
+  }
+
+  public static List<ScimMemberRef> buildScimMemberRefList(List<ScimUser> users) {
+
+    List<ScimMemberRef> membersRefs = new ArrayList<ScimMemberRef>();
+    for (ScimUser u : users) {
+      membersRefs.add(getMemberRef(u));
+    }
+    return membersRefs;
+  }
+  
+  public static String getX509TestCertificate() {
+
+    return "MIIEWDCCA0CgAwIBAgIDAII4MA0GCSqGSIb3DQEBCwUAMC4xCzAJBgNVBAYTAklU"
+        + "MQ0wCwYDVQQKEwRJTkZOMRAwDgYDVQQDEwdJTkZOIENBMB4XDTE1MDUxODEzNTQx"
+        + "NFoXDTE2MDUxNzEzNTQxNFowZDELMAkGA1UEBhMCSVQxDTALBgNVBAoTBElORk4x"
+        + "HTAbBgNVBAsTFFBlcnNvbmFsIENlcnRpZmljYXRlMQ0wCwYDVQQHEwRDTkFGMRgw"
+        + "FgYDVQQDEw9FbnJpY28gVmlhbmVsbG8wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAw"
+        + "ggEKAoIBAQDf74gCX/5D7HAKlI9u+vMy4R8uYvtZp60L401zOuDHc0sKPCq2sU8N"
+        + "IB8cNOC+69h+hPqbU8gcleXZ0T3KOy3NPrU7CFaOxzsCVAoDcLeKFlCMu4X1OK0V"
+        + "NPq7+fgJ1cVdsJ4StHl3oTtQPCoU6NNly8HJIufVjat2IgjNHdMHINs5IcxpTmE5"
+        + "OGae3reOfRBtqBr8UvyiTwHEEll6JpdbKjzjrcHBoOdFZTiwR18fO+B8MZLOjXSk"
+        + "OEG5p5K8y4UOkHQeqooKgW0tn7dvCxQfuu5TGYUmK6pwjcxzcnSE9U4abFh5/oD1"
+        + "PqjoCGtlvnl9nGrhAFD+qa5zq6SrgWsNAgMBAAGjggFHMIIBQzAMBgNVHRMBAf8E"
+        + "AjAAMA4GA1UdDwEB/wQEAwIEsDAdBgNVHSUEFjAUBggrBgEFBQcDAgYIKwYBBQUH"
+        + "AwQwPQYDVR0fBDYwNDAyoDCgLoYsaHR0cDovL3NlY3VyaXR5LmZpLmluZm4uaXQv"
+        + "Q0EvSU5GTkNBX2NybC5kZXIwJQYDVR0gBB4wHDAMBgorBgEEAdEjCgEHMAwGCiqG"
+        + "SIb3TAUCAgEwHQYDVR0OBBYEFIQEiwCbKssJqSBNMziZtu54ZQRCMFYGA1UdIwRP"
+        + "ME2AFNFi87N3csgu+/J5Gm83TiefE9UgoTKkMDAuMQswCQYDVQQGEwJJVDENMAsG"
+        + "A1UEChMESU5GTjEQMA4GA1UEAxMHSU5GTiBDQYIBADAnBgNVHREEIDAegRxlbnJp"
+        + "Y28udmlhbmVsbG9AY25hZi5pbmZuLml0MA0GCSqGSIb3DQEBCwUAA4IBAQBfhv9P"
+        + "4bYo7lVRYjHrxreKVaEyujzPZFowZPYMz0e/lPcdqh9TIoDBbhy7/PXiTVqQEniZ"
+        + "fU1Nso4rqBj8Qy609Y60PEFHhfLnjhvd/d+pXu6F1QTzUMwA2k7z5M+ykh7L46/z"
+        + "1vwvcdvCgtWZ+FedvLuKh7miTCfxEIRLcpRPggbC856BSKet7jPdkMxkUwbFa34Z"
+        + "qOuDQ6MvcrFA/lLgqN1c1OoE9tnf/uyOjVYq8hyXqOAhi2heE1e+s4o3/PQsaP5x"
+        + "LetVho/J33BExHo+hCMt1rN89DO5qU7FFijLlbmOZROacpjkPNn2V4wkd5WeX2dm" 
+        + "b6UoBRqPsAiQL0mY";
+  }
+  
   public static String getAccessToken(String clientId, String clientSecret, String scope) {
     return clientCredentialsTokenGetter(clientId, clientSecret).scope(scope).getAccessToken();
   }
@@ -58,16 +110,16 @@ public class TestUtils {
       String clientSecret) {
     return new AccessTokenGetter(clientId, clientSecret).grantType("client_credentials");
   }
-  
-  public static AccessTokenGetter clientCredentialsTokenGetter(){
+
+  public static AccessTokenGetter clientCredentialsTokenGetter() {
     return new AccessTokenGetter(CLIENT_CRED_GRANT_CLIENT_ID, CLIENT_CRED_GRANT_CLIENT_SECRET)
-        .grantType("client_credentials");
+      .grantType("client_credentials");
   }
 
 
   public static AccessTokenGetter passwordTokenGetter() {
     return new AccessTokenGetter(PASSWORD_GRANT_CLIENT_ID, PASSWORD_GRANT_CLIENT_SECRET)
-        .grantType("password");
+      .grantType("password");
   }
 
   public static AccessTokenGetter passwordTokenGetter(String clientId, String clientSecret) {
@@ -113,16 +165,36 @@ public class TestUtils {
 
       switch (grantType) {
         case "client_credentials":
-          return given().port(port).param("grant_type", grantType).param("client_id", clientId)
-              .param("client_secret", clientSecret).param("scope", scope).when().post("/token")
-              .then().log().all(true).statusCode(HttpStatus.OK.value()).extract()
-              .path("access_token");
+          return given().port(port)
+            .param("grant_type", grantType)
+            .param("client_id", clientId)
+            .param("client_secret", clientSecret)
+            .param("scope", scope)
+            .when()
+            .post("/token")
+            .then()
+            .log()
+            .all(true)
+            .statusCode(HttpStatus.OK.value())
+            .extract()
+            .path("access_token");
 
         case "password":
-          return given().port(port).param("grant_type", grantType).param("client_id", clientId)
-              .param("client_secret", clientSecret).param("scope", scope)
-              .param("username", username).param("password", password).when().post("/token").then()
-              .log().all(true).statusCode(HttpStatus.OK.value()).extract().path("access_token");
+          return given().port(port)
+            .param("grant_type", grantType)
+            .param("client_id", clientId)
+            .param("client_secret", clientSecret)
+            .param("scope", scope)
+            .param("username", username)
+            .param("password", password)
+            .when()
+            .post("/token")
+            .then()
+            .log()
+            .all(true)
+            .statusCode(HttpStatus.OK.value())
+            .extract()
+            .path("access_token");
 
         default:
           throw new IllegalArgumentException("Unsupported grant type: " + grantType);

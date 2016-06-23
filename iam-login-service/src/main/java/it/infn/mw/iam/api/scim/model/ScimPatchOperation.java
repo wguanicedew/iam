@@ -1,12 +1,10 @@
 package it.infn.mw.iam.api.scim.model;
 
-import org.hibernate.validator.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ScimPatchOperation<T> {
@@ -16,8 +14,8 @@ public class ScimPatchOperation<T> {
   }
 
   private final ScimPatchOperationType op;
-  @NotBlank
   private final String path;
+  @NotNull
   private final T value;
 
   @JsonCreator
@@ -32,9 +30,6 @@ public class ScimPatchOperation<T> {
   public ScimPatchOperation(Builder<T> builder) {
 
     this.op = builder.op;
-    if (builder.path == null) {
-      throw new IllegalArgumentException("scim patch operation path cannot be null");
-    }
     this.path = builder.path;
     this.value = builder.value;
   }
@@ -54,20 +49,13 @@ public class ScimPatchOperation<T> {
     return path;
   }
 
-  public static <T> Builder<T> builder() {
-    return new Builder<T>();
-  }
-
   public static class Builder<T> {
 
     ScimPatchOperationType op;
     String path;
     T value;
 
-    public Builder() {
-      op = ScimPatchOperationType.add;
-      path = "";
-    }
+    public Builder() {}
 
     public Builder<T> op(ScimPatchOperationType op) {
 
@@ -84,6 +72,24 @@ public class ScimPatchOperation<T> {
     public Builder<T> value(T val) {
 
       this.value = val;
+      return this;
+    }
+
+    public Builder<T> add() {
+
+      this.op = ScimPatchOperationType.add;
+      return this;
+    }
+
+    public Builder<T> remove() {
+
+      this.op = ScimPatchOperationType.remove;
+      return this;
+    }
+
+    public Builder<T> replace() {
+
+      this.op = ScimPatchOperationType.replace;
       return this;
     }
 
