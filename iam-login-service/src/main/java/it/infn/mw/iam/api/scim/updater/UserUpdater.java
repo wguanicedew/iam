@@ -2,9 +2,10 @@ package it.infn.mw.iam.api.scim.updater;
 
 import java.util.List;
 
-import org.junit.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.google.common.base.Preconditions;
 
 import it.infn.mw.iam.api.scim.converter.AddressConverter;
 import it.infn.mw.iam.api.scim.converter.OidcIdConverter;
@@ -137,8 +138,8 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
 
   private void patchX509Certificate(IamAccount a, ScimX509Certificate cert,
       ScimPatchOperationType action) {
-
-    Assert.assertNotNull("X509Certificate is null", cert);
+    
+    Preconditions.checkNotNull("X509Certificate is null", cert);
 
     switch (action) {
 
