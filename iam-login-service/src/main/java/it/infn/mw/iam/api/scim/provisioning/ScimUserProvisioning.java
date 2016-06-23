@@ -97,7 +97,7 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
     account.setCreationTime(creationTime);
     account.setLastUpdateTime(creationTime);
     account.setUsername(user.getUserName());
-    account.setActive(user.getActive() == null ? true : user.getActive());
+    account.setActive(user.getActive() == null ? false : user.getActive());
 
     if (account.getPassword() == null){
       account.setPassword(UUID.randomUUID().toString());
