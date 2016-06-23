@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import it.infn.mw.iam.api.scim.converter.UserConverter;
 import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
+import it.infn.mw.iam.api.scim.exception.ScimResourceExistsException;
 import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
 import it.infn.mw.iam.api.scim.model.ScimListResponse;
 import it.infn.mw.iam.api.scim.model.ScimPatchOperation;
@@ -85,20 +86,23 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
     Date creationTime = new Date();
     String uuid = UUID.randomUUID().toString();
 
+    accountRepository.findByUsername(user.getUserName()).ifPresent(a -> {
+      throw new ScimResourceExistsException("userName is already taken: " + a.getUsername());
+    });
 
     IamAccount account = converter.fromScim(user);
     account.setUuid(uuid);
     account.setCreationTime(creationTime);
     account.setLastUpdateTime(creationTime);
 
-    if (account.getPassword() == null){
+    if (account.getPassword() == null) {
       account.setPassword(UUID.randomUUID().toString());
     }
 
     authorityRepository.findByAuthority("ROLE_USER").map(a -> account.getAuthorities().add(a))
         .orElseThrow(
             () -> new IllegalStateException("ROLE_USER not found in database. This is a bug"));
-    
+
     accountRepository.save(account);
 
     return converter.toScim(account);

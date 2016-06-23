@@ -24,6 +24,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.scim.model.ScimGroup;
 import it.infn.mw.iam.test.TestUtils;
+import it.infn.mw.iam.util.JacksonUtils;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = IamLoginService.class)
@@ -37,7 +38,7 @@ public class ScimGroupProvisioningTests {
   @BeforeClass
   public static void init() {
 
-    TestUtils.initRestAssured();
+    JacksonUtils.initRestAssured();
   }
 
   @Before

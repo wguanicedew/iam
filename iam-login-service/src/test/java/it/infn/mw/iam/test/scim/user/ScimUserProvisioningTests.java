@@ -32,6 +32,7 @@ import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.scim.model.ScimConstants;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.test.TestUtils;
+import it.infn.mw.iam.util.JacksonUtils;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = IamLoginService.class)
@@ -46,7 +47,7 @@ public class ScimUserProvisioningTests {
   @BeforeClass
   public static void init() {
 
-    TestUtils.initRestAssured();
+    JacksonUtils.initRestAssured();
   }
 
   @Before
@@ -290,9 +291,8 @@ public class ScimUserProvisioningTests {
 
     deleteUser(creationResult.getMeta().getLocation());
   }
-  
-  
-  
+
+
 
   @Test
   public void testUserCreationWithOidcAccount() {
@@ -388,6 +388,42 @@ public class ScimUserProvisioningTests {
     deleteUser(creationResult.getMeta().getLocation());
     // @formatter:on
 
+  }
+
+
+  @Test
+  public void testUniqueUsernameCreationCheck() {
+    ScimUser user = ScimUser.builder("user1").buildEmail("user1@test.org").buildName("User", "1")
+        .active(true).build();
+
+    //@formatter:off
+    ScimUser creationResult = 
+    given()
+      .port(8080)
+      .auth().preemptive().oauth2(accessToken)
+      .contentType(SCIM_CONTENT_TYPE)
+      .body(user)
+      .log()
+        .all(true)
+    .when()
+      .post("/scim/Users/")
+    .then()
+      .statusCode(HttpStatus.CREATED.value())
+      .extract().as(ScimUser.class);
+    
+     given()
+          .port(8080)
+          .auth().preemptive().oauth2(accessToken)
+          .contentType(SCIM_CONTENT_TYPE)
+          .body(user)
+          .log()
+            .all(true)
+        .when()
+          .post("/scim/Users/")
+        .then()
+          .statusCode(HttpStatus.CONFLICT.value());
+     
+     deleteUser(creationResult.getMeta().getLocation());
   }
 
 }

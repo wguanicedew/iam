@@ -24,7 +24,6 @@ import org.mitre.oauth2.model.RegisteredClient;
 import org.mitre.openid.connect.client.OIDCAuthenticationFilter;
 import org.mitre.openid.connect.client.OIDCAuthenticationProvider;
 import org.mitre.openid.connect.client.service.IssuerService;
-import org.mitre.openid.connect.client.service.impl.DynamicServerConfigurationService;
 import org.mitre.openid.connect.client.service.impl.PlainAuthRequestUrlBuilder;
 import org.mitre.openid.connect.client.service.impl.StaticAuthRequestOptionsService;
 import org.mitre.openid.connect.client.service.impl.StaticClientConfigurationService;
@@ -101,11 +100,6 @@ public class IamClient {
     issuerService.setIssuer(iamClientConfig.getIssuer());
 
     return issuerService;
-  }
-
-  private DynamicServerConfigurationService dynamicServerConfiguration() {
-
-    return new DynamicServerConfigurationService();
   }
 
   private StaticClientConfigurationService staticClientConfiguration() {
