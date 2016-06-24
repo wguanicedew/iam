@@ -1,21 +1,28 @@
-# http_proxy:
-#   build: ./docker/httpd-proxy/
-#   container_name: idptestbed
-#
-# idp:
-#   build: ./docker/idp/
-#   container_name: idp
-#   environment:
-#     - JETTY_MAX_HEAP=64m
-#     - JETTY_BROWSER_SSL_KEYSTORE_PASSWORD=password
-#     - JETTY_BACKCHANNEL_SSL_KEYSTORE_PASSWORD=password
-#   expose:
-#     - "4443"
-#
-# ldap:
-#   build: ./docker/ldap/
-#   container_name: ldap
-#
-# sp:
-#   container_name: sp
-#   build: ./docker/sp/
+version: '2'
+
+services:
+  http_proxy:
+    container_name: idptestbed
+    build: 
+      context: ../docker/saml-idp/httpd-proxy/
+
+  idp:
+    container_name: idp
+    build: 
+      context: ../docker/saml-idp/idp/
+    environment:
+      - JETTY_MAX_HEAP=64m
+      - JETTY_BROWSER_SSL_KEYSTORE_PASSWORD=password
+      - JETTY_BACKCHANNEL_SSL_KEYSTORE_PASSWORD=password
+    expose:
+      - "4443"
+
+  ldap:
+    container_name: ldap
+    build: 
+      context: ../docker/saml-idp/ldap/
+
+  sp:
+    container_name: sp
+    build: 
+      context: ../docker/saml-idp/sp/
