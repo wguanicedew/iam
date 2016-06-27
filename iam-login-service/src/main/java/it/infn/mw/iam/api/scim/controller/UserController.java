@@ -1,5 +1,7 @@
 package it.infn.mw.iam.api.scim.controller;
 
+import static it.infn.mw.iam.api.scim.controller.utils.ValidationHelper.handleValidationError;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -27,8 +29,6 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 
-import it.infn.mw.iam.api.scim.controller.utils.ValidationErrorMessageHelper;
-import it.infn.mw.iam.api.scim.exception.ScimValidationException;
 import it.infn.mw.iam.api.scim.model.ScimConstants;
 import it.infn.mw.iam.api.scim.model.ScimListResponse;
 import it.infn.mw.iam.api.scim.model.ScimUser;
@@ -47,12 +47,10 @@ public class UserController {
   @Autowired
   ScimUserProvisioning userProvisioningService;
 
-  FilterProvider excludePasswordFilter = 
-      new SimpleFilterProvider()
-      .addFilter("passwordFilter",
+  FilterProvider excludePasswordFilter = new SimpleFilterProvider().addFilter("passwordFilter",
       SimpleBeanPropertyFilter.serializeAllExcept("password"));
-  
-  private Set<String> parseAttributes(String attributesParameter) {
+
+  private Set<String> parseAttributes(final String attributesParameter) {
 
     Set<String> result = new HashSet<>();
     if (!Strings.isNullOrEmpty(attributesParameter)) {
@@ -64,13 +62,6 @@ public class UserController {
     return result;
   }
 
-  private void handleValidationError(String message, BindingResult validationResult) {
-
-    if (validationResult.hasErrors()) {
-      throw new ScimValidationException(
-          ValidationErrorMessageHelper.buildValidationErrorMessage(message, validationResult));
-    }
-  }
 
   private ScimPageRequest buildPageRequest(Integer count, Integer startIndex) {
 
@@ -95,9 +86,9 @@ public class UserController {
 
   @PreAuthorize("#oauth2.hasScope('scim:read') or hasRole('ADMIN')")
   @RequestMapping(method = RequestMethod.GET, produces = ScimConstants.SCIM_CONTENT_TYPE)
-  public MappingJacksonValue listUsers(@RequestParam(required = false) Integer count,
-      @RequestParam(required = false) Integer startIndex,
-      @RequestParam(required = false) String attributes) {
+  public MappingJacksonValue listUsers(@RequestParam(required = false) final Integer count,
+      @RequestParam(required = false) final Integer startIndex,
+      @RequestParam(required = false) final String attributes) {
 
     ScimPageRequest pr = buildPageRequest(count, startIndex);
     ScimListResponse<ScimUser> result = userProvisioningService.list(pr);
@@ -128,14 +119,15 @@ public class UserController {
   @RequestMapping(method = RequestMethod.POST, consumes = ScimConstants.SCIM_CONTENT_TYPE,
       produces = ScimConstants.SCIM_CONTENT_TYPE)
   @ResponseStatus(HttpStatus.CREATED)
-  public MappingJacksonValue create(@RequestBody @Validated(ScimUser.NewUserValidation.class) ScimUser user,
-      BindingResult validationResult) {
+  public MappingJacksonValue create(
+      @RequestBody @Validated(ScimUser.NewUserValidation.class) final ScimUser user,
+      final BindingResult validationResult) {
 
     handleValidationError("Invalid Scim User", validationResult);
     ScimUser result = userProvisioningService.create(user);
-    
+
     MappingJacksonValue wrapper = new MappingJacksonValue(result);
-    
+
     return wrapper;
   }
 
@@ -144,8 +136,8 @@ public class UserController {
       consumes = ScimConstants.SCIM_CONTENT_TYPE, produces = ScimConstants.SCIM_CONTENT_TYPE)
   @ResponseStatus(HttpStatus.OK)
   public ScimUser replaceUser(@PathVariable final String id,
-      @RequestBody @Validated(ScimUser.NewUserValidation.class) ScimUser user,
-      BindingResult validationResult) {
+      @RequestBody @Validated(ScimUser.NewUserValidation.class) final ScimUser user,
+      final BindingResult validationResult) {
 
     handleValidationError("Invalid Scim User", validationResult);
 
@@ -156,9 +148,10 @@ public class UserController {
   @PreAuthorize("#oauth2.hasScope('scim:write') or hasRole('ADMIN')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH,
       consumes = ScimConstants.SCIM_CONTENT_TYPE)
+
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void updateUser(@PathVariable final String id,
-      @RequestBody ScimUserPatchRequest patchRequest) {
+      @RequestBody final ScimUserPatchRequest patchRequest) {
 
     userProvisioningService.update(id, patchRequest.getOperations());
 
