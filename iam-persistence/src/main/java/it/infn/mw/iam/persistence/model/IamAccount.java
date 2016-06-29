@@ -204,11 +204,6 @@ public class IamAccount {
 
     this.oidcIds = oidcIds;
   }
-  
-  public void addOidcId(IamOidcId oidcId){
-    getOidcIds().add(oidcId);
-    oidcId.setAccount(this);
-  }
 
   public List<IamSshKey> getSshKeys() {
 

@@ -5,49 +5,58 @@ import org.springframework.stereotype.Service;
 
 import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
 import it.infn.mw.iam.api.scim.model.ScimMemberRef;
-import it.infn.mw.iam.api.scim.model.ScimOidcId;
+import it.infn.mw.iam.api.scim.model.ScimSshKey;
 import it.infn.mw.iam.persistence.model.IamAccount;
-import it.infn.mw.iam.persistence.model.IamOidcId;
+import it.infn.mw.iam.persistence.model.IamSshKey;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
 @Service
-public class OidcIdConverter implements Converter<ScimOidcId, IamOidcId> {
+public class SshKeyConverter implements Converter<ScimSshKey, IamSshKey> {
 
   private final ScimResourceLocationProvider resourceLocationProvider;
   private final IamAccountRepository accountRepository;
 
   @Autowired
-  public OidcIdConverter(ScimResourceLocationProvider resourceLocationProvider,
-      IamAccountRepository accountRepository) {
+  public SshKeyConverter(IamAccountRepository accountRepository,
+      ScimResourceLocationProvider resourceLocationProvider) {
 
-    this.resourceLocationProvider = resourceLocationProvider;
     this.accountRepository = accountRepository;
+    this.resourceLocationProvider = resourceLocationProvider;
   }
 
   @Override
-  public IamOidcId fromScim(ScimOidcId scim) {
+  public IamSshKey fromScim(ScimSshKey scim) {
 
-    IamOidcId oidcId = new IamOidcId();
-    oidcId.setIssuer(scim.issuer);
-    oidcId.setSubject(scim.subject);
+    IamSshKey sshKey = new IamSshKey();
+    sshKey.setLabel(scim.getDisplay());
+    sshKey.setFingerprint(scim.getFingerprint());
+    sshKey.setValue(scim.getValue());
 
-    if (scim.getAccountRef() != null) {
-      oidcId.setAccount(getAccount(scim.getAccountRef().getValue()));
+    if (scim.isPrimary() != null) {
+      sshKey.setPrimary(scim.isPrimary());
     } else {
-      oidcId.setAccount(null);
+      sshKey.setPrimary(false);
     }
 
-    return oidcId;
+    if (scim.getAccountRef() != null) {
+      sshKey.setAccount(getAccount(scim.getAccountRef().getValue()));
+    } else {
+      sshKey.setAccount(null);
+    }
+
+    return sshKey;
   }
 
   @Override
-  public ScimOidcId toScim(IamOidcId entity) {
+  public ScimSshKey toScim(IamSshKey entity) {
 
-    ScimOidcId.Builder builder = ScimOidcId.builder()
-      .issuer(entity.getIssuer())
-      .subject(entity.getSubject());
-    
+    ScimSshKey.Builder builder = ScimSshKey.builder()
+      .display(entity.getLabel())
+      .primary(entity.isPrimary())
+      .value(entity.getValue());
+
     if (entity.getAccount() != null) {
+
       builder.accountRef(ScimMemberRef.builder()
         .display(entity.getAccount().getUsername())
         .value(entity.getAccount().getUuid())

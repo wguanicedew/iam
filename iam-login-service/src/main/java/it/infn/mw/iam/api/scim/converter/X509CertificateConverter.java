@@ -9,7 +9,7 @@ import it.infn.mw.iam.api.scim.model.ScimX509Certificate;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamX509Certificate;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
-import it.infn.mw.iam.util.X509Utils;
+import it.infn.mw.iam.util.x509.X509Utils;
 
 @Service
 public class X509CertificateConverter

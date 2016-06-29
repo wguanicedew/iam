@@ -21,6 +21,7 @@ import it.infn.mw.iam.api.scim.model.ScimAddress;
 import it.infn.mw.iam.api.scim.model.ScimIndigoUser;
 import it.infn.mw.iam.api.scim.model.ScimName;
 import it.infn.mw.iam.api.scim.model.ScimOidcId;
+import it.infn.mw.iam.api.scim.model.ScimSshKey;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.model.ScimUserPatchRequest;
 import it.infn.mw.iam.api.scim.model.ScimX509Certificate;
@@ -300,4 +301,43 @@ public class ScimUserProvisioningPatchTests {
     restUtils.doDelete(creationResult.getMeta().getLocation());
   }
 
+  @Test
+  public void testAddAndRemoveSshKey() {
+
+    ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John", "Lennon");
+
+    ScimUser lennon_update = ScimUser.builder()
+      .indigoUserInfo(ScimIndigoUser.builder()
+          .addSshKey(ScimSshKey.builder()
+              .display("Personal rsa key")
+              .value(TestUtils.getSshKey())
+              .build())
+          .build())
+      .build();
+
+    ScimUserPatchRequest req = getPatchAddRequest(lennon_update);
+
+    restUtils.doPatch(lennon.getMeta().getLocation(), req);
+
+    restUtils.doGet(lennon.getMeta().getLocation())
+      .body("id", equalTo(lennon.getId()))
+      .body("userName", equalTo(lennon.getUserName()))
+      .body("urn:indigo-dc:scim:schemas:IndigoUser.sshKeys[0].display",
+          equalTo(lennon_update.getIndigoUser().getSshKeys().get(0).getDisplay()))
+      .body("urn:indigo-dc:scim:schemas:IndigoUser.sshKeys[0].value",
+          equalTo(lennon_update.getIndigoUser().getSshKeys().get(0).getValue()))
+      .body("urn:indigo-dc:scim:schemas:IndigoUser.sshKeys[0].fingerprint",
+          equalTo(lennon_update.getIndigoUser().getSshKeys().get(0).getFingerprint()));
+
+    req = getPatchRemoveRequest(lennon_update);
+
+    restUtils.doPatch(lennon.getMeta().getLocation(), req, HttpStatus.NO_CONTENT);
+
+    restUtils.doGet(lennon.getMeta().getLocation())
+      .body("id", equalTo(lennon.getId()))
+      .body("userName", equalTo(lennon.getUserName()))
+      .body("urn:indigo-dc:scim:schemas:IndigoUser", equalTo(null));
+
+    restUtils.doDelete(lennon.getMeta().getLocation());
+  }
 }

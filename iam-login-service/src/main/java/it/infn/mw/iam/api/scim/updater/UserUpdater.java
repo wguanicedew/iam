@@ -1,13 +1,17 @@
 package it.infn.mw.iam.api.scim.updater;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Preconditions;
+
 import it.infn.mw.iam.api.scim.converter.AddressConverter;
 import it.infn.mw.iam.api.scim.converter.OidcIdConverter;
+import it.infn.mw.iam.api.scim.converter.SshKeyConverter;
 import it.infn.mw.iam.api.scim.converter.X509CertificateConverter;
 import it.infn.mw.iam.api.scim.exception.ScimResourceExistsException;
 import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
@@ -16,14 +20,17 @@ import it.infn.mw.iam.api.scim.model.ScimEmail;
 import it.infn.mw.iam.api.scim.model.ScimName;
 import it.infn.mw.iam.api.scim.model.ScimOidcId;
 import it.infn.mw.iam.api.scim.model.ScimPatchOperation;
+import it.infn.mw.iam.api.scim.model.ScimSshKey;
 import it.infn.mw.iam.api.scim.model.ScimPatchOperation.ScimPatchOperationType;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.model.ScimX509Certificate;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamOidcId;
+import it.infn.mw.iam.persistence.model.IamSshKey;
 import it.infn.mw.iam.persistence.model.IamX509Certificate;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamOidcIdRepository;
+import it.infn.mw.iam.persistence.repository.IamSshKeyRepository;
 import it.infn.mw.iam.persistence.repository.IamX509CertificateRepository;
 
 @Component
@@ -32,23 +39,28 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
   private final IamAccountRepository accountRepository;
   private final IamOidcIdRepository oidcIdRepository;
   private final IamX509CertificateRepository x509CertificateRepository;
+  private final IamSshKeyRepository sshKeyRepository;
 
   private final OidcIdConverter oidcIdConverter;
   private final AddressConverter addressConverter;
   private final X509CertificateConverter certificateConverter;
+  private final SshKeyConverter sshKeyConverter;
 
   @Autowired
   public UserUpdater(IamAccountRepository accountRepository, IamOidcIdRepository oidcIdRepository,
-      IamX509CertificateRepository x509CertificateRepository, OidcIdConverter oidcIdConverter,
-      AddressConverter addressConverter, X509CertificateConverter certificateConverter) {
+      IamX509CertificateRepository x509CertificateRepository, IamSshKeyRepository sshKeyRepository,
+      OidcIdConverter oidcIdConverter, AddressConverter addressConverter,
+      X509CertificateConverter certificateConverter, SshKeyConverter sshKeyConverter) {
 
     this.accountRepository = accountRepository;
     this.oidcIdRepository = oidcIdRepository;
     this.x509CertificateRepository = x509CertificateRepository;
+    this.sshKeyRepository = sshKeyRepository;
 
     this.oidcIdConverter = oidcIdConverter;
     this.addressConverter = addressConverter;
     this.certificateConverter = certificateConverter;
+    this.sshKeyConverter = sshKeyConverter;
   }
 
   public void update(IamAccount account, List<ScimPatchOperation<ScimUser>> operations) {
@@ -84,6 +96,7 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
     if (u.getIndigoUser() != null) {
 
       addOidcIdsIfNotNull(a, u.getIndigoUser().getOidcIds());
+      addSshKeysIfNotNull(a, u.getIndigoUser().getSshKeys());
     }
 
     a.touch();
@@ -97,6 +110,7 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
     if (u.getIndigoUser() != null) {
 
       removeOidcIdsIfNotNull(a, u.getIndigoUser().getOidcIds());
+      removeSshKeysIfNotNull(a, u.getIndigoUser().getSshKeys());
     }
 
     a.touch();
@@ -123,7 +137,8 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
 
   }
 
-  private void patchX509Certificates(IamAccount a, List<ScimX509Certificate> x509Certificates, ScimPatchOperationType action) {
+  private void patchX509Certificates(IamAccount a, List<ScimX509Certificate> x509Certificates,
+      ScimPatchOperationType action) {
 
     if (x509Certificates != null) {
 
@@ -238,29 +253,39 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
 
       for (ScimOidcId oidc : oidcIds) {
 
-        addOidcIdIfNotNull(a, oidc);
+        addOidcId(a, oidc);
       }
     }
   }
 
-  private void addOidcIdIfNotNull(IamAccount a, ScimOidcId oidcId) {
+  private void addOidcId(IamAccount owner, ScimOidcId oidcIdToAdd) {
 
-    if (oidcId != null) {
+    Preconditions.checkNotNull(oidcIdToAdd, "Error: OpenID account to add is null");
 
-      IamOidcId current = oidcIdConverter.fromScim(oidcId);
+    Optional<IamAccount> oidcAccount =
+        accountRepository.findByOidcId(oidcIdToAdd.getIssuer(), oidcIdToAdd.getSubject());
 
-      if (current.getAccount() == null) {
+    if (oidcAccount.isPresent()) {
 
-        current.setAccount(a);
-        oidcIdRepository.save(current);
+      if (oidcAccount.get().getUuid().equals(owner.getUuid())) {
 
-        a.getOidcIds().add(current);
+        return;
 
-      } else if (current.getAccount().getUuid() != a.getUuid()) {
+      } else {
 
-        throw new ScimResourceExistsException("Cannot add OpenID Connect account to user "
-            + a.getUsername() + " because it's already associated to another user");
+        throw new ScimResourceExistsException(
+            String.format("OpenID account {},{} is already mapped to another user",
+                oidcIdToAdd.getIssuer(), oidcIdToAdd.getSubject()));
+
       }
+
+    } else {
+
+      IamOidcId oidcIdToCreate = oidcIdConverter.fromScim(oidcIdToAdd);
+      oidcIdToCreate.setAccount(owner);
+      oidcIdRepository.save(oidcIdToCreate);
+
+      owner.getOidcIds().add(oidcIdToCreate);
     }
   }
 
@@ -270,26 +295,129 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
 
       for (ScimOidcId oidc : oidcIds) {
 
-        removeOidcIdIfNotNull(a, oidc);
+        removeOidcId(a, oidc);
       }
     }
   }
 
-  private void removeOidcIdIfNotNull(IamAccount a, ScimOidcId oidcId) {
+  private void removeOidcId(IamAccount owner, ScimOidcId oidcIdToRemove) {
 
-    if (oidcId != null) {
+    Preconditions.checkNotNull(oidcIdToRemove, "Error: OpenID account to remove is null");
 
-      IamOidcId current = oidcIdConverter.fromScim(oidcId);
+    Optional<IamAccount> oidcAccount =
+        accountRepository.findByOidcId(oidcIdToRemove.getIssuer(), oidcIdToRemove.getSubject());
 
-      if (current.getAccount() != null && current.getAccount().getUuid() == a.getUuid()) {
+    if (oidcAccount.isPresent()) {
 
-        oidcIdRepository.delete(current);
-        a.getOidcIds().remove(current);
+      if (oidcAccount.get().getUuid().equals(owner.getUuid())) {
+
+        /* remove */
+        IamOidcId toRemove = oidcIdRepository
+          .findByIssuerAndSubject(oidcIdToRemove.getIssuer(), oidcIdToRemove.getSubject())
+          .orElseThrow(() -> new ScimResourceNotFoundException(
+              String.format("No Open ID connect account found for {},{}",
+                  oidcIdToRemove.getSubject(), oidcIdToRemove.getIssuer())));
+
+        oidcIdRepository.delete(toRemove);
+        owner.getOidcIds().remove(toRemove);
 
       } else {
-        throw new ScimResourceNotFoundException("User " + a.getUsername() + " has no ("
-            + oidcId.issuer + ", " + oidcId.subject + ") oidc account to remove!");
+
+        throw new ScimResourceExistsException(
+            String.format("OpenID account {},{} is already mapped to another user",
+                oidcIdToRemove.getIssuer(), oidcIdToRemove.getSubject()));
+
       }
+
+    } else {
+
+      throw new ScimResourceNotFoundException(
+          String.format("User {} has no ({},{}) oidc account to remove!", owner.getUsername(),
+              oidcIdToRemove.issuer, oidcIdToRemove.subject));
+    }
+  }
+
+  private void addSshKeysIfNotNull(IamAccount a, List<ScimSshKey> sshKeys) {
+
+    if (sshKeys != null) {
+
+      for (ScimSshKey sshKey : sshKeys) {
+
+        addSshKey(a, sshKey);
+      }
+    }
+  }
+
+  private void addSshKey(IamAccount owner, ScimSshKey sshKey) {
+
+    Preconditions.checkNotNull(sshKey, "Error: SSH key to add is null");
+
+    Optional<IamAccount> oidcAccount = accountRepository.findBySshKey(sshKey.getFingerprint());
+
+    if (oidcAccount.isPresent()) {
+
+      if (oidcAccount.get().getUuid().equals(owner.getUuid())) {
+
+        return;
+
+      } else {
+
+        throw new ScimResourceExistsException(
+            String.format("Ssh key {} is already mapped to another user", sshKey.getFingerprint()));
+
+      }
+
+    } else {
+
+      IamSshKey sshKeyToCreate = sshKeyConverter.fromScim(sshKey);
+      sshKeyToCreate.setAccount(owner);
+      sshKeyRepository.save(sshKeyToCreate);
+
+      owner.getSshKeys().add(sshKeyToCreate);
+    }
+  }
+
+  private void removeSshKeysIfNotNull(IamAccount a, List<ScimSshKey> sshKeys) {
+
+    if (sshKeys != null) {
+
+      for (ScimSshKey sshKey : sshKeys) {
+
+        removeSshKey(a, sshKey);
+      }
+    }
+  }
+
+  private void removeSshKey(IamAccount owner, ScimSshKey sshKeyToRemove) {
+
+    Preconditions.checkNotNull(sshKeyToRemove, "Error: ssh key to remove is null");
+
+    Optional<IamAccount> oidcAccount =
+        accountRepository.findBySshKey(sshKeyToRemove.getFingerprint());
+
+    if (oidcAccount.isPresent()) {
+
+      if (oidcAccount.get().getUuid().equals(owner.getUuid())) {
+
+        /* remove */
+        IamSshKey toRemove = sshKeyRepository.findByFingerprint(sshKeyToRemove.getFingerprint())
+          .orElseThrow(() -> new ScimResourceNotFoundException(
+              String.format("No ssh key found for {},{}", sshKeyToRemove.getFingerprint())));
+
+        sshKeyRepository.delete(toRemove);
+        owner.getSshKeys().remove(toRemove);
+
+      } else {
+
+        throw new ScimResourceExistsException(String
+          .format("Ssh key {} is already mapped to another user", sshKeyToRemove.getFingerprint()));
+
+      }
+
+    } else {
+
+      throw new ScimResourceNotFoundException(String.format("User {} has no {} ssh key to remove!",
+          owner.getUsername(), sshKeyToRemove.getFingerprint()));
     }
   }
 }

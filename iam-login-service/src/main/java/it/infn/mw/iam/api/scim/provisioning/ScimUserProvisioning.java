@@ -13,9 +13,12 @@ import org.springframework.stereotype.Service;
 import it.infn.mw.iam.api.scim.converter.AddressConverter;
 import it.infn.mw.iam.api.scim.converter.UserConverter;
 import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
+import it.infn.mw.iam.api.scim.exception.ScimResourceExistsException;
 import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
 import it.infn.mw.iam.api.scim.model.ScimListResponse;
+import it.infn.mw.iam.api.scim.model.ScimOidcId;
 import it.infn.mw.iam.api.scim.model.ScimPatchOperation;
+import it.infn.mw.iam.api.scim.model.ScimSshKey;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.provisioning.paging.OffsetPageable;
 import it.infn.mw.iam.api.scim.provisioning.paging.ScimPageRequest;
@@ -24,6 +27,8 @@ import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamUserInfo;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamAuthoritiesRepository;
+import it.infn.mw.iam.persistence.repository.IamOidcIdRepository;
+import it.infn.mw.iam.persistence.repository.IamSshKeyRepository;
 
 @Service
 public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser> {
@@ -34,18 +39,22 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
   private final UserUpdater updater;
 
   private final IamAccountRepository accountRepository;
+  private final IamOidcIdRepository oidcIdRepository;
+  private final IamSshKeyRepository sshKeyRepository;
 
   private final IamAuthoritiesRepository authorityRepository;
 
   @Autowired
   public ScimUserProvisioning(UserConverter converter, AddressConverter addressConverter,
-      UserUpdater updater, IamAccountRepository accountRepo,
-      IamAuthoritiesRepository authorityRepo) {
+      UserUpdater updater, IamAccountRepository accountRepo, IamOidcIdRepository oidcIdRepository,
+      IamSshKeyRepository sshKeyRepository, IamAuthoritiesRepository authorityRepo) {
 
     this.converter = converter;
     this.addressConverter = addressConverter;
     this.updater = updater;
     this.accountRepository = accountRepo;
+    this.oidcIdRepository = oidcIdRepository;
+    this.sshKeyRepository = sshKeyRepository;
     this.authorityRepository = authorityRepo;
 
   }
@@ -67,7 +76,7 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
     idSanityChecks(id);
 
     IamAccount account = accountRepository.findByUuid(id)
-        .orElseThrow(() -> new ScimResourceNotFoundException("No user mapped to id '" + id + "'"));
+      .orElseThrow(() -> new ScimResourceNotFoundException("No user mapped to id '" + id + "'"));
 
     return converter.toScim(account);
 
@@ -79,7 +88,7 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
     idSanityChecks(id);
 
     IamAccount account = accountRepository.findByUuid(id)
-        .orElseThrow(() -> new ScimResourceNotFoundException("No user mapped to id '" + id + "'"));
+      .orElseThrow(() -> new ScimResourceNotFoundException("No user mapped to id '" + id + "'"));
 
     accountRepository.delete(account);
 
@@ -87,6 +96,8 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
 
   @Override
   public ScimUser create(ScimUser user) {
+
+    checkUniqueness(user);
 
     Date creationTime = new Date();
 
@@ -99,13 +110,14 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
     account.setUsername(user.getUserName());
     account.setActive(user.getActive() == null ? false : user.getActive());
 
-    if (account.getPassword() == null){
+    if (account.getPassword() == null) {
       account.setPassword(UUID.randomUUID().toString());
     }
 
-    authorityRepository.findByAuthority("ROLE_USER").map(a -> account.getAuthorities().add(a))
-        .orElseThrow(
-            () -> new IllegalStateException("ROLE_USER not found in database. This is a bug"));
+    authorityRepository.findByAuthority("ROLE_USER")
+      .map(a -> account.getAuthorities().add(a))
+      .orElseThrow(
+          () -> new IllegalStateException("ROLE_USER not found in database. This is a bug"));
 
     IamUserInfo userInfo = new IamUserInfo();
 
@@ -153,10 +165,10 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
   public ScimUser replace(String id, ScimUser scimItemToBeUpdated) {
 
     IamAccount existingAccount = accountRepository.findByUuid(id)
-        .orElseThrow(() -> new ScimResourceNotFoundException("No user mapped to id '" + id + "'"));
+      .orElseThrow(() -> new ScimResourceNotFoundException("No user mapped to id '" + id + "'"));
 
     if (accountRepository.findByUsernameWithDifferentId(scimItemToBeUpdated.getUserName(), id)
-        .isPresent()) {
+      .isPresent()) {
       throw new IllegalArgumentException("userName is already mappped to another user");
     }
 
@@ -187,10 +199,40 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
   public void update(String id, List<ScimPatchOperation<ScimUser>> operations) {
 
     IamAccount iamAccount = accountRepository.findByUuid(id)
-        .orElseThrow(() -> new ScimResourceNotFoundException("No user mapped to id '" + id + "'"));
+      .orElseThrow(() -> new ScimResourceNotFoundException("No user mapped to id '" + id + "'"));
 
     updater.update(iamAccount, operations);
 
+  }
+
+  private void checkUniqueness(ScimUser user) {
+
+    if (user.getIndigoUser() != null) {
+
+      if (user.getIndigoUser().getOidcIds() != null) {
+
+        for (ScimOidcId oidcid : user.getIndigoUser().getOidcIds()) {
+
+          if (oidcIdRepository.findByIssuerAndSubject(oidcid.getIssuer(), oidcid.getSubject())
+            .isPresent()) {
+
+            throw new ScimResourceExistsException("OIDC id " + oidcid.getIssuer() + ","
+                + oidcid.getSubject() + " is already mapped to another user");
+          }
+        }
+
+        for (ScimSshKey sshKey : user.getIndigoUser().getSshKeys()) {
+
+          if (sshKeyRepository.findByFingerprint(sshKey.getFingerprint()).isPresent()) {
+
+            throw new ScimResourceExistsException(
+                "ssh key " + sshKey.getFingerprint() + " is already mapped to another user");
+          }
+        }
+
+      }
+
+    }
   }
 
 }

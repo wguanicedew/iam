@@ -201,4 +201,24 @@ public class TestUtils {
       }
     }
   }
+  
+  public static String getSshKey() {
+    
+    return "AAAAB3NzaC1yc2EAAAABIwAAAQEAxL6nllg/rMURT2QTy4MGj0gxYQ6sxcqCde5orLBs4rjIogo9bL7+HFLt6FHpCQbZ0CXakoL2M7PmXbFdwlD4Yw4ye4VxEaW3J1eNzRMWMGNTaAlcGiQqDuS/SsxI6SOlp/kfXQprDn2MnED1jIQHQq5pm25wKpKYeUBAaC6hvA4OlE39YpMCsVPEM3BhkR7F51I/60+5jV5P/g0arCnZKYJOnLmNpYc86ry8yydQMvD5HFBjRR8GRfvTU/0UcVtNsa1PzHTD7+lTA7iwDHX4cfe+4o38C850zU9yUMV+SnlLMJhwBiCxaaqeU0SdBbG+nCL47drSlSvv85+baXftSw==";
+  }
+  
+  public static String getSshKeyMD5Fingerprint() {
+    
+    return "265af5c556421a4e9432f65e48b37d91";
+  }
+  
+  public static String getSshKeyFormattedMD5Fingerprint() {
+    
+    return "26:5a:f5:c5:56:42:1a:4e:94:32:f6:5e:48:b3:7d:91";
+  }
+  
+  public static String getSshKeySHA256Fingerprint() {
+    
+    return "dowJH1al1DJII+i7DYux1BGQkx3P+XVpaz3TIX5zt5Y=";
+  }
 }

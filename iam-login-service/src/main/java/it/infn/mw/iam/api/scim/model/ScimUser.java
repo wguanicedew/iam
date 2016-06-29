@@ -383,6 +383,17 @@ public class ScimUser extends ScimResource {
       indigoUser.getOidcIds().add(oidcId);
       return this;
     }
+    
+    public Builder buildSshKey(String label, String key) {
+      if (indigoUser == null) {
+        indigoUser = ScimIndigoUser.builder().build();
+      }
+
+      ScimSshKey sshKey = ScimSshKey.builder().display(label).value(key).build();
+
+      indigoUser.getSshKeys().add(sshKey);
+      return this;
+    }
 
     public ScimUser build() {
 
