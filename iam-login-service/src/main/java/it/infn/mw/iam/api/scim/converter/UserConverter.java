@@ -3,6 +3,7 @@ package it.infn.mw.iam.api.scim.converter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import it.infn.mw.iam.api.scim.exception.ScimException;
 import it.infn.mw.iam.api.scim.exception.ScimResourceExistsException;
 import it.infn.mw.iam.api.scim.model.ScimAddress;
 import it.infn.mw.iam.api.scim.model.ScimEmail;
@@ -20,6 +21,8 @@ import it.infn.mw.iam.persistence.model.IamOidcId;
 import it.infn.mw.iam.persistence.model.IamSshKey;
 import it.infn.mw.iam.persistence.model.IamUserInfo;
 import it.infn.mw.iam.persistence.model.IamX509Certificate;
+import it.infn.mw.iam.util.ssh.InvalidSshKeyException;
+import it.infn.mw.iam.util.ssh.RSAPublicKey;
 
 @Service
 public class UserConverter implements Converter<ScimUser, IamAccount> {
@@ -99,6 +102,16 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
       for (ScimSshKey sshKey : scimUser.getIndigoUser().getSshKeys()) {
         IamSshKey iamSshKey = sshKeyConverter.fromScim(sshKey);
 
+        if (iamSshKey.getFingerprint() == null && iamSshKey.getValue() != null) {
+
+          try {
+            RSAPublicKey key = new RSAPublicKey(iamSshKey.getValue());
+            iamSshKey.setFingerprint(key.getSHA256Fingerprint());
+          } catch (InvalidSshKeyException e) {
+            throw new ScimException(e.getMessage());
+          }
+        }
+
         if (iamSshKey.getAccount() != null) {
           if (account.getUuid() != iamSshKey.getAccount().getUuid()) {
 
@@ -109,7 +122,7 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
             throw new ScimResourceExistsException(errorMessage);
           }
         } else {
-          
+
           iamSshKey.setAccount(account);
         }
         account.getSshKeys().add(iamSshKey);

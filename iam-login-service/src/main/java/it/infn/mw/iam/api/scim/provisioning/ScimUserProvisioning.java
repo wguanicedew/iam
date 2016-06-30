@@ -16,19 +16,20 @@ import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
 import it.infn.mw.iam.api.scim.exception.ScimResourceExistsException;
 import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
 import it.infn.mw.iam.api.scim.model.ScimListResponse;
-import it.infn.mw.iam.api.scim.model.ScimOidcId;
 import it.infn.mw.iam.api.scim.model.ScimPatchOperation;
-import it.infn.mw.iam.api.scim.model.ScimSshKey;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.provisioning.paging.OffsetPageable;
 import it.infn.mw.iam.api.scim.provisioning.paging.ScimPageRequest;
 import it.infn.mw.iam.api.scim.updater.UserUpdater;
 import it.infn.mw.iam.persistence.model.IamAccount;
+import it.infn.mw.iam.persistence.model.IamOidcId;
+import it.infn.mw.iam.persistence.model.IamSshKey;
 import it.infn.mw.iam.persistence.model.IamUserInfo;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamAuthoritiesRepository;
 import it.infn.mw.iam.persistence.repository.IamOidcIdRepository;
 import it.infn.mw.iam.persistence.repository.IamSshKeyRepository;
+import it.infn.mw.iam.util.ssh.RSAPublicKey;
 
 @Service
 public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser> {
@@ -97,8 +98,6 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
   @Override
   public ScimUser create(ScimUser user) {
 
-    checkUniqueness(user);
-
     Date creationTime = new Date();
 
     String uuid = UUID.randomUUID().toString();
@@ -136,9 +135,66 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
     }
     account.setUserInfo(userInfo);
 
+    if (account.hasOidcIds()) {
+
+      account.getOidcIds().forEach((oidcId) -> {
+        checkOidcIdNotExists(oidcId);
+      });
+    }
+    
+    if (account.hasSshKeys()) {
+
+      account.getSshKeys().forEach((sshKey) -> {
+        checkSshKeyNotExists(sshKey);
+      });
+
+      if (!account.getSshKeys()
+        .stream()
+        .filter(sshKey -> sshKey.isPrimary())
+        .findFirst()
+        .isPresent()) {
+
+        account.getSshKeys().forEach(sshKey -> sshKey.setPrimary(false));
+        account.getSshKeys().get(0).setPrimary(true);
+      }
+    }
+    
+    if (account.hasSamlIds()) {
+      // TO-DO
+    }
+
     accountRepository.save(account);
 
     return converter.toScim(account);
+  }
+
+  private void checkOidcIdNotExists(IamOidcId oidcId) {
+
+    if (oidcIdRepository.findByIssuerAndSubject(oidcId.getIssuer(), oidcId.getSubject())
+      .isPresent()) {
+
+      throw new ScimResourceExistsException("OIDC id " + oidcId.getIssuer() + ","
+          + oidcId.getSubject() + " is already mapped to another user");
+    }
+
+  }
+
+  private void checkSshKeyNotExists(IamSshKey sshKey) {
+
+    /* Generate fingerprint if null */
+    if (sshKey.getFingerprint() == null && sshKey.getValue() != null) {
+      
+      RSAPublicKey key = new RSAPublicKey(sshKey.getValue());
+      sshKey.setFingerprint(key.getSHA256Fingerprint());
+      
+    }
+
+    if (sshKeyRepository.findByFingerprint(sshKey.getFingerprint()).isPresent()) {
+
+      throw new ScimResourceExistsException(
+          "ssh key " + sshKey.getFingerprint() + " is already mapped to another user");
+    }
+
   }
 
   @Override
@@ -203,36 +259,6 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
 
     updater.update(iamAccount, operations);
 
-  }
-
-  private void checkUniqueness(ScimUser user) {
-
-    if (user.getIndigoUser() != null) {
-
-      if (user.getIndigoUser().getOidcIds() != null) {
-
-        for (ScimOidcId oidcid : user.getIndigoUser().getOidcIds()) {
-
-          if (oidcIdRepository.findByIssuerAndSubject(oidcid.getIssuer(), oidcid.getSubject())
-            .isPresent()) {
-
-            throw new ScimResourceExistsException("OIDC id " + oidcid.getIssuer() + ","
-                + oidcid.getSubject() + " is already mapped to another user");
-          }
-        }
-
-        for (ScimSshKey sshKey : user.getIndigoUser().getSshKeys()) {
-
-          if (sshKeyRepository.findByFingerprint(sshKey.getFingerprint()).isPresent()) {
-
-            throw new ScimResourceExistsException(
-                "ssh key " + sshKey.getFingerprint() + " is already mapped to another user");
-          }
-        }
-
-      }
-
-    }
   }
 
 }

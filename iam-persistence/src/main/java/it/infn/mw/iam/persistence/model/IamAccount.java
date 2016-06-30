@@ -22,6 +22,8 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 
+import com.google.common.base.Preconditions;
+
 /**
  * 
  *
@@ -61,14 +63,14 @@ public class IamAccount {
 
   @ManyToMany
   @JoinTable(name = "iam_account_authority",
-      joinColumns = @JoinColumn(name = "account_id", referencedColumnName = "id") ,
-      inverseJoinColumns = @JoinColumn(name = "authority_id", referencedColumnName = "id") )
+      joinColumns = @JoinColumn(name = "account_id", referencedColumnName = "id"),
+      inverseJoinColumns = @JoinColumn(name = "authority_id", referencedColumnName = "id"))
   private Set<IamAuthority> authorities = new HashSet<>();
 
   @ManyToMany
   @JoinTable(name = "iam_account_group",
-      joinColumns = @JoinColumn(name = "account_id", referencedColumnName = "id") ,
-      inverseJoinColumns = @JoinColumn(name = "group_id", referencedColumnName = "id") )
+      joinColumns = @JoinColumn(name = "account_id", referencedColumnName = "id"),
+      inverseJoinColumns = @JoinColumn(name = "group_id", referencedColumnName = "id"))
   private Set<IamGroup> groups = new HashSet<>();
 
   @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
@@ -192,6 +194,7 @@ public class IamAccount {
 
   public void setSamlIds(List<IamSamlId> samlIds) {
 
+    Preconditions.checkNotNull(samlIds);
     this.samlIds = samlIds;
   }
 
@@ -202,6 +205,7 @@ public class IamAccount {
 
   public void setOidcIds(List<IamOidcId> oidcIds) {
 
+    Preconditions.checkNotNull(oidcIds);
     this.oidcIds = oidcIds;
   }
 
@@ -212,6 +216,7 @@ public class IamAccount {
 
   public void setSshKeys(List<IamSshKey> sshKeys) {
 
+    Preconditions.checkNotNull(sshKeys);
     this.sshKeys = sshKeys;
   }
 
@@ -222,7 +227,23 @@ public class IamAccount {
 
   public void setX509Certificates(List<IamX509Certificate> x509Certificates) {
 
+    Preconditions.checkNotNull(x509Certificates);
     this.x509Certificates = x509Certificates;
+  }
+
+  public boolean hasOidcIds() {
+
+    return !oidcIds.isEmpty();
+  }
+
+  public boolean hasSshKeys() {
+
+    return !sshKeys.isEmpty();
+  }
+
+  public boolean hasSamlIds() {
+
+    return !samlIds.isEmpty();
   }
 
   public void touch() {

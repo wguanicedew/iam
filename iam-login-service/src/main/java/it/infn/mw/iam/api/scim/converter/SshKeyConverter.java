@@ -53,7 +53,8 @@ public class SshKeyConverter implements Converter<ScimSshKey, IamSshKey> {
     ScimSshKey.Builder builder = ScimSshKey.builder()
       .display(entity.getLabel())
       .primary(entity.isPrimary())
-      .value(entity.getValue());
+      .value(entity.getValue())
+      .fingerprint(entity.getFingerprint());
 
     if (entity.getAccount() != null) {
 

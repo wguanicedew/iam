@@ -56,14 +56,11 @@ public class ScimUser extends ScimResource {
 
   @JsonCreator
   private ScimUser(@JsonProperty("id") String id, @JsonProperty("externalId") String externalId,
-      @JsonProperty("meta") ScimMeta meta, 
-      @JsonProperty("schemas") Set<String> schemas,
-      @JsonProperty("userName") String userName, 
-      @JsonProperty("password") String password,
-      @JsonProperty("name") ScimName name,
-      @JsonProperty("displayName") String displayName, @JsonProperty("nickName") String nickName,
-      @JsonProperty("profileUrl") String profileUrl, @JsonProperty("title") String title,
-      @JsonProperty("userType") String userType,
+      @JsonProperty("meta") ScimMeta meta, @JsonProperty("schemas") Set<String> schemas,
+      @JsonProperty("userName") String userName, @JsonProperty("password") String password,
+      @JsonProperty("name") ScimName name, @JsonProperty("displayName") String displayName,
+      @JsonProperty("nickName") String nickName, @JsonProperty("profileUrl") String profileUrl,
+      @JsonProperty("title") String title, @JsonProperty("userType") String userType,
       @JsonProperty("preferredLanguage") String preferredLanguage,
       @JsonProperty("locale") String locale, @JsonProperty("timezone") String timezone,
       @JsonProperty("active") Boolean active, @JsonProperty("emails") List<ScimEmail> emails,
@@ -198,6 +195,24 @@ public class ScimUser extends ScimResource {
   public List<ScimGroupRef> getGroups() {
 
     return groups;
+  }
+
+  public boolean hasOidcIds() {
+
+    return indigoUser != null && indigoUser.getOidcIds() != null
+        && !indigoUser.getOidcIds().isEmpty();
+  }
+
+  public boolean hasSshKeys() {
+
+    return indigoUser != null && indigoUser.getSshKeys() != null
+        && !indigoUser.getSshKeys().isEmpty();
+  }
+
+  public boolean hasSamlIds() {
+
+    return indigoUser != null && indigoUser.getSamlIds() != null
+        && !indigoUser.getSamlIds().isEmpty();
   }
 
   public static Builder builder(String uuid) {
@@ -383,7 +398,7 @@ public class ScimUser extends ScimResource {
       indigoUser.getOidcIds().add(oidcId);
       return this;
     }
-    
+
     public Builder buildSshKey(String label, String key) {
       if (indigoUser == null) {
         indigoUser = ScimIndigoUser.builder().build();

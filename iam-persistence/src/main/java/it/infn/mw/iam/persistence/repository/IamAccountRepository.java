@@ -26,7 +26,13 @@ public interface IamAccountRepository extends PagingAndSortingRepository<IamAcco
       @Param("subject") String subject);
 
   @Query("select a from IamAccount a join a.sshKeys sk where sk.fingerprint = :fingerprint")
-  Optional<IamAccount> findBySshKey(@Param("fingerprint") String fingerprint);
+  Optional<IamAccount> findBySshKeyFingerprint(@Param("fingerprint") String fingerprint);
+
+  @Query("select a from IamAccount a join a.sshKeys sk where sk.label = :label")
+  Optional<IamAccount> findBySshKeyLabel(@Param("label") String label);
+
+  @Query("select a from IamAccount a join a.sshKeys sk where sk.value = :value")
+  Optional<IamAccount> findBySshKeyValue(@Param("value") String value);
 
   @Query("select a from IamAccount a join a.userInfo ui where ui.email = :emailAddress")
   Optional<IamAccount> findByEmail(@Param("emailAddress") String emailAddress);

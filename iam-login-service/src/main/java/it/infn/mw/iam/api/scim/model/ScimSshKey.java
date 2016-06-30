@@ -10,14 +10,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
-import it.infn.mw.iam.api.scim.exception.ScimException;
-import it.infn.mw.iam.util.ssh.InvalidSshKeyException;
-import it.infn.mw.iam.util.ssh.RSAPublicKey;
+import it.infn.mw.iam.api.scim.model.ScimUser.NewUserValidation;
 
 @JsonInclude(Include.NON_EMPTY)
 public class ScimSshKey {
 
   @Length(max = 36)
+  @NotBlank(groups = {NewUserValidation.class})
   private final String display;
 
   private final Boolean primary;
@@ -25,14 +24,11 @@ public class ScimSshKey {
   @Length(max = 48)
   private String fingerprint;
 
-  @NotBlank
+  @NotBlank(groups = {NewUserValidation.class})
   private final String value;
 
   @JsonIgnore
   private ScimMemberRef accountRef;
-
-  @JsonIgnore
-  private RSAPublicKey key;
 
   @JsonCreator
   private ScimSshKey(@JsonProperty("display") String display,
@@ -41,24 +37,8 @@ public class ScimSshKey {
 
     this.display = display;
     this.value = value;
-    if (value == null) {
-      throw new IllegalArgumentException("ScimSshKey value cannot be null");
-    }
     this.primary = primary;
-    try {
-      this.key = new RSAPublicKey(value);
-    } catch (InvalidSshKeyException e) {
-      throw new ScimException(e.getMessage());
-    }
-    if (fingerprint != null) {
-      if (!fingerprint.equals(key.getSHA256Fingerprint())) {
-        throw new ScimException(
-            "Cannot assign fingerprint " + fingerprint + " to the ssh key " + key);
-      }
-      this.fingerprint = fingerprint;
-    } else {
-      this.fingerprint = key.getSHA256Fingerprint();
-    }
+    this.fingerprint = fingerprint;
   }
 
   public String getDisplay() {
@@ -92,20 +72,7 @@ public class ScimSshKey {
     this.display = b.display;
     this.primary = b.primary;
     this.value = b.value;
-    try {
-      this.key = new RSAPublicKey(value);
-    } catch (InvalidSshKeyException e) {
-      throw new ScimException(e.getMessage());
-    }
-    if (b.fingerprint != null) {
-      if (!b.fingerprint.equals(this.key.getSHA256Fingerprint())) {
-        throw new ScimException(
-            "Cannot assign fingerprint " + fingerprint + " to the ssh key " + value);
-      }
-      this.fingerprint = b.fingerprint;
-    } else {
-      this.fingerprint = key.getSHA256Fingerprint();
-    }
+    this.fingerprint = b.fingerprint;
     this.accountRef = b.accountRef;
   }
 

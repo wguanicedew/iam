@@ -13,6 +13,7 @@ import it.infn.mw.iam.api.scim.converter.AddressConverter;
 import it.infn.mw.iam.api.scim.converter.OidcIdConverter;
 import it.infn.mw.iam.api.scim.converter.SshKeyConverter;
 import it.infn.mw.iam.api.scim.converter.X509CertificateConverter;
+import it.infn.mw.iam.api.scim.exception.ScimException;
 import it.infn.mw.iam.api.scim.exception.ScimResourceExistsException;
 import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
 import it.infn.mw.iam.api.scim.model.ScimAddress;
@@ -32,6 +33,7 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamOidcIdRepository;
 import it.infn.mw.iam.persistence.repository.IamSshKeyRepository;
 import it.infn.mw.iam.persistence.repository.IamX509CertificateRepository;
+import it.infn.mw.iam.util.ssh.RSAPublicKey;
 
 @Component
 public class UserUpdater implements Updater<IamAccount, ScimUser> {
@@ -348,15 +350,16 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
     }
   }
 
-  private void addSshKey(IamAccount owner, ScimSshKey sshKey) {
+  private void addSshKey(IamAccount owner, ScimSshKey sshKey) throws ScimException {
 
     Preconditions.checkNotNull(sshKey, "Error: SSH key to add is null");
+    Preconditions.checkNotNull(sshKey.getValue(), "Unable to add ssh key with key value null");
 
-    Optional<IamAccount> oidcAccount = accountRepository.findBySshKey(sshKey.getFingerprint());
+    Optional<IamAccount> sshKeyAccount = accountRepository.findBySshKeyValue(sshKey.getValue());
 
-    if (oidcAccount.isPresent()) {
+    if (sshKeyAccount.isPresent()) {
 
-      if (oidcAccount.get().getUuid().equals(owner.getUuid())) {
+      if (sshKeyAccount.get().getUuid().equals(owner.getUuid())) {
 
         return;
 
@@ -371,6 +374,14 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
 
       IamSshKey sshKeyToCreate = sshKeyConverter.fromScim(sshKey);
       sshKeyToCreate.setAccount(owner);
+
+      RSAPublicKey key = new RSAPublicKey(sshKey.getValue());
+      sshKeyToCreate.setFingerprint(key.getSHA256Fingerprint());
+
+      if (sshKeyToCreate.getLabel() == null) {
+        sshKeyToCreate.setLabel(owner.getUsername() + "'s personal ssh key");
+      }
+
       sshKeyRepository.save(sshKeyToCreate);
 
       owner.getSshKeys().add(sshKeyToCreate);
@@ -392,20 +403,33 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
 
     Preconditions.checkNotNull(sshKeyToRemove, "Error: ssh key to remove is null");
 
-    Optional<IamAccount> oidcAccount =
-        accountRepository.findBySshKey(sshKeyToRemove.getFingerprint());
+    Optional<IamSshKey> iamSshKey;
 
-    if (oidcAccount.isPresent()) {
+    if (sshKeyToRemove.getFingerprint() != null) {
 
-      if (oidcAccount.get().getUuid().equals(owner.getUuid())) {
+      iamSshKey = sshKeyRepository.findByFingerprint(sshKeyToRemove.getFingerprint());
+
+    } else if (sshKeyToRemove.getDisplay() != null) {
+
+      iamSshKey = sshKeyRepository.findByLabel(sshKeyToRemove.getDisplay());
+
+    } else if (sshKeyToRemove.getValue() != null) {
+
+      iamSshKey = sshKeyRepository.findByValue(sshKeyToRemove.getValue());
+
+    } else {
+
+      throw new ScimException(
+          "Unable to load ssh key from persistence with " + sshKeyToRemove.toString());
+    }
+
+    if (iamSshKey.isPresent()) {
+
+      if (iamSshKey.get().getAccount().getUuid().equals(owner.getUuid())) {
 
         /* remove */
-        IamSshKey toRemove = sshKeyRepository.findByFingerprint(sshKeyToRemove.getFingerprint())
-          .orElseThrow(() -> new ScimResourceNotFoundException(
-              String.format("No ssh key found for {},{}", sshKeyToRemove.getFingerprint())));
-
-        sshKeyRepository.delete(toRemove);
-        owner.getSshKeys().remove(toRemove);
+        sshKeyRepository.delete(iamSshKey.get());
+        owner.getSshKeys().remove(iamSshKey.get());
 
       } else {
 
