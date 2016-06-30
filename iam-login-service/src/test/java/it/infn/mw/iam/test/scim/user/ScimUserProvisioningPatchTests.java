@@ -28,6 +28,7 @@ import it.infn.mw.iam.api.scim.model.ScimUserPatchRequest;
 import it.infn.mw.iam.api.scim.model.ScimX509Certificate;
 import it.infn.mw.iam.test.ScimRestUtils;
 import it.infn.mw.iam.test.TestUtils;
+import it.infn.mw.iam.util.JacksonUtils;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = IamLoginService.class)
@@ -40,7 +41,7 @@ public class ScimUserProvisioningPatchTests {
   @BeforeClass
   public static void init() {
 
-    TestUtils.initRestAssured();
+    JacksonUtils.initRestAssured();
   }
 
   @Before

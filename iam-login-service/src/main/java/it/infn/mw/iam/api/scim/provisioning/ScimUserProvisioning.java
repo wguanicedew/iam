@@ -102,6 +102,10 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
 
     Date creationTime = new Date();
 
+    accountRepository.findByUsername(user.getUserName()).ifPresent(a -> {
+      throw new ScimResourceExistsException("userName is already taken: " + a.getUsername());
+    });
+
     String uuid = UUID.randomUUID().toString();
 
     IamAccount account = converter.fromScim(user);

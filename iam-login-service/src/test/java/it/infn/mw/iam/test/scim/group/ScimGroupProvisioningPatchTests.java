@@ -22,6 +22,7 @@ import it.infn.mw.iam.api.scim.model.ScimGroupPatchRequest;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.test.ScimRestUtils;
 import it.infn.mw.iam.test.TestUtils;
+import it.infn.mw.iam.util.JacksonUtils;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = IamLoginService.class)
@@ -36,7 +37,7 @@ public class ScimGroupProvisioningPatchTests {
   @BeforeClass
   public static void init() {
 
-    TestUtils.initRestAssured();
+    JacksonUtils.initRestAssured();
   }
 
   @Before
