@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
+import it.infn.mw.iam.api.scim.exception.ScimException;
 import it.infn.mw.iam.api.scim.exception.ScimPatchOperationNotSupported;
 import it.infn.mw.iam.api.scim.exception.ScimResourceExistsException;
 import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
@@ -65,6 +66,14 @@ public class ScimExceptionHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(ScimPatchOperationNotSupported.class)
   @ResponseBody
   public ScimErrorResponse handleInvalidArgumentException(ScimPatchOperationNotSupported e) {
+
+    return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
+  }
+
+  @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(ScimException.class)
+  @ResponseBody
+  public ScimErrorResponse handleInvalidArgumentException(ScimException e) {
 
     return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
   }

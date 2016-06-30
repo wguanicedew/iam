@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Preconditions;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonFilter("attributeFilter")
@@ -248,6 +249,7 @@ public class ScimUser extends ScimResource {
 
     public Builder() {
       super();
+      this.indigoUser = ScimIndigoUser.builder().build();
     }
 
     public Builder(String userName) {
@@ -389,24 +391,19 @@ public class ScimUser extends ScimResource {
     }
 
     public Builder buildOidcId(String issuer, String subject) {
-      if (indigoUser == null) {
-        indigoUser = ScimIndigoUser.builder().build();
-      }
 
-      ScimOidcId oidcId = ScimOidcId.builder().subject(subject).issuer(issuer).build();
+      Preconditions.checkNotNull(indigoUser);
 
-      indigoUser.getOidcIds().add(oidcId);
+      indigoUser.getOidcIds().add(ScimOidcId.builder().subject(subject).issuer(issuer).build());
       return this;
     }
 
-    public Builder buildSshKey(String label, String key) {
-      if (indigoUser == null) {
-        indigoUser = ScimIndigoUser.builder().build();
-      }
+    public Builder buildSshKey(String label, String key, boolean isPrimary) {
 
-      ScimSshKey sshKey = ScimSshKey.builder().display(label).value(key).build();
+      Preconditions.checkNotNull(indigoUser);
 
-      indigoUser.getSshKeys().add(sshKey);
+      indigoUser.getSshKeys()
+        .add(ScimSshKey.builder().display(label).value(key).primary(isPrimary).build());
       return this;
     }
 

@@ -28,6 +28,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.scim.model.ScimConstants;
+import it.infn.mw.iam.api.scim.model.ScimIndigoUser;
+import it.infn.mw.iam.api.scim.model.ScimSshKey;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.test.ScimRestUtils;
 import it.infn.mw.iam.test.TestUtils;
@@ -233,6 +235,27 @@ public class ScimUserProvisioningTests {
   }
 
   @Test
+  public void testUserCreationWithPassword() {
+    ScimUser user = ScimUser.builder("user_with_password")
+      .buildEmail("up@test.org")
+      .buildName("User", "With Password")
+      .password("a_password")
+      .active(true)
+      .build();
+
+    ScimUser creationResult = restUtils.doPost("/scim/Users/", user).extract().as(ScimUser.class);
+
+    assertNull(creationResult.getPassword());
+
+    passwordTokenGetter().scope("openid")
+      .username("user_with_password")
+      .password("a_password")
+      .getAccessToken();
+
+    restUtils.doDelete(creationResult.getMeta().getLocation());
+  }
+
+  @Test
   public void testUpdateUsernameChecksValidation() {
 
     ScimUser lennon = ScimUser.builder("john_lennon")
@@ -268,27 +291,6 @@ public class ScimUserProvisioningTests {
   }
 
   @Test
-  public void testUserCreationWithPassword() {
-    ScimUser user = ScimUser.builder("user_with_password")
-      .buildEmail("up@test.org")
-      .buildName("User", "With Password")
-      .password("a_password")
-      .active(true)
-      .build();
-
-    ScimUser creationResult = restUtils.doPost("/scim/Users/", user).extract().as(ScimUser.class);
-
-    assertNull(creationResult.getPassword());
-
-    passwordTokenGetter().scope("openid")
-      .username("user_with_password")
-      .password("a_password")
-      .getAccessToken();
-
-    restUtils.doDelete(creationResult.getMeta().getLocation());
-  }
-
-  @Test
   public void testUserCreationWithOidcAccount() {
 
     ScimUser user = ScimUser.builder("user_with_oidc")
@@ -311,37 +313,6 @@ public class ScimUserProvisioningTests {
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".oidcIds[0].issuer",
           equalTo("urn:oidc:test:issuer"))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".oidcIds[0].subject", equalTo("1234"));
-
-    restUtils.doDelete(creationResult.getMeta().getLocation());
-  }
-
-  @Test
-  public void testUserCreationWithSshKey() {
-
-    ScimUser user = ScimUser.builder("user_with_oidc")
-      .buildEmail("test_user@test.org")
-      .buildName("User", "With OIDC Account")
-      .buildSshKey("this is my key", TestUtils.getSshKey())
-      .active(true)
-      .build();
-
-    ScimUser creationResult =
-        restUtils.doPost("/scim/Users/", user)
-          .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys", hasSize(equalTo(1)))
-          .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].display", equalTo("this is my key"))
-          .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].value",
-              equalTo(TestUtils.getSshKey()))
-          .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].fingerprint",
-              equalTo(TestUtils.getSshKeySHA256Fingerprint()))
-          .extract()
-          .as(ScimUser.class);
-
-    restUtils.doGet(creationResult.getMeta().getLocation())
-      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys", hasSize(equalTo(1)))
-      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].display", equalTo("this is my key"))
-      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].value", equalTo(TestUtils.getSshKey()))
-      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].fingerprint",
-          equalTo(TestUtils.getSshKeySHA256Fingerprint()));
 
     restUtils.doDelete(creationResult.getMeta().getLocation());
   }
@@ -379,19 +350,81 @@ public class ScimUserProvisioningTests {
   }
 
   @Test
-  public void testUserCreationWithStolenSshKeyFailure() {
+  public void testUserCreationWithSshKey() {
 
     ScimUser user = ScimUser.builder("user_with_sshkey")
       .buildEmail("test_user@test.org")
-      .buildName("User", "With ssh key")
-      .buildSshKey("this is my key", TestUtils.getSshKey())
+      .buildName("User", "With ssh key Account")
+      .buildSshKey("Personal", TestUtils.getSshKey(), true)
       .active(true)
       .build();
 
     ScimUser creationResult =
         restUtils.doPost("/scim/Users/", user)
           .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys", hasSize(equalTo(1)))
-          .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].display", equalTo("this is my key"))
+          .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].display", equalTo("Personal"))
+          .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].value",
+              equalTo(TestUtils.getSshKey()))
+          .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].fingerprint",
+              equalTo(TestUtils.getSshKeySHA256Fingerprint()))
+          .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].primary",
+              equalTo(true))
+          .extract()
+          .as(ScimUser.class);
+
+    restUtils.doGet(creationResult.getMeta().getLocation())
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys", hasSize(equalTo(1)))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].display", equalTo("Personal"))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].value", equalTo(TestUtils.getSshKey()))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].fingerprint",
+          equalTo(TestUtils.getSshKeySHA256Fingerprint()))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].primary",
+          equalTo(true));
+
+    restUtils.doDelete(creationResult.getMeta().getLocation());
+  }
+
+  @Test
+  public void testUserCreationWithSshKeyValueOnly() {
+
+    ScimUser user = ScimUser.builder("user_with_sshkey")
+      .buildEmail("test_user@test.org")
+      .buildName("User", "With ssh key Account")
+      .indigoUserInfo(ScimIndigoUser.builder()
+        .addSshKey(ScimSshKey.builder().value(TestUtils.getSshKey()).build())
+        .build())
+      .active(true)
+      .build();
+
+    ScimUser creationResult = restUtils.doPost("/scim/Users/", user)
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys", hasSize(equalTo(1)))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].display",
+          equalTo(user.getUserName() + "'s personal ssh key"))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].value", equalTo(TestUtils.getSshKey()))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].fingerprint",
+          equalTo(TestUtils.getSshKeySHA256Fingerprint()))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].primary",
+          equalTo(true))
+      .extract()
+      .as(ScimUser.class);
+
+    restUtils.doDelete(creationResult.getMeta().getLocation());
+  }
+
+  @Test
+  public void testUserCreationWithStolenSshKeyFailure() {
+
+    ScimUser user = ScimUser.builder("user_with_sshkey")
+      .buildEmail("test_user@test.org")
+      .buildName("User", "With ssh key")
+      .buildSshKey("Personal", TestUtils.getSshKey(), true)
+      .active(true)
+      .build();
+
+    ScimUser creationResult =
+        restUtils.doPost("/scim/Users/", user)
+          .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys", hasSize(equalTo(1)))
+          .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].display", equalTo("Personal"))
           .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].value",
               equalTo(TestUtils.getSshKey()))
           .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].fingerprint",
@@ -402,7 +435,7 @@ public class ScimUserProvisioningTests {
     ScimUser anotherUser = ScimUser.builder("another_user_with_sshkey")
       .buildEmail("another_test_user@test.org")
       .buildName("Another User", "With ssh key")
-      .buildSshKey("this is my key", TestUtils.getSshKey())
+      .buildSshKey("Personal", TestUtils.getSshKey(), true)
       .active(true)
       .build();
 

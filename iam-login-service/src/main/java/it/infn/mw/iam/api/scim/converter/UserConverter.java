@@ -125,6 +125,12 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
 
           iamSshKey.setAccount(account);
         }
+        
+        if (iamSshKey.getLabel() == null) {
+          
+          iamSshKey.setLabel(account.getUsername() + "'s personal ssh key");
+        }
+        
         account.getSshKeys().add(iamSshKey);
       }
     }

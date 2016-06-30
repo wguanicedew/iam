@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import it.infn.mw.iam.api.scim.converter.AddressConverter;
 import it.infn.mw.iam.api.scim.converter.UserConverter;
 import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
+import it.infn.mw.iam.api.scim.exception.ScimException;
 import it.infn.mw.iam.api.scim.exception.ScimResourceExistsException;
 import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
 import it.infn.mw.iam.api.scim.model.ScimListResponse;
@@ -29,6 +30,7 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamAuthoritiesRepository;
 import it.infn.mw.iam.persistence.repository.IamOidcIdRepository;
 import it.infn.mw.iam.persistence.repository.IamSshKeyRepository;
+import it.infn.mw.iam.util.ssh.InvalidSshKeyException;
 import it.infn.mw.iam.util.ssh.RSAPublicKey;
 
 @Service
@@ -184,9 +186,12 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
     /* Generate fingerprint if null */
     if (sshKey.getFingerprint() == null && sshKey.getValue() != null) {
       
-      RSAPublicKey key = new RSAPublicKey(sshKey.getValue());
-      sshKey.setFingerprint(key.getSHA256Fingerprint());
-      
+      try {
+        RSAPublicKey key = new RSAPublicKey(sshKey.getValue());
+        sshKey.setFingerprint(key.getSHA256Fingerprint());
+      } catch (InvalidSshKeyException e) {
+        throw new ScimException(e.getMessage());
+      }
     }
 
     if (sshKeyRepository.findByFingerprint(sshKey.getFingerprint()).isPresent()) {

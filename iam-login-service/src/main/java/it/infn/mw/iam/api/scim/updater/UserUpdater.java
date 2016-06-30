@@ -33,6 +33,7 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamOidcIdRepository;
 import it.infn.mw.iam.persistence.repository.IamSshKeyRepository;
 import it.infn.mw.iam.persistence.repository.IamX509CertificateRepository;
+import it.infn.mw.iam.util.ssh.InvalidSshKeyException;
 import it.infn.mw.iam.util.ssh.RSAPublicKey;
 
 @Component
@@ -375,8 +376,12 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
       IamSshKey sshKeyToCreate = sshKeyConverter.fromScim(sshKey);
       sshKeyToCreate.setAccount(owner);
 
-      RSAPublicKey key = new RSAPublicKey(sshKey.getValue());
-      sshKeyToCreate.setFingerprint(key.getSHA256Fingerprint());
+      try {
+        RSAPublicKey key = new RSAPublicKey(sshKey.getValue());
+        sshKeyToCreate.setFingerprint(key.getSHA256Fingerprint());
+      } catch (InvalidSshKeyException e) {
+        throw new ScimException(e.getMessage());
+      }
 
       if (sshKeyToCreate.getLabel() == null) {
         sshKeyToCreate.setLabel(owner.getUsername() + "'s personal ssh key");
