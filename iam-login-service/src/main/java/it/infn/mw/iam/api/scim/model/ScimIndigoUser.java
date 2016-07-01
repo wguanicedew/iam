@@ -17,12 +17,13 @@ public class ScimIndigoUser {
 
   @JsonCreator
   private ScimIndigoUser(@JsonProperty("oidcIds") List<ScimOidcId> oidcIds,
-      @JsonProperty("sshKeys") List<ScimSshKey> sshKeys) {
-    
+      @JsonProperty("sshKeys") List<ScimSshKey> sshKeys,
+      @JsonProperty("samlIds") List<ScimSamlId> samlIds) {
+
     this.oidcIds = oidcIds != null ? oidcIds : new ArrayList<ScimOidcId>();
     this.sshKeys = sshKeys != null ? sshKeys : new ArrayList<ScimSshKey>();
-    this.samlIds = new ArrayList<ScimSamlId>();
-    
+    this.samlIds = samlIds != null ? samlIds : new ArrayList<ScimSamlId>();
+
   }
 
   private ScimIndigoUser(Builder b) {

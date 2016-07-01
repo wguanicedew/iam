@@ -11,13 +11,12 @@ import it.infn.mw.iam.api.scim.model.ScimGroupRef;
 import it.infn.mw.iam.api.scim.model.ScimIndigoUser;
 import it.infn.mw.iam.api.scim.model.ScimMeta;
 import it.infn.mw.iam.api.scim.model.ScimName;
-import it.infn.mw.iam.api.scim.model.ScimOidcId;
-import it.infn.mw.iam.api.scim.model.ScimSshKey;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.model.ScimX509Certificate;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.model.IamOidcId;
+import it.infn.mw.iam.persistence.model.IamSamlId;
 import it.infn.mw.iam.persistence.model.IamSshKey;
 import it.infn.mw.iam.persistence.model.IamUserInfo;
 import it.infn.mw.iam.persistence.model.IamX509Certificate;
@@ -34,17 +33,20 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
 
   private final OidcIdConverter oidcIdConverter;
   private final SshKeyConverter sshKeyConverter;
+  private final SamlIdConverter samlIdConverter;
 
 
   @Autowired
   public UserConverter(ScimResourceLocationProvider rlp, AddressConverter ac,
-      X509CertificateConverter cc, OidcIdConverter oidc, SshKeyConverter sshc) {
+      X509CertificateConverter cc, OidcIdConverter oidc, SshKeyConverter sshc,
+      SamlIdConverter samlc) {
 
     this.resourceLocationProvider = rlp;
     this.addressConverter = ac;
     this.certificateConverter = cc;
     this.oidcIdConverter = oidc;
     this.sshKeyConverter = sshc;
+    this.samlIdConverter = samlc;
   }
 
   @Override
@@ -81,7 +83,7 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
 
     if (scimUser.hasOidcIds()) {
 
-      for (ScimOidcId oidcId : scimUser.getIndigoUser().getOidcIds()) {
+      scimUser.getIndigoUser().getOidcIds().forEach(oidcId -> {
 
         IamOidcId iamOidcId = oidcIdConverter.fromScim(oidcId);
 
@@ -98,12 +100,13 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
           iamOidcId.setAccount(account);
         }
         account.getOidcIds().add(iamOidcId);
-      }
+      });
     }
 
     if (scimUser.hasSshKeys()) {
 
-      for (ScimSshKey sshKey : scimUser.getIndigoUser().getSshKeys()) {
+      scimUser.getIndigoUser().getSshKeys().forEach(sshKey -> {
+
         IamSshKey iamSshKey = sshKeyConverter.fromScim(sshKey);
 
         if (iamSshKey.getFingerprint() == null && iamSshKey.getValue() != null) {
@@ -135,12 +138,30 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
         }
 
         account.getSshKeys().add(iamSshKey);
-      }
+      });
     }
 
     if (scimUser.hasSamlIds()) {
 
-      // TO-DO
+      scimUser.getIndigoUser().getSamlIds().forEach(samlId -> {
+        
+        IamSamlId iamSamlId = samlIdConverter.fromScim(samlId);
+
+        if (iamSamlId.getAccount() != null) {
+          if (account.getUuid() != iamSamlId.getAccount().getUuid()) {
+
+            String errorMessage = String.format("Saml id %s,%s is already mapped to another user",
+                iamSamlId.getIdpId(), iamSamlId.getUserId());
+
+            throw new ScimResourceExistsException(errorMessage);
+          }
+        } else {
+
+          iamSamlId.setAccount(account);
+        }
+        account.getSamlIds().add(iamSamlId);
+        
+      });
     }
 
     return account;
@@ -210,15 +231,17 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
 
     ScimIndigoUser.Builder indigoUserBuilder = new ScimIndigoUser.Builder();
 
-    for (IamOidcId oidcId : entity.getOidcIds()) {
+    entity.getOidcIds().forEach(oidcId -> 
+      indigoUserBuilder.addOidcid(oidcIdConverter.toScim(oidcId))
+    );
 
-      indigoUserBuilder.addOidcid(oidcIdConverter.toScim(oidcId));
-    }
-
-    for (IamSshKey sshKey : entity.getSshKeys()) {
-
+    entity.getSshKeys().forEach(sshKey -> {
       indigoUserBuilder.addSshKey(sshKeyConverter.toScim(sshKey));
-    }
+    });
+    
+    entity.getSamlIds().forEach(samlId -> {
+      indigoUserBuilder.addSamlId(samlIdConverter.toScim(samlId));
+    });
 
     ScimIndigoUser indigoUser = indigoUserBuilder.build();
 

@@ -444,6 +444,31 @@ public class ScimUserProvisioningTests {
   }
 
   @Test
+  public void testUserCreationWithSamlId() {
+
+    ScimUser user = ScimUser.builder("user_with_samlId")
+      .buildEmail("test_user@test.org")
+      .buildName("User", "With saml id Account")
+      .buildSamlId("IdpID", "UserID")
+      .active(true)
+      .build();
+
+    ScimUser creationResult = restUtils.doPost("/scim/Users/", user)
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".samlIds", hasSize(equalTo(1)))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".samlIds[0].idpId", equalTo("IdpID"))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".samlIds[0].userId", equalTo("UserID"))
+      .extract()
+      .as(ScimUser.class);
+
+    restUtils.doGet(creationResult.getMeta().getLocation())
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".samlIds", hasSize(equalTo(1)))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".samlIds[0].idpId", equalTo("IdpID"))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".samlIds[0].userId", equalTo("UserID"));
+
+    restUtils.doDelete(creationResult.getMeta().getLocation());
+  }
+
+  @Test
   public void testUniqueUsernameCreationCheck() {
     ScimUser user = ScimUser.builder("user1")
       .buildEmail("user1@test.org")

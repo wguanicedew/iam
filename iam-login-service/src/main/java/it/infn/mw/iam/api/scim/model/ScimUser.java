@@ -198,6 +198,11 @@ public class ScimUser extends ScimResource {
     return groups;
   }
 
+  public boolean hasX509Certificates() {
+
+    return x509Certificates != null && !x509Certificates.isEmpty();
+  }
+
   public boolean hasOidcIds() {
 
     return indigoUser != null && indigoUser.getOidcIds() != null
@@ -404,6 +409,14 @@ public class ScimUser extends ScimResource {
 
       indigoUser.getSshKeys()
         .add(ScimSshKey.builder().display(label).value(key).primary(isPrimary).build());
+      return this;
+    }
+
+    public Builder buildSamlId(String idpId, String userId) {
+
+      Preconditions.checkNotNull(indigoUser);
+
+      indigoUser.getSamlIds().add(ScimSamlId.builder().idpId(idpId).userId(userId).build());
       return this;
     }
 

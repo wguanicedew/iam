@@ -24,11 +24,13 @@ import it.infn.mw.iam.api.scim.provisioning.paging.ScimPageRequest;
 import it.infn.mw.iam.api.scim.updater.UserUpdater;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamOidcId;
+import it.infn.mw.iam.persistence.model.IamSamlId;
 import it.infn.mw.iam.persistence.model.IamSshKey;
 import it.infn.mw.iam.persistence.model.IamUserInfo;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamAuthoritiesRepository;
 import it.infn.mw.iam.persistence.repository.IamOidcIdRepository;
+import it.infn.mw.iam.persistence.repository.IamSamlIdRepository;
 import it.infn.mw.iam.persistence.repository.IamSshKeyRepository;
 import it.infn.mw.iam.util.ssh.InvalidSshKeyException;
 import it.infn.mw.iam.util.ssh.RSAPublicKeyUtils;
@@ -44,13 +46,15 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
   private final IamAccountRepository accountRepository;
   private final IamOidcIdRepository oidcIdRepository;
   private final IamSshKeyRepository sshKeyRepository;
+  private final IamSamlIdRepository samlIdRepository;
 
   private final IamAuthoritiesRepository authorityRepository;
 
   @Autowired
   public ScimUserProvisioning(UserConverter converter, AddressConverter addressConverter,
       UserUpdater updater, IamAccountRepository accountRepo, IamOidcIdRepository oidcIdRepository,
-      IamSshKeyRepository sshKeyRepository, IamAuthoritiesRepository authorityRepo) {
+      IamSshKeyRepository sshKeyRepository, IamSamlIdRepository samlIdRepository,
+      IamAuthoritiesRepository authorityRepo) {
 
     this.converter = converter;
     this.addressConverter = addressConverter;
@@ -58,6 +62,7 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
     this.accountRepository = accountRepo;
     this.oidcIdRepository = oidcIdRepository;
     this.sshKeyRepository = sshKeyRepository;
+    this.samlIdRepository = samlIdRepository;
     this.authorityRepository = authorityRepo;
 
   }
@@ -166,7 +171,10 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
     }
 
     if (account.hasSamlIds()) {
-      // TO-DO
+
+      account.getSamlIds().forEach(samlId -> {
+        checkSamlIdNotExists(samlId);
+      });
     }
 
     accountRepository.save(account);
@@ -201,6 +209,17 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
 
       throw new ScimResourceExistsException(
           "ssh key " + sshKey.getFingerprint() + " is already mapped to another user");
+    }
+
+  }
+
+  private void checkSamlIdNotExists(IamSamlId samlId) {
+
+    if (samlIdRepository.findByIdpIdAndUserId(samlId.getIdpId(), samlId.getUserId()).isPresent()) {
+
+      throw new ScimResourceExistsException(
+          String.format("Saml id {},{} is already mapped to another user", samlId.getIdpId(),
+              samlId.getUserId()));
     }
 
   }

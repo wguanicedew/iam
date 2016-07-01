@@ -22,6 +22,7 @@ import it.infn.mw.iam.api.scim.model.ScimConstants;
 import it.infn.mw.iam.api.scim.model.ScimIndigoUser;
 import it.infn.mw.iam.api.scim.model.ScimName;
 import it.infn.mw.iam.api.scim.model.ScimOidcId;
+import it.infn.mw.iam.api.scim.model.ScimSamlId;
 import it.infn.mw.iam.api.scim.model.ScimSshKey;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.model.ScimUserPatchRequest;
@@ -157,6 +158,44 @@ public class ScimUserProvisioningPatchTests {
 
     /* Remove oidc account */
     req = getPatchRemoveRequest(updateOidcId);
+
+    restUtils.doPatch(lennon.getMeta().getLocation(), req);
+
+    restUtils.doGet(lennon.getMeta().getLocation()).body("id", equalTo(lennon.getId())).body(
+        "urn:indigo-dc:scim:schemas:IndigoUser", equalTo(null));
+
+    restUtils.doDelete(lennon.getMeta().getLocation());
+    restUtils.doDelete(lincoln.getMeta().getLocation());
+  }
+  
+  @Test
+  public void testAddRessignAndRemoveSamlId() {
+
+    ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John", "Lennon");
+    ScimUser lincoln = addTestUser("abraham_lincoln", "lincoln@email.test", "Abraham", "Lincoln");
+
+    ScimIndigoUser indigoUser = ScimIndigoUser.builder()
+      .addSamlId(ScimSamlId.builder().idpId("test_idp").userId("test_user").build())
+      .build();
+
+    ScimUser updateSamlId = ScimUser.builder().indigoUserInfo(indigoUser).build();
+
+    ScimUserPatchRequest req = getPatchAddRequest(updateSamlId);
+
+    restUtils.doPatch(lennon.getMeta().getLocation(), req);
+
+    restUtils.doGet(lennon.getMeta().getLocation())
+      .body("id", equalTo(lennon.getId()))
+      .body("urn:indigo-dc:scim:schemas:IndigoUser.samlIds[0].idpId",
+          equalTo(indigoUser.getSamlIds().get(0).getIdpId()))
+      .body("urn:indigo-dc:scim:schemas:IndigoUser.samlIds[0].userId",
+          equalTo(indigoUser.getSamlIds().get(0).getUserId()));
+
+    /* lincoln tryes to add the oidc account: */
+    restUtils.doPatch(lincoln.getMeta().getLocation(), req, HttpStatus.CONFLICT);
+
+    /* Remove oidc account */
+    req = getPatchRemoveRequest(updateSamlId);
 
     restUtils.doPatch(lennon.getMeta().getLocation(), req);
 

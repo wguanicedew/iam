@@ -10,9 +10,11 @@ import com.google.common.base.Preconditions;
 
 import it.infn.mw.iam.api.scim.converter.AddressConverter;
 import it.infn.mw.iam.api.scim.converter.OidcIdConverter;
+import it.infn.mw.iam.api.scim.converter.SamlIdConverter;
 import it.infn.mw.iam.api.scim.converter.SshKeyConverter;
 import it.infn.mw.iam.api.scim.converter.X509CertificateConverter;
 import it.infn.mw.iam.api.scim.exception.ScimException;
+import it.infn.mw.iam.api.scim.exception.ScimPatchOperationNotSupported;
 import it.infn.mw.iam.api.scim.exception.ScimResourceExistsException;
 import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
 import it.infn.mw.iam.api.scim.model.ScimAddress;
@@ -22,14 +24,17 @@ import it.infn.mw.iam.api.scim.model.ScimOidcId;
 import it.infn.mw.iam.api.scim.model.ScimPatchOperation;
 import it.infn.mw.iam.api.scim.model.ScimSshKey;
 import it.infn.mw.iam.api.scim.model.ScimPatchOperation.ScimPatchOperationType;
+import it.infn.mw.iam.api.scim.model.ScimSamlId;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.model.ScimX509Certificate;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamOidcId;
+import it.infn.mw.iam.persistence.model.IamSamlId;
 import it.infn.mw.iam.persistence.model.IamSshKey;
 import it.infn.mw.iam.persistence.model.IamX509Certificate;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamOidcIdRepository;
+import it.infn.mw.iam.persistence.repository.IamSamlIdRepository;
 import it.infn.mw.iam.persistence.repository.IamSshKeyRepository;
 import it.infn.mw.iam.persistence.repository.IamX509CertificateRepository;
 import it.infn.mw.iam.util.ssh.InvalidSshKeyException;
@@ -42,27 +47,32 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
   private final IamOidcIdRepository oidcIdRepository;
   private final IamX509CertificateRepository x509CertificateRepository;
   private final IamSshKeyRepository sshKeyRepository;
+  private final IamSamlIdRepository samlIdRepository;
 
   private final OidcIdConverter oidcIdConverter;
   private final AddressConverter addressConverter;
   private final X509CertificateConverter certificateConverter;
   private final SshKeyConverter sshKeyConverter;
+  private final SamlIdConverter samlIdConverter;
 
   @Autowired
   public UserUpdater(IamAccountRepository accountRepository, IamOidcIdRepository oidcIdRepository,
       IamX509CertificateRepository x509CertificateRepository, IamSshKeyRepository sshKeyRepository,
-      OidcIdConverter oidcIdConverter, AddressConverter addressConverter,
-      X509CertificateConverter certificateConverter, SshKeyConverter sshKeyConverter) {
+      IamSamlIdRepository samlIdRepository, OidcIdConverter oidcIdConverter,
+      AddressConverter addressConverter, X509CertificateConverter certificateConverter,
+      SshKeyConverter sshKeyConverter, SamlIdConverter samlIdConverter) {
 
     this.accountRepository = accountRepository;
     this.oidcIdRepository = oidcIdRepository;
     this.x509CertificateRepository = x509CertificateRepository;
     this.sshKeyRepository = sshKeyRepository;
+    this.samlIdRepository = samlIdRepository;
 
     this.oidcIdConverter = oidcIdConverter;
     this.addressConverter = addressConverter;
     this.certificateConverter = certificateConverter;
     this.sshKeyConverter = sshKeyConverter;
+    this.samlIdConverter = samlIdConverter;
   }
 
   public void update(IamAccount account, List<ScimPatchOperation<ScimUser>> operations) {
@@ -93,16 +103,26 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
     patchEmail(a, u.getEmails());
     patchAddress(a, u.getAddresses());
     patchPassword(a, u.getPassword());
-    patchX509Certificates(a, u.getX509Certificates(), ScimPatchOperationType.add);
+
+    if (u.hasX509Certificates()) {
+
+      u.getX509Certificates()
+        .forEach(x509Cert -> patchX509Certificate(a, x509Cert, ScimPatchOperationType.add));
+    }
 
     if (u.hasOidcIds()) {
 
-      addOidcIdsIfNotNull(a, u.getIndigoUser().getOidcIds());
+      u.getIndigoUser().getOidcIds().forEach(oidcId -> addOidcId(a, oidcId));
     }
 
     if (u.hasSshKeys()) {
 
-      addSshKeysIfNotNull(a, u.getIndigoUser().getSshKeys());
+      u.getIndigoUser().getSshKeys().forEach(sshKey -> addSshKey(a, sshKey));
+    }
+
+    if (u.hasSamlIds()) {
+
+      u.getIndigoUser().getSamlIds().forEach(samlId -> addSamlId(a, samlId));
     }
 
     a.touch();
@@ -111,18 +131,25 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
 
   private void removeNotNullInfo(IamAccount a, ScimUser u) {
 
-    patchX509Certificates(a, u.getX509Certificates(), ScimPatchOperationType.remove);
+    if (u.hasX509Certificates()) {
+
+      u.getX509Certificates()
+        .forEach(x509Cert -> patchX509Certificate(a, x509Cert, ScimPatchOperationType.remove));
+    }
 
     if (u.hasOidcIds()) {
-      removeOidcIdsIfNotNull(a, u.getIndigoUser().getOidcIds());
+
+      u.getIndigoUser().getOidcIds().forEach(oidcId -> removeOidcId(a, oidcId));
     }
 
     if (u.hasSshKeys()) {
-      removeSshKeysIfNotNull(a, u.getIndigoUser().getSshKeys());
+
+      u.getIndigoUser().getSshKeys().forEach(sshKey -> removeSshKey(a, sshKey));
     }
 
     if (u.hasSamlIds()) {
-      // TO-DO
+
+      u.getIndigoUser().getSamlIds().forEach(samlId -> removeSamlId(a, samlId));
     }
 
     a.touch();
@@ -146,19 +173,6 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
   private void patchPassword(IamAccount a, String password) {
 
     a.setPassword(password != null ? password : a.getPassword());
-
-  }
-
-  private void patchX509Certificates(IamAccount a, List<ScimX509Certificate> x509Certificates,
-      ScimPatchOperationType action) {
-
-    if (x509Certificates != null) {
-
-      for (ScimX509Certificate cert : x509Certificates) {
-
-        patchX509Certificate(a, cert, action);
-      }
-    }
 
   }
 
@@ -204,7 +218,9 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
 
         break;
       default:
-        break;
+
+        throw new ScimPatchOperationNotSupported(
+            "Unexpected ScimPatchOperationType " + action.toString());
     }
 
   }
@@ -259,17 +275,6 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
     }
   }
 
-  private void addOidcIdsIfNotNull(IamAccount a, List<ScimOidcId> oidcIds) {
-
-    if (oidcIds != null) {
-
-      for (ScimOidcId oidc : oidcIds) {
-
-        addOidcId(a, oidc);
-      }
-    }
-  }
-
   private void addOidcId(IamAccount owner, ScimOidcId oidcIdToAdd) {
 
     Preconditions.checkNotNull(oidcIdToAdd, "Error: OpenID account to add is null");
@@ -298,17 +303,6 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
       oidcIdRepository.save(oidcIdToCreate);
 
       owner.getOidcIds().add(oidcIdToCreate);
-    }
-  }
-
-  private void removeOidcIdsIfNotNull(IamAccount a, List<ScimOidcId> oidcIds) {
-
-    if (oidcIds != null) {
-
-      for (ScimOidcId oidc : oidcIds) {
-
-        removeOidcId(a, oidc);
-      }
     }
   }
 
@@ -346,17 +340,6 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
       throw new ScimResourceNotFoundException(
           String.format("User {} has no ({},{}) oidc account to remove!", owner.getUsername(),
               oidcIdToRemove.issuer, oidcIdToRemove.subject));
-    }
-  }
-
-  private void addSshKeysIfNotNull(IamAccount a, List<ScimSshKey> sshKeys) {
-
-    if (sshKeys != null) {
-
-      for (ScimSshKey sshKey : sshKeys) {
-
-        addSshKey(a, sshKey);
-      }
     }
   }
 
@@ -398,17 +381,6 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
       sshKeyRepository.save(sshKeyToCreate);
 
       owner.getSshKeys().add(sshKeyToCreate);
-    }
-  }
-
-  private void removeSshKeysIfNotNull(IamAccount a, List<ScimSshKey> sshKeys) {
-
-    if (sshKeys != null) {
-
-      for (ScimSshKey sshKey : sshKeys) {
-
-        removeSshKey(a, sshKey);
-      }
     }
   }
 
@@ -456,5 +428,78 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
       throw new ScimResourceNotFoundException(String.format("User {} has no {} ssh key to remove!",
           owner.getUsername(), sshKeyToRemove.getFingerprint()));
     }
+  }
+
+  private void addSamlId(IamAccount owner, ScimSamlId samlIdToAdd) {
+
+    Preconditions.checkNotNull(samlIdToAdd, "null saml id to add");
+    Preconditions.checkNotNull(samlIdToAdd.getIdpId(), "saml id to add has null idpId");
+    Preconditions.checkNotNull(samlIdToAdd.getUserId(), "saml id to add has null userId");
+
+    Optional<IamAccount> samlAccount =
+        accountRepository.findBySamlId(samlIdToAdd.getIdpId(), samlIdToAdd.getUserId());
+
+    if (samlAccount.isPresent()) {
+
+      if (samlAccount.get().getUuid().equals(owner.getUuid())) {
+
+        return;
+
+      } else {
+
+        throw new ScimResourceExistsException(
+            String.format("Saml account {},{} is already mapped to another user",
+                samlIdToAdd.getIdpId(), samlIdToAdd.getUserId()));
+
+      }
+
+    } else {
+
+      IamSamlId samlIdToCreate = samlIdConverter.fromScim(samlIdToAdd);
+      samlIdToCreate.setAccount(owner);
+      samlIdRepository.save(samlIdToCreate);
+
+      owner.getSamlIds().add(samlIdToCreate);
+    }
+
+    return;
+  }
+
+  private void removeSamlId(IamAccount owner, ScimSamlId samlIdToRemove) {
+
+    Preconditions.checkNotNull(samlIdToRemove, "Error: Saml account to remove is null");
+
+    Optional<IamAccount> samlAccount =
+        accountRepository.findBySamlId(samlIdToRemove.getIdpId(), samlIdToRemove.getUserId());
+
+    if (samlAccount.isPresent()) {
+
+      if (samlAccount.get().getUuid().equals(owner.getUuid())) {
+
+        /* remove */
+        IamSamlId toRemove = samlIdRepository
+          .findByIdpIdAndUserId(samlIdToRemove.getIdpId(), samlIdToRemove.getUserId())
+          .orElseThrow(() -> new ScimResourceNotFoundException(
+              String.format("No Saml connect account found for {},{}", samlIdToRemove.getIdpId(),
+                  samlIdToRemove.getUserId())));
+
+        samlIdRepository.delete(toRemove);
+        owner.getSamlIds().remove(toRemove);
+
+      } else {
+
+        throw new ScimResourceExistsException(
+            String.format("Saml account {},{} is already mapped to another user",
+                samlIdToRemove.getIdpId(), samlIdToRemove.getUserId()));
+
+      }
+
+    } else {
+
+      throw new ScimResourceNotFoundException(
+          String.format("User {} has no ({},{}) saml account to remove!", owner.getUsername(),
+              samlIdToRemove.getIdpId(), samlIdToRemove.getUserId()));
+    }
+
   }
 }

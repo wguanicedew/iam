@@ -22,7 +22,7 @@ public class ScimSshKey {
   private final Boolean primary;
 
   @Length(max = 48)
-  private String fingerprint;
+  private final String fingerprint;
 
   @NotBlank(groups = {NewUserValidation.class})
   private final String value;
