@@ -31,7 +31,7 @@ import it.infn.mw.iam.persistence.repository.IamAuthoritiesRepository;
 import it.infn.mw.iam.persistence.repository.IamOidcIdRepository;
 import it.infn.mw.iam.persistence.repository.IamSshKeyRepository;
 import it.infn.mw.iam.util.ssh.InvalidSshKeyException;
-import it.infn.mw.iam.util.ssh.RSAPublicKey;
+import it.infn.mw.iam.util.ssh.RSAPublicKeyUtils;
 
 @Service
 public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser> {
@@ -147,7 +147,7 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
         checkOidcIdNotExists(oidcId);
       });
     }
-    
+
     if (account.hasSshKeys()) {
 
       account.getSshKeys().forEach((sshKey) -> {
@@ -164,7 +164,7 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
         account.getSshKeys().get(0).setPrimary(true);
       }
     }
-    
+
     if (account.hasSamlIds()) {
       // TO-DO
     }
@@ -189,10 +189,9 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
 
     /* Generate fingerprint if null */
     if (sshKey.getFingerprint() == null && sshKey.getValue() != null) {
-      
+
       try {
-        RSAPublicKey key = new RSAPublicKey(sshKey.getValue());
-        sshKey.setFingerprint(key.getSHA256Fingerprint());
+        sshKey.setFingerprint(RSAPublicKeyUtils.getSHA256Fingerprint(sshKey.getValue()));
       } catch (InvalidSshKeyException e) {
         throw new ScimException(e.getMessage());
       }

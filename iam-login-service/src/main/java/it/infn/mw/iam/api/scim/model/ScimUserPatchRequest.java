@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Preconditions;
 
 @JsonInclude(Include.NON_EMPTY)
 public class ScimUserPatchRequest {
@@ -23,10 +24,8 @@ public class ScimUserPatchRequest {
   private ScimUserPatchRequest(@JsonProperty("schemas") Set<String> schemas,
       @JsonProperty("operations") List<ScimPatchOperation<ScimUser>> operations) {
 
+	Preconditions.checkNotNull(operations, "Operation list is null");
     this.schemas = schemas;
-    if (operations == null) {
-      throw new IllegalArgumentException("Operations list is null");
-    }
     this.operations = operations;
   }
 
@@ -75,7 +74,7 @@ public class ScimUserPatchRequest {
 
     public Builder replace(ScimUser user) {
 
-      operations.add((new ScimPatchOperation.Builder<ScimUser>()).remove().value(user).build());
+      operations.add((new ScimPatchOperation.Builder<ScimUser>()).replace().value(user).build());
       return this;
     }
 

@@ -22,7 +22,7 @@ import it.infn.mw.iam.persistence.model.IamSshKey;
 import it.infn.mw.iam.persistence.model.IamUserInfo;
 import it.infn.mw.iam.persistence.model.IamX509Certificate;
 import it.infn.mw.iam.util.ssh.InvalidSshKeyException;
-import it.infn.mw.iam.util.ssh.RSAPublicKey;
+import it.infn.mw.iam.util.ssh.RSAPublicKeyUtils;
 
 @Service
 public class UserConverter implements Converter<ScimUser, IamAccount> {
@@ -79,7 +79,7 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
 
     }
 
-    if (scimUser.getIndigoUser() != null) {
+    if (scimUser.hasOidcIds()) {
 
       for (ScimOidcId oidcId : scimUser.getIndigoUser().getOidcIds()) {
 
@@ -99,14 +99,17 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
         }
         account.getOidcIds().add(iamOidcId);
       }
+    }
+
+    if (scimUser.hasSshKeys()) {
+
       for (ScimSshKey sshKey : scimUser.getIndigoUser().getSshKeys()) {
         IamSshKey iamSshKey = sshKeyConverter.fromScim(sshKey);
 
         if (iamSshKey.getFingerprint() == null && iamSshKey.getValue() != null) {
 
           try {
-            RSAPublicKey key = new RSAPublicKey(iamSshKey.getValue());
-            iamSshKey.setFingerprint(key.getSHA256Fingerprint());
+            iamSshKey.setFingerprint(RSAPublicKeyUtils.getSHA256Fingerprint(iamSshKey.getValue()));
           } catch (InvalidSshKeyException e) {
             throw new ScimException(e.getMessage());
           }
@@ -125,14 +128,19 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
 
           iamSshKey.setAccount(account);
         }
-        
+
         if (iamSshKey.getLabel() == null) {
-          
+
           iamSshKey.setLabel(account.getUsername() + "'s personal ssh key");
         }
-        
+
         account.getSshKeys().add(iamSshKey);
       }
+    }
+
+    if (scimUser.hasSamlIds()) {
+
+      // TO-DO
     }
 
     return account;

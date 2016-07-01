@@ -33,7 +33,7 @@ import it.infn.mw.iam.persistence.repository.IamOidcIdRepository;
 import it.infn.mw.iam.persistence.repository.IamSshKeyRepository;
 import it.infn.mw.iam.persistence.repository.IamX509CertificateRepository;
 import it.infn.mw.iam.util.ssh.InvalidSshKeyException;
-import it.infn.mw.iam.util.ssh.RSAPublicKey;
+import it.infn.mw.iam.util.ssh.RSAPublicKeyUtils;
 
 @Component
 public class UserUpdater implements Updater<IamAccount, ScimUser> {
@@ -95,9 +95,13 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
     patchPassword(a, u.getPassword());
     patchX509Certificates(a, u.getX509Certificates(), ScimPatchOperationType.add);
 
-    if (u.getIndigoUser() != null) {
+    if (u.hasOidcIds()) {
 
       addOidcIdsIfNotNull(a, u.getIndigoUser().getOidcIds());
+    }
+
+    if (u.hasSshKeys()) {
+
       addSshKeysIfNotNull(a, u.getIndigoUser().getSshKeys());
     }
 
@@ -109,10 +113,16 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
 
     patchX509Certificates(a, u.getX509Certificates(), ScimPatchOperationType.remove);
 
-    if (u.getIndigoUser() != null) {
-
+    if (u.hasOidcIds()) {
       removeOidcIdsIfNotNull(a, u.getIndigoUser().getOidcIds());
+    }
+
+    if (u.hasSshKeys()) {
       removeSshKeysIfNotNull(a, u.getIndigoUser().getSshKeys());
+    }
+
+    if (u.hasSamlIds()) {
+      // TO-DO
     }
 
     a.touch();
@@ -154,7 +164,7 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
 
   private void patchX509Certificate(IamAccount a, ScimX509Certificate cert,
       ScimPatchOperationType action) {
-    
+
     Preconditions.checkNotNull("X509Certificate is null", cert);
 
     switch (action) {
@@ -376,8 +386,7 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
       sshKeyToCreate.setAccount(owner);
 
       try {
-        RSAPublicKey key = new RSAPublicKey(sshKey.getValue());
-        sshKeyToCreate.setFingerprint(key.getSHA256Fingerprint());
+        sshKeyToCreate.setFingerprint(RSAPublicKeyUtils.getSHA256Fingerprint(sshKey.getValue()));
       } catch (InvalidSshKeyException e) {
         throw new ScimException(e.getMessage());
       }

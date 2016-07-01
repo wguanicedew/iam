@@ -6,43 +6,27 @@ import org.apache.commons.codec.digest.MessageDigestAlgorithms;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
-import java.util.HashMap;
 
-public class RSAPublicKey {
+public class RSAPublicKeyUtils {
 
-  private final String key;
-  private HashMap<String, String> fingerprints = new HashMap<String, String>();
+  public static String getMD5Fingerprint(String key) {
 
-  public RSAPublicKey(String key) throws InvalidSshKeyException {
-
-    this.key = key;
-    fingerprints.put(MessageDigestAlgorithms.MD5, buildMD5Fingerprint());
-    fingerprints.put(MessageDigestAlgorithms.SHA_256, buildSHA256Fingerprint());
+    return buildMD5Fingerprint(key);
   }
 
-  public String getKey() {
+  public static String getFormattedMD5Fingerprint(String key) {
 
-    return key;
+    return String.join(":", buildMD5Fingerprint(key).split("(?<=\\G..)"));
   }
 
-  public String getMD5Fingerprint() {
+  public static String getSHA256Fingerprint(String key) {
 
-    return fingerprints.get(MessageDigestAlgorithms.MD5);
+    return buildSHA256Fingerprint(key);
   }
 
-  public String getFormattedMD5Fingerprint() {
+  private static String buildMD5Fingerprint(String key) throws InvalidSshKeyException {
 
-    return String.join(":", fingerprints.get(MessageDigestAlgorithms.MD5).split("(?<=\\G..)"));
-  }
-
-  public String getSHA256Fingerprint() {
-
-    return fingerprints.get(MessageDigestAlgorithms.SHA_256);
-  }
-
-  private String buildMD5Fingerprint() throws InvalidSshKeyException {
-
-    String fingerprint;
+    String fingerprint = null;
 
     try {
 
@@ -52,8 +36,8 @@ public class RSAPublicKey {
 
     } catch (NoSuchAlgorithmException e) {
 
-      throw new InvalidSshKeyException("Error during fingerprint generation: unsupported algorithm",
-          e);
+      /* Algorithm is MessageDigestAlgorithms.MD5 so the exception is never thrown */
+      assert false;
 
     } catch (IllegalArgumentException iae) {
 
@@ -64,9 +48,9 @@ public class RSAPublicKey {
     return fingerprint;
   }
 
-  private String buildSHA256Fingerprint() throws InvalidSshKeyException {
+  private static String buildSHA256Fingerprint(String key) throws InvalidSshKeyException {
 
-    String fingerprint;
+    String fingerprint = null;
 
     try {
 
@@ -76,8 +60,8 @@ public class RSAPublicKey {
 
     } catch (NoSuchAlgorithmException e) {
 
-      throw new InvalidSshKeyException("Error during fingerprint generation: unsupported algorithm",
-          e);
+      /* Algorithm is MessageDigestAlgorithms.SHA_256 so the exception is never thrown */
+      assert false;
 
     } catch (IllegalArgumentException iae) {
 
