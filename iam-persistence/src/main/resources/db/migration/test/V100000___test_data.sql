@@ -11,8 +11,8 @@ INSERT INTO system_scope(scope, description, icon, restricted, default_scope, st
   ('offline_access', 'offline access', 'time', false, false, false, null),
   ('scim:read','read access to SCIM user and groups', null, true, false, false, null),
   ('scim:write','write access to SCIM user and groups', null, true, false, false, null),
-  ('registration:list','List registration requests', null, true, false, false, null),
-  ('registration:update','Update registration requests', null, true, false, false, null);
+  ('registration:read','List registration requests', null, true, false, false, null),
+  ('registration:write','Update registration requests', null, true, false, false, null);
 
 INSERT INTO client_details (id, client_id, client_secret, client_name, dynamically_registered, refresh_token_validity_seconds, access_token_validity_seconds, id_token_validity_seconds, allow_introspection, token_endpoint_auth_method) VALUES
   (1, 'client', 'secret', 'Test Client', false, null, 3600, 600, true, 'SECRET_BASIC'),
@@ -83,8 +83,8 @@ INSERT INTO client_scope (owner_id, scope) VALUES
   (9, 'offline_access'),
   (10, 'openid'),
   (10, 'profile'),
-  (10, 'registration:list'),
-  (10, 'registration:update'),
+  (10, 'registration:read'),
+  (10, 'registration:write'),
   (10, 'scim:write'),
   (10, 'scim:read');
   
