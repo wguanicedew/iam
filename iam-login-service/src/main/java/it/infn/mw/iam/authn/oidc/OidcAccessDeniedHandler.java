@@ -1,4 +1,4 @@
-package it.infn.mw.iam.oidc;
+package it.infn.mw.iam.authn.oidc;
 
 import java.io.IOException;
 

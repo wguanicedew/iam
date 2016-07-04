@@ -2,7 +2,6 @@ package it.infn.mw.iam.config;
 
 import org.mitre.oauth2.service.OAuth2TokenEntityService;
 import org.mitre.oauth2.web.CorsFilter;
-import org.mitre.openid.connect.client.OIDCAuthenticationProvider;
 import org.mitre.openid.connect.web.AuthenticationTimeStamper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -33,8 +32,9 @@ import org.springframework.security.web.context.request.async.WebAsyncManagerInt
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.filter.GenericFilterBean;
 
-import it.infn.mw.iam.oidc.OidcAccessDeniedHandler;
-import it.infn.mw.iam.oidc.SaveRequestOidcAuthenticationFilter;
+import it.infn.mw.iam.authn.oidc.OidcAccessDeniedHandler;
+import it.infn.mw.iam.authn.oidc.OidcAuthenticationProvider;
+import it.infn.mw.iam.authn.oidc.OidcClientFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -104,11 +104,11 @@ public class SecurityConfig {
     private AuthenticationManager oidcAuthManager;
 
     @Autowired
-    OIDCAuthenticationProvider authProvider;
+    OidcAuthenticationProvider authProvider;
 
     @Autowired
     @Qualifier("openIdConnectAuthenticationFilter")
-    private SaveRequestOidcAuthenticationFilter oidcFilter;
+    private OidcClientFilter oidcFilter;
 
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {

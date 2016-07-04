@@ -1,6 +1,6 @@
 package it.infn.mw.iam.core;
 
-import it.infn.mw.iam.config.oidc.GoogleClientConfig;
+import it.infn.mw.iam.config.oidc.GoogleClientProperties;
 
 public interface LoginPageConfiguration {
 
@@ -10,6 +10,6 @@ public interface LoginPageConfiguration {
 
   public boolean isSamlEnabled();
 
-  public GoogleClientConfig getGoogleConfiguration();
+  public GoogleClientProperties getGoogleConfiguration();
 
 }

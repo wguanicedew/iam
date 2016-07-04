@@ -1,4 +1,4 @@
-package it.infn.mw.iam.saml.web;
+package it.infn.mw.iam.authn.saml.web;
 
 import java.util.Set;
 
@@ -27,7 +27,7 @@ public class SamlSsoController {
   MetadataManager metadata;
 
   @RequestMapping(value = "/idpSelection", method = RequestMethod.GET)
-  public String idpSelection(HttpServletRequest request, Model model) {
+  public String idpSelection(final HttpServletRequest request, final Model model) {
 
     if (!(SecurityContextHolder.getContext()
         .getAuthentication() instanceof AnonymousAuthenticationToken)) {
@@ -43,4 +43,5 @@ public class SamlSsoController {
       return "samlIdpSelection";
     }
   }
+  
 }

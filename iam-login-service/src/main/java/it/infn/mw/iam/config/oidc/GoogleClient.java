@@ -22,12 +22,15 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 
-import it.infn.mw.iam.oidc.OidcAuthenticationFailureHandler;
-import it.infn.mw.iam.oidc.OidcAuthenticationSuccessHandler;
-import it.infn.mw.iam.oidc.OidcExceptionMessageHelper;
-import it.infn.mw.iam.oidc.SaveRequestOidcAuthenticationFilter;
-import it.infn.mw.iam.oidc.service.OidcUserDetailsService;
+import it.infn.mw.iam.authn.ExternalAuthenticationFailureHandler;
+import it.infn.mw.iam.authn.TimestamperSuccessHandler;
+import it.infn.mw.iam.authn.oidc.OidcAuthenticationProvider;
+import it.infn.mw.iam.authn.oidc.OidcClientFilter;
+import it.infn.mw.iam.authn.oidc.OidcExceptionMessageHelper;
+import it.infn.mw.iam.authn.oidc.service.DefaultOidcUserDetailsService;
+import it.infn.mw.iam.authn.oidc.service.OidcUserDetailsService;
 
 @Configuration
 @Profile("google")
@@ -37,11 +40,11 @@ public class GoogleClient {
   private String iamBaseUrl;
 
   @Autowired
-  private GoogleClientConfig googleClientConfig;
+  private GoogleClientProperties googleClientProperties;
 
   @Bean
   public FilterRegistrationBean disabledAutomaticOidcFilterRegistration(
-      SaveRequestOidcAuthenticationFilter f) {
+      OidcClientFilter f) {
 
     FilterRegistrationBean b = new FilterRegistrationBean(f);
     b.setEnabled(false);
@@ -49,9 +52,9 @@ public class GoogleClient {
   }
 
   @Bean(name = "openIdConnectAuthenticationFilter")
-  public SaveRequestOidcAuthenticationFilter openIdConnectAuthenticationFilterCanl() {
+  public OidcClientFilter openIdConnectAuthenticationFilterCanl() {
 
-    SaveRequestOidcAuthenticationFilter filter = new SaveRequestOidcAuthenticationFilter();
+    OidcClientFilter filter = new OidcClientFilter();
     filter.setAuthenticationManager(authenticationManager());
     filter.setIssuerService(googleIssuerService());
     filter.setServerConfigurationService(dynamicServerConfiguration());
@@ -61,7 +64,7 @@ public class GoogleClient {
     filter.setAuthenticationSuccessHandler(successHandler());
     filter.setHttpRequestFactory(new HttpComponentsClientHttpRequestFactory());
     filter.setAuthenticationFailureHandler(
-        new OidcAuthenticationFailureHandler(new OidcExceptionMessageHelper()));
+        new ExternalAuthenticationFailureHandler(new OidcExceptionMessageHelper()));
 
     return filter;
   }
@@ -69,7 +72,8 @@ public class GoogleClient {
   @Bean(name = "externalAuthenticationSuccessHandler")
   public AuthenticationSuccessHandler successHandler() {
 
-    return new OidcAuthenticationSuccessHandler();
+    return new TimestamperSuccessHandler(new SavedRequestAwareAuthenticationSuccessHandler());
+
   }
 
   @Bean(name = "OIDCAuthenticationManager")
@@ -81,15 +85,14 @@ public class GoogleClient {
   @Bean
   public OIDCAuthenticationProvider openIdConnectAuthenticationProvider() {
 
-    OIDCAuthenticationProvider provider = new OIDCAuthenticationProvider();
-
+    OidcAuthenticationProvider provider = new OidcAuthenticationProvider(userDetailService());
     return provider;
   }
 
   private IssuerService googleIssuerService() {
 
     StaticSingleIssuerService issuerService = new StaticSingleIssuerService();
-    issuerService.setIssuer(googleClientConfig.getIssuer());
+    issuerService.setIssuer(googleClientProperties.getIssuer());
 
     return issuerService;
   }
@@ -103,7 +106,7 @@ public class GoogleClient {
 
     Map<String, RegisteredClient> clients = new LinkedHashMap<String, RegisteredClient>();
 
-    clients.put(googleClientConfig.getIssuer(), googleClientConfig);
+    clients.put(googleClientProperties.getIssuer(), googleClientProperties);
 
     StaticClientConfigurationService config = new StaticClientConfigurationService();
     config.setClients(clients);
@@ -124,6 +127,6 @@ public class GoogleClient {
   @Bean
   public OidcUserDetailsService userDetailService() {
 
-    return new OidcUserDetailsService();
+    return new DefaultOidcUserDetailsService();
   }
 }

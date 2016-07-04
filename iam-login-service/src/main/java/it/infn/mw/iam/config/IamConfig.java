@@ -11,9 +11,9 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 
+import it.infn.mw.iam.authn.oidc.OidcTokenEnhancer;
 import it.infn.mw.iam.core.IamProperties;
 import it.infn.mw.iam.core.IamUserDetailsService;
-import it.infn.mw.iam.oidc.OidcTokenEnhancer;
 import it.infn.mw.iam.util.DumpHeadersFilter;
 
 @Configuration

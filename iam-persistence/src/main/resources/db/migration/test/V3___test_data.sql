@@ -118,7 +118,11 @@ INSERT INTO iam_account(id, uuid, username, password, user_info_id, creationtime
 
 INSERT INTO iam_oidc_id(issuer, subject, account_id) VALUES
 ('https://accounts.google.com', '105440632287425289613', 1),
-('https://accounts.google.com', '112972579367980197252', 2);
+('https://accounts.google.com', '114132403455520317223', 2);
+
+INSERT INTO iam_saml_id(idpid, userid, account_id) VALUES
+('https://idptestbed/idp/shibboleth', 'andrea.ceccanti@example.org',1),
+('https://idptestbed/idp/shibboleth', 'ciccio.paglia@example.org',2);
 
 INSERT INTO iam_group(id, name, uuid, description, creationtime, lastupdatetime) VALUES
 (1, 'Production', 'c617d586-54e6-411d-8e38-64967798fa8a', 'The INDIGO-DC production group', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP()),

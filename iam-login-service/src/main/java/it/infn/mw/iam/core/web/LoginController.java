@@ -2,6 +2,8 @@ package it.infn.mw.iam.core.web;
 
 import java.security.Principal;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.stereotype.Controller;
@@ -24,9 +26,10 @@ public class LoginController {
   IamProperties properties;
 
   @RequestMapping("/login")
-  public String login(Principal principal, Model model) {
+  public String login(Principal principal, Model model, HttpServletRequest request) {
 
     if (principal == null || principal instanceof AnonymousAuthenticationToken) {
+      
       model.addAttribute(LOGIN_PAGE_CONFIGURATION_KEY, loginPageConfiguration);
       model.addAttribute(IAM_PROPERTIES__KEY, properties);
 

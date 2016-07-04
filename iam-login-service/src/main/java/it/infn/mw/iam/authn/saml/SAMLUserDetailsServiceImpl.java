@@ -1,8 +1,7 @@
-package it.infn.mw.iam.saml;
+package it.infn.mw.iam.authn.saml;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -12,18 +11,23 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.saml.SAMLCredential;
 import org.springframework.security.saml.userdetails.SAMLUserDetailsService;
 
+import it.infn.mw.iam.authn.saml.util.SamlUserIdentifierResolver;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamAuthority;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
-import it.infn.mw.iam.saml.util.SAMLUserIdentifierAccessor;
 
 public class SAMLUserDetailsServiceImpl implements SAMLUserDetailsService {
 
-  @Autowired
-  SAMLUserIdentifierAccessor userIdAccessor;
+  final SamlUserIdentifierResolver resolver;
+  final IamAccountRepository repo;
 
   @Autowired
-  IamAccountRepository repo;
+  public SAMLUserDetailsServiceImpl(SamlUserIdentifierResolver resolver,
+      IamAccountRepository repo) {
+    this.resolver = resolver;
+    this.repo = repo;
+  }
+
 
   List<GrantedAuthority> convertAuthorities(IamAccount a) {
 
@@ -38,25 +42,19 @@ public class SAMLUserDetailsServiceImpl implements SAMLUserDetailsService {
   public Object loadUserBySAML(SAMLCredential credential) throws UsernameNotFoundException {
 
     String issuerId = credential.getRemoteEntityID();
-    String userSamlId = userIdAccessor.getUserIdentifier(credential);
 
-    if (userSamlId == null) {
-      throw new UsernameNotFoundException("No NameID found in SAML assertion");
-    }
+    String userSamlId =
+        resolver.getUserIdentifier(credential).orElseThrow(() -> new UsernameNotFoundException(
+            "Could not extract a user identifier from the SAML assertion"));
 
-    Optional<IamAccount> account = repo.findBySamlId(issuerId, userSamlId);
+    IamAccount account = repo.findBySamlId(issuerId, userSamlId).orElseThrow(() -> {
+      String errorMessage =
+          String.format("No local user found linked to SAML identity (%s) %s ", issuerId, userSamlId);
+      
+      return new UsernameNotFoundException(errorMessage);
+    });
 
-    if (account.isPresent()) {
-
-      IamAccount a = account.get();
-
-      User u = new User(a.getUsername(), a.getPassword(), convertAuthorities(a));
-
-      return u;
-
-    }
-
-    return null;
+    return new User(account.getUsername(), account.getPassword(), convertAuthorities(account));
 
   }
 

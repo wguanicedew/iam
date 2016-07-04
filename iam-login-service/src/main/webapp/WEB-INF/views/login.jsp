@@ -40,11 +40,11 @@
         </div>    
       </c:if>
       
-      <c:if test="${externalAuthenticationError != null}">
+      <c:if test="${ param.externalAuthenticationError != null }">
         <div class="alert alert-error">
-          <strong>External authentication error</strong><br>
-            ${externalAuthenticationErrorMessage}<br>
-        </div>    
+          <strong>External authentication error</strong>
+          <div>${param.externalAuthenticationError}</div>
+        </div>
       </c:if>
       
       <c:if test="${ param.error != null }">
@@ -111,7 +111,8 @@
           Github is enabled
         </c:if>
       </div>
-
+    </div>
+    <div>
       <c:if test="${loginPageConfiguration.samlEnabled}">
         <c:url
           var="samlLoginUrl"
