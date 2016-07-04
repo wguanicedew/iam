@@ -61,14 +61,14 @@ public class IamAccount {
 
   @ManyToMany
   @JoinTable(name = "iam_account_authority",
-      joinColumns = @JoinColumn(name = "account_id", referencedColumnName = "id") ,
-      inverseJoinColumns = @JoinColumn(name = "authority_id", referencedColumnName = "id") )
+      joinColumns = @JoinColumn(name = "account_id", referencedColumnName = "id"),
+      inverseJoinColumns = @JoinColumn(name = "authority_id", referencedColumnName = "id"))
   private Set<IamAuthority> authorities = new HashSet<>();
 
   @ManyToMany
   @JoinTable(name = "iam_account_group",
-      joinColumns = @JoinColumn(name = "account_id", referencedColumnName = "id") ,
-      inverseJoinColumns = @JoinColumn(name = "group_id", referencedColumnName = "id") )
+      joinColumns = @JoinColumn(name = "account_id", referencedColumnName = "id"),
+      inverseJoinColumns = @JoinColumn(name = "group_id", referencedColumnName = "id"))
   private Set<IamGroup> groups = new HashSet<>();
 
   @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
@@ -82,6 +82,15 @@ public class IamAccount {
 
   @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
   private List<IamX509Certificate> x509Certificates = new ArrayList<>();
+
+  @Column(name = "confirmation_key", unique = true, length = 36)
+  private String confirmationKey;
+
+  @Column(name = "reset_key", unique = true, length = 36)
+  private String resetKey;
+
+  @OneToOne(cascade = CascadeType.REMOVE, mappedBy = "account")
+  private IamRegistrationRequest registrationRequest;
 
   public IamAccount() {}
 
@@ -160,7 +169,7 @@ public class IamAccount {
     return creationTime;
   }
 
-  public void setCreationTime(Date creationTime) {
+  public void setCreationTime(final Date creationTime) {
 
     this.creationTime = creationTime;
   }
@@ -170,7 +179,7 @@ public class IamAccount {
     return lastUpdateTime;
   }
 
-  public void setLastUpdateTime(Date lastUpdateTime) {
+  public void setLastUpdateTime(final Date lastUpdateTime) {
 
     this.lastUpdateTime = lastUpdateTime;
   }
@@ -180,7 +189,7 @@ public class IamAccount {
     return active;
   }
 
-  public void setActive(boolean active) {
+  public void setActive(final boolean active) {
 
     this.active = active;
   }
@@ -190,7 +199,7 @@ public class IamAccount {
     return samlIds;
   }
 
-  public void setSamlIds(List<IamSamlId> samlIds) {
+  public void setSamlIds(final List<IamSamlId> samlIds) {
 
     this.samlIds = samlIds;
   }
@@ -200,12 +209,12 @@ public class IamAccount {
     return oidcIds;
   }
 
-  public void setOidcIds(List<IamOidcId> oidcIds) {
+  public void setOidcIds(final List<IamOidcId> oidcIds) {
 
     this.oidcIds = oidcIds;
   }
-  
-  public void addOidcId(IamOidcId oidcId){
+
+  public void addOidcId(IamOidcId oidcId) {
     getOidcIds().add(oidcId);
     oidcId.setAccount(this);
   }
@@ -215,7 +224,7 @@ public class IamAccount {
     return sshKeys;
   }
 
-  public void setSshKeys(List<IamSshKey> sshKeys) {
+  public void setSshKeys(final List<IamSshKey> sshKeys) {
 
     this.sshKeys = sshKeys;
   }
@@ -225,9 +234,39 @@ public class IamAccount {
     return x509Certificates;
   }
 
-  public void setX509Certificates(List<IamX509Certificate> x509Certificates) {
+  public void setX509Certificates(final List<IamX509Certificate> x509Certificates) {
 
     this.x509Certificates = x509Certificates;
+  }
+
+  public String getConfirmationKey() {
+
+    return confirmationKey;
+  }
+
+  public void setConfirmationKey(final String confirmationKey) {
+
+    this.confirmationKey = confirmationKey;
+  }
+
+  public String getResetKey() {
+
+    return resetKey;
+  }
+
+  public void setResetKey(final String resetKey) {
+
+    this.resetKey = resetKey;
+  }
+
+  public IamRegistrationRequest getRegistrationRequest() {
+
+    return registrationRequest;
+  }
+
+  public void setRegistrationRequest(final IamRegistrationRequest registrationRequest) {
+
+    this.registrationRequest = registrationRequest;
   }
 
   public void touch() {

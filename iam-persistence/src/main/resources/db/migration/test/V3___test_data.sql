@@ -10,7 +10,9 @@ INSERT INTO system_scope(scope, description, icon, restricted, default_scope, st
   ('phone', 'telephone number', 'bell', false, true, false, null),
   ('offline_access', 'offline access', 'time', false, false, false, null),
   ('scim:read','read access to SCIM user and groups', null, true, false, false, null),
-  ('scim:write','write access to SCIM user and groups', null, true, false, false, null);
+  ('scim:write','write access to SCIM user and groups', null, true, false, false, null),
+  ('registration:list','List registration requests', null, true, false, false, null),
+  ('registration:update','Update registration requests', null, true, false, false, null);
 
 INSERT INTO client_details (id, client_id, client_secret, client_name, dynamically_registered, refresh_token_validity_seconds, access_token_validity_seconds, id_token_validity_seconds, allow_introspection, token_endpoint_auth_method) VALUES
   (1, 'client', 'secret', 'Test Client', false, null, 3600, 600, true, 'SECRET_BASIC'),
@@ -21,7 +23,8 @@ INSERT INTO client_details (id, client_id, client_secret, client_name, dynamical
   (6, 'scim-client-ro', 'secret', 'SCIM client (read-only)', false, null, 3600, 600, true, 'SECRET_POST'),
   (7, 'scim-client-rw', 'secret', 'SCIM client (read-write)', false, null, 3600, 600, true, 'SECRET_POST'),
   (8, 'token-exchange-actor', 'secret', 'Token Exchange grant client actor', false, null, 3600, 600, true, 'SECRET_POST'),
-  (9, 'token-exchange-subject', 'secret', 'Token Exchange grant client subject', false, null, 3600, 600, true, 'SECRET_POST');
+  (9, 'token-exchange-subject', 'secret', 'Token Exchange grant client subject', false, null, 3600, 600, true, 'SECRET_POST'),
+  (10, 'registration-client', 'secret', 'Registration service test client', false, null, 3600, 600, true, 'SECRET_POST');
 
 INSERT INTO client_scope (owner_id, scope) VALUES
   (1, 'openid'),
@@ -77,7 +80,13 @@ INSERT INTO client_scope (owner_id, scope) VALUES
   (8, 'read-tasks'),
   (9, 'openid'),
   (9, 'profile'),
-  (9, 'offline_access');
+  (9, 'offline_access'),
+  (10, 'openid'),
+  (10, 'profile'),
+  (10, 'registration:list'),
+  (10, 'registration:update'),
+  (10, 'scim:write'),
+  (10, 'scim:read');
   
   
 INSERT INTO client_redirect_uri (owner_id, redirect_uri) VALUES
@@ -86,7 +95,7 @@ INSERT INTO client_redirect_uri (owner_id, redirect_uri) VALUES
   (3, 'http://localhost:4000/callback'),
   (4, 'http://localhost:5000/callback');
 
-  INSERT INTO client_grant_type (owner_id, grant_type) VALUES
+INSERT INTO client_grant_type (owner_id, grant_type) VALUES
   (1, 'authorization_code'),
   (1, 'urn:ietf:params:oauth:grant_type:redelegate'),
   (1, 'implicit'),
@@ -102,7 +111,9 @@ INSERT INTO client_redirect_uri (owner_id, redirect_uri) VALUES
   (8, 'client_credentials'),
   (8, 'refresh_token'),
   (9, 'client_credentials'),
-  (9, 'refresh_token');
+  (9, 'refresh_token'),
+  (10, 'client_credentials'),
+  (10, 'refresh_token');
   
 INSERT INTO iam_authority(ID, AUTH) VALUES
 (1, 'ROLE_ADMIN'),

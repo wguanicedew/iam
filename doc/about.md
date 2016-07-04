@@ -14,20 +14,20 @@ The IAM service provides a layer where identities, enrollment, group membership 
 * **Policy definition, distribution and evaluation**: the IAM provides tools and APIs to
     - define authorization policies on distributed resources
     - define policy distribution flows so that policies can be imported from other IAM instances
-    - evaluate policies against a request context and issue an authorisation decision
+    - evaluate policies against a request context and issue an authorization decision
 
 ### Architecture
 
-![INDIGO IAM Architecture](doc/images/IAM-architecture.png)
+![INDIGO IAM Architecture](images/IAM-architecture.png)
 
 The IAM service is composed of basic components (which could be deployed as microservices) providing part of the full IAM functionality.
 
-* The **Authentication** component will deal with user authentication through the supported mechanims (e.g., SAML, X.509, OpenID Connect) and expose the authentication information to the other IAM components.
-* The **Internal Authorisation** component, which is orthogonal to all exposed services, defines an authorisation layer that defines local, IAM-specific authorisation polcies, like for instance which user is allowed to create a new collaboration, or to cancel sessions in case of a security incident, etc.
+* The **Authentication** component will deal with user authentication through the supported mechanism (e.g., SAML, X.509, OpenID Connect) and expose the authentication information to the other IAM components.
+* The **Internal Authorization** component, which is orthogonal to all exposed services, defines an authorization layer that defines local, IAM-specific authorization policies, like for instance which user is allowed to create a new collaboration, or to cancel sessions in case of a security incident, etc.
 * The **Session management** component deals with the management of sessions (search, creation, revocation, etc.), in order to provide support for single sign-on and logout
 to client services and applications.
 * The **User management** component implements user management functions, like attribute management, identity management, enrollment and registration flows (e.g., how new users can join an existing collaboration), and provisioning.
-* The **Authorisation** component provides a flexible XACML authorization engine, and exposes policy authoring, evaluation and distribution functionality.
+* The **Authorization** component provides a flexible XACML authorization engine, and exposes policy authoring, evaluation and distribution functionality.
 * The **Auditing** component maintains a persistent audit log of all the actions performed in the system.
 
 
@@ -44,4 +44,4 @@ to client services and applications.
 #### Software
 
 * [Mitreid-connect](https://github.com/mitreid-connect/)
-* [Argus authorisation service](http://argus-authz.github.io/)
+* [Argus authorization service](http://argus-authz.github.io/)
