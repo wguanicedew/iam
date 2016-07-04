@@ -1,7 +1,3 @@
-# INDIGO Identity and Access Management service
-
-This is the INDIGO Identity and Access Management service code repository.
-
 # Summary
 
 * [About Indigo IAM](doc/about.md)
