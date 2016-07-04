@@ -76,17 +76,33 @@ public class SecurityConfig {
 
       // @formatter:off
 
-      http.requestMatchers().antMatchers("/", "/login**", "/logout", "/authorize", "/manage/**")
-          .and().sessionManagement().enableSessionUrlRewriting(false).and().authorizeRequests()
-          .antMatchers("/login**").permitAll().antMatchers("/authorize**").permitAll()
-          .antMatchers("/").authenticated().and().formLogin().loginPage("/login")
-          .failureUrl("/login?error=failure").successHandler(authenticationTimeStamper).and()
-          .exceptionHandling().accessDeniedHandler(new OidcAccessDeniedHandler()).and()
+      http.requestMatchers()
+        .antMatchers("/", "/login**", "/logout", "/authorize", "/manage/**")
+        .and()
+        .sessionManagement()
+          .enableSessionUrlRewriting(false)
+        .and()
+          .authorizeRequests()
+            .antMatchers("/login**", "/webjars/**").permitAll()
+          .antMatchers("/authorize**").permitAll()
+          .antMatchers("/").authenticated()
+        .and()
+          .formLogin()
+            .loginPage("/login")
+            .failureUrl("/login?error=failure")
+            .successHandler(authenticationTimeStamper)
+        .and()
+          .exceptionHandling()
+            .accessDeniedHandler(new OidcAccessDeniedHandler())
+        .and()
           .addFilterBefore(authorizationRequestFilter, SecurityContextPersistenceFilter.class)
-          .logout().logoutUrl("/logout").and().anonymous().and().csrf()
-          .requireCsrfProtectionMatcher(new AntPathRequestMatcher("/authorize")).disable();;
+        .logout()
+          .logoutUrl("/logout")
+        .and().anonymous()
+        .and()
+          .csrf()
+            .requireCsrfProtectionMatcher(new AntPathRequestMatcher("/authorize")).disable();;
       // @formatter:on
-
     }
 
     @Bean
