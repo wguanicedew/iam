@@ -28,23 +28,27 @@ import it.infn.mw.iam.core.IamRegistrationRequestStatus;
 @Transactional
 public class RegistrationController {
 
+  private RegistrationRequestService service;
+
   @Autowired
-  private DefaultRegistrationRequestService service;
+  public RegistrationController(RegistrationRequestService registrationService) {
+    service = registrationService;
+  }
 
   @RequestMapping(value = "/registration/add", method = RequestMethod.GET)
   public ModelAndView showAddForm(final Model model) {
 
-    ScimUser user = new ScimUser.Builder("").build();
+    ScimUser user = new ScimUser.Builder().build();
     model.addAttribute("user", user);
     return new ModelAndView("registration");
 
   }
 
-  @PreAuthorize("#oauth2.hasScope('registration:list') or hasRole('ADMIN')")
+  @PreAuthorize("#oauth2.hasScope('registration:read') or hasRole('ADMIN')")
   @RequestMapping(value = "/registration", method = RequestMethod.GET)
   @ResponseBody
   public List<RegistrationRequestDto> listRequests(
-      @RequestParam("status") final IamRegistrationRequestStatus status) {
+      @RequestParam(value="status", required=false, defaultValue="NEW") final IamRegistrationRequestStatus status) {
 
     return service.list(status);
   }
@@ -60,7 +64,7 @@ public class RegistrationController {
     return service.create(user);
   }
 
-  @PreAuthorize("#oauth2.hasScope('registration:update') or hasRole('ADMIN')")
+  @PreAuthorize("#oauth2.hasScope('registration:write') or hasRole('ADMIN')")
   @RequestMapping(value = "/registration/{uuid}", method = RequestMethod.POST)
   public RegistrationRequestDto changeStatus(@PathVariable("uuid") final String uuid,
       @RequestParam("decision") final String decision) {

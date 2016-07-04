@@ -48,7 +48,7 @@ public class RegistrationTests {
   public void testListNewRequests() {
 
     String accessToken =
-        TestUtils.getAccessToken("registration-client", "secret", "registration:list");
+        TestUtils.getAccessToken("registration-client", "secret", "registration:read");
 
     RegistrationRequestDto reg = createRegistrationRequest("test_list_new");
 
@@ -103,7 +103,7 @@ public class RegistrationTests {
   public void testApproveRequest() {
 
     String accessToken =
-        TestUtils.getAccessToken("registration-client", "secret", "registration:update");
+        TestUtils.getAccessToken("registration-client", "secret", "registration:write");
 
     // create new request
     RegistrationRequestDto reg = createRegistrationRequest("test_approve");
@@ -132,7 +132,7 @@ public class RegistrationTests {
   public void testRejectRequest() {
 
     String accessToken =
-        TestUtils.getAccessToken("registration-client", "secret", "registration:update");
+        TestUtils.getAccessToken("registration-client", "secret", "registration:write");
 
     // create new request
     RegistrationRequestDto reg = createRegistrationRequest("test_reject");
@@ -161,7 +161,7 @@ public class RegistrationTests {
   public void testApproveRequestNotConfirmedFailure() {
 
     String accessToken =
-        TestUtils.getAccessToken("registration-client", "secret", "registration:update");
+        TestUtils.getAccessToken("registration-client", "secret", "registration:write");
 
     // create new request
     RegistrationRequestDto reg = createRegistrationRequest("test_approve_fail");
@@ -205,7 +205,7 @@ public class RegistrationTests {
   public void testWrongDecisionFailure() {
 
     String accessToken =
-        TestUtils.getAccessToken("registration-client", "secret", "registration:update");
+        TestUtils.getAccessToken("registration-client", "secret", "registration:write");
 
     // create new request
     RegistrationRequestDto reg = createRegistrationRequest("test_wrong_decision");

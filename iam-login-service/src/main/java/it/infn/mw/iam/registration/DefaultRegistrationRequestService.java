@@ -73,6 +73,7 @@ public class DefaultRegistrationRequestService implements RegistrationRequestSer
     List<IamRegistrationRequest> result = requestRepository.findByStatus(status).get();
 
     List<RegistrationRequestDto> requests = new ArrayList<>();
+    
     for (IamRegistrationRequest elem : result) {
       RegistrationRequestDto item = converter.fromEntity(elem);
       requests.add(item);

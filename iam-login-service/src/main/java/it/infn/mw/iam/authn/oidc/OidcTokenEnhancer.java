@@ -1,4 +1,4 @@
-package it.infn.mw.iam.oidc;
+package it.infn.mw.iam.authn.oidc;
 
 import java.util.Date;
 import java.util.UUID;
@@ -31,6 +31,18 @@ public class OidcTokenEnhancer extends ConnectTokenEnhancer {
   @Autowired
   private OIDCTokenService connectTokenService;
 
+  private SignedJWT signClaims(JWTClaimsSet claims){
+    JWSAlgorithm signingAlg = getJwtService().getDefaultSigningAlgorithm();
+    
+    JWSHeader header = new JWSHeader(signingAlg, null, null, null, null, null, null, null, null,
+        null, getJwtService().getDefaultSignerKeyId(), null, null);
+    SignedJWT signedJWT = new SignedJWT(header, claims);
+
+    getJwtService().signJwt(signedJWT);
+    return signedJWT;
+    
+  }
+  
   protected OAuth2AccessTokenEntity buildAccessToken(OAuth2AccessToken accessToken,
       OAuth2Authentication authentication, UserInfo userInfo, Date issueTime) {
 
@@ -45,9 +57,13 @@ public class OidcTokenEnhancer extends ConnectTokenEnhancer {
     }
 
     // @formatter:off
-    Builder builder = new JWTClaimsSet.Builder().issuer(getConfigBean().getIssuer())
-        .issueTime(issueTime).expirationTime(token.getExpiration()).subject(subject)
-        .jwtID(UUID.randomUUID().toString());
+    Builder builder = 
+        new JWTClaimsSet.Builder()
+          .issuer(getConfigBean().getIssuer())
+          .issueTime(issueTime)
+          .expirationTime(token.getExpiration())
+          .subject(subject)
+          .jwtID(UUID.randomUUID().toString());
     // @formatter:on
 
     String audience = (String) authentication.getOAuth2Request().getExtensions().get("aud");
@@ -57,16 +73,8 @@ public class OidcTokenEnhancer extends ConnectTokenEnhancer {
     }
 
     JWTClaimsSet claims = builder.build();
-
-    JWSAlgorithm signingAlg = getJwtService().getDefaultSigningAlgorithm();
-    JWSHeader header = new JWSHeader(signingAlg, null, null, null, null, null, null, null, null,
-        null, getJwtService().getDefaultSignerKeyId(), null, null);
-    SignedJWT signed = new SignedJWT(header, claims);
-
-    getJwtService().signJwt(signed);
-
-    token.setJwt(signed);
-
+    token.setJwt(signClaims(claims));
+    
     return token;
 
   }

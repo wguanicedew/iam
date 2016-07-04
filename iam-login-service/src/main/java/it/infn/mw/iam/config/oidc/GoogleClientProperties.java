@@ -7,11 +7,11 @@ import org.springframework.stereotype.Component;
 
 @Component
 @ConfigurationProperties(prefix = "google")
-public class GoogleClientConfig extends RegisteredClient {
+public class GoogleClientProperties extends RegisteredClient {
 
   String issuer;
 
-  public GoogleClientConfig() {
+  public GoogleClientProperties() {
     setTokenEndpointAuthMethod(AuthMethod.SECRET_BASIC);
   }
 

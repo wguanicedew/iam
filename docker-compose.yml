@@ -35,12 +35,12 @@ services:
       dockerfile: ./iam-login-service/docker/Dockerfile
 
     environment:
-      IAM_JAVA_OPTS: -Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n,address=1044 -Dspring.profiles.active=google,mysql,dev 
+      IAM_JAVA_OPTS: -Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n,address=1044 -Dspring.profiles.active=saml,google,mysql-test,dev
         # Uncomment and join the lines below to enable debug loggers
         # -Dlogging.level.org.springframework.security=DEBUG -Dlogging.level.org.springframework.mvc=DEBUG
       IAM_JAR: /code/iam-login-service/target/iam-login-service-${POM_VERSION}.war
-      IAM_BASE_URL: https://iam
-      IAM_ISSUER: https://iam/
+      IAM_BASE_URL: https://iam.local.io
+      IAM_ISSUER: https://iam.local.io
       IAM_USE_FORWARDED_HEADERS: "true"
 
       IAM_DB_HOST: db
@@ -53,6 +53,9 @@ services:
 
       IAM_GITHUB_CLIENT_ID: ${IAM_GITHUB_CLIENT_ID}
       IAM_GITHUB_CLIENT_SECRET: ${IAM_GITHUB_CLIENT_SECRET}
+
+      IAM_SAML_IDP_METADATA: file:///code/docker/saml-idp/idp/shibboleth-idp/metadata/idp-metadata.xml
+      IAM_SAML_ENTITY_ID: urn:iam:iam-devel
 
     ports:
       - "1044:1044"
@@ -76,10 +79,13 @@ services:
       IAM_CLIENT_JAVA_OPTS: -Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n,address=1045
       IAM_CLIENT_ID: client
       IAM_CLIENT_SECRET: secret
-      IAM_CLIENT_ISSUER: https://iam/
-      IAM_CLIENT_REDIRECT_URIS: https://iam/iam-test-client/openid_connect_login
+      IAM_CLIENT_ISSUER: https://iam.local.io/
+      IAM_CLIENT_REDIRECT_URIS: https://iam.local.io/iam-test-client/openid_connect_login
       IAM_CLIENT_USE_FORWARD_HEADERS: "true"
       IAM_CLIENT_JAR: /code/iam-test-client/target/iam-test-client-${POM_VERSION}.jar
+
+    extra_hosts:
+      - "iam.local.io:192.168.99.100"
 
     ports:
       - "1045:1045"
@@ -96,6 +102,9 @@ services:
 
     depends_on:
       - iam-be
+      - client
+
+    dns_search: local.io
 
     container_name: iam
 

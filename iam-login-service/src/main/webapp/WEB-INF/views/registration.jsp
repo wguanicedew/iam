@@ -1,11 +1,12 @@
-<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
-	pageEncoding="ISO-8859-1"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <html>
 <head>
 <title>Registration Form</title>
+<base href="<c:url value='/'/>">
+
 <link rel="stylesheet"
-	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+	href="<c:url value='/webjars/bootstrap/css/bootstrap.min.css'/>"></link>
+  
 <link href="<c:url value='/resources/css/registration_app.css' />"
 	rel="stylesheet"></link>
 </head>
@@ -93,7 +94,9 @@
 		</div>
 	</div>
 
-	<script src="/webjars/angularjs/1.5.7/angular.min.js"></script>
+	<script
+    type="text/javascript"
+		src="<c:url value='/webjars/angularjs/angular.min.js'/>"></script>
 	<script src="<c:url value='/resources/js/registration_app.js' />"></script>
 	<script src="<c:url value='/resources/js/service/registration_service.js' />"></script>
 	<script src="<c:url value='/resources/js/controller/registration_controller.js' />"></script>

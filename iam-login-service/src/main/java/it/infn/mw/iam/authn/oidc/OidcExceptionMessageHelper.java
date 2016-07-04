@@ -1,8 +1,10 @@
-package it.infn.mw.iam.oidc;
+package it.infn.mw.iam.authn.oidc;
 
 import org.springframework.security.core.AuthenticationException;
 
-public class OidcExceptionMessageHelper {
+import it.infn.mw.iam.authn.AuthenticationExceptionMessageHelper;
+
+public class OidcExceptionMessageHelper implements AuthenticationExceptionMessageHelper {
 
   public String buildErrorMessage(AuthenticationException e) {
 

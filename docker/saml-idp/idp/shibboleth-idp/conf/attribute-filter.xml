@@ -17,9 +17,12 @@
                             urn:mace:shibboleth:2.0:afp:mf:basic http://shibboleth.net/schema/idp/shibboleth-afp-mf-basic.xsd
                             urn:mace:shibboleth:2.0:afp:mf:saml http://shibboleth.net/schema/idp/shibboleth-afp-mf-saml.xsd">
 
-    <!-- Release some attributes to an SP. -->
-    <afp:AttributeFilterPolicy id="example1">
-        <afp:PolicyRequirementRule xsi:type="basic:AttributeRequesterString" value="https://sp.idptestbed/shibboleth" />
+    <afp:AttributeFilterPolicy id="default-policy">
+        <afp:PolicyRequirementRule xsi:type="basic:ANY" />
+
+        <afp:AttributeRule attributeID="eduPersonUniqueId">
+            <afp:PermitValueRule xsi:type="basic:ANY" />
+        </afp:AttributeRule>
 
         <afp:AttributeRule attributeID="eduPersonPrincipalName">
             <afp:PermitValueRule xsi:type="basic:ANY" />
@@ -40,12 +43,6 @@
         <afp:AttributeRule attributeID="givenName">
             <afp:PermitValueRule xsi:type="basic:ANY" />
         </afp:AttributeRule>
-
-        <afp:AttributeRule attributeID="eduPersonPrincipalName">
-            <afp:PermitValueRule xsi:type="basic:ANY" />
-        </afp:AttributeRule>
-
-
     </afp:AttributeFilterPolicy>
 
 </afp:AttributeFilterPolicyGroup>

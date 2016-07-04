@@ -11,8 +11,8 @@ INSERT INTO system_scope(scope, description, icon, restricted, default_scope, st
   ('offline_access', 'offline access', 'time', false, false, false, null),
   ('scim:read','read access to SCIM user and groups', null, true, false, false, null),
   ('scim:write','write access to SCIM user and groups', null, true, false, false, null),
-  ('registration:list','List registration requests', null, true, false, false, null),
-  ('registration:update','Update registration requests', null, true, false, false, null);
+  ('registration:read','List registration requests', null, true, false, false, null),
+  ('registration:write','Update registration requests', null, true, false, false, null);
 
 INSERT INTO client_details (id, client_id, client_secret, client_name, dynamically_registered, refresh_token_validity_seconds, access_token_validity_seconds, id_token_validity_seconds, allow_introspection, token_endpoint_auth_method) VALUES
   (1, 'client', 'secret', 'Test Client', false, null, 3600, 600, true, 'SECRET_BASIC'),
@@ -83,8 +83,8 @@ INSERT INTO client_scope (owner_id, scope) VALUES
   (9, 'offline_access'),
   (10, 'openid'),
   (10, 'profile'),
-  (10, 'registration:list'),
-  (10, 'registration:update'),
+  (10, 'registration:read'),
+  (10, 'registration:write'),
   (10, 'scim:write'),
   (10, 'scim:read');
   
@@ -129,7 +129,11 @@ INSERT INTO iam_account(id, uuid, username, password, user_info_id, creationtime
 
 INSERT INTO iam_oidc_id(issuer, subject, account_id) VALUES
 ('https://accounts.google.com', '105440632287425289613', 1),
-('https://accounts.google.com', '112972579367980197252', 2);
+('https://accounts.google.com', '114132403455520317223', 2);
+
+INSERT INTO iam_saml_id(idpid, userid, account_id) VALUES
+('https://idptestbed/idp/shibboleth', 'andrea.ceccanti@example.org',1),
+('https://idptestbed/idp/shibboleth', 'ciccio.paglia@example.org',2);
 
 INSERT INTO iam_group(id, name, uuid, description, creationtime, lastupdatetime) VALUES
 (1, 'Production', 'c617d586-54e6-411d-8e38-64967798fa8a', 'The INDIGO-DC production group', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP()),
