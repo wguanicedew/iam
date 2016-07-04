@@ -93,12 +93,9 @@
 		</div>
 	</div>
 
-	<script
-		src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.min.js"></script>
+	<script src="/webjars/angularjs/1.5.7/angular.min.js"></script>
 	<script src="<c:url value='/resources/js/registration_app.js' />"></script>
-	<script
-		src="<c:url value='/resources/js/service/registration_service.js' />"></script>
-	<script
-		src="<c:url value='/resources/js/controller/registration_controller.js' />"></script>
+	<script src="<c:url value='/resources/js/service/registration_service.js' />"></script>
+	<script src="<c:url value='/resources/js/controller/registration_controller.js' />"></script>
 </body>
 </html>
