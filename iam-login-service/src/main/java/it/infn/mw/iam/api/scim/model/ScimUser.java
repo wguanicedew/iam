@@ -14,7 +14,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.Preconditions;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonFilter("attributeFilter")
@@ -404,9 +403,7 @@ public class ScimUser extends ScimResource {
 
     public Builder buildOidcId(String issuer, String subject) {
 
-      try {
-        Preconditions.checkNotNull(indigoUser);
-      } catch (NullPointerException npe) {
+      if (indigoUser == null) {
         this.indigoUser = ScimIndigoUser.builder().build();
       }
 
@@ -416,9 +413,7 @@ public class ScimUser extends ScimResource {
 
     public Builder buildSshKey(String label, String key, boolean isPrimary) {
 
-      try {
-        Preconditions.checkNotNull(indigoUser);
-      } catch (NullPointerException npe) {
+      if (indigoUser == null) {
         this.indigoUser = ScimIndigoUser.builder().build();
       }
 
@@ -429,9 +424,7 @@ public class ScimUser extends ScimResource {
 
     public Builder buildSamlId(String idpId, String userId) {
 
-      try {
-        Preconditions.checkNotNull(indigoUser);
-      } catch (NullPointerException npe) {
+      if (indigoUser == null) {
         this.indigoUser = ScimIndigoUser.builder().build();
       }
 
