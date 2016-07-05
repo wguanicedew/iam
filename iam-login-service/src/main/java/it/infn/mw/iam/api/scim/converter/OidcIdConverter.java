@@ -28,8 +28,8 @@ public class OidcIdConverter implements Converter<ScimOidcId, IamOidcId> {
   public IamOidcId fromScim(ScimOidcId scim) {
 
     IamOidcId oidcId = new IamOidcId();
-    oidcId.setIssuer(scim.issuer);
-    oidcId.setSubject(scim.subject);
+    oidcId.setIssuer(scim.getIssuer());
+    oidcId.setSubject(scim.getSubject());
 
     if (scim.getAccountRef() != null) {
       oidcId.setAccount(getAccount(scim.getAccountRef().getValue()));

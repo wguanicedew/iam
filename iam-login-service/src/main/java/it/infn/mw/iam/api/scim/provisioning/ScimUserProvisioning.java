@@ -166,7 +166,7 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
         .isPresent()) {
 
         account.getSshKeys().forEach(sshKey -> sshKey.setPrimary(false));
-        account.getSshKeys().get(0).setPrimary(true);
+        account.getSshKeys().stream().findFirst().get().setPrimary(true);
       }
     }
 

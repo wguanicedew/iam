@@ -41,6 +41,9 @@ public interface IamAccountRepository extends PagingAndSortingRepository<IamAcco
   Optional<IamAccount> findByUsernameWithDifferentId(@Param("username") String username,
       @Param("uuid") String uuid);
 
+  @Query("select a from IamAccount a join a.x509Certificates c where c.certificateSubject = :subject")
+  Optional<IamAccount> findByCertificateSubject(@Param("subject") String subject);
+
   @Query("select a from IamAccount a join a.groups ag where ag.id = :groupId")
   List<IamAccount> findByGroupId(@Param("groupId") String groupId);
 }

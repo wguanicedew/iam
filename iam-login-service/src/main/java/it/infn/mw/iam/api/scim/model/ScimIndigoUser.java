@@ -1,7 +1,7 @@
 package it.infn.mw.iam.api.scim.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -11,18 +11,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ScimIndigoUser {
 
-  private final List<ScimSshKey> sshKeys;
-  private final List<ScimOidcId> oidcIds;
-  private final List<ScimSamlId> samlIds;
+  private final Set<ScimSshKey> sshKeys;
+  private final Set<ScimOidcId> oidcIds;
+  private final Set<ScimSamlId> samlIds;
 
   @JsonCreator
-  private ScimIndigoUser(@JsonProperty("oidcIds") List<ScimOidcId> oidcIds,
-      @JsonProperty("sshKeys") List<ScimSshKey> sshKeys,
-      @JsonProperty("samlIds") List<ScimSamlId> samlIds) {
+  private ScimIndigoUser(@JsonProperty("oidcIds") Set<ScimOidcId> oidcIds,
+      @JsonProperty("sshKeys") Set<ScimSshKey> sshKeys,
+      @JsonProperty("samlIds") Set<ScimSamlId> samlIds) {
 
-    this.oidcIds = oidcIds != null ? oidcIds : new ArrayList<ScimOidcId>();
-    this.sshKeys = sshKeys != null ? sshKeys : new ArrayList<ScimSshKey>();
-    this.samlIds = samlIds != null ? samlIds : new ArrayList<ScimSamlId>();
+    this.oidcIds = oidcIds != null ? oidcIds : new HashSet<ScimOidcId>();
+    this.sshKeys = sshKeys != null ? sshKeys : new HashSet<ScimSshKey>();
+    this.samlIds = samlIds != null ? samlIds : new HashSet<ScimSamlId>();
 
   }
 
@@ -38,17 +38,17 @@ public class ScimIndigoUser {
     return sshKeys.isEmpty() && oidcIds.isEmpty() && samlIds.isEmpty();
   }
 
-  public List<ScimSshKey> getSshKeys() {
+  public Set<ScimSshKey> getSshKeys() {
 
     return sshKeys;
   }
 
-  public List<ScimOidcId> getOidcIds() {
+  public Set<ScimOidcId> getOidcIds() {
 
     return oidcIds;
   }
 
-  public List<ScimSamlId> getSamlIds() {
+  public Set<ScimSamlId> getSamlIds() {
 
     return samlIds;
   }
@@ -60,9 +60,9 @@ public class ScimIndigoUser {
 
   public static class Builder {
 
-    private List<ScimSshKey> sshKeys = new ArrayList<ScimSshKey>();
-    private List<ScimOidcId> oidcIds = new ArrayList<ScimOidcId>();
-    private List<ScimSamlId> samlIds = new ArrayList<ScimSamlId>();
+    private Set<ScimSshKey> sshKeys = new HashSet<ScimSshKey>();
+    private Set<ScimOidcId> oidcIds = new HashSet<ScimOidcId>();
+    private Set<ScimSamlId> samlIds = new HashSet<ScimSamlId>();
 
     public Builder addSshKey(ScimSshKey sshKey) {
 

@@ -128,4 +128,10 @@ public class ScimSshKey {
       return new ScimSshKey(this);
     }
   }
+
+  @Override
+  public String toString() {
+    return "ScimSshKey [display=" + display + ", primary=" + primary + ", fingerprint="
+        + fingerprint + ", value=" + value + ", accountRef=" + accountRef + "]";
+  }
 }

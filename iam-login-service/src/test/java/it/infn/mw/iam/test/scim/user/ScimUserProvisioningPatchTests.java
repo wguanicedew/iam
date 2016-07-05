@@ -1,6 +1,7 @@
 package it.infn.mw.iam.test.scim.user;
 
 import static it.infn.mw.iam.test.TestUtils.passwordTokenGetter;
+import static org.hamcrest.Matchers.startsWith;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertNull;
@@ -148,10 +149,10 @@ public class ScimUserProvisioningPatchTests {
 
     restUtils.doGet(lennon.getMeta().getLocation())
       .body("id", equalTo(lennon.getId()))
-      .body("urn:indigo-dc:scim:schemas:IndigoUser.oidcIds[0].issuer",
-          equalTo(indigoUser.getOidcIds().get(0).getIssuer()))
-      .body("urn:indigo-dc:scim:schemas:IndigoUser.oidcIds[0].subject",
-          equalTo(indigoUser.getOidcIds().get(0).getSubject()));
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".oidcIds[0].issuer",
+          equalTo(indigoUser.getOidcIds().stream().findFirst().get().getIssuer()))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".oidcIds[0].subject",
+          equalTo(indigoUser.getOidcIds().stream().findFirst().get().getSubject()));
 
     /* lincoln tryes to add the oidc account: */
     restUtils.doPatch(lincoln.getMeta().getLocation(), req, HttpStatus.CONFLICT);
@@ -167,7 +168,7 @@ public class ScimUserProvisioningPatchTests {
     restUtils.doDelete(lennon.getMeta().getLocation());
     restUtils.doDelete(lincoln.getMeta().getLocation());
   }
-  
+
   @Test
   public void testAddRessignAndRemoveSamlId() {
 
@@ -186,10 +187,10 @@ public class ScimUserProvisioningPatchTests {
 
     restUtils.doGet(lennon.getMeta().getLocation())
       .body("id", equalTo(lennon.getId()))
-      .body("urn:indigo-dc:scim:schemas:IndigoUser.samlIds[0].idpId",
-          equalTo(indigoUser.getSamlIds().get(0).getIdpId()))
-      .body("urn:indigo-dc:scim:schemas:IndigoUser.samlIds[0].userId",
-          equalTo(indigoUser.getSamlIds().get(0).getUserId()));
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".samlIds[0].idpId",
+          equalTo(indigoUser.getSamlIds().stream().findFirst().get().getIdpId()))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".samlIds[0].userId",
+          equalTo(indigoUser.getSamlIds().stream().findFirst().get().getUserId()));
 
     /* lincoln tryes to add the oidc account: */
     restUtils.doPatch(lincoln.getMeta().getLocation(), req, HttpStatus.CONFLICT);
@@ -291,7 +292,7 @@ public class ScimUserProvisioningPatchTests {
       .body("userName", equalTo(lennon.getUserName()))
       .body("x509Certificates", hasSize(equalTo(1)))
       .body("x509Certificates[0].value",
-          equalTo(lennon_update.getX509Certificates().get(0).getValue()));
+          equalTo(lennon_update.getX509Certificates().stream().findFirst().get().getValue()));
 
     ScimUser lennon_remove =
         ScimUser.builder()
@@ -356,10 +357,9 @@ public class ScimUserProvisioningPatchTests {
     restUtils.doGet(lennon.getMeta().getLocation())
       .body("id", equalTo(lennon.getId()))
       .body("userName", equalTo(lennon.getUserName()))
-      .body("urn:indigo-dc:scim:schemas:IndigoUser.sshKeys[0].display", equalTo("Personal"))
-      .body("urn:indigo-dc:scim:schemas:IndigoUser.sshKeys[0].value",
-          equalTo(TestUtils.getSshKey()))
-      .body("urn:indigo-dc:scim:schemas:IndigoUser.sshKeys[0].fingerprint",
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].display", equalTo("Personal"))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].value", equalTo(TestUtils.getSshKey()))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].fingerprint",
           equalTo(TestUtils.getSshKeySHA256Fingerprint()))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].primary", equalTo(true));
 
@@ -395,10 +395,9 @@ public class ScimUserProvisioningPatchTests {
     restUtils.doGet(lennon.getMeta().getLocation())
       .body("id", equalTo(lennon.getId()))
       .body("userName", equalTo(lennon.getUserName()))
-      .body("urn:indigo-dc:scim:schemas:IndigoUser.sshKeys[0].display", equalTo("Personal"))
-      .body("urn:indigo-dc:scim:schemas:IndigoUser.sshKeys[0].value",
-          equalTo(TestUtils.getSshKey()))
-      .body("urn:indigo-dc:scim:schemas:IndigoUser.sshKeys[0].fingerprint",
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].display", equalTo("Personal"))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].value", equalTo(TestUtils.getSshKey()))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].fingerprint",
           equalTo(TestUtils.getSshKeySHA256Fingerprint()));
 
     req = getPatchRemoveRequest(ScimUser.builder()
@@ -430,10 +429,9 @@ public class ScimUserProvisioningPatchTests {
     restUtils.doGet(lennon.getMeta().getLocation())
       .body("id", equalTo(lennon.getId()))
       .body("userName", equalTo(lennon.getUserName()))
-      .body("urn:indigo-dc:scim:schemas:IndigoUser.sshKeys[0].display", equalTo("Personal"))
-      .body("urn:indigo-dc:scim:schemas:IndigoUser.sshKeys[0].value",
-          equalTo(TestUtils.getSshKey()))
-      .body("urn:indigo-dc:scim:schemas:IndigoUser.sshKeys[0].fingerprint",
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].display", equalTo("Personal"))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].value", equalTo(TestUtils.getSshKey()))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].fingerprint",
           equalTo(TestUtils.getSshKeySHA256Fingerprint()));
 
     req =
@@ -467,10 +465,9 @@ public class ScimUserProvisioningPatchTests {
     restUtils.doGet(lennon.getMeta().getLocation())
       .body("id", equalTo(lennon.getId()))
       .body("userName", equalTo(lennon.getUserName()))
-      .body("urn:indigo-dc:scim:schemas:IndigoUser.sshKeys[0].display", equalTo("Personal"))
-      .body("urn:indigo-dc:scim:schemas:IndigoUser.sshKeys[0].value",
-          equalTo(TestUtils.getSshKey()))
-      .body("urn:indigo-dc:scim:schemas:IndigoUser.sshKeys[0].fingerprint",
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].display", equalTo("Personal"))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].value", equalTo(TestUtils.getSshKey()))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].fingerprint",
           equalTo(TestUtils.getSshKeySHA256Fingerprint()));
 
     req =
@@ -487,6 +484,115 @@ public class ScimUserProvisioningPatchTests {
       .body("id", equalTo(lennon.getId()))
       .body("userName", equalTo(lennon.getUserName()))
       .body("urn:indigo-dc:scim:schemas:IndigoUser", equalTo(null));
+
+    restUtils.doDelete(lennon.getMeta().getLocation());
+  }
+
+  @Test
+  public void testAddOidcIdDuplicateInASingleRequest() {
+
+    ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John", "Lennon");
+
+    ScimIndigoUser indigoUser = ScimIndigoUser.builder()
+      .addOidcid(ScimOidcId.builder().issuer("test_issuer").subject("test_subject").build())
+      .addOidcid(ScimOidcId.builder().issuer("test_issuer").subject("test_subject").build())
+      .build();
+
+    ScimUserPatchRequest req =
+        getPatchAddRequest(ScimUser.builder().indigoUserInfo(indigoUser).build());
+
+    restUtils.doPatch(lennon.getMeta().getLocation(), req, HttpStatus.CONFLICT).body("detail",
+        startsWith("Duplicated Open ID account"));
+
+    restUtils.doDelete(lennon.getMeta().getLocation());
+  }
+
+  @Test
+  public void testAddSshKeyDuplicateInASingleRequest() {
+
+    ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John", "Lennon");
+
+    ScimIndigoUser indigoUser = ScimIndigoUser.builder()
+      .addSshKey(ScimSshKey.builder().value(TestUtils.getSshKey()).build())
+      .addSshKey(ScimSshKey.builder().value(TestUtils.getSshKey()).build())
+      .build();
+
+    ScimUserPatchRequest req =
+        getPatchAddRequest(ScimUser.builder().indigoUserInfo(indigoUser).build());
+
+    restUtils.doPatch(lennon.getMeta().getLocation(), req, HttpStatus.CONFLICT).body("detail",
+        startsWith("Duplicated SSH Key"));
+
+    restUtils.doDelete(lennon.getMeta().getLocation());
+  }
+
+  @Test
+  public void testAddSamlIdDuplicateInASingleRequest() {
+
+    ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John", "Lennon");
+
+    ScimIndigoUser indigoUser = ScimIndigoUser.builder()
+      .addSamlId(ScimSamlId.builder().idpId("Idp Test ID").userId("User Test Id").build())
+      .addSamlId(ScimSamlId.builder().idpId("Idp Test ID").userId("User Test Id").build())
+      .build();
+
+    ScimUserPatchRequest req =
+        getPatchAddRequest(ScimUser.builder().indigoUserInfo(indigoUser).build());
+
+    restUtils.doPatch(lennon.getMeta().getLocation(), req, HttpStatus.CONFLICT).body("detail",
+        startsWith("Duplicated Saml Id"));
+
+    restUtils.doDelete(lennon.getMeta().getLocation());
+  }
+
+  @Test
+  public void testAddX509DuplicateInASingleRequest() {
+
+    ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John", "Lennon");
+
+    ScimUser lennon_update = ScimUser.builder()
+      .buildX509Certificate("Personal Certificate", TestUtils.getX509TestCertificate(), true)
+      .buildX509Certificate("Personal Certificate", TestUtils.getX509TestCertificate(), true)
+      .build();
+
+    ScimUserPatchRequest req = getPatchAddRequest(lennon_update);
+
+    restUtils.doPatch(lennon.getMeta().getLocation(), req, HttpStatus.CONFLICT).body("detail",
+        startsWith("Duplicated x509 certificate"));
+
+    restUtils.doDelete(lennon.getMeta().getLocation());
+  }
+
+  @Test
+  public void testPatchAddOidIdAndSshKeyAndSamlId() {
+
+    ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John", "Lennon");
+
+    ScimIndigoUser indigoUser = ScimIndigoUser.builder()
+      .addOidcid(ScimOidcId.builder().issuer("test_issuer").subject("test_subject").build())
+      .addSshKey(ScimSshKey.builder().value(TestUtils.getSshKey()).build())
+      .addSamlId(ScimSamlId.builder().idpId("Idp Test ID").userId("User Test Id").build())
+      .build();
+
+    ScimUserPatchRequest req =
+        getPatchAddRequest(ScimUser.builder().indigoUserInfo(indigoUser).build());
+
+    restUtils.doPatch(lennon.getMeta().getLocation(), req);
+
+    restUtils.doGet(lennon.getMeta().getLocation())
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".oidcIds", hasSize(equalTo(1)))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".oidcIds[0].issuer", equalTo("test_issuer"))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".oidcIds[0].subject", equalTo("test_subject"))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys", hasSize(equalTo(1)))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].display",
+          equalTo("john_lennon's personal ssh key"))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].value", equalTo(TestUtils.getSshKey()))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].fingerprint",
+          equalTo(TestUtils.getSshKeySHA256Fingerprint()))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].primary", equalTo(true))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".samlIds", hasSize(equalTo(1)))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".samlIds[0].idpId", equalTo("Idp Test ID"))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".samlIds[0].userId", equalTo("User Test Id"));
 
     restUtils.doDelete(lennon.getMeta().getLocation());
   }

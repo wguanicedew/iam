@@ -14,7 +14,6 @@ import it.infn.mw.iam.api.scim.converter.SamlIdConverter;
 import it.infn.mw.iam.api.scim.converter.SshKeyConverter;
 import it.infn.mw.iam.api.scim.converter.X509CertificateConverter;
 import it.infn.mw.iam.api.scim.exception.ScimException;
-import it.infn.mw.iam.api.scim.exception.ScimPatchOperationNotSupported;
 import it.infn.mw.iam.api.scim.exception.ScimResourceExistsException;
 import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
 import it.infn.mw.iam.api.scim.model.ScimAddress;
@@ -23,7 +22,6 @@ import it.infn.mw.iam.api.scim.model.ScimName;
 import it.infn.mw.iam.api.scim.model.ScimOidcId;
 import it.infn.mw.iam.api.scim.model.ScimPatchOperation;
 import it.infn.mw.iam.api.scim.model.ScimSshKey;
-import it.infn.mw.iam.api.scim.model.ScimPatchOperation.ScimPatchOperationType;
 import it.infn.mw.iam.api.scim.model.ScimSamlId;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.model.ScimX509Certificate;
@@ -106,8 +104,13 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
 
     if (u.hasX509Certificates()) {
 
-      u.getX509Certificates()
-        .forEach(x509Cert -> patchX509Certificate(a, x509Cert, ScimPatchOperationType.add));
+      u.getX509Certificates().forEach(x509Cert -> addX509Certificate(a, x509Cert));
+
+      /* if there's no primary x509 certificate, set the first as it */
+      if (a.getX509Certificates().stream().noneMatch(cert -> cert.isPrimary())) {
+
+        a.getX509Certificates().stream().findFirst().get().setPrimary(true);
+      }
     }
 
     if (u.hasOidcIds()) {
@@ -118,6 +121,12 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
     if (u.hasSshKeys()) {
 
       u.getIndigoUser().getSshKeys().forEach(sshKey -> addSshKey(a, sshKey));
+
+      /* if there's no primary ssh key, set the first as it */
+      if (a.getSshKeys().stream().noneMatch(sshKey -> sshKey.isPrimary())) {
+
+        a.getSshKeys().stream().findFirst().get().setPrimary(true);
+      }
     }
 
     if (u.hasSamlIds()) {
@@ -133,8 +142,7 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
 
     if (u.hasX509Certificates()) {
 
-      u.getX509Certificates()
-        .forEach(x509Cert -> patchX509Certificate(a, x509Cert, ScimPatchOperationType.remove));
+      u.getX509Certificates().forEach(x509Cert -> removeX509Certificate(a, x509Cert));
     }
 
     if (u.hasOidcIds()) {
@@ -176,53 +184,55 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
 
   }
 
-  private void patchX509Certificate(IamAccount a, ScimX509Certificate cert,
-      ScimPatchOperationType action) {
+  private void addX509Certificate(IamAccount a, ScimX509Certificate cert) {
 
-    Preconditions.checkNotNull("X509Certificate is null", cert);
+    Preconditions.checkNotNull(cert, "X509Certificate is null");
 
-    switch (action) {
+    IamX509Certificate toAdd = certificateConverter.fromScim(cert);
 
-      case add:
+    Optional<IamAccount> x509Account =
+        accountRepository.findByCertificateSubject(toAdd.getCertificateSubject());
 
-        IamX509Certificate toAdd = certificateConverter.fromScim(cert);
+    if (!x509Account.isPresent()) {
 
-        if (toAdd.getAccount() == null) {
+      toAdd.setAccount(a);
+      x509CertificateRepository.save(toAdd);
 
-          toAdd.setAccount(a);
-          x509CertificateRepository.save(toAdd);
+      a.getX509Certificates().add(toAdd);
 
-          a.getX509Certificates().add(toAdd);
 
-        } else if (toAdd.getAccount().getUuid() != a.getUuid()) {
+    } else {
 
-          throw new ScimResourceExistsException("Cannot add x509 certificate to user "
-              + a.getUsername() + " because it's already associated to another user");
-        }
-        break;
-      case remove:
+      if (x509Account.get().equals(a)) {
 
-        IamX509Certificate toRemove = x509CertificateRepository.findByCertificate(cert.getValue())
-          .orElseThrow(() -> new ScimResourceNotFoundException("No x509 certificate found"));
+        throw new ScimResourceExistsException(String.format("Duplicated x509 certificate (%s,%s)",
+            toAdd.getLabel(), toAdd.getCertificateSubject()));
 
-        if (toRemove.getAccount().getUuid().equals(a.getUuid())) {
+      } else {
 
-          x509CertificateRepository.delete(toRemove);
-          a.getX509Certificates().remove(toRemove);
-
-        } else {
-
-          throw new ScimResourceExistsException("Cannot remove x509 certificate to user "
-              + a.getUsername() + " because it's owned by another user");
-        }
-
-        break;
-      default:
-
-        throw new ScimPatchOperationNotSupported(
-            "Unexpected ScimPatchOperationType " + action.toString());
+        throw new ScimResourceExistsException(
+            String.format("Cannot add x509 certificate: already mapped to another user"));
+      }
     }
+  }
 
+  private void removeX509Certificate(IamAccount a, ScimX509Certificate cert) {
+
+    Preconditions.checkNotNull(cert, "X509Certificate is null");
+
+    IamX509Certificate toRemove = x509CertificateRepository.findByCertificate(cert.getValue())
+      .orElseThrow(() -> new ScimResourceNotFoundException("No x509 certificate found"));
+
+    if (toRemove.getAccount().equals(a)) {
+
+      x509CertificateRepository.delete(toRemove);
+      a.getX509Certificates().remove(toRemove);
+
+    } else {
+
+      throw new ScimResourceExistsException(
+          "Cannot remove x509 certificate: already mapped to another user");
+    }
   }
 
   private void patchAddress(IamAccount a, List<ScimAddress> addresses) {
@@ -277,93 +287,78 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
 
   private void addOidcId(IamAccount owner, ScimOidcId oidcIdToAdd) {
 
-    Preconditions.checkNotNull(oidcIdToAdd, "Error: OpenID account to add is null");
+    Preconditions.checkNotNull(oidcIdToAdd, "Add OpenID account: null OpenID account");
+    Preconditions.checkNotNull(oidcIdToAdd.getIssuer(), "Add OpenID account: null issuer");
+    Preconditions.checkNotNull(oidcIdToAdd.getSubject(), "Add OpenID account: null subject");
 
     Optional<IamAccount> oidcAccount =
         accountRepository.findByOidcId(oidcIdToAdd.getIssuer(), oidcIdToAdd.getSubject());
 
-    if (oidcAccount.isPresent()) {
+    if (!oidcAccount.isPresent()) {
 
-      if (oidcAccount.get().getUuid().equals(owner.getUuid())) {
+      IamOidcId oidcIdToCreate = oidcIdConverter.fromScim(oidcIdToAdd);
+      oidcIdToCreate.setAccount(owner);
 
-        return;
+      oidcIdRepository.save(oidcIdToCreate);
+      owner.getOidcIds().add(oidcIdToCreate);
+
+    } else {
+
+      if (oidcAccount.get().equals(owner)) {
+
+        throw new ScimResourceExistsException(String.format("Duplicated Open ID account (%s,%s)",
+            oidcIdToAdd.getIssuer(), oidcIdToAdd.getSubject()));
 
       } else {
 
         throw new ScimResourceExistsException(
-            String.format("OpenID account {},{} is already mapped to another user",
+            String.format("OpenID account (%s,%s) is already mapped to another user",
                 oidcIdToAdd.getIssuer(), oidcIdToAdd.getSubject()));
 
       }
-
-    } else {
-
-      IamOidcId oidcIdToCreate = oidcIdConverter.fromScim(oidcIdToAdd);
-      oidcIdToCreate.setAccount(owner);
-      oidcIdRepository.save(oidcIdToCreate);
-
-      owner.getOidcIds().add(oidcIdToCreate);
     }
   }
 
   private void removeOidcId(IamAccount owner, ScimOidcId oidcIdToRemove) {
 
-    Preconditions.checkNotNull(oidcIdToRemove, "Error: OpenID account to remove is null");
+    Preconditions.checkNotNull(oidcIdToRemove, "Remove OpenID account: null OpenID account");
 
-    Optional<IamAccount> oidcAccount =
-        accountRepository.findByOidcId(oidcIdToRemove.getIssuer(), oidcIdToRemove.getSubject());
-
-    if (oidcAccount.isPresent()) {
-
-      if (oidcAccount.get().getUuid().equals(owner.getUuid())) {
-
-        /* remove */
-        IamOidcId toRemove = oidcIdRepository
-          .findByIssuerAndSubject(oidcIdToRemove.getIssuer(), oidcIdToRemove.getSubject())
+    IamAccount oidcAccount =
+        accountRepository.findByOidcId(oidcIdToRemove.getIssuer(), oidcIdToRemove.getSubject())
           .orElseThrow(() -> new ScimResourceNotFoundException(
-              String.format("No Open ID connect account found for {},{}",
-                  oidcIdToRemove.getSubject(), oidcIdToRemove.getIssuer())));
+              String.format("User {} has no (%s,%s) oidc account to remove!", owner.getUsername(),
+                  oidcIdToRemove.getIssuer(), oidcIdToRemove.getSubject())));
 
-        oidcIdRepository.delete(toRemove);
-        owner.getOidcIds().remove(toRemove);
+    if (oidcAccount.equals(owner)) {
 
-      } else {
+      /* remove */
+      IamOidcId toRemove = oidcIdRepository
+        .findByIssuerAndSubject(oidcIdToRemove.getIssuer(), oidcIdToRemove.getSubject())
+        .orElseThrow(() -> new ScimResourceNotFoundException(
+            String.format("No Open ID connect account found for (%s,%s)",
+                oidcIdToRemove.getSubject(), oidcIdToRemove.getIssuer())));
 
-        throw new ScimResourceExistsException(
-            String.format("OpenID account {},{} is already mapped to another user",
-                oidcIdToRemove.getIssuer(), oidcIdToRemove.getSubject()));
-
-      }
+      oidcIdRepository.delete(toRemove);
+      owner.getOidcIds().remove(toRemove);
 
     } else {
 
-      throw new ScimResourceNotFoundException(
-          String.format("User {} has no ({},{}) oidc account to remove!", owner.getUsername(),
-              oidcIdToRemove.issuer, oidcIdToRemove.subject));
+      throw new ScimResourceExistsException(
+          String.format("OpenID account (%s,%s) is already mapped to another user",
+              oidcIdToRemove.getIssuer(), oidcIdToRemove.getSubject()));
+
     }
+
   }
 
   private void addSshKey(IamAccount owner, ScimSshKey sshKey) throws ScimException {
 
-    Preconditions.checkNotNull(sshKey, "Error: SSH key to add is null");
-    Preconditions.checkNotNull(sshKey.getValue(), "Unable to add ssh key with key value null");
+    Preconditions.checkNotNull(sshKey, "Add ssh key: null ssh key");
+    Preconditions.checkNotNull(sshKey.getValue(), "Add ssh key: null key value");
 
     Optional<IamAccount> sshKeyAccount = accountRepository.findBySshKeyValue(sshKey.getValue());
 
-    if (sshKeyAccount.isPresent()) {
-
-      if (sshKeyAccount.get().getUuid().equals(owner.getUuid())) {
-
-        return;
-
-      } else {
-
-        throw new ScimResourceExistsException(
-            String.format("Ssh key {} is already mapped to another user", sshKey.getFingerprint()));
-
-      }
-
-    } else {
+    if (!sshKeyAccount.isPresent()) {
 
       IamSshKey sshKeyToCreate = sshKeyConverter.fromScim(sshKey);
       sshKeyToCreate.setAccount(owner);
@@ -381,12 +376,27 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
       sshKeyRepository.save(sshKeyToCreate);
 
       owner.getSshKeys().add(sshKeyToCreate);
+
+    } else {
+
+      if (sshKeyAccount.get().equals(owner)) {
+
+        throw new ScimResourceExistsException(String.format("Duplicated SSH Key (%s,%s)",
+            sshKey.getDisplay(), sshKey.getFingerprint()));
+
+      } else {
+
+        throw new ScimResourceExistsException(
+            String.format("Ssh key (%s,%s) is already mapped to another user", sshKey.getDisplay(),
+                sshKey.getFingerprint()));
+
+      }
     }
   }
 
   private void removeSshKey(IamAccount owner, ScimSshKey sshKeyToRemove) {
 
-    Preconditions.checkNotNull(sshKeyToRemove, "Error: ssh key to remove is null");
+    Preconditions.checkNotNull(sshKeyToRemove, "Remove ssh key: null ssh key");
 
     Optional<IamSshKey> iamSshKey;
 
@@ -405,12 +415,12 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
     } else {
 
       throw new ScimException(
-          "Unable to load ssh key from persistence with " + sshKeyToRemove.toString());
+          String.format("Unable to load ssh key from persistence with %s", sshKeyToRemove));
     }
 
     if (iamSshKey.isPresent()) {
 
-      if (iamSshKey.get().getAccount().getUuid().equals(owner.getUuid())) {
+      if (iamSshKey.get().getAccount().equals(owner)) {
 
         /* remove */
         sshKeyRepository.delete(iamSshKey.get());
@@ -419,68 +429,67 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
       } else {
 
         throw new ScimResourceExistsException(String
-          .format("Ssh key {} is already mapped to another user", sshKeyToRemove.getFingerprint()));
+          .format("Ssh key %s is already mapped to another user", sshKeyToRemove.getFingerprint()));
 
       }
 
     } else {
 
-      throw new ScimResourceNotFoundException(String.format("User {} has no {} ssh key to remove!",
+      throw new ScimResourceNotFoundException(String.format("User %s has no %s ssh key to remove!",
           owner.getUsername(), sshKeyToRemove.getFingerprint()));
     }
   }
 
   private void addSamlId(IamAccount owner, ScimSamlId samlIdToAdd) {
 
-    Preconditions.checkNotNull(samlIdToAdd, "null saml id to add");
-    Preconditions.checkNotNull(samlIdToAdd.getIdpId(), "saml id to add has null idpId");
-    Preconditions.checkNotNull(samlIdToAdd.getUserId(), "saml id to add has null userId");
+    Preconditions.checkNotNull(samlIdToAdd, "Add Saml Id: null Saml Id");
+    Preconditions.checkNotNull(samlIdToAdd.getIdpId(), "Add Saml Id: null idpId");
+    Preconditions.checkNotNull(samlIdToAdd.getUserId(), "Add Saml Id: null userId");
 
     Optional<IamAccount> samlAccount =
         accountRepository.findBySamlId(samlIdToAdd.getIdpId(), samlIdToAdd.getUserId());
 
-    if (samlAccount.isPresent()) {
-
-      if (samlAccount.get().getUuid().equals(owner.getUuid())) {
-
-        return;
-
-      } else {
-
-        throw new ScimResourceExistsException(
-            String.format("Saml account {},{} is already mapped to another user",
-                samlIdToAdd.getIdpId(), samlIdToAdd.getUserId()));
-
-      }
-
-    } else {
+    if (!samlAccount.isPresent()) {
 
       IamSamlId samlIdToCreate = samlIdConverter.fromScim(samlIdToAdd);
       samlIdToCreate.setAccount(owner);
       samlIdRepository.save(samlIdToCreate);
 
       owner.getSamlIds().add(samlIdToCreate);
-    }
 
-    return;
+    } else {
+
+      if (samlAccount.get().equals(owner)) {
+
+        throw new ScimResourceExistsException(String.format("Duplicated Saml Id (%s,%s)",
+            samlIdToAdd.getIdpId(), samlIdToAdd.getUserId()));
+
+      } else {
+
+        throw new ScimResourceExistsException(
+            String.format("Saml account (%s,%s) is already mapped to another user",
+                samlIdToAdd.getIdpId(), samlIdToAdd.getUserId()));
+
+      }
+    }
   }
 
   private void removeSamlId(IamAccount owner, ScimSamlId samlIdToRemove) {
 
-    Preconditions.checkNotNull(samlIdToRemove, "Error: Saml account to remove is null");
+    Preconditions.checkNotNull(samlIdToRemove, "Remove Saml Id: null saml id");
 
     Optional<IamAccount> samlAccount =
         accountRepository.findBySamlId(samlIdToRemove.getIdpId(), samlIdToRemove.getUserId());
 
     if (samlAccount.isPresent()) {
 
-      if (samlAccount.get().getUuid().equals(owner.getUuid())) {
+      if (samlAccount.get().equals(owner)) {
 
         /* remove */
         IamSamlId toRemove = samlIdRepository
           .findByIdpIdAndUserId(samlIdToRemove.getIdpId(), samlIdToRemove.getUserId())
           .orElseThrow(() -> new ScimResourceNotFoundException(
-              String.format("No Saml connect account found for {},{}", samlIdToRemove.getIdpId(),
+              String.format("No Saml connect account found for (%s,%s)", samlIdToRemove.getIdpId(),
                   samlIdToRemove.getUserId())));
 
         samlIdRepository.delete(toRemove);
@@ -489,7 +498,7 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
       } else {
 
         throw new ScimResourceExistsException(
-            String.format("Saml account {},{} is already mapped to another user",
+            String.format("Saml account (%s,%s) is already mapped to another user",
                 samlIdToRemove.getIdpId(), samlIdToRemove.getUserId()));
 
       }
@@ -497,7 +506,7 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
     } else {
 
       throw new ScimResourceNotFoundException(
-          String.format("User {} has no ({},{}) saml account to remove!", owner.getUsername(),
+          String.format("User %s has no (%s,%s) saml account to remove!", owner.getUsername(),
               samlIdToRemove.getIdpId(), samlIdToRemove.getUserId()));
     }
 

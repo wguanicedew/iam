@@ -1,6 +1,7 @@
 package it.infn.mw.iam.api.scim.model;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -49,7 +50,7 @@ public class ScimUser extends ScimResource {
   private final List<ScimEmail> emails;
 
   private final List<ScimAddress> addresses;
-  private final List<ScimX509Certificate> x509Certificates;
+  private final Set<ScimX509Certificate> x509Certificates;
 
   private final List<ScimGroupRef> groups;
 
@@ -67,7 +68,7 @@ public class ScimUser extends ScimResource {
       @JsonProperty("active") Boolean active, @JsonProperty("emails") List<ScimEmail> emails,
       @JsonProperty("addresses") List<ScimAddress> addresses,
       @JsonProperty("groups") List<ScimGroupRef> groups,
-      @JsonProperty("x509Certificates") List<ScimX509Certificate> x509Certificates,
+      @JsonProperty("x509Certificates") Set<ScimX509Certificate> x509Certificates,
       @JsonProperty("urn:indigo-dc:scim:schemas:IndigoUser") ScimIndigoUser indigoUser) {
 
     super(id, externalId, meta, schemas);
@@ -182,7 +183,7 @@ public class ScimUser extends ScimResource {
     return addresses;
   }
 
-  public List<ScimX509Certificate> getX509Certificates() {
+  public Set<ScimX509Certificate> getX509Certificates() {
 
     return x509Certificates;
   }
@@ -249,7 +250,7 @@ public class ScimUser extends ScimResource {
     private List<ScimEmail> emails = new ArrayList<ScimEmail>();
     private List<ScimGroupRef> groups = new ArrayList<ScimGroupRef>();
     private List<ScimAddress> addresses = new ArrayList<ScimAddress>();
-    private List<ScimX509Certificate> x509Certificates = new ArrayList<ScimX509Certificate>();
+    private Set<ScimX509Certificate> x509Certificates = new HashSet<ScimX509Certificate>();
     private ScimIndigoUser indigoUser;
 
     public Builder() {
@@ -392,6 +393,13 @@ public class ScimUser extends ScimResource {
     public Builder addX509Certificate(ScimX509Certificate x509Certificate) {
 
       x509Certificates.add(x509Certificate);
+      return this;
+    }
+
+    public Builder buildX509Certificate(String display, String value, boolean isPrimary) {
+
+      x509Certificates.add(
+          ScimX509Certificate.builder().display(display).value(value).primary(isPrimary).build());
       return this;
     }
 
