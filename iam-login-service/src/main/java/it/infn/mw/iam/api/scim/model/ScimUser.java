@@ -255,7 +255,6 @@ public class ScimUser extends ScimResource {
 
     public Builder() {
       super();
-      this.indigoUser = ScimIndigoUser.builder().build();
     }
 
     public Builder(String userName) {
@@ -405,7 +404,11 @@ public class ScimUser extends ScimResource {
 
     public Builder buildOidcId(String issuer, String subject) {
 
-      Preconditions.checkNotNull(indigoUser);
+      try {
+        Preconditions.checkNotNull(indigoUser);
+      } catch (NullPointerException npe) {
+        this.indigoUser = ScimIndigoUser.builder().build();
+      }
 
       indigoUser.getOidcIds().add(ScimOidcId.builder().subject(subject).issuer(issuer).build());
       return this;
@@ -413,7 +416,11 @@ public class ScimUser extends ScimResource {
 
     public Builder buildSshKey(String label, String key, boolean isPrimary) {
 
-      Preconditions.checkNotNull(indigoUser);
+      try {
+        Preconditions.checkNotNull(indigoUser);
+      } catch (NullPointerException npe) {
+        this.indigoUser = ScimIndigoUser.builder().build();
+      }
 
       indigoUser.getSshKeys()
         .add(ScimSshKey.builder().display(label).value(key).primary(isPrimary).build());
@@ -422,7 +429,11 @@ public class ScimUser extends ScimResource {
 
     public Builder buildSamlId(String idpId, String userId) {
 
-      Preconditions.checkNotNull(indigoUser);
+      try {
+        Preconditions.checkNotNull(indigoUser);
+      } catch (NullPointerException npe) {
+        this.indigoUser = ScimIndigoUser.builder().build();
+      }
 
       indigoUser.getSamlIds().add(ScimSamlId.builder().idpId(idpId).userId(userId).build());
       return this;
