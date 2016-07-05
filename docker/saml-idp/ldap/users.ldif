@@ -28,3 +28,33 @@ sn: aff
 cn: St aff
 mail: staff1@idptestbed.edu
 userPassword: password
+
+dn: uid=andrea,ou=People,dc=idptestbed
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+objectClass: inetOrgPerson
+objectClass: eduPerson
+givenName: Andrea
+uid: andrea
+sn: Ceccanti
+cn: Andrea Ceccanti
+mail: andrea@idptestbed.edu
+userPassword: password
+eduPersonPrincipalName: andrea.ceccanti
+eduPersonAffiliation: INFN
+
+dn: uid=ciccio,ou=People,dc=idptestbed
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+objectClass: inetOrgPerson
+objectClass: eduPerson
+givenName: Ciccio
+uid: ciccio
+sn: Paglia
+cn: Ciccio Paglia
+mail: cicciopaglia@idptestbed.edu
+userPassword: password
+eduPersonPrincipalName: ciccio.paglia
+eduPersonAffiliation: INFN

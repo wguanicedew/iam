@@ -84,6 +84,15 @@ public class IamAccount {
   @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   private Set<IamX509Certificate> x509Certificates = new HashSet<>();
 
+  @Column(name = "confirmation_key", unique = true, length = 36)
+  private String confirmationKey;
+
+  @Column(name = "reset_key", unique = true, length = 36)
+  private String resetKey;
+
+  @OneToOne(cascade = CascadeType.REMOVE, mappedBy = "account")
+  private IamRegistrationRequest registrationRequest;
+
   public IamAccount() {}
 
   public Long getId() {
@@ -161,7 +170,7 @@ public class IamAccount {
     return creationTime;
   }
 
-  public void setCreationTime(Date creationTime) {
+  public void setCreationTime(final Date creationTime) {
 
     this.creationTime = creationTime;
   }
@@ -171,7 +180,7 @@ public class IamAccount {
     return lastUpdateTime;
   }
 
-  public void setLastUpdateTime(Date lastUpdateTime) {
+  public void setLastUpdateTime(final Date lastUpdateTime) {
 
     this.lastUpdateTime = lastUpdateTime;
   }
@@ -181,7 +190,7 @@ public class IamAccount {
     return active;
   }
 
-  public void setActive(boolean active) {
+  public void setActive(final boolean active) {
 
     this.active = active;
   }
@@ -245,6 +254,36 @@ public class IamAccount {
     return !samlIds.isEmpty();
   }
 
+  public String getConfirmationKey() {
+
+    return confirmationKey;
+  }
+
+  public void setConfirmationKey(final String confirmationKey) {
+
+    this.confirmationKey = confirmationKey;
+  }
+
+  public String getResetKey() {
+
+    return resetKey;
+  }
+
+  public void setResetKey(final String resetKey) {
+
+    this.resetKey = resetKey;
+  }
+
+  public IamRegistrationRequest getRegistrationRequest() {
+
+    return registrationRequest;
+  }
+
+  public void setRegistrationRequest(final IamRegistrationRequest registrationRequest) {
+
+    this.registrationRequest = registrationRequest;
+  }
+
   public void touch() {
 
     setLastUpdateTime(new Date());
@@ -279,11 +318,12 @@ public class IamAccount {
 
   @Override
   public String toString() {
-
-    return "IamAccount [id=" + id + ", uuid=" + uuid + ", username=" + username + ", active="
-        + active + ", userInfo=" + userInfo + ", authorities=" + authorities + ", groups=" + groups
-        + ", samlIds=" + samlIds + ", oidcIds=" + oidcIds + ", sshKeys=" + sshKeys
-        + ", x509Certificates=" + x509Certificates + "]";
+    return "IamAccount [id=" + id + ", uuid=" + uuid + ", username=" + username + ", password="
+        + password + ", active=" + active + ", creationTime=" + creationTime + ", lastUpdateTime="
+        + lastUpdateTime + ", userInfo=" + userInfo + ", authorities=" + authorities + ", groups="
+        + groups + ", samlIds=" + samlIds + ", oidcIds=" + oidcIds + ", sshKeys=" + sshKeys
+        + ", x509Certificates=" + x509Certificates + ", confirmationKey=" + confirmationKey
+        + ", resetKey=" + resetKey + ", registrationRequest=" + registrationRequest + "]";
   }
 
 }

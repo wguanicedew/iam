@@ -9,7 +9,7 @@ import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
-import it.infn.mw.iam.config.oidc.GoogleClientConfig;
+import it.infn.mw.iam.config.oidc.GoogleClientProperties;
 import it.infn.mw.iam.core.LoginPageConfiguration;
 
 @Component
@@ -22,7 +22,7 @@ public class DefaultLoginPageConfiguration implements LoginPageConfiguration, En
   private boolean samlEnabled;
 
   @Autowired
-  GoogleClientConfig googleClientConfiguration;
+  GoogleClientProperties googleClientConfiguration;
 
   @PostConstruct
   public void init() {
@@ -63,7 +63,7 @@ public class DefaultLoginPageConfiguration implements LoginPageConfiguration, En
   }
 
   @Override
-  public GoogleClientConfig getGoogleConfiguration() {
+  public GoogleClientProperties getGoogleConfiguration() {
 
     return googleClientConfiguration;
   }

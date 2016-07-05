@@ -67,7 +67,7 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
 
   }
 
-  private void idSanityChecks(String id) {
+  private void idSanityChecks(final String id) {
 
     if (id == null) {
       throw new IllegalArgumentException("id cannot be null");
@@ -79,7 +79,7 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
   }
 
   @Override
-  public ScimUser getById(String id) {
+  public ScimUser getById(final String id) {
 
     idSanityChecks(id);
 
@@ -91,7 +91,7 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
   }
 
   @Override
-  public void delete(String id) {
+  public void delete(final String id) {
 
     idSanityChecks(id);
 
@@ -102,8 +102,7 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
 
   }
 
-  @Override
-  public ScimUser create(ScimUser user) {
+  public IamAccount createAccount(final ScimUser user) {
 
     Date creationTime = new Date();
 
@@ -179,6 +178,14 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
 
     accountRepository.save(account);
 
+    return account;
+  }
+
+  @Override
+  public ScimUser create(final ScimUser user) {
+
+    IamAccount account = createAccount(user);
+
     return converter.toScim(account);
   }
 
@@ -225,7 +232,7 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
   }
 
   @Override
-  public ScimListResponse<ScimUser> list(ScimPageRequest params) {
+  public ScimListResponse<ScimUser> list(final ScimPageRequest params) {
 
     if (params.getCount() == 0) {
       int userCount = accountRepository.countAllUsers();
@@ -245,7 +252,7 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
   }
 
   @Override
-  public ScimUser replace(String id, ScimUser scimItemToBeUpdated) {
+  public ScimUser replace(final String id, final ScimUser scimItemToBeUpdated) {
 
     IamAccount existingAccount = accountRepository.findByUuid(id)
       .orElseThrow(() -> new ScimResourceNotFoundException("No user mapped to id '" + id + "'"));
@@ -275,11 +282,10 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
 
     accountRepository.save(updatedAccount);
     return converter.toScim(updatedAccount);
-
   }
 
   @Override
-  public void update(String id, List<ScimPatchOperation<ScimUser>> operations) {
+  public void update(final String id, final List<ScimPatchOperation<ScimUser>> operations) {
 
     IamAccount iamAccount = accountRepository.findByUuid(id)
       .orElseThrow(() -> new ScimResourceNotFoundException("No user mapped to id '" + id + "'"));

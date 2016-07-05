@@ -46,4 +46,6 @@ public interface IamAccountRepository extends PagingAndSortingRepository<IamAcco
 
   @Query("select a from IamAccount a join a.groups ag where ag.id = :groupId")
   List<IamAccount> findByGroupId(@Param("groupId") String groupId);
+
+  Optional<IamAccount> findByConfirmationKey(@Param("confirmationKey") String confirmationKey);
 }

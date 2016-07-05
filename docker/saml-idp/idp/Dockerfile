@@ -4,7 +4,6 @@ MAINTAINER Unicon, Inc.
 
 COPY shibboleth-idp/ /opt/shibboleth-idp/
 
-
 #Testing JCE code as well (from base image's readme)
 RUN yum -y update \
     && yum -y install unzip \

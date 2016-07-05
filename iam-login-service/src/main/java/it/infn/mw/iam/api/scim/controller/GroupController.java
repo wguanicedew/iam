@@ -1,5 +1,7 @@
 package it.infn.mw.iam.api.scim.controller;
 
+import static it.infn.mw.iam.api.scim.controller.utils.ValidationHelper.handleValidationError;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -27,8 +29,6 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 
-import it.infn.mw.iam.api.scim.controller.utils.ValidationErrorMessageHelper;
-import it.infn.mw.iam.api.scim.exception.ScimValidationException;
 import it.infn.mw.iam.api.scim.model.ScimConstants;
 import it.infn.mw.iam.api.scim.model.ScimGroup;
 import it.infn.mw.iam.api.scim.model.ScimGroupPatchRequest;
@@ -44,7 +44,7 @@ public class GroupController {
 
   private static final int SCIM_MAX_PAGE_SIZE = 10;
 
-  private Set<String> parseAttributes(String attributesParameter) {
+  private Set<String> parseAttributes(final String attributesParameter) {
 
     Set<String> result = new HashSet<>();
     if (!Strings.isNullOrEmpty(attributesParameter)) {
@@ -54,14 +54,6 @@ public class GroupController {
     result.add("schemas");
     result.add("id");
     return result;
-  }
-
-  private void handleValidationError(String message, BindingResult validationResult) {
-
-    if (validationResult.hasErrors()) {
-      throw new ScimValidationException(
-          ValidationErrorMessageHelper.buildValidationErrorMessage(message, validationResult));
-    }
   }
 
   @Autowired
@@ -98,9 +90,9 @@ public class GroupController {
 
   @PreAuthorize("#oauth2.hasScope('scim:read') or hasRole('ADMIN')")
   @RequestMapping(method = RequestMethod.GET, produces = ScimConstants.SCIM_CONTENT_TYPE)
-  public MappingJacksonValue listGroups(@RequestParam(required = false) Integer count,
-      @RequestParam(required = false) Integer startIndex,
-      @RequestParam(required = false) String attributes) {
+  public MappingJacksonValue listGroups(@RequestParam(required = false) final Integer count,
+      @RequestParam(required = false) final Integer startIndex,
+      @RequestParam(required = false) final String attributes) {
 
     ScimPageRequest pr = buildPageRequest(count, startIndex);
     ScimListResponse<ScimGroup> result = groupProvisioningService.list(pr);
@@ -123,7 +115,8 @@ public class GroupController {
   @RequestMapping(method = RequestMethod.POST, consumes = ScimConstants.SCIM_CONTENT_TYPE,
       produces = ScimConstants.SCIM_CONTENT_TYPE)
   @ResponseStatus(HttpStatus.CREATED)
-  public ScimGroup create(@RequestBody @Validated ScimGroup group, BindingResult validationResult) {
+  public ScimGroup create(@RequestBody @Validated final ScimGroup group,
+      final BindingResult validationResult) {
 
     handleValidationError("Invalid Scim Group", validationResult);
     ScimGroup result = groupProvisioningService.create(group);
@@ -135,7 +128,7 @@ public class GroupController {
       consumes = ScimConstants.SCIM_CONTENT_TYPE, produces = ScimConstants.SCIM_CONTENT_TYPE)
   @ResponseStatus(HttpStatus.OK)
   public ScimGroup replaceGroup(@PathVariable final String id,
-      @RequestBody @Validated ScimGroup group, BindingResult validationResult) {
+      @RequestBody @Validated final ScimGroup group, final BindingResult validationResult) {
 
     handleValidationError("Invalid Scim Group", validationResult);
 
@@ -148,7 +141,7 @@ public class GroupController {
       consumes = ScimConstants.SCIM_CONTENT_TYPE)
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void updateGroup(@PathVariable final String id,
-      @RequestBody @Validated ScimGroupPatchRequest groupPatchRequest) {
+      @RequestBody @Validated final ScimGroupPatchRequest groupPatchRequest) {
 
     groupProvisioningService.update(id, groupPatchRequest.getOperations());
   }
