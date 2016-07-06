@@ -237,6 +237,7 @@ public class ScimUserProvisioningTests {
 
   @Test
   public void testUserCreationWithPassword() {
+
     ScimUser user = ScimUser.builder("user_with_password")
       .buildEmail("up@test.org")
       .buildName("User", "With Password")
@@ -344,7 +345,7 @@ public class ScimUserProvisioningTests {
       .build();
 
     restUtils.doPost("/scim/Users/", anotherUser, HttpStatus.CONFLICT).body("detail",
-        equalTo("OIDC id urn:oidc:test:issuer,1234 is already mapped to another user"));
+        equalTo("OIDC id (urn:oidc:test:issuer,1234) is already mapped to another user"));
 
     restUtils.doDelete(creationResult.getMeta().getLocation());
 
@@ -470,6 +471,7 @@ public class ScimUserProvisioningTests {
 
   @Test
   public void testUniqueUsernameCreationCheck() {
+
     ScimUser user = ScimUser.builder("user1")
       .buildEmail("user1@test.org")
       .buildName("User", "1")
@@ -477,10 +479,80 @@ public class ScimUserProvisioningTests {
       .build();
 
     ScimUser creationResult = restUtils.doPost("/scim/Users", user).extract().as(ScimUser.class);
-
-
     restUtils.doPost("/scim/Users", user, HttpStatus.CONFLICT);
+
     restUtils.doDelete(creationResult.getMeta().getLocation());
   }
 
+
+  @Test
+  public void testUserCreationWithX509Certificate() {
+
+    ScimUser user = ScimUser.builder("user_with_x509")
+      .buildEmail("test_user@test.org")
+      .buildName("User", "With x509 Certificate")
+      .buildX509Certificate("Personal1", TestUtils.getX509TestCertificate(0), false)
+      .active(true)
+      .build();
+
+    ScimUser creationResult = restUtils.doPost("/scim/Users/", user)
+      .body("x509Certificates", hasSize(equalTo(1)))
+      .body("x509Certificates[0].display", equalTo("Personal1"))
+      .body("x509Certificates[0].value", equalTo(TestUtils.getX509TestCertificate(0)))
+      .body("x509Certificates[0].primary", equalTo(true))
+      .extract()
+      .as(ScimUser.class);
+
+    restUtils.doDelete(creationResult.getMeta().getLocation());
+  }
+
+  @Test
+  public void testUserCreationWithMultipleX509Certificate() {
+
+    ScimUser user = ScimUser.builder("user_with_x509")
+      .buildEmail("test_user@test.org")
+      .buildName("User", "With x509 Certificate")
+      .buildX509Certificate("Personal1", TestUtils.getX509TestCertificate(0), false)
+      .buildX509Certificate("Personal2", TestUtils.getX509TestCertificate(1), true)
+      .active(true)
+      .build();
+
+    ScimUser creationResult = restUtils.doPost("/scim/Users/", user)
+      .body("x509Certificates", hasSize(equalTo(2)))
+      .body("x509Certificates[0].display", equalTo("Personal1"))
+      .body("x509Certificates[0].value", equalTo(TestUtils.getX509TestCertificate(0)))
+      .body("x509Certificates[0].primary", equalTo(false))
+      .body("x509Certificates[1].display", equalTo("Personal2"))
+      .body("x509Certificates[1].value", equalTo(TestUtils.getX509TestCertificate(1)))
+      .body("x509Certificates[1].primary", equalTo(true))
+      .extract()
+      .as(ScimUser.class);
+
+    restUtils.doDelete(creationResult.getMeta().getLocation());
+  }
+
+  @Test
+  public void testUserCreationWithMultipleX509CertificateAndNoPrimary() {
+
+    ScimUser user = ScimUser.builder("user_with_x509")
+      .buildEmail("test_user@test.org")
+      .buildName("User", "With x509 Certificate")
+      .buildX509Certificate("Personal1", TestUtils.getX509TestCertificate(0), false)
+      .buildX509Certificate("Personal2", TestUtils.getX509TestCertificate(1), false)
+      .active(true)
+      .build();
+
+    ScimUser creationResult = restUtils.doPost("/scim/Users/", user)
+      .body("x509Certificates", hasSize(equalTo(2)))
+      .body("x509Certificates[0].display", equalTo("Personal1"))
+      .body("x509Certificates[0].value", equalTo(TestUtils.getX509TestCertificate(0)))
+      .body("x509Certificates[0].primary", equalTo(true))
+      .body("x509Certificates[1].display", equalTo("Personal2"))
+      .body("x509Certificates[1].value", equalTo(TestUtils.getX509TestCertificate(1)))
+      .body("x509Certificates[1].primary", equalTo(false))
+      .extract()
+      .as(ScimUser.class);
+
+    restUtils.doDelete(creationResult.getMeta().getLocation());
+  }
 }

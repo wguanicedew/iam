@@ -1,14 +1,9 @@
 package it.infn.mw.iam.api.scim.converter;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
-import it.infn.mw.iam.api.scim.model.ScimMemberRef;
 import it.infn.mw.iam.api.scim.model.ScimX509Certificate;
-import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamX509Certificate;
-import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.util.x509.X509Utils;
 
 @Service
@@ -20,21 +15,9 @@ public class X509CertificateConverter
    * <li>scim.value => certificate</li>
    * <li>scim.display => label</li>
    * <li>scim.primary => primary</li>
-   * <li>scim.accountRef => uuid => load account from persistence</li>
    * <li>scim.certificateSubject => must be extract from certificate</li>
    * </ul>
    */
-
-  private final ScimResourceLocationProvider resourceLocationProvider;
-  private final IamAccountRepository accountRepository;
-
-  @Autowired
-  public X509CertificateConverter(IamAccountRepository accountRepository,
-      ScimResourceLocationProvider resourceLocationProvider) {
-
-    this.accountRepository = accountRepository;
-    this.resourceLocationProvider = resourceLocationProvider;
-  }
 
   @Override
   public IamX509Certificate fromScim(ScimX509Certificate scim) {
@@ -50,12 +33,6 @@ public class X509CertificateConverter
       cert.setPrimary(false);
     }
 
-    if (scim.getAccountRef() != null) {
-      cert.setAccount(getAccount(scim.getAccountRef().getValue()));
-    } else {
-      cert.setAccount(null);
-    }
-
     cert.setCertificateSubject(X509Utils.getCertificateSubject(scim.getValue()));
 
     return cert;
@@ -68,17 +45,6 @@ public class X509CertificateConverter
       .primary(entity.isPrimary())
       .display(entity.getLabel())
       .value(entity.getCertificate())
-      .accountRef(ScimMemberRef.builder()
-        .display(entity.getAccount().getUsername())
-        .value(entity.getAccount().getUuid())
-        .ref(resourceLocationProvider.userLocation(entity.getAccount().getUuid()))
-        .build())
       .build();
-  }
-
-  private IamAccount getAccount(String uuid) {
-
-    return accountRepository.findByUuid(uuid).orElseThrow(
-        () -> new ScimResourceNotFoundException("No account mapped to id '" + uuid + "'"));
   }
 }

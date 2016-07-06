@@ -27,6 +27,7 @@ import it.infn.mw.iam.persistence.model.IamOidcId;
 import it.infn.mw.iam.persistence.model.IamSamlId;
 import it.infn.mw.iam.persistence.model.IamSshKey;
 import it.infn.mw.iam.persistence.model.IamUserInfo;
+import it.infn.mw.iam.persistence.model.IamX509Certificate;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamAuthoritiesRepository;
 import it.infn.mw.iam.persistence.repository.IamOidcIdRepository;
@@ -145,35 +146,48 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
     }
     account.setUserInfo(userInfo);
 
+    if (account.hasX509Certificates()) {
+
+      account.getX509Certificates().forEach(cert -> checkX509CertificateNotExists(cert));
+
+      long count = account.getX509Certificates().stream().filter(cert -> cert.isPrimary()).count();
+      
+      if (count > 1) {
+
+        throw new ScimException("Too many primary x509 certificates provided!");
+      }
+
+      if (count == 0) {
+
+        account.getX509Certificates().stream().findFirst().get().setPrimary(true);
+      }
+    }
+
     if (account.hasOidcIds()) {
 
-      account.getOidcIds().forEach((oidcId) -> {
-        checkOidcIdNotExists(oidcId);
-      });
+      account.getOidcIds().forEach(oidcId -> checkOidcIdNotExists(oidcId));
     }
 
     if (account.hasSshKeys()) {
 
-      account.getSshKeys().forEach((sshKey) -> {
-        checkSshKeyNotExists(sshKey);
-      });
+      account.getSshKeys().forEach(sshKey -> checkSshKeyNotExists(sshKey));
 
-      if (!account.getSshKeys()
-        .stream()
-        .filter(sshKey -> sshKey.isPrimary())
-        .findFirst()
-        .isPresent()) {
+      long count = account.getSshKeys().stream().filter(sshKey -> sshKey.isPrimary()).count();
+      
+      if (count > 1) {
 
-        account.getSshKeys().forEach(sshKey -> sshKey.setPrimary(false));
+        throw new ScimException("Too many primary ssh keys provided!");
+      }
+
+      if (count == 0) {
+
         account.getSshKeys().stream().findFirst().get().setPrimary(true);
       }
     }
 
     if (account.hasSamlIds()) {
 
-      account.getSamlIds().forEach(samlId -> {
-        checkSamlIdNotExists(samlId);
-      });
+      account.getSamlIds().forEach(samlId -> checkSamlIdNotExists(samlId));
     }
 
     accountRepository.save(account);
@@ -189,15 +203,24 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
     return converter.toScim(account);
   }
 
+  private void checkX509CertificateNotExists(IamX509Certificate cert) {
+
+    if (accountRepository.findByCertificateSubject(cert.getCertificateSubject()).isPresent()) {
+
+      throw new ScimResourceExistsException(String
+        .format("X509 Certificate %s is already mapped to a user", cert.getCertificateSubject()));
+    }
+  }
+
   private void checkOidcIdNotExists(IamOidcId oidcId) {
 
     if (oidcIdRepository.findByIssuerAndSubject(oidcId.getIssuer(), oidcId.getSubject())
       .isPresent()) {
 
-      throw new ScimResourceExistsException("OIDC id " + oidcId.getIssuer() + ","
-          + oidcId.getSubject() + " is already mapped to another user");
+      throw new ScimResourceExistsException(
+          String.format("OIDC id (%s,%s) is already mapped to another user", oidcId.getIssuer(),
+              oidcId.getSubject()));
     }
-
   }
 
   private void checkSshKeyNotExists(IamSshKey sshKey) {

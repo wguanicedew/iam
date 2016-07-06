@@ -18,6 +18,7 @@ import it.infn.mw.iam.persistence.model.IamOidcId;
 import it.infn.mw.iam.persistence.model.IamSamlId;
 import it.infn.mw.iam.persistence.model.IamSshKey;
 import it.infn.mw.iam.persistence.model.IamUserInfo;
+import it.infn.mw.iam.persistence.model.IamX509Certificate;
 import it.infn.mw.iam.util.ssh.InvalidSshKeyException;
 import it.infn.mw.iam.util.ssh.RSAPublicKeyUtils;
 
@@ -28,17 +29,19 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
 
   private final AddressConverter addressConverter;
 
+  private final X509CertificateConverter x509CertificateConverter;
   private final OidcIdConverter oidcIdConverter;
   private final SshKeyConverter sshKeyConverter;
   private final SamlIdConverter samlIdConverter;
 
 
   @Autowired
-  public UserConverter(ScimResourceLocationProvider rlp, AddressConverter ac, OidcIdConverter oidc,
-      SshKeyConverter sshc, SamlIdConverter samlc) {
+  public UserConverter(ScimResourceLocationProvider rlp, X509CertificateConverter x509cc,
+      AddressConverter ac, OidcIdConverter oidc, SshKeyConverter sshc, SamlIdConverter samlc) {
 
     this.resourceLocationProvider = rlp;
     this.addressConverter = ac;
+    this.x509CertificateConverter = x509cc;
     this.oidcIdConverter = oidc;
     this.sshKeyConverter = sshc;
     this.samlIdConverter = samlc;
@@ -76,6 +79,15 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
 
     }
 
+    if (scimUser.hasX509Certificates()) {
+
+      scimUser.getX509Certificates().forEach(scimCert -> {
+        IamX509Certificate iamCert = x509CertificateConverter.fromScim(scimCert);
+        iamCert.setAccount(account);
+        account.getX509Certificates().add(iamCert);
+      });
+    }
+
     if (scimUser.hasOidcIds()) {
 
       scimUser.getIndigoUser().getOidcIds().forEach(oidcId -> {
@@ -83,7 +95,7 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
         IamOidcId iamOidcId = oidcIdConverter.fromScim(oidcId);
 
         if (iamOidcId.getAccount() != null) {
-          if (account.getUuid() != iamOidcId.getAccount().getUuid()) {
+          if (!account.equals(iamOidcId.getAccount())) {
 
             String errorMessage = String.format("OIDC id %s,%s is already mapped to another user",
                 iamOidcId.getIssuer(), iamOidcId.getSubject());

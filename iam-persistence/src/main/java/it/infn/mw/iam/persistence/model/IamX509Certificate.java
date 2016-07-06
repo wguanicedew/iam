@@ -2,9 +2,11 @@ package it.infn.mw.iam.persistence.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -30,7 +32,8 @@ public class IamX509Certificate {
   @Column(name = "is_primary")
   private boolean primary;
 
-  @ManyToOne
+  @ManyToOne(fetch=FetchType.EAGER)
+  @JoinColumn(name="account_id")
   private IamAccount account;
 
   public IamX509Certificate() {}

@@ -276,7 +276,7 @@ public class ScimUserProvisioningPatchTests {
       .body("userName", equalTo(lennon.getUserName()))
       .body("x509Certificates", hasSize(equalTo(1)))
       .body("x509Certificates[0].value",
-          equalTo(lennon_update.getX509Certificates().stream().findFirst().get().getValue()));
+          equalTo(TestUtils.getX509TestCertificate()));
 
     ScimUser lennon_remove = ScimUser.builder()
       .buildX509Certificate(null, TestUtils.getX509TestCertificate(), null)
