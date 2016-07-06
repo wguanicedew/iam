@@ -173,6 +173,22 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
     patchAddress(a, u.getAddresses());
     patchPassword(a, u.getPassword());
 
+    if (u.hasX509Certificates()) {
+
+      u.getX509Certificates().forEach(x509Cert -> replaceX509Certificate(a, x509Cert));
+    }
+
+    if (u.hasSshKeys()) {
+
+      u.getIndigoUser().getSshKeys().forEach(sshKey -> replaceSshKey(a, sshKey));
+
+      /* if there's no primary ssh key, set the first as it */
+      if (a.getSshKeys().stream().noneMatch(sshKey -> sshKey.isPrimary())) {
+
+        a.getSshKeys().stream().findFirst().get().setPrimary(true);
+      }
+    }
+
     a.touch();
     accountRepository.save(a);
 
@@ -213,6 +229,40 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
         throw new ScimResourceExistsException(
             String.format("Cannot add x509 certificate: already mapped to another user"));
       }
+    }
+  }
+
+  private void replaceX509Certificate(IamAccount a, ScimX509Certificate cert) {
+
+    Preconditions.checkNotNull(cert, "X509Certificate is null");
+
+    Optional<IamX509Certificate> x509Cert =
+        x509CertificateRepository.findByCertificate(cert.getValue());
+
+    if (x509Cert.isPresent()) {
+
+      if (a.equals(x509Cert.get().getAccount())) {
+
+        /* update display and primary */
+        if (cert.getDisplay() != null) {
+          x509Cert.get().setLabel(cert.getDisplay());
+        }
+        if (cert.isPrimary() != null) {
+          x509Cert.get().setPrimary(cert.isPrimary());
+        }
+
+        x509CertificateRepository.save(x509Cert.get());
+
+      } else {
+
+        throw new ScimResourceExistsException(
+            String.format("Cannot add x509 certificate: already mapped to another user"));
+      }
+
+    } else {
+
+      throw new ScimResourceNotFoundException(
+          String.format("Cannot find x509 certificate with vakue %s", cert.getValue()));
     }
   }
 
@@ -394,6 +444,50 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
     }
   }
 
+  private void replaceSshKey(IamAccount owner, ScimSshKey sshKeyToReplace) throws ScimException {
+
+    Preconditions.checkNotNull(sshKeyToReplace, "Replace ssh key: null ssh key");
+
+    Optional<IamSshKey> iamSshKey;
+
+    if (sshKeyToReplace.getFingerprint() != null) {
+
+      iamSshKey = sshKeyRepository.findByFingerprint(sshKeyToReplace.getFingerprint());
+
+    } else if (sshKeyToReplace.getValue() != null) {
+
+      iamSshKey = sshKeyRepository.findByValue(sshKeyToReplace.getValue());
+
+    } else if (sshKeyToReplace.getDisplay() != null) {
+
+      iamSshKey = sshKeyRepository.findByLabel(sshKeyToReplace.getDisplay());
+
+    } else {
+
+      throw new ScimException(
+          String.format("Unable to load ssh key from persistence with %s", sshKeyToReplace));
+    }
+
+    if (iamSshKey.isPresent()) {
+
+      if (sshKeyToReplace.getDisplay() != null) {
+        iamSshKey.get().setLabel(sshKeyToReplace.getDisplay());
+      }
+
+      if (sshKeyToReplace.isPrimary() != null) {
+        iamSshKey.get().setPrimary(sshKeyToReplace.isPrimary());
+      }
+
+      sshKeyRepository.save(iamSshKey.get());
+
+    } else {
+
+      throw new ScimResourceNotFoundException(
+          String.format("Ssh key (%s) to replace not found", sshKeyToReplace));
+
+    }
+  }
+
   private void removeSshKey(IamAccount owner, ScimSshKey sshKeyToRemove) {
 
     Preconditions.checkNotNull(sshKeyToRemove, "Remove ssh key: null ssh key");
@@ -404,13 +498,13 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
 
       iamSshKey = sshKeyRepository.findByFingerprint(sshKeyToRemove.getFingerprint());
 
-    } else if (sshKeyToRemove.getDisplay() != null) {
-
-      iamSshKey = sshKeyRepository.findByLabel(sshKeyToRemove.getDisplay());
-
     } else if (sshKeyToRemove.getValue() != null) {
 
       iamSshKey = sshKeyRepository.findByValue(sshKeyToRemove.getValue());
+
+    } else if (sshKeyToRemove.getDisplay() != null) {
+
+      iamSshKey = sshKeyRepository.findByLabel(sshKeyToRemove.getDisplay());
 
     } else {
 

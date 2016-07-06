@@ -356,7 +356,7 @@ public class ScimUserProvisioningTests {
     ScimUser user = ScimUser.builder("user_with_sshkey")
       .buildEmail("test_user@test.org")
       .buildName("User", "With ssh key Account")
-      .buildSshKey("Personal", TestUtils.getSshKey(), true)
+      .buildSshKey("Personal", TestUtils.getSshKey(), null, true)
       .active(true)
       .build();
 
@@ -413,7 +413,7 @@ public class ScimUserProvisioningTests {
     ScimUser user = ScimUser.builder("user_with_sshkey")
       .buildEmail("test_user@test.org")
       .buildName("User", "With ssh key")
-      .buildSshKey("Personal", TestUtils.getSshKey(), true)
+      .buildSshKey("Personal", TestUtils.getSshKey(), null, true)
       .active(true)
       .build();
 
@@ -431,7 +431,7 @@ public class ScimUserProvisioningTests {
     ScimUser anotherUser = ScimUser.builder("another_user_with_sshkey")
       .buildEmail("another_test_user@test.org")
       .buildName("Another User", "With ssh key")
-      .buildSshKey("Personal", TestUtils.getSshKey(), true)
+      .buildSshKey("Personal", TestUtils.getSshKey(), null, true)
       .active(true)
       .build();
 

@@ -12,14 +12,12 @@ import it.infn.mw.iam.api.scim.model.ScimIndigoUser;
 import it.infn.mw.iam.api.scim.model.ScimMeta;
 import it.infn.mw.iam.api.scim.model.ScimName;
 import it.infn.mw.iam.api.scim.model.ScimUser;
-import it.infn.mw.iam.api.scim.model.ScimX509Certificate;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.model.IamOidcId;
 import it.infn.mw.iam.persistence.model.IamSamlId;
 import it.infn.mw.iam.persistence.model.IamSshKey;
 import it.infn.mw.iam.persistence.model.IamUserInfo;
-import it.infn.mw.iam.persistence.model.IamX509Certificate;
 import it.infn.mw.iam.util.ssh.InvalidSshKeyException;
 import it.infn.mw.iam.util.ssh.RSAPublicKeyUtils;
 
@@ -29,7 +27,6 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
   private final ScimResourceLocationProvider resourceLocationProvider;
 
   private final AddressConverter addressConverter;
-  private final X509CertificateConverter certificateConverter;
 
   private final OidcIdConverter oidcIdConverter;
   private final SshKeyConverter sshKeyConverter;
@@ -37,13 +34,11 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
 
 
   @Autowired
-  public UserConverter(ScimResourceLocationProvider rlp, AddressConverter ac,
-      X509CertificateConverter cc, OidcIdConverter oidc, SshKeyConverter sshc,
-      SamlIdConverter samlc) {
+  public UserConverter(ScimResourceLocationProvider rlp, AddressConverter ac, OidcIdConverter oidc,
+      SshKeyConverter sshc, SamlIdConverter samlc) {
 
     this.resourceLocationProvider = rlp;
     this.addressConverter = ac;
-    this.certificateConverter = cc;
     this.oidcIdConverter = oidc;
     this.sshKeyConverter = sshc;
     this.samlIdConverter = samlc;
@@ -144,7 +139,7 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
     if (scimUser.hasSamlIds()) {
 
       scimUser.getIndigoUser().getSamlIds().forEach(samlId -> {
-        
+
         IamSamlId iamSamlId = samlIdConverter.fromScim(samlId);
 
         if (iamSamlId.getAccount() != null) {
@@ -160,7 +155,7 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
           iamSamlId.setAccount(account);
         }
         account.getSamlIds().add(iamSamlId);
-        
+
       });
     }
 
@@ -193,15 +188,10 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
       builder.addAddress(address);
     }
 
-    for (IamGroup group : entity.getGroups()) {
+    entity.getGroups().forEach(group -> builder.addGroup(getScimGroupRef(group)));
+    entity.getX509Certificates().forEach(cert -> builder.buildX509Certificate(cert.getLabel(),
+        cert.getCertificate(), cert.isPrimary()));
 
-      builder.addGroup(getScimGroupRef(group));
-    }
-
-    for (IamX509Certificate cert : entity.getX509Certificates()) {
-
-      builder.addX509Certificate(getScimX509Certificate(cert));
-    }
     return builder.build();
   }
 
@@ -231,17 +221,14 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
 
     ScimIndigoUser.Builder indigoUserBuilder = new ScimIndigoUser.Builder();
 
-    entity.getOidcIds().forEach(oidcId -> 
-      indigoUserBuilder.addOidcid(oidcIdConverter.toScim(oidcId))
-    );
+    entity.getOidcIds()
+      .forEach(oidcId -> indigoUserBuilder.buildOidcId(oidcId.getIssuer(), oidcId.getSubject()));
 
-    entity.getSshKeys().forEach(sshKey -> {
-      indigoUserBuilder.addSshKey(sshKeyConverter.toScim(sshKey));
-    });
-    
-    entity.getSamlIds().forEach(samlId -> {
-      indigoUserBuilder.addSamlId(samlIdConverter.toScim(samlId));
-    });
+    entity.getSshKeys().forEach(sshKey -> indigoUserBuilder.buildSshKey(sshKey.getLabel(),
+        sshKey.getValue(), sshKey.getFingerprint(), sshKey.isPrimary()));
+
+    entity.getSamlIds()
+      .forEach(samlId -> indigoUserBuilder.buildSamlId(samlId.getIdpId(), samlId.getUserId()));
 
     ScimIndigoUser indigoUser = indigoUserBuilder.build();
 
@@ -264,10 +251,5 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
       return addressConverter.toScim(entity.getUserInfo().getAddress());
     }
     return null;
-  }
-
-  private ScimX509Certificate getScimX509Certificate(IamX509Certificate cert) {
-
-    return certificateConverter.toScim(cert);
   }
 }

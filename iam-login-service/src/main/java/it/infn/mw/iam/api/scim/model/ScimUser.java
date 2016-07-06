@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Preconditions;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonFilter("attributeFilter")
@@ -348,29 +349,27 @@ public class ScimUser extends ScimResource {
 
     public Builder addGroup(ScimGroupRef scimGroupRef) {
 
+      Preconditions.checkNotNull(scimGroupRef, "Null group ref");
+
       groups.add(scimGroupRef);
       return this;
     }
 
     public Builder buildEmail(String email) {
 
-      ScimEmail.Builder builder = new ScimEmail.Builder();
-      builder.email(email);
-      emails.add(builder.build());
+      emails.add(ScimEmail.builder().email(email).build());
       return this;
     }
 
     public Builder buildName(String givenName, String familyName) {
 
-      ScimName.Builder builder = new ScimName.Builder();
-
-      builder.givenName(givenName).familyName(familyName);
-
-      name(builder.build());
+      this.name = ScimName.builder().givenName(givenName).familyName(familyName).build();
       return this;
     }
 
     public Builder addEmail(ScimEmail scimEmail) {
+
+      Preconditions.checkNotNull(scimEmail, "Null email");
 
       emails.add(scimEmail);
       return this;
@@ -388,48 +387,75 @@ public class ScimUser extends ScimResource {
       return this;
     }
 
-    public Builder addX509Certificate(ScimX509Certificate x509Certificate) {
+    public Builder addX509Certificate(ScimX509Certificate scimX509Certificate) {
 
-      x509Certificates.add(x509Certificate);
+      Preconditions.checkNotNull(scimX509Certificate, "Null x509 certificate");
+
+      x509Certificates.add(scimX509Certificate);
       return this;
     }
 
-    public Builder buildX509Certificate(String display, String value, boolean isPrimary) {
+    public Builder buildX509Certificate(String display, String value, Boolean isPrimary) {
 
       x509Certificates.add(
           ScimX509Certificate.builder().display(display).value(value).primary(isPrimary).build());
       return this;
     }
 
-    public Builder buildOidcId(String issuer, String subject) {
+    public Builder addOidcId(ScimOidcId oidcId) {
+
+      Preconditions.checkNotNull(oidcId, "Null OpenID Connect ID");
 
       if (indigoUser == null) {
         this.indigoUser = ScimIndigoUser.builder().build();
       }
 
-      indigoUser.getOidcIds().add(ScimOidcId.builder().subject(subject).issuer(issuer).build());
+      indigoUser.getOidcIds().add(oidcId);
       return this;
     }
 
-    public Builder buildSshKey(String label, String key, boolean isPrimary) {
+    public Builder buildOidcId(String issuer, String subject) {
+
+      return addOidcId(ScimOidcId.builder().subject(subject).issuer(issuer).build());
+    }
+
+    public Builder addSshKey(ScimSshKey sshKey) {
+
+      Preconditions.checkNotNull(sshKey, "Null ssh key");
 
       if (indigoUser == null) {
         this.indigoUser = ScimIndigoUser.builder().build();
       }
 
-      indigoUser.getSshKeys()
-        .add(ScimSshKey.builder().display(label).value(key).primary(isPrimary).build());
+      indigoUser.getSshKeys().add(sshKey);
+      return this;
+    }
+
+    public Builder buildSshKey(String label, String key, String fingerprint, boolean isPrimary) {
+
+      return addSshKey(ScimSshKey.builder()
+        .display(label)
+        .value(key)
+        .fingerprint(fingerprint)
+        .primary(isPrimary)
+        .build());
+    }
+
+    public Builder addSamlId(ScimSamlId samlId) {
+
+      Preconditions.checkNotNull(samlId, "Null saml id");
+
+      if (indigoUser == null) {
+        this.indigoUser = ScimIndigoUser.builder().build();
+      }
+
+      indigoUser.getSamlIds().add(samlId);
       return this;
     }
 
     public Builder buildSamlId(String idpId, String userId) {
 
-      if (indigoUser == null) {
-        this.indigoUser = ScimIndigoUser.builder().build();
-      }
-
-      indigoUser.getSamlIds().add(ScimSamlId.builder().idpId(idpId).userId(userId).build());
-      return this;
+      return addSamlId(ScimSamlId.builder().idpId(idpId).userId(userId).build());
     }
 
     public ScimUser build() {
