@@ -1,6 +1,6 @@
 package it.infn.mw.iam.authn.saml.web;
 
-import java.util.Set;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -15,6 +15,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import it.infn.mw.iam.authn.saml.MetadataLookupService;
+import it.infn.mw.iam.authn.saml.model.IdpDescription;
 
 @Controller
 @RequestMapping("/saml")
@@ -26,22 +31,31 @@ public class SamlSsoController {
   @Autowired
   MetadataManager metadata;
 
+  @Autowired
+  MetadataLookupService lookupService;
+
   @RequestMapping(value = "/idpSelection", method = RequestMethod.GET)
   public String idpSelection(final HttpServletRequest request, final Model model) {
 
     if (!(SecurityContextHolder.getContext()
-        .getAuthentication() instanceof AnonymousAuthenticationToken)) {
+      .getAuthentication() instanceof AnonymousAuthenticationToken)) {
       LOG.warn("The current user is already logged.");
       return "redirect:/";
     } else {
 
-      Set<String> idps = metadata.getIDPEntityNames();
-      for (String idp : idps) {
-        LOG.info("Configured Identity Provider for SSO: " + idp);
-      }
-      model.addAttribute("idps", idps);
-      return "samlIdpSelection";
+      model.addAttribute("idps", lookupService.listIdps());
+      return "idpSelection";
     }
   }
-  
+
+  @RequestMapping(value = "/idps", method = RequestMethod.GET)
+  public @ResponseBody List<IdpDescription> idps(
+      @RequestParam(value = "q", required = false) String text) {
+
+    if (text == null) {
+      return lookupService.listIdps();
+    }
+
+    return lookupService.lookupIdp(text);
+  }
 }

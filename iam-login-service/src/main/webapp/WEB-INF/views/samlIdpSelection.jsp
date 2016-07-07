@@ -1,7 +1,4 @@
 <%@ taglib
-  prefix="authz"
-  uri="http://www.springframework.org/security/tags"%>
-<%@ taglib
   prefix="c"
   uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib
@@ -33,13 +30,16 @@
           var="idp"
           items="${idps}">
           <div>
+            <c:if test="${idp.imageUrl != null}">
+              <img alt="${idp.organizationName}" src="${idp.imageUrl }"/>
+            </c:if>
             <input
               type="radio"
-              id="'idp_' + ${idp}"
+              id="'idp_' + ${idp.entityId}"
               name="${idpDiscoReturnParam}"
-              value="${idp}" /> <label for="'idp_' + ${idp}">${idp}</label>
+              value="${idp.entityId}" />
+              <label for="'idp_' + ${idp}">${idp.organizationName}</label>            
           </div>
-
         </c:forEach>
         <input type="submit" value="Go!"/>
       </form>
