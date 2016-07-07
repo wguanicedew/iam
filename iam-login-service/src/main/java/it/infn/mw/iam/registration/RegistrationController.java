@@ -40,15 +40,15 @@ public class RegistrationController {
 
     ScimUser user = new ScimUser.Builder().build();
     model.addAttribute("user", user);
-    return new ModelAndView("registration");
+    return new ModelAndView("iam/registration");
 
   }
 
   @PreAuthorize("#oauth2.hasScope('registration:read') or hasRole('ADMIN')")
   @RequestMapping(value = "/registration", method = RequestMethod.GET)
   @ResponseBody
-  public List<RegistrationRequestDto> listRequests(
-      @RequestParam(value="status", required=false, defaultValue="NEW") final IamRegistrationRequestStatus status) {
+  public List<RegistrationRequestDto> listRequests(@RequestParam(value = "status", required = false,
+      defaultValue = "NEW") final IamRegistrationRequestStatus status) {
 
     return service.list(status);
   }

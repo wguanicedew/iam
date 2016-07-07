@@ -29,11 +29,11 @@ public class LoginController {
   public String login(Principal principal, Model model, HttpServletRequest request) {
 
     if (principal == null || principal instanceof AnonymousAuthenticationToken) {
-      
+
       model.addAttribute(LOGIN_PAGE_CONFIGURATION_KEY, loginPageConfiguration);
       model.addAttribute(IAM_PROPERTIES__KEY, properties);
 
-      return "login";
+      return "iam/login";
     }
 
     return "redirect:/";
