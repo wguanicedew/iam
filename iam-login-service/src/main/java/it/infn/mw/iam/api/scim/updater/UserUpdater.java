@@ -73,7 +73,8 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
     this.samlIdConverter = samlIdConverter;
   }
 
-  public void update(IamAccount account, List<ScimPatchOperation<ScimUser>> operations) {
+  public void update(IamAccount account, List<ScimPatchOperation<ScimUser>> operations)
+      throws ScimException {
 
     operations.forEach(op -> {
       switch (op.getOp()) {
@@ -93,7 +94,7 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
     });
   }
 
-  private void addNotNullInfo(IamAccount a, ScimUser u) {
+  private void addNotNullInfo(IamAccount a, ScimUser u) throws ScimException {
 
     patchUserName(a, u.getUserName());
     patchActive(a, u.getActive());
@@ -138,7 +139,7 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
     accountRepository.save(a);
   }
 
-  private void removeNotNullInfo(IamAccount a, ScimUser u) {
+  private void removeNotNullInfo(IamAccount a, ScimUser u) throws ScimException {
 
     if (u.hasX509Certificates()) {
 
@@ -164,7 +165,7 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
     accountRepository.save(a);
   }
 
-  private void replaceNotNullInfo(IamAccount a, ScimUser u) {
+  private void replaceNotNullInfo(IamAccount a, ScimUser u) throws ScimException {
 
     patchUserName(a, u.getUserName());
     patchActive(a, u.getActive());
@@ -191,16 +192,15 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
 
     a.touch();
     accountRepository.save(a);
-
   }
 
   private void patchPassword(IamAccount a, String password) {
 
     a.setPassword(password != null ? password : a.getPassword());
-
   }
 
-  private void addX509Certificate(IamAccount a, ScimX509Certificate cert) {
+  private void addX509Certificate(IamAccount a, ScimX509Certificate cert)
+      throws ScimResourceExistsException {
 
     Preconditions.checkNotNull(cert, "X509Certificate is null");
 
@@ -232,56 +232,53 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
     }
   }
 
-  private void replaceX509Certificate(IamAccount a, ScimX509Certificate cert) {
+  private void replaceX509Certificate(IamAccount owner, ScimX509Certificate cert)
+      throws ScimResourceNotFoundException {
 
     Preconditions.checkNotNull(cert, "X509Certificate is null");
 
-    Optional<IamX509Certificate> x509Cert =
-        x509CertificateRepository.findByCertificate(cert.getValue());
+    Optional<IamX509Certificate> toReplace = owner.getX509Certificates()
+      .stream()
+      .filter(x509Cert -> x509Cert.getCertificate().equals(cert.getValue())
+          || x509Cert.getLabel().equals(cert.getDisplay()))
+      .findFirst();
 
-    if (x509Cert.isPresent()) {
+    if (toReplace.isPresent()) {
 
-      if (a.equals(x509Cert.get().getAccount())) {
-
-        /* update display and primary */
-        if (cert.getDisplay() != null) {
-          x509Cert.get().setLabel(cert.getDisplay());
-        }
-        if (cert.isPrimary() != null) {
-          x509Cert.get().setPrimary(cert.isPrimary());
-        }
-
-        x509CertificateRepository.save(x509Cert.get());
-
-      } else {
-
-        throw new ScimResourceExistsException(
-            String.format("Cannot add x509 certificate: already mapped to another user"));
+      /* update display and primary */
+      if (cert.getDisplay() != null) {
+        toReplace.get().setLabel(cert.getDisplay());
       }
+      if (cert.isPrimary() != null) {
+        toReplace.get().setPrimary(cert.isPrimary());
+      }
+
+      x509CertificateRepository.save(toReplace.get());
 
     } else {
 
-      throw new ScimResourceNotFoundException(
-          String.format("Cannot find x509 certificate with vakue %s", cert.getValue()));
+      throw new ScimResourceNotFoundException("No x509 certificate found");
     }
   }
 
-  private void removeX509Certificate(IamAccount a, ScimX509Certificate cert) {
+  private void removeX509Certificate(IamAccount owner, ScimX509Certificate cert)
+      throws ScimResourceNotFoundException {
 
     Preconditions.checkNotNull(cert, "X509Certificate is null");
 
-    IamX509Certificate toRemove = x509CertificateRepository.findByCertificate(cert.getValue())
-      .orElseThrow(() -> new ScimResourceNotFoundException("No x509 certificate found"));
+    Optional<IamX509Certificate> toRemove = owner.getX509Certificates()
+      .stream()
+      .filter(x509Cert -> x509Cert.getCertificate().equals(cert.getValue()))
+      .findFirst();
 
-    if (toRemove.getAccount().equals(a)) {
+    if (toRemove.isPresent()) {
 
-      x509CertificateRepository.delete(toRemove);
-      a.getX509Certificates().remove(toRemove);
+      x509CertificateRepository.delete(toRemove.get());
+      owner.getX509Certificates().remove(toRemove.get());
 
     } else {
 
-      throw new ScimResourceExistsException(
-          "Cannot remove x509 certificate: already mapped to another user");
+      throw new ScimResourceNotFoundException("No x509 certificate found");
     }
   }
 
@@ -335,7 +332,8 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
     }
   }
 
-  private void addOidcId(IamAccount owner, ScimOidcId oidcIdToAdd) {
+  private void addOidcId(IamAccount owner, ScimOidcId oidcIdToAdd)
+      throws ScimResourceExistsException {
 
     Preconditions.checkNotNull(oidcIdToAdd, "Add OpenID account: null OpenID account");
     Preconditions.checkNotNull(oidcIdToAdd.getIssuer(), "Add OpenID account: null issuer");
@@ -369,39 +367,31 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
     }
   }
 
-  private void removeOidcId(IamAccount owner, ScimOidcId oidcIdToRemove) {
+  private void removeOidcId(IamAccount owner, ScimOidcId oidcIdToRemove)
+      throws ScimResourceNotFoundException {
 
     Preconditions.checkNotNull(oidcIdToRemove, "Remove OpenID account: null OpenID account");
 
-    IamAccount oidcAccount =
-        accountRepository.findByOidcId(oidcIdToRemove.getIssuer(), oidcIdToRemove.getSubject())
-          .orElseThrow(() -> new ScimResourceNotFoundException(
-              String.format("User {} has no (%s,%s) oidc account to remove!", owner.getUsername(),
-                  oidcIdToRemove.getIssuer(), oidcIdToRemove.getSubject())));
+    Optional<IamOidcId> toRemove = owner.getOidcIds()
+      .stream()
+      .filter(oidcId -> oidcId.getIssuer().equals(oidcIdToRemove.getIssuer())
+          && oidcId.getSubject().equals(oidcIdToRemove.getSubject()))
+      .findFirst();
 
-    if (oidcAccount.equals(owner)) {
+    if (toRemove.isPresent()) {
 
-      /* remove */
-      IamOidcId toRemove = oidcIdRepository
-        .findByIssuerAndSubject(oidcIdToRemove.getIssuer(), oidcIdToRemove.getSubject())
-        .orElseThrow(() -> new ScimResourceNotFoundException(
-            String.format("No Open ID connect account found for (%s,%s)",
-                oidcIdToRemove.getSubject(), oidcIdToRemove.getIssuer())));
-
-      oidcIdRepository.delete(toRemove);
-      owner.getOidcIds().remove(toRemove);
+      oidcIdRepository.delete(toRemove.get());
+      owner.getOidcIds().remove(toRemove.get());
 
     } else {
 
-      throw new ScimResourceExistsException(
-          String.format("OpenID account (%s,%s) is already mapped to another user",
-              oidcIdToRemove.getIssuer(), oidcIdToRemove.getSubject()));
-
+      throw new ScimResourceNotFoundException(
+          String.format("No Open ID connect account found for (%s,%s)", oidcIdToRemove.getSubject(),
+              oidcIdToRemove.getIssuer()));
     }
-
   }
 
-  private void addSshKey(IamAccount owner, ScimSshKey sshKey) throws ScimException {
+  private void addSshKey(IamAccount owner, ScimSshKey sshKey) throws ScimResourceExistsException {
 
     Preconditions.checkNotNull(sshKey, "Add ssh key: null ssh key");
     Preconditions.checkNotNull(sshKey.getValue(), "Add ssh key: null key value");
@@ -448,84 +438,46 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
 
     Preconditions.checkNotNull(sshKeyToReplace, "Replace ssh key: null ssh key");
 
-    Optional<IamSshKey> iamSshKey;
+    Optional<IamSshKey> toReplace = owner.getSshKeys()
+      .stream()
+      .filter(sshKey -> sshKey.getFingerprint().equals(sshKeyToReplace.getFingerprint())
+          || sshKey.getValue().equals(sshKeyToReplace.getValue()))
+      .findFirst();
 
-    if (sshKeyToReplace.getFingerprint() != null) {
-
-      iamSshKey = sshKeyRepository.findByFingerprint(sshKeyToReplace.getFingerprint());
-
-    } else if (sshKeyToReplace.getValue() != null) {
-
-      iamSshKey = sshKeyRepository.findByValue(sshKeyToReplace.getValue());
-
-    } else if (sshKeyToReplace.getDisplay() != null) {
-
-      iamSshKey = sshKeyRepository.findByLabel(sshKeyToReplace.getDisplay());
-
-    } else {
-
-      throw new ScimException(
-          String.format("Unable to load ssh key from persistence with %s", sshKeyToReplace));
-    }
-
-    if (iamSshKey.isPresent()) {
+    if (toReplace.isPresent()) {
 
       if (sshKeyToReplace.getDisplay() != null) {
-        iamSshKey.get().setLabel(sshKeyToReplace.getDisplay());
+        toReplace.get().setLabel(sshKeyToReplace.getDisplay());
       }
-
       if (sshKeyToReplace.isPrimary() != null) {
-        iamSshKey.get().setPrimary(sshKeyToReplace.isPrimary());
+        toReplace.get().setPrimary(sshKeyToReplace.isPrimary());
       }
-
-      sshKeyRepository.save(iamSshKey.get());
+      sshKeyRepository.save(toReplace.get());
 
     } else {
 
       throw new ScimResourceNotFoundException(
           String.format("Ssh key (%s) to replace not found", sshKeyToReplace));
-
     }
   }
 
-  private void removeSshKey(IamAccount owner, ScimSshKey sshKeyToRemove) {
+  private void removeSshKey(IamAccount owner, ScimSshKey sshKeyToRemove)
+      throws ScimResourceNotFoundException {
 
     Preconditions.checkNotNull(sshKeyToRemove, "Remove ssh key: null ssh key");
 
-    Optional<IamSshKey> iamSshKey;
+    Optional<IamSshKey> toRemove = owner.getSshKeys()
+      .stream()
+      .filter(sshKey -> sshKey.getFingerprint().equals(sshKeyToRemove.getFingerprint())
+          || sshKey.getValue().equals(sshKeyToRemove.getValue())
+          || sshKey.getLabel().equals(sshKeyToRemove.getDisplay()))
+      .findFirst();
 
-    if (sshKeyToRemove.getFingerprint() != null) {
+    if (toRemove.isPresent()) {
 
-      iamSshKey = sshKeyRepository.findByFingerprint(sshKeyToRemove.getFingerprint());
-
-    } else if (sshKeyToRemove.getValue() != null) {
-
-      iamSshKey = sshKeyRepository.findByValue(sshKeyToRemove.getValue());
-
-    } else if (sshKeyToRemove.getDisplay() != null) {
-
-      iamSshKey = sshKeyRepository.findByLabel(sshKeyToRemove.getDisplay());
-
-    } else {
-
-      throw new ScimException(
-          String.format("Unable to load ssh key from persistence with %s", sshKeyToRemove));
-    }
-
-    if (iamSshKey.isPresent()) {
-
-      if (iamSshKey.get().getAccount().equals(owner)) {
-
-        /* remove */
-        sshKeyRepository.delete(iamSshKey.get());
-        owner.getSshKeys().remove(iamSshKey.get());
-
-      } else {
-
-        throw new ScimResourceExistsException(String
-          .format("Ssh key %s is already mapped to another user", sshKeyToRemove.getFingerprint()));
-
-      }
+      /* remove */
+      sshKeyRepository.delete(toRemove.get());
+      owner.getSshKeys().remove(toRemove.get());
 
     } else {
 
@@ -534,7 +486,8 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
     }
   }
 
-  private void addSamlId(IamAccount owner, ScimSamlId samlIdToAdd) {
+  private void addSamlId(IamAccount owner, ScimSamlId samlIdToAdd)
+      throws ScimResourceExistsException {
 
     Preconditions.checkNotNull(samlIdToAdd, "Add Saml Id: null Saml Id");
     Preconditions.checkNotNull(samlIdToAdd.getIdpId(), "Add Saml Id: null idpId");
@@ -568,34 +521,21 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
     }
   }
 
-  private void removeSamlId(IamAccount owner, ScimSamlId samlIdToRemove) {
+  private void removeSamlId(IamAccount owner, ScimSamlId samlIdToRemove)
+      throws ScimResourceNotFoundException {
 
     Preconditions.checkNotNull(samlIdToRemove, "Remove Saml Id: null saml id");
 
-    Optional<IamAccount> samlAccount =
-        accountRepository.findBySamlId(samlIdToRemove.getIdpId(), samlIdToRemove.getUserId());
+    Optional<IamSamlId> toRemove = owner.getSamlIds()
+      .stream()
+      .filter(samlId -> samlId.getIdpId().equals(samlIdToRemove.getIdpId())
+          && samlId.getUserId().equals(samlIdToRemove.getUserId()))
+      .findFirst();
 
-    if (samlAccount.isPresent()) {
+    if (toRemove.isPresent()) {
 
-      if (samlAccount.get().equals(owner)) {
-
-        /* remove */
-        IamSamlId toRemove = samlIdRepository
-          .findByIdpIdAndUserId(samlIdToRemove.getIdpId(), samlIdToRemove.getUserId())
-          .orElseThrow(() -> new ScimResourceNotFoundException(
-              String.format("No Saml connect account found for (%s,%s)", samlIdToRemove.getIdpId(),
-                  samlIdToRemove.getUserId())));
-
-        samlIdRepository.delete(toRemove);
-        owner.getSamlIds().remove(toRemove);
-
-      } else {
-
-        throw new ScimResourceExistsException(
-            String.format("Saml account (%s,%s) is already mapped to another user",
-                samlIdToRemove.getIdpId(), samlIdToRemove.getUserId()));
-
-      }
+      samlIdRepository.delete(toRemove.get());
+      owner.getSamlIds().remove(toRemove.get());
 
     } else {
 
@@ -603,6 +543,5 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
           String.format("User %s has no (%s,%s) saml account to remove!", owner.getUsername(),
               samlIdToRemove.getIdpId(), samlIdToRemove.getUserId()));
     }
-
   }
 }

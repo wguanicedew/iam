@@ -247,9 +247,8 @@ public class ScimUserProvisioningPatchTests {
 
     String certificate = Base64.getEncoder().encodeToString("this is not a certificate".getBytes());
 
-    ScimUser lennon_update = ScimUser.builder()
-      .buildX509Certificate("Personal Certificate", certificate, true)
-      .build();
+    ScimUser lennon_update =
+        ScimUser.builder().buildX509Certificate("Personal Certificate", certificate, true).build();
 
     ScimUserPatchRequest req = getPatchAddRequest(lennon_update);
 
@@ -264,7 +263,7 @@ public class ScimUserProvisioningPatchTests {
     ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John", "Lennon");
 
     ScimUser lennon_update = ScimUser.builder()
-      .buildX509Certificate("Personal Certificate", TestUtils.getX509TestCertificate(), true)
+      .buildX509Certificate("Personal Certificate", TestUtils.x509Certs.get(0).certificate, true)
       .build();
 
     ScimUserPatchRequest req = getPatchAddRequest(lennon_update);
@@ -275,11 +274,10 @@ public class ScimUserProvisioningPatchTests {
       .body("id", equalTo(lennon.getId()))
       .body("userName", equalTo(lennon.getUserName()))
       .body("x509Certificates", hasSize(equalTo(1)))
-      .body("x509Certificates[0].value",
-          equalTo(TestUtils.getX509TestCertificate()));
+      .body("x509Certificates[0].value", equalTo(TestUtils.x509Certs.get(0).certificate));
 
     ScimUser lennon_remove = ScimUser.builder()
-      .buildX509Certificate(null, TestUtils.getX509TestCertificate(), null)
+      .buildX509Certificate(null, TestUtils.x509Certs.get(0).certificate, null)
       .build();
 
     req = getPatchRemoveRequest(lennon_remove);
@@ -317,25 +315,27 @@ public class ScimUserProvisioningPatchTests {
 
     ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John", "Lennon");
     ScimUser lincoln = addTestUser("abraham_lincoln", "lincoln@email.test", "Abraham", "Lincoln");
-    
-    ScimUser updateSshKey = ScimUser.builder().buildSshKey("Personal", TestUtils.getSshKey(), null, true).build();
-    
+
+    ScimUser updateSshKey =
+        ScimUser.builder().buildSshKey("Personal", TestUtils.sshKeys.get(0).key, null, true).build();
+
     restUtils.doPatch(lennon.getMeta().getLocation(), getPatchAddRequest(updateSshKey));
 
     restUtils.doGet(lennon.getMeta().getLocation())
       .body("id", equalTo(lennon.getId()))
       .body("userName", equalTo(lennon.getUserName()))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].display", equalTo("Personal"))
-      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].value", equalTo(TestUtils.getSshKey()))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].value", equalTo(TestUtils.sshKeys.get(0).key))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].fingerprint",
-          equalTo(TestUtils.getSshKeySHA256Fingerprint()))
+          equalTo(TestUtils.sshKeys.get(0).fingerprintSHA256))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].primary", equalTo(true));
-    
+
     /* lincoln tryes to add the lennon ssh key: */
-    restUtils.doPatch(lincoln.getMeta().getLocation(), getPatchAddRequest(updateSshKey), HttpStatus.CONFLICT);
-    
+    restUtils.doPatch(lincoln.getMeta().getLocation(), getPatchAddRequest(updateSshKey),
+        HttpStatus.CONFLICT);
+
     restUtils.doPatch(lennon.getMeta().getLocation(), getPatchRemoveRequest(updateSshKey));
-    
+
     restUtils.doDelete(lennon.getMeta().getLocation());
   }
 
@@ -361,7 +361,7 @@ public class ScimUserProvisioningPatchTests {
     ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John", "Lennon");
 
     ScimUserPatchRequest req = getPatchAddRequest(
-        ScimUser.builder().buildSshKey("Personal", TestUtils.getSshKey(), null, true).build());
+        ScimUser.builder().buildSshKey("Personal", TestUtils.sshKeys.get(0).key, null, true).build());
 
     restUtils.doPatch(lennon.getMeta().getLocation(), req);
 
@@ -369,9 +369,9 @@ public class ScimUserProvisioningPatchTests {
       .body("id", equalTo(lennon.getId()))
       .body("userName", equalTo(lennon.getUserName()))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].display", equalTo("Personal"))
-      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].value", equalTo(TestUtils.getSshKey()))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].value", equalTo(TestUtils.sshKeys.get(0).key))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].fingerprint",
-          equalTo(TestUtils.getSshKeySHA256Fingerprint()));
+          equalTo(TestUtils.sshKeys.get(0).fingerprintSHA256));
 
     req = getPatchRemoveRequest(ScimUser.builder()
       .indigoUserInfo(ScimIndigoUser.builder()
@@ -395,7 +395,7 @@ public class ScimUserProvisioningPatchTests {
     ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John", "Lennon");
 
     ScimUserPatchRequest req = getPatchAddRequest(
-        ScimUser.builder().buildSshKey("Personal", TestUtils.getSshKey(), null, true).build());
+        ScimUser.builder().buildSshKey("Personal", TestUtils.sshKeys.get(0).key, null, true).build());
 
     restUtils.doPatch(lennon.getMeta().getLocation(), req);
 
@@ -403,15 +403,15 @@ public class ScimUserProvisioningPatchTests {
       .body("id", equalTo(lennon.getId()))
       .body("userName", equalTo(lennon.getUserName()))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].display", equalTo("Personal"))
-      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].value", equalTo(TestUtils.getSshKey()))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].value", equalTo(TestUtils.sshKeys.get(0).key))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].fingerprint",
-          equalTo(TestUtils.getSshKeySHA256Fingerprint()));
+          equalTo(TestUtils.sshKeys.get(0).fingerprintSHA256));
 
     req =
         getPatchRemoveRequest(ScimUser.builder()
           .indigoUserInfo(ScimIndigoUser.builder()
             .addSshKey(
-                ScimSshKey.builder().fingerprint(TestUtils.getSshKeySHA256Fingerprint()).build())
+                ScimSshKey.builder().fingerprint(TestUtils.sshKeys.get(0).fingerprintSHA256).build())
             .build())
           .build());
 
@@ -431,7 +431,7 @@ public class ScimUserProvisioningPatchTests {
     ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John", "Lennon");
 
     ScimUserPatchRequest req = getPatchAddRequest(
-        ScimUser.builder().buildSshKey("Personal", TestUtils.getSshKey(), null, true).build());
+        ScimUser.builder().buildSshKey("Personal", TestUtils.sshKeys.get(0).key, null, true).build());
 
     restUtils.doPatch(lennon.getMeta().getLocation(), req);
 
@@ -439,15 +439,15 @@ public class ScimUserProvisioningPatchTests {
       .body("id", equalTo(lennon.getId()))
       .body("userName", equalTo(lennon.getUserName()))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].display", equalTo("Personal"))
-      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].value", equalTo(TestUtils.getSshKey()))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].value", equalTo(TestUtils.sshKeys.get(0).key))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].fingerprint",
-          equalTo(TestUtils.getSshKeySHA256Fingerprint()));
+          equalTo(TestUtils.sshKeys.get(0).fingerprintSHA256));
 
     req =
         getPatchRemoveRequest(
             ScimUser.builder()
               .indigoUserInfo(ScimIndigoUser.builder()
-                .addSshKey(ScimSshKey.builder().value(TestUtils.getSshKey()).build())
+                .addSshKey(ScimSshKey.builder().value(TestUtils.sshKeys.get(0).key).build())
                 .build())
               .build());
 
@@ -486,8 +486,8 @@ public class ScimUserProvisioningPatchTests {
     ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John", "Lennon");
 
     ScimIndigoUser indigoUser = ScimIndigoUser.builder()
-      .addSshKey(ScimSshKey.builder().value(TestUtils.getSshKey()).build())
-      .addSshKey(ScimSshKey.builder().value(TestUtils.getSshKey()).build())
+      .addSshKey(ScimSshKey.builder().value(TestUtils.sshKeys.get(0).key).build())
+      .addSshKey(ScimSshKey.builder().value(TestUtils.sshKeys.get(0).key).build())
       .build();
 
     ScimUserPatchRequest req =
@@ -524,8 +524,8 @@ public class ScimUserProvisioningPatchTests {
     ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John", "Lennon");
 
     ScimUser lennon_update = ScimUser.builder()
-      .buildX509Certificate("Personal Certificate", TestUtils.getX509TestCertificate(), true)
-      .buildX509Certificate("Personal Certificate", TestUtils.getX509TestCertificate(), true)
+      .buildX509Certificate("Personal Certificate", TestUtils.x509Certs.get(0).certificate, true)
+      .buildX509Certificate("Personal Certificate", TestUtils.x509Certs.get(0).certificate, true)
       .build();
 
     ScimUserPatchRequest req = getPatchAddRequest(lennon_update);
@@ -543,7 +543,7 @@ public class ScimUserProvisioningPatchTests {
 
     ScimIndigoUser indigoUser = ScimIndigoUser.builder()
       .addOidcid(ScimOidcId.builder().issuer("test_issuer").subject("test_subject").build())
-      .addSshKey(ScimSshKey.builder().value(TestUtils.getSshKey()).build())
+      .addSshKey(ScimSshKey.builder().value(TestUtils.sshKeys.get(0).key).build())
       .addSamlId(ScimSamlId.builder().idpId("Idp Test ID").userId("User Test Id").build())
       .build();
 
@@ -559,9 +559,9 @@ public class ScimUserProvisioningPatchTests {
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys", hasSize(equalTo(1)))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].display",
           equalTo("john_lennon's personal ssh key"))
-      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].value", equalTo(TestUtils.getSshKey()))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].value", equalTo(TestUtils.sshKeys.get(0).key))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].fingerprint",
-          equalTo(TestUtils.getSshKeySHA256Fingerprint()))
+          equalTo(TestUtils.sshKeys.get(0).fingerprintSHA256))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].primary", equalTo(true))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".samlIds", hasSize(equalTo(1)))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".samlIds[0].idpId", equalTo("Idp Test ID"))
@@ -569,31 +569,96 @@ public class ScimUserProvisioningPatchTests {
 
     restUtils.doDelete(lennon.getMeta().getLocation());
   }
-  
+
   @Test
   public void testPatchSshKeyLabelAndPrimary() {
 
     ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John", "Lennon");
 
     ScimUserPatchRequest req = getPatchAddRequest(
-        ScimUser.builder().buildSshKey("Personal", TestUtils.getSshKey(), null, true).build());
+        ScimUser.builder().buildSshKey("Personal", TestUtils.sshKeys.get(0).key, null, true).build());
 
     restUtils.doPatch(lennon.getMeta().getLocation(), req);
 
-    ScimUserPatchRequest req_update = getPatchReplaceRequest(
-        ScimUser.builder().buildSshKey("New label", TestUtils.getSshKey(), null, false).build());
-    
+    ScimUserPatchRequest req_update = getPatchReplaceRequest(ScimUser.builder()
+      .buildSshKey("New label", null, TestUtils.sshKeys.get(0).fingerprintSHA256, false)
+      .build());
+
     restUtils.doPatch(lennon.getMeta().getLocation(), req_update);
-    
+
     /* expected primary = true because it's the only ssh key */
     restUtils.doGet(lennon.getMeta().getLocation())
       .body("id", equalTo(lennon.getId()))
       .body("userName", equalTo(lennon.getUserName()))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].display", equalTo("New label"))
-      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].value", equalTo(TestUtils.getSshKey()))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].value", equalTo(TestUtils.sshKeys.get(0).key))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].fingerprint",
-          equalTo(TestUtils.getSshKeySHA256Fingerprint()))
+          equalTo(TestUtils.sshKeys.get(0).fingerprintSHA256))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].primary", equalTo(true));
+
+    restUtils.doDelete(lennon.getMeta().getLocation());
+  }
+
+  @Test
+  public void testAddMultipleX509CertificateAndNoPrimary() {
+
+    ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John", "Lennon");
+
+    ScimUserPatchRequest req = getPatchAddRequest(ScimUser.builder()
+      .buildX509Certificate("Personal1", TestUtils.x509Certs.get(0).certificate, false)
+      .buildX509Certificate("Personal2", TestUtils.x509Certs.get(1).certificate, false)
+      .build());
+
+    restUtils.doPatch(lennon.getMeta().getLocation(), req);
+
+    restUtils.doGet(lennon.getMeta().getLocation())
+      .body("x509Certificates", hasSize(equalTo(2)))
+      .body("x509Certificates[0].display", equalTo("Personal1"))
+      .body("x509Certificates[0].value", equalTo(TestUtils.x509Certs.get(0).certificate))
+      .body("x509Certificates[0].primary", equalTo(true))
+      .body("x509Certificates[1].display", equalTo("Personal2"))
+      .body("x509Certificates[1].value", equalTo(TestUtils.x509Certs.get(1).certificate))
+      .body("x509Certificates[1].primary", equalTo(false));
+
+    restUtils.doDelete(lennon.getMeta().getLocation());
+  }
+
+  @Test
+  public void testReplacePrimaryWithMultipleX509Certificate() {
+
+    ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John", "Lennon");
+
+    ScimUserPatchRequest req = getPatchAddRequest(ScimUser.builder()
+      .buildX509Certificate("Personal1", TestUtils.x509Certs.get(0).certificate, false)
+      .buildX509Certificate("Personal2", TestUtils.x509Certs.get(1).certificate, false)
+      .build());
+
+    restUtils.doPatch(lennon.getMeta().getLocation(), req);
+
+    restUtils.doGet(lennon.getMeta().getLocation())
+      .body("x509Certificates", hasSize(equalTo(2)))
+      .body("x509Certificates[0].display", equalTo("Personal1"))
+      .body("x509Certificates[0].value", equalTo(TestUtils.x509Certs.get(0).certificate))
+      .body("x509Certificates[0].primary", equalTo(true))
+      .body("x509Certificates[1].display", equalTo("Personal2"))
+      .body("x509Certificates[1].value", equalTo(TestUtils.x509Certs.get(1).certificate))
+      .body("x509Certificates[1].primary", equalTo(false));
+
+    req = getPatchReplaceRequest(ScimUser.builder()
+      .buildX509Certificate("Personal1", TestUtils.x509Certs.get(0).certificate, false)
+      .buildX509Certificate("Personal2", TestUtils.x509Certs.get(1).certificate, true)
+      .build());
+
+    restUtils.doPatch(lennon.getMeta().getLocation(), req);
+
+    restUtils.doGet(lennon.getMeta().getLocation())
+      .body("x509Certificates", hasSize(equalTo(2)))
+      .body("x509Certificates[0].display", equalTo("Personal1"))
+      .body("x509Certificates[0].value", equalTo(TestUtils.x509Certs.get(0).certificate))
+      .body("x509Certificates[0].primary", equalTo(false))
+      .body("x509Certificates[1].display", equalTo("Personal2"))
+      .body("x509Certificates[1].value", equalTo(TestUtils.x509Certs.get(1).certificate))
+      .body("x509Certificates[1].primary", equalTo(true));
 
     restUtils.doDelete(lennon.getMeta().getLocation());
   }

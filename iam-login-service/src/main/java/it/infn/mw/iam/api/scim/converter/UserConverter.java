@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import it.infn.mw.iam.api.scim.exception.ScimException;
-import it.infn.mw.iam.api.scim.exception.ScimResourceExistsException;
 import it.infn.mw.iam.api.scim.model.ScimAddress;
 import it.infn.mw.iam.api.scim.model.ScimEmail;
 import it.infn.mw.iam.api.scim.model.ScimGroupRef;
@@ -73,7 +72,7 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
 
     account.setUserInfo(userInfo);
 
-    if (scimUser.getAddresses() != null && scimUser.getAddresses().size() > 0) {
+    if (scimUser.hasAddresses()) {
 
       userInfo.setAddress(addressConverter.fromScim(scimUser.getAddresses().get(0)));
 
@@ -93,20 +92,9 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
       scimUser.getIndigoUser().getOidcIds().forEach(oidcId -> {
 
         IamOidcId iamOidcId = oidcIdConverter.fromScim(oidcId);
-
-        if (iamOidcId.getAccount() != null) {
-          if (!account.equals(iamOidcId.getAccount())) {
-
-            String errorMessage = String.format("OIDC id %s,%s is already mapped to another user",
-                iamOidcId.getIssuer(), iamOidcId.getSubject());
-
-            throw new ScimResourceExistsException(errorMessage);
-          }
-        } else {
-
-          iamOidcId.setAccount(account);
-        }
+        iamOidcId.setAccount(account);
         account.getOidcIds().add(iamOidcId);
+
       });
     }
 
@@ -125,19 +113,7 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
           }
         }
 
-        if (iamSshKey.getAccount() != null) {
-          if (account.getUuid() != iamSshKey.getAccount().getUuid()) {
-
-            String errorMessage =
-                String.format("Ssh key ['%s',%s] is already mapped to another user",
-                    iamSshKey.getLabel(), iamSshKey.getFingerprint());
-
-            throw new ScimResourceExistsException(errorMessage);
-          }
-        } else {
-
-          iamSshKey.setAccount(account);
-        }
+        iamSshKey.setAccount(account);
 
         if (iamSshKey.getLabel() == null) {
 
@@ -153,19 +129,7 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
       scimUser.getIndigoUser().getSamlIds().forEach(samlId -> {
 
         IamSamlId iamSamlId = samlIdConverter.fromScim(samlId);
-
-        if (iamSamlId.getAccount() != null) {
-          if (account.getUuid() != iamSamlId.getAccount().getUuid()) {
-
-            String errorMessage = String.format("Saml id %s,%s is already mapped to another user",
-                iamSamlId.getIdpId(), iamSamlId.getUserId());
-
-            throw new ScimResourceExistsException(errorMessage);
-          }
-        } else {
-
-          iamSamlId.setAccount(account);
-        }
+        iamSamlId.setAccount(account);
         account.getSamlIds().add(iamSamlId);
 
       });
@@ -200,9 +164,9 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
       builder.addAddress(address);
     }
 
-    entity.getGroups().forEach(group -> builder.addGroup(getScimGroupRef(group)));
-    entity.getX509Certificates().forEach(cert -> builder.buildX509Certificate(cert.getLabel(),
-        cert.getCertificate(), cert.isPrimary()));
+    entity.getGroups().forEach(group -> builder.addGroupRef(getScimGroupRef(group)));
+    entity.getX509Certificates()
+      .forEach(cert -> builder.addX509Certificate(x509CertificateConverter.toScim(cert)));
 
     return builder.build();
   }
@@ -234,13 +198,13 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
     ScimIndigoUser.Builder indigoUserBuilder = new ScimIndigoUser.Builder();
 
     entity.getOidcIds()
-      .forEach(oidcId -> indigoUserBuilder.buildOidcId(oidcId.getIssuer(), oidcId.getSubject()));
+      .forEach(oidcId -> indigoUserBuilder.addOidcid(oidcIdConverter.toScim(oidcId)));
 
-    entity.getSshKeys().forEach(sshKey -> indigoUserBuilder.buildSshKey(sshKey.getLabel(),
-        sshKey.getValue(), sshKey.getFingerprint(), sshKey.isPrimary()));
+    entity.getSshKeys()
+      .forEach(sshKey -> indigoUserBuilder.addSshKey(sshKeyConverter.toScim(sshKey)));
 
     entity.getSamlIds()
-      .forEach(samlId -> indigoUserBuilder.buildSamlId(samlId.getIdpId(), samlId.getUserId()));
+      .forEach(samlId -> indigoUserBuilder.addSamlId(samlIdConverter.toScim(samlId)));
 
     ScimIndigoUser indigoUser = indigoUserBuilder.build();
 

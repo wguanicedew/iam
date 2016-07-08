@@ -178,6 +178,11 @@ public class ScimUser extends ScimResource {
     return emails;
   }
 
+  public boolean hasAddresses() {
+    
+    return addresses != null && !addresses.isEmpty();
+  }
+
   public List<ScimAddress> getAddresses() {
 
     return addresses;
@@ -347,7 +352,7 @@ public class ScimUser extends ScimResource {
       return this;
     }
 
-    public Builder addGroup(ScimGroupRef scimGroupRef) {
+    public Builder addGroupRef(ScimGroupRef scimGroupRef) {
 
       Preconditions.checkNotNull(scimGroupRef, "Null group ref");
 

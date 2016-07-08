@@ -1,7 +1,6 @@
 package it.infn.mw.iam.api.scim.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -10,9 +9,6 @@ public class ScimOidcId {
 
   private final String issuer;
   private final String subject;
-
-  @JsonIgnore
-  private ScimMemberRef accountRef;
 
   @JsonCreator
   private ScimOidcId(@JsonProperty("issuer") String issuer,
@@ -25,7 +21,6 @@ public class ScimOidcId {
   private ScimOidcId(Builder b) {
     this.issuer = b.issuer;
     this.subject = b.subject;
-    this.accountRef = b.accountRef;
   }
 
   public String getIssuer() {
@@ -38,12 +33,6 @@ public class ScimOidcId {
     return subject;
   }
 
-  @JsonIgnore
-  public ScimMemberRef getAccountRef() {
-
-    return accountRef;
-  }
-
   public static Builder builder() {
 
     return new Builder();
@@ -53,7 +42,6 @@ public class ScimOidcId {
 
     private String issuer;
     private String subject;
-    private ScimMemberRef accountRef;
 
     public Builder issuer(String issuer) {
 
@@ -67,12 +55,6 @@ public class ScimOidcId {
       return this;
     }
 
-    public Builder accountRef(ScimMemberRef accountRef) {
-
-      this.accountRef = accountRef;
-      return this;
-    }
-
     public ScimOidcId build() {
 
       return new ScimOidcId(this);
@@ -81,7 +63,6 @@ public class ScimOidcId {
 
   @Override
   public String toString() {
-    return "ScimOidcId [issuer=" + issuer + ", subject=" + subject + ", accountRef=" + accountRef
-        + "]";
+    return "ScimOidcId [issuer=" + issuer + ", subject=" + subject + "]";
   }
 }

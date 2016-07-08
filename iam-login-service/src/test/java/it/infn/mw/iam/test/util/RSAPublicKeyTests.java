@@ -12,22 +12,28 @@ public class RSAPublicKeyTests {
   @Test
   public void testMD5Fingerprint() {
 
-    String fp = RSAPublicKeyUtils.getMD5Fingerprint(TestUtils.getSshKey());
-    Assert.assertEquals(fp, TestUtils.getSshKeyMD5Fingerprint());
+    String fp = RSAPublicKeyUtils.getMD5Fingerprint(TestUtils.sshKeys.get(0).key);
+    Assert.assertEquals(fp, TestUtils.sshKeys.get(0).fingerprintMDS);
+    fp = RSAPublicKeyUtils.getMD5Fingerprint(TestUtils.sshKeys.get(1).key);
+    Assert.assertEquals(fp, TestUtils.sshKeys.get(1).fingerprintMDS);
   }
 
   @Test
   public void testFormattedMD5Fingerprint() {
 
-    String fp = RSAPublicKeyUtils.getFormattedMD5Fingerprint(TestUtils.getSshKey());
-    Assert.assertEquals(fp, TestUtils.getSshKeyFormattedMD5Fingerprint());
+    String fp = RSAPublicKeyUtils.getFormattedMD5Fingerprint(TestUtils.sshKeys.get(0).key);
+    Assert.assertEquals(fp, TestUtils.sshKeys.get(0).fingerprintMD5Formatted);
+    fp = RSAPublicKeyUtils.getFormattedMD5Fingerprint(TestUtils.sshKeys.get(1).key);
+    Assert.assertEquals(fp, TestUtils.sshKeys.get(1).fingerprintMD5Formatted);
   }
 
   @Test
   public void testSHA256Fingerprint() {
 
-    String fp = RSAPublicKeyUtils.getSHA256Fingerprint(TestUtils.getSshKey());
-    Assert.assertEquals(fp, TestUtils.getSshKeySHA256Fingerprint());
+    String fp = RSAPublicKeyUtils.getSHA256Fingerprint(TestUtils.sshKeys.get(0).key);
+    Assert.assertEquals(fp, TestUtils.sshKeys.get(0).fingerprintSHA256);
+    fp = RSAPublicKeyUtils.getSHA256Fingerprint(TestUtils.sshKeys.get(1).key);
+    Assert.assertEquals(fp, TestUtils.sshKeys.get(1).fingerprintSHA256);
   }
 
   @Test
