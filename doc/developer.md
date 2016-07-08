@@ -23,18 +23,28 @@ You will need:
 You can start a development/testing environment with the following command:
 
 ```bash
-  export POM_VERSION=$(sh utils/print-pom-version.sh)
   docker-compose build
   docker-compose up
 ```
 
-Besides POM_VERSION, the docker-compose.yml file requires that you set some
-environment variables for it to run properly, mainly to provide OAuth client
-credentials for external authentication mechanisms (Google, Github,...).
+The docker-compose.yml file requires that you set some environment variables
+for it to run properly, mainly to provide OAuth client credentials for external
+authentication mechanisms (Google, Github,...).
 
 ## Building Docker production images
 
-Check the following folders:
+To build the docker images for the iam-service and iam-test client,
+use the following commands:
+
+```bash
+sh iam-login-service/docker/build-prod-image.sh
+sh iam-test-client/docker/build-prod-image.sh
+```
+
+These commands should run **after** war and jar archives have been built, i.e.
+after a `mvn package`.
+
+For more details on the image build scripts see the following folders:
 
 - [iam-login-service](iam-login-service/docker)
 - [iam-test-client](iam-test-client/docker)
