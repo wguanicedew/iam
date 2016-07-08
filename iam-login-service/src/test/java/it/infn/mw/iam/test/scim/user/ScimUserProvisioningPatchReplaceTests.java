@@ -1,8 +1,5 @@
 package it.infn.mw.iam.test.scim.user;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -125,7 +122,7 @@ public class ScimUserProvisioningPatchReplaceTests {
   }
 
   @Test
-  public void testPatchReplaceX509CertificatePrimaryWithNoEffect() {
+  public void testPatchReplaceX509CertificatePrimary() {
 
     ScimUser user = testUsers.get(0);
 
@@ -135,15 +132,14 @@ public class ScimUserProvisioningPatchReplaceTests {
 
     restUtils.doPatch(user.getMeta().getLocation(), req);
 
-    restUtils.doGet(user.getMeta().getLocation())
-      .body("id", equalTo(user.getId()))
-      .body("x509Certificates", hasSize(equalTo(2)))
-      .body("x509Certificates[0].primary", equalTo(true))
-      .body("x509Certificates[1].primary", equalTo(false));
+    ScimUser updated_user =
+        restUtils.doGet(user.getMeta().getLocation()).extract().as(ScimUser.class);
+    Assert.assertTrue(
+        updated_user.getX509Certificates().stream().filter(cert -> cert.isPrimary()).count() == 1);
   }
 
   @Test
-  public void testPatchReplaceX509CertificatePrimary() {
+  public void testPatchReplaceX509CertificatePrimarySwitch() {
 
     ScimUser user = testUsers.get(0);
 
@@ -209,7 +205,7 @@ public class ScimUserProvisioningPatchReplaceTests {
   }
 
   @Test
-  public void testPatchReplaceSshKeyPrimaryWithNoEffect() {
+  public void testPatchReplaceSshKeyPrimary() {
 
     ScimUser user = testUsers.get(0);
 
@@ -227,13 +223,12 @@ public class ScimUserProvisioningPatchReplaceTests {
     Assert.assertTrue(updated_user.getIndigoUser()
       .getSshKeys()
       .stream()
-      .filter(sshKey -> sshKey.getValue().equals(keyToReplace.getValue()) && sshKey.isPrimary())
-      .findFirst()
-      .isPresent());
+      .filter(sshKey -> sshKey.isPrimary())
+      .count() == 1);
   }
 
   @Test
-  public void testPatchReplaceSshKeyPrimary() {
+  public void testPatchReplaceSshKeyPrimarySwitch() {
 
     ScimUser user = testUsers.get(0);
 
