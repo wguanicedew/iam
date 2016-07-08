@@ -134,12 +134,14 @@
             </div>
           </c:if>
         </div>
-
-        <div id="registration">
-          <a
-            href="/registration/add"
-            class="btn btn-success btn-block">Register a new account</a>
-        </div>
+        
+         <c:if test="${loginPageConfiguration.registrationEnabled}">
+          <div id="registration">
+            <a
+              href="/registration/add"
+              class="btn btn-success btn-block">Register a new account</a>
+          </div>
+        </c:if>
 
       </div>
     </div>

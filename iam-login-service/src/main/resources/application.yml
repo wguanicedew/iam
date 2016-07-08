@@ -18,7 +18,7 @@ spring:
     generate-ddl: true
 
   profiles:
-    active: google,h2,dev
+    active: google,h2,dev,registration
 
 iam:
   baseUrl: ${IAM_BASE_URL:http://localhost:8080}

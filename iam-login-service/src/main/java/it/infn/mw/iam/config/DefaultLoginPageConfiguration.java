@@ -20,6 +20,8 @@ public class DefaultLoginPageConfiguration implements LoginPageConfiguration, En
   private boolean googleEnabled;
   private boolean githubEnabled;
   private boolean samlEnabled;
+  private boolean registrationEnabled;
+
 
   @Autowired
   GoogleClientProperties googleClientConfiguration;
@@ -30,6 +32,7 @@ public class DefaultLoginPageConfiguration implements LoginPageConfiguration, En
     googleEnabled = activeProfilesContains("google");
     githubEnabled = activeProfilesContains("github");
     samlEnabled = activeProfilesContains("saml");
+    registrationEnabled = activeProfilesContains("registration");
   }
 
   private boolean activeProfilesContains(String val) {
@@ -63,9 +66,9 @@ public class DefaultLoginPageConfiguration implements LoginPageConfiguration, En
   }
 
   @Override
-  public GoogleClientProperties getGoogleConfiguration() {
+  public boolean isRegistrationEnabled() {
 
-    return googleClientConfiguration;
+    return registrationEnabled;
   }
 
 }
