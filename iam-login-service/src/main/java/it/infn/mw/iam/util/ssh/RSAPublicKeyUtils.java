@@ -4,7 +4,6 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.MessageDigestAlgorithms;
 
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
 public class RSAPublicKeyUtils {
@@ -34,15 +33,10 @@ public class RSAPublicKeyUtils {
       byte[] digest = MessageDigest.getInstance(MessageDigestAlgorithms.MD5).digest(decodedKey);
       fingerprint = Hex.encodeHexString(digest);
 
-    } catch (NoSuchAlgorithmException e) {
-
-      /* Algorithm is MessageDigestAlgorithms.MD5 so the exception is never thrown */
-      assert false;
-
-    } catch (IllegalArgumentException iae) {
+    } catch (Throwable e) {
 
       throw new InvalidSshKeyException(
-          "Error during fingerprint generation: RSA key is not base64 encoded", iae);
+          "Error during fingerprint generation: RSA key is not base64 encoded", e);
     }
 
     return fingerprint;
@@ -58,15 +52,10 @@ public class RSAPublicKeyUtils {
       byte[] digest = MessageDigest.getInstance(MessageDigestAlgorithms.SHA_256).digest(decodedKey);
       fingerprint = Base64.getEncoder().encodeToString(digest);
 
-    } catch (NoSuchAlgorithmException e) {
-
-      /* Algorithm is MessageDigestAlgorithms.SHA_256 so the exception is never thrown */
-      assert false;
-
-    } catch (IllegalArgumentException iae) {
+    } catch (Throwable e) {
 
       throw new InvalidSshKeyException(
-          "Error during fingerprint generation: RSA key is not base64 encoded", iae);
+          "Error during fingerprint generation: RSA key is not base64 encoded", e);
     }
 
     return fingerprint;

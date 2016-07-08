@@ -177,6 +177,12 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
     if (u.hasX509Certificates()) {
 
       u.getX509Certificates().forEach(x509Cert -> replaceX509Certificate(a, x509Cert));
+      
+      /* if there's no primary x509 cert, set the first as it */
+      if (a.getX509Certificates().stream().noneMatch(x509Cert -> x509Cert.isPrimary())) {
+
+        a.getX509Certificates().stream().findFirst().get().setPrimary(true);
+      }
     }
 
     if (u.hasSshKeys()) {
