@@ -1,10 +1,5 @@
 <script type="text/ng-template" id="result-template.html">
-<a> 
-  <img
-    ng-show="match.model.imageUrl"
-    ng-src="{{match.model.imageUrl}}"
-    width="16">
- 
+<a>
   <span ng-bind-html="match.model.organizationName | uibTypeaheadHighlight:query"> </span>
 </a>
 </script>
@@ -16,20 +11,19 @@
     class="alert alert-info"
     role="alert"
     ng-show="idpSelected.organizationName != null">
-    You selected:<br> <img
-      ng-show="idpSelected.imageUrl"
-      ng-src="{{idpSelected.imageUrl}}"
-      width="16"> <strong><span>{{idpSelected.organizationName}}</span></strong>
+    You selected:<br>
+    <strong><span>{{idpSelected.organizationName}}</span></strong>
   </div>
   <input
     type="text"
     ng-model="idpSelected"
-    placeholder="Search for your IdP"
+    placeholder="Search for your IdP..."
     uib-typeahead="idpDesc as idpDesc.organizationName for idpDesc in lookupIdp($viewValue)"
     typeahead-loading="loadingIdps"
     typeahead-no-results="noResults"
-    typeahead-min-length="2"
+    typeahead-min-length="0"
     typeahead-template-url="result-template.html"
+    autofocus="autofocus"
     class="form-control"> <i
     ng-show="loadingIdps"
     class="glyphicon glyphicon-refresh"></i>

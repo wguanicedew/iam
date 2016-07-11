@@ -14,9 +14,6 @@ angular.module('iam-login-app', ['ui.bootstrap'])
 
       $scope.lookupIdp = function(val) {
 
-        if (val.length == 1)
-          return {};
-
         var result = $http.get('/saml/idps', {
           params: {
             q: val
@@ -24,6 +21,7 @@ angular.module('iam-login-app', ['ui.bootstrap'])
         }).then(function(response) {
           return response.data;
         });
+
         return result;
       }
     }])
