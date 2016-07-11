@@ -1,6 +1,7 @@
 package it.infn.mw.iam.authn.saml.web;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +31,7 @@ public class SamlSsoController {
       @RequestParam(value = "q", required = false) String text) {
 
     if (text == null) {
-      return lookupService.listIdps();
+      return lookupService.listIdps().stream().limit(20).collect(Collectors.toList());
     }
 
     return lookupService.lookupIdp(text);
