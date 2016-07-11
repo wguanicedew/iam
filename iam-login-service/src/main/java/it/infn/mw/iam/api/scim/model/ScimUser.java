@@ -1,6 +1,7 @@
 package it.infn.mw.iam.api.scim.model;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -13,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Preconditions;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonFilter("attributeFilter")
@@ -50,25 +52,22 @@ public class ScimUser extends ScimResource {
   private final List<ScimAddress> addresses;
   private final List<ScimX509Certificate> x509Certificates;
 
-  private final List<ScimGroupRef> groups;
+  private final Set<ScimGroupRef> groups;
 
   private final ScimIndigoUser indigoUser;
 
   @JsonCreator
   private ScimUser(@JsonProperty("id") String id, @JsonProperty("externalId") String externalId,
-      @JsonProperty("meta") ScimMeta meta, 
-      @JsonProperty("schemas") Set<String> schemas,
-      @JsonProperty("userName") String userName, 
-      @JsonProperty("password") String password,
-      @JsonProperty("name") ScimName name,
-      @JsonProperty("displayName") String displayName, @JsonProperty("nickName") String nickName,
-      @JsonProperty("profileUrl") String profileUrl, @JsonProperty("title") String title,
-      @JsonProperty("userType") String userType,
+      @JsonProperty("meta") ScimMeta meta, @JsonProperty("schemas") Set<String> schemas,
+      @JsonProperty("userName") String userName, @JsonProperty("password") String password,
+      @JsonProperty("name") ScimName name, @JsonProperty("displayName") String displayName,
+      @JsonProperty("nickName") String nickName, @JsonProperty("profileUrl") String profileUrl,
+      @JsonProperty("title") String title, @JsonProperty("userType") String userType,
       @JsonProperty("preferredLanguage") String preferredLanguage,
       @JsonProperty("locale") String locale, @JsonProperty("timezone") String timezone,
       @JsonProperty("active") Boolean active, @JsonProperty("emails") List<ScimEmail> emails,
       @JsonProperty("addresses") List<ScimAddress> addresses,
-      @JsonProperty("groups") List<ScimGroupRef> groups,
+      @JsonProperty("groups") Set<ScimGroupRef> groups,
       @JsonProperty("x509Certificates") List<ScimX509Certificate> x509Certificates,
       @JsonProperty("urn:indigo-dc:scim:schemas:IndigoUser") ScimIndigoUser indigoUser) {
 
@@ -179,6 +178,11 @@ public class ScimUser extends ScimResource {
     return emails;
   }
 
+  public boolean hasAddresses() {
+    
+    return addresses != null && !addresses.isEmpty();
+  }
+
   public List<ScimAddress> getAddresses() {
 
     return addresses;
@@ -195,9 +199,32 @@ public class ScimUser extends ScimResource {
     return indigoUser;
   }
 
-  public List<ScimGroupRef> getGroups() {
+  public Set<ScimGroupRef> getGroups() {
 
     return groups;
+  }
+
+  public boolean hasX509Certificates() {
+
+    return x509Certificates != null && !x509Certificates.isEmpty();
+  }
+
+  public boolean hasOidcIds() {
+
+    return indigoUser != null && indigoUser.getOidcIds() != null
+        && !indigoUser.getOidcIds().isEmpty();
+  }
+
+  public boolean hasSshKeys() {
+
+    return indigoUser != null && indigoUser.getSshKeys() != null
+        && !indigoUser.getSshKeys().isEmpty();
+  }
+
+  public boolean hasSamlIds() {
+
+    return indigoUser != null && indigoUser.getSamlIds() != null
+        && !indigoUser.getSamlIds().isEmpty();
   }
 
   public static Builder builder(String uuid) {
@@ -226,7 +253,7 @@ public class ScimUser extends ScimResource {
     private Boolean active;
 
     private List<ScimEmail> emails = new ArrayList<ScimEmail>();
-    private List<ScimGroupRef> groups = new ArrayList<ScimGroupRef>();
+    private Set<ScimGroupRef> groups = new LinkedHashSet<ScimGroupRef>();
     private List<ScimAddress> addresses = new ArrayList<ScimAddress>();
     private List<ScimX509Certificate> x509Certificates = new ArrayList<ScimX509Certificate>();
     private ScimIndigoUser indigoUser;
@@ -325,7 +352,9 @@ public class ScimUser extends ScimResource {
       return this;
     }
 
-    public Builder addGroup(ScimGroupRef scimGroupRef) {
+    public Builder addGroupRef(ScimGroupRef scimGroupRef) {
+
+      Preconditions.checkNotNull(scimGroupRef, "Null group ref");
 
       groups.add(scimGroupRef);
       return this;
@@ -333,23 +362,19 @@ public class ScimUser extends ScimResource {
 
     public Builder buildEmail(String email) {
 
-      ScimEmail.Builder builder = new ScimEmail.Builder();
-      builder.email(email);
-      emails.add(builder.build());
+      emails.add(ScimEmail.builder().email(email).build());
       return this;
     }
 
     public Builder buildName(String givenName, String familyName) {
 
-      ScimName.Builder builder = new ScimName.Builder();
-
-      builder.givenName(givenName).familyName(familyName);
-
-      name(builder.build());
+      this.name = ScimName.builder().givenName(givenName).familyName(familyName).build();
       return this;
     }
 
     public Builder addEmail(ScimEmail scimEmail) {
+
+      Preconditions.checkNotNull(scimEmail, "Null email");
 
       emails.add(scimEmail);
       return this;
@@ -367,21 +392,75 @@ public class ScimUser extends ScimResource {
       return this;
     }
 
-    public Builder addX509Certificate(ScimX509Certificate x509Certificate) {
+    public Builder addX509Certificate(ScimX509Certificate scimX509Certificate) {
 
-      x509Certificates.add(x509Certificate);
+      Preconditions.checkNotNull(scimX509Certificate, "Null x509 certificate");
+
+      x509Certificates.add(scimX509Certificate);
+      return this;
+    }
+
+    public Builder buildX509Certificate(String display, String value, Boolean isPrimary) {
+
+      addX509Certificate(
+          ScimX509Certificate.builder().display(display).value(value).primary(isPrimary).build());
+      return this;
+    }
+
+    public Builder addOidcId(ScimOidcId oidcId) {
+
+      Preconditions.checkNotNull(oidcId, "Null OpenID Connect ID");
+
+      if (indigoUser == null) {
+        this.indigoUser = ScimIndigoUser.builder().build();
+      }
+
+      indigoUser.getOidcIds().add(oidcId);
       return this;
     }
 
     public Builder buildOidcId(String issuer, String subject) {
+
+      return addOidcId(ScimOidcId.builder().subject(subject).issuer(issuer).build());
+    }
+
+    public Builder addSshKey(ScimSshKey sshKey) {
+
+      Preconditions.checkNotNull(sshKey, "Null ssh key");
+
       if (indigoUser == null) {
-        indigoUser = ScimIndigoUser.builder().build();
+        this.indigoUser = ScimIndigoUser.builder().build();
       }
 
-      ScimOidcId oidcId = ScimOidcId.builder().subject(subject).issuer(issuer).build();
-
-      indigoUser.getOidcIds().add(oidcId);
+      indigoUser.getSshKeys().add(sshKey);
       return this;
+    }
+
+    public Builder buildSshKey(String label, String key, String fingerprint, boolean isPrimary) {
+
+      return addSshKey(ScimSshKey.builder()
+        .display(label)
+        .value(key)
+        .fingerprint(fingerprint)
+        .primary(isPrimary)
+        .build());
+    }
+
+    public Builder addSamlId(ScimSamlId samlId) {
+
+      Preconditions.checkNotNull(samlId, "Null saml id");
+
+      if (indigoUser == null) {
+        this.indigoUser = ScimIndigoUser.builder().build();
+      }
+
+      indigoUser.getSamlIds().add(samlId);
+      return this;
+    }
+
+    public Builder buildSamlId(String idpId, String userId) {
+
+      return addSamlId(ScimSamlId.builder().idpId(idpId).userId(userId).build());
     }
 
     public ScimUser build() {

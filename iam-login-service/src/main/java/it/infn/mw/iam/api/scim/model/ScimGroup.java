@@ -86,12 +86,6 @@ public final class ScimGroup extends ScimResource {
       return this;
     }
 
-    public Builder addMember(ScimMemberRef member) {
-
-      members.add(member);
-      return this;
-    }
-
     public ScimGroup build() {
 
       return new ScimGroup(this);

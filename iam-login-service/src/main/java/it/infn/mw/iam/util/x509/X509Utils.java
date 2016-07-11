@@ -1,4 +1,4 @@
-package it.infn.mw.iam.util;
+package it.infn.mw.iam.util.x509;
 
 import java.io.ByteArrayInputStream;
 import java.security.cert.CertificateException;

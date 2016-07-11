@@ -57,12 +57,6 @@ public class ScimPatchOperation<T> {
 
     public Builder() {}
 
-    public Builder<T> op(ScimPatchOperationType op) {
-
-      this.op = op;
-      return this;
-    }
-
     public Builder<T> path(String path) {
 
       this.path = path;

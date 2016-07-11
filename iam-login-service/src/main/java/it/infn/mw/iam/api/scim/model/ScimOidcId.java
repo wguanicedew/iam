@@ -7,8 +7,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ScimOidcId {
 
-  public final String issuer;
-  public final String subject;
+  private final String issuer;
+  private final String subject;
 
   @JsonCreator
   private ScimOidcId(@JsonProperty("issuer") String issuer,
@@ -40,8 +40,8 @@ public class ScimOidcId {
 
   public static class Builder {
 
-    public String issuer;
-    public String subject;
+    private String issuer;
+    private String subject;
 
     public Builder issuer(String issuer) {
 
@@ -59,5 +59,10 @@ public class ScimOidcId {
 
       return new ScimOidcId(this);
     }
+  }
+
+  @Override
+  public String toString() {
+    return "ScimOidcId [issuer=" + issuer + ", subject=" + subject + "]";
   }
 }

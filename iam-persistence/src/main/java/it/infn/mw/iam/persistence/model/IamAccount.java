@@ -1,14 +1,15 @@
 package it.infn.mw.iam.persistence.model;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -21,6 +22,8 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
+
+import com.google.common.base.Preconditions;
 
 /**
  * 
@@ -71,17 +74,17 @@ public class IamAccount {
       inverseJoinColumns = @JoinColumn(name = "group_id", referencedColumnName = "id"))
   private Set<IamGroup> groups = new HashSet<>();
 
-  @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
-  private List<IamSamlId> samlIds = new ArrayList<>();
+  @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  private List<IamSamlId> samlIds = new LinkedList<>();
 
-  @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
-  private List<IamOidcId> oidcIds = new ArrayList<>();
+  @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  private List<IamOidcId> oidcIds = new LinkedList<>();
 
-  @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
-  private List<IamSshKey> sshKeys = new ArrayList<>();
+  @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  private List<IamSshKey> sshKeys = new LinkedList<>();
 
-  @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
-  private List<IamX509Certificate> x509Certificates = new ArrayList<>();
+  @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+  private List<IamX509Certificate> x509Certificates = new LinkedList<>();
 
   @Column(name = "confirmation_key", unique = true, length = 36)
   private String confirmationKey;
@@ -159,7 +162,7 @@ public class IamAccount {
     return groups;
   }
 
-  public void setGroups(final Set<IamGroup> groups) {
+  public void setGroups(Set<IamGroup> groups) {
 
     this.groups = groups;
   }
@@ -199,8 +202,9 @@ public class IamAccount {
     return samlIds;
   }
 
-  public void setSamlIds(final List<IamSamlId> samlIds) {
+  public void setSamlIds(List<IamSamlId> samlIds) {
 
+    Preconditions.checkNotNull(samlIds);
     this.samlIds = samlIds;
   }
 
@@ -209,14 +213,10 @@ public class IamAccount {
     return oidcIds;
   }
 
-  public void setOidcIds(final List<IamOidcId> oidcIds) {
+  public void setOidcIds(List<IamOidcId> oidcIds) {
 
+    Preconditions.checkNotNull(oidcIds);
     this.oidcIds = oidcIds;
-  }
-
-  public void addOidcId(IamOidcId oidcId) {
-    getOidcIds().add(oidcId);
-    oidcId.setAccount(this);
   }
 
   public List<IamSshKey> getSshKeys() {
@@ -224,8 +224,9 @@ public class IamAccount {
     return sshKeys;
   }
 
-  public void setSshKeys(final List<IamSshKey> sshKeys) {
+  public void setSshKeys(List<IamSshKey> sshKeys) {
 
+    Preconditions.checkNotNull(sshKeys);
     this.sshKeys = sshKeys;
   }
 
@@ -234,9 +235,30 @@ public class IamAccount {
     return x509Certificates;
   }
 
-  public void setX509Certificates(final List<IamX509Certificate> x509Certificates) {
+  public void setX509Certificates(List<IamX509Certificate> x509Certificates) {
 
+    Preconditions.checkNotNull(x509Certificates);
     this.x509Certificates = x509Certificates;
+  }
+
+  public boolean hasX509Certificates() {
+    
+    return !x509Certificates.isEmpty();
+  }
+
+  public boolean hasOidcIds() {
+
+    return !oidcIds.isEmpty();
+  }
+
+  public boolean hasSshKeys() {
+
+    return !sshKeys.isEmpty();
+  }
+
+  public boolean hasSamlIds() {
+
+    return !samlIds.isEmpty();
   }
 
   public String getConfirmationKey() {
@@ -303,11 +325,12 @@ public class IamAccount {
 
   @Override
   public String toString() {
-
-    return "IamAccount [id=" + id + ", uuid=" + uuid + ", username=" + username + ", active="
-        + active + ", userInfo=" + userInfo + ", authorities=" + authorities + ", groups=" + groups
-        + ", samlIds=" + samlIds + ", oidcIds=" + oidcIds + ", sshKeys=" + sshKeys
-        + ", x509Certificates=" + x509Certificates + "]";
+    return "IamAccount [id=" + id + ", uuid=" + uuid + ", username=" + username + ", password="
+        + password + ", active=" + active + ", creationTime=" + creationTime + ", lastUpdateTime="
+        + lastUpdateTime + ", userInfo=" + userInfo + ", authorities=" + authorities + ", groups="
+        + groups + ", samlIds=" + samlIds + ", oidcIds=" + oidcIds + ", sshKeys=" + sshKeys
+        + ", x509Certificates=" + x509Certificates + ", confirmationKey=" + confirmationKey
+        + ", resetKey=" + resetKey + ", registrationRequest=" + registrationRequest + "]";
   }
 
 }

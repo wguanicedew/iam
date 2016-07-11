@@ -74,7 +74,6 @@ public class IamOidcId {
 
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((account == null) ? 0 : account.hashCode());
     result = prime * result + ((issuer == null) ? 0 : issuer.hashCode());
     result = prime * result + ((subject == null) ? 0 : subject.hashCode());
     return result;
@@ -90,11 +89,6 @@ public class IamOidcId {
     if (getClass() != obj.getClass())
       return false;
     IamOidcId other = (IamOidcId) obj;
-    if (account == null) {
-      if (other.account != null)
-        return false;
-    } else if (!account.equals(other.account))
-      return false;
     if (issuer == null) {
       if (other.issuer != null)
         return false;

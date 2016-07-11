@@ -29,7 +29,7 @@ public class ScimX509CertificateConverterTests {
   public void testConversionFromScimToIamWithCertificate() {
 
     ScimX509Certificate scimCert =
-        ScimX509Certificate.builder().value(TestUtils.getX509TestCertificate()).build();
+        ScimX509Certificate.builder().value(TestUtils.x509Certs.get(0).certificate).build();
 
     IamX509Certificate iamCert = converter.fromScim(scimCert);
 
@@ -44,7 +44,7 @@ public class ScimX509CertificateConverterTests {
   public void testConversionFromScimToIamWithCertificateAndLabel() {
 
     ScimX509Certificate scimCert = ScimX509Certificate.builder()
-      .value(TestUtils.getX509TestCertificate())
+      .value(TestUtils.x509Certs.get(0).certificate)
       .display("This is the label")
       .build();
 
