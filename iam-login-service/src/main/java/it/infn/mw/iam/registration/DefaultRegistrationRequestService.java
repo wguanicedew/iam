@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.HashBasedTable;
@@ -20,8 +21,12 @@ import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
 import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.provisioning.ScimUserProvisioning;
+import it.infn.mw.iam.core.IamMessageType;
 import it.infn.mw.iam.core.IamRegistrationRequestStatus;
+import it.infn.mw.iam.core.IamUserDetailsService;
+import it.infn.mw.iam.message.MessageService;
 import it.infn.mw.iam.persistence.model.IamAccount;
+import it.infn.mw.iam.persistence.model.IamMessage;
 import it.infn.mw.iam.persistence.model.IamRegistrationRequest;
 import it.infn.mw.iam.persistence.repository.IamRegistrationRequestRepository;
 
@@ -35,10 +40,16 @@ public class DefaultRegistrationRequestService implements RegistrationRequestSer
   private ScimUserProvisioning userService;
 
   @Autowired
+  private MessageService messageService;
+
+  @Autowired
   private RegistrationConverter converter;
 
   @Autowired
   private TokenGenerator tokenGenerator;
+
+  @Autowired
+  private IamUserDetailsService userDetailsService;
 
   private static Table<IamRegistrationRequestStatus, IamRegistrationRequestStatus, Boolean> transictions;
 
@@ -50,7 +61,7 @@ public class DefaultRegistrationRequestService implements RegistrationRequestSer
   }
 
   @Override
-  public RegistrationRequestDto create(final ScimUser user) {
+  public RegistrationRequestDto createRequest(final ScimUser user) {
 
     IamAccount newAccount = userService.createAccount(user);
     newAccount.setConfirmationKey(tokenGenerator.generateToken());
@@ -62,18 +73,21 @@ public class DefaultRegistrationRequestService implements RegistrationRequestSer
     request.setAccount(newAccount);
     request.setStatus(NEW);
 
+    IamMessage message = messageService.createMessage(request, IamMessageType.CONFIRMATION);
+    request.setMessage(message);
+
     requestRepository.save(request);
 
     return converter.fromEntity(request);
   }
 
   @Override
-  public List<RegistrationRequestDto> list(final IamRegistrationRequestStatus status) {
+  public List<RegistrationRequestDto> listRequests(final IamRegistrationRequestStatus status) {
 
     List<IamRegistrationRequest> result = requestRepository.findByStatus(status).get();
 
     List<RegistrationRequestDto> requests = new ArrayList<>();
-    
+
     for (IamRegistrationRequest elem : result) {
       RegistrationRequestDto item = converter.fromEntity(elem);
       requests.add(item);
@@ -116,8 +130,8 @@ public class DefaultRegistrationRequestService implements RegistrationRequestSer
   public RegistrationRequestDto confirmRequest(final String confirmationKey) {
 
     IamRegistrationRequest reg = requestRepository.findByAccountConfirmationKey(confirmationKey)
-        .orElseThrow(() -> new ScimResourceNotFoundException(String
-            .format("No registration request found for registration_key [%s]", confirmationKey)));
+      .orElseThrow(() -> new ScimResourceNotFoundException(String
+        .format("No registration request found for registration_key [%s]", confirmationKey)));
 
     reg.setStatus(CONFIRMED);
     reg.setLastUpdateTime(new Date());
@@ -126,6 +140,18 @@ public class DefaultRegistrationRequestService implements RegistrationRequestSer
     requestRepository.save(reg);
 
     return converter.fromEntity(reg);
+  }
+
+  @Override
+  public Boolean usernameAvailable(final String username) {
+    Boolean retval = false;
+    try {
+      userDetailsService.loadUserByUsername(username);
+    } catch (UsernameNotFoundException unfe) {
+      retval = true;
+    }
+
+    return retval;
   }
 
   private boolean checkStateTransiction(final IamRegistrationRequestStatus currentStatus,

@@ -4,22 +4,34 @@
 <title>Registration Form</title>
 <base href="<c:url value='/'/>">
 
-<link rel="stylesheet"
-	href="<c:url value='/webjars/bootstrap/css/bootstrap.min.css'/>"></link>
+<link rel="stylesheet" href="<c:url value='/webjars/bootstrap/css/bootstrap.min.css'/>"></link>
   
-<link href="<c:url value='/resources/css/registration_app.css' />"
-	rel="stylesheet"></link>
+<link href="<c:url value='/resources/css/registration_app.css' />" rel="stylesheet"></link>
 </head>
 
 <body ng-app="registrationApp" class="ng-cloak">
-	<div class="generic-container"
-		ng-controller="RegistrationController as ctrl">
+	<div class="generic-container" ng-controller="RegistrationController as ctrl">
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				<span class="lead">User Registration Form </span>
 			</div>
+			
+			<div>
+		    	<div class="alert alert-success" ng-show="showSuccessAlert">
+		        	<button type="button" class="close" data-ng-click="switchBool('showSuccessAlert')">×</button> 
+		        	<strong>Done!</strong> {{textAlert}}
+		        </div>
+			</div>
+			
+			<div>
+		    	<div class="alert alert-danger" ng-show="showErrorAlert">
+		        	<button type="button" class="close" data-ng-click="switchBool('showErrorAlert')">×</button> 
+		        	<strong>Error!</strong> {{textAlert}}
+		        </div>
+			</div>
+			
 			<div class="formcontainer">
-				<form ng-submit="ctrl.submit()" name="registrationForm" class="form-horizontal">
+				<form ng-submit="ctrl.submit()" name="registrationForm" id="registrationForm" class="form-horizontal">
 					<div class="row">
 						<div class="form-group col-md-12">
 							<label class="col-md-2 control-lable" for="givenname">First Name</label>
@@ -72,17 +84,20 @@
 							<label class="col-md-2 control-lable" for="username">Username</label>
 							<div class="col-md-7">
 								<input type="text" ng-model="ctrl.user.userName"
-									id="userName" class="username form-control input-sm"
-									placeholder="Username" required ng-minlength="3" />
+									id="username" name="username" class="username form-control input-sm"
+									placeholder="Username" required ng-minlength="3" username-available-validator
+									ng-model-options="{ debounce : { 'default' : 500 } }" />
+							
 								<div class="has-error" ng-show="registrationForm.$dirty">
 									<span ng-show="registrationForm.usernname.$error.required"> This is a required field</span>
 									<span ng-show="registrationForm.username.$error.minlength">Minimum length required is 3</span>
+									<span ng-show="registrationForm.username.$error.uniqueUsername">Username already in use</span>
 									<span ng-show="registrationForm.username.$invalid">This field is invalid</span>
 								</div>
 							</div>
 						</div>
 					</div>
-
+					
 					<div class="row">
 						<div class="form-actions floatRight">
 							<input type="submit" value="Register" class="btn btn-primary btn-sm" ng-disabled="registrationForm.$invalid">
@@ -93,10 +108,11 @@
 			</div>
 		</div>
 	</div>
-
-	<script
-    type="text/javascript"
-		src="<c:url value='/webjars/angularjs/angular.min.js'/>"></script>
+	
+	
+	
+	<script type="text/javascript" src="<c:url value='/webjars/angularjs/angular.min.js'/>"></script>
+	<script type="text/javascript" src="<c:url value='/webjars/angular-ui-bootstrap/ui-bootstrap.js'/>"></script>
 	<script src="<c:url value='/resources/js/registration_app.js' />"></script>
 	<script src="<c:url value='/resources/js/service/registration_service.js' />"></script>
 	<script src="<c:url value='/resources/js/controller/registration_controller.js' />"></script>

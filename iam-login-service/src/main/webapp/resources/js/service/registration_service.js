@@ -10,19 +10,33 @@ RegistrationApp.factory('RegistrationRequestService', ['$http', '$q', function($
 				        'Content-Type': 'application/scim+json'
 					}
 			}
-			return $http.post('http://localhost:8080/registration', user, config)
-				.then(
-						function success(response){
-							alert('Request successfully saved. Check your mail.');
-							return response.data;
-						},
-						function error(errResponse){
-							console.error('Error creating user');
-							return $q.reject(errResponse);
-						}
-				);
+			return $http.post('/registration', user, config);
+		},
+		
+		listRequests: function(status){
+			return $http.get('/registration', {params: {status: status}});
+		},
+		
+		updateRequest: function(uuid, decision){
+			return $http.post('/registration/'+uuid+'/'+decision);
 		},
 		
 	};
-	
 }]);
+
+RegistrationApp.directive('usernameAvailableValidator', function($http, $q){
+	return{
+		require: 'ngModel',
+		link: function($scope, element, attrs, ngModel){
+			ngModel.$asyncValidators.uniqueUsername = function(username){
+				return $http.get('/registration/username-available/'+username).then(
+						function(response){
+							if(response.data === true){
+								return true;
+							}
+							return $q.reject('exists');
+						});
+			};
+		}
+	}
+});

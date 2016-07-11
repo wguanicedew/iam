@@ -31,7 +31,7 @@ public class RegistrationController {
   private RegistrationRequestService service;
 
   @Autowired
-  public RegistrationController(RegistrationRequestService registrationService) {
+  public RegistrationController(final RegistrationRequestService registrationService) {
     service = registrationService;
   }
 
@@ -44,13 +44,25 @@ public class RegistrationController {
 
   }
 
+  @RequestMapping(value = "/registration/manage", method = RequestMethod.GET)
+  public ModelAndView showManagement() {
+
+    return new ModelAndView("requestsManagement");
+
+  }
+
+  @RequestMapping(value = "/registration/username-available/{username}", method = RequestMethod.GET)
+  public Boolean usernameAvailable(@PathVariable("username") final String username) {
+    return service.usernameAvailable(username);
+  }
+
   @PreAuthorize("#oauth2.hasScope('registration:read') or hasRole('ADMIN')")
   @RequestMapping(value = "/registration", method = RequestMethod.GET)
   @ResponseBody
-  public List<RegistrationRequestDto> listRequests(
-      @RequestParam(value="status", required=false, defaultValue="NEW") final IamRegistrationRequestStatus status) {
+  public List<RegistrationRequestDto> listRequests(@RequestParam(value = "status", required = false,
+      defaultValue = "NEW") final IamRegistrationRequestStatus status) {
 
-    return service.list(status);
+    return service.listRequests(status);
   }
 
   @RequestMapping(value = "/registration", method = RequestMethod.POST,
@@ -61,13 +73,13 @@ public class RegistrationController {
 
     handleValidationError("Invalid user", validationResult);
 
-    return service.create(user);
+    return service.createRequest(user);
   }
 
   @PreAuthorize("#oauth2.hasScope('registration:write') or hasRole('ADMIN')")
-  @RequestMapping(value = "/registration/{uuid}", method = RequestMethod.POST)
+  @RequestMapping(value = "/registration/{uuid}/{decision}", method = RequestMethod.POST)
   public RegistrationRequestDto changeStatus(@PathVariable("uuid") final String uuid,
-      @RequestParam("decision") final String decision) {
+      @PathVariable("decision") final String decision) {
 
     IamRegistrationRequestStatus status = null;
     try {

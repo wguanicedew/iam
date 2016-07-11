@@ -454,15 +454,25 @@ public class SecurityConfig {
     protected void configure(final HttpSecurity http) throws Exception {
 
       // @formatter:off
-      http.antMatcher("/registration/**").exceptionHandling()
-          .authenticationEntryPoint(authenticationEntryPoint).and()
-          .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
-          .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class).sessionManagement()
-          .sessionCreationPolicy(SessionCreationPolicy.NEVER).and().authorizeRequests()
-          .antMatchers(HttpMethod.POST, "/registration").permitAll()
-          .antMatchers(HttpMethod.GET, "/registration/add").permitAll()
-          .antMatchers(HttpMethod.POST, "/registration/confirm/**").permitAll()
-          .antMatchers("/registration**").authenticated().and().csrf().disable();
+      http
+        .antMatcher("/registration/**")
+          .exceptionHandling()
+            .authenticationEntryPoint(authenticationEntryPoint)
+          .and()
+            .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
+            .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
+            .sessionManagement()
+              .sessionCreationPolicy(SessionCreationPolicy.NEVER)
+          .and()
+            .authorizeRequests()
+              .antMatchers(HttpMethod.POST, "/registration").permitAll()
+              .antMatchers(HttpMethod.GET, "/registration/add").permitAll()
+              .antMatchers(HttpMethod.GET, "/registration/username-exists/**").permitAll()
+              .antMatchers(HttpMethod.POST, "/registration/confirm/**").permitAll()
+              .antMatchers("/registration**").authenticated()
+          .and()
+            .csrf()
+              .disable();
       // @formatter:on
     }
   }
@@ -475,8 +485,11 @@ public class SecurityConfig {
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
 
-      HttpSecurity h2Console = http.requestMatchers().antMatchers("/h2-console", "/h2-console/**")
-          .and().csrf().disable();
+      HttpSecurity h2Console = http.requestMatchers()
+        .antMatchers("/h2-console", "/h2-console/**")
+        .and()
+        .csrf()
+        .disable();
 
       h2Console.httpBasic();
       h2Console.headers().frameOptions().disable();
