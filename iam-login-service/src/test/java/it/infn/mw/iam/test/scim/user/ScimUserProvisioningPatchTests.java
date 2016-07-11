@@ -337,6 +337,7 @@ public class ScimUserProvisioningPatchTests {
     restUtils.doPatch(lennon.getMeta().getLocation(), getPatchRemoveRequest(updateSshKey));
 
     restUtils.doDelete(lennon.getMeta().getLocation());
+    restUtils.doDelete(lincoln.getMeta().getLocation());
   }
 
   @Test
