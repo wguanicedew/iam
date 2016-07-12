@@ -21,6 +21,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 
 import it.infn.mw.iam.authn.saml.model.IdpDescription;
@@ -120,7 +121,11 @@ public class DefaultMetadataLookupService implements MetadataLookupService {
 
     for (String idpName : idpNames) {
       try {
-        results.add(descriptionFromMetadata(metadataManager.getEntityDescriptor(idpName)));
+        IdpDescription desc = descriptionFromMetadata(metadataManager.getEntityDescriptor(idpName));
+
+        if (!Strings.isNullOrEmpty(desc.getOrganizationName())) {
+          results.add(desc);
+        }
 
       } catch (MetadataProviderException e) {
         LOG.warn("Error accessing metadata for entity: {}", idpName, e);
