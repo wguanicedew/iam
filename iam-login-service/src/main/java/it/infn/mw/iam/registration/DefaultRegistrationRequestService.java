@@ -21,12 +21,10 @@ import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
 import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.provisioning.ScimUserProvisioning;
-import it.infn.mw.iam.core.IamMessageType;
 import it.infn.mw.iam.core.IamRegistrationRequestStatus;
 import it.infn.mw.iam.core.IamUserDetailsService;
 import it.infn.mw.iam.message.MessageService;
 import it.infn.mw.iam.persistence.model.IamAccount;
-import it.infn.mw.iam.persistence.model.IamMessage;
 import it.infn.mw.iam.persistence.model.IamRegistrationRequest;
 import it.infn.mw.iam.persistence.repository.IamRegistrationRequestRepository;
 
@@ -73,8 +71,6 @@ public class DefaultRegistrationRequestService implements RegistrationRequestSer
     request.setAccount(newAccount);
     request.setStatus(NEW);
 
-    IamMessage message = messageService.createMessage(request, IamMessageType.CONFIRMATION);
-    request.setMessage(message);
 
     requestRepository.save(request);
 

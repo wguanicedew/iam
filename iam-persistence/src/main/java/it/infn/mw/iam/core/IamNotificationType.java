@@ -1,5 +1,5 @@
 package it.infn.mw.iam.core;
 
-public enum IamMessageType {
+public enum IamNotificationType {
   CONFIRMATION, RESETPASSWD
 }

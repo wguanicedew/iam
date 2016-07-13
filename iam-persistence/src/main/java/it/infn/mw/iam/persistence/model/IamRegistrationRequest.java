@@ -2,7 +2,6 @@ package it.infn.mw.iam.persistence.model;
 
 import java.util.Date;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -44,9 +43,6 @@ public class IamRegistrationRequest {
   @Temporal(TemporalType.TIMESTAMP)
   @Column(nullable = true)
   private Date lastUpdateTime;
-
-  @OneToOne(cascade = CascadeType.REMOVE, mappedBy = "request")
-  private IamMessage message;
 
   public IamRegistrationRequest() {}
 
@@ -108,14 +104,6 @@ public class IamRegistrationRequest {
   public void setLastUpdateTime(final Date lastUpdateTime) {
 
     this.lastUpdateTime = lastUpdateTime;
-  }
-
-  public IamMessage getMessage() {
-    return message;
-  }
-
-  public void setMessage(IamMessage message) {
-    this.message = message;
   }
 
   @Override
