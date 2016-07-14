@@ -4,8 +4,8 @@
  
 .absolute-center {
   margin: auto;
-  position: absolute;
-  top: 0; left: 0; bottom: 0; right: 0;
+  position: relative;
+  top: 100; left: 0; bottom: 0; right: 0;
 }
 
 .absolute-center.is-responsive {
@@ -26,6 +26,23 @@
   background-repeat: no-repeat;
 }
 
+#external-authn {
+  text-align: center;
+  margin-top: 2em;
+}
+
+#external-authn .btn {
+  margin-top: 10px;
+}
+
+#registration{
+  text-align: center;
+  margin-top: 2em;
+}
+
+.btn-google {
+  text-align: center !important;
+}
 .social-authn {
   text-align: center;
 }

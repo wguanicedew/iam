@@ -74,7 +74,6 @@ public class IamSamlId {
 
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((account == null) ? 0 : account.hashCode());
     result = prime * result + ((idpId == null) ? 0 : idpId.hashCode());
     result = prime * result + ((userId == null) ? 0 : userId.hashCode());
     return result;
@@ -90,11 +89,6 @@ public class IamSamlId {
     if (getClass() != obj.getClass())
       return false;
     IamSamlId other = (IamSamlId) obj;
-    if (account == null) {
-      if (other.account != null)
-        return false;
-    } else if (!account.equals(other.account))
-      return false;
     if (idpId == null) {
       if (other.idpId != null)
         return false;

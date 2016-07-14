@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -34,6 +35,10 @@ public class ScimGroupProvisioningPatchTests {
   private String accessToken;
   private ScimRestUtils restUtils;
 
+  private ScimGroup engineers;
+  private ScimUser lennon;
+  private ScimUser lincoln;
+
   @BeforeClass
   public static void init() {
 
@@ -45,6 +50,18 @@ public class ScimGroupProvisioningPatchTests {
 
     accessToken = TestUtils.getAccessToken("scim-client-rw", "secret", "scim:read scim:write");
     restUtils = ScimRestUtils.getInstance(accessToken);
+
+    engineers = addTestGroup("engineers");
+    lennon = addTestUser("john_lennon", "lennon@email.test", "John", "Lennon");
+    lincoln = addTestUser("abraham_lincoln", "lincoln@email.test", "Abraham", "Lincoln");
+  }
+
+  @After
+  public void teardownTests() {
+
+    restUtils.doDelete(lennon.getMeta().getLocation());
+    restUtils.doDelete(lincoln.getMeta().getLocation());
+    restUtils.doDelete(engineers.getMeta().getLocation());
   }
 
   private ScimGroup addTestGroup(String displayName) {
@@ -87,10 +104,7 @@ public class ScimGroupProvisioningPatchTests {
   @Test
   public void testAddMemberToGroup() {
 
-    ScimGroup engineers = addTestGroup("engineers");
-
     List<ScimUser> members = new ArrayList<ScimUser>();
-    ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John", "Lennon");
     members.add(lennon);
 
     ScimGroupPatchRequest patchReq = getPatchAddUsersRequest(members);
@@ -105,35 +119,23 @@ public class ScimGroupProvisioningPatchTests {
       .body("members[0].value", equalTo(lennon.getId()))
       .body("members[0].$ref", equalTo(lennon.getMeta().getLocation()));
 
-    restUtils.doDelete(lennon.getMeta().getLocation());
-    restUtils.doDelete(engineers.getMeta().getLocation());
   }
 
   @Test
   public void testRemoveNonMemberFromGroup() {
 
-    ScimGroup engineers = addTestGroup("engineers");
-
     List<ScimUser> members = new ArrayList<ScimUser>();
-    ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John", "Lennon");
     members.add(lennon);
 
     ScimGroupPatchRequest patchReq = getPatchRemoveUsersRequest(members);
 
     restUtils.doPatch(engineers.getMeta().getLocation(), patchReq);
-
-    restUtils.doDelete(lennon.getMeta().getLocation());
-    restUtils.doDelete(engineers.getMeta().getLocation());
   }
 
   @Test
   public void testAddAndRemoveMultipleMembersToGroup() {
 
-    ScimGroup engineers = addTestGroup("engineers");
-
     List<ScimUser> members = new ArrayList<ScimUser>();
-    ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John", "Lennon");
-    ScimUser lincoln = addTestUser("abraham_lincoln", "lincoln@email.test", "Abraham", "Lincoln");
     members.add(lennon);
     members.add(lincoln);
 
@@ -154,23 +156,16 @@ public class ScimGroupProvisioningPatchTests {
       .body("id", equalTo(engineers.getId()))
       .body("displayName", equalTo(engineers.getDisplayName()))
       .body("members", equalTo(null));
-
-    restUtils.doDelete(lennon.getMeta().getLocation());
-    restUtils.doDelete(lincoln.getMeta().getLocation());
-    restUtils.doDelete(engineers.getMeta().getLocation());
   }
 
   @Test
   public void testAddMultipleMembersToGroup() {
 
-    ScimGroup engineers = addTestGroup("engineers");
-
     List<ScimUser> members = new ArrayList<ScimUser>();
-    ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John", "Lennon");
-    ScimUser lincoln = addTestUser("abhram_lincoln", "lincoln@email.test", "Abhram", "Lincoln");
-    restUtils.doDelete(lincoln.getMeta().getLocation());
+    ScimUser fakeUser = addTestUser("fake_user", "mail@domain.com", "Fake", "User");
     members.add(lennon);
-    members.add(lincoln);
+    members.add(fakeUser);
+    restUtils.doDelete(fakeUser.getMeta().getLocation());
 
     ScimGroupPatchRequest patchAddReq = getPatchAddUsersRequest(members);
 
@@ -180,19 +175,12 @@ public class ScimGroupProvisioningPatchTests {
       .body("id", equalTo(engineers.getId()))
       .body("displayName", equalTo(engineers.getDisplayName()))
       .body("members", equalTo(null));
-
-    restUtils.doDelete(lennon.getMeta().getLocation());
-    restUtils.doDelete(engineers.getMeta().getLocation());
   }
 
   @Test
   public void testRemoveMultipleMembersToGroup() {
 
-    ScimGroup engineers = addTestGroup("engineers");
-
     List<ScimUser> members = new ArrayList<ScimUser>();
-    ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John", "Lennon");
-    ScimUser lincoln = addTestUser("abhram_lincoln", "lincoln@email.test", "Abhram", "Lincoln");
     members.add(lennon);
     members.add(lincoln);
 
@@ -213,23 +201,15 @@ public class ScimGroupProvisioningPatchTests {
       .body("id", equalTo(engineers.getId()))
       .body("displayName", equalTo(engineers.getDisplayName()))
       .body("members", equalTo(null));
-
-    restUtils.doDelete(lennon.getMeta().getLocation());
-    restUtils.doDelete(lincoln.getMeta().getLocation());
-    restUtils.doDelete(engineers.getMeta().getLocation());
   }
 
   @Test
   public void testReplaceMember() {
 
-    ScimGroup engineers = addTestGroup("engineers");
-
     List<ScimUser> members = new ArrayList<ScimUser>();
-    ScimUser lennon = addTestUser("john_lennon", "lennon@email.test", "John", "Lennon");
     members.add(lennon);
 
     List<ScimUser> replacedMembers = new ArrayList<ScimUser>();
-    ScimUser lincoln = addTestUser("abhram_lincoln", "lincoln@email.test", "Abhram", "Lincoln");
     replacedMembers.add(lincoln);
 
     ScimGroupPatchRequest patchAddReq = getPatchAddUsersRequest(members);
@@ -251,10 +231,6 @@ public class ScimGroupProvisioningPatchTests {
       .body("displayName", equalTo(engineers.getDisplayName()))
       .body("members", hasSize(equalTo(1)))
       .body("members[0].display", equalTo(lincoln.getUserName()));
-
-    restUtils.doDelete(lennon.getMeta().getLocation());
-    restUtils.doDelete(lincoln.getMeta().getLocation());
-    restUtils.doDelete(engineers.getMeta().getLocation());
   }
 
 }

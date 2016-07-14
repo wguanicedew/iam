@@ -2,8 +2,6 @@ package it.infn.mw.iam.config.saml;
 
 import static it.infn.mw.iam.authn.saml.util.SamlIdResolvers.eppn;
 import static it.infn.mw.iam.authn.saml.util.SamlIdResolvers.epuid;
-import static it.infn.mw.iam.authn.saml.util.SamlIdResolvers.mail;
-import static it.infn.mw.iam.authn.saml.util.SamlIdResolvers.nameid;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -167,7 +165,7 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public SamlUserIdentifierResolver resolver() {
 
-      List<SamlUserIdentifierResolver> resolvers = Arrays.asList(epuid(), eppn(), nameid(), mail());
+      List<SamlUserIdentifierResolver> resolvers = Arrays.asList(epuid(), eppn());
 
       return new FirstApplicableChainedSamlIdResolver(resolvers);
     }
@@ -446,14 +444,14 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
     return new MetadataDisplayFilter();
   }
 
-  
+
   @Bean
   public AuthenticationSuccessHandler successRedirectHandler() {
-    
+
     SavedRequestAwareAuthenticationSuccessHandler successRedirectHandler =
         new SavedRequestAwareAuthenticationSuccessHandler();
     successRedirectHandler.setDefaultTargetUrl("/");
-    
+
     return new TimestamperSuccessHandler(successRedirectHandler);
   }
 

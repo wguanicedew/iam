@@ -1,6 +1,6 @@
 security:
   filter-order: 1
-   
+
 server:
   port: ${IAM_PORT:8080}
   tomcat:
@@ -23,27 +23,27 @@ spring:
     password: ${IAM_MAIL_PASSWORD:password}
 
   profiles:
-    active: google,h2,dev
+    active: google,h2,dev,registration
 
 iam:
   baseUrl: ${IAM_BASE_URL:http://localhost:8080}
   issuer: ${IAM_ISSUER:http://localhost:8080}
-  
+
   token:
     lifetime: 86400
-  
+
   organisation:
     name: indigo-dc
-  
+
   keyStoreLocation: ${IAM_KEY_STORE_LOCATION:classpath:keystore.jwks}
 
 x509:
   trustAnchorsDir: ${IAM_X509_TRUST_ANCHORS_DIR:/etc/grid-security/certificates}
-  trustAnchorsRefreshMsec: ${IAM_X509_TRUST_ANCHORS_REFRESH:14400} 
-  
+  trustAnchorsRefreshMsec: ${IAM_X509_TRUST_ANCHORS_REFRESH:14400}
+
 google:
     issuer: https://accounts.google.com
-    
+
     client:
       clientId: ${IAM_GOOGLE_CLIENT_ID:define_me_please}
       clientSecret: ${IAM_GOOGLE_CLIENT_SECRET:define_me_please}
@@ -61,7 +61,7 @@ github:
     useCurrentUri: false
     scope: user:email
   resource:
-    userInfoUri: https://api.github.com/user 
+  	userInfoUri: https://api.github.com/user
     
 notification:
   confirmation:
@@ -96,7 +96,7 @@ spring:
     validation-query: ${IAM_DB_VALIDATION_QUERY:SELECT 1}
     time-between-eviction-runs-millis: ${IAM_DB_TIME_BETWEEN_EVICTION_RUNS_MILLIS:5000}
     min-evictable-idle-time-millis: ${IAM_DB_MIN_EVICTABLE_IDLE_TIME_MILLIS:60000}
-  
+
   jpa:
     openInView: false
 
@@ -120,7 +120,7 @@ spring:
     validation-query: ${IAM_DB_VALIDATION_QUERY:SELECT 1}
     time-between-eviction-runs-millis: ${IAM_DB_TIME_BETWEEN_EVICTION_RUNS_MILLIS:5000}
     min-evictable-idle-time-millis: ${IAM_DB_MIN_EVICTABLE_IDLE_TIME_MILLIS:60000}
-  
+
   jpa:
     openInView: false
 
@@ -144,7 +144,7 @@ spring:
     validation-query: ${IAM_DB_VALIDATION_QUERY:SELECT 1}
     time-between-eviction-runs-millis: ${IAM_DB_TIME_BETWEEN_EVICTION_RUNS_MILLIS:5000}
     min-evictable-idle-time-millis: ${IAM_DB_MIN_EVICTABLE_IDLE_TIME_MILLIS:60000}
-  
+
   jpa:
     openInView: false
 
@@ -155,11 +155,11 @@ flyway:
 ---
 spring:
   profiles: saml
-  
+
 saml:
   entity-id: ${IAM_SAML_ENTITY_ID:urn:iam:iam-devel}
   keystore: ${IAM_SAML_KEYSTORE:classpath:/saml/samlKeystore.jks}
-  idp-metadata: ${IAM_SAML_IDP_METADATA:classpath:/saml/idp-metadata.xml}
   keystore-password: ${IAM_SAML_KEYSTORE_PASSWORD:password}
   key-id: ${IAM_SAML_KEY_ID:iam}
   key-password: ${IAM_SAML_KEY_PASSWORD:password}
+  idp-metadata: ${IAM_SAML_IDP_METADATA:classpath:/saml/idp-metadata.xml}

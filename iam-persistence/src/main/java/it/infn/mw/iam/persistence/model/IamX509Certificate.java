@@ -2,9 +2,11 @@ package it.infn.mw.iam.persistence.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -30,7 +32,8 @@ public class IamX509Certificate {
   @Column(name = "is_primary")
   private boolean primary;
 
-  @ManyToOne
+  @ManyToOne(fetch=FetchType.EAGER)
+  @JoinColumn(name="account_id")
   private IamAccount account;
 
   public IamX509Certificate() {}
@@ -45,27 +48,10 @@ public class IamX509Certificate {
     if (getClass() != obj.getClass())
       return false;
     IamX509Certificate other = (IamX509Certificate) obj;
-    if (account == null) {
-      if (other.account != null)
-        return false;
-    } else if (!account.equals(other.account))
-      return false;
     if (certificate == null) {
       if (other.certificate != null)
         return false;
     } else if (!certificate.equals(other.certificate))
-      return false;
-    if (id == null) {
-      if (other.id != null)
-        return false;
-    } else if (!id.equals(other.id))
-      return false;
-    if (label == null) {
-      if (other.label != null)
-        return false;
-    } else if (!label.equals(other.label))
-      return false;
-    if (primary != other.primary)
       return false;
     return true;
   }
@@ -100,11 +86,7 @@ public class IamX509Certificate {
 
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((account == null) ? 0 : account.hashCode());
     result = prime * result + ((certificate == null) ? 0 : certificate.hashCode());
-    result = prime * result + ((id == null) ? 0 : id.hashCode());
-    result = prime * result + ((label == null) ? 0 : label.hashCode());
-    result = prime * result + (primary ? 1231 : 1237);
     return result;
   }
 

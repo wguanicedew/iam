@@ -24,7 +24,7 @@
     <link href="resources/css/mitreid-connect-responsive.css" rel="stylesheet">
     <link href="resources/css/mitreid-connect-responsive-local.css" rel="stylesheet">
 
-	<link href="resources/font-awesome/css/font-awesome.css" rel="stylesheet">
+	  <link href="resources/font-awesome/css/font-awesome.css" rel="stylesheet">
     <link href="resources/bootstrap-social/social-buttons.css" rel="stylesheet">
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->

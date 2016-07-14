@@ -74,6 +74,31 @@ public class OffsetPageable implements Pageable {
   }
 
   @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + count;
+    result = prime * result + offset;
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    OffsetPageable other = (OffsetPageable) obj;
+    if (count != other.count)
+      return false;
+    if (offset != other.offset)
+      return false;
+    return true;
+  }
+
+  @Override
   public String toString() {
 
     return "OffsetPageable [offset=" + offset + ", count=" + count + "]";

@@ -107,6 +107,8 @@ public class ScimRestUtils {
       .when()
       .get(location)
       .then()
+      .log()
+      .all(true)
       .statusCode(expectedStatus.value());
     /** @formatter:on */
   }

@@ -25,12 +25,24 @@ public interface IamAccountRepository extends PagingAndSortingRepository<IamAcco
   Optional<IamAccount> findByOidcId(@Param("issuer") String issuer,
       @Param("subject") String subject);
 
+  @Query("select a from IamAccount a join a.sshKeys sk where sk.fingerprint = :fingerprint")
+  Optional<IamAccount> findBySshKeyFingerprint(@Param("fingerprint") String fingerprint);
+
+  @Query("select a from IamAccount a join a.sshKeys sk where sk.label = :label")
+  Optional<IamAccount> findBySshKeyLabel(@Param("label") String label);
+
+  @Query("select a from IamAccount a join a.sshKeys sk where sk.value = :value")
+  Optional<IamAccount> findBySshKeyValue(@Param("value") String value);
+
   @Query("select a from IamAccount a join a.userInfo ui where ui.email = :emailAddress")
   Optional<IamAccount> findByEmail(@Param("emailAddress") String emailAddress);
 
   @Query("select a from IamAccount a where a.username = :username and a.uuid != :uuid")
   Optional<IamAccount> findByUsernameWithDifferentId(@Param("username") String username,
       @Param("uuid") String uuid);
+
+  @Query("select a from IamAccount a join a.x509Certificates c where c.certificateSubject = :subject")
+  Optional<IamAccount> findByCertificateSubject(@Param("subject") String subject);
 
   @Query("select a from IamAccount a join a.groups ag where ag.id = :groupId")
   List<IamAccount> findByGroupId(@Param("groupId") String groupId);

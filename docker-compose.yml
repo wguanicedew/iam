@@ -38,7 +38,7 @@ services:
       IAM_JAVA_OPTS: -Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n,address=1044 -Dspring.profiles.active=saml,google,mysql-test,dev
         # Uncomment and join the lines below to enable debug loggers
         # -Dlogging.level.org.springframework.security=DEBUG -Dlogging.level.org.springframework.mvc=DEBUG
-      IAM_JAR: /code/iam-login-service/target/iam-login-service-${POM_VERSION}.war
+      IAM_JAR: /code/iam-login-service/target/iam-login-service.war
       IAM_BASE_URL: https://iam.local.io
       IAM_ISSUER: https://iam.local.io
       IAM_USE_FORWARDED_HEADERS: "true"
@@ -82,7 +82,7 @@ services:
       IAM_CLIENT_ISSUER: https://iam.local.io/
       IAM_CLIENT_REDIRECT_URIS: https://iam.local.io/iam-test-client/openid_connect_login
       IAM_CLIENT_USE_FORWARD_HEADERS: "true"
-      IAM_CLIENT_JAR: /code/iam-test-client/target/iam-test-client-${POM_VERSION}.jar
+      IAM_CLIENT_JAR: /code/iam-test-client/target/iam-test-client.jar
 
     extra_hosts:
       - "iam.local.io:192.168.99.100"

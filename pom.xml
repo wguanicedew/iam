@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
@@ -9,7 +11,7 @@
 
   <groupId>it.infn.mw</groupId>
   <artifactId>iam-parent</artifactId>
-  <version>0.3.0-SNAPSHOT</version>
+  <version>0.4.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>IAM Parent POM</name>
 
@@ -22,16 +24,19 @@
     <eclipselink.version>2.5.2</eclipselink.version>
     <mitreid.version>1.2.7.cnaf-SNAPSHOT</mitreid.version>
     <spring-security-saml.version>1.0.1.RELEASE</spring-security-saml.version>
-    
+
     <spring-boot.version>1.3.5.RELEASE</spring-boot.version>
 
-    <angularjs.version>1.4.3</angularjs.version>
+    <webjars-locator.version>0.32</webjars-locator.version>
+    <angularjs.version>1.5.3</angularjs.version>
+    <angular-ui-bootstrap.version>1.3.3</angular-ui-bootstrap.version>
+
     <angular-jwt.version>??</angular-jwt.version>
     <angular-ui-bootstrap.version>1.3.3</angular-ui-bootstrap.version>
     <jquery.version>2.1.1</jquery.version>
-    <bootstrap.version>3.2.0</bootstrap.version>
+    <bootstrap.version>3.3.6</bootstrap.version>
     <rest-assured.version>2.9.0</rest-assured.version>
-    
+
     <flyway-test.version>4.0</flyway-test.version>
 
     <resource.delimiter>@</resource.delimiter>
@@ -58,6 +63,11 @@
 
       <dependency>
         <groupId>org.webjars</groupId>
+        <artifactId>webjars-locator</artifactId>
+        <version>${webjars-locator.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.webjars</groupId>
         <artifactId>angularjs</artifactId>
         <version>${angularjs.version}</version>
       </dependency>
@@ -66,6 +76,12 @@
       	<groupId>org.webjars</groupId>
       	<artifactId>angular-ui-bootstrap</artifactId>
       	<version>${angular-ui-bootstrap.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.webjars</groupId>
+        <artifactId>angular-ui-bootstrap</artifactId>
+        <version>${angular-ui-bootstrap.version}</version>
       </dependency>
 
       <dependency>
@@ -124,7 +140,7 @@
         <artifactId>bcprov-jdk15on</artifactId>
         <version>1.52</version>
       </dependency>
-      
+
       <dependency>
         <groupId>com.jayway.restassured</groupId>
         <artifactId>rest-assured</artifactId>
@@ -142,14 +158,14 @@
           </exclusion>
         </exclusions>
       </dependency>
-      
+
       <dependency>
         <groupId>org.flywaydb.flyway-test-extensions</groupId>
         <artifactId>flyway-spring-test</artifactId>
         <version>${flyway-test.version}</version>
         <scope>test</scope>
       </dependency>
-      
+
     </dependencies>
 
   </dependencyManagement>
@@ -212,8 +228,8 @@
           <failOnMissingWebXml>false</failOnMissingWebXml>
           <archive>
             <manifest>
-                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+              <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
             </manifest>
           </archive>
         </configuration>
@@ -270,7 +286,7 @@
           <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
         </configuration>
       </plugin>
-			<plugin>
+      <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>cobertura-maven-plugin</artifactId>
         <version>2.7</version>
@@ -280,20 +296,20 @@
             <format>xml</format>
           </formats>
           <instrumentation>
-            <excludes>				
+            <excludes>
               <!-- Exclude tests -->
               <exclude>it/infn/mw/iam/test/**/*.class</exclude>
-              
+
               <!-- Exclude persistence code (mainly interfaces and model classes) -->
               <exclude>it/infn/mw/iam/persistence//**/*.class</exclude>
-              
+
               <!-- Exclude Github support code (still not supported) -->
               <exclude>it/infn/mw/iam/github/**/*.class</exclude>
               <exclude>it/infn/mw/iam/config/github/**/*.class</exclude>
 
               <!-- Exclude test client app code -->
               <exclude>it/infn/mw/tc/**/*.class</exclude>
-              
+
               <!-- Exclude protected resource test app code -->
               <exclude>it/infn/mw/pr/**/*.class</exclude>
 

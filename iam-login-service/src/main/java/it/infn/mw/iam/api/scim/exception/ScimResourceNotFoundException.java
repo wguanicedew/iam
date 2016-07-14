@@ -6,7 +6,6 @@ public class ScimResourceNotFoundException extends ScimException {
 
   public ScimResourceNotFoundException(String message) {
     super(message);
-    // TODO Auto-generated constructor stub
   }
 
 }

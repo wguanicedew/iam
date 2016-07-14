@@ -4,7 +4,6 @@ import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotBlank;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -19,9 +18,6 @@ public class ScimX509Certificate {
 
   @NotBlank
   private final String value;
-
-  @JsonIgnore
-  private ScimMemberRef accountRef;
 
   @JsonCreator
   private ScimX509Certificate(@JsonProperty("display") String display,
@@ -47,17 +43,10 @@ public class ScimX509Certificate {
     return primary;
   }
 
-  @JsonIgnore
-  public ScimMemberRef getAccountRef() {
-
-    return accountRef;
-  }
-
   private ScimX509Certificate(Builder b) {
 
     this.display = b.display;
     this.value = b.value;
-    this.accountRef = b.accountRef;
     this.primary = b.primary;
   }
 
@@ -71,7 +60,6 @@ public class ScimX509Certificate {
     private String display;
     private String value;
     private Boolean primary;
-    private ScimMemberRef accountRef;
 
     public Builder() {
 
@@ -92,12 +80,6 @@ public class ScimX509Certificate {
     public Builder primary(Boolean primary) {
 
       this.primary = primary;
-      return this;
-    }
-
-    public Builder accountRef(ScimMemberRef accountRef) {
-
-      this.accountRef = accountRef;
       return this;
     }
 

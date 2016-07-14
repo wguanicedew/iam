@@ -1,20 +1,20 @@
 package it.infn.mw.iam.authn.saml.web;
 
-import java.util.Set;
-
-import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import it.infn.mw.iam.authn.saml.MetadataLookupService;
+import it.infn.mw.iam.authn.saml.model.IdpDescription;
 
 @Controller
 @RequestMapping("/saml")
@@ -24,24 +24,16 @@ public class SamlSsoController {
   public static final Logger LOG = LoggerFactory.getLogger(SamlSsoController.class);
 
   @Autowired
-  MetadataManager metadata;
+  MetadataLookupService lookupService;
 
-  @RequestMapping(value = "/idpSelection", method = RequestMethod.GET)
-  public String idpSelection(final HttpServletRequest request, final Model model) {
+  @RequestMapping(value = "/idps", method = RequestMethod.GET)
+  public @ResponseBody List<IdpDescription> idps(
+      @RequestParam(value = "q", required = false) String text) {
 
-    if (!(SecurityContextHolder.getContext()
-        .getAuthentication() instanceof AnonymousAuthenticationToken)) {
-      LOG.warn("The current user is already logged.");
-      return "redirect:/";
-    } else {
-
-      Set<String> idps = metadata.getIDPEntityNames();
-      for (String idp : idps) {
-        LOG.info("Configured Identity Provider for SSO: " + idp);
-      }
-      model.addAttribute("idps", idps);
-      return "samlIdpSelection";
+    if (text == null) {
+      return lookupService.listIdps().stream().limit(20).collect(Collectors.toList());
     }
+
+    return lookupService.lookupIdp(text);
   }
-  
 }
