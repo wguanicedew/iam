@@ -16,6 +16,11 @@ spring:
     name: INDIGO IAM
   jpa:
     generate-ddl: true
+  mail:
+    host: ${IAM_MAIL_HOST:localhost}
+    port: ${IAM_MAIL_PORT:25}
+    username: ${IAM_MAIL_USERNAME:username}
+    password: ${IAM_MAIL_PASSWORD:password}
 
   profiles:
     active: google,h2,dev
@@ -57,6 +62,11 @@ github:
     scope: user:email
   resource:
     userInfoUri: https://api.github.com/user 
+    
+notification:
+  confirmation:
+    subject: Confirm Indigo registration request
+
 ---
 spring:
   profiles: h2

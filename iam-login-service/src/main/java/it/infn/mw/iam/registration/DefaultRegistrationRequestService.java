@@ -71,8 +71,9 @@ public class DefaultRegistrationRequestService implements RegistrationRequestSer
     request.setAccount(newAccount);
     request.setStatus(NEW);
 
-
     requestRepository.save(request);
+
+    messageService.createConfirmationMessage(request);
 
     return converter.fromEntity(request);
   }

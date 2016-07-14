@@ -40,7 +40,7 @@ public class IamEmailNotification {
   @Column
   private String body;
 
-  @OneToMany(mappedBy = "iamEmailNotification", cascade = CascadeType.REMOVE)
+  @OneToMany(mappedBy = "iamEmailNotification", cascade = CascadeType.ALL)
   private List<IamNotificationReceiver> receivers;
 
   @Temporal(TemporalType.TIMESTAMP)
