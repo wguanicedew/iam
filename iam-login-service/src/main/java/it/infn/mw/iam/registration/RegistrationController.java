@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,20 +36,10 @@ public class RegistrationController {
     service = registrationService;
   }
 
-  @RequestMapping(value = "/registration/add", method = RequestMethod.GET)
-  public ModelAndView showAddForm(final Model model) {
-
-    ScimUser user = new ScimUser.Builder().build();
-    model.addAttribute("user", user);
-    return new ModelAndView("iam/registration");
-
-  }
-
   @RequestMapping(value = "/registration/manage", method = RequestMethod.GET)
   public ModelAndView showManagement() {
 
     return new ModelAndView("requestsManagement");
-
   }
 
   @RequestMapping(value = "/registration/username-available/{username}", method = RequestMethod.GET)

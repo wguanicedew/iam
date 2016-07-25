@@ -2,6 +2,7 @@ package it.infn.mw.iam.persistence.model;
 
 import java.util.Date;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -43,6 +44,10 @@ public class IamRegistrationRequest {
   @Temporal(TemporalType.TIMESTAMP)
   @Column(nullable = true)
   private Date lastUpdateTime;
+
+  @OneToOne(cascade = CascadeType.ALL)
+  @JoinColumn(name = "notification_id")
+  private IamEmailNotification notification;
 
   public IamRegistrationRequest() {}
 
@@ -106,6 +111,14 @@ public class IamRegistrationRequest {
     this.lastUpdateTime = lastUpdateTime;
   }
 
+  public IamEmailNotification getNotification() {
+    return notification;
+  }
+
+  public void setNotification(IamEmailNotification notification) {
+    this.notification = notification;
+  }
+
   @Override
   public int hashCode() {
 
@@ -137,9 +150,11 @@ public class IamRegistrationRequest {
 
   @Override
   public String toString() {
-
-    return "IamRegRequest [id=" + id + ", account=" + account + ", creationTime=" + creationTime
-        + ", status=" + status + ", lastUpdateTime=" + lastUpdateTime + "]";
+    return "IamRegistrationRequest [id=" + id + ", uuid=" + uuid + ", creationTime=" + creationTime
+        + ", status=" + status + ", lastUpdateTime=" + lastUpdateTime + ", notification="
+        + notification + "]";
   }
+
+
 
 }

@@ -19,11 +19,11 @@ spring:
   mail:
     host: ${IAM_MAIL_HOST:localhost}
     port: ${IAM_MAIL_PORT:25}
-    username: ${IAM_MAIL_USERNAME:username}
-    password: ${IAM_MAIL_PASSWORD:password}
+    username: ${IAM_MAIL_USERNAME:}
+    password: ${IAM_MAIL_PASSWORD:}
 
   profiles:
-    active: google,h2,dev,registration
+    active: google,h2,dev,registration,saml
 
 iam:
   baseUrl: ${IAM_BASE_URL:http://localhost:8080}
@@ -61,9 +61,12 @@ github:
     useCurrentUri: false
     scope: user:email
   resource:
-  	userInfoUri: https://api.github.com/user
+    userInfoUri: https://api.github.com/user
     
 notification:
+  mailFrom: indigo@localhost
+  taskDelay: ${IAM_NOTIFICATION_TASK_DELAY:30000}
+  cleanupAge: ${IAM_NOTIFICATION_CLEANUP_AGE:30}
   confirmation:
     subject: Confirm Indigo registration request
 

@@ -1,7 +1,8 @@
 package it.infn.mw.iam.registration;
 
 import static com.jayway.restassured.RestAssured.given;
-import static it.infn.mw.iam.api.scim.model.ScimConstants.SCIM_CONTENT_TYPE;
+import static it.infn.mw.iam.test.RegistrationUtils.createRegistrationRequest;
+import static it.infn.mw.iam.test.RegistrationUtils.deleteUser;
 
 import org.hamcrest.Matchers;
 import org.junit.BeforeClass;
@@ -15,8 +16,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.util.Assert;
 
 import it.infn.mw.iam.IamLoginService;
-import it.infn.mw.iam.api.scim.model.ScimConstants;
-import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.core.IamRegistrationRequestStatus;
 import it.infn.mw.iam.test.TestUtils;
 
@@ -53,10 +52,19 @@ public class RegistrationTests {
     RegistrationRequestDto reg = createRegistrationRequest("test_list_new");
 
     // @formatter:off
-    given().port(8080).auth().preemptive().oauth2(accessToken)
-        .param("status", IamRegistrationRequestStatus.NEW).when().get("/registration").then().log()
-        .body(true).statusCode(HttpStatus.OK.value())
-        .body("size()", Matchers.greaterThanOrEqualTo(1));
+    given()
+      .port(8080)
+      .auth()
+        .preemptive()
+        .oauth2(accessToken)
+      .param("status", IamRegistrationRequestStatus.NEW)
+    .when()
+      .get("/registration")
+    .then()
+      .log()
+        .body(true)
+      .statusCode(HttpStatus.OK.value())
+      .body("size()", Matchers.greaterThanOrEqualTo(1));
     // @formatter:on
 
     deleteUser(reg.getAccountId());
@@ -66,8 +74,15 @@ public class RegistrationTests {
   public void testListRequestsUnauthorized() {
 
     // @formatter:off
-    given().port(8080).param("status", IamRegistrationRequestStatus.NEW).when().get("/registration")
-        .then().log().body(true).statusCode(HttpStatus.UNAUTHORIZED.value());
+    given()
+      .port(8080)
+      .param("status", IamRegistrationRequestStatus.NEW)
+    .when()
+      .get("/registration")
+    .then()
+      .log()
+        .body(true)
+      .statusCode(HttpStatus.UNAUTHORIZED.value());
     // @formatter:on
   }
 
@@ -307,43 +322,20 @@ public class RegistrationTests {
     // @formatter:on
   }
 
-  private RegistrationRequestDto createRegistrationRequest(final String username) {
-
-    String email = username + "@example.org";
-
-    ScimUser user =
-        new ScimUser.Builder(username).buildEmail(email).buildName("Test", "User").build();
-
-    // @formatter:off
-    RegistrationRequestDto reg = given().port(8080).contentType(ScimConstants.SCIM_CONTENT_TYPE)
-        .body(user).log().all(true).when().post("/registration").then().log().body(true)
-        .statusCode(HttpStatus.OK.value()).extract().as(RegistrationRequestDto.class);;
-    // @formatter:on
-
-    return reg;
-  }
-
   private void confirmRegistrationRequest(final String token) {
 
     // @formatter:off
-    given().port(8080).pathParam("token", token).when().post("/registration/confirm/{token}").then()
-        .log().body(true).statusCode(HttpStatus.OK.value())
-        .body("status", Matchers.equalTo(IamRegistrationRequestStatus.CONFIRMED.name()));
-    // @formatter:on
-  }
-
-  private void deleteUser(final String userId) {
-
-    String accessToken =
-        TestUtils.getAccessToken("registration-client", "secret", "scim:write scim:read");
-
-    String location = "/scim/Users/" + userId;
-    // @formatter:off
-    given().port(8080).auth().preemptive().oauth2(accessToken).contentType(SCIM_CONTENT_TYPE).when()
-        .delete(location).then().statusCode(HttpStatus.NO_CONTENT.value());
-
-    given().port(8080).auth().preemptive().oauth2(accessToken).contentType(SCIM_CONTENT_TYPE).when()
-        .get(location).then().statusCode(HttpStatus.NOT_FOUND.value());
+    given()
+      .port(8080)
+      .pathParam("token", token)
+    .when()
+      .post("/registration/confirm/{token}")
+    .then()
+      .log()
+        .body(true)
+      .statusCode(HttpStatus.OK.value())
+      .body("status", Matchers.equalTo(IamRegistrationRequestStatus.CONFIRMED.name()))
+    ;
     // @formatter:on
   }
 

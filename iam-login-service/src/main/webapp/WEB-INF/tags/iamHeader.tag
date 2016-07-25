@@ -19,7 +19,11 @@
 <link
   rel="stylesheet"
   href="resources/iam/css/iam.css"></link>
-    
+
+<link
+  rel="stylesheet"
+  href="resources/iam/css/registration_app.css"></link>
+
 <link
   href="resources/font-awesome/css/font-awesome.css"
   rel="stylesheet">

@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
     "it.infn.mw.iam.core.web",
     "it.infn.mw.iam.api", 
     "it.infn.mw.iam.registration", 
-    "it.infn.mw.iam.message",
+    "it.infn.mw.iam.notification",
     "org.mitre.oauth2.web",
     "org.mitre.oauth2.view", 
     "org.mitre.openid.connect.web", 

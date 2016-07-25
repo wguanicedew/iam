@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +24,7 @@ import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.provisioning.ScimUserProvisioning;
 import it.infn.mw.iam.core.IamRegistrationRequestStatus;
 import it.infn.mw.iam.core.IamUserDetailsService;
-import it.infn.mw.iam.message.MessageService;
+import it.infn.mw.iam.notification.NotificationService;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamRegistrationRequest;
 import it.infn.mw.iam.persistence.repository.IamRegistrationRequestRepository;
@@ -38,7 +39,8 @@ public class DefaultRegistrationRequestService implements RegistrationRequestSer
   private ScimUserProvisioning userService;
 
   @Autowired
-  private MessageService messageService;
+  @Qualifier("defaultNotificationService")
+  private NotificationService notificationService;
 
   @Autowired
   private RegistrationConverter converter;
@@ -73,7 +75,7 @@ public class DefaultRegistrationRequestService implements RegistrationRequestSer
 
     requestRepository.save(request);
 
-    messageService.createConfirmationMessage(request);
+    notificationService.createConfirmationMessage(request);
 
     return converter.fromEntity(request);
   }

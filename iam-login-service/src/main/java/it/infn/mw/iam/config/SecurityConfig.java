@@ -466,7 +466,6 @@ public class SecurityConfig {
           .and()
             .authorizeRequests()
               .antMatchers(HttpMethod.POST, "/registration").permitAll()
-              .antMatchers(HttpMethod.GET, "/registration/add").permitAll()
               .antMatchers(HttpMethod.GET, "/registration/username-exists/**").permitAll()
               .antMatchers(HttpMethod.POST, "/registration/confirm/**").permitAll()
               .antMatchers("/registration**").authenticated()
