@@ -2,14 +2,76 @@
 
 RegistrationApp
 		.controller(
+				'RequestManagementController',
+				[
+						'$scope',
+						'RegistrationRequestService',
+						function($scope, RegistrationRequestService) {
+							var self = this;
+
+							$scope.list = [];
+							$scope.sortType = 'status';
+							$scope.sortReverse = false;
+
+							$scope.listRequests = function(status) {
+								RegistrationRequestService
+										.listRequests(status)
+										.then(
+												function(result) {
+													$scope.list = result.data;
+												},
+												function(errResponse) {
+													$scope.textAlert = errResponse.data.error_description
+															|| errResponse.data.detail;
+													$scope.showErrorAlert = true;
+												})
+							};
+
+							$scope.approveRequest = function(uuid) {
+								RegistrationRequestService
+										.updateRequest(uuid, 'APPROVED')
+										.then(
+												function() {
+													$scope.textAlert = "Approvation success";
+													$scope.showSuccessAlert = true;
+													$scope.listRequests();
+												},
+												function(errResponse) {
+													$scope.textAlert = errResponse.data.error_description
+															|| errResponse.data.detail;
+													$scope.showErrorAlert = true;
+												})
+							};
+
+							$scope.rejectRequest = function(uuid) {
+								RegistrationRequestService
+										.updateRequest(uuid, 'REJECTED')
+										.then(
+												function() {
+													$scope.textAlert = "Operation success";
+													$scope.showSuccessAlert = true;
+													self.listRequests();
+												},
+												function(errResponse) {
+													$scope.textAlert = errResponse.data.error_description
+															|| errResponse.data.detail;
+													$scope.showErrorAlert = true;
+												})
+							};
+
+						} ]);
+
+RegistrationApp
+		.controller(
 				'RegistrationController',
 				[
 						'$scope',
 						'$uibModalInstance',
 						'RegistrationRequestService',
-						function($scope, $uibModalInstance, RegistrationRequestService) {
+						function($scope, $uibModalInstance,
+								RegistrationRequestService) {
 							var self = this;
-							self.user = {
+							$scope.user = {
 								schemas : [
 										"urn:ietf:params:scim:schemas:core:2.0:User",
 										"urn:indigo-dc:scim:schemas:IndigoUser" ],
@@ -30,7 +92,7 @@ RegistrationApp
 							$scope.sortType = 'status';
 							$scope.sortReverse = false;
 
-							self.createUser = function(user) {
+							$scope.createUser = function(user) {
 								RegistrationRequestService
 										.create(user)
 										.then(
@@ -38,7 +100,7 @@ RegistrationApp
 													$scope.textAlert = "Registration success";
 													$scope.showSuccessAlert = true;
 													$scope.showErrorAlert = false;
-													self.reset();
+													$scope.reset();
 													return response.data;
 												},
 												function(errResponse) {
@@ -51,71 +113,25 @@ RegistrationApp
 												})
 							};
 
-							self.listRequests = function(status) {
-								RegistrationRequestService
-										.listRequests(status)
-										.then(
-												function(result) {
-													self.list = result.data;
-												},
-												function(errResponse) {
-													$scope.textAlert = errResponse.data.error_description
-															|| errResponse.data.detail;
-													$scope.showErrorAlert = true;
-												})
+							$scope.submit = function() {
+								$scope.createUser($scope.user);
 							};
 
-							self.approveRequest = function(uuid) {
-								RegistrationRequestService
-										.updateRequest(uuid, 'APPROVED')
-										.then(
-												function() {
-													$scope.textAlert = "Approvation success";
-													$scope.showSuccessAlert = true;
-													self.listRequests();
-												},
-												function(errResponse) {
-													$scope.textAlert = errResponse.data.error_description
-															|| errResponse.data.detail;
-													$scope.showErrorAlert = true;
-												})
-							};
-
-							self.rejectRequest = function(uuid) {
-								RegistrationRequestService
-										.updateRequest(uuid, 'REJECTED')
-										.then(
-												function() {
-													$scope.textAlert = "Operation success";
-													$scope.showSuccessAlert = true;
-													self.listRequests();
-												},
-												function(errResponse) {
-													$scope.textAlert = errResponse.data.error_description
-															|| errResponse.data.detail;
-													$scope.showErrorAlert = true;
-												})
-							};
-
-							self.submit = function() {
-								self.createUser(self.user);
-							};
-
-							self.reset = function() {
-								self.user.name = {
+							$scope.reset = function() {
+								$scope.user.name = {
 									givenName : '',
 									familyName : '',
 								};
-								self.user.userName = '';
-								self.user.emails = [ {
+								$scope.user.userName = '';
+								$scope.user.emails = [ {
 									type : "work",
 									value : '',
 									primary : "true",
 								} ];
 								$scope.registrationForm.$setPristine();
 							};
-							
-							$scope.cancel = function() {
+
+							$scope.dismiss = function() {
 								$uibModalInstance.close();
 							};
 

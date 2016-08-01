@@ -1,5 +1,4 @@
-<div class="generic-container"
-	ng-controller="RegistrationController as ctrl">
+<div class="generic-container">
 	<div class="panel panel-default">
 		<div class="panel-heading">
 			<span class="lead">User Registration Form </span>
@@ -22,14 +21,14 @@
 		</div>
 
 		<div class="formcontainer">
-			<form ng-submit="ctrl.submit()" name="registrationForm"
+			<form ng-submit="submit()" name="registrationForm"
 				id="registrationForm" class="form-horizontal">
 				<div class="row">
 					<div class="form-group col-md-12">
 						<label class="col-md-2 control-lable" for="givenname">First
 							Name</label>
 						<div class="col-md-7">
-							<input type="text" ng-model="ctrl.user.name.givenName"
+							<input type="text" ng-model="user.name.givenName"
 								id="givenname" class="username form-control input-sm"
 								placeholder="First name" required ng-minlength="3" />
 							<div class="has-error" ng-show="registrationForm.$dirty">
@@ -49,7 +48,7 @@
 						<label class="col-md-2 control-lable" for="familyname">Family
 							Name</label>
 						<div class="col-md-7">
-							<input type="text" ng-model="ctrl.user.name.familyName"
+							<input type="text" ng-model="user.name.familyName"
 								id="familyName" class="username form-control input-sm"
 								placeholder="Family name" required ng-minlength="3" />
 							<div class="has-error" ng-show="registrationForm.$dirty">
@@ -68,7 +67,7 @@
 					<div class="form-group col-md-12">
 						<label class="col-md-2 control-lable" for="email">Email</label>
 						<div class="col-md-7">
-							<input type="email" ng-model="ctrl.user.emails[0].value"
+							<input type="email" ng-model="user.emails[0].value"
 								id="email" class="email form-control input-sm"
 								placeholder="Email" required />
 							<div class="has-error" ng-show="registrationForm.$dirty">
@@ -85,7 +84,7 @@
 					<div class="form-group col-md-12">
 						<label class="col-md-2 control-lable" for="username">Username</label>
 						<div class="col-md-7">
-							<input type="text" ng-model="ctrl.user.userName" id="username"
+							<input type="text" ng-model="user.userName" id="username"
 								name="username" class="username form-control input-sm"
 								placeholder="Username" required ng-minlength="3"
 								username-available-validator
@@ -110,11 +109,11 @@
 						<input type="submit" value="Register"
 							class="btn btn-primary btn-sm"
 							ng-disabled="registrationForm.$invalid">
-						<button type="button" ng-click="ctrl.reset()"
+						<button type="button" ng-click="reset()"
 							class="btn btn-warning btn-sm"
 							ng-disabled="registrationForm.$pristine">Reset Form</button>
-						<button type="button" ng-click="ctrl.cancel()"
-							class="btn btn-warning btn-sm">Cancel</button>
+						<button type="button" ng-click="dismiss()"
+							class="btn btn-danger btn-sm">Cancel</button>
 					</div>
 				</div>
 			</form>

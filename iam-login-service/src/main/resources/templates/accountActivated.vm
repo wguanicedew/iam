@@ -1,0 +1,12 @@
+Dear $recipient,
+
+your Indigo account has been activated.
+
+Now you can login into Indigo with the following credentials:
+
+--------------------
+username: $username
+password: $password
+--------------------
+
+The Indigo-DC Team
