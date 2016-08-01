@@ -23,7 +23,7 @@ spring:
     password: ${IAM_MAIL_PASSWORD:}
 
   profiles:
-    active: google,h2,dev,registration,saml
+    active: google,h2,dev,registration
 
 iam:
   baseUrl: ${IAM_BASE_URL:http://localhost:8080}
@@ -67,8 +67,9 @@ notification:
   mailFrom: indigo@localhost
   taskDelay: ${IAM_NOTIFICATION_TASK_DELAY:30000}
   cleanupAge: ${IAM_NOTIFICATION_CLEANUP_AGE:30}
-  confirmation:
-    subject: Confirm Indigo registration request
+  subject:
+    confirmation: Confirm Indigo registration request
+    activated: Indigo Account activated
 
 ---
 spring:

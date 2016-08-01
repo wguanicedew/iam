@@ -87,6 +87,38 @@ public class RegistrationTests {
   }
 
   @Test
+  public void testListAllRequests() {
+
+    String accessToken =
+        TestUtils.getAccessToken("registration-client", "secret", "registration:read");
+
+    RegistrationRequestDto reg1 = createRegistrationRequest("test_list_1");
+    RegistrationRequestDto reg2 = createRegistrationRequest("test_list_2");
+
+    String token = generator.getLastToken();
+    Assert.notNull(token);
+    confirmRegistrationRequest(token);
+
+    // @formatter:off
+    given()
+      .port(8080)
+      .auth()
+        .preemptive()
+        .oauth2(accessToken)
+    .when()
+      .get("/registration")
+    .then()
+      .log()
+        .body(true)
+      .statusCode(HttpStatus.OK.value())
+      .body("size()", Matchers.greaterThanOrEqualTo(2));
+    // @formatter:on
+
+    deleteUser(reg1.getAccountId());
+    deleteUser(reg2.getAccountId());
+  }
+
+  @Test
   public void testConfirmRequest() {
 
     RegistrationRequestDto reg = createRegistrationRequest("test_confirm");
@@ -107,8 +139,15 @@ public class RegistrationTests {
     String badToken = "abcdefghilmnopqrstuvz";
 
     // @formatter:off
-    given().port(8080).pathParam("token", badToken).when().post("/registration/confirm/{token}")
-        .then().log().body(true).statusCode(HttpStatus.NOT_FOUND.value());
+    given()
+      .port(8080)
+      .pathParam("token", badToken)
+    .when()
+      .get("/registration/confirm/{token}")
+    .then()
+      .log()
+        .body(true)
+      .statusCode(HttpStatus.NOT_FOUND.value());
     // @formatter:on
 
     deleteUser(reg.getAccountId());
@@ -329,7 +368,7 @@ public class RegistrationTests {
       .port(8080)
       .pathParam("token", token)
     .when()
-      .post("/registration/confirm/{token}")
+      .get("/registration/confirm/{token}")
     .then()
       .log()
         .body(true)

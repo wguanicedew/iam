@@ -12,6 +12,7 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -83,7 +84,17 @@ public class DefaultRegistrationRequestService implements RegistrationRequestSer
   @Override
   public List<RegistrationRequestDto> listRequests(final IamRegistrationRequestStatus status) {
 
-    List<IamRegistrationRequest> result = requestRepository.findByStatus(status).get();
+    List<IamRegistrationRequest> result = new ArrayList<>();
+
+    if (status != null) {
+      result = requestRepository.findByStatus(status).get();
+    } else {
+      Sort srt = new Sort(Sort.Direction.ASC, "creationTime");
+      Iterable<IamRegistrationRequest> iter = requestRepository.findAll(srt);
+      for (IamRegistrationRequest elem : iter) {
+        result.add(elem);
+      }
+    }
 
     List<RegistrationRequestDto> requests = new ArrayList<>();
 
@@ -116,6 +127,8 @@ public class DefaultRegistrationRequestService implements RegistrationRequestSer
       IamAccount account = reg.getAccount();
       account.setActive(true);
       account.setLastUpdateTime(new Date());
+      notificationService.createAccountActivatedMessage(reg);
+
     } else if (CONFIRMED.equals(status)) {
       reg.getAccount().getUserInfo().setEmailVerified(true);
     }

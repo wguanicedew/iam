@@ -20,4 +20,7 @@ public interface IamEmailNotificationRepository
   List<IamEmailNotification> findByStatusWithUpdateTime(
       @Param("delivery_status") IamDeliveryStatus deliveryStatus,
       @Param("last_update") Date lastUpdate);
+
+  @Query("select count(n) from IamEmailNotification n")
+  Integer countAllMessages();
 }

@@ -5,8 +5,9 @@ RegistrationApp
 				'RegistrationController',
 				[
 						'$scope',
+						'$uibModalInstance',
 						'RegistrationRequestService',
-						function($scope, RegistrationRequestService) {
+						function($scope, $uibModalInstance, RegistrationRequestService) {
 							var self = this;
 							self.user = {
 								schemas : [
@@ -25,7 +26,9 @@ RegistrationApp
 								} ],
 							};
 
-							self.list = [];
+							$scope.list = [];
+							$scope.sortType = 'status';
+							$scope.sortReverse = false;
 
 							self.createUser = function(user) {
 								RegistrationRequestService
@@ -69,6 +72,7 @@ RegistrationApp
 												function() {
 													$scope.textAlert = "Approvation success";
 													$scope.showSuccessAlert = true;
+													self.listRequests();
 												},
 												function(errResponse) {
 													$scope.textAlert = errResponse.data.error_description
@@ -84,6 +88,7 @@ RegistrationApp
 												function() {
 													$scope.textAlert = "Operation success";
 													$scope.showSuccessAlert = true;
+													self.listRequests();
 												},
 												function(errResponse) {
 													$scope.textAlert = errResponse.data.error_description
@@ -91,8 +96,6 @@ RegistrationApp
 													$scope.showErrorAlert = true;
 												})
 							};
-
-							self.listRequests('NEW');
 
 							self.submit = function() {
 								self.createUser(self.user);
@@ -111,6 +114,10 @@ RegistrationApp
 								} ];
 								$scope.registrationForm.$setPristine();
 							};
+							
+							$scope.cancel = function() {
+								$uibModalInstance.close();
+							};
 
 							// switch flag
 							$scope.switchBool = function(value) {
@@ -118,20 +125,15 @@ RegistrationApp
 							};
 						} ]);
 
-RegistrationApp.controller(
-				'RegistrationFormModalController',
-				[
-						'$scope',
-						'$uibModal',
-						function($scope, $uibModal) {
+RegistrationApp.controller('RegistrationFormModalController', [ '$scope',
+		'$uibModal', function($scope, $uibModal) {
 
-							$scope.open = function() {
-								$uibModal
-										.open({
-											templateUrl : "/resources/iam/template/registration.html",
-											controller : "RegistrationController",
-											size : 'lg',
-											animation : true
-										});
-							};
-						} ]);
+			$scope.open = function() {
+				$uibModal.open({
+					templateUrl : "/resources/iam/template/registration.html",
+					controller : "RegistrationController",
+					size : 'lg',
+					animation : true
+				});
+			};
+		} ]);

@@ -22,6 +22,7 @@ import org.springframework.ui.velocity.VelocityEngineUtils;
 
 import it.infn.mw.iam.core.IamDeliveryStatus;
 import it.infn.mw.iam.core.IamNotificationType;
+import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamEmailNotification;
 import it.infn.mw.iam.persistence.model.IamNotificationReceiver;
 import it.infn.mw.iam.persistence.model.IamRegistrationRequest;
@@ -45,8 +46,11 @@ public class DefaultNotificationService implements NotificationService {
   @Value("${iam.baseUrl}")
   private String baseUrl;
 
-  @Value("${notification.confirmation.subject}")
-  private String confirmSubject;
+  @Value("${notification.subject.confirmation}")
+  private String subjectConfirm;
+
+  @Value("${notification.subject.activated}")
+  private String subjectActivated;
 
   @Value("${notification.mailFrom}")
   private String mailFrom;
@@ -59,35 +63,31 @@ public class DefaultNotificationService implements NotificationService {
   public IamEmailNotification createConfirmationMessage(final IamRegistrationRequest request) {
 
     String recipient = request.getAccount().getUserInfo().getName();
-    String confirmURL = String.format("%s/registration/confirm/%s", baseUrl,
+    String confirmURL = String.format("%s/registration/verify/%s", baseUrl,
         request.getAccount().getConfirmationKey());
 
     Map<String, Object> model = new HashMap<>();
     model.put("recipient", recipient);
     model.put("confirmURL", confirmURL);
 
-    String body = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine,
-        "confirmRegistration.vm", "UTF-8", model);
+    return createMessage("confirmRegistration.vm", model, IamNotificationType.CONFIRMATION,
+        subjectConfirm, request.getAccount());
+  }
 
-    IamEmailNotification message = new IamEmailNotification();
-    message.setUuid(UUID.randomUUID().toString());
-    message.setType(IamNotificationType.CONFIRMATION);
-    message.setSubject(confirmSubject);
-    message.setBody(body);
-    message.setCreationTime(new Date());
-    message.setDeliveryStatus(IamDeliveryStatus.PENDING);
+  @Override
+  public IamEmailNotification createAccountActivatedMessage(final IamRegistrationRequest request) {
 
-    List<IamNotificationReceiver> receivers = new ArrayList<>();
-    IamNotificationReceiver rcv = new IamNotificationReceiver();
-    rcv.setIamEmailNotification(message);
-    rcv.setAccount(request.getAccount());
-    receivers.add(rcv);
+    String recipient = request.getAccount().getUserInfo().getName();
+    String username = request.getAccount().getUsername();
+    String password = request.getAccount().getPassword();
 
-    message.setReceivers(receivers);
+    Map<String, Object> model = new HashMap<>();
+    model.put("recipient", recipient);
+    model.put("username", username);
+    model.put("password", password);
 
-    notificationRepository.save(message);
-
-    return message;
+    return createMessage("accountActivated.vm", model, IamNotificationType.ACTIVATED,
+        subjectActivated, request.getAccount());
   }
 
   @Override
@@ -112,8 +112,7 @@ public class DefaultNotificationService implements NotificationService {
 
         elem.setDeliveryStatus(IamDeliveryStatus.DELIVERED);
 
-        logger.info(
-            "Sent confirmation mail: message_id {} message_type {} mail_from {} rcpt_to {} status {}",
+        logger.info("Sent mail: message_id {} message_type {} mail_from {} rcpt_to {} status {}",
             elem.getUuid(), elem.getType(), mailFrom, messageTemplate.getTo(),
             elem.getDeliveryStatus().name());
 
@@ -142,8 +141,37 @@ public class DefaultNotificationService implements NotificationService {
     }
   }
 
+
   protected void doSend(final SimpleMailMessage message) {
     mailSender.send(message);
+  }
+
+
+  private IamEmailNotification createMessage(final String template, final Map<String, Object> model,
+      final IamNotificationType messageType, final String subject, final IamAccount receiver) {
+
+    String body =
+        VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, template, "UTF-8", model);
+
+    IamEmailNotification message = new IamEmailNotification();
+    message.setUuid(UUID.randomUUID().toString());
+    message.setType(messageType);
+    message.setSubject(subject);
+    message.setBody(body);
+    message.setCreationTime(new Date());
+    message.setDeliveryStatus(IamDeliveryStatus.PENDING);
+
+    List<IamNotificationReceiver> receivers = new ArrayList<>();
+    IamNotificationReceiver rcv = new IamNotificationReceiver();
+    rcv.setIamEmailNotification(message);
+    rcv.setAccount(receiver);
+    receivers.add(rcv);
+
+    message.setReceivers(receivers);
+
+    notificationRepository.save(message);
+
+    return message;
   }
 
 }

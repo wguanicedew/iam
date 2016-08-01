@@ -7,6 +7,8 @@ public interface NotificationService {
 
   public IamEmailNotification createConfirmationMessage(IamRegistrationRequest request);
 
+  public IamEmailNotification createAccountActivatedMessage(IamRegistrationRequest request);
+
   public void sendPendingNotification();
 
   public void clearExpiredNotifications();

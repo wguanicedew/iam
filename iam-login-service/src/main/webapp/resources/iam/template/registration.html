@@ -8,7 +8,7 @@
 		<div>
 			<div class="alert alert-success" ng-show="showSuccessAlert">
 				<button type="button" class="close"
-					data-ng-click="switchBool('showSuccessAlert')">X</button>
+					data-ng-click="switchBool('showSuccessAlert')">&times;</button>
 				<strong>Done!</strong> {{textAlert}}
 			</div>
 		</div>
@@ -16,7 +16,7 @@
 		<div>
 			<div class="alert alert-danger" ng-show="showErrorAlert">
 				<button type="button" class="close"
-					data-ng-click="switchBool('showErrorAlert')">X</button>
+					data-ng-click="switchBool('showErrorAlert')">&times;</button>
 				<strong>Error!</strong> {{textAlert}}
 			</div>
 		</div>
@@ -113,6 +113,8 @@
 						<button type="button" ng-click="ctrl.reset()"
 							class="btn btn-warning btn-sm"
 							ng-disabled="registrationForm.$pristine">Reset Form</button>
+						<button type="button" ng-click="ctrl.cancel()"
+							class="btn btn-warning btn-sm">Cancel</button>
 					</div>
 				</div>
 			</form>

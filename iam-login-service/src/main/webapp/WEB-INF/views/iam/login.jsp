@@ -22,6 +22,7 @@
   <c:if test="${loginPageConfiguration.samlEnabled}">
 
   </c:if>
+  
   <div class="row">
 
     <div class="absolute-center is-responsive">
@@ -51,13 +52,13 @@
             <div>${param.externalAuthenticationError}</div>
           </div>
         </c:if>
-
+        
         <c:if test="${ param.error != null }">
           <div class="alert alert-danger">
             <spring:message code="login.error" />
           </div>
         </c:if>
-
+        
         <form
           id="login-form"
           action="${loginUrl}"
@@ -133,7 +134,7 @@
       		</div>
     	</div>
   	</div>
-
+  	
 	<script type="text/javascript" src="<c:url value='/webjars/angularjs/angular.min.js'/>"></script>
 	<script type="text/javascript" src="<c:url value='/webjars/angularjs/angular-animate.js'/>"></script>
 	<script type="text/javascript" src="<c:url value='/webjars/angular-ui-bootstrap/ui-bootstrap-tpls.min.js'/>"></script>
