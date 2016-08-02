@@ -426,14 +426,21 @@ public class SecurityConfig {
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
 
-      // @formatter:off
-      http.antMatcher("/scim/**").exceptionHandling()
-          .authenticationEntryPoint(authenticationEntryPoint).and()
-          .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
-          .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class).sessionManagement()
-          .sessionCreationPolicy(SessionCreationPolicy.NEVER).and().authorizeRequests()
-          .antMatchers("/scim/**").authenticated().and().csrf().disable();
-      // @formatter:on
+      http.antMatcher("/scim/**")
+        .exceptionHandling()
+        .authenticationEntryPoint(authenticationEntryPoint)
+        .and()
+        .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
+        .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
+        .sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.NEVER)
+        .and()
+        .authorizeRequests()
+        .antMatchers("/scim/**")
+        .authenticated()
+        .and()
+        .csrf()
+        .disable();
     }
   }
 
@@ -453,17 +460,61 @@ public class SecurityConfig {
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
 
-      // @formatter:off
-      http.antMatcher("/registration/**").exceptionHandling()
-          .authenticationEntryPoint(authenticationEntryPoint).and()
-          .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
-          .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class).sessionManagement()
-          .sessionCreationPolicy(SessionCreationPolicy.NEVER).and().authorizeRequests()
-          .antMatchers(HttpMethod.POST, "/registration").permitAll()
-          .antMatchers(HttpMethod.GET, "/registration/add").permitAll()
-          .antMatchers(HttpMethod.POST, "/registration/confirm/**").permitAll()
-          .antMatchers("/registration**").authenticated().and().csrf().disable();
-      // @formatter:on
+      http.antMatcher("/registration/**")
+        .exceptionHandling()
+        .authenticationEntryPoint(authenticationEntryPoint)
+        .and()
+        .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
+        .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
+        .sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.NEVER)
+        .and()
+        .authorizeRequests()
+        .antMatchers(HttpMethod.POST, "/registration")
+        .permitAll()
+        .antMatchers(HttpMethod.GET, "/registration/add")
+        .permitAll()
+        .antMatchers(HttpMethod.POST, "/registration/confirm/**")
+        .permitAll()
+        .antMatchers("/registration**")
+        .authenticated()
+        .and()
+        .csrf()
+        .disable();
+    }
+  }
+
+  @Configuration
+  @Order(20)
+  public static class DashboardAdminConfig extends WebSecurityConfigurerAdapter {
+
+    @Autowired
+    private OAuth2AuthenticationProcessingFilter resourceFilter;
+
+    @Autowired
+    private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
+
+    @Autowired
+    private CorsFilter corsFilter;
+
+    @Override
+    protected void configure(final HttpSecurity http) throws Exception {
+
+      http.antMatcher("/dashboard/**")
+      .exceptionHandling()
+      .authenticationEntryPoint(authenticationEntryPoint)
+      .and()
+      .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
+      .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
+      .sessionManagement()
+      .sessionCreationPolicy(SessionCreationPolicy.NEVER)
+      .and()
+      .authorizeRequests()
+      .antMatchers("/dashboard/**")
+      .authenticated()
+      .and()
+      .csrf()
+      .disable();
     }
   }
 

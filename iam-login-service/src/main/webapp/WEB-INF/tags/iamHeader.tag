@@ -19,10 +19,27 @@
 <link
   rel="stylesheet"
   href="resources/iam/css/iam.css"></link>
+
+<link
+  rel="stylesheet"
+  href="resources/iam/css/AdminLTE.min.css"></link>
+
+<link
+  rel="stylesheet"
+  href="resources/iam/css/dashboard/home.css"></link>
+
+<link
+  rel="stylesheet"
+  href="resources/iam/css/skins/_all-skins.min.css"></link>
+
+<link
+  rel="stylesheet"
+  href="resources/iam/css/ionicons/ionicons.min.css"></link>
     
 <link
   href="resources/font-awesome/css/font-awesome.css"
   rel="stylesheet">
+
 <link
   href="resources/bootstrap-social/bootstrap-social.css"
   rel="stylesheet">

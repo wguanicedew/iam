@@ -1,0 +1,199 @@
+<!-- Content Header (Page header) -user-image -->
+<section class="content-header">
+	<h1>User Profile</h1>
+	<ol class="breadcrumb">
+		<li><a href="#"><i class="fa fa-home"></i> Home</a></li>
+	</ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+
+	<div class="row">
+		<div class="col-md-3">
+
+			<!-- Profile Image -->
+			<div class="box box-primary">
+				<div class="box-body box-profile">
+					<img class="profile-user-img img-responsive img-circle"
+						src="{{userInfo['urn:indigo-dc:scim:schemas:IndigoUser'].userInfo.picture}}"
+						alt="User profile picture">
+
+					<h3 class="profile-username text-center">{{userInfo.name.formatted}}</h3>
+
+					<p class="text-muted text-center">{{userInfo.displayName}}</p>
+
+					<ul class="list-group list-group-unbordered">
+						<li class="list-group-item"><b>E-mail</b> <a
+							class="pull-right" href="mailto:{{userInfo.emails[0].value}}">{{userInfo.emails[0].value}}</a>
+						</li>
+						<li class="list-group-item"><b>E-mail verified</b> <span
+							class="pull-right label {{userInfo['urn:indigo-dc:scim:schemas:IndigoUser'].userInfo.emailVerified ? 'label-success' : 'label-danger'}}">{{userInfo['urn:indigo-dc:scim:schemas:IndigoUser'].userInfo.emailVerified
+								? 'Verified' : 'Not verified' }}</span></li>
+						<li class="list-group-item"><b>Gender</b> <a
+							class="pull-right">{{userInfo['urn:indigo-dc:scim:schemas:IndigoUser'].userInfo.gender}}</a>
+						</li>
+						<li class="list-group-item"><b>Birthdate</b> <a
+							class="pull-right">{{userInfo['urn:indigo-dc:scim:schemas:IndigoUser'].userInfo.birthdate}}</a>
+						</li>
+
+						<li class="list-group-item"><b>Created</b> <a
+							class="pull-right">{{userInfo.meta.created | date:'yyyy-MM-dd
+								HH:mm:ss'}}</a></li>
+						<li class="list-group-item"><b>Last update</b> <a
+							class="pull-right">{{userInfo.meta.lastModified |
+								date:'yyyy-MM-dd HH:mm:ss'}}</a></li>
+
+					</ul>
+
+					<a href="#" class="btn btn-primary btn-block"><b>Edit</b></a>
+				</div>
+				<!-- /.box-body -->
+			</div>
+			<!-- /.box -->
+
+		</div>
+		<div class="col-md-9">
+
+			<!-- Groups Box -->
+			<div class="box box-primary" ng-show="userInfo.groups.length">
+				<div class="box-header with-border">
+					<h3 class="box-title">
+						<strong><i class="fa fa-users margin-r-5"></i> Groups</strong>
+					</h3>
+				</div>
+				<!-- /.box-header -->
+				<div class="box-body">
+
+					<div class="table-responsive">
+						<table class="table no-margin">
+							<thead>
+								<tr>
+									<th>#</th>
+									<th>Name</th>
+									<th>Description</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr ng-repeat="group in userInfo.groups">
+									<td>{{$index + 1}}</td>
+									<td><a href="#group?id={{ group.value }}">{{
+											group.display }}</a></td>
+									<td />
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+
+			<!-- OidcIds Box -->
+			<div class="box box-primary"
+				ng-show="userInfo['urn:indigo-dc:scim:schemas:IndigoUser'].oidcIds">
+				<div class="box-header with-border">
+					<h3 class="box-title">
+						<strong><i class="fa fa-google-plus margin-r-5"></i>
+							OpenID Connect Accounts</strong>
+					</h3>
+				</div>
+				<!-- /.box-header -->
+				<div class="box-body">
+
+					<div class="table-responsive">
+						<table class="table no-margin">
+							<thead>
+								<tr>
+									<th>#</th>
+									<th>Issuer</th>
+									<th>Subject</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr
+									ng-repeat="oidcId in userInfo['urn:indigo-dc:scim:schemas:IndigoUser'].oidcIds">
+									<td>{{$index + 1}}</td>
+									<td>{{ oidcId.issuer }}</td>
+									<td>{{ oidcId.subject }}</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+
+			<!-- sshKeys Box -->
+			<div class="box box-primary"
+				ng-show="userInfo['urn:indigo-dc:scim:schemas:IndigoUser'].sshKeys">
+				<div class="box-header with-border">
+					<h3 class="box-title">
+						<strong><i class="fa fa-google-plus margin-r-5"></i> SSH
+							keys</strong>
+					</h3>
+				</div>
+				<!-- /.box-header -->
+				<div class="box-body">
+
+					<div class="table-responsive">
+						<table class="table no-margin">
+							<thead>
+								<tr>
+									<th>#</th>
+									<th>Label</th>
+									<th>Fingerprint</th>
+									<th>Primary</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr
+									ng-repeat="sshKey in userInfo['urn:indigo-dc:scim:schemas:IndigoUser'].sshKeys">
+									<td>{{$index + 1}}</td>
+									<td>{{ sshKey.display }}</td>
+									<td><a href='' ng-click="showSshKeyValue(sshKey.value)">{{
+											sshKey.fingerprint }}</a></td>
+									<td><span class="label label-success">{{
+											sshKey.primary ? 'primary' : '' }}</span></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+
+			<!-- samlIds Box -->
+			<div class="box box-primary"
+				ng-show="userInfo['urn:indigo-dc:scim:schemas:IndigoUser'].samlIds">
+				<div class="box-header with-border">
+					<h3 class="box-title">
+						<strong><i class="fa fa-cloud margin-r-5"></i> Saml IDs</strong>
+					</h3>
+				</div>
+				<!-- /.box-header -->
+				<div class="box-body">
+
+					<div class="table-responsive">
+						<table class="table no-margin">
+							<thead>
+								<tr>
+									<th>#</th>
+									<th>Identity Provider</th>
+									<th>User ID</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr
+									ng-repeat="samlId in userInfo['urn:indigo-dc:scim:schemas:IndigoUser'].samlIds">
+									<td>{{$index + 1}}</td>
+									<td>{{ samlId.idpId }}</td>
+									<td>{{ samlId.userId }}</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+
+			{{ userInfo }}
+
+		</div>
+	</div>
+</section>
