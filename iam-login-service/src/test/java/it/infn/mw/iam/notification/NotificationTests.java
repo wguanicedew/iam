@@ -3,7 +3,9 @@ package it.infn.mw.iam.notification;
 import static it.infn.mw.iam.test.RegistrationUtils.createRegistrationRequest;
 import static it.infn.mw.iam.test.RegistrationUtils.deleteUser;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.mail.MessagingException;
 
@@ -104,6 +106,37 @@ public class NotificationTests {
   }
 
   @Test
+  public void testSendMultipleNotifications() {
+
+    int count = 3;
+    List<RegistrationRequestDto> requestList = new ArrayList<>();
+
+    for (int idx = 1; idx <= count; idx++) {
+      RegistrationRequestDto reg = createRegistrationRequest("test_user_" + idx);
+      requestList.add(reg);
+    }
+
+    notificationService.sendPendingNotification();
+
+    Assert.assertTrue("element count", wiser.getMessages().size() == count);
+    Iterable<IamEmailNotification> queue = notificationRepository.findAll();
+    for (IamEmailNotification elem : queue) {
+      Assert.assertTrue("status", IamDeliveryStatus.DELIVERED.equals(elem.getDeliveryStatus()));
+    }
+
+    for (RegistrationRequestDto elem : requestList) {
+      deleteUser(elem.getAccountId());
+    }
+  }
+
+  @Test
+  public void testSendWithEmptyQueue() {
+
+    notificationService.sendPendingNotification();
+    Assert.assertTrue("element count", wiser.getMessages().size() == 0);
+  }
+
+  @Test
   public void testDeliveryFailure() {
     String username = "test_user";
     RegistrationRequestDto reg = createRegistrationRequest(username);
@@ -126,9 +159,8 @@ public class NotificationTests {
     String username = "test_user";
 
     RegistrationRequestDto reg = createRegistrationRequest(username);
-
     notificationService.sendPendingNotification();
-
+    Assert.assertTrue("element count", wiser.getMessages().size() == 1);
     agingMessages();
 
     notificationService.clearExpiredNotifications();
