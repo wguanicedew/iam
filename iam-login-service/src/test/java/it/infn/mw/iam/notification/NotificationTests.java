@@ -4,10 +4,13 @@ import static it.infn.mw.iam.test.RegistrationUtils.createRegistrationRequest;
 import static it.infn.mw.iam.test.RegistrationUtils.deleteUser;
 
 import java.util.Date;
-import java.util.List;
+
+import javax.mail.MessagingException;
 
 import org.apache.commons.lang.time.DateUtils;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,10 +20,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.WebIntegrationTest;
 import org.springframework.data.domain.Sort;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.subethamail.wiser.Wiser;
+import org.subethamail.wiser.WiserMessage;
 
 import it.infn.mw.iam.IamLoginService;
+import it.infn.mw.iam.core.IamDeliveryStatus;
 import it.infn.mw.iam.persistence.model.IamEmailNotification;
 import it.infn.mw.iam.persistence.repository.IamEmailNotificationRepository;
 import it.infn.mw.iam.registration.RegistrationRequestDto;
@@ -29,11 +34,11 @@ import it.infn.mw.iam.test.TestUtils;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = IamLoginService.class)
 @WebIntegrationTest
-public class NotificationTest {
+public class NotificationTests {
 
   @Autowired
-  @Qualifier("fakeNotificationService")
-  private FakeNotificationService notificationService;
+  @Qualifier("defaultNotificationService")
+  private NotificationService notificationService;
 
   @Value("${notification.subject.confirmation}")
   private String subjectConfirm;
@@ -44,8 +49,16 @@ public class NotificationTest {
   @Value("${notification.cleanupAge}")
   private Integer notificationCleanUpAge;
 
+  @Value("${spring.mail.host}")
+  private String mailHost;
+
+  @Value("${spring.mail.port}")
+  private Integer mailPort;
+
   @Autowired
   private IamEmailNotificationRepository notificationRepository;
+
+  private Wiser wiser;
 
 
   @BeforeClass
@@ -54,22 +67,56 @@ public class NotificationTest {
     TestUtils.initRestAssured();
   }
 
+  @Before
+  public void setUp() {
+    wiser = new Wiser();
+    wiser.setHostname(mailHost);
+    wiser.setPort(mailPort);
+    wiser.start();
+  }
+
+  @After
+  public void tearDown() {
+    wiser.stop();
+  }
+
   @Test
-  public void testSendConfirmation() {
+  public void testSendEmails() throws MessagingException {
 
     String username = "test_user";
 
     RegistrationRequestDto reg = createRegistrationRequest(username);
+    notificationService.sendPendingNotification();
 
-    List<SimpleMailMessage> messageList = notificationService.getSendedNotification();
-    Assert.assertTrue("element count", messageList.size() == 1);
+    Assert.assertTrue("element count", wiser.getMessages().size() == 1);
+    WiserMessage message = wiser.getMessages().get(0);
 
-    SimpleMailMessage elem = messageList.get(0);
+    Assert.assertTrue("sender", mailFrom.equals(message.getEnvelopeSender()));
+    Assert.assertTrue("receiver", message.getEnvelopeReceiver().startsWith(username));
+    Assert.assertTrue("subject", subjectConfirm.equals(message.getMimeMessage().getSubject()));
 
-    Assert.assertTrue("sender", mailFrom.equals(elem.getFrom()));
-    Assert.assertTrue("subject", subjectConfirm.equals(elem.getSubject()));
-    Assert.assertTrue("receiver count", elem.getTo().length == 1);
-    Assert.assertTrue("receiver", elem.getTo()[0].startsWith(username));
+    Iterable<IamEmailNotification> queue = notificationRepository.findAll();
+    for (IamEmailNotification elem : queue) {
+      Assert.assertTrue("status", IamDeliveryStatus.DELIVERED.equals(elem.getDeliveryStatus()));
+    }
+
+    deleteUser(reg.getAccountId());
+  }
+
+  @Test
+  public void testDeliveryFailure() {
+    String username = "test_user";
+    RegistrationRequestDto reg = createRegistrationRequest(username);
+
+    wiser.stop();
+
+    notificationService.sendPendingNotification();
+
+    Iterable<IamEmailNotification> queue = notificationRepository.findAll();
+    for (IamEmailNotification elem : queue) {
+      Assert.assertTrue("status",
+          IamDeliveryStatus.DELIVERY_ERROR.equals(elem.getDeliveryStatus()));
+    }
 
     deleteUser(reg.getAccountId());
   }
@@ -80,7 +127,7 @@ public class NotificationTest {
 
     RegistrationRequestDto reg = createRegistrationRequest(username);
 
-    notificationService.getSendedNotification();
+    notificationService.sendPendingNotification();
 
     agingMessages();
 

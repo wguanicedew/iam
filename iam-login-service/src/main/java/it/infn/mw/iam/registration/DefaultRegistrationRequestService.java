@@ -27,6 +27,7 @@ import it.infn.mw.iam.core.IamRegistrationRequestStatus;
 import it.infn.mw.iam.core.IamUserDetailsService;
 import it.infn.mw.iam.notification.NotificationService;
 import it.infn.mw.iam.persistence.model.IamAccount;
+import it.infn.mw.iam.persistence.model.IamEmailNotification;
 import it.infn.mw.iam.persistence.model.IamRegistrationRequest;
 import it.infn.mw.iam.persistence.repository.IamRegistrationRequestRepository;
 
@@ -76,7 +77,10 @@ public class DefaultRegistrationRequestService implements RegistrationRequestSer
 
     requestRepository.save(request);
 
-    notificationService.createConfirmationMessage(request);
+    IamEmailNotification notification = notificationService.createConfirmationMessage(request);
+    List<IamEmailNotification> notificationList = new ArrayList<>();
+    notificationList.add(notification);
+    request.setNotifications(notificationList);
 
     return converter.fromEntity(request);
   }

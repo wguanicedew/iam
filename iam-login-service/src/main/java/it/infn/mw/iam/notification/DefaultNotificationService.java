@@ -22,7 +22,6 @@ import org.springframework.ui.velocity.VelocityEngineUtils;
 
 import it.infn.mw.iam.core.IamDeliveryStatus;
 import it.infn.mw.iam.core.IamNotificationType;
-import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamEmailNotification;
 import it.infn.mw.iam.persistence.model.IamNotificationReceiver;
 import it.infn.mw.iam.persistence.model.IamRegistrationRequest;
@@ -71,7 +70,7 @@ public class DefaultNotificationService implements NotificationService {
     model.put("confirmURL", confirmURL);
 
     return createMessage("confirmRegistration.vm", model, IamNotificationType.CONFIRMATION,
-        subjectConfirm, request.getAccount());
+        subjectConfirm, request);
   }
 
   @Override
@@ -87,11 +86,11 @@ public class DefaultNotificationService implements NotificationService {
     model.put("password", password);
 
     return createMessage("accountActivated.vm", model, IamNotificationType.ACTIVATED,
-        subjectActivated, request.getAccount());
+        subjectActivated, request);
   }
 
   @Override
-  public void sendPendingNotification() {
+  public synchronized void sendPendingNotification() {
 
     SimpleMailMessage messageTemplate = new SimpleMailMessage();
     messageTemplate.setFrom(mailFrom);
@@ -112,12 +111,14 @@ public class DefaultNotificationService implements NotificationService {
 
         elem.setDeliveryStatus(IamDeliveryStatus.DELIVERED);
 
-        logger.info("Sent mail: message_id {} message_type {} mail_from {} rcpt_to {} status {}",
-            elem.getUuid(), elem.getType(), mailFrom, messageTemplate.getTo(),
-            elem.getDeliveryStatus().name());
+        logger.info("Sent mail. message_id:{} status:{} message_type:{} mail_from:{} rcpt_to:{}",
+            elem.getUuid(), elem.getDeliveryStatus().name(), elem.getType(), mailFrom,
+            messageTemplate.getTo());
 
       } catch (MailException me) {
         elem.setDeliveryStatus(IamDeliveryStatus.DELIVERY_ERROR);
+        logger.error("Message delivery fail. message_id:{} reason:{}", elem.getUuid(),
+            me.getMessage());
       }
 
       elem.setLastUpdate(new Date());
@@ -148,7 +149,8 @@ public class DefaultNotificationService implements NotificationService {
 
 
   private IamEmailNotification createMessage(final String template, final Map<String, Object> model,
-      final IamNotificationType messageType, final String subject, final IamAccount receiver) {
+      final IamNotificationType messageType, final String subject,
+      final IamRegistrationRequest request) {
 
     String body =
         VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, template, "UTF-8", model);
@@ -160,11 +162,12 @@ public class DefaultNotificationService implements NotificationService {
     message.setBody(body);
     message.setCreationTime(new Date());
     message.setDeliveryStatus(IamDeliveryStatus.PENDING);
+    message.setRequest(request);
 
     List<IamNotificationReceiver> receivers = new ArrayList<>();
     IamNotificationReceiver rcv = new IamNotificationReceiver();
     rcv.setIamEmailNotification(message);
-    rcv.setAccount(receiver);
+    rcv.setAccount(request.getAccount());
     receivers.add(rcv);
 
     message.setReceivers(receivers);

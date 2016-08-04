@@ -13,12 +13,12 @@ RegistrationApp
 							$scope.sortType = 'status';
 							$scope.sortReverse = false;
 
-							$scope.listRequests = function(status) {
+							self.listRequests = function(status) {
 								RegistrationRequestService
 										.listRequests(status)
 										.then(
 												function(result) {
-													$scope.list = result.data;
+													self.list = result.data;
 												},
 												function(errResponse) {
 													$scope.textAlert = errResponse.data.error_description
@@ -27,14 +27,14 @@ RegistrationApp
 												})
 							};
 
-							$scope.approveRequest = function(uuid) {
+							self.approveRequest = function(uuid) {
 								RegistrationRequestService
 										.updateRequest(uuid, 'APPROVED')
 										.then(
 												function() {
 													$scope.textAlert = "Approvation success";
 													$scope.showSuccessAlert = true;
-													$scope.listRequests();
+													self.listRequests();
 												},
 												function(errResponse) {
 													$scope.textAlert = errResponse.data.error_description
@@ -43,7 +43,7 @@ RegistrationApp
 												})
 							};
 
-							$scope.rejectRequest = function(uuid) {
+							self.rejectRequest = function(uuid) {
 								RegistrationRequestService
 										.updateRequest(uuid, 'REJECTED')
 										.then(
@@ -57,6 +57,11 @@ RegistrationApp
 															|| errResponse.data.detail;
 													$scope.showErrorAlert = true;
 												})
+							};
+							
+							// switch flag
+							$scope.switchBool = function(value) {
+								$scope[value] = !$scope[value];
 							};
 
 						} ]);

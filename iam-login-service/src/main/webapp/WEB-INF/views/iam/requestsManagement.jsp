@@ -5,8 +5,9 @@
 
 <body ng-app="registrationApp" class="ng-cloak">
 	<div class="main-container"
-		ng-controller="RegistrationController as ctrl"
+		ng-controller="RequestManagementController as ctrl"
 		ng-init="ctrl.listRequests()">
+		
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				<span class="lead">List of Requests</span>
@@ -74,6 +75,10 @@
 					</tbody>
 				</table>
 			</div>
+		</div>
+		
+		<div style="width: 200px; margin: auto;">
+			<a class="btn btn-primary btn-block" style="align: left" href='/'>Back to Home Page</a>
 		</div>
 	</div>
 
