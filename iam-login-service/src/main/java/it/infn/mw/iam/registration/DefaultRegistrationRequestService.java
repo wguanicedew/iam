@@ -8,12 +8,12 @@ import static it.infn.mw.iam.core.IamRegistrationRequestStatus.REJECTED;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.HashBasedTable;
@@ -24,11 +24,11 @@ import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.provisioning.ScimUserProvisioning;
 import it.infn.mw.iam.core.IamRegistrationRequestStatus;
-import it.infn.mw.iam.core.IamUserDetailsService;
 import it.infn.mw.iam.notification.NotificationService;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamEmailNotification;
 import it.infn.mw.iam.persistence.model.IamRegistrationRequest;
+import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamRegistrationRequestRepository;
 
 @Service
@@ -51,7 +51,7 @@ public class DefaultRegistrationRequestService implements RegistrationRequestSer
   private TokenGenerator tokenGenerator;
 
   @Autowired
-  private IamUserDetailsService userDetailsService;
+  private IamAccountRepository iamAccountRepo;
 
   private static Table<IamRegistrationRequestStatus, IamRegistrationRequestStatus, Boolean> transictions;
 
@@ -160,14 +160,9 @@ public class DefaultRegistrationRequestService implements RegistrationRequestSer
 
   @Override
   public Boolean usernameAvailable(final String username) {
-    Boolean retval = false;
-    try {
-      userDetailsService.loadUserByUsername(username);
-    } catch (UsernameNotFoundException unfe) {
-      retval = true;
-    }
 
-    return retval;
+    Optional<IamAccount> account = iamAccountRepo.findByUsername(username);
+    return !account.isPresent();
   }
 
   private boolean checkStateTransiction(final IamRegistrationRequestStatus currentStatus,
