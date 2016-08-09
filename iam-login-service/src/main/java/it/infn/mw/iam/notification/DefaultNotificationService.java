@@ -18,10 +18,12 @@ import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.velocity.VelocityEngineUtils;
 
 import it.infn.mw.iam.core.IamDeliveryStatus;
 import it.infn.mw.iam.core.IamNotificationType;
+import it.infn.mw.iam.core.time.TimeProvider;
 import it.infn.mw.iam.persistence.model.IamEmailNotification;
 import it.infn.mw.iam.persistence.model.IamNotificationReceiver;
 import it.infn.mw.iam.persistence.model.IamRegistrationRequest;
@@ -57,6 +59,9 @@ public class DefaultNotificationService implements NotificationService {
   @Value("${notification.cleanupAge}")
   private Integer notificationCleanUpAge;
 
+  @Autowired
+  private TimeProvider timeProvider;
+
 
   @Override
   public IamEmailNotification createConfirmationMessage(final IamRegistrationRequest request) {
@@ -90,7 +95,8 @@ public class DefaultNotificationService implements NotificationService {
   }
 
   @Override
-  public synchronized void sendPendingNotification() {
+  @Transactional
+  public void sendPendingNotification() {
 
     SimpleMailMessage messageTemplate = new SimpleMailMessage();
     messageTemplate.setFrom(mailFrom);
@@ -129,8 +135,8 @@ public class DefaultNotificationService implements NotificationService {
   @Override
   public void clearExpiredNotifications() {
 
-    Date threshold = DateUtils.addDays(new Date(), -notificationCleanUpAge);
-
+    Date currentTime = new Date(timeProvider.currentTimeMillis());
+    Date threshold = DateUtils.addDays(currentTime, -notificationCleanUpAge);
 
     List<IamEmailNotification> messageList =
         notificationRepository.findByStatusWithUpdateTime(IamDeliveryStatus.DELIVERED, threshold);

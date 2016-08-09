@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -44,7 +45,7 @@ public class IamUserDetailsService implements UserDetailsService {
         return u;
 
       } else {
-        throw new UsernameNotFoundException("User '" + username + "' is not active.");
+        throw new DisabledException("User '" + username + "' is not active.");
       }
     }
 

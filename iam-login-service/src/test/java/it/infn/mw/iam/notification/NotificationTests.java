@@ -21,7 +21,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.WebIntegrationTest;
-import org.springframework.data.domain.Sort;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.subethamail.wiser.Wiser;
 import org.subethamail.wiser.WiserMessage;
@@ -59,6 +58,9 @@ public class NotificationTests {
 
   @Autowired
   private IamEmailNotificationRepository notificationRepository;
+
+  @Autowired
+  private MockTimeProvider timeProvider;
 
   private Wiser wiser;
 
@@ -161,7 +163,9 @@ public class NotificationTests {
     RegistrationRequestDto reg = createRegistrationRequest(username);
     notificationService.sendPendingNotification();
     Assert.assertTrue("element count", wiser.getMessages().size() == 1);
-    agingMessages();
+
+    Date fakeDate = DateUtils.addDays(new Date(), (notificationCleanUpAge + 1));
+    timeProvider.setTime(fakeDate.getTime());
 
     notificationService.clearExpiredNotifications();
 
@@ -169,17 +173,6 @@ public class NotificationTests {
     Assert.assertTrue("messages count", count == 0);
 
     deleteUser(reg.getAccountId());
-  }
-
-  private void agingMessages() {
-    Date fakeDate = DateUtils.addDays(new Date(), -(notificationCleanUpAge + 1));
-
-    Iterable<IamEmailNotification> iter =
-        notificationRepository.findAll(new Sort(Sort.Direction.ASC, "id"));
-    for (IamEmailNotification elem : iter) {
-      elem.setLastUpdate(fakeDate);
-    }
-    notificationRepository.save(iter);
   }
 
 }
