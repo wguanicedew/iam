@@ -130,11 +130,16 @@ public class DefaultRegistrationRequestService implements RegistrationRequestSer
     if (APPROVED.equals(status)) {
       IamAccount account = reg.getAccount();
       account.setActive(true);
+      account.setResetKey(tokenGenerator.generateToken());
       account.setLastUpdateTime(new Date());
       notificationService.createAccountActivatedMessage(reg);
 
     } else if (CONFIRMED.equals(status)) {
       reg.getAccount().getUserInfo().setEmailVerified(true);
+      notificationService.createAdminHandleRequestMessage(reg);
+
+    } else if (REJECTED.equals(status)) {
+      notificationService.createRequestRejectedMessage(reg);
     }
 
     requestRepository.save(reg);
@@ -154,6 +159,7 @@ public class DefaultRegistrationRequestService implements RegistrationRequestSer
     reg.getAccount().getUserInfo().setEmailVerified(true);
 
     requestRepository.save(reg);
+    notificationService.createAdminHandleRequestMessage(reg);
 
     return converter.fromEntity(reg);
   }

@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
     "it.infn.mw.iam.authn",
     "it.infn.mw.iam.persistence", 
     "it.infn.mw.iam.core.web",
+    "it.infn.mw.iam.core.time",
     "it.infn.mw.iam.api", 
     "it.infn.mw.iam.registration", 
     "it.infn.mw.iam.notification",

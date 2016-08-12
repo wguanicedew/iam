@@ -1,6 +1,7 @@
 package it.infn.mw.iam.registration;
 
 import static com.jayway.restassured.RestAssured.given;
+import static it.infn.mw.iam.test.RegistrationUtils.confirmRegistrationRequest;
 import static it.infn.mw.iam.test.RegistrationUtils.createRegistrationRequest;
 import static it.infn.mw.iam.test.RegistrationUtils.deleteUser;
 
@@ -357,23 +358,6 @@ public class RegistrationTests {
         .body(true)
       .statusCode(HttpStatus.OK.value())
       .body(Matchers.equalTo("false"))
-    ;
-    // @formatter:on
-  }
-
-  private void confirmRegistrationRequest(final String token) {
-
-    // @formatter:off
-    given()
-      .port(8080)
-      .pathParam("token", token)
-    .when()
-      .get("/registration/confirm/{token}")
-    .then()
-      .log()
-        .body(true)
-      .statusCode(HttpStatus.OK.value())
-      .body("status", Matchers.equalTo(IamRegistrationRequestStatus.CONFIRMED.name()))
     ;
     // @formatter:on
   }

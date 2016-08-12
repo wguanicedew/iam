@@ -96,9 +96,6 @@ public class IamAccount {
   @OneToOne(cascade = CascadeType.REMOVE, mappedBy = "account")
   private IamRegistrationRequest registrationRequest;
 
-  @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "account")
-  private List<IamNotificationReceiver> notificationReceiver;
-
   public IamAccount() {}
 
   public Long getId() {

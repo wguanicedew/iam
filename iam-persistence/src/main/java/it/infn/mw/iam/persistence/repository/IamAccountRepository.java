@@ -48,4 +48,6 @@ public interface IamAccountRepository extends PagingAndSortingRepository<IamAcco
   List<IamAccount> findByGroupId(@Param("groupId") String groupId);
 
   Optional<IamAccount> findByConfirmationKey(@Param("confirmationKey") String confirmationKey);
+
+  Optional<IamAccount> findByResetKey(@Param("resetKey") String resetKey);
 }

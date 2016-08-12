@@ -65,12 +65,17 @@ github:
     userInfoUri: https://api.github.com/user
     
 notification:
+  disable: ${IAM_NOTIFICATION_DISABLE:false}
   mailFrom: ${IAM_NOTIFICATION_FROM:indigo@localhost}
   taskDelay: ${IAM_NOTIFICATION_TASK_DELAY:30000}
   cleanupAge: ${IAM_NOTIFICATION_CLEANUP_AGE:30}
+  adminAddress: ${IAM_NOTIFICATION_ADMIN_ALERT_ADDRESS:}
   subject:
     confirmation: Confirm Indigo registration request
     activated: Indigo Account activated
+    rejected: Indigo Account request rejected
+    adminHandleRequest: New Indigo account request
+    resetPassword: Indigo account reset password
 
 ---
 spring:
@@ -80,11 +85,30 @@ spring:
     url: jdbc:h2:mem:iam;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;LOCK_TIMEOUT=30000;MVCC=TRUE
     username: sa
     password:
+  
+  mail:
+    host: ${IAM_MAIL_HOST:localhost}
+    port: ${IAM_MAIL_PORT:10025}
+    username: ${IAM_MAIL_USERNAME:}
+    password: ${IAM_MAIL_PASSWORD:}
 
 flyway:
   locations:
     - classpath:db/migration/h2
     - classpath:db/migration/test
+    
+notification:
+  disable: ${IAM_NOTIFICATION_DISABLE:false}
+  mailFrom: ${IAM_NOTIFICATION_FROM:indigo@localhost}
+  taskDelay: ${IAM_NOTIFICATION_TASK_DELAY:30000}
+  cleanupAge: ${IAM_NOTIFICATION_CLEANUP_AGE:30}
+  adminAddress: ${IAM_NOTIFICATION_ADMIN_ALERT_ADDRESS:indigo-alerts@localhost}
+  subject:
+    confirmation: Confirm Indigo registration request
+    activated: Indigo Account activated
+    rejected: Indigo Account request rejected
+    adminHandleRequest: New Indigo account request
+    resetPassword: Indigo account reset password
 ---
 spring:
   profiles: mysql

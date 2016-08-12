@@ -85,8 +85,8 @@
 	<script type="text/javascript" src="<c:url value='/webjars/angularjs/angular.min.js'/>"></script>
 	<script type="text/javascript" src="<c:url value='/webjars/angular-ui-bootstrap/ui-bootstrap.js'/>"></script>
 		
-	<script type="text/javascript" src="/resources/iam/js/registration_app.js"></script>
-	<script type="text/javascript" src="/resources/iam/js/service/registration_service.js"></script>
-	<script type="text/javascript" src="/resources/iam/js/controller/registration_controller.js"></script>
+	<script type="text/javascript" src="/resources/iam/js/registration.app.js"></script>
+	<script type="text/javascript" src="/resources/iam/js/service/registration.service.js"></script>
+	<script type="text/javascript" src="/resources/iam/js/controller/registration.controller.js"></script>
 	
 </body>

@@ -130,6 +130,10 @@
 					  <a class="btn btn-success btn-block" ng-click="open()">Register a new account</a>
 					</div>
 				</c:if>
+				
+				<div id="forgot-password" style="margin: 10px" ng-controller="ForgotPasswordModalController">
+				  <a ng-click="open()">Forgot your password?</a>
+				</div>
 
       		</div>
     	</div>
@@ -140,13 +144,18 @@
 	<script type="text/javascript" src="<c:url value='/webjars/angular-ui-bootstrap/ui-bootstrap-tpls.min.js'/>"></script>
 	<script type="text/javascript" src="/resources/iam/js/iam-login-app.js"></script>
 
-	<script type="text/javascript" src="/resources/iam/js/registration_app.js"></script>
-	<script type="text/javascript" src="/resources/iam/js/service/registration_service.js"></script>
-	<script type="text/javascript" src="/resources/iam/js/controller/registration_controller.js"></script>
+	<script type="text/javascript" src="/resources/iam/js/registration.app.js"></script>
+	<script type="text/javascript" src="/resources/iam/js/service/registration.service.js"></script>
+	<script type="text/javascript" src="/resources/iam/js/controller/registration.controller.js"></script>
+	<script type="text/javascript" src="/resources/iam/js/directive/registration.directive.js"></script>
+	
+	<script type="text/javascript" src="/resources/iam/js/passwordreset.app.js"></script>
+	<script type="text/javascript" src="/resources/iam/js/service/passwordreset.service.js"></script>
+	<script type="text/javascript" src="/resources/iam/js/controller/passwordreset.controller.js"></script>
 	
 	<script type="text/javascript">
 		angular.element(document).ready(function() {
-			angular.bootstrap(document, ['iam-login-app', 'registrationApp']);
+			angular.bootstrap(document, ['iam-login-app', 'registrationApp', 'passwordResetApp']);
 		});
 	</script>
 	

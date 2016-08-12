@@ -1,5 +1,6 @@
 package it.infn.mw.iam.notification;
 
+import static it.infn.mw.iam.test.RegistrationUtils.confirmRegistrationRequest;
 import static it.infn.mw.iam.test.RegistrationUtils.createRegistrationRequest;
 import static it.infn.mw.iam.test.RegistrationUtils.deleteUser;
 
@@ -29,7 +30,9 @@ import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.core.IamDeliveryStatus;
 import it.infn.mw.iam.persistence.model.IamEmailNotification;
 import it.infn.mw.iam.persistence.repository.IamEmailNotificationRepository;
+import it.infn.mw.iam.registration.PersistentUUIDTokenGenerator;
 import it.infn.mw.iam.registration.RegistrationRequestDto;
+import it.infn.mw.iam.test.RegistrationUtils;
 import it.infn.mw.iam.test.TestUtils;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -41,14 +44,8 @@ public class NotificationTests {
   @Qualifier("defaultNotificationService")
   private NotificationService notificationService;
 
-  @Value("${notification.subject.confirmation}")
-  private String subjectConfirm;
-
-  @Value("${notification.mailFrom}")
-  private String mailFrom;
-
-  @Value("${notification.cleanupAge}")
-  private Integer notificationCleanUpAge;
+  @Autowired
+  private NotificationProperties properties;
 
   @Value("${spring.mail.host}")
   private String mailHost;
@@ -61,6 +58,9 @@ public class NotificationTests {
 
   @Autowired
   private MockTimeProvider timeProvider;
+
+  @Autowired
+  private PersistentUUIDTokenGenerator generator;
 
   private Wiser wiser;
 
@@ -80,8 +80,9 @@ public class NotificationTests {
   }
 
   @After
-  public void tearDown() {
+  public void tearDown() throws InterruptedException {
     wiser.stop();
+    Thread.sleep(1000L);
   }
 
   @Test
@@ -95,9 +96,10 @@ public class NotificationTests {
     Assert.assertTrue("element count", wiser.getMessages().size() == 1);
     WiserMessage message = wiser.getMessages().get(0);
 
-    Assert.assertTrue("sender", mailFrom.equals(message.getEnvelopeSender()));
+    Assert.assertTrue("sender", properties.getMailFrom().equals(message.getEnvelopeSender()));
     Assert.assertTrue("receiver", message.getEnvelopeReceiver().startsWith(username));
-    Assert.assertTrue("subject", subjectConfirm.equals(message.getMimeMessage().getSubject()));
+    Assert.assertTrue("subject",
+        properties.getSubject().get("confirmation").equals(message.getMimeMessage().getSubject()));
 
     Iterable<IamEmailNotification> queue = notificationRepository.findAll();
     for (IamEmailNotification elem : queue) {
@@ -105,6 +107,26 @@ public class NotificationTests {
     }
 
     deleteUser(reg.getAccountId());
+  }
+
+  @Test
+  public void testDisableNotificationOption() {
+    String username = "test_user";
+
+    RegistrationRequestDto reg = createRegistrationRequest(username);
+
+    properties.setDisable(true);
+    notificationService.sendPendingNotification();
+
+    Assert.assertTrue("element count", wiser.getMessages().size() == 0);
+
+    Iterable<IamEmailNotification> queue = notificationRepository.findAll();
+    for (IamEmailNotification elem : queue) {
+      Assert.assertTrue("status", IamDeliveryStatus.DELIVERED.equals(elem.getDeliveryStatus()));
+    }
+
+    deleteUser(reg.getAccountId());
+    properties.setDisable(false);
   }
 
   @Test
@@ -156,6 +178,77 @@ public class NotificationTests {
     deleteUser(reg.getAccountId());
   }
 
+
+  @Test
+  public void testApproveFlowNotifications() throws MessagingException {
+    String username = "test_user";
+
+    RegistrationRequestDto reg = createRegistrationRequest(username);
+    notificationService.sendPendingNotification();
+
+    Assert.assertTrue("element count", wiser.getMessages().size() == 1);
+    WiserMessage message = wiser.getMessages().get(0);
+    Assert.assertTrue("subject confirmation",
+        properties.getSubject().get("confirmation").equals(message.getMimeMessage().getSubject()));
+
+    String confirmationKey = generator.getLastToken();
+    confirmRegistrationRequest(confirmationKey);
+    notificationService.sendPendingNotification();
+
+    Assert.assertTrue("element count after confirm", wiser.getMessages().size() == 2);
+    message = wiser.getMessages().get(1);
+    Assert.assertTrue("subject handle", properties.getSubject()
+      .get("adminHandleRequest")
+      .equals(message.getMimeMessage().getSubject()));
+    Assert.assertTrue("receiver",
+        message.getEnvelopeReceiver().startsWith(properties.getAdminAddress()));
+
+    RegistrationUtils.approveRequest(reg.getUuid());
+    notificationService.sendPendingNotification();
+
+    Assert.assertTrue("element count after approve", wiser.getMessages().size() == 3);
+    message = wiser.getMessages().get(2);
+    Assert.assertTrue("subject activated",
+        properties.getSubject().get("activated").equals(message.getMimeMessage().getSubject()));
+
+    deleteUser(reg.getAccountId());
+  }
+
+  @Test
+  public void testRejectFlowNotifications() throws MessagingException {
+    String username = "test_user";
+
+    RegistrationRequestDto reg = createRegistrationRequest(username);
+    notificationService.sendPendingNotification();
+
+    Assert.assertTrue("element count", wiser.getMessages().size() == 1);
+    WiserMessage message = wiser.getMessages().get(0);
+    Assert.assertTrue("subject confirm",
+        properties.getSubject().get("confirmation").equals(message.getMimeMessage().getSubject()));
+
+    String confirmationKey = generator.getLastToken();
+    confirmRegistrationRequest(confirmationKey);
+    notificationService.sendPendingNotification();
+
+    Assert.assertTrue("element count after confirm", wiser.getMessages().size() == 2);
+    message = wiser.getMessages().get(1);
+    Assert.assertTrue("subject handle", properties.getSubject()
+      .get("adminHandleRequest")
+      .equals(message.getMimeMessage().getSubject()));
+    Assert.assertTrue("receiver",
+        message.getEnvelopeReceiver().startsWith(properties.getAdminAddress()));
+
+    RegistrationUtils.rejectRequest(reg.getUuid());
+    notificationService.sendPendingNotification();
+
+    Assert.assertTrue("element count after reject", wiser.getMessages().size() == 3);
+    message = wiser.getMessages().get(2);
+    Assert.assertTrue("subject rejected",
+        properties.getSubject().get("rejected").equals(message.getMimeMessage().getSubject()));
+
+    deleteUser(reg.getAccountId());
+  }
+
   @Test
   public void testCleanOldMessages() {
     String username = "test_user";
@@ -164,7 +257,7 @@ public class NotificationTests {
     notificationService.sendPendingNotification();
     Assert.assertTrue("element count", wiser.getMessages().size() == 1);
 
-    Date fakeDate = DateUtils.addDays(new Date(), (notificationCleanUpAge + 1));
+    Date fakeDate = DateUtils.addDays(new Date(), (properties.getCleanupAge() + 1));
     timeProvider.setTime(fakeDate.getTime());
 
     notificationService.clearExpiredNotifications();

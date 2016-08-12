@@ -101,7 +101,7 @@ public class SecurityConfig {
         .and().anonymous()
         .and()
           .csrf()
-            .requireCsrfProtectionMatcher(new AntPathRequestMatcher("/authorize")).disable();;
+            .requireCsrfProtectionMatcher(new AntPathRequestMatcher("/authorize")).disable();
       // @formatter:on
     }
 

@@ -1,12 +1,12 @@
 package it.infn.mw.iam.persistence.model;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -21,9 +21,8 @@ public class IamNotificationReceiver {
   @JoinColumn(name = "notification_id")
   private IamEmailNotification iamEmailNotification;
 
-  @OneToOne
-  @JoinColumn(name = "account_id")
-  private IamAccount account;
+  @Column(name = "email_address", length = 254)
+  private String emailAddress;
 
   public IamNotificationReceiver() {}
 
@@ -43,13 +42,14 @@ public class IamNotificationReceiver {
     this.iamEmailNotification = iamEmailNotification;
   }
 
-  public IamAccount getAccount() {
-    return account;
+  public String getEmailAddress() {
+    return emailAddress;
   }
 
-  public void setAccount(IamAccount account) {
-    this.account = account;
+  public void setEmailAddress(String emailAddress) {
+    this.emailAddress = emailAddress;
   }
+
 
   @Override
   public int hashCode() {
@@ -80,7 +80,7 @@ public class IamNotificationReceiver {
   @Override
   public String toString() {
     return "IamNotificationReceiver [id=" + id + ", iamEmailNotification=" + iamEmailNotification
-        + ", account=" + account + "]";
+        + ", emailAddress=" + emailAddress + "]";
   }
 
 }

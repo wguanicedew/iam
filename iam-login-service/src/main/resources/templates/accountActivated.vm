@@ -2,11 +2,8 @@ Dear $recipient,
 
 your Indigo account has been activated.
 
-Now you can login into Indigo with the following credentials:
+In order to login into Indigo follow this link to set your own new password:
 
---------------------
-username: $username
-password: $password
---------------------
+$resetPasswordUrl
 
 The Indigo-DC Team

@@ -21,23 +21,17 @@
 		</div>
 
 		<div class="formcontainer">
-			<form ng-submit="submit()" name="registrationForm"
-				id="registrationForm" class="form-horizontal">
+			<form ng-submit="submit()" name="registrationForm" id="registrationForm" class="form-horizontal">
 				<div class="row">
 					<div class="form-group col-md-12">
-						<label class="col-md-2 control-lable" for="givenname">First
-							Name</label>
+						<label class="col-md-2 control-lable" for="givenname">First Name</label>
 						<div class="col-md-7">
-							<input type="text" ng-model="user.name.givenName"
-								id="givenname" class="username form-control input-sm"
-								placeholder="First name" required ng-minlength="3" />
+							<input type="text" ng-model="user.name.givenName" id="givenname" class="username form-control input-sm" 
+								   placeholder="First name" required ng-minlength="3" />
 							<div class="has-error" ng-show="registrationForm.$dirty">
-								<span ng-show="registrationForm.givenname.$error.required">
-									This is a required field</span> <span
-									ng-show="registrationForm.givenname.$error.minlength">Minimum
-									length required is 3</span> <span
-									ng-show="registrationForm.givenname.$invalid">This field
-									is invalid</span>
+								<span ng-show="registrationForm.givenname.$error.required"> This is a required field</span> 
+								<span ng-show="registrationForm.givenname.$error.minlength">Minimum length required is 3</span> 
+								<span ng-show="registrationForm.givenname.$invalid">This field is invalid</span>
 							</div>
 						</div>
 					</div>
@@ -45,19 +39,14 @@
 
 				<div class="row">
 					<div class="form-group col-md-12">
-						<label class="col-md-2 control-lable" for="familyname">Family
-							Name</label>
+						<label class="col-md-2 control-lable" for="familyname">Family Name</label>
 						<div class="col-md-7">
-							<input type="text" ng-model="user.name.familyName"
-								id="familyName" class="username form-control input-sm"
-								placeholder="Family name" required ng-minlength="3" />
+							<input type="text" ng-model="user.name.familyName" id="familyName" class="username form-control input-sm"
+								   placeholder="Family name" required ng-minlength="3" />
 							<div class="has-error" ng-show="registrationForm.$dirty">
-								<span ng-show="registrationForm.familyname.$error.required">
-									This is a required field</span> <span
-									ng-show="registrationForm.familyname.$error.minlength">Minimum
-									length required is 3</span> <span
-									ng-show="registrationForm.familyname.$invalid">This
-									field is invalid</span>
+								<span ng-show="registrationForm.familyname.$error.required"> This is a required field</span> 
+								<span ng-show="registrationForm.familyname.$error.minlength">Minimum length required is 3</span> 
+								<span ng-show="registrationForm.familyname.$invalid">This field is invalid</span>
 							</div>
 						</div>
 					</div>
@@ -71,10 +60,8 @@
 								id="email" class="email form-control input-sm"
 								placeholder="Email" required />
 							<div class="has-error" ng-show="registrationForm.$dirty">
-								<span ng-show="registrationForm.email.$error.required">This
-									is a required field</span> <span
-									ng-show="registrationForm.email.$invalid">This field is
-									invalid </span>
+								<span ng-show="registrationForm.email.$error.required">This is a required field</span> 
+								<span ng-show="registrationForm.email.$invalid">This field is invalid </span>
 							</div>
 						</div>
 					</div>
@@ -84,21 +71,16 @@
 					<div class="form-group col-md-12">
 						<label class="col-md-2 control-lable" for="username">Username</label>
 						<div class="col-md-7">
-							<input type="text" ng-model="user.userName" id="username"
-								name="username" class="username form-control input-sm"
-								placeholder="Username" required ng-minlength="3"
-								username-available-validator
+							<input type="text" ng-model="user.userName" 
+								id="username" name="username" class="username form-control input-sm"
+								placeholder="Username" required ng-minlength="3" iam-username-available-validator
 								ng-model-options="{ debounce : { 'default' : 500 } }" />
 
 							<div class="has-error" ng-show="registrationForm.$dirty">
-								<span ng-show="registrationForm.usernname.$error.required">
-									This is a required field</span> <span
-									ng-show="registrationForm.username.$error.minlength">Minimum
-									length required is 3</span> <span
-									ng-show="registrationForm.username.$error.uniqueUsername">Username
-									already in use</span> <span
-									ng-show="registrationForm.username.$invalid">This field
-									is invalid</span>
+								<span ng-show="registrationForm.usernname.$error.required"> This is a required field</span> 
+								<span ng-show="registrationForm.username.$error.minlength">Minimum length required is 3</span>
+								<span ng-show="registrationForm.username.$error.uniqueUsername">Username already in use</span>
+								<span ng-show="registrationForm.username.$invalid">This field is invalid</span>
 							</div>
 						</div>
 					</div>
@@ -106,14 +88,9 @@
 
 				<div class="row">
 					<div class="form-actions floatRight">
-						<input type="submit" value="Register"
-							class="btn btn-primary btn-sm"
-							ng-disabled="registrationForm.$invalid">
-						<button type="button" ng-click="reset()"
-							class="btn btn-warning btn-sm"
-							ng-disabled="registrationForm.$pristine">Reset Form</button>
-						<button type="button" ng-click="dismiss()"
-							class="btn btn-danger btn-sm">Cancel</button>
+						<input type="submit" value="Register" class="btn btn-primary btn-sm" ng-disabled="registrationForm.$invalid">
+						<button type="button" ng-click="reset()" class="btn btn-warning btn-sm" ng-disabled="registrationForm.$pristine">Reset Form</button>
+						<button type="button" ng-click="dismiss()" class="btn btn-danger btn-sm">Cancel</button>
 					</div>
 				</div>
 			</form>
