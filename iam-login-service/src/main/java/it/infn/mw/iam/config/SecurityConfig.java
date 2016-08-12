@@ -77,7 +77,7 @@ public class SecurityConfig {
       // @formatter:off
 
       http.requestMatchers()
-        .antMatchers("/", "/login**", "/logout", "/authorize", "/manage/**")
+        .antMatchers("/", "/login**", "/logout", "/authorize", "/manage/**", "/dashboard**")
         .and()
         .sessionManagement()
           .enableSessionUrlRewriting(false)
@@ -101,7 +101,7 @@ public class SecurityConfig {
         .and().anonymous()
         .and()
           .csrf()
-            .requireCsrfProtectionMatcher(new AntPathRequestMatcher("/authorize")).disable();;
+            .requireCsrfProtectionMatcher(new AntPathRequestMatcher("/authorize")).disable();
       // @formatter:on
     }
 
@@ -481,40 +481,6 @@ public class SecurityConfig {
         .and()
         .csrf()
         .disable();
-    }
-  }
-
-  @Configuration
-  @Order(20)
-  public static class DashboardAdminConfig extends WebSecurityConfigurerAdapter {
-
-    @Autowired
-    private OAuth2AuthenticationProcessingFilter resourceFilter;
-
-    @Autowired
-    private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
-
-    @Autowired
-    private CorsFilter corsFilter;
-
-    @Override
-    protected void configure(final HttpSecurity http) throws Exception {
-
-      http.antMatcher("/dashboard/**")
-      .exceptionHandling()
-      .authenticationEntryPoint(authenticationEntryPoint)
-      .and()
-      .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
-      .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
-      .sessionManagement()
-      .sessionCreationPolicy(SessionCreationPolicy.NEVER)
-      .and()
-      .authorizeRequests()
-      .antMatchers("/dashboard/**")
-      .authenticated()
-      .and()
-      .csrf()
-      .disable();
     }
   }
 

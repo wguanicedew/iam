@@ -15,7 +15,7 @@
 <link
   rel="stylesheet"
   href="<c:url value='/webjars/bootstrap/css/bootstrap.min.css'/>"></link>
-  
+
 <link
   rel="stylesheet"
   href="resources/iam/css/iam.css"></link>

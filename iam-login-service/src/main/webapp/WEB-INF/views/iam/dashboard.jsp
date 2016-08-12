@@ -6,17 +6,18 @@
 
 <o:iamHeader title="INDIGO IAM | User Dashboard" />
 
-<body class="skin-blue" ng-app="ngRouteDashboard">
-	<div class="wrapper" ng-controller="HomeController">
+<body class="skin-blue" ng-app="dashboardApp">
+	<div class="wrapper">
 
-		<header class="main-header"> </header>
+		<header class="main-header"></header>
+		
 
 		<aside class="main-sidebar">
 			<mainsidebar />
 		</aside>
 
         <!-- Content Wrapper. Contains page content -->
-        <div class="content-wrapper" ui-view>
+        <div class="content-wrapper" ui-view="content">
         </div>
         <!-- /.content-wrapper -->
 	</div>
@@ -40,8 +41,8 @@
 	<script type="text/javascript"
 		src="<c:url value='/webjars/angularjs/angular-animate.js'/>"></script>
 
-    <script type="text/javascript"
-        src="<c:url value='/webjars/angular-ui-router/angular-ui-router.min.js'/>"></script>
+	<script type="text/javascript"
+		src="<c:url value='/webjars/angular-ui-router/angular-ui-router.min.js'/>"></script>
 
 	<script type="text/javascript"
 		src="<c:url value='/webjars/angularjs/angular-resource.min.js'/>"></script>
@@ -51,5 +52,24 @@
 
 	<script type="text/javascript" src="/resources/iam/js/adminLTE.js"></script>
 
-	<script type="text/javascript" src="/resources/iam/js/dashboard-app.js"></script>
+	<script type="text/javascript" src="/resources/iam/js/dashboard-app/dashboard-app.module.js"></script>
+	<script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/box.directive.js"></script>
+	<script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/header.directive.js"></script>
+	<script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/mainsidebar.directive.js"></script>
+	<script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/ng-confirm-click.directive.js"></script>
+	<script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/sidebar.directive.js"></script>
+	<script type="text/javascript" src="/resources/iam/js/dashboard-app/services/scim-factory.service.js"></script>
+	<script type="text/javascript" src="/resources/iam/js/dashboard-app/services/utils.service.js"></script>
+	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/home.controller.js"></script>
+	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/error.controller.js"></script>
+	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/users.controller.js"></script>
+	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/groups.controller.js"></script>
+	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/add-group.controller.js"></script>
+	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/edit-group.controller.js"></script>
+	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/add-user-group.controller.js"></script>
+	<script type="text/javascript" src="/resources/iam/js/dashboard-app/filters/start-from.filter.js"></script>
+    <script type="text/javascript" src="/resources/iam/js/dashboard-app/filters/get-by-id.filter.js"></script>
+    <script type="text/javascript" src="/resources/iam/js/dashboard-app/dashboard-app.config.js"></script>
+
+	
 </body>

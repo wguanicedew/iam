@@ -16,33 +16,24 @@
 			<div class="box box-primary">
 				<div class="box-body box-profile">
 					<img class="profile-user-img img-responsive img-circle"
-						src="{{userInfo['urn:indigo-dc:scim:schemas:IndigoUser'].userInfo.picture}}"
+						src="/resources/iam/img/default-avatar.png"
 						alt="User profile picture">
 
-					<h3 class="profile-username text-center">{{userInfo.name.formatted}}</h3>
+					<h3 class="profile-username text-center">{{home.userInfo.name.formatted}}</h3>
 
-					<p class="text-muted text-center">{{userInfo.displayName}}</p>
+					<p class="text-muted text-center">{{home.userInfo.displayName}}</p>
 
 					<ul class="list-group list-group-unbordered">
 						<li class="list-group-item"><b>E-mail</b> <a
-							class="pull-right" href="mailto:{{userInfo.emails[0].value}}">{{userInfo.emails[0].value}}</a>
+							class="pull-right"
+							href="mailto:{{home.userInfo.emails[0].value}}">{{home.userInfo.emails[0].value}}</a>
 						</li>
-						<li class="list-group-item"><b>E-mail verified</b> <span
-							class="pull-right label {{userInfo['urn:indigo-dc:scim:schemas:IndigoUser'].userInfo.emailVerified ? 'label-success' : 'label-danger'}}">{{userInfo['urn:indigo-dc:scim:schemas:IndigoUser'].userInfo.emailVerified
-								? 'Verified' : 'Not verified' }}</span></li>
-						<li class="list-group-item"><b>Gender</b> <a
-							class="pull-right">{{userInfo['urn:indigo-dc:scim:schemas:IndigoUser'].userInfo.gender}}</a>
-						</li>
-						<li class="list-group-item"><b>Birthdate</b> <a
-							class="pull-right">{{userInfo['urn:indigo-dc:scim:schemas:IndigoUser'].userInfo.birthdate}}</a>
-						</li>
-
 						<li class="list-group-item"><b>Created</b> <a
-							class="pull-right">{{userInfo.meta.created | date:'yyyy-MM-dd
-								HH:mm:ss'}}</a></li>
+							class="pull-right">{{home.userInfo.meta.created |
+								date:'medium'}}</a></li>
 						<li class="list-group-item"><b>Last update</b> <a
-							class="pull-right">{{userInfo.meta.lastModified |
-								date:'yyyy-MM-dd HH:mm:ss'}}</a></li>
+							class="pull-right">{{home.userInfo.meta.lastModified |
+								date:'medium'}}</a></li>
 
 					</ul>
 
@@ -56,11 +47,12 @@
 		<div class="col-md-9">
 
 			<!-- Groups Box -->
-			<div class="box box-primary" ng-show="userInfo.groups.length">
+			<div class="box box-primary" ng-show="home.userInfo.groups.length">
 				<div class="box-header with-border">
 					<h3 class="box-title">
-						<strong><i class="fa fa-users margin-r-5"></i> Groups</strong>
+						<strong>Groups</strong>
 					</h3>
+					<i class="fa fa-users pull-right"></i>
 				</div>
 				<!-- /.box-header -->
 				<div class="box-body">
@@ -71,30 +63,42 @@
 								<tr>
 									<th>#</th>
 									<th>Name</th>
-									<th>Description</th>
+									<th>Actions</th>
 								</tr>
 							</thead>
 							<tbody>
-								<tr ng-repeat="group in userInfo.groups">
+								<tr ng-repeat="group in home.userInfo.groups">
 									<td>{{$index + 1}}</td>
-									<td><a href="#group?id={{ group.value }}">{{
-											group.display }}</a></td>
-									<td />
+									<td><a href="">{{group.display}}</a></td>
+									<td>
+										<div class="btn-group">
+											<button class="btn btn-xs btn-danger">
+												<i class="fa fa-trash"></i> delete
+											</button>
+										</div>
+									</td>
 								</tr>
 							</tbody>
 						</table>
 					</div>
 				</div>
+				<div class="box-footer">
+
+					<button class="btn btn-success btn-xs"
+						ng-click="home.clickToOpen()">
+						<i class="fa fa-plus"></i> Add Group
+					</button>
+				</div>
 			</div>
 
 			<!-- OidcIds Box -->
 			<div class="box box-primary"
-				ng-show="userInfo['urn:indigo-dc:scim:schemas:IndigoUser'].oidcIds">
+				ng-show="home.userInfo['urn:indigo-dc:scim:schemas:IndigoUser'].oidcIds">
 				<div class="box-header with-border">
 					<h3 class="box-title">
-						<strong><i class="fa fa-google-plus margin-r-5"></i>
-							OpenID Connect Accounts</strong>
+						<strong> OpenID Connect Accounts</strong>
 					</h3>
+					<i class="fa fa-lock pull-right"></i>
 				</div>
 				<!-- /.box-header -->
 				<div class="box-body">
@@ -106,14 +110,22 @@
 									<th>#</th>
 									<th>Issuer</th>
 									<th>Subject</th>
+									<th>Actions</th>
 								</tr>
 							</thead>
 							<tbody>
 								<tr
-									ng-repeat="oidcId in userInfo['urn:indigo-dc:scim:schemas:IndigoUser'].oidcIds">
+									ng-repeat="oidcId in home.userInfo['urn:indigo-dc:scim:schemas:IndigoUser'].oidcIds">
 									<td>{{$index + 1}}</td>
 									<td>{{ oidcId.issuer }}</td>
 									<td>{{ oidcId.subject }}</td>
+									<td>
+										<div class="btn-group">
+											<button class="btn btn-xs btn-danger">
+												<i class="fa fa-trash"></i> delete
+											</button>
+										</div>
+									</td>
 								</tr>
 							</tbody>
 						</table>
@@ -123,12 +135,12 @@
 
 			<!-- sshKeys Box -->
 			<div class="box box-primary"
-				ng-show="userInfo['urn:indigo-dc:scim:schemas:IndigoUser'].sshKeys">
+				ng-show="home.userInfo['urn:indigo-dc:scim:schemas:IndigoUser'].sshKeys">
 				<div class="box-header with-border">
 					<h3 class="box-title">
-						<strong><i class="fa fa-google-plus margin-r-5"></i> SSH
-							keys</strong>
+						<strong>SSH keys</strong>
 					</h3>
+					<i class="fa fa-key pull-right"></i>
 				</div>
 				<!-- /.box-header -->
 				<div class="box-body">
@@ -141,17 +153,28 @@
 									<th>Label</th>
 									<th>Fingerprint</th>
 									<th>Primary</th>
+									<th>Actions</th>
 								</tr>
 							</thead>
 							<tbody>
 								<tr
-									ng-repeat="sshKey in userInfo['urn:indigo-dc:scim:schemas:IndigoUser'].sshKeys">
+									ng-repeat="sshKey in home.userInfo['urn:indigo-dc:scim:schemas:IndigoUser'].sshKeys">
 									<td>{{$index + 1}}</td>
 									<td>{{ sshKey.display }}</td>
-									<td><a href='' ng-click="showSshKeyValue(sshKey.value)">{{
+									<td><a href=''
+										ng-click="home.showSshKeyValue(sshKey.value)">{{
 											sshKey.fingerprint }}</a></td>
-									<td><span class="label label-success">{{
-											sshKey.primary ? 'primary' : '' }}</span></td>
+									<td>
+									   <span ng-show="sshKey.primary" class="label label-success">primary</span>
+									   <button ng-show="!sshKey.primary" class="btn btn-xs btn-default">Set primary</button>
+									</td>
+									<td>
+										<div class="btn-group">
+											<button class="btn btn-xs btn-danger">
+												<i class="fa fa-trash"></i> delete
+											</button>
+										</div>
+									</td>
 								</tr>
 							</tbody>
 						</table>
@@ -161,11 +184,12 @@
 
 			<!-- samlIds Box -->
 			<div class="box box-primary"
-				ng-show="userInfo['urn:indigo-dc:scim:schemas:IndigoUser'].samlIds">
+				ng-show="home.userInfo['urn:indigo-dc:scim:schemas:IndigoUser'].samlIds">
 				<div class="box-header with-border">
 					<h3 class="box-title">
-						<strong><i class="fa fa-cloud margin-r-5"></i> Saml IDs</strong>
+						<strong>Saml IDs</strong>
 					</h3>
+					<i class="fa fa-cloud pull-right"></i>
 				</div>
 				<!-- /.box-header -->
 				<div class="box-body">
@@ -177,23 +201,28 @@
 									<th>#</th>
 									<th>Identity Provider</th>
 									<th>User ID</th>
+									<th>Actions</th>
 								</tr>
 							</thead>
 							<tbody>
 								<tr
-									ng-repeat="samlId in userInfo['urn:indigo-dc:scim:schemas:IndigoUser'].samlIds">
+									ng-repeat="samlId in home.userInfo['urn:indigo-dc:scim:schemas:IndigoUser'].samlIds">
 									<td>{{$index + 1}}</td>
 									<td>{{ samlId.idpId }}</td>
 									<td>{{ samlId.userId }}</td>
+									<td>
+										<div class="btn-group">
+											<button class="btn btn-xs btn-danger">
+												<i class="fa fa-trash"></i> delete
+											</button>
+										</div>
+									</td>
 								</tr>
 							</tbody>
 						</table>
 					</div>
 				</div>
 			</div>
-
-			{{ userInfo }}
-
 		</div>
 	</div>
 </section>
