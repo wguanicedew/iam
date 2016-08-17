@@ -1,0 +1,9 @@
+Dear $recipient,
+
+your Indigo account has been activated.
+
+In order to login into Indigo follow this link to set your own new password:
+
+$resetPasswordUrl
+
+The Indigo-DC Team

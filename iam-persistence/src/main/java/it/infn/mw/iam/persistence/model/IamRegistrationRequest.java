@@ -1,7 +1,9 @@
 package it.infn.mw.iam.persistence.model;
 
 import java.util.Date;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -10,6 +12,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -43,6 +46,9 @@ public class IamRegistrationRequest {
   @Temporal(TemporalType.TIMESTAMP)
   @Column(nullable = true)
   private Date lastUpdateTime;
+
+  @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "request")
+  private List<IamEmailNotification> notifications;
 
   public IamRegistrationRequest() {}
 
@@ -106,6 +112,14 @@ public class IamRegistrationRequest {
     this.lastUpdateTime = lastUpdateTime;
   }
 
+  public List<IamEmailNotification> getNotifications() {
+    return notifications;
+  }
+
+  public void setNotifications(List<IamEmailNotification> notifications) {
+    this.notifications = notifications;
+  }
+
   @Override
   public int hashCode() {
 
@@ -137,9 +151,10 @@ public class IamRegistrationRequest {
 
   @Override
   public String toString() {
-
-    return "IamRegRequest [id=" + id + ", account=" + account + ", creationTime=" + creationTime
+    return "IamRegistrationRequest [id=" + id + ", uuid=" + uuid + ", creationTime=" + creationTime
         + ", status=" + status + ", lastUpdateTime=" + lastUpdateTime + "]";
   }
+
+
 
 }

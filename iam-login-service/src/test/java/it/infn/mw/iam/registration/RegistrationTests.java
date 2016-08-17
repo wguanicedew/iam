@@ -1,7 +1,9 @@
 package it.infn.mw.iam.registration;
 
 import static com.jayway.restassured.RestAssured.given;
-import static it.infn.mw.iam.api.scim.model.ScimConstants.SCIM_CONTENT_TYPE;
+import static it.infn.mw.iam.test.RegistrationUtils.confirmRegistrationRequest;
+import static it.infn.mw.iam.test.RegistrationUtils.createRegistrationRequest;
+import static it.infn.mw.iam.test.RegistrationUtils.deleteUser;
 
 import org.hamcrest.Matchers;
 import org.junit.BeforeClass;
@@ -15,8 +17,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.util.Assert;
 
 import it.infn.mw.iam.IamLoginService;
-import it.infn.mw.iam.api.scim.model.ScimConstants;
-import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.core.IamRegistrationRequestStatus;
 import it.infn.mw.iam.test.TestUtils;
 
@@ -53,10 +53,19 @@ public class RegistrationTests {
     RegistrationRequestDto reg = createRegistrationRequest("test_list_new");
 
     // @formatter:off
-    given().port(8080).auth().preemptive().oauth2(accessToken)
-        .param("status", IamRegistrationRequestStatus.NEW).when().get("/registration").then().log()
-        .body(true).statusCode(HttpStatus.OK.value())
-        .body("size()", Matchers.greaterThanOrEqualTo(1));
+    given()
+      .port(8080)
+      .auth()
+        .preemptive()
+        .oauth2(accessToken)
+      .param("status", IamRegistrationRequestStatus.NEW)
+    .when()
+      .get("/registration")
+    .then()
+      .log()
+        .body(true)
+      .statusCode(HttpStatus.OK.value())
+      .body("size()", Matchers.greaterThanOrEqualTo(1));
     // @formatter:on
 
     deleteUser(reg.getAccountId());
@@ -66,9 +75,48 @@ public class RegistrationTests {
   public void testListRequestsUnauthorized() {
 
     // @formatter:off
-    given().port(8080).param("status", IamRegistrationRequestStatus.NEW).when().get("/registration")
-        .then().log().body(true).statusCode(HttpStatus.UNAUTHORIZED.value());
+    given()
+      .port(8080)
+      .param("status", IamRegistrationRequestStatus.NEW)
+    .when()
+      .get("/registration")
+    .then()
+      .log()
+        .body(true)
+      .statusCode(HttpStatus.UNAUTHORIZED.value());
     // @formatter:on
+  }
+
+  @Test
+  public void testListAllRequests() {
+
+    String accessToken =
+        TestUtils.getAccessToken("registration-client", "secret", "registration:read");
+
+    RegistrationRequestDto reg1 = createRegistrationRequest("test_list_1");
+    RegistrationRequestDto reg2 = createRegistrationRequest("test_list_2");
+
+    String token = generator.getLastToken();
+    Assert.notNull(token);
+    confirmRegistrationRequest(token);
+
+    // @formatter:off
+    given()
+      .port(8080)
+      .auth()
+        .preemptive()
+        .oauth2(accessToken)
+    .when()
+      .get("/registration")
+    .then()
+      .log()
+        .body(true)
+      .statusCode(HttpStatus.OK.value())
+      .body("size()", Matchers.greaterThanOrEqualTo(2));
+    // @formatter:on
+
+    deleteUser(reg1.getAccountId());
+    deleteUser(reg2.getAccountId());
   }
 
   @Test
@@ -92,8 +140,15 @@ public class RegistrationTests {
     String badToken = "abcdefghilmnopqrstuvz";
 
     // @formatter:off
-    given().port(8080).pathParam("token", badToken).when().post("/registration/confirm/{token}")
-        .then().log().body(true).statusCode(HttpStatus.NOT_FOUND.value());
+    given()
+      .port(8080)
+      .pathParam("token", badToken)
+    .when()
+      .get("/registration/confirm/{token}")
+    .then()
+      .log()
+        .body(true)
+      .statusCode(HttpStatus.NOT_FOUND.value());
     // @formatter:on
 
     deleteUser(reg.getAccountId());
@@ -117,12 +172,21 @@ public class RegistrationTests {
 
     // approve it
     // @formatter:off
-    given().port(8080).auth().preemptive().oauth2(accessToken)
-        .param("decision", IamRegistrationRequestStatus.APPROVED.name())
-        .pathParam("uuid", reg.getUuid()).when().post("/registration/{uuid}").then().log()
-        .body(true).statusCode(HttpStatus.OK.value())
-        .body("status", Matchers.equalTo(IamRegistrationRequestStatus.APPROVED.name()))
-        .body("uuid", Matchers.equalTo(reg.getUuid()));
+    given()
+      .port(8080)
+      .auth()
+        .preemptive()
+        .oauth2(accessToken)
+      .pathParam("uuid", reg.getUuid())
+      .pathParam("decision", IamRegistrationRequestStatus.APPROVED.name())
+    .when()
+      .post("/registration/{uuid}/{decision}")
+    .then()
+      .log()
+        .body(true)
+      .statusCode(HttpStatus.OK.value())
+      .body("status", Matchers.equalTo(IamRegistrationRequestStatus.APPROVED.name()))
+      .body("uuid", Matchers.equalTo(reg.getUuid()));
     // @formatter:on
 
     deleteUser(reg.getAccountId());
@@ -146,12 +210,21 @@ public class RegistrationTests {
 
     // @formatter:off
     // reject it
-    given().port(8080).auth().preemptive().oauth2(accessToken)
-        .param("decision", IamRegistrationRequestStatus.REJECTED.name())
-        .pathParam("uuid", reg.getUuid()).when().post("/registration/{uuid}").then().log()
-        .body(true).statusCode(HttpStatus.OK.value())
-        .body("status", Matchers.equalTo(IamRegistrationRequestStatus.REJECTED.name()))
-        .body("uuid", Matchers.equalTo(reg.getUuid()));
+    given()
+      .port(8080)
+        .auth()
+          .preemptive()
+          .oauth2(accessToken)
+      .pathParam("uuid", reg.getUuid())
+      .pathParam("decision", IamRegistrationRequestStatus.REJECTED.name())
+    .when()
+      .post("/registration/{uuid}/{decision}")
+    .then()
+      .log()
+        .body(true)
+      .statusCode(HttpStatus.OK.value())
+      .body("status", Matchers.equalTo(IamRegistrationRequestStatus.REJECTED.name()))
+      .body("uuid", Matchers.equalTo(reg.getUuid()));
     // @formatter:on
 
     deleteUser(reg.getAccountId());
@@ -169,10 +242,19 @@ public class RegistrationTests {
 
     // @formatter:off
     // approve it without confirm
-    given().port(8080).auth().preemptive().oauth2(accessToken)
-        .param("decision", IamRegistrationRequestStatus.APPROVED.name())
-        .pathParam("uuid", reg.getUuid()).when().post("/registration/{uuid}").then().log()
-        .body(true).statusCode(HttpStatus.BAD_REQUEST.value());
+    given()
+      .port(8080)
+      .auth()
+        .preemptive()
+        .oauth2(accessToken)
+      .pathParam("uuid", reg.getUuid())
+      .pathParam("decision", IamRegistrationRequestStatus.APPROVED.name())
+    .when()
+      .post("/registration/{uuid}/{decision}")
+    .then()
+      .log()
+        .body(true)
+      .statusCode(HttpStatus.BAD_REQUEST.value());
     // @formatter:on
 
     deleteUser(reg.getAccountId());
@@ -193,9 +275,16 @@ public class RegistrationTests {
 
     // approve it
     // @formatter:off
-    given().port(8080).param("decision", IamRegistrationRequestStatus.APPROVED.name())
-        .pathParam("uuid", reg.getUuid()).when().post("/registration/{uuid}").then().log()
-        .body(true).statusCode(HttpStatus.UNAUTHORIZED.value());
+    given()
+      .port(8080)
+      .pathParam("uuid", reg.getUuid())
+      .pathParam("decision", IamRegistrationRequestStatus.APPROVED.name())
+    .when()
+      .post("/registration/{uuid}/{decision}")
+    .then()
+      .log()
+        .body(true)
+      .statusCode(HttpStatus.UNAUTHORIZED.value());
     // @formatter:on
 
     deleteUser(reg.getAccountId());
@@ -219,51 +308,57 @@ public class RegistrationTests {
 
     // approve it
     // @formatter:off
-    given().port(8080).auth().preemptive().oauth2(accessToken).param("decision", "wrong")
-        .pathParam("uuid", reg.getUuid()).when().post("/registration/{uuid}").then().log()
-        .body(true).statusCode(HttpStatus.BAD_REQUEST.value());
+    given()
+      .port(8080)
+      .auth()
+        .preemptive()
+        .oauth2(accessToken)
+      .pathParam("uuid", reg.getUuid())
+      .pathParam("decision", "wrong")
+    .when()
+      .post("/registration/{uuid}/{decision}")
+    .then()
+      .log()
+        .body(true)
+      .statusCode(HttpStatus.BAD_REQUEST.value());
     // @formatter:on
 
     deleteUser(reg.getAccountId());
   }
 
-  private RegistrationRequestDto createRegistrationRequest(final String username) {
-
-    String email = username + "@example.org";
-
-    ScimUser user =
-        new ScimUser.Builder(username).buildEmail(email).buildName("Test", "User").build();
-
+  @Test
+  public void testUsernameAvailable() {
+    String username = "tester";
     // @formatter:off
-    RegistrationRequestDto reg = given().port(8080).contentType(ScimConstants.SCIM_CONTENT_TYPE)
-        .body(user).log().all(true).when().post("/registration").then().log().body(true)
-        .statusCode(HttpStatus.OK.value()).extract().as(RegistrationRequestDto.class);;
-    // @formatter:on
-
-    return reg;
-  }
-
-  private void confirmRegistrationRequest(final String token) {
-
-    // @formatter:off
-    given().port(8080).pathParam("token", token).when().post("/registration/confirm/{token}").then()
-        .log().body(true).statusCode(HttpStatus.OK.value())
-        .body("status", Matchers.equalTo(IamRegistrationRequestStatus.CONFIRMED.name()));
+    given()
+      .port(8080)
+      .pathParam("username", username)
+    .when()
+      .get("registration/username-available/{username}")
+    .then()
+      .log()
+        .body(true)
+      .statusCode(HttpStatus.OK.value())
+      .body(Matchers.equalTo("true"))
+    ;
     // @formatter:on
   }
 
-  private void deleteUser(final String userId) {
-
-    String accessToken =
-        TestUtils.getAccessToken("registration-client", "secret", "scim:write scim:read");
-
-    String location = "/scim/Users/" + userId;
+  @Test
+  public void testUsernameAlreadyTaken() {
+    String username = "admin";
     // @formatter:off
-    given().port(8080).auth().preemptive().oauth2(accessToken).contentType(SCIM_CONTENT_TYPE).when()
-        .delete(location).then().statusCode(HttpStatus.NO_CONTENT.value());
-
-    given().port(8080).auth().preemptive().oauth2(accessToken).contentType(SCIM_CONTENT_TYPE).when()
-        .get(location).then().statusCode(HttpStatus.NOT_FOUND.value());
+    given()
+      .port(8080)
+      .pathParam("username", username)
+    .when()
+      .get("registration/username-available/{username}")
+    .then()
+      .log()
+        .body(true)
+      .statusCode(HttpStatus.OK.value())
+      .body(Matchers.equalTo("false"))
+    ;
     // @formatter:on
   }
 

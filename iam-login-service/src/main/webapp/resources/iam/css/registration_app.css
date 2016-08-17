@@ -25,11 +25,17 @@ body, .form-control{
 	padding-left: 20px;
 }
 
-.generic-container {
-  width:80%;
+.main-container {
   margin-left: 20px;
   margin-top: 20px;
   margin-bottom: 20px;
+  padding: 20px;
+  background-color: #EAE7E7;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.generic-container {
   padding: 20px;
   background-color: #EAE7E7;
   border: 1px solid #ddd;
@@ -53,6 +59,10 @@ body, .form-control{
 	background-color: yellow;
 }
 
+.username.ng-dirty.ng-invalid-unique-username {
+	background-color: orange;
+}
+
 .email.ng-valid {
 	background-color: lightgreen;
 }
@@ -63,4 +73,8 @@ body, .form-control{
 
 .email.ng-dirty.ng-invalid-email {
 	background-color: yellow;
+}
+
+.simil-link {
+	color: royalblue;
 }
