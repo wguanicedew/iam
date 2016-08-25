@@ -1,5 +1,9 @@
 package it.infn.mw.iam.api.account;
 
+import java.util.NoSuchElementException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +15,8 @@ import it.infn.mw.iam.registration.TokenGenerator;
 
 @Service
 public class DefaultPasswordResetService implements PasswordResetService {
+
+  private static final Logger logger = LoggerFactory.getLogger(DefaultPasswordResetService.class);
 
   @Autowired
   private IamAccountRepository accountRepository;
@@ -29,30 +35,42 @@ public class DefaultPasswordResetService implements PasswordResetService {
       .orElseThrow(() -> new ScimResourceNotFoundException(
           String.format("No account found for reset_key [%s]", resetKey)));
 
-    return (account.getUserInfo().getEmailVerified() && account.isActive());
+    return isAccountEnabled(account);
   }
 
   @Override
   public void changePassword(String resetKey, String password) {
-    // TODO: missing implementation
 
-    // find iamaccount
+    if (checkResetKey(resetKey)) {
+      IamAccount account = accountRepository.findByResetKey(resetKey).get();
+      // TODO: password digest?????
+      account.setPassword(password);
+      account.setResetKey(null);
 
-    // update password
-
-    // nullify resetKey?
+      accountRepository.save(account);
+    }
   }
 
   @Override
   public void forgotPassword(String email) {
-    IamAccount account =
-        accountRepository.findByEmail(email).orElseThrow(() -> new ScimResourceNotFoundException(
-            String.format("No account found for the email address [%s]", email)));
+    try {
+      IamAccount account = accountRepository.findByEmail(email).get();
 
-    String resetKey = tokenGenerator.generateToken();
-    account.setResetKey(resetKey);
+      if (isAccountEnabled(account)) {
+        String resetKey = tokenGenerator.generateToken();
+        account.setResetKey(resetKey);
+        accountRepository.save(account);
 
-    notificationService.createResetPasswordMessage(account);
+        notificationService.createResetPasswordMessage(account);
+      }
+    } catch (NoSuchElementException nse) {
+      logger.warn("No account found for the email {}. Message: {}", email, nse.getMessage());
+    }
+  }
+
+
+  private boolean isAccountEnabled(IamAccount account) {
+    return account.isActive() && account.getUserInfo().getEmailVerified();
   }
 
 }

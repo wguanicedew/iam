@@ -5,64 +5,63 @@ angular.module('registrationApp').controller('RequestManagementController', Requ
 RequestManagementController.$inject = ['$scope', 'RegistrationRequestService'];
 
 function RequestManagementController($scope, RegistrationRequestService){
-	var self = this;
+	var vm = this;
+	vm.operationResult;
+	vm.textAlert;
+	
+	vm.listRequests = listRequests;
+	vm.approveRequest = approveRequest;
+	vm.rejectRequest = rejectRequest;
 
-	$scope.list = [];
-	$scope.sortType = 'status';
-	$scope.sortReverse = false;
+	vm.list = [];
+	vm.sortType = 'status';
+	vm.sortReverse = false;
+	
 
-	self.listRequests = function(status) {
+	function listRequests(status) {
 		RegistrationRequestService.listRequests(status).then(
 				function(result) {
-					self.list = result.data;
+					vm.list = result.data;
 				},
 				function(errResponse) {
-					$scope.textAlert = errResponse.data.error_description
-							|| errResponse.data.detail;
-					$scope.showErrorAlert = true;
+					vm.textAlert = errResponse.data.error_description || errResponse.data.detail;
+					vm.operationResult = 'err';
 				})
 	};
 
-	self.approveRequest = function(uuid) {
+	function approveRequest(uuid) {
 		RegistrationRequestService.updateRequest(uuid, 'APPROVED').then(
 				function() {
-					$scope.textAlert = "Approvation success";
-					$scope.showSuccessAlert = true;
-					self.listRequests();
+					vm.textAlert = "Approvation success";
+					vm.operationResult = 'ok';
+					vm.listRequests();
 				},
 				function(errResponse) {
-					$scope.textAlert = errResponse.data.error_description
-							|| errResponse.data.detail;
-					$scope.showErrorAlert = true;
+					vm.textAlert = errResponse.data.error_description || errResponse.data.detail;
+					vm.operationResult = 'err';
 				})
 	};
 
-	self.rejectRequest = function(uuid) {
+	function rejectRequest(uuid) {
 		RegistrationRequestService.updateRequest(uuid, 'REJECTED').then(
 				function() {
-					$scope.textAlert = "Operation success";
-					$scope.showSuccessAlert = true;
-					self.listRequests();
+					vm.textAlert = "Operation success";
+					vm.operationResult = 'ok';
+					vm.listRequests();
 				},
 				function(errResponse) {
-					$scope.textAlert = errResponse.data.error_description
-							|| errResponse.data.detail;
-					$scope.showErrorAlert = true;
+					vm.textAlert = errResponse.data.error_description || errResponse.data.detail;
+					vm.operationResult = 'err';
 				})
-	};
-
-	// switch flag
-	$scope.switchBool = function(value) {
-		$scope[value] = !$scope[value];
 	};
 
 };
 
 angular.module('registrationApp').controller('RegistrationController', RegistrationController);
 
-RegistrationController.$inject = [ '$scope', '$uibModalInstance', 'RegistrationRequestService' ];
+RegistrationController.$inject = [ '$scope', '$uibModalInstance', '$window', 'RegistrationRequestService' ];
 
-function RegistrationController($scope, $uibModalInstance, RegistrationRequestService) {
+function RegistrationController($scope, $uibModalInstance, $window, RegistrationRequestService) {
 	$scope.user = {
 		schemas : [ "urn:ietf:params:scim:schemas:core:2.0:User",
 				"urn:indigo-dc:scim:schemas:IndigoUser" ],
@@ -82,21 +81,18 @@ function RegistrationController($scope, $uibModalInstance, RegistrationRequestSe
 	$scope.list = [];
 	$scope.sortType = 'status';
 	$scope.sortReverse = false;
+	
+	$scope.textAlert;
+	$scope.operationResult;
 
 	$scope.createUser = function(user) {
 		RegistrationRequestService.create(user).then(
-				function(response) {
-					$scope.textAlert = "Registration success";
-					$scope.showSuccessAlert = true;
-					$scope.showErrorAlert = false;
-					$scope.reset();
-					return response.data;
+				function() {
+					$window.location.href = "/registration/submitted";
 				},
 				function(errResponse) {
-					$scope.textAlert = errResponse.data.error_description
-							|| errResponse.data.detail;
-					$scope.showErrorAlert = true;
-					$scope.showSuccessAlert = false;
+					$scope.operationResult = 'err';
+					$scope.textAlert = errResponse.data.error_description || errResponse.data.detail;
 					return $q.reject(errResponse);
 				})
 	};
@@ -122,11 +118,6 @@ function RegistrationController($scope, $uibModalInstance, RegistrationRequestSe
 	$scope.dismiss = function() {
 		$uibModalInstance.close();
 	};
-
-	// switch flag
-	$scope.switchBool = function(value) {
-		$scope[value] = !$scope[value];
-	};
 };
 
 angular.module('registrationApp').controller('RegistrationFormModalController', RegistrationFormModalController);
@@ -138,7 +129,7 @@ function RegistrationFormModalController($scope, $uibModal) {
 		$uibModal.open({
 			templateUrl : "/resources/iam/template/registration.html",
 			controller : "RegistrationController",
-			size : 'lg',
+			size : '600px',
 			animation : true
 		});
 	};

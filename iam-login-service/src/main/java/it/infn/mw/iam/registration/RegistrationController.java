@@ -104,4 +104,9 @@ public class RegistrationController {
     return new ModelAndView("iam/verify");
   }
 
+  @RequestMapping(value = "/registration/submitted", method = RequestMethod.GET)
+  public ModelAndView submissionSuccess() {
+    return new ModelAndView("iam/requestSubmitted");
+  }
+
 }

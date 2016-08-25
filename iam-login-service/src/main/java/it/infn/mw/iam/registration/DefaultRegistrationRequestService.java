@@ -136,6 +136,7 @@ public class DefaultRegistrationRequestService implements RegistrationRequestSer
 
     } else if (CONFIRMED.equals(status)) {
       reg.getAccount().getUserInfo().setEmailVerified(true);
+      reg.getAccount().setConfirmationKey(null);
       notificationService.createAdminHandleRequestMessage(reg);
 
     } else if (REJECTED.equals(status)) {

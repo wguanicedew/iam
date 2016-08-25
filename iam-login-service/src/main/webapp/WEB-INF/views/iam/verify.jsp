@@ -16,10 +16,8 @@
 				</div>
 
 				<div style="font-size: medium;">
-					<p>Your Indigo registration request has been confirmed
-						successfully.</p>
-					<p>Now you have to wait for approval from Indigo Admin before
-						start using Indigo services.</p>
+					<p class="text-center">Your Indigo registration request has been confirmed successfully.</p>
+					<p class="text-center">Now you have to wait for approval from Indigo Admin before start using Indigo services.</p>
 				</div>
 			</c:if>
 
@@ -28,9 +26,9 @@
 					<h3>Confirmation failure</h3>
 				</div>
 				<div style="font-size: medium;">
-					<p>Your Indigo registration request fail.</p>
-					<p>Detailed error message:</p>
-					<p>${verificationMessage}</p>
+					<p class="text-center">Your Indigo registration request fail.</p>
+					<p class="text-center">Detailed error message:</p>
+					<p class="text-center">${verificationMessage}</p>
 				</div>
 			</c:if>
 

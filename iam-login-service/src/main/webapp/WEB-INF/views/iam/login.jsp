@@ -59,6 +59,13 @@
           </div>
         </c:if>
         
+        <c:if test="${resetPasswordMessage != null}">
+			<div class="alert alert-${resetPasswordStyle}">
+				${resetPasswordMessage} 
+			</div>
+		</c:if>
+        
+        
         <form
           id="login-form"
           action="${loginUrl}"
@@ -131,8 +138,8 @@
 					</div>
 				</c:if>
 				
-				<div id="forgot-password" style="margin: 10px" ng-controller="ForgotPasswordModalController">
-				  <a ng-click="open()">Forgot your password?</a>
+				<div id="forgot-password" ng-controller="ForgotPasswordModalController">
+				  <a class="btn btn-link btn-block" ng-click="open()">Forgot your password?</a>
 				</div>
 
       		</div>

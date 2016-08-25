@@ -2,13 +2,40 @@
 
 angular.module('passwordResetApp').controller('ResetPasswordController', ResetPasswordController);
 
-ResetPasswordController.$inject = ['$scope']
+ResetPasswordController.$inject = ['$scope', 'ResetPasswordService']
 
-function ResetPasswordController($scope){
+function ResetPasswordController($scope, ResetPasswordService){
 	var vm = this;
 	vm.password;
-	vm.password-repeat;
+	vm.passwordrepeat;
+	vm.resetkey;
+	vm.operationResult;
+	vm.textAlert;
 	
+	vm.submit = submit;
+	vm.reset = reset;
+	
+	vm.messages = {
+		'ok': "Your password has been update successfully. Go back to home page and log into Indigo!",
+		'err': "An error occuors. Password has not been changed!"
+	};
+	
+	
+	function submit(){
+		ResetPasswordService.changePassword(vm.resetKey, vm.password).then(
+			function(response){
+				vm.operationResult = response.data;
+				vm.textAlert = vm.messages[vm.updateResult];
+				vm.reset();
+			}
+		);
+	};
+	
+	function reset(){
+		vm.password = '';
+		vm.passwordrepeat = '';
+		$scope.changePasswdForm.$setPristine();
+	};
 };
 
 
@@ -21,32 +48,20 @@ function ForgotPasswordController($scope, $uibModalInstance, ResetPasswordServic
 	$scope.email;
 	
 	$scope.submit = function(){
-		ResetPasswordService.forgotPassword($scope.email).then(
-				function(response) {
-					$scope.textAlert = "Success";
-					$scope.showSuccessAlert = true;
-					$scope.showErrorAlert = false;
-					$scope.reset();
-					return response.data;
-				},
-				function(errResponse) {
-					$scope.textAlert = errResponse.data.error_description
-							|| errResponse.data.detail;
-					$scope.showErrorAlert = true;
-					$scope.showSuccessAlert = false;
-					return $q.reject(errResponse);
-				}
-		);
+		ResetPasswordService.forgotPassword($scope.email);
+		$scope.operationResult = 'ok';
+		$scope.textAlert='If the email address specified is registered within a valid user, an email will be sent with a URL for reset password.'
+		$scope.reset();
 	}
 	
 	$scope.dismiss = function() {
 		$uibModalInstance.close();
 	};
 	
-	// switch flag
-	$scope.switchBool = function(value) {
-		$scope[value] = !$scope[value];
-	};
+	$scope.reset = function(){
+		$scope.email = '';
+		$scope.forgotPasswordForm.$setPristine();
+	}
 };
 
 
@@ -59,7 +74,7 @@ function ForgotPasswordModalController($scope, $uibModal){
 		$uibModal.open({
 			templateUrl : "/resources/iam/template/forgotPassword.html",
 			controller : "ForgotPasswordController",
-			size : 'lg',
+			size : '600px',
 			animation : true
 		});
 	};

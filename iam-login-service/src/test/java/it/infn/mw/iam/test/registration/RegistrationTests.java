@@ -1,4 +1,4 @@
-package it.infn.mw.iam.registration;
+package it.infn.mw.iam.test.registration;
 
 import static com.jayway.restassured.RestAssured.given;
 import static it.infn.mw.iam.test.RegistrationUtils.confirmRegistrationRequest;
@@ -18,6 +18,8 @@ import org.springframework.util.Assert;
 
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.core.IamRegistrationRequestStatus;
+import it.infn.mw.iam.registration.PersistentUUIDTokenGenerator;
+import it.infn.mw.iam.registration.RegistrationRequestDto;
 import it.infn.mw.iam.test.TestUtils;
 
 @RunWith(SpringJUnit4ClassRunner.class)

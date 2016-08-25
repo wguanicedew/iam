@@ -1,4 +1,4 @@
-package it.infn.mw.iam.notification;
+package it.infn.mw.iam.test.notification;
 
 import static it.infn.mw.iam.test.RegistrationUtils.createRegistrationRequest;
 import static it.infn.mw.iam.test.RegistrationUtils.deleteUser;
@@ -27,6 +27,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.subethamail.wiser.Wiser;
 
 import it.infn.mw.iam.IamLoginService;
+import it.infn.mw.iam.notification.MockTimeProvider;
+import it.infn.mw.iam.notification.NotificationService;
 import it.infn.mw.iam.persistence.repository.IamEmailNotificationRepository;
 import it.infn.mw.iam.registration.RegistrationRequestDto;
 import it.infn.mw.iam.test.TestUtils;

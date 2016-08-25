@@ -19,7 +19,7 @@ function RegistrationRequestService($http){
 			headers : {
 				'Accept' : 'application/scim+json',
 				'Content-Type' : 'application/scim+json'
-			}
+			},
 		}
 		return $http.post('/registration', user, config);
 	}

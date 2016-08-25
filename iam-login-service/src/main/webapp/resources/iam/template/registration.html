@@ -1,99 +1,101 @@
-<div class="generic-container">
-	<div class="panel panel-default">
-		<div class="panel-heading">
-			<span class="lead">User Registration Form </span>
-		</div>
-
-		<div>
-			<div class="alert alert-success" ng-show="showSuccessAlert">
-				<button type="button" class="close"
-					data-ng-click="switchBool('showSuccessAlert')">&times;</button>
-				<strong>Done!</strong> {{textAlert}}
-			</div>
-		</div>
-
-		<div>
-			<div class="alert alert-danger" ng-show="showErrorAlert">
-				<button type="button" class="close"
-					data-ng-click="switchBool('showErrorAlert')">&times;</button>
-				<strong>Error!</strong> {{textAlert}}
-			</div>
-		</div>
-
-		<div class="formcontainer">
-			<form ng-submit="submit()" name="registrationForm" id="registrationForm" class="form-horizontal">
-				<div class="row">
-					<div class="form-group col-md-12">
-						<label class="col-md-2 control-lable" for="givenname">First Name</label>
-						<div class="col-md-7">
-							<input type="text" ng-model="user.name.givenName" id="givenname" class="username form-control input-sm" 
-								   placeholder="First name" required ng-minlength="3" />
-							<div class="has-error" ng-show="registrationForm.$dirty">
-								<span ng-show="registrationForm.givenname.$error.required"> This is a required field</span> 
-								<span ng-show="registrationForm.givenname.$error.minlength">Minimum length required is 3</span> 
-								<span ng-show="registrationForm.givenname.$invalid">This field is invalid</span>
-							</div>
-						</div>
-					</div>
-				</div>
-
-				<div class="row">
-					<div class="form-group col-md-12">
-						<label class="col-md-2 control-lable" for="familyname">Family Name</label>
-						<div class="col-md-7">
-							<input type="text" ng-model="user.name.familyName" id="familyName" class="username form-control input-sm"
-								   placeholder="Family name" required ng-minlength="3" />
-							<div class="has-error" ng-show="registrationForm.$dirty">
-								<span ng-show="registrationForm.familyname.$error.required"> This is a required field</span> 
-								<span ng-show="registrationForm.familyname.$error.minlength">Minimum length required is 3</span> 
-								<span ng-show="registrationForm.familyname.$invalid">This field is invalid</span>
-							</div>
-						</div>
-					</div>
-				</div>
-
-				<div class="row">
-					<div class="form-group col-md-12">
-						<label class="col-md-2 control-lable" for="email">Email</label>
-						<div class="col-md-7">
-							<input type="email" ng-model="user.emails[0].value"
-								id="email" class="email form-control input-sm"
-								placeholder="Email" required />
-							<div class="has-error" ng-show="registrationForm.$dirty">
-								<span ng-show="registrationForm.email.$error.required">This is a required field</span> 
-								<span ng-show="registrationForm.email.$invalid">This field is invalid </span>
-							</div>
-						</div>
-					</div>
-				</div>
-
-				<div class="row">
-					<div class="form-group col-md-12">
-						<label class="col-md-2 control-lable" for="username">Username</label>
-						<div class="col-md-7">
-							<input type="text" ng-model="user.userName" 
-								id="username" name="username" class="username form-control input-sm"
-								placeholder="Username" required ng-minlength="3" iam-username-available-validator
-								ng-model-options="{ debounce : { 'default' : 500 } }" />
-
-							<div class="has-error" ng-show="registrationForm.$dirty">
-								<span ng-show="registrationForm.usernname.$error.required"> This is a required field</span> 
-								<span ng-show="registrationForm.username.$error.minlength">Minimum length required is 3</span>
-								<span ng-show="registrationForm.username.$error.uniqueUsername">Username already in use</span>
-								<span ng-show="registrationForm.username.$invalid">This field is invalid</span>
-							</div>
-						</div>
-					</div>
-				</div>
-
-				<div class="row">
-					<div class="form-actions floatRight">
-						<input type="submit" value="Register" class="btn btn-primary btn-sm" ng-disabled="registrationForm.$invalid">
-						<button type="button" ng-click="reset()" class="btn btn-warning btn-sm" ng-disabled="registrationForm.$pristine">Reset Form</button>
-						<button type="button" ng-click="dismiss()" class="btn btn-danger btn-sm">Cancel</button>
-					</div>
-				</div>
-			</form>
+<div class="container" style="width: inherit;">
+	<h2>User Registration Form </h2>
+			
+	<div ng-show="operationResult != null">
+		<div class="alert" ng-class="{'alert-success': operationResult=='ok', 'alert-danger': operationResult=='err'}">
+			<button class="close" ng-click="operationResult=null" aria-label="close">&times;</button>
+			<strong>Done!</strong> {{textAlert}}
 		</div>
 	</div>
+
+	<div>
+		<div class="alert alert-danger" ng-show="showErrorAlert">
+			<button type="button" class="close"
+				data-ng-click="switchBool('showErrorAlert')">&times;</button>
+			<strong>Error!</strong> {{textAlert}}
+		</div>
+	</div>
+			
+	<form class="form-horizontal" ng-submit="submit()" name="registrationForm" id="registrationForm">
+	
+		<div class="form-group">
+			<label class="control-label col-sm-2" for="givenname">Name</label>
+			<div ng-class="{'has-error': registrationForm.givenname.$dirty && registrationForm.givenname.$invalid, 'has-success': registrationForm.givenname.$dirty && !registrationForm.givenname.$invalid}">
+				<div class="col-sm-10">
+					<input class="form-control" name="givenname" id="givenname" type="text" ng-model="user.name.givenName" placeholder="First name" required ng-minlength="3" />
+					<span class="glyphicon form-control-feedback" 
+						  ng-class="{'glyphicon-remove': registrationForm.givenname.$dirty && registrationForm.givenname.$invalid, 'glyphicon-ok': registrationForm.givenname.$dirty && registrationForm.givenname.$valid}" 
+						  style="right: 15px"></span>
+					<span class="help-block" ng-show="registrationForm.givenname.$dirty && registrationForm.givenname.$error.required"> This is a required field</span> 
+					<span class="help-block" ng-show="registrationForm.givenname.$dirty && registrationForm.givenname.$error.minlength">Minimum length required is 3</span> 
+					<span class="help-block" ng-show="registrationForm.givenname.$dirty && registrationForm.givenname.$invalid">This field is invalid</span>
+				</div>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label class="control-label col-sm-2" for="familyname">Surname</label>
+			<div ng-class="{'has-error': registrationForm.familyname.$dirty && registrationForm.familyname.$invalid, 'has-success': registrationForm.familyname.$dirty && !registrationForm.familyname.$invalid}">
+				<div class="col-sm-10">
+					<input class="form-control" name="familyname" id="familyname" type="text" ng-model="user.name.familyName" placeholder="Family name" required ng-minlength="3" />
+					<span class="glyphicon form-control-feedback" 
+						  ng-class="{'glyphicon-remove': registrationForm.familyname.$dirty && registrationForm.familyname.$invalid, 'glyphicon-ok': registrationForm.familyname.$dirty && registrationForm.familyname.$valid}" 
+						  style="right: 15px"></span>
+					<span class="help-block" ng-show="registrationForm.familyname.$dirty && registrationForm.familyname.$error.required"> This is a required field</span> 
+					<span class="help-block" ng-show="registrationForm.familyname.$dirty && registrationForm.familyname.$error.minlength">Minimum length required is 3</span> 
+					<span class="help-block" ng-show="registrationForm.familyname.$dirty && registrationForm.familyname.$invalid">This field is invalid</span>
+				</div>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label class="control-label col-sm-2" for="email">Email</label>
+			<div ng-class="{'has-error': registrationForm.email.$dirty && registrationForm.email.$invalid, 'has-success': registrationForm.email.$dirty && !registrationForm.email.$invalid}">
+				<div class="col-sm-10">
+					<input class="form-control" name="email" id="email" type="email" ng-model="user.emails[0].value" placeholder="Email" required />
+					<span class="glyphicon form-control-feedback" 
+						  ng-class="{'glyphicon-remove': registrationForm.email.$dirty && registrationForm.email.$invalid, 'glyphicon-ok': registrationForm.email.$dirty && registrationForm.email.$valid}" 
+						  style="right: 15px"></span>
+					<span class="help-block" ng-show="registrationForm.email.$dirty && registrationForm.email.$error.required">This is a required field</span> 
+					<span class="help-block" ng-show="registrationForm.email.$dirty && registrationForm.email.$invalid">This field is invalid </span>
+				</div>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label class="control-label col-sm-2" for="username">Username</label>
+			<div ng-class="{'has-error': registrationForm.username.$dirty && registrationForm.username.$invalid, 'has-success': registrationForm.username.$dirty && !registrationForm.username.$invalid}">
+				<div class="col-sm-10">
+					<input class="form-control" id="username" name="username" type="text" ng-model="user.userName" placeholder="Username" 
+						required ng-minlength="3" iam-username-available-validator ng-model-options="{ debounce : { 'default' : 500 } }" />
+					<span class="glyphicon form-control-feedback" 
+					  ng-class="{'glyphicon-remove': registrationForm.username.$dirty && registrationForm.username.$invalid, 'glyphicon-ok': registrationForm.username.$dirty && registrationForm.username.$valid}" 
+					  style="right: 15px"></span>
+					<span class="help-block" ng-show="registrationForm.username.$dirty && registrationForm.username.$error.required"> This is a required field</span> 
+					<span class="help-block" ng-show="registrationForm.username.$dirty && registrationForm.username.$error.minlength">Minimum length required is 3</span>
+					<span class="help-block" ng-show="registrationForm.username.$dirty && registrationForm.username.$error.uniqueUsername">Username already in use</span>
+					<span class="help-block" ng-show="registrationForm.username.$dirty && registrationForm.username.$invalid">This field is invalid</span>
+				</div>
+			</div>
+		</div>
+		
+		<div class="form-group">
+			<label class="control-label col-sm-2" for="notes">Notes</label>
+			<div>
+				<div class="col-sm-10">
+					<textarea class="form-control" id="notes" name="notes" rows="5" placeholder="Notes for admins"></textarea>
+				</div>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<div class="col-sm-offset-6 col-sm-6">
+				<div style="float: right;">
+					<input class="btn btn-primary btn-sm" type="submit" value="Register" ng-disabled="registrationForm.$invalid">
+					<button class="btn btn-warning btn-sm" type="button" ng-click="reset()" ng-disabled="registrationForm.$pristine">Reset Form</button>
+					<button class="btn btn-danger btn-sm" type="button" ng-click="dismiss()" >Cancel</button>
+				</div>
+			</div>
+		</div>
+	</form>
 </div>

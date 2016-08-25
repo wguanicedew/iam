@@ -1,9 +1,9 @@
 The following user has confirmed his membership request:
 
 ---------------------
-Name:
-Username:
-Email:
+Name: $name
+Username: $username
+Email: $email
 ---------------------
 
 	

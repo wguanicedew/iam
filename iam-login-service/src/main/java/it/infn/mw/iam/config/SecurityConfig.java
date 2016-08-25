@@ -469,6 +469,7 @@ public class SecurityConfig {
               .antMatchers(HttpMethod.GET, "/registration/username-exists/**").permitAll()
               .antMatchers(HttpMethod.GET, "/registration/confirm/**").permitAll()
               .antMatchers(HttpMethod.GET, "/registration/verify/**").permitAll()
+              .antMatchers(HttpMethod.GET, "/registration/submitted").permitAll()
               .antMatchers("/registration**").authenticated()
           .and()
             .csrf()

@@ -1,4 +1,4 @@
-package it.infn.mw.iam.notification;
+package it.infn.mw.iam.test.notification;
 
 import static it.infn.mw.iam.test.RegistrationUtils.confirmRegistrationRequest;
 import static it.infn.mw.iam.test.RegistrationUtils.createRegistrationRequest;
@@ -28,6 +28,9 @@ import org.subethamail.wiser.WiserMessage;
 
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.core.IamDeliveryStatus;
+import it.infn.mw.iam.notification.MockTimeProvider;
+import it.infn.mw.iam.notification.NotificationProperties;
+import it.infn.mw.iam.notification.NotificationService;
 import it.infn.mw.iam.persistence.model.IamEmailNotification;
 import it.infn.mw.iam.persistence.repository.IamEmailNotificationRepository;
 import it.infn.mw.iam.registration.PersistentUUIDTokenGenerator;
