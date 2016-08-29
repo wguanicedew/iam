@@ -59,23 +59,15 @@ function RequestManagementController($scope, RegistrationRequestService){
 
 angular.module('registrationApp').controller('RegistrationController', RegistrationController);
 
-RegistrationController.$inject = [ '$scope', '$uibModalInstance', '$window', 'RegistrationRequestService' ];
+RegistrationController.$inject = [ '$scope', '$q', '$uibModalInstance', '$window', 'RegistrationRequestService' ];
 
-function RegistrationController($scope, $uibModalInstance, $window, RegistrationRequestService) {
-	$scope.user = {
-		schemas : [ "urn:ietf:params:scim:schemas:core:2.0:User",
-				"urn:indigo-dc:scim:schemas:IndigoUser" ],
-		name : {
-			givenName : '',
-			familyName : '',
-		},
-		active : "false",
-		userName : '',
-		emails : [ {
-			type : "work",
-			value : '',
-			primary : "true",
-		} ],
+function RegistrationController($scope, $q, $uibModalInstance, $window, RegistrationRequestService) {
+	$scope.request = {
+		givenname : '',
+		familyname : '',
+		username : '',
+		email : '',
+		notes : '',
 	};
 
 	$scope.list = [];
@@ -85,37 +77,40 @@ function RegistrationController($scope, $uibModalInstance, $window, Registration
 	$scope.textAlert;
 	$scope.operationResult;
 
-	$scope.createUser = function(user) {
-		RegistrationRequestService.create(user).then(
-				function() {
-					$window.location.href = "/registration/submitted";
-				},
-				function(errResponse) {
-					$scope.operationResult = 'err';
-					$scope.textAlert = errResponse.data.error_description || errResponse.data.detail;
-					return $q.reject(errResponse);
-				})
+	$scope.createRequest = createRequest; 
+	$scope.submit = submit;
+	$scope.reset = reset;
+	$scope.dismiss = dismiss;
+	
+		
+	function createRequest(request) {
+		RegistrationRequestService.createRequest(request).then(
+			function() {
+				$window.location.href = "/registration/submitted";
+			},
+			function(errResponse) {
+				$scope.operationResult = 'err';
+				$scope.textAlert = errResponse.data.error_description || errResponse.data.detail;
+				return $q.reject(errResponse);
+			})
 	};
 
-	$scope.submit = function() {
-		$scope.createUser($scope.user);
+	function submit() {
+		$scope.createRequest($scope.request);
 	};
 
-	$scope.reset = function() {
-		$scope.user.name = {
-			givenName : '',
-			familyName : '',
+	function reset() {
+		$scope.request = {
+			givenname : '',
+			familyname : '',
+			username : '',
+			email : '',
+			notes : '',
 		};
-		$scope.user.userName = '';
-		$scope.user.emails = [ {
-			type : "work",
-			value : '',
-			primary : "true",
-		} ];
 		$scope.registrationForm.$setPristine();
 	};
 
-	$scope.dismiss = function() {
+	function dismiss() {
 		$uibModalInstance.close();
 	};
 };

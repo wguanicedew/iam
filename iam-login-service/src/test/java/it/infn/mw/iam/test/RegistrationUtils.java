@@ -6,8 +6,8 @@ import static it.infn.mw.iam.api.scim.model.ScimConstants.SCIM_CONTENT_TYPE;
 import org.hamcrest.Matchers;
 import org.springframework.http.HttpStatus;
 
-import it.infn.mw.iam.api.scim.model.ScimConstants;
-import it.infn.mw.iam.api.scim.model.ScimUser;
+import com.jayway.restassured.http.ContentType;
+
 import it.infn.mw.iam.core.IamRegistrationRequestStatus;
 import it.infn.mw.iam.registration.RegistrationRequestDto;
 
@@ -16,19 +16,22 @@ public class RegistrationUtils {
   public static RegistrationRequestDto createRegistrationRequest(String username) {
 
     String email = username + "@example.org";
-
-    ScimUser user =
-        new ScimUser.Builder(username).buildEmail(email).buildName("Test", "User").build();
+    RegistrationRequestDto request = new RegistrationRequestDto();
+    request.setGivenname("Test");
+    request.setFamilyname("User");
+    request.setEmail(email);
+    request.setUsername(username);
+    request.setNotes("Some short notes...");
 
     // @formatter:off
     RegistrationRequestDto reg = given()
         .port(8080)
-        .contentType(ScimConstants.SCIM_CONTENT_TYPE)
-        .body(user)
+        .contentType(ContentType.JSON)
+        .body(request)
           .log()
             .all(true)
         .when()
-          .post("/registration")
+          .post("/registration/create")
         .then()
           .log()
             .body(true)

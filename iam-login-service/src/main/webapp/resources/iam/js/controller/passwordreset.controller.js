@@ -25,7 +25,7 @@ function ResetPasswordController($scope, ResetPasswordService){
 		ResetPasswordService.changePassword(vm.resetKey, vm.password).then(
 			function(response){
 				vm.operationResult = response.data;
-				vm.textAlert = vm.messages[vm.updateResult];
+				vm.textAlert = vm.messages[vm.operationResult];
 				vm.reset();
 			}
 		);

@@ -7,26 +7,26 @@ RegistrationRequestService.$inject = ['$http'];
 function RegistrationRequestService($http){
 	
 	var service = {
-		create : create,
+		createRequest : createRequest,
 		listRequests : listRequests,
 		updateRequest : updateRequest
 	};
 
 	return service;
 
-	function create(user) {
+	function createRequest(request) {
 		var config = {
 			headers : {
-				'Accept' : 'application/scim+json',
-				'Content-Type' : 'application/scim+json'
+				'Accept' : 'application/json',
+				'Content-Type' : 'application/json'
 			},
 		}
-		return $http.post('/registration', user, config);
+		return $http.post('/registration/create', request, config);
 	}
 	;
 
 	function listRequests(status) {
-		return $http.get('/registration', {
+		return $http.get('/registration/list', {
 			params : {
 				status : status
 			}

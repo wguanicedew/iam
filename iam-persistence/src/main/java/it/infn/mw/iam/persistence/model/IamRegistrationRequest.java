@@ -47,6 +47,9 @@ public class IamRegistrationRequest {
   @Column(nullable = true)
   private Date lastUpdateTime;
 
+  @Column(nullable = true)
+  private String notes;
+
   @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "request")
   private List<IamEmailNotification> notifications;
 
@@ -110,6 +113,14 @@ public class IamRegistrationRequest {
   public void setLastUpdateTime(final Date lastUpdateTime) {
 
     this.lastUpdateTime = lastUpdateTime;
+  }
+
+  public String getNotes() {
+    return notes;
+  }
+
+  public void setNotes(String notes) {
+    this.notes = notes;
   }
 
   public List<IamEmailNotification> getNotifications() {

@@ -2,3 +2,4 @@ CREATE TABLE iam_email_notification (ID BIGINT AUTO_INCREMENT NOT NULL, UUID VAR
 ALTER TABLE iam_email_notification ADD CONSTRAINT FK_iam_email_notification_request_id FOREIGN KEY (request_id) REFERENCES iam_reg_request (id);
 CREATE TABLE iam_notification_receiver(ID BIGINT AUTO_INCREMENT NOT NULL, NOTIFICATION_ID BIGINT, EMAIL_ADDRESS VARCHAR(254), PRIMARY KEY (ID));
 ALTER TABLE iam_notification_receiver ADD CONSTRAINT FK_iam_notification_receiver_notification_id FOREIGN KEY (notification_id) REFERENCES iam_email_notification (id);
+ALTER TABLE iam_reg_request ADD COLUMN notes TEXT;

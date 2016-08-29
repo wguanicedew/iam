@@ -30,7 +30,7 @@
 								{{ctrl.textAlert}}
 							</div>
 							
-							<div style="width: 200px; margin: auto;" ng-show="ctrl.updateResult == 'ok'">
+							<div style="width: 200px; margin: auto;" ng-show="ctrl.operationResult == 'ok'">
 								<a class="btn btn-primary btn-block" style="align: center" href='/login'>Back to Login Page</a>
 							</div>
 						</div>

@@ -1,7 +1,5 @@
 package it.infn.mw.iam.registration;
 
-import static it.infn.mw.iam.api.scim.controller.utils.ValidationHelper.handleValidationError;
-
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,8 +7,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,8 +18,6 @@ import org.springframework.web.servlet.ModelAndView;
 
 import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
 import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
-import it.infn.mw.iam.api.scim.model.ScimConstants;
-import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.core.IamRegistrationRequestStatus;
 
 @RestController
@@ -59,14 +53,11 @@ public class RegistrationController {
   }
 
   @RequestMapping(value = "/registration", method = RequestMethod.POST,
-      consumes = ScimConstants.SCIM_CONTENT_TYPE)
+      consumes = "application/json")
   public RegistrationRequestDto createRegistrationRequest(
-      @RequestBody @Validated(ScimUser.NewUserValidation.class) final ScimUser user,
-      final BindingResult validationResult) {
+      @RequestBody RegistrationRequestDto request) {
 
-    handleValidationError("Invalid user", validationResult);
-
-    return service.createRequest(user);
+    return service.createRequest(request);
   }
 
   @PreAuthorize("#oauth2.hasScope('registration:write') or hasRole('ADMIN')")
@@ -95,8 +86,8 @@ public class RegistrationController {
     try {
       service.confirmRequest(token);
       model.addAttribute("verificationSuccess", true);
-    } catch (ScimResourceNotFoundException srnfe) {
-      String message = "Activation failed: " + srnfe.getMessage();
+    } catch (ScimResourceNotFoundException e) {
+      String message = "Activation failed: " + e.getMessage();
       model.addAttribute("verificationMessage", message);
       model.addAttribute("verificationFailure", true);
     }

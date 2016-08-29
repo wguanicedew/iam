@@ -17,6 +17,8 @@ public class PasswordResetController {
   @Autowired
   private PasswordResetService service;
 
+  private static final String PLAIN_TEXT = "plain/text";
+
 
   @RequestMapping(value = "/iam/password-reset/{token}", method = RequestMethod.GET)
   public String resetPassword(Model model, @PathVariable("token") String token) {
@@ -36,7 +38,7 @@ public class PasswordResetController {
   }
 
   @RequestMapping(value = "/iam/password-reset", method = RequestMethod.POST,
-      produces = "text/plain")
+      produces = PLAIN_TEXT)
   @ResponseBody
   public String changePassword(@RequestParam(required = true, name = "resetkey") String resetKey,
       @RequestParam(required = true, name = "password") String password) {
@@ -50,9 +52,12 @@ public class PasswordResetController {
     return retval;
   }
 
-  @RequestMapping(value = "/iam/password-forgot/{email}", method = RequestMethod.GET)
-  public void forgotPassword(@PathVariable("email") String email) {
+  @RequestMapping(value = "/iam/password-forgot/{email}", method = RequestMethod.GET,
+      produces = PLAIN_TEXT)
+  @ResponseBody
+  public String forgotPassword(@PathVariable("email") String email) {
     service.forgotPassword(email);
+    return "ok";
   }
 
 }

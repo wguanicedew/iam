@@ -2,12 +2,11 @@ package it.infn.mw.iam.registration;
 
 import java.util.List;
 
-import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.core.IamRegistrationRequestStatus;
 
 public interface RegistrationRequestService {
 
-  public RegistrationRequestDto createRequest(ScimUser user);
+  public RegistrationRequestDto createRequest(RegistrationRequestDto request);
 
   public List<RegistrationRequestDto> listRequests(IamRegistrationRequestStatus status);
 

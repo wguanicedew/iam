@@ -63,26 +63,33 @@ public class DefaultRegistrationRequestService implements RegistrationRequestSer
   }
 
   @Override
-  public RegistrationRequestDto createRequest(final ScimUser user) {
+  public RegistrationRequestDto createRequest(RegistrationRequestDto request) {
+
+    ScimUser user = ScimUser.builder()
+      .buildName(request.getGivenname(), request.getFamilyname())
+      .buildEmail(request.getEmail())
+      .userName(request.getUsername())
+      .build();
 
     IamAccount newAccount = userService.createAccount(user);
     newAccount.setConfirmationKey(tokenGenerator.generateToken());
     newAccount.setActive(false);
 
-    IamRegistrationRequest request = new IamRegistrationRequest();
-    request.setUuid(UUID.randomUUID().toString());
-    request.setCreationTime(new Date());
-    request.setAccount(newAccount);
-    request.setStatus(NEW);
+    IamRegistrationRequest regRequest = new IamRegistrationRequest();
+    regRequest.setUuid(UUID.randomUUID().toString());
+    regRequest.setCreationTime(new Date());
+    regRequest.setAccount(newAccount);
+    regRequest.setStatus(NEW);
+    regRequest.setNotes(request.getNotes());
 
-    requestRepository.save(request);
+    requestRepository.save(regRequest);
 
-    IamEmailNotification notification = notificationService.createConfirmationMessage(request);
+    IamEmailNotification notification = notificationService.createConfirmationMessage(regRequest);
     List<IamEmailNotification> notificationList = new ArrayList<>();
     notificationList.add(notification);
-    request.setNotifications(notificationList);
+    regRequest.setNotifications(notificationList);
 
-    return converter.fromEntity(request);
+    return converter.fromEntity(regRequest);
   }
 
   @Override
