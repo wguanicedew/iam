@@ -2,14 +2,13 @@ angular.module('registrationApp').directive('iamUsernameAvailableValidator', fun
 	return{
 		require: 'ngModel',
 		link: function($scope, element, attrs, ngModel){
-			ngModel.$asyncValidators.uniqueUsername = function(username){
-				return $http.get('/registration/username-available/'+username).then(
+			ngModel.$validators.uniqueUsername = function(username){
+				if(username){
+					return $http.get('/registration/username-available/'+username).then(
 						function(response){
-							if(response.data === true){
-								return true;
-							}
-							return $q.reject('exists');
+							ngModel.$setValidity('unique', response.data);
 						});
+				}
 			};
 		}
 	}

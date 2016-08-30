@@ -37,7 +37,14 @@ public class PasswordResetController {
     return "iam/resetPassword";
   }
 
-  @RequestMapping(value = "/iam/password-reset", method = RequestMethod.POST,
+  @RequestMapping(value = "/iam/password/reset-key/{token}", method = RequestMethod.GET)
+  @ResponseBody
+  public Boolean checkResetKey(Model model, @PathVariable("token") String token) {
+    return service.checkResetKey(token);
+  }
+
+
+  @RequestMapping(value = "/iam/password-change", method = RequestMethod.POST,
       produces = PLAIN_TEXT)
   @ResponseBody
   public String changePassword(@RequestParam(required = true, name = "resetkey") String resetKey,
@@ -51,6 +58,7 @@ public class PasswordResetController {
     }
     return retval;
   }
+
 
   @RequestMapping(value = "/iam/password-forgot/{email}", method = RequestMethod.GET,
       produces = PLAIN_TEXT)

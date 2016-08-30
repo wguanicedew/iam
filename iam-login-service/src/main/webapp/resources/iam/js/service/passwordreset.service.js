@@ -33,6 +33,6 @@ function ResetPasswordService($http){
 		        return str.join("&");
 		    },
 		}
-		return $http.post('/iam/password-reset', data, config);
+		return $http.post('/iam/password-change', data, config);
 	}
 }

@@ -58,23 +58,28 @@ public class PasswordResetTests {
     String resetKey = tokenGenerator.getLastToken();
 
     // @formatter:off
-    RestAssured.given()
+    Boolean retval = RestAssured.given()
       .port(8080)
       .pathParam("token", resetKey)
     .when()
-      .get("/iam/password-reset/{token}")
+      .get("/iam/password/reset-key/{token}")
     .then()
       .log()
         .body(true)
       .statusCode(HttpStatus.OK.value())
+      .extract()
+        .as(Boolean.class);
     ;
-    
+    // @formatter:on
+    Assert.assertEquals(Boolean.TRUE, retval);
+
+    // @formatter:off
     RestAssured.given()
       .port(8080)
       .param("resetkey", resetKey)
       .param("password", newPassword)
     .when()
-      .post("/iam/password-reset")
+      .post("/iam/password-change")
     .then()
       .log()
         .body(true)
@@ -93,11 +98,11 @@ public class PasswordResetTests {
       .port(8080)
       .pathParam("token", resetKey)
     .when()
-      .get("/iam/password-reset/{token}")
+      .get("/iam/password/reset-key/{token}")
     .then()
       .log()
         .body(true)
-      .statusCode(HttpStatus.OK.value())
+      .statusCode(HttpStatus.NOT_FOUND.value())
     ;
     // @formatter:on
   }
@@ -127,24 +132,29 @@ public class PasswordResetTests {
     String resetKey = tokenGenerator.getLastToken();
 
     // @formatter:off
-    RestAssured.given()
+    Object retval = RestAssured.given()
       .port(8080)
       .pathParam("token", resetKey)
     .when()
-      .get("/iam/password-reset/{token}")
+      .get("/iam/password/reset-key/{token}")
     .then()
       .log()
         .body(true)
       .statusCode(HttpStatus.OK.value())
+      .extract()
+        .as(Boolean.class)
     ;
-    
+    // @formatter:on
+    Assert.assertEquals(Boolean.TRUE, retval);
+
     // update password
-    String retval = RestAssured.given()
+    // @formatter:off
+    retval = RestAssured.given()
       .port(8080)
       .param("resetkey", resetKey)
       .param("password", newPassword)
     .when()
-      .post("/iam/password-reset")
+      .post("/iam/password-change")
     .then()
       .log()
         .body(true)
@@ -161,7 +171,7 @@ public class PasswordResetTests {
       .param("resetkey", resetKey)
       .param("password", newPassword)
     .when()
-      .post("/iam/password-reset")
+      .post("/iam/password-change")
     .then()
       .log()
         .body(true)

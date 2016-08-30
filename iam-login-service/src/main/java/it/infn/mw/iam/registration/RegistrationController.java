@@ -44,7 +44,7 @@ public class RegistrationController {
   }
 
   @PreAuthorize("#oauth2.hasScope('registration:read') or hasRole('ADMIN')")
-  @RequestMapping(value = "/registration", method = RequestMethod.GET)
+  @RequestMapping(value = "/registration/list", method = RequestMethod.GET)
   @ResponseBody
   public List<RegistrationRequestDto> listRequests(
       @RequestParam(value = "status", required = false) final IamRegistrationRequestStatus status) {
@@ -52,7 +52,7 @@ public class RegistrationController {
     return service.listRequests(status);
   }
 
-  @RequestMapping(value = "/registration", method = RequestMethod.POST,
+  @RequestMapping(value = "/registration/create", method = RequestMethod.POST,
       consumes = "application/json")
   public RegistrationRequestDto createRegistrationRequest(
       @RequestBody RegistrationRequestDto request) {

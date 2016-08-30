@@ -4,18 +4,10 @@
 	<div ng-show="operationResult != null">
 		<div class="alert" ng-class="{'alert-success': operationResult=='ok', 'alert-danger': operationResult=='err'}">
 			<button class="close" ng-click="operationResult=null" aria-label="close">&times;</button>
-			<strong>Done!</strong> {{textAlert}}
+			{{textAlert}}
 		</div>
 	</div>
 
-	<div>
-		<div class="alert alert-danger" ng-show="showErrorAlert">
-			<button type="button" class="close"
-				data-ng-click="switchBool('showErrorAlert')">&times;</button>
-			<strong>Error!</strong> {{textAlert}}
-		</div>
-	</div>
-			
 	<form class="form-horizontal" ng-submit="submit()" name="registrationForm" id="registrationForm">
 	
 		<div class="form-group">
@@ -73,7 +65,7 @@
 					  style="right: 15px"></span>
 					<span class="help-block" ng-show="registrationForm.username.$dirty && registrationForm.username.$error.required"> This is a required field</span> 
 					<span class="help-block" ng-show="registrationForm.username.$dirty && registrationForm.username.$error.minlength">Minimum length required is 3</span>
-					<span class="help-block" ng-show="registrationForm.username.$dirty && registrationForm.username.$error.uniqueUsername">Username already in use</span>
+					<span class="help-block" ng-show="registrationForm.username.$dirty && registrationForm.username.$error.unique">Username already in use</span>
 					<span class="help-block" ng-show="registrationForm.username.$dirty && registrationForm.username.$invalid">This field is invalid</span>
 				</div>
 			</div>
