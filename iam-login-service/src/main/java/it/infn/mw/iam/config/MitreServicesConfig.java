@@ -4,12 +4,10 @@ import org.mitre.jwt.signer.service.impl.ClientKeyCacheService;
 import org.mitre.jwt.signer.service.impl.JWKSetCacheService;
 import org.mitre.jwt.signer.service.impl.SymmetricKeyJWTValidatorCacheService;
 import org.mitre.oauth2.service.ClientDetailsEntityService;
-import org.mitre.oauth2.service.IntrospectionResultAssembler;
 import org.mitre.oauth2.service.OAuth2TokenEntityService;
 import org.mitre.oauth2.service.SystemScopeService;
 import org.mitre.oauth2.service.impl.BlacklistAwareRedirectResolver;
 import org.mitre.oauth2.service.impl.DefaultClientUserDetailsService;
-import org.mitre.oauth2.service.impl.DefaultIntrospectionResultAssembler;
 import org.mitre.oauth2.service.impl.DefaultOAuth2AuthorizationCodeService;
 import org.mitre.oauth2.service.impl.DefaultOAuth2ClientDetailsEntityService;
 import org.mitre.oauth2.service.impl.DefaultOAuth2ProviderTokenService;
@@ -216,11 +214,6 @@ public class MitreServicesConfig {
     return new IamScopeClaimTranslationService();
   }
 
-  @Bean
-  IntrospectionResultAssembler defaultIntrospectionResultAssembler() {
-
-    return new DefaultIntrospectionResultAssembler();
-  }
 
   @Bean
   SymmetricKeyJWTValidatorCacheService defaultSimmetricKeyJWTValidatorCacheService() {
