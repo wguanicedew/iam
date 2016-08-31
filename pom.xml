@@ -33,6 +33,7 @@
 
     <angular-jwt.version>??</angular-jwt.version>
     <jquery.version>2.1.1</jquery.version>
+    <jquery-ui.version>1.12.0</jquery-ui.version>
     <bootstrap.version>3.3.6</bootstrap.version>
     <rest-assured.version>2.9.0</rest-assured.version>
 
@@ -82,6 +83,12 @@
         <artifactId>jquery</artifactId>
         <version>${jquery.version}</version>
       </dependency>
+      
+      <dependency>
+	    <groupId>org.webjars</groupId>
+	    <artifactId>jquery-ui</artifactId>
+	    <version>${jquery-ui.version}</version>
+	  </dependency>
 
       <dependency>
         <groupId>org.webjars</groupId>

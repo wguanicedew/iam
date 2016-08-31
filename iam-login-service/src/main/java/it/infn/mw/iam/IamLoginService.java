@@ -13,15 +13,16 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @SpringBootApplication
 @EnableTransactionManagement
-
 // @formatter:off
 @ComponentScan(basePackages = {
     "it.infn.mw.iam.config", 
     "it.infn.mw.iam.authn",
     "it.infn.mw.iam.persistence", 
     "it.infn.mw.iam.core.web",
+    "it.infn.mw.iam.core.time",
     "it.infn.mw.iam.api", 
     "it.infn.mw.iam.registration", 
+    "it.infn.mw.iam.notification",
     "org.mitre.oauth2.web",
     "org.mitre.oauth2.view", 
     "org.mitre.openid.connect.web", 
