@@ -10,51 +10,66 @@ function RequestManagementController($scope, RegistrationRequestService){
 	vm.textAlert;
 	
 	vm.listRequests = listRequests;
+	vm.listPending = listPending;
 	vm.approveRequest = approveRequest;
 	vm.rejectRequest = rejectRequest;
+	vm.init = init;
 
 	vm.list = [];
-	vm.sortType = 'status';
-	vm.sortReverse = false;
+	vm.sortType = 'creationTime';
+	vm.sortReverse = true;
 	
+	function init(){
+		vm.listPending();
+	};
 
 	function listRequests(status) {
 		RegistrationRequestService.listRequests(status).then(
-				function(result) {
-					vm.list = result.data;
-				},
-				function(errResponse) {
-					vm.textAlert = errResponse.data.error_description || errResponse.data.detail;
-					vm.operationResult = 'err';
-				})
+			function(result) {
+				vm.list = result.data;
+			},
+			function(errResponse) {
+				vm.textAlert = errResponse.data.error_description || errResponse.data.detail;
+				vm.operationResult = 'err';
+			})
+	};
+	
+	function listPending() {
+		RegistrationRequestService.listPending().then(
+			function(result) {
+				vm.list = result.data;
+			},
+			function(errResponse) {
+				vm.textAlert = errResponse.data.error_description || errResponse.data.detail;
+				vm.operationResult = 'err';
+			})
 	};
 
 	function approveRequest(uuid) {
 		RegistrationRequestService.updateRequest(uuid, 'APPROVED').then(
-				function() {
-					vm.textAlert = "Approvation success";
-					vm.operationResult = 'ok';
-					vm.listRequests();
-				},
-				function(errResponse) {
-					vm.textAlert = errResponse.data.error_description || errResponse.data.detail;
-					vm.operationResult = 'err';
-				})
+			function() {
+				vm.textAlert = "Approvation success";
+				vm.operationResult = 'ok';
+				vm.listPending();
+			},
+			function(errResponse) {
+				vm.textAlert = errResponse.data.error_description || errResponse.data.detail;
+				vm.operationResult = 'err';
+			})
 	};
 
 	function rejectRequest(uuid) {
 		RegistrationRequestService.updateRequest(uuid, 'REJECTED').then(
-				function() {
-					vm.textAlert = "Operation success";
-					vm.operationResult = 'ok';
-					vm.listRequests();
-				},
-				function(errResponse) {
-					vm.textAlert = errResponse.data.error_description || errResponse.data.detail;
-					vm.operationResult = 'err';
-				})
+			function() {
+				vm.textAlert = "Rejection success";
+				vm.operationResult = 'ok';
+				vm.listPending();
+			},
+			function(errResponse) {
+				vm.textAlert = errResponse.data.error_description || errResponse.data.detail;
+				vm.operationResult = 'err';
+			})
 	};
-
 };
 
 angular.module('registrationApp').controller('RegistrationController', RegistrationController);
@@ -70,10 +85,6 @@ function RegistrationController($scope, $q, $uibModalInstance, $window, Registra
 		notes : '',
 	};
 
-	$scope.list = [];
-	$scope.sortType = 'status';
-	$scope.sortReverse = false;
-	
 	$scope.textAlert;
 	$scope.operationResult;
 

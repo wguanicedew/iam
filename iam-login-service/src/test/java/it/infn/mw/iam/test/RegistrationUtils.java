@@ -76,15 +76,17 @@ public class RegistrationUtils {
     // @formatter:on
   }
 
-  public static void confirmRegistrationRequest(String token) {
+  public static void confirmRegistrationRequest(String confirmationKey) {
 
     // @formatter:off
     given()
       .port(8080)
-      .pathParam("token", token)
+      .pathParam("token", confirmationKey)
     .when()
       .get("/registration/confirm/{token}")
     .then()
+      .log()
+        .body(true)
       .statusCode(HttpStatus.OK.value())
       .body("status", Matchers.equalTo(IamRegistrationRequestStatus.CONFIRMED.name()))
     ;
@@ -114,6 +116,8 @@ public class RegistrationUtils {
     .when()
       .post("/registration/{uuid}/{decision}")
     .then()
+      .log()
+        .body(true)
       .statusCode(HttpStatus.OK.value())
     ;
     // @formatter:on

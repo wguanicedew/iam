@@ -9,6 +9,7 @@ function RegistrationRequestService($http){
 	var service = {
 		createRequest : createRequest,
 		listRequests : listRequests,
+		listPending : listPending,
 		updateRequest : updateRequest
 	};
 
@@ -22,8 +23,7 @@ function RegistrationRequestService($http){
 			},
 		}
 		return $http.post('/registration/create', request, config);
-	}
-	;
+	};
 
 	function listRequests(status) {
 		return $http.get('/registration/list', {
@@ -31,11 +31,13 @@ function RegistrationRequestService($http){
 				status : status
 			}
 		});
-	}
-	;
+	};
+	
+	function listPending() {
+		return $http.get('/registration/list/pending');
+	};
 
 	function updateRequest(uuid, decision) {
 		return $http.post('/registration/' + uuid + '/' + decision);
-	}
-	;
+	};
 };

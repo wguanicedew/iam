@@ -70,7 +70,8 @@ public class DefaultPasswordResetService implements PasswordResetService {
 
 
   private boolean isAccountEnabled(IamAccount account) {
-    return account.isActive() && account.getUserInfo().getEmailVerified();
+    return account.isActive() && (account.getUserInfo().getEmailVerified() != null
+        && account.getUserInfo().getEmailVerified());
   }
 
 }

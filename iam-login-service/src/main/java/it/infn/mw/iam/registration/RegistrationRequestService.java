@@ -10,6 +10,8 @@ public interface RegistrationRequestService {
 
   public List<RegistrationRequestDto> listRequests(IamRegistrationRequestStatus status);
 
+  public List<RegistrationRequestDto> listPendingRequests();
+
   public RegistrationRequestDto updateStatus(String uuid, IamRegistrationRequestStatus status);
 
   public RegistrationRequestDto confirmRequest(String confirmationKey);
