@@ -9,9 +9,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 
 import it.infn.mw.iam.authn.oidc.OidcTokenEnhancer;
+import it.infn.mw.iam.core.IamOAuth2AuthorizationCodeService;
 import it.infn.mw.iam.core.IamProperties;
 import it.infn.mw.iam.core.IamUserDetailsService;
 import it.infn.mw.iam.util.DumpHeadersFilter;
@@ -26,6 +28,12 @@ public class IamConfig {
   UserDetailsService iamUserDetailsService() {
 
     return new IamUserDetailsService();
+  }
+
+  @Bean
+  AuthorizationCodeServices authorizationCodeServices() {
+
+    return new IamOAuth2AuthorizationCodeService();
   }
 
   @Bean

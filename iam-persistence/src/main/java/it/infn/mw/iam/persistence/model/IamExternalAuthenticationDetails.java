@@ -1,5 +1,6 @@
 package it.infn.mw.iam.persistence.model;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -10,6 +11,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -43,14 +45,17 @@ public class IamExternalAuthenticationDetails {
   Date expirationTime;
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "details")
-  List<IamExternalAuthenticationAttribute> attributes;
+  List<IamExternalAuthenticationAttribute> attributes = new ArrayList<>();
+
+  @Lob
+  @Column(name = "authentication_token", nullable = false)
+  byte[] authenticationToken;
 
   public IamExternalAuthenticationDetails() {}
 
   public List<IamExternalAuthenticationAttribute> getAttributes() {
     return attributes;
   }
-
 
   public void setAttributes(List<IamExternalAuthenticationAttribute> attributes) {
     this.attributes = attributes;
@@ -165,6 +170,14 @@ public class IamExternalAuthenticationDetails {
     } else if (!type.equals(other.type))
       return false;
     return true;
+  }
+
+  public byte[] getAuthenticationToken() {
+    return authenticationToken;
+  }
+
+  public void setAuthenticationToken(byte[] authenticationToken) {
+    this.authenticationToken = authenticationToken;
   }
 
   @Override

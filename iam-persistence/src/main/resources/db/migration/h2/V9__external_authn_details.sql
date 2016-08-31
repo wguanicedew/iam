@@ -4,15 +4,16 @@ CREATE TABLE iam_ext_authn_attr (
   value VARCHAR(512) NOT NULL, 
   details_id BIGINT, 
   PRIMARY KEY (id));
-  
+
 CREATE TABLE iam_ext_authn (
   id BIGINT IDENTITY NOT NULL, 
   authentication_time TIMESTAMP NOT NULL, 
+  authentication_token LONGVARBINARY NOT NULL, 
   expiration_time TIMESTAMP NOT NULL, 
   type VARCHAR(32) NOT NULL, 
   holder_id BIGINT, 
   PRIMARY KEY (id));
-  
+
 ALTER TABLE iam_ext_authn_attr 
   ADD CONSTRAINT FK_iam_ext_authn_attr_details_id 
   FOREIGN KEY (details_id) 

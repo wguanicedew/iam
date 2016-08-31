@@ -10,7 +10,6 @@ import org.mitre.oauth2.service.SystemScopeService;
 import org.mitre.oauth2.service.impl.BlacklistAwareRedirectResolver;
 import org.mitre.oauth2.service.impl.DefaultClientUserDetailsService;
 import org.mitre.oauth2.service.impl.DefaultIntrospectionResultAssembler;
-import org.mitre.oauth2.service.impl.DefaultOAuth2AuthorizationCodeService;
 import org.mitre.oauth2.service.impl.DefaultOAuth2ClientDetailsEntityService;
 import org.mitre.oauth2.service.impl.DefaultOAuth2ProviderTokenService;
 import org.mitre.oauth2.service.impl.DefaultSystemScopeService;
@@ -54,7 +53,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.OAuth2RequestValidator;
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
-import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.endpoint.RedirectResolver;
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
 import org.springframework.security.oauth2.provider.token.TokenEnhancer;
@@ -102,11 +100,6 @@ public class MitreServicesConfig {
     return new DefaultOAuth2ProviderTokenService();
   }
 
-  @Bean
-  AuthorizationCodeServices authorizationCodeServices() {
-
-    return new DefaultOAuth2AuthorizationCodeService();
-  }
 
   @Bean(name = "mitreUserInfoInterceptor")
   public AsyncHandlerInterceptor userInfoInterceptor() {
