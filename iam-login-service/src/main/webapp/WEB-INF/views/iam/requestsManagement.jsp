@@ -3,8 +3,8 @@
 
 <o:iamHeader title="Registration Request Management" />
 
-<body ng-app="registrationApp" class="ng-cloak">
-	<div class="container" ng-controller="RequestManagementController as ctrl" ng-init="ctrl.init()">
+<body ng-app="registrationApp" class="ng-cloak" ng-controller="RequestManagementController as ctrl" ng-init="ctrl.init()">
+	<div class="container">
 
 		<h2>List of Pending Requests</h2>
 	
@@ -16,17 +16,17 @@
 		</div>
 
 		<div class="panel-group" id="accordion">
-			<div class="panel panel-default" ng-repeat="r in ctrl.list | orderBy:ctrl.sortType:ctrl.sortReverse">
+			<div class="panel panel-default" ng-repeat="r in ctrl.filteredList | orderBy:ctrl.sortType:ctrl.sortReverse">
 				<div class="panel-heading">
 					<h4 class="panel-title">
 						<button class="btn btn-link" data-toggle="collapse" data-parent="#accordion" data-target="#collapse_{{$index}}" title="Click for more details">
 							{{r.creationTime | date:'dd/MM/yyyy HH:mm:ss'}}: {{r.givenname}} {{r.familyname}} adds a registration request
 						</button>
-						<button type="button" class="btn btn-default btn-sm">
-							<span class="glyphicon glyphicon-ok-sign" ng-click="ctrl.approveRequest(r.uuid)" title="Approve request"> OK</span>
+						<button type="button" class="btn btn-default btn-sm" ng-click="ctrl.approveRequest(r.uuid)" title="Approve request">
+							<span class="glyphicon glyphicon-ok-sign"> OK</span>
 						</button>
-						<button type="button" class="btn btn-default btn-sm">
-							<span class="glyphicon glyphicon-remove-sign" ng-click="ctrl.rejectRequest(r.uuid)" title="Reject request"> DEL</span>						
+						<button type="button" class="btn btn-default btn-sm" ng-click="ctrl.rejectRequest(r.uuid)" title="Reject request">
+							<span class="glyphicon glyphicon-remove-sign"> DEL</span>						
 						</button>
 					</h4>
 				</div>
@@ -56,14 +56,19 @@
 				</div>
 			</div>
 		</div>
-	</div>
-
-	<div style="width: 200px; margin: auto;">
-		<a class="btn btn-primary btn-block" style="align: left" href='/'>Back to Home Page</a>
+		
+		<div class="row col-sm-12 text-center">
+			<ul uib-pagination ng-model="ctrl.currentPage" ng-change="ctrl.pageChanged()" total-items="ctrl.list.length" max-size="ctrl.maxSize" boundary-links="true"></ul>
+		</div>
+		
+		<div class="row col-sm-12 text-center">
+			<a class="btn btn-primary" href='/'>Back to Home Page</a>
+		</div>
+		
 	</div>
 
 	<script type="text/javascript" src="<c:url value='/webjars/angularjs/angular.min.js'/>"></script>
-	<script type="text/javascript" src="<c:url value='/webjars/angular-ui-bootstrap/ui-bootstrap.js'/>"></script>
+	<script type="text/javascript" src="<c:url value='/webjars/angular-ui-bootstrap/ui-bootstrap-tpls.js'/>"></script>
 	<script type="text/javascript" src="<c:url value='/webjars/jquery/jquery.min.js'/>"></script>
 	<script type="text/javascript" src="<c:url value='/webjars/bootstrap/bootstrap.min.js'/>"></script>
 		
