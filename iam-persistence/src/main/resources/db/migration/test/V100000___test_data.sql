@@ -134,8 +134,8 @@ INSERT INTO iam_saml_id(idpid, userid, account_id) VALUES
 ('https://idptestbed/idp/shibboleth', 'ciccio.paglia@example.org',2);
 
 INSERT INTO iam_group(id, name, uuid, description, creationtime, lastupdatetime) VALUES
-(1, 'Production', 'c617d586-54e6-411d-8e38-64967798fa8a', 'The INDIGO-DC production group', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP()),
-(2, 'Analysis', '6a384bcd-d4b3-4b7f-a2fe-7d897ada0dd1', 'The INDIGO-DB analysis group', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP());
+(1, 'Production', 'c617d586-54e6-411d-8e38-64967798fa8a', 'The production group', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP()),
+(2, 'Analysis', '6a384bcd-d4b3-4b7f-a2fe-7d897ada0dd1', 'The analysis group', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP());
 
 INSERT INTO iam_account_group(account_id, group_id) VALUES
 (1,1),

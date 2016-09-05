@@ -2,6 +2,7 @@ package it.infn.mw.iam.config;
 
 import org.h2.server.web.WebServlet;
 import org.mitre.oauth2.service.impl.DefaultOAuth2AuthorizationCodeService;
+import org.mitre.oauth2.service.IntrospectionResultAssembler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.embedded.FilterRegistrationBean;
 import org.springframework.boot.context.embedded.ServletRegistrationBean;
@@ -13,6 +14,7 @@ import org.springframework.security.oauth2.provider.code.AuthorizationCodeServic
 import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 
 import it.infn.mw.iam.authn.oidc.OidcTokenEnhancer;
+import it.infn.mw.iam.core.IamIntrospectionResultAssembler;
 import it.infn.mw.iam.core.IamProperties;
 import it.infn.mw.iam.util.DumpHeadersFilter;
 
@@ -40,6 +42,12 @@ public class IamConfig {
 
     IamProperties.INSTANCE.setOrganisationName(iamOrganisationName);
     return IamProperties.INSTANCE;
+  }
+
+  @Bean
+  IntrospectionResultAssembler defaultIntrospectionResultAssembler() {
+
+    return new IamIntrospectionResultAssembler();
   }
 
   @Bean
