@@ -12,7 +12,6 @@ public class RegistrationRequestDto {
   private String uuid;
   private Date creationTime;
   private String status;
-  private String approver;
   private Date lastUpdateTime;
   private String username;
   private String password;
@@ -29,7 +28,6 @@ public class RegistrationRequestDto {
   @JsonCreator
   public RegistrationRequestDto(@JsonProperty("uuid") String uuid,
       @JsonProperty("creationdate") Date creationTime, @JsonProperty("status") String status,
-      @JsonProperty("approver") String approver,
       @JsonProperty("lastupdatetime") Date lastUpdateTime,
       @JsonProperty("username") String username, @JsonProperty("password") String password,
       @JsonProperty("givename") String givenname, @JsonProperty("familyname") String familyname,
@@ -47,7 +45,6 @@ public class RegistrationRequestDto {
     this.uuid = uuid;
     this.creationTime = creationTime;
     this.status = status;
-    this.approver = approver;
     this.lastUpdateTime = lastUpdateTime;
     this.accountId = accountId;
     this.notificationStatus = notificationStatus;
@@ -82,16 +79,6 @@ public class RegistrationRequestDto {
   public void setStatus(String status) {
 
     this.status = status;
-  }
-
-  public String getApprover() {
-
-    return approver;
-  }
-
-  public void setApprover(String approver) {
-
-    this.approver = approver;
   }
 
   public Date getLastUpdateTime() {
