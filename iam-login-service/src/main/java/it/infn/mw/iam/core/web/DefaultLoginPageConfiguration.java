@@ -1,4 +1,4 @@
-package it.infn.mw.iam.config;
+package it.infn.mw.iam.core.web;
 
 import java.util.Arrays;
 
@@ -10,7 +10,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import it.infn.mw.iam.config.oidc.GoogleClientProperties;
-import it.infn.mw.iam.core.LoginPageConfiguration;
 
 @Component
 public class DefaultLoginPageConfiguration implements LoginPageConfiguration, EnvironmentAware {

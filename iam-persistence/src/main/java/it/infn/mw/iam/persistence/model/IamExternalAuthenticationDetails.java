@@ -10,15 +10,10 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-
-import org.mitre.oauth2.model.AuthenticationHolderEntity;
 
 @Entity
 @Table(name = "iam_ext_authn")
@@ -29,9 +24,8 @@ public class IamExternalAuthenticationDetails {
   @Column(name = "id")
   Long id;
 
-  @OneToOne(optional = false)
-  @JoinColumn(name = "holder_id")
-  AuthenticationHolderEntity holder;
+  @Column(name = "saved_authn_id", updatable = false, unique = true)
+  Long savedAuthenticationId;
 
   @Column(name = "type", length = 32, nullable = false)
   String type;
@@ -47,19 +41,7 @@ public class IamExternalAuthenticationDetails {
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "details")
   List<IamExternalAuthenticationAttribute> attributes = new ArrayList<>();
 
-  @Lob
-  @Column(name = "authentication_token", nullable = false)
-  byte[] authenticationToken;
-
   public IamExternalAuthenticationDetails() {}
-
-  public List<IamExternalAuthenticationAttribute> getAttributes() {
-    return attributes;
-  }
-
-  public void setAttributes(List<IamExternalAuthenticationAttribute> attributes) {
-    this.attributes = attributes;
-  }
 
   public void addAttribute(String name, String value) {
     IamExternalAuthenticationAttribute attr = new IamExternalAuthenticationAttribute();
@@ -69,55 +51,33 @@ public class IamExternalAuthenticationDetails {
     attributes.add(attr);
   }
 
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((authenticationTime == null) ? 0 : authenticationTime.hashCode());
-    result = prime * result + ((expirationTime == null) ? 0 : expirationTime.hashCode());
-    result = prime * result + ((holder == null) ? 0 : holder.hashCode());
-    result = prime * result + ((type == null) ? 0 : type.hashCode());
-    return result;
+  public List<IamExternalAuthenticationAttribute> getAttributes() {
+    return attributes;
+  }
+
+  public Date getAuthenticationTime() {
+    return authenticationTime;
+  }
+
+  public Date getExpirationTime() {
+    return expirationTime;
   }
 
   public Long getId() {
     return id;
   }
 
-
-
-  public void setId(Long id) {
-    this.id = id;
+  public Long getSavedAuthenticationId() {
+    return savedAuthenticationId;
   }
-
-
-
-  public AuthenticationHolderEntity getHolder() {
-    return holder;
-  }
-
-
-
-  public void setHolder(AuthenticationHolderEntity holder) {
-    this.holder = holder;
-  }
-
 
 
   public String getType() {
     return type;
   }
 
-
-
-  public void setType(String type) {
-    this.type = type;
-  }
-
-
-
-  public Date getAuthenticationTime() {
-    return authenticationTime;
+  public void setAttributes(List<IamExternalAuthenticationAttribute> attributes) {
+    this.attributes = attributes;
   }
 
 
@@ -128,63 +88,26 @@ public class IamExternalAuthenticationDetails {
 
 
 
-  public Date getExpirationTime() {
-    return expirationTime;
-  }
-
-
-
   public void setExpirationTime(Date expirationTime) {
     this.expirationTime = expirationTime;
   }
 
 
 
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (getClass() != obj.getClass())
-      return false;
-    IamExternalAuthenticationDetails other = (IamExternalAuthenticationDetails) obj;
-    if (authenticationTime == null) {
-      if (other.authenticationTime != null)
-        return false;
-    } else if (!authenticationTime.equals(other.authenticationTime))
-      return false;
-    if (expirationTime == null) {
-      if (other.expirationTime != null)
-        return false;
-    } else if (!expirationTime.equals(other.expirationTime))
-      return false;
-    if (holder == null) {
-      if (other.holder != null)
-        return false;
-    } else if (!holder.getId().equals(other.holder.getId()))
-      return false;
-    if (type == null) {
-      if (other.type != null)
-        return false;
-    } else if (!type.equals(other.type))
-      return false;
-    return true;
+  public void setId(Long id) {
+    this.id = id;
   }
 
-  public byte[] getAuthenticationToken() {
-    return authenticationToken;
+
+
+  public void setSavedAuthenticationId(Long savedAuthenticationId) {
+    this.savedAuthenticationId = savedAuthenticationId;
   }
 
-  public void setAuthenticationToken(byte[] authenticationToken) {
-    this.authenticationToken = authenticationToken;
-  }
 
-  @Override
-  public String toString() {
-    return "IamExternalAuthenticationDetails [id=" + id + ", holder=" + holder + ", type=" + type
-        + ", authenticationTime=" + authenticationTime + ", expirationTime=" + expirationTime
-        + ", attributes=" + attributes + "]";
+
+  public void setType(String type) {
+    this.type = type;
   }
 
 }

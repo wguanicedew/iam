@@ -18,8 +18,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
     "it.infn.mw.iam.config", 
     "it.infn.mw.iam.authn",
     "it.infn.mw.iam.persistence", 
-    "it.infn.mw.iam.core.web",
-    "it.infn.mw.iam.core.time",
+    "it.infn.mw.iam.core",
     "it.infn.mw.iam.api", 
     "it.infn.mw.iam.registration", 
     "it.infn.mw.iam.notification",
@@ -29,9 +28,10 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
     "org.mitre.openid.connect.view",
     "org.mitre.discovery.web", 
     "org.mitre.discovery.view"},
-  excludeFilters = {
-    @ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE, value=UserInfoEndpoint.class)  
-  })
+excludeFilters = {
+    @ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE,
+        value=UserInfoEndpoint.class)
+})
 // @formatter:on
 
 @EnableAutoConfiguration(exclude = {SecurityAutoConfiguration.class, OAuth2AutoConfiguration.class,

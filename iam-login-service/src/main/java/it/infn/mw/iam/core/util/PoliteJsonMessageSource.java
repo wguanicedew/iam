@@ -1,4 +1,4 @@
-package it.infn.mw.iam.core;
+package it.infn.mw.iam.core.util;
 
 import java.io.File;
 import java.io.IOException;

@@ -23,7 +23,6 @@ import org.mitre.openid.connect.service.ClientLogoLoadingService;
 import org.mitre.openid.connect.service.LoginHintExtracter;
 import org.mitre.openid.connect.service.OIDCTokenService;
 import org.mitre.openid.connect.service.PairwiseIdentiferService;
-import org.mitre.openid.connect.service.ScopeClaimTranslationService;
 import org.mitre.openid.connect.service.StatsService;
 import org.mitre.openid.connect.service.UserInfoService;
 import org.mitre.openid.connect.service.WhitelistedSiteService;
@@ -58,8 +57,6 @@ import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEn
 import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
 import org.springframework.web.servlet.AsyncHandlerInterceptor;
-
-import it.infn.mw.iam.core.IamScopeClaimTranslationService;
 
 @Configuration
 public class MitreServicesConfig {
@@ -203,11 +200,6 @@ public class MitreServicesConfig {
     return new InMemoryClientLogoLoadingService();
   }
 
-  @Bean
-  ScopeClaimTranslationService defaultScopeClaimTranslationService() {
-
-    return new IamScopeClaimTranslationService();
-  }
 
   @Bean
   IntrospectionResultAssembler defaultIntrospectionResultAssembler() {
