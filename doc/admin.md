@@ -109,6 +109,16 @@ Full key:
 ```
 Save the output of the above command (minus the `Full key:` initial text) in a file.
 
+### IAM docker image
+
+The IAM service is provided on the following Dockerhub repositories:
+
+- indigoiam/iam-login-service
+- indigodatacloud/iam-login-service
+
+We keep the images in sync, so the following instructions apply to images
+fetched from any of the two repositories. 
+
 ### IAM configuration
 
 The IAM service is configured via spring profiles and environment variables.
@@ -176,7 +186,6 @@ All configurable aspects of the IAM are configured via environment variables.
 |IAM_SAML_KEY_PASSWORD | N/A | The SAML key password |
 |IAM_SAML_IDP_METADATA | N/A | The path to the SAML federation idp metadata |
 
-
 ### Example configuration
 
 The IAM service is run starting the docker container with the following command:
@@ -186,7 +195,7 @@ The IAM service is run starting the docker container with the following command:
   --name iam-login-service --net=iam -p 8080:8080 \
   --env-file=/path/to//iam-login-service/env \
    -v /path/to//keystore.jks:/keystore.jks:ro \
-  indigoiam/iam-login-service
+  indigodatacloud/iam-login-service
 ```
 
 The env file content is the following: 
