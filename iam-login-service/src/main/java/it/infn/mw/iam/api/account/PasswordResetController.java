@@ -25,7 +25,7 @@ public class PasswordResetController {
     String message = null;
     try {
       if (!service.checkResetKey(token)) {
-        message = "This account is not active. Cannot reset password!";
+        message = "This account is not active or email is not verified. Cannot reset password!";
       }
     } catch (ScimResourceNotFoundException e) {
       message = "Invalid reset key: " + e.getMessage();

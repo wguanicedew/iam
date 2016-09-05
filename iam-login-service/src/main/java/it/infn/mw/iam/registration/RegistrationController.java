@@ -28,7 +28,7 @@ public class RegistrationController {
   private RegistrationRequestService service;
 
   @Autowired
-  public RegistrationController(final RegistrationRequestService registrationService) {
+  public RegistrationController(RegistrationRequestService registrationService) {
     service = registrationService;
   }
 
@@ -39,7 +39,7 @@ public class RegistrationController {
   }
 
   @RequestMapping(value = "/registration/username-available/{username}", method = RequestMethod.GET)
-  public Boolean usernameAvailable(@PathVariable("username") final String username) {
+  public Boolean usernameAvailable(@PathVariable("username") String username) {
     return service.usernameAvailable(username);
   }
 
@@ -47,9 +47,17 @@ public class RegistrationController {
   @RequestMapping(value = "/registration/list", method = RequestMethod.GET)
   @ResponseBody
   public List<RegistrationRequestDto> listRequests(
-      @RequestParam(value = "status", required = false) final IamRegistrationRequestStatus status) {
+      @RequestParam(value = "status", required = false) IamRegistrationRequestStatus status) {
 
     return service.listRequests(status);
+  }
+
+  @PreAuthorize("#oauth2.hasScope('registration:read') or hasRole('ADMIN')")
+  @RequestMapping(value = "/registration/list/pending", method = RequestMethod.GET)
+  @ResponseBody
+  public List<RegistrationRequestDto> listPendingRequests() {
+
+    return service.listPendingRequests();
   }
 
   @RequestMapping(value = "/registration/create", method = RequestMethod.POST,
@@ -62,8 +70,8 @@ public class RegistrationController {
 
   @PreAuthorize("#oauth2.hasScope('registration:write') or hasRole('ADMIN')")
   @RequestMapping(value = "/registration/{uuid}/{decision}", method = RequestMethod.POST)
-  public RegistrationRequestDto changeStatus(@PathVariable("uuid") final String uuid,
-      @PathVariable("decision") final String decision) {
+  public RegistrationRequestDto changeStatus(@PathVariable("uuid") String uuid,
+      @PathVariable("decision") String decision) {
 
     IamRegistrationRequestStatus status = null;
     try {
@@ -76,13 +84,13 @@ public class RegistrationController {
   }
 
   @RequestMapping(value = "/registration/confirm/{token}", method = RequestMethod.GET)
-  public RegistrationRequestDto confirmEmail(@PathVariable("token") final String token) {
+  public RegistrationRequestDto confirmEmail(@PathVariable("token") String token) {
 
     return service.confirmRequest(token);
   }
 
   @RequestMapping(value = "/registration/verify/{token}", method = RequestMethod.GET)
-  public ModelAndView verify(final Model model, @PathVariable("token") final String token) {
+  public ModelAndView verify(final Model model, @PathVariable("token") String token) {
     try {
       service.confirmRequest(token);
       model.addAttribute("verificationSuccess", true);

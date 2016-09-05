@@ -58,8 +58,12 @@ public class DefaultRegistrationRequestService implements RegistrationRequestSer
   {
     transictions = HashBasedTable.create();
     transictions.put(NEW, CONFIRMED, true);
+    transictions.put(NEW, APPROVED, true);
+    transictions.put(NEW, REJECTED, true);
     transictions.put(CONFIRMED, APPROVED, true);
     transictions.put(CONFIRMED, REJECTED, true);
+    transictions.put(APPROVED, CONFIRMED, true);
+    transictions.put(REJECTED, CONFIRMED, true);
   }
 
   @Override
@@ -93,7 +97,7 @@ public class DefaultRegistrationRequestService implements RegistrationRequestSer
   }
 
   @Override
-  public List<RegistrationRequestDto> listRequests(final IamRegistrationRequestStatus status) {
+  public List<RegistrationRequestDto> listRequests(IamRegistrationRequestStatus status) {
 
     List<IamRegistrationRequest> result = new ArrayList<>();
 
@@ -118,8 +122,22 @@ public class DefaultRegistrationRequestService implements RegistrationRequestSer
   }
 
   @Override
-  public RegistrationRequestDto updateStatus(final String uuid,
-      final IamRegistrationRequestStatus status) {
+  public List<RegistrationRequestDto> listPendingRequests() {
+
+    List<IamRegistrationRequest> result = requestRepository.findPendingRequests().get();
+
+    List<RegistrationRequestDto> requests = new ArrayList<>();
+
+    for (IamRegistrationRequest elem : result) {
+      RegistrationRequestDto item = converter.fromEntity(elem);
+      requests.add(item);
+    }
+
+    return requests;
+  }
+
+  @Override
+  public RegistrationRequestDto updateStatus(String uuid, IamRegistrationRequestStatus status) {
 
     IamRegistrationRequest reg =
         requestRepository.findByUuid(uuid).orElseThrow(() -> new ScimResourceNotFoundException(
@@ -130,56 +148,52 @@ public class DefaultRegistrationRequestService implements RegistrationRequestSer
           String.format("Bad status transition from [%s] to [%s]", reg.getStatus(), status));
     }
 
-    reg.setStatus(status);
-    reg.setLastUpdateTime(new Date());
-    requestRepository.save(reg);
-
     if (APPROVED.equals(status)) {
       IamAccount account = reg.getAccount();
       account.setActive(true);
       account.setResetKey(tokenGenerator.generateToken());
       account.setLastUpdateTime(new Date());
       notificationService.createAccountActivatedMessage(reg);
+      reg.setStatus(status);
 
     } else if (CONFIRMED.equals(status)) {
       reg.getAccount().getUserInfo().setEmailVerified(true);
       reg.getAccount().setConfirmationKey(null);
-      notificationService.createAdminHandleRequestMessage(reg);
+
+      if (reg.getStatus().equals(NEW)) {
+        reg.setStatus(status);
+        notificationService.createAdminHandleRequestMessage(reg);
+      }
 
     } else if (REJECTED.equals(status)) {
+      reg.setStatus(status);
       notificationService.createRequestRejectedMessage(reg);
     }
 
+    reg.setLastUpdateTime(new Date());
     requestRepository.save(reg);
 
     return converter.fromEntity(reg);
   }
 
   @Override
-  public RegistrationRequestDto confirmRequest(final String confirmationKey) {
+  public RegistrationRequestDto confirmRequest(String confirmationKey) {
 
     IamRegistrationRequest reg = requestRepository.findByAccountConfirmationKey(confirmationKey)
       .orElseThrow(() -> new ScimResourceNotFoundException(String
         .format("No registration request found for registration_key [%s]", confirmationKey)));
 
-    reg.setStatus(CONFIRMED);
-    reg.setLastUpdateTime(new Date());
-    reg.getAccount().getUserInfo().setEmailVerified(true);
-
-    requestRepository.save(reg);
-    notificationService.createAdminHandleRequestMessage(reg);
-
-    return converter.fromEntity(reg);
+    return updateStatus(reg.getUuid(), CONFIRMED);
   }
 
   @Override
-  public Boolean usernameAvailable(final String username) {
+  public Boolean usernameAvailable(String username) {
 
     Optional<IamAccount> account = iamAccountRepo.findByUsername(username);
     return !account.isPresent();
   }
 
-  private boolean checkStateTransiction(final IamRegistrationRequestStatus currentStatus,
+  private boolean checkStateTransiction(IamRegistrationRequestStatus currentStatus,
       final IamRegistrationRequestStatus newStatus) {
 
     return transictions.contains(currentStatus, newStatus);
