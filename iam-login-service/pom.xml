@@ -43,7 +43,22 @@
       <groupId>org.webjars</groupId>
       <artifactId>angular-ui-bootstrap</artifactId>
     </dependency>
-    
+
+    <dependency>
+      <groupId>org.webjars</groupId>
+      <artifactId>angular-ui-router</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.webjars</groupId>
+      <artifactId>angular-ui-select</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.webjars</groupId>
+      <artifactId>angular-sanitize</artifactId>
+    </dependency>
+ 
     <dependency>
       <groupId>org.webjars</groupId>
       <artifactId>jquery</artifactId>

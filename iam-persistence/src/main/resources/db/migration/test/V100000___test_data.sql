@@ -117,21 +117,31 @@ INSERT INTO iam_authority(ID, AUTH) VALUES
 (1, 'ROLE_ADMIN'),
 (2, 'ROLE_USER');
   
-INSERT INTO iam_user_info(ID,GIVENNAME,FAMILYNAME, EMAIL, EMAILVERIFIED) VALUES
-(1, 'Test', 'User', 'test@iam.test', true),
-(2, 'Admin', 'User', 'admin@iam.test', true);
+INSERT INTO iam_user_info(ID,GIVENNAME,FAMILYNAME, EMAIL, EMAILVERIFIED, BIRTHDATE, PICTURE, GENDER) VALUES
+(1, 'Test', 'User', 'test@iam.test', true, '1950-01-01', '/resources/iam/img/default-avatar.png', 'M'),
+(2, 'Admin', 'User', 'admin@iam.test', true, '1950-01-01', '/resources/iam/img/default-avatar.png', 'M'),
+(3, 'Enrico', 'Vianello', 'enrico.vianello@cnaf.infn.it', true, '1986-05-17', 'http://www.gravatar.com/avatar/4f496230f3e42d606024e16c5f389611', 'M');
 
 INSERT INTO iam_account(id, uuid, username, password, user_info_id, creationtime, lastupdatetime, active) VALUES
 (1, '80e5fb8d-b7c8-451a-89ba-346ae278a66f', 'test', 'password', 1, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), true),
-(2, '73f16d93-2441-4a50-88ff-85360d78c6b5', 'admin', 'password', 2, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), true);
+(2, '73f16d93-2441-4a50-88ff-85360d78c6b5', 'admin', 'password', 2, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), true),
+(3, 'A6DA4962-4116-4FF4-A738-DC5339E28B42', 'enrico', 'password', 3, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), true);
 
 INSERT INTO iam_oidc_id(issuer, subject, account_id) VALUES
 ('https://accounts.google.com', '105440632287425289613', 1),
-('https://accounts.google.com', '114132403455520317223', 2);
+('https://accounts.google.com', '114132403455520317223', 2),
+('https://accounts.google.com', '110433194200909171079', 3);
+
+INSERT INTO iam_ssh_key(fingerprint, label, is_primary, val, account_id) VALUES
+('dowJH1al1DJII+i7DYux1BGQkx3P+XVpaz3TIX5zt5Y=', 'Personal SSH key', true, 'AAAAB3NzaC1yc2EAAAABIwAAAQEAxL6nllg/rMURT2QTy4MGj0gxYQ6sxcqCde5orLBs4rjIogo9bL7+HFLt6FHpCQbZ0CXakoL2M7PmXbFdwlD4Yw4ye4VxEaW3J1eNzRMWMGNTaAlcGiQqDuS/SsxI6SOlp/kfXQprDn2MnED1jIQHQq5pm25wKpKYeUBAaC6hvA4OlE39YpMCsVPEM3BhkR7F51I/60+5jV5P/g0arCnZKYJOnLmNpYc86ry8yydQMvD5HFBjRR8GRfvTU/0UcVtNsa1PzHTD7+lTA7iwDHX4cfe+4o38C850zU9yUMV+SnlLMJhwBiCxaaqeU0SdBbG+nCL47drSlSvv85+baXftSw==', 3);
+
+INSERT INTO iam_x509_cert(certificatesubject, label, is_primary, account_id, certificate) VALUES
+('C=IT, O=INFN, OU=Personal Certificate, L=CNAF, CN=Enrico Vianello','Personal Certificate', true, 3, 'MIIEWDCCA0CgAwIBAgIDAII4MA0GCSqGSIb3DQEBCwUAMC4xCzAJBgNVBAYTAklUMQ0wCwYDVQQKEwRJTkZOMRAwDgYDVQQDEwdJTkZOIENBMB4XDTE1MDUxODEzNTQxNFoXDTE2MDUxNzEzNTQxNFowZDELMAkGA1UEBhMCSVQxDTALBgNVBAoTBElORk4xHTAbBgNVBAsTFFBlcnNvbmFsIENlcnRpZmljYXRlMQ0wCwYDVQQHEwRDTkFGMRgwFgYDVQQDEw9FbnJpY28gVmlhbmVsbG8wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDf74gCX/5D7HAKlI9u+vMy4R8uYvtZp60L401zOuDHc0sKPCq2sU8NIB8cNOC+69h+hPqbU8gcleXZ0T3KOy3NPrU7CFaOxzsCVAoDcLeKFlCMu4X1OK0VNPq7+fgJ1cVdsJ4StHl3oTtQPCoU6NNly8HJIufVjat2IgjNHdMHINs5IcxpTmE5OGae3reOfRBtqBr8UvyiTwHEEll6JpdbKjzjrcHBoOdFZTiwR18fO+B8MZLOjXSkOEG5p5K8y4UOkHQeqooKgW0tn7dvCxQfuu5TGYUmK6pwjcxzcnSE9U4abFh5/oD1PqjoCGtlvnl9nGrhAFD+qa5zq6SrgWsNAgMBAAGjggFHMIIBQzAMBgNVHRMBAf8EAjAAMA4GA1UdDwEB/wQEAwIEsDAdBgNVHSUEFjAUBggrBgEFBQcDAgYIKwYBBQUHAwQwPQYDVR0fBDYwNDAyoDCgLoYsaHR0cDovL3NlY3VyaXR5LmZpLmluZm4uaXQvQ0EvSU5GTkNBX2NybC5kZXIwJQYDVR0gBB4wHDAMBgorBgEEAdEjCgEHMAwGCiqGSIb3TAUCAgEwHQYDVR0OBBYEFIQEiwCbKssJqSBNMziZtu54ZQRCMFYGA1UdIwRPME2AFNFi87N3csgu+/J5Gm83TiefE9UgoTKkMDAuMQswCQYDVQQGEwJJVDENMAsGA1UEChMESU5GTjEQMA4GA1UEAxMHSU5GTiBDQYIBADAnBgNVHREEIDAegRxlbnJpY28udmlhbmVsbG9AY25hZi5pbmZuLml0MA0GCSqGSIb3DQEBCwUAA4IBAQBfhv9P4bYo7lVRYjHrxreKVaEyujzPZFowZPYMz0e/lPcdqh9TIoDBbhy7/PXiTVqQEniZfU1Nso4rqBj8Qy609Y60PEFHhfLnjhvd/d+pXu6F1QTzUMwA2k7z5M+ykh7L46/z1vwvcdvCgtWZ+FedvLuKh7miTCfxEIRLcpRPggbC856BSKet7jPdkMxkUwbFa34ZqOuDQ6MvcrFA/lLgqN1c1OoE9tnf/uyOjVYq8hyXqOAhi2heE1e+s4o3/PQsaP5xLetVho/J33BExHo+hCMt1rN89DO5qU7FFijLlbmOZROacpjkPNn2V4wkd5WeX2dmb6UoBRqPsAiQL0mY');
 
 INSERT INTO iam_saml_id(idpid, userid, account_id) VALUES
 ('https://idptestbed/idp/shibboleth', 'andrea.ceccanti@example.org',1),
-('https://idptestbed/idp/shibboleth', 'ciccio.paglia@example.org',2);
+('https://idptestbed/idp/shibboleth', 'ciccio.paglia@example.org',2),
+('https://idptestbed/idp/shibboleth', 'enrico.vianello@example.org',3);
 
 INSERT INTO iam_group(id, name, uuid, description, creationtime, lastupdatetime) VALUES
 (1, 'Production', 'c617d586-54e6-411d-8e38-64967798fa8a', 'The production group', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP()),
@@ -141,12 +151,16 @@ INSERT INTO iam_account_group(account_id, group_id) VALUES
 (1,1),
 (1,2),
 (2,1),
-(2,2);
+(2,2),
+(3,1),
+(3,2);
 
 INSERT INTO iam_account_authority(account_id, authority_id) VALUES
 (1,2),
 (2,1),
-(2,2);
+(2,2),
+(3,1),
+(3,2);
 
 -- Other test groups
 INSERT INTO iam_group(id, name, uuid, description, creationtime, lastupdatetime) VALUES
