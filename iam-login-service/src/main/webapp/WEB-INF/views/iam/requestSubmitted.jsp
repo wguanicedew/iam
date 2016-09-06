@@ -19,11 +19,11 @@
 			   Check you mailbox!</p>
 			<p class="text-center">After confirmation, you have to wait for approval from Indigo Admin before start using Indigo services.</p>
 		</div>
-
-		<div style="width: 200px; margin: auto;">
-			<a class="btn btn-primary btn-block" style="align: center" href='/login'>Back to Login Page</a>
+		
+		<div class="row col-sm-12 text-center">
+			<a class="btn btn-primary" href='/login'>Back to Login Page</a>
 		</div>
-			
+
 	</div>
 
 </body>

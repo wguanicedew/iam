@@ -22,11 +22,11 @@
 						<button class="btn btn-link" data-toggle="collapse" data-parent="#accordion" data-target="#collapse_{{$index}}" title="Click for more details">
 							{{r.creationTime | date:'dd/MM/yyyy HH:mm:ss'}}: {{r.givenname}} {{r.familyname}} adds a registration request
 						</button>
-						<button type="button" class="btn btn-default btn-sm" ng-click="ctrl.approveRequest(r.uuid)" title="Approve request">
-							<span class="glyphicon glyphicon-ok-sign"> OK</span>
+						<button type="button" class="btn btn-default btn-sm" ng-click="ctrl.approveRequest(r.uuid)" name="btn_approve" title="Approve request">
+							<span class="glyphicon glyphicon-ok-sign"></span> OK
 						</button>
-						<button type="button" class="btn btn-default btn-sm" ng-click="ctrl.rejectRequest(r.uuid)" title="Reject request">
-							<span class="glyphicon glyphicon-remove-sign"> DEL</span>						
+						<button type="button" class="btn btn-default btn-sm" ng-click="ctrl.rejectRequest(r.uuid)" name="btn_reject" title="Reject request">
+							<span class="glyphicon glyphicon-remove-sign"></span> DEL				
 						</button>
 					</h4>
 				</div>
