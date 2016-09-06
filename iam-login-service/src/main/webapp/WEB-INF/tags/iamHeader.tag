@@ -8,9 +8,7 @@
 
 <meta charset="utf-8">
 <title>${config.topbarTitle}-${title}</title>
-<meta
-  name="viewport"
-  content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link
   rel="stylesheet"
@@ -56,4 +54,3 @@
 		return ${userAuthorities};
 	}
 </script>
-  
