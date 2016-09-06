@@ -1,4 +1,4 @@
-package it.infn.mw.iam.core;
+package it.infn.mw.iam.core.oauth;
 
 import java.util.Arrays;
 import java.util.List;
@@ -21,12 +21,10 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.TokenRequest;
 import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
-import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 
-@Component("tokenExchangeTokenGranter")
 public class TokenExchangeTokenGranter extends AbstractTokenGranter {
 
   public static final Logger LOG = LoggerFactory.getLogger(TokenExchangeTokenGranter.class);

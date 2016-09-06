@@ -1,4 +1,4 @@
-package it.infn.mw.iam.core;
+package it.infn.mw.iam.core.web;
 
 public interface LoginPageConfiguration {
 
