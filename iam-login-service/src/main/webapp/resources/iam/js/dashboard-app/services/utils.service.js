@@ -1,4 +1,4 @@
-angular.module('dashboardApp').factory("Utils", 
+angular.module('dashboardApp').factory("Utils",
 	function() {
 		return {
 			s4 : function() {
@@ -7,6 +7,16 @@ angular.module('dashboardApp').factory("Utils",
 			uuid : function() {
 				return this.s4() + this.s4() + '-' + this.s4() + '-' + this.s4() + '-' + this.s4() + '-' + this.s4()
 					+ this.s4() + this.s4();
+			},
+			isMe: function(id) {
+				
+				var loggedUser = getUserInfo();
+				return (id != loggedUser.sub);
+			},
+			isAdmin: function() {
+				
+				var loggedUserAuth = getUserAuthorities();
+				return (loggedUserAuth.indexOf("ROLE_ADMIN") != -1);
 			}
 		}
 	});

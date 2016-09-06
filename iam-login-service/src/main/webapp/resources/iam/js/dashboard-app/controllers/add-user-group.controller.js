@@ -1,87 +1,64 @@
 'use strict';
 
-angular.module('dashboardApp').controller('AddUserGroupController', AddUserGroupController);
+angular.module('dashboardApp').controller('AddUserGroupController',
+		AddUserGroupController);
 
-AddUserGroupController.$inject = ['$scope', '$state', '$uibModalInstance', '$filter', 'Utils', 'scimFactory', 'user'];
+AddUserGroupController.$inject = [ '$scope', '$state', '$q',
+		'$uibModalInstance', '$sanitize', 'scimFactory', 'user', 'oGroups' ];
 
-function AddUserGroupController($scope, $state, $uibModalInstance, $filter, Utils, scimFactory, user) {
+function AddUserGroupController($scope, $state, $q, $uibModalInstance,
+		$sanitize, scimFactory, user, oGroups) {
 
-	var ctrl = this;
-	
-	ctrl.groupSelected = null;
-	
-	ctrl.user = user;
-	console.log(ctrl.userGroups);
-	ctrl.groups = [];
-	ctrl.oGroups = [];
-	
-	ctrl.getAllGroups = getAllGroups;
-	ctrl.evalAddGroupList = evalAddGroupList;
-	ctrl.cancel = cancel;
-	
-	getAllGroups(1,10);
-	
-	function getAllGroups(startIndex, count) {
-		
-		scimFactory.getGroups(startIndex, count)
-			.then(function(response) {
-				
-				angular.forEach(response.data.Resources, function(group) {
-					ctrl.groups.push(group);
-				});
-				ctrl.groups = $filter('orderBy')(ctrl.groups, "displayName", false);
-				
-				if (response.data.totalResults > (response.data.startIndex + response.data.itemsPerPage)) {
-					ctrl.getAllGroups(startIndex + count, count);
-				} else {
-					evalAddGroupList();
-				}
-			},function(error) {
-				$state.go("error", { "errCode": error.status, "errMessage": error.statusText });
-			});
-	}
+	var addGroupCtrl = this;
 
-	function evalAddGroupList() {
-		
-		ctrl.oGroups = ctrl.groups;
+	// methods
+	addGroupCtrl.cancel = cancel;
+	addGroupCtrl.lookupGroups = lookupGroups;
+	addGroupCtrl.addGroup = addGroup;
 
-		angular.forEach(ctrl.user.groups, function(group) {
-		
-			var found = $filter('getById')(ctrl.oGroups, group.value);
-			if (found == null) {
-				$state.go("error", { "errCode": 500, "errMessage": "User's group " + group.displayName + " not found into db!" });
-				return;
-			}
-			console.log("Deleting element at ", found[0], ctrl.oGroups[found[0]]);
-			// remove using position
-			ctrl.oGroups.splice(found[0], 1);
-		});
-		
-		console.log(ctrl.oGroups);
-	}
-	
-	ctrl.lookupGroups = lookupGroups;
-	
+	// params
+	addGroupCtrl.user = user;
+	console.log(addGroupCtrl.user);
+
+	// fields
+	addGroupCtrl.groupsSelected = null;
+	addGroupCtrl.oGroups = oGroups;
+	addGroupCtrl.disabled = false;
+
+	$scope.oGroups = oGroups;
+	$scope.selected = {}
+
 	function lookupGroups() {
 
-        return ctrl.oGroups;
-      }
-	
+		return addGroupCtrl.oGroups;
+	}
+
 	function cancel() {
-        $uibModalInstance.close();
-    };
-    
-    ctrl.addGroup = addGroup;
-    
-    function addGroup() {
-        
-    	scimFactory.patchAddUserToGroup(ctrl.groupSelected, user).then(function(response) {
-    		ctrl.cancel();
-    		console.log(response);
-		},function(error) {
-			ctrl.cancel();
-			$state.go("error", { "errCode": error.status, "errMessage": error.statusText });
+
+		$uibModalInstance.close();
+	}
+
+	function addGroup() {
+
+		console.log(addGroupCtrl.groupsSelected);
+		console.log(addGroupCtrl.user);
+		var requests = [];
+		angular.forEach(addGroupCtrl.groupsSelected, function(groupToAdd) {
+			requests.push(scimFactory.addUserToGroup(groupToAdd.id,
+					addGroupCtrl.user.id));
 		});
-    };
-	
+
+		$q.all(requests).then(function(response) {
+			console.log("Added ", addGroupCtrl.groupsSelected);
+			addGroupCtrl.cancel();
+		}, function(error) {
+			console.error(error);
+			addGroupCtrl.cancel();
+			$state.go("error", {
+				"error" : error
+			});
+		});
+	}
+	;
+
 }

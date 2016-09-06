@@ -1,46 +1,52 @@
 'use strict';
 
-angular.module('dashboardApp').controller('AddGroupController', AddGroupController);
+angular.module('dashboardApp').controller('AddGroupController',
+		AddGroupController);
 
-AddGroupController.$inject = ['$scope', '$uibModalInstance', 'Utils', 'scimFactory', '$location'];
+AddGroupController.$inject = [ '$scope', '$uibModalInstance', 'Utils',
+		'scimFactory', '$state' ];
 
-function AddGroupController($scope, $uibModalInstance, Utils, scimFactory, $location) {
-
-	$scope.group = {};
-	$scope.addGroup = addGroup;
-	$scope.resetGroup = resetGroup;
+function AddGroupController($scope, $uibModalInstance, Utils, scimFactory,
+		$state) {
 	
+	var addGroupCtrl = this;
+
+	addGroupCtrl.group = {};
+	addGroupCtrl.addGroup = addGroup;
+	addGroupCtrl.resetGroup = resetGroup;
+	addGroupCtrl.cancel = cancel;
+
 	function resetGroup() {
 
-		$scope.group.id = "";
-		$scope.group.displayName = "";
-		$scope.group.description = "";
+		addGroupCtrl.group.id = "";
+		addGroupCtrl.group.displayName = "";
+		addGroupCtrl.group.description = "";
 
-	};
+	}
+	;
 
-	$scope.resetGroup();
+	addGroupCtrl.resetGroup();
 
 	function addGroup() {
-		
-		$scope.group.id = Utils.uuid();
-		$scope.group.schemas = [];
-		$scope.group.schemas[0] = "urn:ietf:params:scim:schemas:core:2.0:Group";
 
-		console.info($scope.group);
-		
-		scimFactory
-			.createGroup($scope.group)
-				.then(
-					function(response) {
-						$uibModalInstance.close(response.data);
-					},
-					function(error) {
-						console.error('Error creating group: ' + error);
-						$location.path("/dashboard#/error?e=" + error);
-					}
-				);
-	};
-	
+		addGroupCtrl.group.id = Utils.uuid();
+		addGroupCtrl.group.schemas = [];
+		addGroupCtrl.group.schemas[0] = "urn:ietf:params:scim:schemas:core:2.0:Group";
+
+		console.info(addGroupCtrl.group);
+
+		scimFactory.createGroup(addGroupCtrl.group).then(function(response) {
+			$uibModalInstance.close(response.data);
+		}, function(error) {
+			console.error('Error creating group: ' + error);
+			addGroupCtrl.cancel();
+			$state.go("error", {
+				"error" : error
+			});
+		});
+	}
+	;
+
 	function cancel() {
 		$uibModalInstance.dismiss("cancel");
 	}

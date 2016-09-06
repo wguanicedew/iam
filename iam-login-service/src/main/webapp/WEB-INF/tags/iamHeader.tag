@@ -18,15 +18,15 @@
 
 <link
   rel="stylesheet"
+  href="<c:url value='/webjars/angular-ui-select/select.min.css'/>"></link>
+
+<link
+  rel="stylesheet"
   href="resources/iam/css/iam.css"></link>
 
 <link
   rel="stylesheet"
-  href="resources/iam/css/AdminLTE.min.css"></link>
-
-<link
-  rel="stylesheet"
-  href="resources/iam/css/dashboard/home.css"></link>
+  href="resources/iam/css/AdminLTE.css"></link>
 
 <link
   rel="stylesheet"
@@ -45,5 +45,15 @@
   rel="stylesheet">
 </head>
 
+<script>
+	//get the info of the current user, if available (null otherwise)
+	function getUserInfo() {
+		return ${userInfoJson};
+	}
 
+	// get the authorities of the current user, if available (null otherwise)
+	function getUserAuthorities() {
+		return ${userAuthorities};
+	}
+</script>
   

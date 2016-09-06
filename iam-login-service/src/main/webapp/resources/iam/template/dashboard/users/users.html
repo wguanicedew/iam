@@ -48,7 +48,7 @@
 							<tr
 								ng-repeat="user in uc.filtered = uc.users | filter:uc.search | startFrom:(uc.currentPage-1)*uc.entryLimit | limitTo:uc.entryLimit">
 								<td>{{$index + (uc.currentPage-1)*uc.entryLimit + 1}}</td>
-								<td>{{user.name.formatted}}</td>
+								<td><a ui-sref="user({id: user.id})">{{user.name.formatted}}</a></td>
 								<td>{{user.emails[0].value}}</td>
 								<td>{{user.meta.created | date:'medium'}}</td>
 								<td>{{user.meta.lastModified | date:'medium' }}</td>

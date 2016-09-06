@@ -2,49 +2,28 @@
 
 angular.module('dashboardApp').controller('HomeController', HomeController);
 
-HomeController.$inject = ['$http', '$location', '$uibModal', '$filter', 'scimFactory'];
+HomeController.$inject = [ '$state', 'Utils', 'scimFactory' ];
 
-function HomeController($http, $location, $uibModal, $filter, scimFactory) {
+function HomeController($state, Utils, scimFactory) {
 
-	var ctrl = this;
+	var home = this;
+
+	home.userInfo = getUserInfo();
+	console.log(home.userInfo);
+
+	if (Utils.isAdmin()) {
+		$state.go("user", {
+			"id": home.userInfo.sub
+		});	
+	}
 	
-	ctrl.userInfo = {};
-
-	ctrl.getUserInfo = getUserInfo;
-	ctrl.clickToOpen = clickToOpen;
-	
-	getUserInfo();
-	
-	function getUserInfo() {
-		scimFactory.getMe()
-			.then(function(response) {
-					console.log(response.data);
-					ctrl.userInfo = response.data;
-				},function(error) {
-					$state.go("error", { "errCode": error.status, "errMessage": error.statusText });
-				});
-	};
-
-	function clickToOpen() {
-		var modalInstance = $uibModal.open({
-			templateUrl: '/resources/iam/template/dashboard/addusergroup.html',
-			controller: 'AddUserGroupController',
-			controllerAs: 'ctrl',
-			resolve: {
-				user: function () {
-	                return ctrl.userInfo;
-	            }
-	        }
+	scimFactory.getMe().then(function(response) {
+		home.me = response.data;
+		console.log(home.me);
+	}, function(error) {
+		$state.go("error", {
+			"error": error
 		});
-		modalInstance.result.then(function(addedGroup) {
-			console.info(addedGroup);
-			getUserInfo();
-		}, function () {
-			console.info('Modal dismissed at: ' + new Date());
-		});
-	};
-	
-	function showSshKeyValue(value) {
-		alert(value);
-	};
+	});
+
 }

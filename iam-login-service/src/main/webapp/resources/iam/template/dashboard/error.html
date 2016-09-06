@@ -1,6 +1,8 @@
 <!-- Content Header (Page header) -user-image -->
 <section class="content-header">
-	<h1><i class="fa fa-thumbs-o-down"></i> Error</h1>
+	<h1>
+		<i class="fa fa-thumbs-o-down"></i> Error
+	</h1>
 	<ol class="breadcrumb">
 		<li><a href=""><i class="fa fa-thumbs-o-down"></i> Error</a></li>
 	</ol>
@@ -11,37 +13,21 @@
 
 	<div class="error-page">
 		<div class="row" style="padding: 140px 20px">
-<!-- 			<div class="col-md-3"> -->
-				<img src="/resources/iam/img/500error.png" class="pull-left" width="200px" />
-<!-- 			</div> -->
-<!-- 			<div class="col-md-9"> -->
+			<img ng-src="{{errorCtrl.error.data.status == 403 ? '/resources/iam/img/403forbidden.png' : '/resources/iam/img/500error.png'}}" class="pull-left"
+				width="200px" />
 
-				<h2 class="headline text-red">Error {{ec.errCode}}</h2>
+			<h2 class="headline text-red">Error
+				{{errorCtrl.error.data.status}}</h2>
 
-				<div class="error-content">
-					<h3>
-						<i class="fa fa-warning text-red"></i> Oops! Something went wrong.
-					</h3>
+			<div class="error-content">
+				<h3>
+					<i class="fa fa-warning text-red"></i> Oops! Something went wrong.
+				</h3>
 
-					<p>{{ec.errMessage}}</p>
-
-					<!-- 			<form class="search-form"> -->
-					<!-- 				<div class="input-group"> -->
-					<!-- 					<input type="text" name="search" class="form-control" -->
-					<!-- 						placeholder="Search"> -->
-
-					<!-- 					<div class="input-group-btn"> -->
-					<!-- 						<button type="submit" name="submit" -->
-					<!-- 							class="btn btn-danger btn-flat"> -->
-					<!-- 							<i class="fa fa-search"></i> -->
-					<!-- 						</button> -->
-					<!-- 					</div> -->
-					<!-- 				</div> -->
-					<!-- 				/.input-group -->
-					<!-- 			</form> -->
-				</div>
-
-<!-- 			</div> -->
+				<p>{{errorCtrl.error.statusText}}</p>
+				<p>{{errorCtrl.error.data.detail}}</p>
+			</div>
 		</div>
-	</div> <!-- /.error-page -->
+	</div>
+	<!-- /.error-page -->
 </section>
