@@ -96,7 +96,8 @@ function GroupsController($scope, $location, $uibModal, $state, $filter,
 	function clickToOpen() {
 		var modalInstance = $uibModal.open({
 			templateUrl : '/resources/iam/template/dashboard/groups/newgroup.html',
-			controller : 'AddGroupController'
+			controller : 'AddGroupController',
+			controllerAs: 'addGroupCtrl'
 		});
 		modalInstance.result.then(function(createdGroup) {
 			console.info(createdGroup);

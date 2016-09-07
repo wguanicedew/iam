@@ -9,7 +9,7 @@
 <body class="skin-blue" ng-app="dashboardApp">
 	<div class="wrapper">
 
-		<header class="main-header" ng-controller="TopbarController"></header>
+		<header class="main-header" ng-controller="TopbarController as topbarCtrl"></header>
 
 
 		<aside class="main-sidebar" ng-controller="NavController as navCtrl">
@@ -79,20 +79,20 @@
 		src="/resources/iam/js/dashboard-app/controllers/user.controller.js"></script>
 	<script type="text/javascript"
 		src="/resources/iam/js/dashboard-app/controllers/group.controller.js"></script>
-    <script type="text/javascript"
-        src="/resources/iam/js/dashboard-app/controllers/nav.controller.js"></script>
+	<script type="text/javascript"
+		src="/resources/iam/js/dashboard-app/controllers/nav.controller.js"></script>
 	<script type="text/javascript"
 		src="/resources/iam/js/dashboard-app/controllers/topbar.controller.js"></script>
 	<script type="text/javascript"
 		src="/resources/iam/js/dashboard-app/controllers/error.controller.js"></script>
-	<script type="text/javascript"
-		src="/resources/iam/js/dashboard-app/controllers/unauthorized.controller.js"></script>
 	<script type="text/javascript"
 		src="/resources/iam/js/dashboard-app/controllers/users.controller.js"></script>
 	<script type="text/javascript"
 		src="/resources/iam/js/dashboard-app/controllers/groups.controller.js"></script>
 	<script type="text/javascript"
 		src="/resources/iam/js/dashboard-app/controllers/add-group.controller.js"></script>
+	<script type="text/javascript"
+		src="/resources/iam/js/dashboard-app/controllers/add-user.controller.js"></script>
 	<script type="text/javascript"
 		src="/resources/iam/js/dashboard-app/controllers/add-user-oidc-account.controller.js"></script>
 	<script type="text/javascript"
@@ -104,11 +104,7 @@
 	<script type="text/javascript"
 		src="/resources/iam/js/dashboard-app/controllers/add-user-group.controller.js"></script>
 	<script type="text/javascript"
-		src="/resources/iam/js/dashboard-app/controllers/edit-group.controller.js"></script>
-	<script type="text/javascript"
 		src="/resources/iam/js/dashboard-app/filters/start-from.filter.js"></script>
-	<!-- 	<script type="text/javascript" -->
-	<!-- 		src="/resources/iam/js/dashboard-app/filters/get-by-id.filter.js"></script> -->
 	<script type="text/javascript"
 		src="/resources/iam/js/dashboard-app/dashboard-app.config.js"></script>
 

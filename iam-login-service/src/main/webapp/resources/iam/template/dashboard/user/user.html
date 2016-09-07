@@ -30,40 +30,39 @@
 					<p class="text-muted text-center">{{user.userInfo.displayName}}</p>
 
 					<ul class="list-group list-group-unbordered">
-						<li class="list-group-item"><b>E-mail</b> <a
+						<li class="list-group-item">
+						  <strong>E-mail</strong> <a
 							class="pull-right"
 							href="mailto:{{user.userInfo.emails[0].value}}">{{user.userInfo.emails[0].value}}</a>
 						</li>
-						<li class="list-group-item"><b>Status</b> <a href=""
-							class="pull-right"
-							ng-click="user.setActive(!user.userInfo.active)"> <span
-								ng-show="user.userInfo.active" class="label label-success">ACTIVE</span>
-								<span ng-show="!user.userInfo.active" class="label label-danger">DISABLED</span>
-						</a></li>
-						<!-- 						<li class="list-group-item"><b>Organisation</b> <a -->
-						<!-- 							class="pull-right">{{user.userInfo.organisation_name}}</a></li> -->
-						<!-- 						<li class="list-group-item"><b>Groups</b> <a -->
-						<!-- 							class="pull-right"><span class="badge">{{user.userInfo.groups.length}}</span></a></li> -->
-						<li class="list-group-item"><b>Last update</b> <a
+						<li class="list-group-item">
+						  <strong>Status</strong> 
+						
+						<button class="pull-right btn btn-success btn-xs" ng-show="user.userInfo.active" confirmed-click="user.setActive(false)"
+						   ng-confirm-click="Are you sure you want to disable user?"><strong>ACTIVE</strong></button>
+						
+						<button class="pull-right btn btn-danger btn-xs" ng-show="!user.userInfo.active" confirmed-click="user.setActive(true)"
+                           ng-confirm-click="Are you sure you want to enable user?"><strong>DISABLED</strong></button>
+						
+                        </li>
+                        <li class="list-group-item">
+                          <strong>Created</strong> <a
+                            class="pull-right">{{user.userInfo.meta.created | date :
+                                "medium" }}</a></li>
+						<li class="list-group-item">
+						  <strong>Last update</strong> <a
 							class="pull-right">{{user.userInfo.meta.lastModified | date :
 								"medium" }}</a></li>
+						<li class="list-group-item">
+						  <strong>Groups</strong> <a
+                            class="pull-right"><span class="label label-default">{{user.userInfo.groups.length}}</span></a></li>
 					</ul>
 
-					<a class="btn btn-app"> <span class="badge bg-purple">{{user.userInfo.groups.length}}</span>
-						<i class="fa fa-users"></i> Groups
-					</a> <a class="btn btn-app"> <span class="badge bg-purple">{{user.userInfo['urn:indigo-dc:scim:schemas:IndigoUser'].oidcIds.length}}</span>
-						<i class="fa fa-lock"></i> OpenID IDs
-					</a> <a class="btn btn-app"> <span class="badge bg-purple">{{user.userInfo['urn:indigo-dc:scim:schemas:IndigoUser'].sshKeys.length}}</span>
-						<i class="fa fa-key"></i> SSH Keys
-					</a> <a class="btn btn-app"> <span class="badge bg-purple">{{user.userInfo['urn:indigo-dc:scim:schemas:IndigoUser'].samlIds.length}}</span>
-						<i class="fa fa-cloud"></i> Saml IDs
-					</a> <a class="btn btn-app"> <span class="badge bg-purple">{{user.userInfo.x509Certificates.length}}</span>
-						<i class="fa fa-user-secret"></i> x509 certs
-					</a>
-
-					<!-- 					<a href="#" class="btn btn-primary btn-block"><b>Edit</b></a> -->
+					<!-- 	<a href="#" class="btn btn-primary btn-block"><b>Edit</b></a> -->
 				</div>
 				<!-- /.box-body -->
+				<div class="box-footer bg-blue">
+                </div>
 			</div>
 			<!-- /.box -->
 
@@ -90,7 +89,7 @@
 								<tr>
 									<th>#</th>
 									<th>Name</th>
-									<th>Actions</th>
+									<th class="text-right">Actions</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -98,12 +97,12 @@
 									ng-repeat="group in user.userInfo.groups | orderBy:'display' ">
 									<td>{{$index + 1}}</td>
 									<td><a ui-sref="group({id: group.value})">{{group.display}}</a></td>
-									<td>
+									<td class="text-right">
 										<div class="btn-group">
 											<button class="btn btn-xs btn-danger"
 												confirmed-click="user.deleteGroup(group)"
 												ng-confirm-click="Are you sure you want to delete '{{group.display}}'?">
-												<i class="fa fa-trash"></i> delete
+												<i class="fa fa-times"></i> Remove
 											</button>
 										</div>
 									</td>
@@ -116,7 +115,7 @@
 
 					<button class="btn btn-success btn-xs"
 						ng-click="user.openAddGroupDialog()">
-						<i class="fa fa-plus"></i> Add Group
+						<i class="fa fa-plus"></i> Add to group
 					</button>
 				</div>
 			</div>
@@ -142,7 +141,7 @@
 									<th>#</th>
 									<th>Issuer</th>
 									<th>Subject</th>
-									<th>Actions</th>
+									<th class="text-right">Actions</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -151,12 +150,12 @@
 									<td>{{$index + 1}}</td>
 									<td>{{ oidcId.issuer }}</td>
 									<td>{{ oidcId.subject }}</td>
-									<td>
+									<td class="text-right">
 										<div class="btn-group">
 											<button class="btn btn-xs btn-danger"
 												confirmed-click="user.deleteOidcAccount(oidcId)"
 												ng-confirm-click="Are you sure you want to delete '{{oidcId.issuer}}-{{oidcId.subject}}'?">
-												<i class="fa fa-trash"></i> delete
+												<i class="fa fa-times"></i> delete
 											</button>
 										</div>
 									</td>
@@ -195,7 +194,7 @@
 									<th>Label</th>
 									<th>Fingerprint</th>
 									<th>Primary</th>
-									<th>Actions</th>
+									<th class="text-right">Actions</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -210,12 +209,12 @@
 										class="label label-success">primary</span>
 										<button ng-show="!sshKey.primary"
 											class="btn btn-xs btn-default">Set primary</button></td>
-									<td>
+									<td class="text-right">
 										<div class="btn-group">
 											<button class="btn btn-xs btn-danger"
 												confirmed-click="user.deleteSshKey(sshKey)"
 												ng-confirm-click="Are you sure you want to delete '{{sshKey.display}}'?">
-												<i class="fa fa-trash"></i> delete
+												<i class="fa fa-times"></i> delete
 											</button>
 										</div>
 									</td>
@@ -253,7 +252,7 @@
 									<th>#</th>
 									<th>Identity Provider</th>
 									<th>User ID</th>
-									<th>Actions</th>
+									<th class="text-right">Actions</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -262,12 +261,12 @@
 									<td>{{$index + 1}}</td>
 									<td>{{ samlId.idpId }}</td>
 									<td>{{ samlId.userId }}</td>
-									<td>
+									<td class="text-right">
 										<div class="btn-group">
 											<button class="btn btn-xs btn-danger"
 												confirmed-click="user.deleteSamlId(samlId)"
 												ng-confirm-click="Are you sure you want to delete '{{samlId.idpId}}-{{samlId.userId}}'?">
-												<i class="fa fa-trash"></i> delete
+												<i class="fa fa-times"></i> delete
 											</button>
 										</div>
 									</td>
@@ -306,7 +305,7 @@
 									<th>Label</th>
 									<th>Primary</th>
 									<th>Value</th>
-									<th>Actions</th>
+									<th class="text-right">Actions</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -319,12 +318,12 @@
 											primary</button></td>
 									<td><a ng-click=user.showCertValue(cert)>{{ cert.value
 											| limitTo : 30 : 0}}...</a></td>
-									<td>
+									<td class="text-right">
 										<div class="btn-group">
 											<button class="btn btn-xs btn-danger"
 												confirmed-click="user.deleteX509Certificate(cert)"
 												ng-confirm-click="Are you sure you want to delete '{{cert.display}}'?">
-												<i class="fa fa-trash"></i> delete
+												<i class="fa fa-times"></i> delete
 											</button>
 										</div>
 									</td>
@@ -336,7 +335,7 @@
                 <div class="box-footer">
 					<button class="btn btn-success btn-xs"
 						ng-click="user.openAddX509CertificateDialog()">
-						<i class="fa fa-plus"></i> Add x509 cecrtificate
+						<i class="fa fa-plus"></i> Add x509 certificate
 					</button>
 				</div>
 			</div>

@@ -6,24 +6,36 @@ HomeController.$inject = [ '$state', 'Utils', 'scimFactory' ];
 
 function HomeController($state, Utils, scimFactory) {
 
-	var home = this;
-
-	home.userInfo = getUserInfo();
-	console.log(home.userInfo);
-
 	if (Utils.isAdmin()) {
-		$state.go("user", {
-			"id": home.userInfo.sub
-		});	
+		console.log("User is admin: redirecting to user " + getUserInfo().name + " page ");
+		$state.go("user", { 
+			id: getUserInfo().sub 
+		});
 	}
+
+	var home = this;
+	
+	home.user = Utils.getLoggedUser();
+	home.isAdmin = Utils.isAdmin();
+	home.isUser = Utils.isUser();
 	
 	scimFactory.getMe().then(function(response) {
-		home.me = response.data;
-		console.log(home.me);
+		home.user.me = response.data;
 	}, function(error) {
 		$state.go("error", {
 			"error": error
 		});
 	});
+
+	home.showSshKeyValue = showSshKeyValue;
+	home.showCertValue = showCertValue;
+
+	function showSshKeyValue(value) {
+		alert(value);
+	}
+
+	function showCertValue(cert) {
+		alert(cert.value);
+	}
 
 }

@@ -2,20 +2,15 @@
 
 angular.module('dashboardApp').controller('UserController', UserController);
 
-UserController.$inject = [ '$state', '$uibModal', '$filter', 'Utils', 'scimFactory' ];
+UserController.$inject = [ '$scope', '$state', '$uibModal', '$filter', 'Utils', 'scimFactory' ];
 
-function UserController($state, $uibModal, $filter, Utils, scimFactory) {
+function UserController($scope, $state, $uibModal, $filter, Utils, scimFactory) {
 
 	var user = this;
 
 	console.log("User ID: ", $state.params.id);
 
 	user.id = $state.params.id;
-
-//	if (!Utils.isMeOrAdmin(user.id)) {
-//		$state.go("unauthorized");
-//		return;
-//	}
 	
 	user.groups = [];
 	user.oGroups = [];

@@ -2,23 +2,24 @@
 
 angular.module('dashboardApp').controller('NavController', NavController);
 
-NavController.$inject = [ '$scope', 'Utils', 'scimFactory' ];
+NavController.$inject = [ '$scope', '$rootScope', 'Utils', 'scimFactory' ];
 
-function NavController($scope, Utils, scimFactory) {
+function NavController($scope, $rootScope, Utils, scimFactory) {
 
 	var navCtrl = this;
 
-	navCtrl.isAdmin = Utils.isAdmin();
-	navCtrl.organisation = getUserInfo().organisation_name;
+	navCtrl.user = Utils.getLoggedUser();
 	
 	scimFactory.getMe().then(function(response) {
-		navCtrl.me = response.data;
-		console.log(navCtrl.me);
+		navCtrl.user.me = response.data;
 	}, function(error) {
 		$state.go("error", {
 			"error": error
 		});
 	});
+
+	
+	navCtrl.isAdmin = Utils.isAdmin();
 
 	if (navCtrl.isAdmin) {
 		

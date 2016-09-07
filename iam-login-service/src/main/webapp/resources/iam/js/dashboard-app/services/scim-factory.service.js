@@ -4,9 +4,32 @@ angular.module('dashboardApp').factory("scimFactory", [ '$http', '$httpParamSeri
 	var urlUsers = urlBase + '/Users';
 	var urlGroups = urlBase + '/Groups';
 	
-	var scimFactory = {};
+	var service = {
+		
+		getUsers: getUsers,
+		getGroups: getGroups,
+		getUser: getUser,
+		getGroup: getGroup,
+		getMe: getMe,
+		createGroup: createGroup,
+		deleteGroup: deleteGroup,
+		deleteUser: deleteUser,
+		addUserToGroup: addUserToGroup,
+		removeUserFromGroup: removeUserFromGroup,
+		addOpenIDAccount: addOpenIDAccount,
+		removeOpenIDAccount: removeOpenIDAccount,
+		addSshKey: addSshKey,
+		removeSshKey: removeSshKey,
+		addX509Certificate: addX509Certificate,
+		removeX509Certificate: removeX509Certificate,
+		addSamlId: addSamlId,
+		removeSamlId: removeSamlId,
+		setUserActiveStatus: setUserActiveStatus
+	}
+	
+	return service;
 
-	scimFactory.getUsers = function(startIndex, count) {
+	function getUsers(startIndex, count) {
 		
 		console.info("Getting users from-to: ", startIndex, count);
 		var qs = $httpParamSerializer({
@@ -18,7 +41,7 @@ angular.module('dashboardApp').factory("scimFactory", [ '$http', '$httpParamSeri
 		return $http.get(url);
 	};
 
-	scimFactory.getGroups = function(startIndex, count) {
+	function getGroups(startIndex, count) {
 		
 		console.info("Getting groups from-to: ", startIndex, count);
 		var qs = $httpParamSerializer({
@@ -30,7 +53,7 @@ angular.module('dashboardApp').factory("scimFactory", [ '$http', '$httpParamSeri
 		return $http.get(url);
 	};
 
-	scimFactory.getUser = function(userId) {
+	function getUser(userId) {
 		
 		console.info("Getting user: ", userId);
 		var url = urlUsers + '/' + userId;
@@ -38,7 +61,7 @@ angular.module('dashboardApp').factory("scimFactory", [ '$http', '$httpParamSeri
 		return $http.get(url);
 	};
 
-	scimFactory.getGroup = function(groupId) {
+	function getGroup(groupId) {
 		
 		console.info("Getting group: ", groupId);
 		var url = urlGroups + '/' + groupId;
@@ -46,7 +69,7 @@ angular.module('dashboardApp').factory("scimFactory", [ '$http', '$httpParamSeri
 		return $http.get(url);
 	};
 
-	scimFactory.getMe = function() {
+	function getMe() {
 		
 		console.info("Getting Me endpoint");
 		var url = urlBase + '/Me';
@@ -54,7 +77,7 @@ angular.module('dashboardApp').factory("scimFactory", [ '$http', '$httpParamSeri
 		return $http.get(url);
 	};
 
-	scimFactory.createGroup = function(group) {
+	function createGroup(group) {
 
 		console.info("Creating group: ", group);
 		var config = {
@@ -67,7 +90,20 @@ angular.module('dashboardApp').factory("scimFactory", [ '$http', '$httpParamSeri
 		return $http.post(urlGroups, group, config);
 	};
 	
-	scimFactory.deleteGroup = function(groupId) {
+	function createUser(user) {
+
+		console.info("Creating user: ", user);
+		var config = {
+			headers : {
+				'Accept' : 'application/scim+json',
+				'Content-Type' : 'application/scim+json'
+			}
+		}
+
+		return $http.post(urlUsers, user, config);
+	};
+	
+	function deleteGroup(groupId) {
 		
 		console.info("Deleting group: ", groupId);
 		var url = urlGroups + '/' + groupId;
@@ -75,7 +111,15 @@ angular.module('dashboardApp').factory("scimFactory", [ '$http', '$httpParamSeri
 		return $http.delete(url);
 	};
 	
-	scimFactory.addUserToGroup = function(groupId, userId) {
+	function deleteUser(groupId) {
+		
+		console.info("Deleting group: ", groupId);
+		var url = urlGroups + '/' + groupId;
+
+		return $http.delete(url);
+	};
+	
+	function addUserToGroup(groupId, userId) {
 		
 		console.info("Patch groupId, add user ", groupId, userId);
 		
@@ -90,9 +134,7 @@ angular.module('dashboardApp').factory("scimFactory", [ '$http', '$httpParamSeri
 					op: "add",
 					path: "members",
 					value: [{
-//						display: user.name,
 						value: userId,
-//						$ref: user.indigoUserInfo.meta.location
 					}]
 				}]
 		};
@@ -102,7 +144,7 @@ angular.module('dashboardApp').factory("scimFactory", [ '$http', '$httpParamSeri
 		return $http.patch(url, data, config);
 	};
 
-	scimFactory.removeUserFromGroup = function(groupId, userId, userLocation, userDisplayName) {
+	function removeUserFromGroup(groupId, userId, userLocation, userDisplayName) {
 		
 		console.info("Patch groupId, remove user", groupId, userId, userLocation);
 		
@@ -126,7 +168,7 @@ angular.module('dashboardApp').factory("scimFactory", [ '$http', '$httpParamSeri
 		return $http.patch(url, data, config);
 	};
 
-	scimFactory.addOpenIDAccount = function(userId, issuer, subject) {
+	function addOpenIDAccount(userId, issuer, subject) {
 		
 		console.info("Patch user-id, add oidc account ", userId, issuer, subject);
 		
@@ -154,7 +196,7 @@ angular.module('dashboardApp').factory("scimFactory", [ '$http', '$httpParamSeri
 		return $http.patch(url, data, config);
 	};
 
-	scimFactory.removeOpenIDAccount = function(userId, issuer, subject) {
+	function removeOpenIDAccount(userId, issuer, subject) {
 		
 		console.info("Patch user-id, remove oidc account ", userId, issuer, subject);
 		
@@ -182,7 +224,7 @@ angular.module('dashboardApp').factory("scimFactory", [ '$http', '$httpParamSeri
 		return $http.patch(url, data, config);
 	};
 
-	scimFactory.addSshKey = function(userId, label, isPrimary, value) {
+	function addSshKey(userId, label, isPrimary, value) {
 		
 		console.info("Patch user-id, add ssh-key ", userId, label, value);
 		
@@ -210,7 +252,7 @@ angular.module('dashboardApp').factory("scimFactory", [ '$http', '$httpParamSeri
 		return $http.patch(url, data, config);
 	};
 
-	scimFactory.removeSshKey = function(userId, fingerprint) {
+	function removeSshKey(userId, fingerprint) {
 		
 		console.info("Patch user-id, remove ssh-key ", userId, fingerprint);
 		
@@ -236,7 +278,7 @@ angular.module('dashboardApp').factory("scimFactory", [ '$http', '$httpParamSeri
 		return $http.patch(url, data, config);
 	};
 	
-	scimFactory.addX509Certificate = function(userId, label, isPrimary, value) {
+	function addX509Certificate(userId, label, isPrimary, value) {
 		
 		console.info("Patch user-id, add ssh-key ", userId, label, value);
 		
@@ -261,7 +303,7 @@ angular.module('dashboardApp').factory("scimFactory", [ '$http', '$httpParamSeri
 		return $http.patch(url, data, config);
 	};
 	
-	scimFactory.removeX509Certificate = function(userId, value) {
+	function removeX509Certificate(userId, value) {
 		
 		console.info("Patch user-id, add ssh-key ", userId, value);
 		
@@ -284,7 +326,7 @@ angular.module('dashboardApp').factory("scimFactory", [ '$http', '$httpParamSeri
 		return $http.patch(url, data, config);
 	};
 	
-	scimFactory.addSamlId = function(userId, samlIdpId, samlUserId) {
+	function addSamlId(userId, samlIdpId, samlUserId) {
 		
 		console.info("Patch user-id, add saml-account ", userId, samlIdpId, samlUserId);
 		
@@ -311,7 +353,7 @@ angular.module('dashboardApp').factory("scimFactory", [ '$http', '$httpParamSeri
 		return $http.patch(url, data, config);
 	};
 	
-	scimFactory.removeSamlId = function(userId, samlId) {
+	function removeSamlId(userId, samlId) {
 		
 		console.info("Patch user-id, remove saml-account ", userId, samlId.idpId, samlId.userId);
 		
@@ -338,7 +380,7 @@ angular.module('dashboardApp').factory("scimFactory", [ '$http', '$httpParamSeri
 		return $http.patch(url, data, config);
 	};
 	
-	scimFactory.setUserActiveStatus = function(userId, status) {
+	function setUserActiveStatus(userId, status) {
 		
 		console.info("Patch user-id, set active to ", userId, status);
 		

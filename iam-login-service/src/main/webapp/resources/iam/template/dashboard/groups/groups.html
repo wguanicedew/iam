@@ -15,7 +15,7 @@
 
 	<div class="row">
 		<div class="col-xs-12">
-			<div class="box">
+			<div class="box" ng-cloak>
 				<div class="box-header with-border">
 					<div class="input-group">
 						<input placeholder="Search.." ng-model="gc.search.displayName"
@@ -69,36 +69,6 @@
 				<div class="box-footer">
 					<button class="btn btn-success" ng-click="gc.clickToOpen()">Add
 						Group</button>
-				</div>
-			</div>
-		</div>
-	</div>
-	<div class="row">
-		<div class="col-xs-12" ng-show="gc.alerts.length">
-			<div class="box">
-				<div class="box box-default">
-					<div class="box-header with-border">
-						<i class="fa fa-info"></i>
-						<h3 class="box-title">Messages</h3>
-					</div>
-					<!-- /.box-header -->
-					<div class="box-body">
-
-						<div ng-repeat="alert in gc.alerts">
-
-							<div style="margin: 5px 5px;">
-								<button type="button" class="close pull-right"
-									ng-click="gc.closeAlert($index)">
-									<i class="fa fa-times"></i>
-								</button>
-								<span>{{alert.time |
-									date:'yyyy-MM-dd&nbsp;HH:mm:ss'}}&nbsp;&nbsp; <strong
-									ng-class="alert.type == 'success' ? 'label bg-green' : ' label bg-red' ">{{alert.title}}</strong>
-									&nbsp;&nbsp;{{alert.text}}
-								</span>
-							</div>
-						</div>
-					</div>
 				</div>
 			</div>
 		</div>

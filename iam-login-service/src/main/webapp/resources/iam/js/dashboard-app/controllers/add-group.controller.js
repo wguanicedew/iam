@@ -23,7 +23,6 @@ function AddGroupController($scope, $uibModalInstance, Utils, scimFactory,
 		addGroupCtrl.group.description = "";
 
 	}
-	;
 
 	addGroupCtrl.resetGroup();
 
@@ -38,14 +37,13 @@ function AddGroupController($scope, $uibModalInstance, Utils, scimFactory,
 		scimFactory.createGroup(addGroupCtrl.group).then(function(response) {
 			$uibModalInstance.close(response.data);
 		}, function(error) {
-			console.error('Error creating group: ' + error);
+			console.error('Error creating group', error);
 			addGroupCtrl.cancel();
 			$state.go("error", {
 				"error" : error
 			});
 		});
 	}
-	;
 
 	function cancel() {
 		$uibModalInstance.dismiss("cancel");

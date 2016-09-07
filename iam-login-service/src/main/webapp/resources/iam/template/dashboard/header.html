@@ -10,57 +10,59 @@
 	<div class="navbar-custom-menu">
 		<ul class="nav navbar-nav">
 			<!-- Notifications: style can be found in dropdown.less -->
-			<li class="dropdown notifications-menu" uib-dropdown><a href=""
-				class="dropdown-toggle" uib-dropdown-toggle> <i class="fa fa-bell-o"></i>
-					<span class="label label-warning">10</span>
-			</a>
-				<ul class="dropdown-menu">
-					<li class="header">You have 10 notifications</li>
-					<li>
-						<!-- inner menu: contains the actual data -->
-						<ul class="menu">
-							<li><a href="#"> <i class="fa fa-users text-aqua"></i> 5
-									new members joined today
-							</a></li>
-							<li><a href="#"> <i class="fa fa-warning text-yellow"></i>
-									Very long description here that may not fit into the page and
-									may cause design problems
-							</a></li>
-							<li><a href="#"> <i class="fa fa-users text-red"></i> 5
-									new members joined
-							</a></li>
+<!-- 			<li class="dropdown notifications-menu" uib-dropdown><a href="" -->
+<!-- 				class="dropdown-toggle" uib-dropdown-toggle> <i class="fa fa-bell-o"></i> -->
+<!-- 					<span class="label label-warning">10</span> -->
+<!-- 			</a> -->
+<!-- 				<ul class="dropdown-menu"> -->
+<!-- 					<li class="header">You have 10 notifications</li> -->
+<!-- 					<li> -->
+<!-- 						inner menu: contains the actual data -->
+<!-- 						<ul class="menu"> -->
+<!-- 							<li><a href="#"> <i class="fa fa-users text-aqua"></i> 5 -->
+<!-- 									new members joined today -->
+<!-- 							</a></li> -->
+<!-- 							<li><a href="#"> <i class="fa fa-warning text-yellow"></i> -->
+<!-- 									Very long description here that may not fit into the page and -->
+<!-- 									may cause design problems -->
+<!-- 							</a></li> -->
+<!-- 							<li><a href="#"> <i class="fa fa-users text-red"></i> 5 -->
+<!-- 									new members joined -->
+<!-- 							</a></li> -->
 
-							<li><a href="#"> <i
-									class="fa fa-shopping-cart text-green"></i> 25 sales made
-							</a></li>
-							<li><a href="#"> <i class="fa fa-user text-red"></i> You
-									changed your username
-							</a></li>
-						</ul>
-					</li>
-					<li class="footer"><a href="#">View all</a></li>
-				</ul></li>
+<!-- 							<li><a href="#"> <i -->
+<!-- 									class="fa fa-shopping-cart text-green"></i> 25 sales made -->
+<!-- 							</a></li> -->
+<!-- 							<li><a href="#"> <i class="fa fa-user text-red"></i> You -->
+<!-- 									changed your username -->
+<!-- 							</a></li> -->
+<!-- 						</ul> -->
+<!-- 					</li> -->
+<!-- 					<li class="footer"><a href="#">View all</a></li> -->
+<!-- 				</ul></li> -->
 			
 			<!-- User Account: style can be found in dropdown.less -->
 			<li class="dropdown user user-menu" uib-dropdown><a href=""
-				class="dropdown-toggle" uib-dropdown-toggle> <img
-					src="{{userInfo.picture}}"
-					class="user-image" alt="User Image" /> <span class="hidden-xs">{{userInfo.preferred_username}}</span>
+				class="dropdown-toggle" uib-dropdown-toggle>
+				<img
+					ng-src="{{topbarCtrl.user.me.picture ? topbarCtrl.user.me.picture : 'resources/iam/img/default-avatar.png'}}"
+					class="user-image" alt="User Image" /> <span class="hidden-xs">{{topbarCtrl.user.me.name.formatted}}</span>
 			</a>
 				<ul class="dropdown-menu">
 					<!-- User image -->
-					<li class="user-header"><img
-						src="{{userInfo.picture}}"
+					<li class="user-header">
+					<img
+						ng-src="{{topbarCtrl.user.me.picture ? topbarCtrl.user.me.picture : 'resources/iam/img/default-avatar.png'}}"
 						class="img-circle" alt="User Image" />
 						<p>
-						  {{userInfo.name}}<br/>
-						  <small><i>{{userInfo.organisation_name}}</i></small>
+						  {{topbarCtrl.user.me.name.formatted}}<br/>
+						  <small>{{topbarCtrl.user.me.userName}} @ {{topbarCtrl.user.info.organisation_name}}</small>
 					    </p>
 					</li>
 					<!-- Menu Footer-->
 					<li class="user-footer">
 						<div class="pull-left">
-							<a ui-sref="user({id: userInfo.sub})" class="btn btn-default btn-flat">Profile</a>
+							<a ui-sref="home" class="btn btn-default btn-flat">Profile</a>
 						</div>
 						<div class="pull-right">
 							<a href="/logout" class="btn btn-default btn-flat">Sign out</a>
