@@ -83,9 +83,9 @@
 		<div class="form-group">
 			<div class="col-sm-offset-6 col-sm-6">
 				<div style="float: right;">
-					<input class="btn btn-primary btn-sm" type="submit" value="Register" ng-disabled="registrationForm.$invalid">
-					<button class="btn btn-warning btn-sm" type="button" ng-click="reset()" ng-disabled="registrationForm.$pristine">Reset Form</button>
-					<button class="btn btn-danger btn-sm" type="button" ng-click="dismiss()" >Cancel</button>
+					<input class="btn btn-primary btn-sm" type="submit" name="register" value="Register" ng-disabled="!registrationForm.$valid || registrationForm.$pristine">
+					<button class="btn btn-warning btn-sm" type="button" name="reset" ng-click="reset()" ng-disabled="registrationForm.$pristine">Reset Form</button>
+					<button class="btn btn-danger btn-sm" type="button" name="dismiss" ng-click="dismiss()" >Cancel</button>
 				</div>
 			</div>
 		</div>

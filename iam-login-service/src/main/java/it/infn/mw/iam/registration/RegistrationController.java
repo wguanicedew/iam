@@ -32,12 +32,6 @@ public class RegistrationController {
     service = registrationService;
   }
 
-  @RequestMapping(value = "/registration/manage", method = RequestMethod.GET)
-  public ModelAndView showManagement() {
-
-    return new ModelAndView("iam/requestsManagement");
-  }
-
   @RequestMapping(value = "/registration/username-available/{username}", method = RequestMethod.GET)
   public Boolean usernameAvailable(@PathVariable("username") String username) {
     return service.usernameAvailable(username);

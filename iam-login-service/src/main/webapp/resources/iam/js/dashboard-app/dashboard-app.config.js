@@ -57,6 +57,15 @@ angular.module('dashboardApp').config(function($stateProvider, $urlRouterProvide
 		        controllerAs: 'unauthCtrl'
 		      }
 		    }
+	}).state('requests', {
+		url : '/requests',
+		views: {
+		      'content' : {
+		        templateUrl: '/resources/iam/template/dashboard/requests/management.html',
+		        controller: 'RequestManagementController',
+		        controllerAs: 'ctrl'
+		      }
+		    }
 	}).state('error', {
 		url : '/error',
 		params: {

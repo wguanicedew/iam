@@ -25,7 +25,7 @@
 				</h3>
 
 				<p>{{errorCtrl.error.statusText}}</p>
-				<p>{{errorCtrl.error.data.detail}}</p>
+				<p>{{errorCtrl.error.data.detail || errorCtrl.error.data.error_description || errorCtrl.error.data.message }}</p>
 			</div>
 		</div>
 	</div>
