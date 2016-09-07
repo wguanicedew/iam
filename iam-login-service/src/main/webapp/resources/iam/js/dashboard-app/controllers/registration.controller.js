@@ -2,9 +2,9 @@
 
 angular.module('dashboardApp').controller('RequestManagementController', RequestManagementController);
 
-RequestManagementController.$inject = ['$scope', '$state', 'RegistrationRequestService'];
+RequestManagementController.$inject = ['$scope', '$state', 'RegistrationRequestService', 'ModalService'];
 
-function RequestManagementController($scope, $state, RegistrationRequestService){
+function RequestManagementController($scope, $state, RegistrationRequestService, ModalService){
 	var vm = this;
 	vm.operationResult;
 	vm.textAlert;
@@ -61,17 +61,16 @@ function RequestManagementController($scope, $state, RegistrationRequestService)
 			function(errResponse) {
 				vm.textAlert = errResponse.data.error_description || errResponse.data.detail;
 				vm.operationResult = 'err';
-				console.log(errResponse);
 				$state.go("error", {
 					"error" : errResponse
 				});
 			})
 	};
 
-	function approveRequest(uuid) {
-		RegistrationRequestService.updateRequest(uuid, 'APPROVED').then(
+	function approveRequest(request) {
+		RegistrationRequestService.updateRequest(request.uuid, 'APPROVED').then(
 			function() {
-				vm.textAlert = "Approvation success";
+				vm.textAlert = `${request.givenname} ${request.familyname} request approved successfully`;
 				vm.operationResult = 'ok';
 				vm.listPending();
 			},
@@ -81,16 +80,27 @@ function RequestManagementController($scope, $state, RegistrationRequestService)
 			})
 	};
 
-	function rejectRequest(uuid) {
-		RegistrationRequestService.updateRequest(uuid, 'REJECTED').then(
-			function() {
-				vm.textAlert = "Rejection success";
-				vm.operationResult = 'ok';
-				vm.listPending();
-			},
-			function(errResponse) {
-				vm.textAlert = errResponse.data.error_description || errResponse.data.detail;
-				vm.operationResult = 'err';
-			})
+	function rejectRequest(request) {
+		
+		var modalOptions = {
+			closeButtonText: 'Cancel',
+            actionButtonText: 'Reject Request',
+            headerText: 'Reject?',
+            bodyText: `Are you sure you want to reject request for ${request.givenname} ${request.familyname}?`	
+		};
+		
+		ModalService.showModal({}, modalOptions).then(
+				function (){
+					RegistrationRequestService.updateRequest(request.uuid, 'REJECTED').then(
+							function() {
+								vm.textAlert = `${request.givenname} ${request.familyname} request rejected successfully`;
+								vm.operationResult = 'ok';
+								vm.listPending();
+							},
+							function(errResponse) {
+								vm.textAlert = errResponse.data.error_description || errResponse.data.detail;
+								vm.operationResult = 'err';
+							})
+				});
 	};
 };
