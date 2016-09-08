@@ -3,10 +3,10 @@
 angular.module('dashboardApp').controller('UsersController', UsersController);
 
 UsersController.$inject = [ '$scope', '$uibModal', '$state', '$filter',
-		'filterFilter', 'scimFactory' ];
+		'filterFilter', 'scimFactory', 'ModalService' ];
 
 function UsersController($scope, $uibModal, $state, $filter, filterFilter,
-		scimFactory) {
+		scimFactory, ModalService) {
 
 	var users = this;
 
@@ -27,6 +27,8 @@ function UsersController($scope, $uibModal, $state, $filter, filterFilter,
 
 	users.getAllUsers = getAllUsers;
 	users.openAddUserDialog = openAddUserDialog;
+	users.deleteUser = deleteUser;
+	users.removeUserFromList = removeUserFromList;
 
 	// Controller actions:
 	users.resetFilters()
@@ -97,4 +99,37 @@ function UsersController($scope, $uibModal, $state, $filter, filterFilter,
 			console.info('Modal dismissed at: ', new Date());
 		});
 	}
+	
+	function removeUserFromList(user) {
+
+		var i = users.list.indexOf(user);
+		users.list.splice(i, 1);
+
+		users.filtered = filterFilter(users.list, users.search);
+		users.updateTotalItems();
+		users.updateNoOfPages();
+	}
+	
+	function deleteUser(user) {
+		
+		var modalOptions = {
+			closeButtonText: 'Cancel',
+            actionButtonText: 'Delete User',
+            headerText: 'Delete?',
+            bodyText: `Are you sure you want to delete user '${user.name.formatted}'?`	
+		};
+		
+		ModalService.showModal({}, modalOptions).then(
+				function (){
+					scimFactory.deleteUser(user.id).then(
+						function(response) {
+							users.removeUserFromList(user);
+							users.textAlert = `User ${user.displayName} deleted successfully`;
+							users.operationResult = 'ok';
+						}, function(error) {
+							users.textAlert = error.data.error_description || error.data.detail;
+							users.operationResult = 'err';
+						});
+				});
+	};
 }

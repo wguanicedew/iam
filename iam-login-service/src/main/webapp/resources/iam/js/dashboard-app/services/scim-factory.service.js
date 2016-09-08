@@ -111,10 +111,10 @@ angular.module('dashboardApp').factory("scimFactory", [ '$http', '$httpParamSeri
 		return $http.delete(url);
 	};
 	
-	function deleteUser(groupId) {
+	function deleteUser(userId) {
 		
-		console.info("Deleting group: ", groupId);
-		var url = urlGroups + '/' + groupId;
+		console.info("Deleting user: ", userId);
+		var url = urlUsers + '/' + userId;
 
 		return $http.delete(url);
 	};
