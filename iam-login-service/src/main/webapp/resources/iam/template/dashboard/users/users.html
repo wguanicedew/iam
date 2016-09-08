@@ -78,7 +78,7 @@
 										class="btn btn-xs btn-default">{{g.display}}</button>
 								</td>
 								<td>
-									<button class="btn btn-danger btn-xs" ng-click="users.deleteUser(user)">
+									<button ng-disabled="user.id == $root.loggedUser.me.id" class="btn btn-danger btn-xs" ng-click="users.deleteUser(user)">
 										<i class="fa fa-times"></i> Delete
 									</button>
 								</td>
