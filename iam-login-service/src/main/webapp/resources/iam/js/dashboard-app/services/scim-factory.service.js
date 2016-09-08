@@ -13,6 +13,7 @@ angular.module('dashboardApp').factory("scimFactory", [ '$http', '$httpParamSeri
 		getMe: getMe,
 		createGroup: createGroup,
 		deleteGroup: deleteGroup,
+		createUser: createUser,
 		deleteUser: deleteUser,
 		addUserToGroup: addUserToGroup,
 		removeUserFromGroup: removeUserFromGroup,

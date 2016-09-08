@@ -34,8 +34,8 @@ function AddGroupController($scope, $rootScope, $uibModalInstance, Utils, scimFa
 		console.info(addGroupCtrl.group);
 
 		scimFactory.createGroup(addGroupCtrl.group).then(function(response) {
-			$uibModalInstance.close(response.data);
 			$rootScope.loggedUser.totGroups = $rootScope.loggedUser.totGroups + 1;
+			$uibModalInstance.close(response.data);
 		}, function(error) {
 			console.error('Error creating group', error);
 			addGroupCtrl.textAlert = error.data.error_description || error.data.detail;

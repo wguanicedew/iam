@@ -83,7 +83,7 @@ function GroupsController($scope, $rootScope, $uibModal, $state, $filter,
 									"displayName", false);
 							gc.updateTotalItems();
 							gc.updateNoOfPages();
-							if (response.data.totalResults > (response.data.startIndex + response.data.itemsPerPage)) {
+							if (response.data.totalResults > (response.data.startIndex - 1 + response.data.itemsPerPage)) {
 								gc.getGroups(startIndex + count, count);
 							}
 						}, function(error) {

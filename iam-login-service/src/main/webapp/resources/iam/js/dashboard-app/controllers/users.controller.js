@@ -71,7 +71,7 @@ function UsersController($scope, $rootScope, $uibModal, $state, $filter, filterF
 									"name.formatted", false);
 							users.updateTotalItems();
 							users.updateNoOfPages();
-							if (response.data.totalResults > (response.data.startIndex + response.data.itemsPerPage)) {
+							if (response.data.totalResults > (response.data.startIndex - 1 + response.data.itemsPerPage)) {
 								users.getAllUsers(startIndex + count, count);
 							}
 						}, function(error) {
