@@ -72,7 +72,7 @@
 									class="fa fa-circle text-success" ng-show="user.active"></i> <i
 									class="fa fa-circle text-danger" ng-show="!user.active"></i></td>
 								<td>{{user.emails[0].value}}</td>
-								<td>{{user.meta.created | date:'medium'}}</td>
+								<td>{{user.meta.created | relativeDate }}</td>
 								<td>
 									<button ng-repeat="g in user.groups"
 										class="btn btn-xs btn-default">{{g.display}}</button>
