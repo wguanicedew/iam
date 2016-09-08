@@ -29,9 +29,11 @@
 					</div>
 				</div>
 				<div class="box-body">
-					<ul uib-pagination ng-model="users.currentPage"
-						items-per-page="users.entryLimit" total-items="users.totalItems"
-						max-size="users.noOfPages" boundary-links="true"></ul>
+				    <div class="text-center">
+						<ul uib-pagination ng-model="users.currentPage"
+							items-per-page="users.entryLimit" total-items="users.totalItems"
+							max-size="10" boundary-links="true"></ul>
+					</div>
 					<table id="userslist" class="table table-striped">
 						<thead>
 							<tr>
@@ -85,9 +87,11 @@
 							</tr>
 						</tfoot>
 					</table>
-					<ul uib-pagination ng-model="users.currentPage"
-						items-per-page="users.entryLimit" total-items="users.totalItems"
-						max-size="users.noOfPages" boundary-links="true"></ul>
+					<div class="text-center">
+						<ul uib-pagination ng-model="users.currentPage"
+							items-per-page="users.entryLimit" total-items="users.totalItems"
+							max-size="10" boundary-links="true"></ul>
+					</div>
 
 				</div>
 				<div class="box-footer">

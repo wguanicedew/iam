@@ -7,12 +7,11 @@
 <o:iamHeader title="INDIGO IAM | User Dashboard" />
 
 <body class="skin-blue" ng-app="dashboardApp">
-	<div class="wrapper">
+	<div class="wrapper" ng-controller="CommonController as commonCtrl">
 
-		<header class="main-header" ng-controller="TopbarController as topbarCtrl"></header>
+		<header class="main-header"></header>
 
-
-		<aside class="main-sidebar" ng-controller="NavController as navCtrl">
+		<aside class="main-sidebar">
 			<mainsidebar />
 		</aside>
 
@@ -51,11 +50,10 @@
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/sidebar.directive.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/services/scim-factory.service.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/services/utils.service.js"></script>
+	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/common.controller.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/home.controller.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/user.controller.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/group.controller.js"></script>
-    <script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/nav.controller.js"></script>
-	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/topbar.controller.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/error.controller.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/users.controller.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/groups.controller.js"></script>

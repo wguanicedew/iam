@@ -28,9 +28,11 @@
 					</div>
 				</div>
 				<div class="box-body">
-					<ul uib-pagination ng-model="gc.currentPage"
-						items-per-page="gc.entryLimit" total-items="gc.totalItems"
-						max-size="gc.noOfPages" boundary-links="true"></ul>
+				    <div class="text-center">
+						<ul uib-pagination ng-model="gc.currentPage"
+							items-per-page="gc.entryLimit" total-items="gc.totalItems"
+							max-size="10" boundary-links="true"></ul>
+				    </div>
 					<table class="table table-striped">
 						<thead>
 							<tr>
@@ -62,9 +64,11 @@
 							</tr>
 						</tfoot>
 					</table>
-					<ul uib-pagination ng-model="gc.currentPage"
-						items-per-page="gc.entryLimit" total-items="gc.totalItems"
-						max-size="gc.noOfPages" boundary-links="true"></ul>
+					<div class="text-center">
+						<ul uib-pagination ng-model="gc.currentPage"
+							items-per-page="gc.entryLimit" total-items="gc.totalItems"
+							max-size="10" boundary-links="true"></ul>
+					</div>
 				</div>
 				<div class="box-footer">
 					<button class="btn btn-success" ng-click="gc.clickToOpen()">Add

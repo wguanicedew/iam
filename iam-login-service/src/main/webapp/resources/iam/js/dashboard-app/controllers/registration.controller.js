@@ -2,9 +2,9 @@
 
 angular.module('dashboardApp').controller('RequestManagementController', RequestManagementController);
 
-RequestManagementController.$inject = ['$scope', '$state', 'RegistrationRequestService'];
+RequestManagementController.$inject = ['$scope', '$rootScope', '$state', 'RegistrationRequestService'];
 
-function RequestManagementController($scope, $state, RegistrationRequestService){
+function RequestManagementController($scope, $rootScope, $state, RegistrationRequestService){
 	var vm = this;
 	vm.operationResult;
 	vm.textAlert;
@@ -56,6 +56,7 @@ function RequestManagementController($scope, $state, RegistrationRequestService)
 		RegistrationRequestService.listPending().then(
 			function(result) {
 				vm.list = result.data;
+				$rootScope.loggedUser.pendingRequests = result.data;
 				vm.elementToDisplay();
 			},
 			function(errResponse) {

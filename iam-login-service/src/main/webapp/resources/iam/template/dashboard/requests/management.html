@@ -4,10 +4,10 @@
 	</h1>
 	<ol class="breadcrumb">
 		<li>
-			<a href=""><i class="fa fa-sign-in"></i> Requests</a>
+			<a ui-sref="requests"><i class="fa fa-sign-in"></i> Requests</a>
 		</li>
 		<li>
-			<a ui-sref="users"><i class="fa fa-list"></i> List of pending request</a>
+			<a ui-sref="requests"><i class="fa fa-list"></i> List of pending request</a>
 		</li>
 	</ol>
 </section>
@@ -17,15 +17,8 @@
     <div class="row">
         <div class="col-md-12">
 
-            <div class="box">
-                <div class="box-header with-border">
-                    <h4><strong>Pending requests</strong></h4>
-                </div>
-                <div class="box-body with-border" ng-show="!ctrl.list.length">
-                    <h4>No Pending Requests Found!</h4>
-                </div>
-                <div class="box-body with-border" ng-show="ctrl.list.length">
-                
+            <div style="min-height: 650px;">
+
 					<div ng-show="ctrl.operationResult != null">
 						<div class="alert" ng-class="{'alert-success': ctrl.operationResult=='ok', 'alert-danger': ctrl.operationResult=='err'}">
 							<button class="close" ng-click="ctrl.operationResult=null" aria-label="close">&times;</button>
@@ -80,13 +73,8 @@
 
 					</div>
 					
-					
-					
-			   </div>
-			   <div class="box-footer with-border">
-	           </div>
+
 	       </div>
-	
 	   </div>
 	</div>
 	
