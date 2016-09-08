@@ -14,6 +14,18 @@
 <section class="content">
 
 	<div class="row">
+
+		<div class="col-xs-12">
+			<div ng-show="gc.operationResult != null">
+				<div class="alert"
+					ng-class="{'alert-success': gc.operationResult=='ok', 'alert-danger': gc.operationResult=='err'}">
+					<button class="close" ng-click="gc.operationResult=null"
+						aria-label="close">&times;</button>
+					{{gc.textAlert}}
+				</div>
+			</div>
+		</div>
+
 		<div class="col-xs-12">
 			<div class="box" ng-cloak>
 				<div class="box-header with-border">
@@ -48,10 +60,8 @@
 								<td><a ui-sref="group({id: group.id})">{{group.displayName}}</a>
 								</td>
 								<td>
-									<button class="btn btn-danger btn-xs"
-										confirmed-click="gc.deleteGroup(group)"
-										ng-confirm-click="Are you sure you want to delete '{{group.displayName}}'?">
-										<i class="fa fa-trash-o"></i> Delete
+									<button class="btn btn-danger btn-xs" ng-click="gc.deleteGroup(group)">
+										<i class="fa fa-times"></i> Delete
 									</button>
 								</td>
 							</tr>

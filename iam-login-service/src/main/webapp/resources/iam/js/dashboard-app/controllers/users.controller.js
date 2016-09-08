@@ -2,10 +2,10 @@
 
 angular.module('dashboardApp').controller('UsersController', UsersController);
 
-UsersController.$inject = [ '$scope', '$uibModal', '$state', '$filter',
+UsersController.$inject = [ '$scope', '$rootScope', '$uibModal', '$state', '$filter',
 		'filterFilter', 'scimFactory', 'ModalService' ];
 
-function UsersController($scope, $uibModal, $state, $filter, filterFilter,
+function UsersController($scope, $rootScope, $uibModal, $state, $filter, filterFilter,
 		scimFactory, ModalService) {
 
 	var users = this;
@@ -124,6 +124,7 @@ function UsersController($scope, $uibModal, $state, $filter, filterFilter,
 					scimFactory.deleteUser(user.id).then(
 						function(response) {
 							users.removeUserFromList(user);
+							$rootScope.loggedUser.totUsers = $rootScope.loggedUser.totUsers -1;
 							users.textAlert = `User ${user.displayName} deleted successfully`;
 							users.operationResult = 'ok';
 						}, function(error) {
