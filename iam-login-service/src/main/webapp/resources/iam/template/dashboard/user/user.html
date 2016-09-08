@@ -55,12 +55,10 @@
                         </li>
                         <li class="list-group-item">
                           <strong>Created</strong> <a
-                            class="pull-right">{{user.userInfo.meta.created | date :
-                                "medium" }}</a></li>
+                            class="pull-right">{{user.userInfo.meta.created | relativeDate }}</a></li>
 						<li class="list-group-item">
 						  <strong>Last update</strong> <a
-							class="pull-right">{{user.userInfo.meta.lastModified | date :
-								"medium" }}</a></li>
+							class="pull-right">{{user.userInfo.meta.lastModified | relativeDate }}</a></li>
 						<li class="list-group-item">
 						  <strong>Groups</strong> <a
                             class="pull-right"><span class="label label-default">{{user.userInfo.groups.length}}</span></a></li>

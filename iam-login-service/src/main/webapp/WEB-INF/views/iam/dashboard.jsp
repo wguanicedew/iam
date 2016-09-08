@@ -41,6 +41,7 @@
 	<script type="text/javascript" src="<c:url value='/webjars/bootstrap/bootstrap.min.js'/>"></script>
 
 	<script type="text/javascript" src="/resources/iam/js/adminLTE.js"></script>
+	<script type="text/javascript" src="/resources/iam/js/directive/angular-relative-date.min.js"></script>
 
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/dashboard-app.module.js"></script>
 	

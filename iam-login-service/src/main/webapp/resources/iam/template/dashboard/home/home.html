@@ -44,11 +44,9 @@
 						</a></li>
 						<li class="list-group-item">
 						  <strong>Created</strong> <a
-                            class="pull-right">{{home.user.me.meta.created | date :
-                                "medium" }}</a></li>
+                            class="pull-right">{{home.user.me.meta.created | relativeDate }}</a></li>
 						<li class="list-group-item"><b>Last update</b> <a
-							class="pull-right">{{home.user.me.meta.lastModified | date :
-								"medium" }}</a></li>
+							class="pull-right">{{home.user.me.meta.lastModified | relativeDate }}</a></li>
 						<li class="list-group-item">
 						  <strong>Groups</strong> <a
                             class="pull-right"><span class="label label-default">{{home.user.me.groups.length}}</span></a></li>
