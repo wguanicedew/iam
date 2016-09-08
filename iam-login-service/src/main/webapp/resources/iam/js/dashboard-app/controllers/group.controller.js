@@ -2,9 +2,9 @@
 
 angular.module('dashboardApp').controller('GroupController', GroupController);
 
-GroupController.$inject = [ '$state', 'scimFactory', 'ModalService' ];
+GroupController.$inject = [ '$state', '$filter', 'scimFactory', 'ModalService' ];
 
-function GroupController($state, scimFactory, ModalService) {
+function GroupController($state, $filter, scimFactory, ModalService) {
 
 	var group = this;
 
