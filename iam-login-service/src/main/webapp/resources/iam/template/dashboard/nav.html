@@ -17,19 +17,18 @@
 		<li class="header">MAIN NAVIGATION</li>
 		<li><a ui-sref="home"> <i class="fa fa-home"></i> <span>Home</span></a></li>
 		<li ng-show="$root.loggedUser.isAdmin"><a ui-sref="users"><i class="fa fa-user"></i> <span>Users</span>
-				<span class="pull-right-container" ng-show="$root.loggedUser.totUsers > 0">
+				<span class="pull-right-container" ng-show="$root.loggedUser.totUsers>0">
 					<small class="label pull-right bg-blue">{{
 						$root.loggedUser.totUsers }}</small>
 			</span> </a></li>
 		<li ng-show="$root.loggedUser.isAdmin"><a ui-sref="groups"><i class="fa fa-users"></i> <span>Groups</span>
-				<span class="pull-right-container" ng-show="$root.loggedUser.totGroups > 0">
+				<span class="pull-right-container" ng-show="$root.loggedUser.totGroups>0">
 					<small class="label pull-right bg-green">{{
 						$root.loggedUser.totGroups }}</small>
 			</span> </a></li>
 		<li ng-show="$root.loggedUser.isAdmin"><a ui-sref="requests"> <i class="fa fa-sign-in"></i> <span>Requests</span>
-				<span class="pull-right-container" ng-show="$root.loggedUser.totRequests"> 0"> <small
-					class="label pull-right bg-red">{{ $root.loggedUser.pendingRequests.length
-						}}</small>
+				<span class="pull-right-container" ng-show="$root.loggedUser.pendingRequests.length>0"> <small
+					class="label pull-right bg-red">{{ $root.loggedUser.pendingRequests.length }}</small>
 			</span>
 		</a></li>
 		<li class="header">DASHBOARD 1.0</li>
