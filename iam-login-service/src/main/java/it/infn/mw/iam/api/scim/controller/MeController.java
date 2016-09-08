@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -36,16 +36,18 @@ public class MeController {
 
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-    if (!(auth.getPrincipal() instanceof User)) {
-
-      throw new ScimException("Authenticated User details not found!");
+    if (auth instanceof OAuth2Authentication) {
+      OAuth2Authentication oauth = (OAuth2Authentication) auth;
+      if (oauth.getUserAuthentication() == null) {
+        throw new ScimException("No user linked to the current OAuth token");
+      }
+      auth = oauth.getUserAuthentication();
     }
 
-    User user = (User) auth.getPrincipal();
+    final String username = auth.getName();
 
-    IamAccount account = iamAccountRepository.findByUsername(user.getUsername())
-      .orElseThrow(() -> new ScimResourceNotFoundException(
-          "No user mapped to username '" + user.getUsername() + "'"));
+    IamAccount account = iamAccountRepository.findByUsername(username).orElseThrow(
+        () -> new ScimResourceNotFoundException("No user mapped to username '" + username + "'"));
 
     return userConverter.toScim(account);
 
