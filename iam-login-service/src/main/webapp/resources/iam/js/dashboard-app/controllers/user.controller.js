@@ -225,11 +225,23 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, Utils, s
 	}
 
 	function showSshKeyValue(value) {
-		alert(value);
+
+		ModalService.showModal({}, {
+			closeButtonText: null,
+			actionButtonText: 'OK',
+			headerText: 'SSH Key value',
+			bodyText: `${value}`
+		});
 	}
 
 	function showCertValue(cert) {
-		alert(cert.value);
+
+		ModalService.showModal({}, {
+			closeButtonText: null,
+			actionButtonText: 'OK',
+			headerText: 'x509 Certificate value',
+			bodyText: `${cert.value}`
+		});
 	}
 
 	function deleteOidcAccount(oidcId) {

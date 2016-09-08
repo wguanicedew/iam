@@ -2,9 +2,9 @@
   <h4>{{modalOptions.headerText}}</h4>
 </div>
 <div class="modal-body">
-  <p class="text-left">{{modalOptions.bodyText}}</p>
+  <p class="text-justify text-wrapped">{{modalOptions.bodyText}}</p>
 </div>
 <div class="modal-footer">
-  <button class="btn" type="button" data-ng-click="modalOptions.close()">{{modalOptions.closeButtonText}}</button>
+  <button class="btn" type="button" ng-show="modalOptions.closeButtonText != null" data-ng-click="modalOptions.close()">{{modalOptions.closeButtonText}}</button>
   <button class="btn btn-primary" type="button" data-ng-click="modalOptions.ok();">{{modalOptions.actionButtonText}}</button>
 </div>
