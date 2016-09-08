@@ -2,9 +2,9 @@
 
 angular.module('dashboardApp').controller('UserController', UserController);
 
-UserController.$inject = [ '$scope', '$state', '$uibModal', '$filter', 'Utils', 'scimFactory' ];
+UserController.$inject = [ '$scope', '$rootScope', '$state', '$uibModal', '$filter', 'Utils', 'scimFactory', 'ModalService' ];
 
-function UserController($scope, $state, $uibModal, $filter, Utils, scimFactory) {
+function UserController($scope, $rootScope, $state, $uibModal, $filter, Utils, scimFactory, ModalService) {
 
 	var user = this;
 
@@ -106,6 +106,8 @@ function UserController($scope, $state, $uibModal, $filter, Utils, scimFactory) 
 		modalInstance.result.then(function() {
 			console.info("Added group");
 			getIndigoUserInfo();
+			user.textAlert = `User's memberships updated successfully`;
+			user.operationResult = 'ok';
 		}, function() {
 			console.info('Modal dismissed at: ', new Date());
 		});
@@ -125,6 +127,8 @@ function UserController($scope, $state, $uibModal, $filter, Utils, scimFactory) 
 		modalInstance.result.then(function() {
 			console.info("Added oidc account");
 			getIndigoUserInfo();
+			user.textAlert = `User's Open ID Account created successfully`;
+			user.operationResult = 'ok';
 		}, function() {
 			console.info('Modal dismissed at: ', new Date());
 		});
@@ -144,7 +148,9 @@ function UserController($scope, $state, $uibModal, $filter, Utils, scimFactory) 
 		modalInstance.result.then(function() {
 			console.info("Added ssh key");
 			getIndigoUserInfo();
-		}, function() {
+			user.textAlert = `User's SSH Key added successfully`;
+			user.operationResult = 'ok';
+		}, function(error) {
 			console.info('Modal dismissed at: ', new Date());
 		});
 	}
@@ -164,6 +170,8 @@ function UserController($scope, $state, $uibModal, $filter, Utils, scimFactory) 
 		modalInstance.result.then(function() {
 			console.info("Added saml account");
 			getIndigoUserInfo();
+			user.textAlert = `User's SAML Account created successfully`;
+			user.operationResult = 'ok';
 		}, function() {
 			console.info('Modal dismissed at: ', new Date());
 		});
@@ -184,23 +192,36 @@ function UserController($scope, $state, $uibModal, $filter, Utils, scimFactory) 
 		modalInstance.result.then(function() {
 			console.info("Added x509 certificate");
 			getIndigoUserInfo();
+			user.textAlert = `User's x509 Certificate added successfully`;
+			user.operationResult = 'ok';
 		}, function() {
 			console.info('Modal dismissed at: ', new Date());
 		});
 	}
 
 	function deleteGroup(group) {
-
-		scimFactory.removeUserFromGroup(group.value, user.userInfo.id,
-				user.userInfo.meta.location, user.userInfo.name.formatted)
-				.then(function(response) {
-					console.log("Deleted: ", group);
-					getIndigoUserInfo();
-				}, function(error) {
-					$state.go("error", {
-						"error": error
+		
+		var modalOptions = {
+			closeButtonText: 'Cancel',
+			actionButtonText: 'Remove user from group',
+			headerText: 'Remove membership?',
+			bodyText: `Are you sure you want to remove user memebership to '${group.display}'?`	
+		};
+			
+		ModalService.showModal({}, modalOptions).then(
+			function (){
+				scimFactory.removeUserFromGroup(group.value, user.userInfo.id,
+						user.userInfo.meta.location, user.userInfo.name.formatted)
+					.then(function(response) {
+						console.log("Deleted: ", group);
+						getIndigoUserInfo();
+						user.textAlert = `Group ${group.display} membership removed successfully`;
+						user.operationResult = 'ok';
+					}, function(error) {
+						user.textAlert = error.data.error_description || error.data.detail;
+						user.operationResult = 'err';
 					});
-				});
+			});
 	}
 
 	function showSshKeyValue(value) {
@@ -213,68 +234,129 @@ function UserController($scope, $state, $uibModal, $filter, Utils, scimFactory) 
 
 	function deleteOidcAccount(oidcId) {
 
-		scimFactory.removeOpenIDAccount(user.userInfo.id, oidcId.issuer,
-				oidcId.subject).then(function(response) {
-			console.log("Removed: ", oidcId.issuer, oidcId.subject);
-			getIndigoUserInfo();
-		}, function(error) {
-			$state.go("error", {
-				"error": error
-			});
-		});
+		var summary = oidcId.issuer + ", " + oidcId.subject;
+		
+		var modalOptions = {
+				closeButtonText: 'Cancel',
+				actionButtonText: 'Remove Open ID Account',
+				headerText: 'Remove Open ID Account?',
+				bodyText: `Are you sure you want to remove the Open ID Account [${summary}]?`	
+			};
+				
+			ModalService.showModal({}, modalOptions).then(
+				function (){
+					scimFactory.removeOpenIDAccount(user.userInfo.id, oidcId.issuer,
+							oidcId.subject)
+						.then(function(response) {
+							console.log("Removed: ", oidcId.issuer, oidcId.subject);
+							getIndigoUserInfo();
+							user.textAlert = `Open ID Account [${summary}] has been removed successfully`;
+							user.operationResult = 'ok';
+						}, function(error) {
+							user.textAlert = error.data.error_description || error.data.detail;
+							user.operationResult = 'err';
+						});
+				});
 	}
 
 	function deleteSshKey(sshKey) {
-
-		scimFactory.removeSshKey(user.userInfo.id, sshKey.fingerprint).then(
-				function(response) {
-					console
-							.log("Removed: ", sshKey.display,
-									sshKey.fingerprint);
-					getIndigoUserInfo();
-				}, function(error) {
-					$state.go("error", {
-						"error": error
-					});
+		
+		var modalOptions = {
+				closeButtonText: 'Cancel',
+				actionButtonText: 'Remove ssh key',
+				headerText: 'Remove ssh key?',
+				bodyText: `Are you sure you want to remove the ssh key [${sshKey.display}]?`	
+			};
+				
+			ModalService.showModal({}, modalOptions).then(
+				function (){
+					scimFactory.removeSshKey(user.userInfo.id, sshKey.fingerprint)
+						.then(function(response) {
+							console.log("Removed: ", sshKey.display, sshKey.fingerprint);
+							getIndigoUserInfo();
+							user.textAlert = `Ssh key [${sshKey.display}] has been removed successfully`;
+							user.operationResult = 'ok';
+						}, function(error) {
+							user.textAlert = error.data.error_description || error.data.detail;
+							user.operationResult = 'err';
+						});
 				});
 	}
 
 	function deleteX509Certificate(x509cert) {
 
-		scimFactory.removeX509Certificate(user.userInfo.id, x509cert.value)
-				.then(function(response) {
-					console.log("Removed: ", x509cert.display);
-					getIndigoUserInfo();
-				}, function(error) {
-					$state.go("error", {
-						"error": error
-					});
+		var modalOptions = {
+				closeButtonText: 'Cancel',
+				actionButtonText: 'Remove x509 Certificate',
+				headerText: 'Remove ssh key?',
+				bodyText: `Are you sure you want to remove the x509 Certificate [${x509cert.display}]?`	
+			};
+				
+			ModalService.showModal({}, modalOptions).then(
+				function (){
+					scimFactory.removeX509Certificate(user.userInfo.id, x509cert.value)
+						.then(function(response) {
+							console.log("Removed: ", x509cert.display);
+							getIndigoUserInfo();
+							user.textAlert = `X509 Certificate [${x509cert.display}] has been removed successfully`;
+							user.operationResult = 'ok';
+						}, function(error) {
+							user.textAlert = error.data.error_description || error.data.detail;
+							user.operationResult = 'err';
+						});
 				});
 	}
 
 	function deleteSamlId(samlId) {
 
-		scimFactory.removeSamlId(user.userInfo.id, samlId).then(
-				function(response) {
-					console.log("Removed: ", samlId.idpId, samlId.userId);
-					getIndigoUserInfo();
-				}, function(error) {
-					$state.go("error", {
-						"error": error
-					});
+		var summary = samlId.idpId + ", " + samlId.userId;
+		
+		var modalOptions = {
+				closeButtonText: 'Cancel',
+				actionButtonText: 'Remove SAML Account',
+				headerText: 'Remove SAML account?',
+				bodyText: `Are you sure you want to remove SAML Account [${summary}]?`	
+			};
+				
+			ModalService.showModal({}, modalOptions).then(
+				function (){
+					scimFactory.removeSamlId(user.userInfo.id, samlId)
+						.then(function(response) {
+							console.log("Removed: ", samlId.idpId, samlId.userId);
+							getIndigoUserInfo();
+							user.textAlert = `SAML account [${summary}] has been removed successfully`;
+							user.operationResult = 'ok';
+						}, function(error) {
+							user.textAlert = error.data.error_description || error.data.detail;
+							user.operationResult = 'err';
+						});
 				});
 	}
 
 	function setActive(status) {
 
-		scimFactory.setUserActiveStatus(user.userInfo.id, status).then(
-				function(response) {
-					console.log("Set active as: ", status);
-					getIndigoUserInfo();
-				}, function(error) {
-					$state.go("error", {
-						"error": error
-					});
+		var headerMsg = status ? 'Enable user?' : 'Disable user?';
+		var action = status ? 'enable' : 'disable';
+		
+		var modalOptions = {
+				closeButtonText: 'Cancel',
+				actionButtonText: 'Change user status',
+				headerText: headerMsg,
+				bodyText: `Are you sure you want to ${action} '${user.userInfo.name.formatted}'?`	
+			};
+				
+			ModalService.showModal({}, modalOptions).then(
+				function (){
+					scimFactory.setUserActiveStatus(user.userInfo.id, status)
+						.then(function(response) {
+							console.log("Set active as: ", status);
+							getIndigoUserInfo();
+							user.textAlert = `User ${user.userInfo.name.formatted} status successfully set to ${action}`;
+							user.operationResult = 'ok';
+						}, function(error) {
+							user.textAlert = error.data.error_description || error.data.detail;
+							user.operationResult = 'err';
+						});
 				});
 	}
 }

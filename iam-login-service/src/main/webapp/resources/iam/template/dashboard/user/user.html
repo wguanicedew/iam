@@ -12,6 +12,17 @@
 <!-- Main content -->
 <section class="content">
 
+	<div class="row" ng-show="user.operationResult != null">
+		<div class="col-xs-12">
+			<div class="alert"
+				ng-class="{'alert-success': user.operationResult=='ok', 'alert-danger': user.operationResult=='err'}">
+				<button class="close" ng-click="user.operationResult=null"
+					aria-label="close">&times;</button>
+				{{user.textAlert}}
+			</div>
+		</div>
+	</div>
+
 	<div class="row">
 		<div class="col-md-3">
 
@@ -38,11 +49,8 @@
 						<li class="list-group-item">
 						  <strong>Status</strong> 
 						
-						<button class="pull-right btn btn-success btn-xs" ng-show="user.userInfo.active" confirmed-click="user.setActive(false)"
-						   ng-confirm-click="Are you sure you want to disable user?"><strong>ACTIVE</strong></button>
-						
-						<button class="pull-right btn btn-danger btn-xs" ng-show="!user.userInfo.active" confirmed-click="user.setActive(true)"
-                           ng-confirm-click="Are you sure you want to enable user?"><strong>DISABLED</strong></button>
+						<button class="pull-right btn btn-success btn-xs" ng-show="user.userInfo.active" ng-click="user.setActive(false)"><strong>ACTIVE</strong></button>
+						<button class="pull-right btn btn-danger btn-xs" ng-show="!user.userInfo.active" ng-click="user.setActive(true)"><strong>DISABLED</strong></button>
 						
                         </li>
                         <li class="list-group-item">
@@ -100,8 +108,7 @@
 									<td class="text-right">
 										<div class="btn-group">
 											<button class="btn btn-xs btn-danger"
-												confirmed-click="user.deleteGroup(group)"
-												ng-confirm-click="Are you sure you want to delete '{{group.display}}'?">
+												ng-click="user.deleteGroup(group)">
 												<i class="fa fa-times"></i> Remove
 											</button>
 										</div>
@@ -153,8 +160,7 @@
 									<td class="text-right">
 										<div class="btn-group">
 											<button class="btn btn-xs btn-danger"
-												confirmed-click="user.deleteOidcAccount(oidcId)"
-												ng-confirm-click="Are you sure you want to delete '{{oidcId.issuer}}-{{oidcId.subject}}'?">
+												ng-click="user.deleteOidcAccount(oidcId)">
 												<i class="fa fa-times"></i> delete
 											</button>
 										</div>
@@ -212,8 +218,7 @@
 									<td class="text-right">
 										<div class="btn-group">
 											<button class="btn btn-xs btn-danger"
-												confirmed-click="user.deleteSshKey(sshKey)"
-												ng-confirm-click="Are you sure you want to delete '{{sshKey.display}}'?">
+												ng-click="user.deleteSshKey(sshKey)">
 												<i class="fa fa-times"></i> delete
 											</button>
 										</div>
@@ -264,9 +269,8 @@
 									<td class="text-right">
 										<div class="btn-group">
 											<button class="btn btn-xs btn-danger"
-												confirmed-click="user.deleteSamlId(samlId)"
-												ng-confirm-click="Are you sure you want to delete '{{samlId.idpId}}-{{samlId.userId}}'?">
-												<i class="fa fa-times"></i> delete
+												ng-click="user.deleteSamlId(samlId)">
+											<i class="fa fa-times"></i> delete
 											</button>
 										</div>
 									</td>
@@ -321,8 +325,7 @@
 									<td class="text-right">
 										<div class="btn-group">
 											<button class="btn btn-xs btn-danger"
-												confirmed-click="user.deleteX509Certificate(cert)"
-												ng-confirm-click="Are you sure you want to delete '{{cert.display}}'?">
+												ng-click="user.deleteX509Certificate(cert)">
 												<i class="fa fa-times"></i> delete
 											</button>
 										</div>

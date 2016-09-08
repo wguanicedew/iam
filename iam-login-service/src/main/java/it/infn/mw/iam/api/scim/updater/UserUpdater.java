@@ -429,7 +429,7 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
       if (sshKeyAccount.get().equals(owner)) {
 
         throw new ScimResourceExistsException(String.format("Duplicated SSH Key (%s,%s)",
-            sshKey.getDisplay(), sshKey.getFingerprint()));
+            sshKey.getDisplay(), sshKey.getValue()));
 
       } else {
 

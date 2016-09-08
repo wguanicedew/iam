@@ -32,7 +32,8 @@ function AddSshKeyController($scope, $uibModalInstance, scimFactory, $state,
 	function addSshKey() {
 
 		if (!checkBase64Encoding()) {
-			alert("Key is not a base64 encoded string!");
+			addSshKeyCtrl.textAlert = "Key is not a base64 encoded string!";
+			addSshKeyCtrl.operationResult = 'err';
 			return;
 		}
 
@@ -44,9 +45,8 @@ function AddSshKeyController($scope, $uibModalInstance, scimFactory, $state,
 					$uibModalInstance.close(response.data);
 				}, function(error) {
 					console.error('Error creating ssh key: ' + error);
-					$state.go("error", {
-						"error" : error
-					});
+					addSshKeyCtrl.textAlert = error.data.error_description || error.data.detail;
+					addSshKeyCtrl.operationResult = 'err';
 				});
 	}
 

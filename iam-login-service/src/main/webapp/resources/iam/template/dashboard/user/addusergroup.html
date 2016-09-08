@@ -14,6 +14,17 @@
 	<ui-select-no-choice> No results found </ui-select-no-choice>
 	</ui-select>
 
+	<div class="row" ng-show="addGroupCtrl.operationResult != null">
+		<div class="col-xs-12">
+			<div class="alert"
+				ng-class="{'alert-success': addGroupCtrl.operationResult=='ok', 'alert-danger': addGroupCtrl.operationResult=='err'}">
+				<button class="close" ng-click="addGroupCtrl.operationResult=null"
+					aria-label="close">&times;</button>
+				{{addGroupCtrl.textAlert}}
+			</div>
+		</div>
+	</div>
+
 </div>
 <div class="modal-footer">
 	<button class="btn btn-primary" type="button"

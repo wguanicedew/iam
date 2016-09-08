@@ -85,6 +85,10 @@ public class ScimGroupProvisioning implements ScimProvisioning<ScimGroup, List<S
     iamGroup.setLastUpdateTime(creationTime);
     iamGroup.setAccounts(new HashSet<IamAccount>());
 
+    if (groupRepository.findByName(group.getDisplayName()).isPresent()) {
+      throw new ScimResourceExistsException("Duplicated group '" + group.getDisplayName() + "'");
+    }
+
     groupRepository.save(iamGroup);
 
     return converter.toScim(iamGroup);

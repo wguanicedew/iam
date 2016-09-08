@@ -29,9 +29,6 @@ function AddOIDCAccountController($scope, $uibModalInstance, scimFactory,
 			$uibModalInstance.close(response.data);
 		}, function(error) {
 			console.error('Error creating group: ' + error);
-			$state.go("error", {
-				"error" : error
-			});
 		});
 	}
 

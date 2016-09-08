@@ -12,6 +12,17 @@
         <input class="form-control" type="text" placeholder="Saml ID User id ..." ng-model="addSamlAccountCtrl.userId">
     </div>
 
+    <div class="row" ng-show="addSamlAccountCtrl.operationResult != null">
+        <div class="col-xs-12">
+            <div class="alert"
+                ng-class="{'alert-success': addSamlAccountCtrl.operationResult=='ok', 'alert-danger': addSamlAccountCtrl.operationResult=='err'}">
+                <button class="close" ng-click="addSamlAccountCtrl.operationResult=null"
+                    aria-label="close">&times;</button>
+                {{addSamlAccountCtrl.textAlert}}
+            </div>
+        </div>
+    </div>
+
 </div>
 <div class="modal-footer">
 	<button class="btn btn-primary" type="button" 

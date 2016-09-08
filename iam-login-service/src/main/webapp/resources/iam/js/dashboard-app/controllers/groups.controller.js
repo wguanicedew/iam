@@ -105,6 +105,8 @@ function GroupsController($scope, $rootScope, $uibModal, $state, $filter,
 			gc.groups = $filter('orderBy')(gc.groups, "displayName", false);
 			gc.updateTotalItems();
 			gc.updateNoOfPages();
+			gc.textAlert = `Group ${createdGroup.displayName} added successfully`;
+			gc.operationResult = 'ok';
 		}, function() {
 			console.info('Modal dismissed at: ', new Date());
 		});

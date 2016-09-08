@@ -4,10 +4,9 @@ angular.module('dashboardApp').controller('AddGroupController',
 		AddGroupController);
 
 AddGroupController.$inject = [ '$scope', '$rootScope', '$uibModalInstance', 'Utils',
-		'scimFactory', '$state' ];
+		'scimFactory' ];
 
-function AddGroupController($scope, $rootScope, $uibModalInstance, Utils, scimFactory,
-		$state) {
+function AddGroupController($scope, $rootScope, $uibModalInstance, Utils, scimFactory) {
 	
 	var addGroupCtrl = this;
 
@@ -39,10 +38,8 @@ function AddGroupController($scope, $rootScope, $uibModalInstance, Utils, scimFa
 			$rootScope.loggedUser.totGroups = $rootScope.loggedUser.totGroups + 1;
 		}, function(error) {
 			console.error('Error creating group', error);
-			addGroupCtrl.cancel();
-			$state.go("error", {
-				"error" : error
-			});
+			addGroupCtrl.textAlert = error.data.error_description || error.data.detail;
+			addGroupCtrl.operationResult = 'err';
 		});
 	}
 
