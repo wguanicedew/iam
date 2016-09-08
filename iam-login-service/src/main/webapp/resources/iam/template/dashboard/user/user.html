@@ -69,7 +69,7 @@
 							class="pull-right">{{user.userInfo.meta.lastModified | relativeDate }}</a></li>
 						<li class="list-group-item">
 						  <strong>Groups</strong> <a
-                            class="pull-right"><span class="label label-default">{{user.userInfo.groups.length}}</span></a></li>
+                            class="pull-right"><span class="label label-default">{{user.userInfo.groups.length || 0}}</span></a></li>
 					</ul>
 
 					<!-- 	<a href="#" class="btn btn-primary btn-block"><b>Edit</b></a> -->
