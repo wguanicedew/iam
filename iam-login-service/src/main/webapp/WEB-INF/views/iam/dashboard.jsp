@@ -47,7 +47,6 @@
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/box.directive.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/header.directive.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/mainsidebar.directive.js"></script>
-	<script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/ng-confirm-click.directive.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/sidebar.directive.js"></script>
 	
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/services/scim-factory.service.js"></script>
