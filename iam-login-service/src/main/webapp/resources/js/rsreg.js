@@ -123,7 +123,7 @@ var ResRegRootView = Backbone.View.extend({
 	    	view.load(function() {
 	    		$('#content').html(view.render().el);
 	    		view.delegateEvents();
-	    		setPageTitle($.t('rsreg.new'));
+	    		setPageTitle($.t('rsreg.new-client'));
 	    		app.navigate('dev/resource/edit', {trigger: true});	    		
 	    		self.remove();
 	    	});
