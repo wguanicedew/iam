@@ -1,5 +1,5 @@
 <div class="modal-header">
-	<h3 class="modal-title">Select groups to add</h3>
+	<h3 class="modal-title">Add group(s) to <strong>{{addGroupCtrl.user.name.formatted}}</strong></h3>
 </div>
 <div class="modal-body">
 
@@ -13,6 +13,17 @@
 	</ui-select-choices> 
 	<ui-select-no-choice> No results found </ui-select-no-choice>
 	</ui-select>
+
+	<div class="row" ng-show="addGroupCtrl.operationResult != null">
+		<div class="col-xs-12">
+			<div class="alert"
+				ng-class="{'alert-success': addGroupCtrl.operationResult=='ok', 'alert-danger': addGroupCtrl.operationResult=='err'}">
+				<button class="close" ng-click="addGroupCtrl.operationResult=null"
+					aria-label="close">&times;</button>
+				{{addGroupCtrl.textAlert}}
+			</div>
+		</div>
+	</div>
 
 </div>
 <div class="modal-footer">

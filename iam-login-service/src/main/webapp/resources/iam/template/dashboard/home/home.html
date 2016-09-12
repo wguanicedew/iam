@@ -4,7 +4,7 @@
 		<i class="fa fa-home"></i> Home
 	</h1>
 	<ol class="breadcrumb">
-		<li><a href="#"><i class="fa fa-home"></i> Home</a></li>
+		<li><a ui-sref="home"><i class="fa fa-home"></i> Home</a></li>
 	</ol>
 </section>
 
@@ -15,46 +15,51 @@
 		<div class="col-md-3">
 
 			<!-- Profile Image -->
-			<div class="box box-primary">
+			<div class="box box-primary" ng-cloak>
 				<div class="box-body box-profile">
 					<img class="profile-user-img img-responsive img-circle"
-						ng-src="{{home.me.picture}}" alt="User profile picture"
-						ng-show="home.me.picture"> <img
+						ng-src="{{home.user.me.picture}}" alt="User profile picture"
+						ng-show="home.user.me.picture"> <img
 						class="profile-user-img img-responsive img-circle"
 						ng-src="resources/iam/img/default-avatar.png"
-						alt="User profile picture" ng-show="!home.userInfo.picture">
+						alt="User profile picture" ng-show="!home.user.me.picture">
 
-					<h3 class="profile-username text-center">{{home.me.name.formatted}}</h3>
+					<h3 class="profile-username text-center">{{home.user.me.name.formatted}}</h3>
 
-					<p class="text-muted text-center">{{home.me.displayName}}</p>
+					<p class="text-muted text-center">{{home.user.me.displayName}}</p>
 
 					<ul class="list-group list-group-unbordered">
 						<li class="list-group-item"><b>E-mail</b> <a
-							class="pull-right" href="mailto:{{home.me.emails[0].value}}">{{home.me.emails[0].value}}</a>
+							class="pull-right" href="mailto:{{home.user.me.emails[0].value}}">{{home.user.me.emails[0].value}}</a>
 						</li>
-						<li class="list-group-item"><b>Status</b> <a href=""
-							class="pull-right"> <span ng-show="home.me.active"
+						<li class="list-group-item">
+                           <strong>Organisation</strong>
+                           <a class="pull-right">{{home.user.info.organisation_name}}</a>
+                       </li>
+						<li class="list-group-item">
+						  <strong>Status</strong> 
+						  <a class="pull-right"> <span ng-show="home.user.me.active"
 								class="label label-success">ACTIVE</span> <span
-								ng-show="!home.me.active" class="label label-danger">DISABLED</span>
+								ng-show="!home.user.me.active" class="label label-danger">DISABLED</span>
 						</a></li>
+						<li class="list-group-item">
+						  <strong>Created</strong> <a
+                            class="pull-right">{{home.user.me.meta.created | relativeDate }}</a></li>
 						<li class="list-group-item"><b>Last update</b> <a
-							class="pull-right">{{home.me.meta.lastModified | date :
-								"medium" }}</a></li>
+							class="pull-right">{{home.user.me.meta.lastModified | relativeDate }}</a></li>
+						<li class="list-group-item">
+						  <strong>Groups</strong> <a
+                            class="pull-right"><span class="label label-default">{{home.user.me.groups.length}}</span></a></li>
+                        <li class="list-group-item">
+                          <strong>Authorities</strong>
+                            <a class="pull-right"><span class="label label-info" ng-show="home.isUser">USER</span></a>
+                            <a class="pull-right"><span class="label label-success" ng-show="home.isAdmin">ADMIN</span></a>
+                        </li>
 					</ul>
-
-					<a class="btn btn-app"> <span class="badge bg-purple">{{home.me.groups.length}}</span>
-						<i class="fa fa-users"></i> Groups
-					</a> <a class="btn btn-app"> <span class="badge bg-purple">{{home.me['urn:indigo-dc:scim:schemas:IndigoUser'].oidcIds.length}}</span>
-						<i class="fa fa-lock"></i> OpenID IDs
-					</a> <a class="btn btn-app"> <span class="badge bg-purple">{{home.me['urn:indigo-dc:scim:schemas:IndigoUser'].sshKeys.length}}</span>
-						<i class="fa fa-key"></i> SSH Keys
-					</a> <a class="btn btn-app"> <span class="badge bg-purple">{{home.me['urn:indigo-dc:scim:schemas:IndigoUser'].samlIds.length}}</span>
-						<i class="fa fa-cloud"></i> Saml IDs
-					</a> <a class="btn btn-app"> <span class="badge bg-purple">{{home.me.x509Certificates.length}}</span>
-						<i class="fa fa-user-secret"></i> x509 certs
-					</a>
 				</div>
 				<!-- /.box-body -->
+				<div class="box-footer bg-blue">
+				</div>
 			</div>
 			<!-- /.box -->
 
@@ -73,8 +78,8 @@
 				<!-- /.box-header -->
 				<div class="box-body">
 
-					<div ng-show="!home.me.groups.length">No groups found</div>
-					<div class="table-responsive" ng-show="home.me.groups.length">
+					<div ng-show="!home.user.me.groups.length">No groups found</div>
+					<div class="table-responsive" ng-show="home.user.me.groups.length">
 						<table class="table no-margin">
 							<thead>
 								<tr>
@@ -83,9 +88,9 @@
 								</tr>
 							</thead>
 							<tbody>
-								<tr ng-repeat="group in home.me.groups | orderBy:'display' ">
+								<tr ng-repeat="group in home.user.me.groups | orderBy:'display' ">
 									<td>{{$index + 1}}</td>
-									<td><a ui-sref="group({id: group.value})">{{group.display}}</a></td>
+									<td><a>{{group.display}}</a></td>
 								</tr>
 							</tbody>
 						</table>
@@ -106,10 +111,10 @@
 				<div class="box-body">
 
 					<div
-						ng-show="!home.me['urn:indigo-dc:scim:schemas:IndigoUser'].oidcIds">
+						ng-show="!home.user.me['urn:indigo-dc:scim:schemas:IndigoUser'].oidcIds">
 						No Open ID Connect accounts found</div>
 					<div class="table-responsive"
-						ng-show="home.me['urn:indigo-dc:scim:schemas:IndigoUser'].oidcIds">
+						ng-show="home.user.me['urn:indigo-dc:scim:schemas:IndigoUser'].oidcIds">
 						<table class="table no-margin">
 							<thead>
 								<tr>
@@ -120,7 +125,7 @@
 							</thead>
 							<tbody>
 								<tr
-									ng-repeat="oidcId in home.me['urn:indigo-dc:scim:schemas:IndigoUser'].oidcIds">
+									ng-repeat="oidcId in home.user.me['urn:indigo-dc:scim:schemas:IndigoUser'].oidcIds">
 									<td>{{$index + 1}}</td>
 									<td>{{ oidcId.issuer }}</td>
 									<td>{{ oidcId.subject }}</td>
@@ -143,10 +148,10 @@
 				<div class="box-body">
 
 					<div
-						ng-show="!home.me['urn:indigo-dc:scim:schemas:IndigoUser'].sshKeys">
+						ng-show="!home.user.me['urn:indigo-dc:scim:schemas:IndigoUser'].sshKeys">
 						No SSH Key found</div>
 					<div class="table-responsive"
-						ng-show="home.me['urn:indigo-dc:scim:schemas:IndigoUser'].sshKeys">
+						ng-show="home.user.me['urn:indigo-dc:scim:schemas:IndigoUser'].sshKeys">
 						<table class="table no-margin">
 							<thead>
 								<tr>
@@ -158,11 +163,11 @@
 							</thead>
 							<tbody>
 								<tr
-									ng-repeat="sshKey in home.me['urn:indigo-dc:scim:schemas:IndigoUser'].sshKeys">
+									ng-repeat="sshKey in home.user.me['urn:indigo-dc:scim:schemas:IndigoUser'].sshKeys">
 									<td>{{$index + 1}}</td>
 									<td>{{sshKey.display}}</td>
 									<td><a href=''
-										ng-click="user.showSshKeyValue(sshKey.value)">{{sshKey.fingerprint}}</a></td>
+										ng-click="home.showSshKeyValue(sshKey.value)">{{sshKey.fingerprint}}</a></td>
 									<td><span ng-show="sshKey.primary"
 										class="label label-success">primary</span></td>
 								</tr>
@@ -184,10 +189,10 @@
 				<div class="box-body">
 
 					<div
-						ng-show="!home.me['urn:indigo-dc:scim:schemas:IndigoUser'].samlIds">
+						ng-show="!home.user.me['urn:indigo-dc:scim:schemas:IndigoUser'].samlIds">
 						No SAML Id found</div>
 					<div class="table-responsive"
-						ng-show="home.me['urn:indigo-dc:scim:schemas:IndigoUser'].samlIds">
+						ng-show="home.user.me['urn:indigo-dc:scim:schemas:IndigoUser'].samlIds">
 						<table class="table no-margin">
 							<thead>
 								<tr>
@@ -198,7 +203,7 @@
 							</thead>
 							<tbody>
 								<tr
-									ng-repeat="samlId in home.me['urn:indigo-dc:scim:schemas:IndigoUser'].samlIds">
+									ng-repeat="samlId in home.user.me['urn:indigo-dc:scim:schemas:IndigoUser'].samlIds">
 									<td>{{$index + 1}}</td>
 									<td>{{samlId.idpId}}</td>
 									<td>{{samlId.userId}}</td>
@@ -220,9 +225,9 @@
 				<!-- /.box-header -->
 				<div class="box-body">
 
-					<div ng-show="!home.me.x509Certificates">No x509 Certificate
+					<div ng-show="!home.user.me.x509Certificates">No x509 Certificate
 						found</div>
-					<div class="table-responsive" ng-show="home.me.x509Certificates">
+					<div class="table-responsive" ng-show="home.user.me.x509Certificates">
 						<table class="table no-margin">
 							<thead>
 								<tr>
@@ -233,12 +238,12 @@
 								</tr>
 							</thead>
 							<tbody>
-								<tr ng-repeat="cert in home.me.x509Certificates">
+								<tr ng-repeat="cert in home.user.me.x509Certificates">
 									<td>{{$index + 1}}</td>
 									<td>{{ cert.display }}</td>
 									<td><span ng-show="cert.primary" class="label label-success">primary</span>
 									</td>
-									<td><a ng-click=user.showCertValue(cert)>{{cert.value | limitTo : 30 : 0}}...</a></td>
+									<td><a ng-click=home.showCertValue(cert)>{{cert.value | limitTo : 30 : 0}}...</a></td>
 								</tr>
 							</tbody>
 						</table>

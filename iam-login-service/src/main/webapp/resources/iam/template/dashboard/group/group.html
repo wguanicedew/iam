@@ -12,9 +12,23 @@
 <!-- Main content -->
 <section class="content">
 
+    <div class="row" ng-show="group.operationResult != null">
+        <div class="col-xs-12">
+            <div class="alert"
+                ng-class="{'alert-success': group.operationResult=='ok', 'alert-danger': group.operationResult=='err'}">
+                <button class="close" ng-click="group.operationResult=null"
+                    aria-label="close">&times;</button>
+                {{group.textAlert}}
+            </div>
+        </div>
+    </div>
+
 	<div class="row">
 
 		<div class="col-xs-12">
+		
+		  <div style="min-height: 650px;">
+		
 			<div class="box">
 				<div class="box-header with-border">
 					<h3 class="box-title">Members</h3>
@@ -37,9 +51,8 @@
 								<td><a ui-sref="user({id: user.value})">{{user.display}}</a></td>
 								<td>
 									<button class="btn btn-danger btn-xs"
-										confirmed-click="group.deleteMember(user)"
-										ng-confirm-click="Are you sure you want to remove '{{user.display}}' membership?">
-										<i class="fa fa-trash-o"></i> Remove
+										ng-click="group.deleteMember(user)">
+										<i class="fa fa-times"></i> Remove
 									</button>
 								</td>
 							</tr>
@@ -63,6 +76,7 @@
 
 				</div>
 			</div>
+		  </div>
 		</div>
 	</div>
 

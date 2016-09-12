@@ -1,42 +1,38 @@
 <!-- sidebar: style can be found in sidebar.less -->
 <section class="sidebar">
 
-<!-- 	<div class="user-panel"> -->
-<!-- 		<div class="pull-left image"> -->
-<!-- 			<img class="img-circle hoverZoomLink" -->
-<!-- 				ng-src="{{navCtrl.me.picture}}" alt="User profile picture" -->
-<!-- 				ng-show="user.userInfo.picture" />  -->
-<!-- 			<img -->
-<!-- 				class="img-circle hoverZoomLink" -->
-<!-- 				ng-src="resources/iam/img/default-avatar.png" -->
-<!-- 				alt="User profile picture" ng-show="!navCtrl.me.picture" /> -->
-<!-- 		</div> -->
-<!-- 		<div class="pull-left info"> -->
-<!-- 			<p>{{navCtrl.me.name.formatted}}</p> -->
-<!-- 			<a href="#"><i class="fa fa-circle text-success"></i> {{navCtrl.organisation}}</a> -->
-<!-- 		</div> -->
-<!-- 	</div> -->
+	<div class="user-panel">
+		<div class="pull-left image">
+			<img class="img-circle hoverZoomLink"
+				ng-src="{{$root.loggedUser.me.picture ? $root.loggedUser.me.picture : 'resources/iam/img/default-avatar.png'}}" alt="User profile picture"/>
+		</div>
+		<div class="pull-left info">
+			<p><a ui-sref="home">{{$root.loggedUser.me.name.formatted}}</a></p>
+			<p>{{$root.loggedUser.info.organisation_name}}</p>
+		</div>
+	</div>
 
 	<!-- sidebar menu: : style can be found in sidebar.less -->
 	<ul class="sidebar-menu">
 		<li class="header">MAIN NAVIGATION</li>
 		<li><a ui-sref="home"> <i class="fa fa-home"></i> <span>Home</span></a></li>
-		<li><a ui-sref="users"><i class="fa fa-user"></i> <span>Users</span>
-				<span class="pull-right-container" ng-show="navCtrl.isAdmin">
+		<li ng-show="$root.loggedUser.isAdmin"><a ui-sref="users"><i class="fa fa-user"></i> <span>Users</span>
+				<span class="pull-right-container" ng-show="$root.loggedUser.totUsers>0">
 					<small class="label pull-right bg-blue">{{
-						navCtrl.data.totUsers }}</small>
+						$root.loggedUser.totUsers }}</small>
 			</span> </a></li>
-		<li><a ui-sref="groups"><i class="fa fa-users"></i> <span>Groups</span>
-				<span class="pull-right-container" ng-show="navCtrl.isAdmin">
+		<li ng-show="$root.loggedUser.isAdmin"><a ui-sref="groups"><i class="fa fa-users"></i> <span>Groups</span>
+				<span class="pull-right-container" ng-show="$root.loggedUser.totGroups>0">
 					<small class="label pull-right bg-green">{{
-						navCtrl.data.totGroups }}</small>
+						$root.loggedUser.totGroups }}</small>
 			</span> </a></li>
-		<li><a ui-sref="requests"> <i class="fa fa-sign-in"></i> <span>Requests</span>
-				<span class="pull-right-container"> <small
-					class="label pull-right bg-red">{{ navCtrl.data.totRequests
-						}}</small>
+		<li ng-show="$root.loggedUser.isAdmin"><a ui-sref="requests"> <i class="fa fa-sign-in"></i> <span>Requests</span>
+				<span class="pull-right-container" ng-show="$root.loggedUser.pendingRequests.length>0"> <small
+					class="label pull-right bg-red">{{ $root.loggedUser.pendingRequests.length }}</small>
 			</span>
 		</a></li>
+		<li class="header">DASHBOARD 1.0</li>
+		<li><a href="/"> <i class="fa fa-home"></i> <span>Home</span></a></li>
 	</ul>
 </section>
 <!-- /.sidebar -->

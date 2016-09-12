@@ -1,5 +1,5 @@
 <div class="modal-header">
-	<h3 class="modal-title">Add SAML Account</h3>
+	<h3 class="modal-title">Add SAML Account to <strong>{{addSamlAccountCtrl.user.name.formatted}}</strong></h3>
 </div>
 <div class="modal-body">
 
@@ -10,6 +10,17 @@
     <div class="form-group">
         <label>User ID</label>
         <input class="form-control" type="text" placeholder="Saml ID User id ..." ng-model="addSamlAccountCtrl.userId">
+    </div>
+
+    <div class="row" ng-show="addSamlAccountCtrl.operationResult != null">
+        <div class="col-xs-12">
+            <div class="alert"
+                ng-class="{'alert-success': addSamlAccountCtrl.operationResult=='ok', 'alert-danger': addSamlAccountCtrl.operationResult=='err'}">
+                <button class="close" ng-click="addSamlAccountCtrl.operationResult=null"
+                    aria-label="close">&times;</button>
+                {{addSamlAccountCtrl.textAlert}}
+            </div>
+        </div>
     </div>
 
 </div>

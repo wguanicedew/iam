@@ -3,11 +3,10 @@
 angular.module('dashboardApp').controller('AddGroupController',
 		AddGroupController);
 
-AddGroupController.$inject = [ '$scope', '$uibModalInstance', 'Utils',
-		'scimFactory', '$state' ];
+AddGroupController.$inject = [ '$scope', '$rootScope', '$uibModalInstance', 'Utils',
+		'scimFactory' ];
 
-function AddGroupController($scope, $uibModalInstance, Utils, scimFactory,
-		$state) {
+function AddGroupController($scope, $rootScope, $uibModalInstance, Utils, scimFactory) {
 	
 	var addGroupCtrl = this;
 
@@ -23,7 +22,6 @@ function AddGroupController($scope, $uibModalInstance, Utils, scimFactory,
 		addGroupCtrl.group.description = "";
 
 	}
-	;
 
 	addGroupCtrl.resetGroup();
 
@@ -36,16 +34,14 @@ function AddGroupController($scope, $uibModalInstance, Utils, scimFactory,
 		console.info(addGroupCtrl.group);
 
 		scimFactory.createGroup(addGroupCtrl.group).then(function(response) {
+			$rootScope.loggedUser.totGroups = $rootScope.loggedUser.totGroups + 1;
 			$uibModalInstance.close(response.data);
 		}, function(error) {
-			console.error('Error creating group: ' + error);
-			addGroupCtrl.cancel();
-			$state.go("error", {
-				"error" : error
-			});
+			console.error('Error creating group', error);
+			addGroupCtrl.textAlert = error.data.error_description || error.data.detail;
+			addGroupCtrl.operationResult = 'err';
 		});
 	}
-	;
 
 	function cancel() {
 		$uibModalInstance.dismiss("cancel");

@@ -7,12 +7,11 @@
 <o:iamHeader title="INDIGO IAM | User Dashboard" />
 
 <body class="skin-blue" ng-app="dashboardApp">
-	<div class="wrapper">
+	<div class="wrapper" ng-controller="CommonController as commonCtrl">
 
-		<header class="main-header" ng-controller="TopbarController"></header>
+		<header class="main-header"></header>
 
-
-		<aside class="main-sidebar" ng-controller="NavController as navCtrl">
+		<aside class="main-sidebar">
 			<mainsidebar />
 		</aside>
 
@@ -42,41 +41,38 @@
 	<script type="text/javascript" src="<c:url value='/webjars/bootstrap/bootstrap.min.js'/>"></script>
 
 	<script type="text/javascript" src="/resources/iam/js/adminLTE.js"></script>
+	<script type="text/javascript" src="/resources/iam/js/directive/angular-relative-date.min.js"></script>
 
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/dashboard-app.module.js"></script>
 	
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/box.directive.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/header.directive.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/mainsidebar.directive.js"></script>
-	<script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/ng-confirm-click.directive.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/sidebar.directive.js"></script>
 	
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/services/scim-factory.service.js"></script>
-	<script type="text/javascript" src="/resources/iam/js/dashboard-app/services/utils.service.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/services/modal.service.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/services/registration.service.js"></script>
-	
+    <script type="text/javascript" src="/resources/iam/js/dashboard-app/services/utils.service.js"></script>
+    
+    <script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/common.controller.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/home.controller.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/user.controller.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/group.controller.js"></script>
-    <script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/nav.controller.js"></script>
-	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/topbar.controller.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/error.controller.js"></script>
-	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/unauthorized.controller.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/users.controller.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/groups.controller.js"></script>
+    <script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/registration.controller.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/add-group.controller.js"></script>
+	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/add-user.controller.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/add-user-oidc-account.controller.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/add-user-sshkey.controller.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/add-user-saml-account.controller.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/add-user-x509-certificate.controller.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/add-user-group.controller.js"></script>
-	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/edit-group.controller.js"></script>
-	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/registration.controller.js"></script>
 	
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/filters/start-from.filter.js"></script>
 	
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/dashboard-app.config.js"></script>
-
 
 </body>

@@ -50,3 +50,7 @@
 #login-form {
   margin-bottom: 0;
 }
+
+.text-wrapped {
+  word-break: break-all;
+}

@@ -35,7 +35,7 @@ function AddUserGroupController($scope, $state, $q, $uibModalInstance,
 
 	function cancel() {
 
-		$uibModalInstance.close();
+		$uibModalInstance.dismiss('Cancel');
 	}
 
 	function addGroup() {
@@ -50,13 +50,11 @@ function AddUserGroupController($scope, $state, $q, $uibModalInstance,
 
 		$q.all(requests).then(function(response) {
 			console.log("Added ", addGroupCtrl.groupsSelected);
-			addGroupCtrl.cancel();
+			$uibModalInstance.close(response);
 		}, function(error) {
 			console.error(error);
-			addGroupCtrl.cancel();
-			$state.go("error", {
-				"error" : error
-			});
+			addGroupCtrl.textAlert = error.data.error_description || error.data.detail;
+			addGroupCtrl.operationResult = 'err';
 		});
 	}
 	;

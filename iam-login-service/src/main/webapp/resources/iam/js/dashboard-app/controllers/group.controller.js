@@ -2,9 +2,9 @@
 
 angular.module('dashboardApp').controller('GroupController', GroupController);
 
-GroupController.$inject = [ '$state', 'scimFactory' ];
+GroupController.$inject = [ '$state', '$filter', 'scimFactory', 'ModalService' ];
 
-function GroupController($state, scimFactory) {
+function GroupController($state, $filter, scimFactory, ModalService) {
 
 	var group = this;
 
@@ -37,14 +37,26 @@ function GroupController($state, scimFactory) {
 
 	function deleteMember(user) {
 
-		scimFactory.removeUserFromGroup(group.id, user.value, user.$ref,
-				user.display).then(function(response) {
-			console.log("Deleted: ", user.display);
-			group.removeMemberFromList(user);
-		}, function(error) {
-			$state.go("error", {
-				"error" : error
-			});
-		});
+		var modalOptions = {
+				closeButtonText: 'Cancel',
+				actionButtonText: 'Remove user from group',
+				headerText: 'Remove membership?',
+				bodyText: `Are you sure you want to remove user memebership to '${group.data.displayName}'?`	
+			};
+				
+			ModalService.showModal({}, modalOptions).then(
+				function (){
+					scimFactory.removeUserFromGroup(group.id, user.value, user.$ref,
+							user.display)
+						.then(function(response) {
+							console.log("Deleted: ", user.display);
+							group.removeMemberFromList(user);
+							group.textAlert = `User ${user.display} membership removed successfully`;
+							group.operationResult = 'ok';
+						}, function(error) {
+							group.textAlert = error.data.error_description || error.data.detail;
+							group.operationResult = 'err';
+						});
+				});
 	}
 }

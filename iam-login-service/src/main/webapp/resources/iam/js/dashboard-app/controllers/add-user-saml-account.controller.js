@@ -25,13 +25,12 @@ function AddSamlAccountController($scope, $uibModalInstance, scimFactory, $state
 			$uibModalInstance.close(response.data);
 		},function(error) {
 			console.error('Error creating new saml account: ' + error);
-			$state.go("error", {
-				"error" : error
-			});
+			addSamlAccountCtrl.textAlert = error.data.error_description || error.data.detail;
+			addSamlAccountCtrl.operationResult = 'err';
 		});
 	}
 	
 	function cancel() {
-		$uibModalInstance.dismiss("cancel");
+		$uibModalInstance.dismiss("Cancel");
 	}
 }

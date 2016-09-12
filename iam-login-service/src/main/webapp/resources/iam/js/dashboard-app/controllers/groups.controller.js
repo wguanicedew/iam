@@ -2,11 +2,11 @@
 
 angular.module('dashboardApp').controller('GroupsController', GroupsController);
 
-GroupsController.$inject = [ '$scope', '$location', '$uibModal', '$state',
-		'$filter', 'filterFilter', 'scimFactory' ];
+GroupsController.$inject = [ '$scope', '$rootScope', '$uibModal', '$state',
+		'$filter', 'filterFilter', 'scimFactory', 'ModalService' ];
 
-function GroupsController($scope, $location, $uibModal, $state, $filter,
-		filterFilter, scimFactory) {
+function GroupsController($scope, $rootScope, $uibModal, $state, $filter,
+		filterFilter, scimFactory, ModalService) {
 
 	var gc = this;
 
@@ -83,7 +83,7 @@ function GroupsController($scope, $location, $uibModal, $state, $filter,
 									"displayName", false);
 							gc.updateTotalItems();
 							gc.updateNoOfPages();
-							if (response.data.totalResults > (response.data.startIndex + response.data.itemsPerPage)) {
+							if (response.data.totalResults > (response.data.startIndex - 1 + response.data.itemsPerPage)) {
 								gc.getGroups(startIndex + count, count);
 							}
 						}, function(error) {
@@ -96,7 +96,8 @@ function GroupsController($scope, $location, $uibModal, $state, $filter,
 	function clickToOpen() {
 		var modalInstance = $uibModal.open({
 			templateUrl : '/resources/iam/template/dashboard/groups/newgroup.html',
-			controller : 'AddGroupController'
+			controller : 'AddGroupController',
+			controllerAs: 'addGroupCtrl'
 		});
 		modalInstance.result.then(function(createdGroup) {
 			console.info(createdGroup);
@@ -104,6 +105,8 @@ function GroupsController($scope, $location, $uibModal, $state, $filter,
 			gc.groups = $filter('orderBy')(gc.groups, "displayName", false);
 			gc.updateTotalItems();
 			gc.updateNoOfPages();
+			gc.textAlert = `Group ${createdGroup.displayName} added successfully`;
+			gc.operationResult = 'ok';
 		}, function() {
 			console.info('Modal dismissed at: ', new Date());
 		});
@@ -121,12 +124,26 @@ function GroupsController($scope, $location, $uibModal, $state, $filter,
 	}
 
 	function deleteGroup(group) {
-		scimFactory.deleteGroup(group.id).then(function(response) {
-			gc.removeGroupFromList(group);
-		}, function(errorResponse) {
-			alert('Error deleting group: ', errorResponse.data.detail);
-			console.error('Error deleting group: ', errorResponse.data.detail);
-		});
+		
+		var modalOptions = {
+			closeButtonText: 'Cancel',
+			actionButtonText: 'Delete Group',
+			headerText: 'Delete?',
+			bodyText: `Are you sure you want to delete group '${group.displayName}'?`	
+		};
+		
+		ModalService.showModal({}, modalOptions).then(
+			function (){
+				scimFactory.deleteGroup(group.id)
+					.then(function(response) {
+						gc.removeGroupFromList(group);
+						$rootScope.loggedUser.totGroups = $rootScope.loggedUser.totGroups -1;
+						gc.textAlert = `Group ${group.displayName} deleted successfully`;
+						gc.operationResult = 'ok';
+					}, function(error) {
+						gc.textAlert = error.data.error_description || error.data.detail;
+						gc.operationResult = 'err';
+					});
+			});
 	}
-	;
 }

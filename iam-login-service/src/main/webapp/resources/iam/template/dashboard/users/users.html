@@ -16,56 +16,70 @@
 	<div class="row">
 
 		<div class="col-xs-12">
-			<div class="box">
+			<div ng-show="users.operationResult != null">
+				<div class="alert"
+					ng-class="{'alert-success': users.operationResult=='ok', 'alert-danger': users.operationResult=='err'}">
+					<button class="close" ng-click="users.operationResult=null"
+						aria-label="close">&times;</button>
+					{{users.textAlert}}
+				</div>
+			</div>
+		</div>
+
+		<div class="col-xs-12">
+			<div class="box" ng-cloak>
 				<div class="box-header with-border">
 					<div class="input-group">
-						<input placeholder="Search.." ng-model="uc.search.displayName"
+						<input placeholder="Search.." ng-model="users.search.displayName"
 							class="form-control" />
 						<div class="input-group-btn">
 							<button type="button" class="btn btn-default"
-								ng-click="uc.resetFilters()">Show all</button>
+								ng-click="users.resetFilters()">Show all</button>
 						</div>
 						<!-- /btn-group -->
 					</div>
 				</div>
 				<div class="box-body">
-					<ul uib-pagination ng-model="uc.currentPage"
-						items-per-page="uc.entryLimit" total-items="uc.totalItems"
-						max-size="uc.noOfPages" boundary-links="true"></ul>
+				    <div class="text-center">
+						<ul uib-pagination ng-model="users.currentPage"
+							items-per-page="users.entryLimit" total-items="users.totalItems"
+							max-size="10" boundary-links="true"></ul>
+					</div>
 					<table id="userslist" class="table table-striped">
 						<thead>
 							<tr>
 								<th>#</th>
+								<th>Pic</th>
 								<th>Name</th>
+								<th class="text-center">Active</th>
 								<th>E-mail</th>
 								<th>Created</th>
-								<th>Last Update</th>
 								<th>Groups</th>
 								<th>Actions</th>
 							</tr>
 						</thead>
 						<tbody>
 							<tr
-								ng-repeat="user in uc.filtered = uc.users | filter:uc.search | startFrom:(uc.currentPage-1)*uc.entryLimit | limitTo:uc.entryLimit">
-								<td>{{$index + (uc.currentPage-1)*uc.entryLimit + 1}}</td>
+								ng-repeat="user in users.filtered = users.list | filter:users.search | startFrom:(users.currentPage-1)*users.entryLimit | limitTo:users.entryLimit">
+								<td>{{$index + (users.currentPage-1)*users.entryLimit + 1}}</td>
+								<td><img class="img-circle" width="22"
+									ng-src="{{user.picture}}" alt="User profile picture"
+									ng-show="user.picture"> <img class="img-circle"
+									width="22" ng-src="resources/iam/img/default-avatar.png"
+									alt="User profile picture" ng-show="!user.picture"></td>
 								<td><a ui-sref="user({id: user.id})">{{user.name.formatted}}</a></td>
+								<td class="text-center"><i
+									class="fa fa-circle text-success" ng-show="user.active"></i> <i
+									class="fa fa-circle text-danger" ng-show="!user.active"></i></td>
 								<td>{{user.emails[0].value}}</td>
-								<td>{{user.meta.created | date:'medium'}}</td>
-								<td>{{user.meta.lastModified | date:'medium' }}</td>
+								<td>{{user.meta.created | relativeDate }}</td>
 								<td>
 									<button ng-repeat="g in user.groups"
 										class="btn btn-xs btn-default">{{g.display}}</button>
-									<button class="btn btn-xs btn-success">
-										<i class="fa fa-plus"></i>
-									</button>
 								</td>
 								<td>
-									<button class="btn btn-warning btn-xs" ng-click="">
-										<i class="fa fa-edit"></i> Edit
-									</button>
-									<button class="btn btn-danger btn-xs" confirmed-click=""
-										ng-confirm-click="Are you sure you want to delete '{{user.name.formatted}}'?">
-										<i class="fa fa-trash-o"></i> Delete
+									<button ng-disabled="user.id == $root.loggedUser.me.id" class="btn btn-danger btn-xs" ng-click="users.deleteUser(user)">
+										<i class="fa fa-times"></i> Delete
 									</button>
 								</td>
 							</tr>
@@ -73,19 +87,26 @@
 						<tfoot>
 							<tr>
 								<th>#</th>
+								<th>Pic</th>
 								<th>Name</th>
+								<th class="text-center">Active</th>
 								<th>E-mail</th>
 								<th>Created</th>
-								<th>Last Update</th>
 								<th>Groups</th>
 								<th>Actions</th>
 							</tr>
 						</tfoot>
 					</table>
-					<ul uib-pagination ng-model="uc.currentPage"
-						items-per-page="uc.entryLimit" total-items="uc.totalItems"
-						max-size="uc.noOfPages" boundary-links="true"></ul>
+					<div class="text-center">
+						<ul uib-pagination ng-model="users.currentPage"
+							items-per-page="users.entryLimit" total-items="users.totalItems"
+							max-size="10" boundary-links="true"></ul>
+					</div>
 
+				</div>
+				<div class="box-footer">
+					<button class="btn btn-success" ng-click="users.openAddUserDialog()"> <i class="fa fa-plus"></i> Add
+						User</button>
 				</div>
 			</div>
 		</div>

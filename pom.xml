@@ -36,8 +36,8 @@
 
     <angular-jwt.version>??</angular-jwt.version>
     <jquery.version>2.1.1</jquery.version>
-    <jquery-ui.version>1.12.0</jquery-ui.version>
     <bootstrap.version>3.3.7</bootstrap.version>
+    <jquery-ui.version>1.12.0</jquery-ui.version>
     <rest-assured.version>2.9.0</rest-assured.version>
 
     <flyway-test.version>4.0</flyway-test.version>

@@ -33,8 +33,10 @@ function AddX509CertificateController($scope, $uibModalInstance, scimFactory,
 
 		console.log("Adding Certificate ", addX509CertCtrl.label,
 				addX509CertCtrl.value);
+
 		if (!checkBase64Encoding()) {
-			alert("Key is not a base64 encoded string!");
+			addX509CertCtrl.textAlert = "Key is not a base64 encoded string!";
+			addX509CertCtrl.operationResult = 'err';
 			return;
 		}
 
@@ -45,11 +47,9 @@ function AddX509CertificateController($scope, $uibModalInstance, scimFactory,
 							addX509CertCtrl.label, addX509CertCtrl.value);
 					$uibModalInstance.close(response.data);
 				}, function(error) {
-					addX509CertCtrl.cancel();
 					console.error('Error creating x509 certificate: ', error);
-					$state.go("error", {
-						"error" : error
-					});
+					addX509CertCtrl.textAlert = error.data.error_description || error.data.detail;
+					addX509CertCtrl.operationResult = 'err';
 				});
 	}
 

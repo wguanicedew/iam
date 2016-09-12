@@ -36,7 +36,7 @@ angular.module('dashboardApp').config(function($stateProvider, $urlRouterProvide
 		      'content' : {
 		        templateUrl: '/resources/iam/template/dashboard/users/users.html',
 		        controller: 'UsersController',
-		        controllerAs: 'uc'
+		        controllerAs: 'users'
 		      }
 		    }
 	}).state('groups', {

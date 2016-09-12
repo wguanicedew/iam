@@ -1,5 +1,5 @@
 <div class="modal-header">
-	<h3 class="modal-title">Add SSH Key</h3>
+	<h3 class="modal-title">Add SSH Key to <strong>{{addSshKeyCtrl.user.name.formatted}}</strong></h3>
 </div>
 <div class="modal-body">
 
@@ -13,6 +13,17 @@
 		<textarea class="form-control" rows="3"
 			placeholder="Insert RSA key value here ..."
 			ng-model="addSshKeyCtrl.value"></textarea>
+	</div>
+
+	<div class="row" ng-show="addSshKeyCtrl.operationResult != null">
+		<div class="col-xs-12">
+			<div class="alert"
+				ng-class="{'alert-success': addSshKeyCtrl.operationResult=='ok', 'alert-danger': addSshKeyCtrl.operationResult=='err'}">
+				<button class="close" ng-click="addSshKeyCtrl.operationResult=null"
+					aria-label="close">&times;</button>
+				{{addSshKeyCtrl.textAlert}}
+			</div>
+		</div>
 	</div>
 
 </div>

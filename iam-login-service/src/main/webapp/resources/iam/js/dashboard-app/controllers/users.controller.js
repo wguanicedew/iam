@@ -2,57 +2,59 @@
 
 angular.module('dashboardApp').controller('UsersController', UsersController);
 
-UsersController.$inject = [ '$scope', '$location', '$state', '$filter',
-		'filterFilter', 'scimFactory' ];
+UsersController.$inject = [ '$scope', '$rootScope', '$uibModal', '$state', '$filter',
+		'filterFilter', 'scimFactory', 'ModalService' ];
 
-function UsersController($scope, $location, $state, $filter, filterFilter,
-		scimFactory) {
+function UsersController($scope, $rootScope, $uibModal, $state, $filter, filterFilter,
+		scimFactory, ModalService) {
 
-	var uc = this;
+	var users = this;
 
-	uc.users = [];
+	users.list = [];
 
 	// create empty search model (object) to trigger $watch on update
-	uc.search = {};
+	users.search = {};
 
 	// pagination controls
-	uc.currentPage = 1;
-	uc.totalItems = uc.users.length;
-	uc.entryLimit = 10; // items per page
+	users.currentPage = 1;
+	users.totalItems = users.list.length;
+	users.entryLimit = 10; // items per page
 
 	// functions
-	uc.resetFilters = resetFilters;
-	uc.updateNoOfPages = updateNoOfPages;
-	uc.updateTotalItems = updateTotalItems;
+	users.resetFilters = resetFilters;
+	users.updateNoOfPages = updateNoOfPages;
+	users.updateTotalItems = updateTotalItems;
 
-	uc.getAllUsers = getAllUsers;
+	users.getAllUsers = getAllUsers;
+	users.openAddUserDialog = openAddUserDialog;
+	users.deleteUser = deleteUser;
+	users.removeUserFromList = removeUserFromList;
 
 	// Controller actions:
-	uc.resetFilters()
-	uc.getAllUsers(1, uc.entryLimit); // eval uc.users
+	users.resetFilters()
+	users.getAllUsers(1, users.entryLimit); // eval users.users
 
 	function updateTotalItems() {
 
-		uc.totalItems = uc.users.length;
+		users.totalItems = users.list.length;
 	}
 
 	function updateNoOfPages() {
 
-		uc.noOfPages = Math.ceil(uc.totalItems / uc.entryLimit);
+		users.noOfPages = Math.ceil(users.totalItems / users.entryLimit);
 	}
 
 	function resetFilters() {
 		// needs to be a function or it won't trigger a $watch
-		uc.search = {};
+		users.search = {};
 	}
-	;
 
 	// $watch search to update pagination
-	$scope.$watch('uc.search', function(newVal, oldVal) {
-		uc.filtered = filterFilter(uc.users, newVal);
-		uc.updateTotalItems();
-		uc.updateNoOfPages();
-		uc.currentPage = 1;
+	$scope.$watch('users.search', function(newVal, oldVal) {
+		users.filtered = filterFilter(users.list, newVal);
+		users.updateTotalItems();
+		users.updateNoOfPages();
+		users.currentPage = 1;
 	}, true);
 
 	function getAllUsers(startIndex, count) {
@@ -63,14 +65,14 @@ function UsersController($scope, $location, $state, $filter, filterFilter,
 						function(response) {
 							angular.forEach(response.data.Resources, function(
 									user) {
-								uc.users.push(user);
+								users.list.push(user);
 							});
-							uc.users = $filter('orderBy')(uc.users,
+							users.list = $filter('orderBy')(users.list,
 									"name.formatted", false);
-							uc.updateTotalItems();
-							uc.updateNoOfPages();
-							if (response.data.totalResults > (response.data.startIndex + response.data.itemsPerPage)) {
-								uc.getAllUsers(startIndex + count, count);
+							users.updateTotalItems();
+							users.updateNoOfPages();
+							if (response.data.totalResults > (response.data.startIndex - 1 + response.data.itemsPerPage)) {
+								users.getAllUsers(startIndex + count, count);
 							}
 						}, function(error) {
 							$state.go("error", {
@@ -78,4 +80,57 @@ function UsersController($scope, $location, $state, $filter, filterFilter,
 							});
 						});
 	}
+
+	function openAddUserDialog() {
+
+		var modalInstance = $uibModal
+				.open({
+					templateUrl : '/resources/iam/template/dashboard/users/newuser.html',
+					controller : 'AddUserController',
+					controllerAs : 'addUserCtrl'
+				});
+		modalInstance.result.then(function(createdUser) {
+			console.info(createdUser);
+			users.list.push(createdUser);
+			users.list = $filter('orderBy')(users.list, "name.formatted", false);
+			users.updateTotalItems();
+			users.updateNoOfPages();
+		}, function() {
+			console.info('Modal dismissed at: ', new Date());
+		});
+	}
+	
+	function removeUserFromList(user) {
+
+		var i = users.list.indexOf(user);
+		users.list.splice(i, 1);
+
+		users.filtered = filterFilter(users.list, users.search);
+		users.updateTotalItems();
+		users.updateNoOfPages();
+	}
+	
+	function deleteUser(user) {
+		
+		var modalOptions = {
+			closeButtonText: 'Cancel',
+            actionButtonText: 'Delete User',
+            headerText: 'Delete?',
+            bodyText: `Are you sure you want to delete user '${user.name.formatted}'?`	
+		};
+		
+		ModalService.showModal({}, modalOptions).then(
+				function (){
+					scimFactory.deleteUser(user.id).then(
+						function(response) {
+							users.removeUserFromList(user);
+							$rootScope.loggedUser.totUsers = $rootScope.loggedUser.totUsers -1;
+							users.textAlert = `User ${user.displayName} deleted successfully`;
+							users.operationResult = 'ok';
+						}, function(error) {
+							users.textAlert = error.data.error_description || error.data.detail;
+							users.operationResult = 'err';
+						});
+				});
+	};
 }

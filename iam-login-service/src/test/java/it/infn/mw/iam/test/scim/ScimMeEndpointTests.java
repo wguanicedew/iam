@@ -4,6 +4,7 @@ import static com.jayway.restassured.RestAssured.given;
 import static it.infn.mw.iam.api.scim.model.ScimConstants.SCIM_CONTENT_TYPE;
 import static it.infn.mw.iam.test.TestUtils.clientCredentialsTokenGetter;
 import static it.infn.mw.iam.test.TestUtils.passwordTokenGetter;
+import static org.hamcrest.Matchers.equalTo;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,10 +45,25 @@ public class ScimMeEndpointTests {
 
 
   public void meEndpointFailsForClientWithoutUser() {
+
     String accessToken = clientCredentialsTokenGetter().getAccessToken();
     // TBD: the test that fails with
 
-
+    given().port(8080)
+      .auth()
+      .preemptive()
+      .oauth2(accessToken)
+      .accept(SCIM_CONTENT_TYPE)
+      .log()
+      .all(true)
+      .when()
+      .get("/scim/Me")
+      .then()
+      .log()
+      .all(true)
+      .statusCode(HttpStatus.BAD_REQUEST.value())
+      .body("status", equalTo("404"))
+      .body("detail", equalTo("No user linked to the current OAuth token"));
   }
 
 }
