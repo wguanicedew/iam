@@ -9,8 +9,10 @@ INSERT INTO system_scope(scope, description, icon, restricted, default_scope, st
   ('address', 'physical address', 'home', false, true, false, null),
   ('phone', 'telephone number', 'bell', false, true, false, null),
   ('offline_access', 'offline access', 'time', false, false, false, null),
-  ('scim:read','read access to SCIM user and groups', null, true, false, false, null),
-  ('scim:write','write access to SCIM user and groups', null, true, false, false, null);
+  ('scim:read','read access to SCIM user and groups', null, true, false, true, 'read access to IAM SCIM APIs'),
+  ('scim:write','write access to SCIM user and groups', null, true, false, true, 'write access to IAM SCIM APIs'),
+  ('registration:read','read access to IAM registration API', null, true, false, true, 'read access to IAM registration APIs'),
+  ('registration:write','write access to IAM registration API', null, true, false, true, 'write access to IAM registration APIs');
 
 INSERT INTO client_details (id, client_id, client_secret, client_name, dynamically_registered, refresh_token_validity_seconds, access_token_validity_seconds, id_token_validity_seconds, allow_introspection, token_endpoint_auth_method) VALUES
   (1, 'client', 'secret', 'Test Client', false, null, 3600, 600, true, 'SECRET_BASIC'),
