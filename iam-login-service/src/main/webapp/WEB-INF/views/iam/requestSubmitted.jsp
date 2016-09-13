@@ -20,7 +20,7 @@
 			<p class="text-center">After confirmation, you have to wait for approval from Indigo Admin before start using Indigo services.</p>
 		</div>
 		
-		<div class="row col-sm-12 text-center">
+		<div class="row text-center">
 			<a class="btn btn-primary" href='/login'>Back to Login Page</a>
 		</div>
 
