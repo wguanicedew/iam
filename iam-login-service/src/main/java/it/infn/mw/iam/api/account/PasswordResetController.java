@@ -60,7 +60,7 @@ public class PasswordResetController {
   }
 
 
-  @RequestMapping(value = "/iam/password-forgot/{email}", method = RequestMethod.GET,
+  @RequestMapping(value = "/iam/password-forgot/{email:.+}", method = RequestMethod.GET,
       produces = PLAIN_TEXT)
   @ResponseBody
   public String forgotPassword(@PathVariable("email") String email) {
