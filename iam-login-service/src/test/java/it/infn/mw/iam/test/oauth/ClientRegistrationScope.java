@@ -1,7 +1,6 @@
 package it.infn.mw.iam.test.oauth;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.Set;
 
 import org.junit.Assert;
@@ -18,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonObject;
 import com.jayway.restassured.RestAssured;
@@ -192,16 +192,9 @@ public class ClientRegistrationScope {
 
 
   private String setToString(Set<String> scopes) {
-    StringBuilder strBuilder = new StringBuilder();
-    Iterator<String> it = scopes.iterator();
-    while (it.hasNext()) {
-    	strBuilder.append(it.next());
-      if (it.hasNext()) {
-    	  strBuilder.append(RegisteredClientFields.SCOPE_SEPARATOR);
-      }
-    }
 
-    return strBuilder.toString();
+    Joiner joiner = Joiner.on(RegisteredClientFields.SCOPE_SEPARATOR);
+    return joiner.join(scopes);
   }
 
 }
