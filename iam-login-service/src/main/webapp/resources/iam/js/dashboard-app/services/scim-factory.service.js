@@ -25,7 +25,8 @@ angular.module('dashboardApp').factory("scimFactory", [ '$http', '$httpParamSeri
 		removeX509Certificate: removeX509Certificate,
 		addSamlId: addSamlId,
 		removeSamlId: removeSamlId,
-		setUserActiveStatus: setUserActiveStatus
+		setUserActiveStatus: setUserActiveStatus,
+		updateUser: updateUser
 	}
 	
 	return service;
@@ -400,6 +401,26 @@ angular.module('dashboardApp').factory("scimFactory", [ '$http', '$httpParamSeri
 		var url = urlUsers + '/' + userId;
 		
 		return $http.patch(url, data, config);
-	}
+	};
+	
+	function updateUser(scimUser) {
+		
+		console.info("Patch user ", scimUser);
+		
+		var config = {
+				headers: { 'Content-Type': 'application/scim+json' }
+			};
+		var data = {
+				schemas: ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
+				operations: [{
+					op: "replace",
+					value: scimUser
+				}]
+			};
+		var url = urlUsers + '/' + scimUser.id;
+		
+		return $http.patch(url, data, config);
+	};
+	
 	return scimFactory;
 } ]);

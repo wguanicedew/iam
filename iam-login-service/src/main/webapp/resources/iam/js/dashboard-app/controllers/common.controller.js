@@ -9,11 +9,9 @@ function CommonController($scope, $rootScope, $state, Utils, scimFactory, Regist
 	var commonCtrl = this;
 	commonCtrl.name = "CommonController";
 
-	$rootScope.loggedUser = { 
-		info: getUserInfo(), 
-		auth: getUserAuthorities(),
-		isAdmin: Utils.isAdmin()
-	}
+	$rootScope.loggedUser = Utils.getLoggedUser();
+
+	console.log("Logged user", $rootScope.loggedUser);
 	
 	scimFactory.getMe().then(function(response) {
 		console.log(response.data);

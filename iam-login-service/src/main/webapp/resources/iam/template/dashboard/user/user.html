@@ -70,12 +70,15 @@
 						<li class="list-group-item">
 						  <strong>Groups</strong> <a
                             class="pull-right"><span class="label label-default">{{user.userInfo.groups.length || 0}}</span></a></li>
+					    <li class="list-group-item">
+                          <strong>Password</strong>
+                          <button class="pull-right btn btn-xs btn-success" ng-click="user.sendResetMail()">Send reset e-mail</button>
 					</ul>
 
-					<!-- 	<a href="#" class="btn btn-primary btn-block"><b>Edit</b></a> -->
 				</div>
 				<!-- /.box-body -->
-				<div class="box-footer bg-blue">
+				<div class="box-footer">
+				    <button class="btn btn-primary btn-block" ng-click="user.openEditUserDialog()"><strong>Edit</strong></button>
                 </div>
 			</div>
 			<!-- /.box -->
