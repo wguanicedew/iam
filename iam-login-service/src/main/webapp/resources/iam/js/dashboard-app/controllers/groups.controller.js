@@ -35,9 +35,11 @@ function GroupsController($scope, $rootScope, $uibModal, $state, $filter,
 	gc.deleteGroup = deleteGroup;
 	gc.removeGroupFromList = removeGroupFromList;
 
+	gc.loadGroupList = loadGroupList;
+
 	// Controller actions:
 	gc.resetFilters()
-	gc.getAllGroups(); // eval gc.groups
+	gc.loadGroupList(); // eval gc.groups
 
 	function updateTotalItems() {
 
@@ -63,6 +65,17 @@ function GroupsController($scope, $rootScope, $uibModal, $state, $filter,
 		gc.currentPage = 1;
 	}, true);
 
+	function loadGroupList() {
+
+		$rootScope.groupsLoadingProgress = 0;
+		gc.loadingModal = $uibModal
+		.open({
+			templateUrl : '/resources/iam/template/dashboard/groups/loading-modal.html'
+		});
+		gc.getAllGroups();
+		
+	}
+
 	function getAllGroups() {
 
 		gc.groups = [];
@@ -85,6 +98,10 @@ function GroupsController($scope, $rootScope, $uibModal, $state, $filter,
 							gc.updateNoOfPages();
 							if (response.data.totalResults > (response.data.startIndex - 1 + response.data.itemsPerPage)) {
 								gc.getGroups(startIndex + count, count);
+								$rootScope.groupsLoadingProgress = Math.floor((startIndex + count) * 100 / response.data.totalResults);
+							} else {
+								$rootScope.groupsLoadingProgress = 100;
+								gc.loadingModal.dismiss("Cancel");
 							}
 						}, function(error) {
 							$state.go("error", {

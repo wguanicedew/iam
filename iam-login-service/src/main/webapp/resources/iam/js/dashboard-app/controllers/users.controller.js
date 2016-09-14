@@ -29,10 +29,12 @@ function UsersController($scope, $rootScope, $uibModal, $state, $filter, filterF
 	users.openAddUserDialog = openAddUserDialog;
 	users.deleteUser = deleteUser;
 	users.removeUserFromList = removeUserFromList;
+	
+	users.loadUserList = loadUserList;
 
 	// Controller actions:
 	users.resetFilters()
-	users.getAllUsers(1, users.entryLimit); // eval users.users
+	users.loadUserList();
 
 	function updateTotalItems() {
 
@@ -57,6 +59,17 @@ function UsersController($scope, $rootScope, $uibModal, $state, $filter, filterF
 		users.currentPage = 1;
 	}, true);
 
+	function loadUserList() {
+
+		$rootScope.usersLoadingProgress = 0;
+		users.loadingModal = $uibModal
+		.open({
+			templateUrl : '/resources/iam/template/loading-modal.html'
+		});
+		getAllUsers(1, users.entryLimit);
+		
+	}
+
 	function getAllUsers(startIndex, count) {
 
 		scimFactory
@@ -73,6 +86,10 @@ function UsersController($scope, $rootScope, $uibModal, $state, $filter, filterF
 							users.updateNoOfPages();
 							if (response.data.totalResults > (response.data.startIndex - 1 + response.data.itemsPerPage)) {
 								users.getAllUsers(startIndex + count, count);
+								$rootScope.usersLoadingProgress = Math.floor((startIndex + count) * 100 / response.data.totalResults);
+							} else {
+								$rootScope.usersLoadingProgress = 100;
+								users.loadingModal.dismiss("Cancel");
 							}
 						}, function(error) {
 							$state.go("error", {
