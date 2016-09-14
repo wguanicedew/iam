@@ -14,24 +14,24 @@
 				<c:when test="${errorMessage != null}">
 					<div class="alert alert-danger">Error: ${errorMessage}</div>
 					
-					<div style="width: 200px; margin: auto;">
-						<a class="btn btn-primary btn-block" style="align: center" href='/login'>Back to Login Page</a>
+					<div class="row text-center">
+						<a class="btn btn-primary" href='/login'>Back to Login Page</a>
 					</div>
 				</c:when>
 				
 				<c:otherwise>
 					<div ng-controller="ResetPasswordController as ctrl">
-					
-						<h4 class="test-center">Change your Indigo password</h4>
-						
+						<div style="text-align: center;">
+							<h3>Change your Indigo password</h3>
+						</div>
 						<div ng-show="ctrl.operationResult != null">
 							<div class="alert" ng-class="{'alert-success': ctrl.operationResult=='ok', 'alert-danger': ctrl.operationResult=='err'}">
 								<button class="close" ng-click="ctrl.operationResult=null" aria-label="close">&times;</button>
 								{{ctrl.textAlert}}
 							</div>
 							
-							<div style="width: 200px; margin: auto;" ng-show="ctrl.operationResult == 'ok'">
-								<a class="btn btn-primary btn-block" style="align: center" href='/login'>Back to Login Page</a>
+							<div class="row text-center" ng-show="ctrl.operationResult == 'ok'">
+								<a class="btn btn-primary" href='/login'>Back to Login Page</a>
 							</div>
 						</div>
 						

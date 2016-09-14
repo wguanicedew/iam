@@ -31,8 +31,8 @@
 			</div>
 		</c:if>
 
-		<div style="width: 200px; margin: auto;">
-			<a class="btn btn-primary btn-block" style="align: center" href='/login'>Back to Login Page</a>
+		<div class="row text-center">
+			<a class="btn btn-primary" href='/login'>Back to Login Page</a>
 		</div>
 			
 	</div>
