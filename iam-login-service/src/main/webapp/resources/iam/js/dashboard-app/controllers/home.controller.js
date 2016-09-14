@@ -7,10 +7,11 @@ HomeController.$inject = [ '$state', 'Utils', 'scimFactory' ];
 function HomeController($state, Utils, scimFactory) {
 
 	if (Utils.isAdmin()) {
-		console.log("User is admin: redirecting to user " + getUserInfo().name + " page ");
+		console.log("User is admin: redirecting to his page ");
 		$state.go("user", { 
 			id: getUserInfo().sub 
 		});
+		return;
 	}
 
 	var home = this;

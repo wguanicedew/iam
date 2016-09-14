@@ -52,6 +52,7 @@
 	
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/services/scim-factory.service.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/services/modal.service.js"></script>
+    <script type="text/javascript" src="/resources/iam/js/dashboard-app/services/passwordreset.service.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/services/registration.service.js"></script>
     <script type="text/javascript" src="/resources/iam/js/dashboard-app/services/utils.service.js"></script>
     
@@ -70,6 +71,7 @@
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/add-user-saml-account.controller.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/add-user-x509-certificate.controller.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/add-user-group.controller.js"></script>
+	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/edit-user.controller.js"></script>
 	
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/filters/start-from.filter.js"></script>
 	
