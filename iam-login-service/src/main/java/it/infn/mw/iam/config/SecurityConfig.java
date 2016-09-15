@@ -20,7 +20,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationManager;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationProcessingFilter;
@@ -42,11 +41,6 @@ import it.infn.mw.iam.authn.oidc.OidcClientFilter;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-
-  @Bean
-  public PasswordEncoder passwordEncoder() {
-    return new BCryptPasswordEncoder();
-  }
 
   @Configuration
   @Order(100)
@@ -71,9 +65,11 @@ public class SecurityConfig {
 
     @Autowired
     public void configureGlobal(final AuthenticationManagerBuilder auth) throws Exception {
-      // @fomatter:off
-      auth.userDetailsService(iamUserDetailsService).passwordEncoder(passwordEncoder);
-      // @fomatter:on
+      // @formatter:off
+      auth
+        .userDetailsService(iamUserDetailsService)
+        .passwordEncoder(passwordEncoder);
+      // @formatter:on
     }
 
     @Override

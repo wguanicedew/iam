@@ -125,8 +125,10 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
     account.setActive(user.getActive() == null ? false : user.getActive());
 
     if (account.getPassword() == null) {
-      account.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
+      account.setPassword(UUID.randomUUID().toString());
     }
+
+    account.setPassword(passwordEncoder.encode(account.getPassword()));
 
     authorityRepository.findByAuthority("ROLE_USER")
       .map(a -> account.getAuthorities().add(a))
