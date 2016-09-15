@@ -108,7 +108,7 @@ public class ClientRegistrationScopeTests {
     String str = response.asString();
     ClientDetailsEntity saved = ClientDetailsEntityJsonProcessor.parse(str);
 
-    Assert.assertNotEquals(saved, null);
+    Assert.assertNotNull(saved);
 
     // @formatter:off
     RestAssured.given()
