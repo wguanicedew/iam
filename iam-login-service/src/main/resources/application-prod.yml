@@ -1,0 +1,8 @@
+spring:
+  profiles:
+    include: mysql,google,registration
+    
+flyway:
+  locations:
+    - classpath:db/migration/mysql
+    - classpath:db/migration/prod

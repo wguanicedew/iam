@@ -31,6 +31,33 @@ The docker-compose.yml file requires that you set some environment variables
 for it to run properly, mainly to provide OAuth client credentials for external
 authentication mechanisms (Google, Github,...).
 
+The setup also assumes that you have an entry in your DNS server (complex) or
+/etc/hosts (simpler) that maps iam.local.io to the machine (or VM) where docker
+is running, e.g.:
+
+```bash
+$ cat /etc/hosts
+...
+
+192.168.99.100 iam.local.io
+```
+
+## How to run tests against the mysql database
+
+IAM JUnit integration tests can (and should) be run against mysql database.
+
+To do so, boostrap the database instance with docker-compose:
+
+```bash
+docker-compose up db
+```
+
+And then run the tests with the following command:
+
+```bash
+mvn -Dspring.profiles.active=mysql-tests test
+```
+
 ## Building Docker production images
 
 To build the docker images for the iam-service and iam-test client,

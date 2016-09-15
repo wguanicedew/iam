@@ -10,6 +10,7 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.UUID;
 
@@ -196,13 +197,20 @@ public class ScimUserProvisioningTests {
       .active(true)
       .build();
 
-    restUtils.doPut(createdUser.getMeta().getLocation(), updatedUser)
+    long creationTimeMs = createdUser.getMeta().getCreated().getTime();
+
+    String returnedCreationTime = restUtils.doPut(createdUser.getMeta().getLocation(), updatedUser)
       .body("id", equalTo(createdUser.getId()))
       .body("userName", equalTo("j.lennon"))
       .body("emails[0].value", equalTo(createdUser.getEmails().get(0).getValue()))
-      .body("meta.created",
-          equalTo(dateTimeFormatter.print(createdUser.getMeta().getCreated().getTime())))
-      .body("active", equalTo(true));
+      .body("active", equalTo(true))
+      .extract()
+      .path("meta.created");
+
+    long returnedTimeMs = dateTimeFormatter.parseDateTime(returnedCreationTime).getMillis();
+
+    // We need to do this since milliseconds are truncated for the creation time in MySQL
+    assertTrue(Math.abs(returnedTimeMs - creationTimeMs) <= 1000);
 
     restUtils.doDelete(createdUser.getMeta().getLocation());
 
@@ -364,7 +372,8 @@ public class ScimUserProvisioningTests {
     ScimUser creationResult = restUtils.doPost("/scim/Users/", user)
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys", hasSize(equalTo(1)))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].display", equalTo("Personal"))
-      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].value", equalTo(TestUtils.sshKeys.get(0).key))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].value",
+          equalTo(TestUtils.sshKeys.get(0).key))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].fingerprint",
           equalTo(TestUtils.sshKeys.get(0).fingerprintSHA256))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].primary", equalTo(true))
@@ -374,7 +383,8 @@ public class ScimUserProvisioningTests {
     restUtils.doGet(creationResult.getMeta().getLocation())
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys", hasSize(equalTo(1)))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].display", equalTo("Personal"))
-      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].value", equalTo(TestUtils.sshKeys.get(0).key))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].value",
+          equalTo(TestUtils.sshKeys.get(0).key))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].fingerprint",
           equalTo(TestUtils.sshKeys.get(0).fingerprintSHA256))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].primary", equalTo(true));
@@ -398,7 +408,8 @@ public class ScimUserProvisioningTests {
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys", hasSize(equalTo(1)))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].display",
           equalTo(user.getUserName() + "'s personal ssh key"))
-      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].value", equalTo(TestUtils.sshKeys.get(0).key))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].value",
+          equalTo(TestUtils.sshKeys.get(0).key))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].fingerprint",
           equalTo(TestUtils.sshKeys.get(0).fingerprintSHA256))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].primary", equalTo(true))
@@ -418,16 +429,15 @@ public class ScimUserProvisioningTests {
       .active(true)
       .build();
 
-    ScimUser creationResult =
-        restUtils.doPost("/scim/Users/", user)
-          .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys", hasSize(equalTo(1)))
-          .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].display", equalTo("Personal"))
-          .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].value",
-              equalTo(TestUtils.sshKeys.get(0).key))
-          .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].fingerprint",
-              equalTo(TestUtils.sshKeys.get(0).fingerprintSHA256))
-          .extract()
-          .as(ScimUser.class);
+    ScimUser creationResult = restUtils.doPost("/scim/Users/", user)
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys", hasSize(equalTo(1)))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].display", equalTo("Personal"))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].value",
+          equalTo(TestUtils.sshKeys.get(0).key))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].fingerprint",
+          equalTo(TestUtils.sshKeys.get(0).fingerprintSHA256))
+      .extract()
+      .as(ScimUser.class);
 
     ScimUser anotherUser = ScimUser.builder("another_user_with_sshkey")
       .buildEmail("another_test_user@test.org")

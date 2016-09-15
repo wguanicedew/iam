@@ -84,11 +84,9 @@ public class ScimGroupProvisioningTests {
       .body("displayName", equalTo("Production"))
       .body("meta.resourceType", equalTo("Group"))
       .body("meta.location", equalTo("http://localhost:8080/scim/Groups/" + groupId))
-      .body("members", hasSize(equalTo(2)))
+      .body("members", hasSize(equalTo(1)))
       .body("members[0].$ref",
           and(startsWith("http://localhost:8080/scim/Users/"), endsWithPath("members[0].value")))
-      .body("members[1].$ref",
-          and(startsWith("http://localhost:8080/scim/Users/"), endsWithPath("members[1].value")))
       .body("schemas", contains(ScimGroup.GROUP_SCHEMA));
 
   }
