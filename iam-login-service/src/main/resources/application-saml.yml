@@ -1,0 +1,7 @@
+saml:
+  entity-id: ${IAM_SAML_ENTITY_ID:urn:iam:iam-devel}
+  keystore: ${IAM_SAML_KEYSTORE:classpath:/saml/samlKeystore.jks}
+  keystore-password: ${IAM_SAML_KEYSTORE_PASSWORD:password}
+  key-id: ${IAM_SAML_KEY_ID:iam}
+  key-password: ${IAM_SAML_KEY_PASSWORD:password}
+  idp-metadata: ${IAM_SAML_IDP_METADATA:classpath:/saml/idp-metadata.xml}
