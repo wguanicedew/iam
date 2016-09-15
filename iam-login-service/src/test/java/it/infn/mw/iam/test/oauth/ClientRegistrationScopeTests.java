@@ -1,5 +1,7 @@
 package it.infn.mw.iam.test.oauth;
 
+import static org.junit.Assert.assertNotNull;
+
 import java.io.IOException;
 import java.util.Set;
 
@@ -29,52 +31,18 @@ import it.infn.mw.iam.IamLoginService;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = IamLoginService.class)
 @WebIntegrationTest
-public class ClientRegistrationScope {
+public class ClientRegistrationScopeTests {
 
   @Value("${server.port}")
   private Integer iamPort;
 
   @Test
-  public void testCreateClientWithReservedScopes() throws JsonProcessingException, IOException {
-
-    String clientName = "test_client";
-    Set<String> scopes = Sets.newHashSet("registration:read", "registration:write");
-
-    String jsonInString = buildClientJsonString(clientName, scopes);
-
-    // @formatter:off
-    Response response = RestAssured.given()
-      .port(iamPort)
-      .contentType(ContentType.JSON)
-      .body(jsonInString)
-      .log()
-        .all(true)
-    .when()
-      .post("/register")
-    .then()
-      .log()
-        .body(true)
-      .statusCode(HttpStatus.CREATED.value())
-      .contentType(ContentType.JSON)
-      .extract()
-        .response()
-    ;
-    // @formatter:on
-
-    String str = response.asString();
-    ClientDetailsEntity saved = ClientDetailsEntityJsonProcessor.parse(str);
-
-    Assert.assertNotEquals(saved, null);
-    Assert.assertTrue(!saved.getScope().containsAll(scopes));
-  }
-
-  @Test
-  public void testGetTokenWithRegistrationReservedScopesFailure()
+  public void testCreateClientWithRegistrationReservedScopes()
       throws JsonProcessingException, IOException {
 
     String clientName = "test_client";
-    Set<String> scopes = Sets.newHashSet("openid", "profile", "email", "address", "phone",
-        "registration:read", "registration:write");
+    Set<String> scopes =
+        Sets.newHashSet("registration:read", "registration:write", "scim:read", "scim:write");
 
     String jsonInString = buildClientJsonString(clientName, scopes);
 
@@ -100,23 +68,12 @@ public class ClientRegistrationScope {
     String str = response.asString();
     ClientDetailsEntity saved = ClientDetailsEntityJsonProcessor.parse(str);
 
-    Assert.assertNotEquals(saved, null);
+    assertNotNull(saved);
+    for (String reservedScope : scopes) {
+      Assert.assertFalse(saved.getScope().contains(reservedScope));
+    }
 
-    // @formatter:off
-    RestAssured.given()
-      .port(iamPort)
-      .param("grant_type", "client_credentials")
-      .param("client_id", saved.getClientId())
-      .param("client_secret", saved.getClientSecret())
-      .param("scope", setToString(scopes))
-    .when()
-      .post("/token")
-    .then()
-      .log()
-        .all(true)
-      .statusCode(HttpStatus.BAD_REQUEST.value())
-    ;
-    // @formatter:on
+
   }
 
   @Test
@@ -124,8 +81,8 @@ public class ClientRegistrationScope {
       throws JsonProcessingException, IOException {
 
     String clientName = "test_client";
-    Set<String> scopes = Sets.newHashSet("openid", "profile", "email", "address", "phone",
-        "scim:read", "scim:write");
+    Set<String> scopes =
+        Sets.newHashSet("scim:read", "scim:write", "registration:read", "registration:write");
 
     String jsonInString = buildClientJsonString(clientName, scopes);
 

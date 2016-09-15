@@ -1,8 +1,8 @@
 Dear $recipient,
 
-Indigo admins have approved your account request. Your Indigo account is active now.
+your registration request has been approved.
 
-In order to login into Indigo follow this link to set your own new password:
+Please set your password by following this link:
 
 $resetPasswordUrl
 

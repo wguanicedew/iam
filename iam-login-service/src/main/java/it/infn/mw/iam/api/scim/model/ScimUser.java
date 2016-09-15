@@ -188,7 +188,7 @@ public class ScimUser extends ScimResource {
   }
 
   public boolean hasAddresses() {
-    
+
     return addresses != null && !addresses.isEmpty();
   }
 
@@ -236,9 +236,9 @@ public class ScimUser extends ScimResource {
         && !indigoUser.getSamlIds().isEmpty();
   }
 
-  public static Builder builder(String uuid) {
+  public static Builder builder(String username) {
 
-    return new Builder(uuid);
+    return new Builder(username);
   }
 
   public static Builder builder() {
