@@ -2,9 +2,9 @@
 
 angular.module('dashboardApp').controller('HomeController', HomeController);
 
-HomeController.$inject = [ '$state', 'Utils', 'scimFactory' ];
+HomeController.$inject = [ '$state', 'Utils', 'scimFactory', 'ModalService' ];
 
-function HomeController($state, Utils, scimFactory) {
+function HomeController($state, Utils, scimFactory, ModalService) {
 
 	if (Utils.isAdmin()) {
 		console.log("User is admin: redirecting to his page ");
@@ -32,11 +32,21 @@ function HomeController($state, Utils, scimFactory) {
 	home.showCertValue = showCertValue;
 
 	function showSshKeyValue(value) {
-		alert(value);
+		ModalService.showModal({}, {
+			closeButtonText: null,
+			actionButtonText: 'OK',
+			headerText: 'SSH Key value',
+			bodyText: `${value}`
+		});
 	}
 
 	function showCertValue(cert) {
-		alert(cert.value);
+		ModalService.showModal({}, {
+			closeButtonText: null,
+			actionButtonText: 'OK',
+			headerText: 'x509 Certificate value',
+			bodyText: `${cert.value}`
+		});
 	}
 
 }
