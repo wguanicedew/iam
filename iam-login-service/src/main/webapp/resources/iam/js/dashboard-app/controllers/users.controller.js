@@ -10,64 +10,54 @@ function UsersController($scope, $rootScope, $uibModal, $state, $filter, filterF
 
 	var users = this;
 
+	// all the users list
 	users.list = [];
-
-	// create empty search model (object) to trigger $watch on update
-	users.search = {};
+	// filtered users to show
+	users.filtered = [];
+	// text to find to filter users
+	users.searchText = "";
 
 	// pagination controls
 	users.currentPage = 1;
-	users.totalItems = users.list.length;
 	users.entryLimit = 10; // items per page
 
 	// functions
 	users.resetFilters = resetFilters;
-	users.updateNoOfPages = updateNoOfPages;
-	users.updateTotalItems = updateTotalItems;
-
+	users.rebuildFilteredList = rebuildFilteredList;
 	users.getAllUsers = getAllUsers;
 	users.openAddUserDialog = openAddUserDialog;
 	users.deleteUser = deleteUser;
 	users.removeUserFromList = removeUserFromList;
-	
 	users.loadUserList = loadUserList;
 
 	// Controller actions:
-	users.resetFilters()
+	users.resetFilters();
 	users.loadUserList();
-
-	function updateTotalItems() {
-
-		users.totalItems = users.list.length;
-	}
-
-	function updateNoOfPages() {
-
-		users.noOfPages = Math.ceil(users.totalItems / users.entryLimit);
-	}
 
 	function resetFilters() {
 		// needs to be a function or it won't trigger a $watch
-		users.search = {};
+		users.searchText = "";
 	}
 
-	// $watch search to update pagination
-	$scope.$watch('users.search', function(newVal, oldVal) {
-		users.filtered = filterFilter(users.list, newVal);
-		users.updateTotalItems();
-		users.updateNoOfPages();
-		users.currentPage = 1;
-	}, true);
+	function rebuildFilteredList() {
+		
+		users.filtered = filterFilter(users.list, {$: users.searchText});
+		users.filtered = $filter('orderBy')(users.filtered,	"name.formatted", false);
+	}
+
+	$scope.$watch('users.searchText', function() {
+
+		gc.rebuildFilteredList();
+	});
 
 	function loadUserList() {
 
 		$rootScope.usersLoadingProgress = 0;
 		users.loadingModal = $uibModal
 		.open({
-			templateUrl : '/resources/iam/template/loading-modal.html'
+			templateUrl : '/resources/iam/template/dashboard/users/loading-modal.html'
 		});
 		getAllUsers(1, users.entryLimit);
-		
 	}
 
 	function getAllUsers(startIndex, count) {
@@ -76,25 +66,31 @@ function UsersController($scope, $rootScope, $uibModal, $state, $filter, filterF
 				.getUsers(startIndex, count)
 				.then(
 						function(response) {
+							
 							angular.forEach(response.data.Resources, function(
 									user) {
 								users.list.push(user);
 							});
-							users.list = $filter('orderBy')(users.list,
-									"name.formatted", false);
-							users.updateTotalItems();
-							users.updateNoOfPages();
+							
+							users.rebuildFilteredList();
+							
 							if (response.data.totalResults > (response.data.startIndex - 1 + response.data.itemsPerPage)) {
+							
 								users.getAllUsers(startIndex + count, count);
 								$rootScope.usersLoadingProgress = Math.floor((startIndex + count) * 100 / response.data.totalResults);
+							
 							} else {
+							
 								$rootScope.usersLoadingProgress = 100;
 								users.loadingModal.dismiss("Cancel");
+							
 							}
 						}, function(error) {
+							
 							$state.go("error", {
 								"error" : error
 							});
+						
 						});
 	}
 
@@ -109,9 +105,7 @@ function UsersController($scope, $rootScope, $uibModal, $state, $filter, filterF
 		modalInstance.result.then(function(createdUser) {
 			console.info(createdUser);
 			users.list.push(createdUser);
-			users.list = $filter('orderBy')(users.list, "name.formatted", false);
-			users.updateTotalItems();
-			users.updateNoOfPages();
+			users.rebuildFilteredList();
 		}, function() {
 			console.info('Modal dismissed at: ', new Date());
 		});
@@ -122,9 +116,7 @@ function UsersController($scope, $rootScope, $uibModal, $state, $filter, filterF
 		var i = users.list.indexOf(user);
 		users.list.splice(i, 1);
 
-		users.filtered = filterFilter(users.list, users.search);
-		users.updateTotalItems();
-		users.updateNoOfPages();
+		users.rebuildFilteredList();
 	}
 	
 	function deleteUser(user) {

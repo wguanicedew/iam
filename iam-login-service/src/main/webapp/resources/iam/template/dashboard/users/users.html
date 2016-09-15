@@ -31,7 +31,7 @@
 			<div class="box" ng-show="$root.usersLoadingProgress == 100">
 				<div class="box-header with-border">
 					<div class="input-group">
-						<input placeholder="Search.." ng-model="users.search.displayName"
+						<input placeholder="Search.." ng-model="users.searchText"
 							class="form-control" />
 						<div class="input-group-btn">
 							<button type="button" class="btn btn-default"
@@ -43,7 +43,7 @@
 				<div class="box-body">
 				    <div class="text-center">
 						<ul uib-pagination ng-model="users.currentPage"
-							items-per-page="users.entryLimit" total-items="users.totalItems"
+							items-per-page="users.entryLimit" total-items="users.filtered.length"
 							max-size="10" boundary-links="true"></ul>
 					</div>
 					<table id="userslist" class="table table-striped">
@@ -61,7 +61,7 @@
 						</thead>
 						<tbody>
 							<tr
-								ng-repeat="user in users.filtered = users.list | filter:users.search | startFrom:(users.currentPage-1)*users.entryLimit | limitTo:users.entryLimit">
+								ng-repeat="user in users.filtered | startFrom:(users.currentPage-1)*users.entryLimit | limitTo:users.entryLimit">
 								<td>{{$index + (users.currentPage-1)*users.entryLimit + 1}}</td>
 								<td><img class="img-circle" width="22"
 									ng-src="{{user.picture}}" alt="User profile picture"
@@ -100,7 +100,7 @@
 					</table>
 					<div class="text-center">
 						<ul uib-pagination ng-model="users.currentPage"
-							items-per-page="users.entryLimit" total-items="users.totalItems"
+							items-per-page="users.entryLimit" total-items="users.filtered.length"
 							max-size="10" boundary-links="true"></ul>
 					</div>
 

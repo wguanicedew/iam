@@ -13,20 +13,20 @@ function GroupsController($scope, $rootScope, $uibModal, $state, $filter,
 	// group data
 	gc.groups = [];
 
-	// create empty search model (object) to trigger $watch on update
-	gc.search = {};
+	// filtered groups to show
+	gc.filtered = [];
+	// text to find to filter groups
+	gc.searchText = "";
 
 	// pagination controls
 	gc.currentPage = 1;
-	gc.totalItems = gc.groups.length;
 	gc.entryLimit = 10; // items per page
 
 	// functions
 	gc.getAllGroups = getAllGroups;
 	gc.getGroups = getGroups;
 	gc.resetFilters = resetFilters;
-	gc.updateNoOfPages = updateNoOfPages;
-	gc.updateTotalItems = updateTotalItems;
+	gc.rebuildFilteredList = rebuildFilteredList;
 
 	// add group
 	gc.clickToOpen = clickToOpen;
@@ -41,29 +41,21 @@ function GroupsController($scope, $rootScope, $uibModal, $state, $filter,
 	gc.resetFilters()
 	gc.loadGroupList(); // eval gc.groups
 
-	function updateTotalItems() {
 
-		gc.totalItems = gc.groups.length;
-	}
-
-	function updateNoOfPages() {
-
-		gc.noOfPages = Math.ceil(gc.totalItems / gc.entryLimit);
+	function rebuildFilteredList() {
+		
+		gc.filtered = filterFilter(gc.groups, {'displayName': gc.searchText});
+		gc.filtered = $filter('orderBy')(gc.filtered, "displayName", false);
 	}
 
 	function resetFilters() {
-		// needs to be a function or it won't trigger a $watch
-		gc.search = {};
+		gc.searchText = "";
 	}
-	;
 
-	// $watch search to update pagination
-	$scope.$watch('gc.search', function(newVal, oldVal) {
-		gc.filtered = filterFilter(gc.groups, newVal);
-		gc.updateTotalItems();
-		gc.updateNoOfPages();
-		gc.currentPage = 1;
-	}, true);
+	$scope.$watch('gc.searchText', function() {
+
+		gc.rebuildFilteredList();
+	});
 
 	function loadGroupList() {
 
@@ -92,10 +84,7 @@ function GroupsController($scope, $rootScope, $uibModal, $state, $filter,
 									group) {
 								gc.groups.push(group);
 							});
-							gc.groups = $filter('orderBy')(gc.groups,
-									"displayName", false);
-							gc.updateTotalItems();
-							gc.updateNoOfPages();
+							gc.rebuildFilteredList();
 							if (response.data.totalResults > (response.data.startIndex - 1 + response.data.itemsPerPage)) {
 								gc.getGroups(startIndex + count, count);
 								$rootScope.groupsLoadingProgress = Math.floor((startIndex + count) * 100 / response.data.totalResults);
@@ -119,9 +108,7 @@ function GroupsController($scope, $rootScope, $uibModal, $state, $filter,
 		modalInstance.result.then(function(createdGroup) {
 			console.info(createdGroup);
 			gc.groups.push(createdGroup);
-			gc.groups = $filter('orderBy')(gc.groups, "displayName", false);
-			gc.updateTotalItems();
-			gc.updateNoOfPages();
+			gc.rebuildFilteredList();
 			gc.textAlert = `Group ${createdGroup.displayName} added successfully`;
 			gc.operationResult = 'ok';
 		}, function() {
@@ -135,9 +122,7 @@ function GroupsController($scope, $rootScope, $uibModal, $state, $filter,
 		var i = gc.groups.indexOf(group);
 		gc.groups.splice(i, 1);
 
-		gc.filtered = filterFilter(gc.groups, gc.search);
-		gc.updateTotalItems();
-		gc.updateNoOfPages();
+		gc.rebuildFilteredList();
 	}
 
 	function deleteGroup(group) {

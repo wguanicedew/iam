@@ -103,6 +103,7 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
     patchEmail(a, u.getEmails());
     patchAddress(a, u.getAddresses());
     patchPassword(a, u.getPassword());
+    patchPicture(a, u.getPicture());
 
     if (u.hasX509Certificates()) {
 
@@ -174,6 +175,7 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
     patchEmail(a, u.getEmails());
     patchAddress(a, u.getAddresses());
     patchPassword(a, u.getPassword());
+    patchPicture(a, u.getPicture());
 
     if (u.hasX509Certificates()) {
 
@@ -204,6 +206,11 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
   private void patchPassword(IamAccount a, String password) {
 
     a.setPassword(password != null ? password : a.getPassword());
+  }
+
+  private void patchPicture(IamAccount a, String picture) {
+
+    a.getUserInfo().setPicture(picture != null ? picture : a.getUserInfo().getPicture());
   }
 
   private void addX509Certificate(IamAccount a, ScimX509Certificate cert)
