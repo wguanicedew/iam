@@ -47,7 +47,7 @@ function UsersController($scope, $rootScope, $uibModal, $state, $filter, filterF
 
 	$scope.$watch('users.searchText', function() {
 
-		gc.rebuildFilteredList();
+		users.rebuildFilteredList();
 	});
 
 	function loadUserList() {
