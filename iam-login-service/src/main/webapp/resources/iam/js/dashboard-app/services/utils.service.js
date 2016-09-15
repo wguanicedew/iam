@@ -41,6 +41,6 @@ function Utils() {
 	
 	function getLoggedUser() {
 		
-		return { info: getUserInfo(), auth: getUserAuthorities() };
+		return { info: getUserInfo(), auth: getUserAuthorities(), isAdmin: isAdmin() };
 	}
 }
