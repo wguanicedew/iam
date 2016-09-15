@@ -2,9 +2,9 @@
 
 angular.module('dashboardApp').controller('UserController', UserController);
 
-UserController.$inject = [ '$scope', '$rootScope', '$state', '$uibModal', '$filter', 'Utils', 'scimFactory', 'ModalService', 'ResetPasswordService' ];
+UserController.$inject = [ '$scope', '$rootScope', '$state', '$uibModal', '$filter', 'filterFilter', 'Utils', 'scimFactory', 'ModalService', 'ResetPasswordService', 'RegistrationRequestService' ];
 
-function UserController($scope, $rootScope, $state, $uibModal, $filter, Utils, scimFactory, ModalService, ResetPasswordService) {
+function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFilter, Utils, scimFactory, ModalService, ResetPasswordService, RegistrationRequestService) {
 
 	var user = this;
 
@@ -16,6 +16,8 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, Utils, s
 	user.oGroups = [];
 
 	user.userInfo = {};
+	user.filteredRequestsList = [];
+	user.requestsList = [];
 
 	// methods
 	user.getIndigoUserInfo = getIndigoUserInfo;
@@ -35,12 +37,18 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, Utils, s
 	user.deleteX509Certificate = deleteX509Certificate;
 	user.deleteSamlId = deleteSamlId;
 	user.setActive = setActive;
-	user.doPasswordReset = doPasswordReset;
 	
+	// password reset
+	user.doPasswordReset = doPasswordReset;
 	user.sendResetMail = sendResetMail;
+	
+	// history requests
+	user.buildFilteredList = buildFilteredList;
+	user.listRequests = listRequests;
 
-	getIndigoUserInfo();
-	getAllGroups(1, 10);
+	user.getIndigoUserInfo();
+	user.getAllGroups(1, 10);
+	user.listRequests();
 
 	function getIndigoUserInfo() {
 		scimFactory.getUser(user.id).then(function(response) {
@@ -429,4 +437,22 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, Utils, s
 						});
 				});
 	}
+	
+	function buildFilteredList() {
+		
+		user.filteredRequestsList = filterFilter(user.requestsList, {'accountId': user.userInfo.id }); ;
+	}
+	
+	function listRequests() {
+		RegistrationRequestService.listRequests().then(
+			function(result) {
+				console.log(result);
+				user.requestsList = result.data;
+				user.buildFilteredList();
+			},
+			function(errResponse) {
+				user.textAlert = errResponse.data.error_description || errResponse.data.detail;
+				user.operationResult = 'err';
+			})
+	};
 }
