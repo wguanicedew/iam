@@ -39,9 +39,9 @@ function GroupController($state, $filter, scimFactory, ModalService) {
 
 		var modalOptions = {
 				closeButtonText: 'Cancel',
-				actionButtonText: 'Remove user from group',
-				headerText: 'Remove membership?',
-				bodyText: `Are you sure you want to remove user memebership to '${group.data.displayName}'?`	
+				actionButtonText: 'Remove membership',
+				headerText: 'Remove «' + user.display + "» from «" + group.data.displayName + "»",
+				bodyText: `Are you sure you want to remove '${user.display}' memebership to '${group.data.displayName}'?`	
 			};
 				
 			ModalService.showModal({}, modalOptions).then(

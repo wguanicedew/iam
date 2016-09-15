@@ -67,6 +67,7 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 			function(response) {
 				ModalService.showModal({}, {
 					closeButtonText: null,
+					user: user.userInfo.name.formatted,
 					actionButtonText: 'OK',
 					headerText: 'Passoword reset requested',
 					bodyText: `A password reset link has just been sent to your e-mail address`
@@ -81,6 +82,7 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 		
 		var modalOptions = {
 				closeButtonText: 'Cancel',
+				user: user.userInfo.name.formatted,
 				actionButtonText: 'Send password reset e-mail?',
 				headerText: 'Password Reset',
 				bodyText: `Are you sure you want to send the reset password link to the user?`	
@@ -269,8 +271,9 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 		
 		var modalOptions = {
 			closeButtonText: 'Cancel',
+			user: user.userInfo.name.formatted,
 			actionButtonText: 'Remove user from group',
-			headerText: 'Remove membership?',
+			headerText: 'Remove membership',
 			bodyText: `Are you sure you want to remove user memebership to '${group.display}'?`	
 		};
 			
@@ -294,6 +297,7 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 
 		ModalService.showModal({}, {
 			closeButtonText: null,
+			user: user.userInfo.name.formatted,
 			actionButtonText: 'OK',
 			headerText: 'SSH Key value',
 			bodyText: `${value}`
@@ -304,6 +308,7 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 
 		ModalService.showModal({}, {
 			closeButtonText: null,
+			user: user.userInfo.name.formatted,
 			actionButtonText: 'OK',
 			headerText: 'x509 Certificate value',
 			bodyText: `${cert.value}`
@@ -312,13 +317,15 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 
 	function deleteOidcAccount(oidcId) {
 
-		var summary = oidcId.issuer + ", " + oidcId.subject;
+		var summary = oidcId.issuer + " - " + oidcId.subject;
 		
 		var modalOptions = {
 				closeButtonText: 'Cancel',
+				user: user.userInfo.name.formatted,
 				actionButtonText: 'Remove Open ID Account',
-				headerText: 'Remove Open ID Account?',
-				bodyText: `Are you sure you want to remove the Open ID Account [${summary}]?`	
+				headerText: 'Remove Open ID Account',
+				bodyText: `Are you sure you want to remove the Open ID Account?`,
+				bodyDetail: `${summary}`
 			};
 				
 			ModalService.showModal({}, modalOptions).then(
@@ -341,8 +348,9 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 		
 		var modalOptions = {
 				closeButtonText: 'Cancel',
+				user: user.userInfo.name.formatted,
 				actionButtonText: 'Remove ssh key',
-				headerText: 'Remove ssh key?',
+				headerText: 'Remove ssh key',
 				bodyText: `Are you sure you want to remove the ssh key [${sshKey.display}]?`	
 			};
 				
@@ -365,9 +373,11 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 
 		var modalOptions = {
 				closeButtonText: 'Cancel',
+				user: user.userInfo.name.formatted,
 				actionButtonText: 'Remove x509 Certificate',
-				headerText: 'Remove ssh key?',
-				bodyText: `Are you sure you want to remove the x509 Certificate [${x509cert.display}]?`	
+				headerText: 'Remove x509 Certificate',
+				bodyText: `Are you sure you want to remove this x509 Certificate?`,
+				bodyDetail: `${x509cert.display}`	
 			};
 				
 			ModalService.showModal({}, modalOptions).then(
@@ -391,9 +401,11 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 		
 		var modalOptions = {
 				closeButtonText: 'Cancel',
+				user: user.userInfo.name.formatted,
 				actionButtonText: 'Remove SAML Account',
-				headerText: 'Remove SAML account?',
-				bodyText: `Are you sure you want to remove SAML Account [${summary}]?`	
+				headerText: 'Remove SAML account',
+				bodyText: `Are you sure you want to remove this SAML Account?`,
+				bodyDetail: `${summary}`	
 			};
 				
 			ModalService.showModal({}, modalOptions).then(
@@ -418,6 +430,7 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 		
 		var modalOptions = {
 				closeButtonText: 'Cancel',
+				user: user.userInfo.name.formatted,
 				actionButtonText: 'Change user status',
 				headerText: headerMsg,
 				bodyText: `Are you sure you want to ${action} '${user.userInfo.name.formatted}'?`	
