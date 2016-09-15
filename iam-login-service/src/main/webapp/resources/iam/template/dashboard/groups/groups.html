@@ -27,10 +27,10 @@
 		</div>
 
 		<div class="col-xs-12">
-			<div class="box" ng-cloak>
+			<div class="box" ng-show="$root.groupsLoadingProgress == 100">
 				<div class="box-header with-border">
 					<div class="input-group">
-						<input placeholder="Search.." ng-model="gc.search.displayName"
+						<input placeholder="Search.." ng-model="gc.searchText"
 							class="form-control" />
 						<div class="input-group-btn">
 							<button type="button" class="btn btn-default"
@@ -42,7 +42,7 @@
 				<div class="box-body">
 				    <div class="text-center">
 						<ul uib-pagination ng-model="gc.currentPage"
-							items-per-page="gc.entryLimit" total-items="gc.totalItems"
+							items-per-page="gc.entryLimit" total-items="gc.filtered.length"
 							max-size="10" boundary-links="true"></ul>
 				    </div>
 					<table class="table table-striped">
@@ -55,7 +55,7 @@
 						</thead>
 						<tbody>
 							<tr
-								ng-repeat="group in gc.filtered = gc.groups | filter:gc.search | startFrom:(gc.currentPage-1)*gc.entryLimit | limitTo:gc.entryLimit">
+								ng-repeat="group in gc.filtered | startFrom:(gc.currentPage-1)*gc.entryLimit | limitTo:gc.entryLimit">
 								<td>{{$index + (gc.currentPage-1)*gc.entryLimit + 1}}</td>
 								<td><a ui-sref="group({id: group.id})">{{group.displayName}}</a>
 								</td>
@@ -76,7 +76,7 @@
 					</table>
 					<div class="text-center">
 						<ul uib-pagination ng-model="gc.currentPage"
-							items-per-page="gc.entryLimit" total-items="gc.totalItems"
+							items-per-page="gc.entryLimit" total-items="gc.filtered.length"
 							max-size="10" boundary-links="true"></ul>
 					</div>
 				</div>

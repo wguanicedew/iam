@@ -189,16 +189,19 @@ public class NotificationTests {
     RegistrationRequestDto reg = createRegistrationRequest(username);
     notificationService.sendPendingNotification();
 
-    Assert.assertTrue("element count", wiser.getMessages().size() == 1);
+    Assert.assertEquals(1, wiser.getMessages().size());
+
     WiserMessage message = wiser.getMessages().get(0);
-    Assert.assertTrue("subject confirmation",
-        properties.getSubject().get("confirmation").equals(message.getMimeMessage().getSubject()));
+
+    Assert.assertEquals(message.getMimeMessage().getSubject(),
+        properties.getSubject().get("confirmation"));
 
     String confirmationKey = generator.getLastToken();
     confirmRegistrationRequest(confirmationKey);
     notificationService.sendPendingNotification();
 
-    Assert.assertTrue("element count after confirm", wiser.getMessages().size() == 2);
+    Assert.assertEquals(2, wiser.getMessages().size());
+
     message = wiser.getMessages().get(1);
     Assert.assertTrue("subject handle", properties.getSubject()
       .get("adminHandleRequest")

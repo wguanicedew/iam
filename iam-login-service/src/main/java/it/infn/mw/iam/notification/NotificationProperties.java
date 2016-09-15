@@ -2,6 +2,7 @@ package it.infn.mw.iam.notification;
 
 import java.util.Map;
 
+import org.hibernate.validator.constraints.NotBlank;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -10,10 +11,16 @@ import org.springframework.stereotype.Component;
 public class NotificationProperties {
 
   private Boolean disable;
+
+  @NotBlank
   private String mailFrom;
+
   private long taskDelay;
   private Integer cleanupAge;
+
+  @NotBlank
   private String adminAddress;
+
   private Map<String, String> subject;
 
   public Boolean getDisable() {

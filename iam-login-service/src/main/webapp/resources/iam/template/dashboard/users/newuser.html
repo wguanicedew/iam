@@ -1,84 +1,115 @@
-<div class="container" style="width: inherit;">
-    <h2>User Creation Form </h2>
-            
-    <div ng-show="addUserCtrl.operationResult != null">
-        <div class="alert" ng-class="{'alert-success': addUserCtrl.operationResult=='ok', 'alert-danger': addUserCtrl.operationResult=='err'}">
-            <button class="close" ng-click="addUserCtrl.operationResult=null" aria-label="close">&times;</button>
-            {{addUserCtrl.textAlert}}
-        </div>
-    </div>
+<form class="form-horizontal" ng-submit="addUserCtrl.submit()"
+	name="userCreationForm" id="userCreationForm">
 
-    <form class="form-horizontal" ng-submit="addUserCtrl.submit()" name="userCreationForm" id="userCreationForm">
-    
-        <div class="form-group">
-            <label class="control-label col-sm-2" for="name">Name</label>
-            <div ng-class="{'has-error': userCreationForm.name.$dirty && userCreationForm.name.$invalid, 'has-success': userCreationForm.name.$dirty && !userCreationForm.name.$invalid}">
-                <div class="col-sm-10">
-                    <input class="form-control" name="name" id="name" type="text" ng-model="addUserCtrl.user.givenname" placeholder="First name" required ng-minlength="3" />
-                    <span class="glyphicon form-control-feedback" 
-                          ng-class="{'glyphicon-remove': userCreationForm.name.$dirty && userCreationForm.name.$invalid, 'glyphicon-ok': userCreationForm.name.$dirty && userCreationForm.name.$valid}" 
-                          style="right: 15px"></span>
-                    <span class="help-block" ng-show="userCreationForm.name.$dirty && userCreationForm.name.$error.required"> This is a required field</span> 
-                    <span class="help-block" ng-show="userCreationForm.name.$dirty && userCreationForm.name.$error.minlength">Minimum length required is 3</span> 
-                    <span class="help-block" ng-show="userCreationForm.name.$dirty && userCreationForm.name.$invalid">This field is invalid</span>
-                </div>
-            </div>
-        </div>
+	<div class="modal-header">
+		<h3 class="modal-title">User creation form</h3>
+	</div>
 
-        <div class="form-group">
-            <label class="control-label col-sm-2" for="surname">Surname</label>
-            <div ng-class="{'has-error': userCreationForm.surname.$dirty && userCreationForm.surname.$invalid, 'has-success': userCreationForm.surname.$dirty && !userCreationForm.surname.$invalid}">
-                <div class="col-sm-10">
-                    <input class="form-control" name="surname" id="surname" type="text" ng-model="addUserCtrl.user.familyname" placeholder="Family name" required ng-minlength="3" />
-                    <span class="glyphicon form-control-feedback" 
-                          ng-class="{'glyphicon-remove': userCreationForm.surname.$dirty && userCreationForm.surname.$invalid, 'glyphicon-ok': userCreationForm.surname.$dirty && userCreationForm.surname.$valid}" 
-                          style="right: 15px"></span>
-                    <span class="help-block" ng-show="userCreationForm.surname.$dirty && userCreationForm.surname.$error.required"> This is a required field</span> 
-                    <span class="help-block" ng-show="userCreationForm.surname.$dirty && userCreationForm.surname.$error.minlength">Minimum length required is 3</span> 
-                    <span class="help-block" ng-show="userCreationForm.surname.$dirty && userCreationForm.surname.$invalid">This field is invalid</span>
-                </div>
-            </div>
-        </div>
+	<div class="modal-body">
+		<div ng-show="addUserCtrl.operationResult != null">
+			<div class="alert"
+				ng-class="{'alert-success': addUserCtrl.operationResult=='ok', 'alert-danger': addUserCtrl.operationResult=='err'}">
+				<button class="close" ng-click="addUserCtrl.operationResult=null"
+					aria-label="close">&times;</button>
+				{{addUserCtrl.textAlert}}
+			</div>
+		</div>
 
-        <div class="form-group">
-            <label class="control-label col-sm-2" for="email">Email</label>
-            <div ng-class="{'has-error': userCreationForm.email.$dirty && userCreationForm.email.$invalid, 'has-success': userCreationForm.email.$dirty && !userCreationForm.email.$invalid}">
-                <div class="col-sm-10">
-                    <input class="form-control" name="email" id="email" type="email" ng-model="addUserCtrl.user.email" placeholder="Email" required />
-                    <span class="glyphicon form-control-feedback" 
-                          ng-class="{'glyphicon-remove': userCreationForm.email.$dirty && userCreationForm.email.$invalid, 'glyphicon-ok': userCreationForm.email.$dirty && userCreationForm.email.$valid}" 
-                          style="right: 15px"></span>
-                    <span class="help-block" ng-show="userCreationForm.email.$dirty && userCreationForm.email.$error.required">This is a required field</span> 
-                    <span class="help-block" ng-show="userCreationForm.email.$dirty && userCreationForm.email.$invalid">This field is invalid </span>
-                </div>
-            </div>
-        </div>
+		<div class="form-group">
+			<label class="control-label col-sm-2" for="name">Name</label>
+			<div
+				ng-class="{'has-error': userCreationForm.name.$dirty && userCreationForm.name.$invalid, 'has-success': userCreationForm.name.$dirty && !userCreationForm.name.$invalid}">
+				<div class="col-sm-10">
+					<input class="form-control" name="name" id="name" type="text"
+						ng-model="addUserCtrl.user.givenname" placeholder="First name"
+						required ng-minlength="3" /> <span
+						class="glyphicon form-control-feedback"
+						ng-class="{'glyphicon-remove': userCreationForm.name.$dirty && userCreationForm.name.$invalid, 'glyphicon-ok': userCreationForm.name.$dirty && userCreationForm.name.$valid}"
+						style="right: 15px"></span> <span class="help-block"
+						ng-show="userCreationForm.name.$dirty && userCreationForm.name.$error.required">
+						This is a required field</span> <span class="help-block"
+						ng-show="userCreationForm.name.$dirty && userCreationForm.name.$error.minlength">Minimum
+						length required is 3</span> <span class="help-block"
+						ng-show="userCreationForm.name.$dirty && userCreationForm.name.$invalid">This
+						field is invalid</span>
+				</div>
+			</div>
+		</div>
 
-        <div class="form-group">
-            <label class="control-label col-sm-2" for="username">Username</label>
-            <div ng-class="{'has-error': userCreationForm.username.$dirty && userCreationForm.username.$invalid, 'has-success': userCreationForm.username.$dirty && !userCreationForm.username.$invalid}">
-                <div class="col-sm-10">
-                    <input class="form-control" id="username" name="username" type="text" ng-model="addUserCtrl.user.username" placeholder="Username" 
-                        required ng-minlength="3" iam-username-available-validator ng-model-options="{ debounce : { 'default' : 500 } }" />
-                    <span class="glyphicon form-control-feedback" 
-                      ng-class="{'glyphicon-remove': userCreationForm.username.$dirty && userCreationForm.username.$invalid, 'glyphicon-ok': userCreationForm.username.$dirty && userCreationForm.username.$valid}" 
-                      style="right: 15px"></span>
-                    <span class="help-block" ng-show="userCreationForm.username.$dirty && userCreationForm.username.$error.required"> This is a required field</span> 
-                    <span class="help-block" ng-show="userCreationForm.username.$dirty && userCreationForm.username.$error.minlength">Minimum length required is 3</span>
-                    <span class="help-block" ng-show="userCreationForm.username.$dirty && userCreationForm.username.$error.unique">Username already in use</span>
-                    <span class="help-block" ng-show="userCreationForm.username.$dirty && userCreationForm.username.$invalid">This field is invalid</span>
-                </div>
-            </div>
-        </div>
+		<div class="form-group">
+			<label class="control-label col-sm-2" for="surname">Surname</label>
+			<div
+				ng-class="{'has-error': userCreationForm.surname.$dirty && userCreationForm.surname.$invalid, 'has-success': userCreationForm.surname.$dirty && !userCreationForm.surname.$invalid}">
+				<div class="col-sm-10">
+					<input class="form-control" name="surname" id="surname" type="text"
+						ng-model="addUserCtrl.user.familyname" placeholder="Family name"
+						required ng-minlength="3" /> <span
+						class="glyphicon form-control-feedback"
+						ng-class="{'glyphicon-remove': userCreationForm.surname.$dirty && userCreationForm.surname.$invalid, 'glyphicon-ok': userCreationForm.surname.$dirty && userCreationForm.surname.$valid}"
+						style="right: 15px"></span> <span class="help-block"
+						ng-show="userCreationForm.surname.$dirty && userCreationForm.surname.$error.required">
+						This is a required field</span> <span class="help-block"
+						ng-show="userCreationForm.surname.$dirty && userCreationForm.surname.$error.minlength">Minimum
+						length required is 3</span> <span class="help-block"
+						ng-show="userCreationForm.surname.$dirty && userCreationForm.surname.$invalid">This
+						field is invalid</span>
+				</div>
+			</div>
+		</div>
 
-        <div class="form-group">
-            <div class="col-sm-offset-6 col-sm-6">
-                <div style="float: right;">
-                    <input class="btn btn-primary btn-sm" type="submit" name="create" value="Create" ng-disabled="!userCreationForm.$valid || userCreationForm.$pristine">
-                    <button class="btn btn-warning btn-sm" type="button" name="reset" ng-click="addUserCtrl.reset()" ng-disabled="userCreationForm.$pristine">Reset Form</button>
-                    <button class="btn btn-danger btn-sm" type="button" name="dismiss" ng-click="addUserCtrl.dismiss()" >Cancel</button>
-                </div>
-            </div>
-        </div>
-    </form>
-</div>
+		<div class="form-group">
+			<label class="control-label col-sm-2" for="email">Email</label>
+			<div
+				ng-class="{'has-error': userCreationForm.email.$dirty && userCreationForm.email.$invalid, 'has-success': userCreationForm.email.$dirty && !userCreationForm.email.$invalid}">
+				<div class="col-sm-10">
+					<input class="form-control" name="email" id="email" type="email"
+						ng-model="addUserCtrl.user.email" placeholder="Email" required />
+					<span class="glyphicon form-control-feedback"
+						ng-class="{'glyphicon-remove': userCreationForm.email.$dirty && userCreationForm.email.$invalid, 'glyphicon-ok': userCreationForm.email.$dirty && userCreationForm.email.$valid}"
+						style="right: 15px"></span> <span class="help-block"
+						ng-show="userCreationForm.email.$dirty && userCreationForm.email.$error.required">This
+						is a required field</span> <span class="help-block"
+						ng-show="userCreationForm.email.$dirty && userCreationForm.email.$invalid">This
+						field is invalid </span>
+				</div>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label class="control-label col-sm-2" for="username">Username</label>
+			<div
+				ng-class="{'has-error': userCreationForm.username.$dirty && userCreationForm.username.$invalid, 'has-success': userCreationForm.username.$dirty && !userCreationForm.username.$invalid}">
+				<div class="col-sm-10">
+					<input class="form-control" id="username" name="username"
+						type="text" ng-model="addUserCtrl.user.username"
+						placeholder="Username" required ng-minlength="3"
+						iam-username-available-validator
+						ng-model-options="{ debounce : { 'default' : 500 } }" /> <span
+						class="glyphicon form-control-feedback"
+						ng-class="{'glyphicon-remove': userCreationForm.username.$dirty && userCreationForm.username.$invalid, 'glyphicon-ok': userCreationForm.username.$dirty && userCreationForm.username.$valid}"
+						style="right: 15px"></span> <span class="help-block"
+						ng-show="userCreationForm.username.$dirty && userCreationForm.username.$error.required">
+						This is a required field</span> <span class="help-block"
+						ng-show="userCreationForm.username.$dirty && userCreationForm.username.$error.minlength">Minimum
+						length required is 3</span> <span class="help-block"
+						ng-show="userCreationForm.username.$dirty && userCreationForm.username.$error.unique">Username
+						already in use</span> <span class="help-block"
+						ng-show="userCreationForm.username.$dirty && userCreationForm.username.$invalid">This
+						field is invalid</span>
+				</div>
+			</div>
+		</div>
+
+	</div>
+	<div class="modal-footer">
+		<button class="btn btn-primary btn-sm" type="submit" name="create"
+			ng-disabled="!userCreationForm.$valid || userCreationForm.$pristine">
+			Create</button>
+		<button class="btn btn-warning btn-sm" type="button" name="reset"
+			ng-click="addUserCtrl.reset()"
+			ng-disabled="userCreationForm.$pristine">Reset Form</button>
+		<button class="btn btn-danger btn-sm" type="button" name="dismiss"
+			ng-click="addUserCtrl.dismiss()">Cancel</button>
+	</div>
+
+</form>

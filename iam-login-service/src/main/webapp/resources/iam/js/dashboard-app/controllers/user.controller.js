@@ -2,9 +2,9 @@
 
 angular.module('dashboardApp').controller('UserController', UserController);
 
-UserController.$inject = [ '$scope', '$rootScope', '$state', '$uibModal', '$filter', 'Utils', 'scimFactory', 'ModalService' ];
+UserController.$inject = [ '$scope', '$rootScope', '$state', '$uibModal', '$filter', 'Utils', 'scimFactory', 'ModalService', 'ResetPasswordService' ];
 
-function UserController($scope, $rootScope, $state, $uibModal, $filter, Utils, scimFactory, ModalService) {
+function UserController($scope, $rootScope, $state, $uibModal, $filter, Utils, scimFactory, ModalService, ResetPasswordService) {
 
 	var user = this;
 
@@ -28,12 +28,16 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, Utils, s
 	user.openAddSshKeyDialog = openAddSshKeyDialog;
 	user.openAddSamlAccountDialog = openAddSamlAccountDialog;
 	user.openAddX509CertificateDialog = openAddX509CertificateDialog;
+	user.openEditUserDialog = openEditUserDialog;
 	user.deleteGroup = deleteGroup;
 	user.deleteOidcAccount = deleteOidcAccount;
 	user.deleteSshKey = deleteSshKey;
 	user.deleteX509Certificate = deleteX509Certificate;
 	user.deleteSamlId = deleteSamlId;
 	user.setActive = setActive;
+	user.doPasswordReset = doPasswordReset;
+	
+	user.sendResetMail = sendResetMail;
 
 	getIndigoUserInfo();
 	getAllGroups(1, 10);
@@ -47,6 +51,37 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, Utils, s
 				"error": error
 			});
 		});
+	}
+
+	function doPasswordReset() {
+		
+		ResetPasswordService.forgotPassword(user.userInfo.emails[0].value).then(
+			function(response) {
+				ModalService.showModal({}, {
+					closeButtonText: null,
+					actionButtonText: 'OK',
+					headerText: 'Passoword reset requested',
+					bodyText: `A password reset link has just been sent to your e-mail address`
+				});
+			}, function(error) {
+				user.textAlert = error.data.error_description || error.data.detail;
+				user.operationResult = 'err';
+			});
+	}
+
+	function sendResetMail() {
+		
+		var modalOptions = {
+				closeButtonText: 'Cancel',
+				actionButtonText: 'Send password reset e-mail?',
+				headerText: 'Password Reset',
+				bodyText: `Are you sure you want to send the reset password link to the user?`	
+			};
+				
+			ModalService.showModal({}, modalOptions).then(
+				function (){
+					user.doPasswordReset();
+				});
 	}
 
 	function getAllGroups(startIndex, count) {
@@ -87,6 +122,29 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, Utils, s
 		});
 	}
 
+	function openEditUserDialog() {
+
+		var modalInstance = $uibModal
+				.open({
+					templateUrl : '/resources/iam/template/dashboard/user/edituser.html',
+					controller : 'EditUserController',
+					controllerAs : 'editUserCtrl',
+					resolve : {
+						user : function() {
+							console.log(user.userInfo);
+							return user.userInfo;
+						}
+					}
+				});
+		modalInstance.result.then(function() {
+			getIndigoUserInfo();
+			user.textAlert = `User's info updated successfully`;
+			user.operationResult = 'ok';
+		}, function() {
+			console.info('Modal dismissed at: ', new Date());
+		});
+	}
+	
 	function openAddGroupDialog() {
 		user.oGroups = getNotMemberGroups();
 		var modalInstance = $uibModal
