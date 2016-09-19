@@ -93,6 +93,8 @@ function GroupsController($scope, $rootScope, $uibModal, $state, $filter,
 								gc.loadingModal.dismiss("Cancel");
 							}
 						}, function(error) {
+
+							gc.loadingModal.dismiss("Error");
 							$state.go("error", {
 								"error" : error
 							});
