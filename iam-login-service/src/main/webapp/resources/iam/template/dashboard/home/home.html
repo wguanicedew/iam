@@ -34,10 +34,17 @@
 						</li>
 						<li class="list-group-item"><strong>Organisation</strong> <a
 							class="pull-right">{{home.user.info.organisation_name}}</a></li>
-						<li class="list-group-item"><strong>Status</strong> <a
-							class="pull-right"> <span ng-show="home.user.me.active"
-								class="label label-success">ACTIVE</span> <span
-								ng-show="!home.user.me.active" class="label label-danger">DISABLED</span>
+						<li class="list-group-item"><strong>Status</strong>
+							<div class="pull-right btn-group btn-toggle"
+								ng-show="home.user.me.active">
+								<button class="btn btn-xs btn-success active">ACTIVE</button>
+								<button class="btn btn-xs btn-default">DISABLED</button>
+							</div>
+							<div class="pull-right btn-group btn-toggle"
+								ng-show="!home.user.me.active">
+								<button class="btn btn-xs btn-default">ACTIVE</button>
+								<button class="btn btn-xs btn-danger active">DISABLED</button>
+							</div></li>
 						</a></li>
 						<li class="list-group-item"><strong>Created</strong> <a
 							class="pull-right">{{home.user.me.meta.created | relativeDate
