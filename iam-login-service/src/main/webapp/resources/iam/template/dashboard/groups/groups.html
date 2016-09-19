@@ -50,7 +50,7 @@
 							<tr>
 								<th>#</th>
 								<th>Name</th>
-								<th>Actions</th>
+								<th class="text-right">Actions</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -59,9 +59,9 @@
 								<td>{{$index + (gc.currentPage-1)*gc.entryLimit + 1}}</td>
 								<td><a ui-sref="group({id: group.id})">{{group.displayName}}</a>
 								</td>
-								<td>
+								<td class="text-right">
 									<button class="btn btn-danger btn-xs" ng-click="gc.deleteGroup(group)">
-										<i class="fa fa-times"></i> Delete
+										<i class="fa fa-times"></i> Remove
 									</button>
 								</td>
 							</tr>
@@ -70,7 +70,7 @@
 							<tr>
 								<th>#</th>
 								<th>Name</th>
-								<th>Actions</th>
+								<th class="text-right">Actions</th>
 							</tr>
 						</tfoot>
 					</table>

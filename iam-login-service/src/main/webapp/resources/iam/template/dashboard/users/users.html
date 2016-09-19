@@ -56,7 +56,7 @@
 								<th>E-mail</th>
 								<th>Created</th>
 								<th>Groups</th>
-								<th>Actions</th>
+								<th class="text-right">Actions</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -78,9 +78,9 @@
 									<button ng-repeat="g in user.groups"
 										class="btn btn-xs btn-default">{{g.display}}</button>
 								</td>
-								<td>
+								<td class="text-right">
 									<button ng-disabled="user.id == $root.loggedUser.me.id" class="btn btn-danger btn-xs" ng-click="users.deleteUser(user)">
-										<i class="fa fa-times"></i> Delete
+										<i class="fa fa-times"></i> Remove
 									</button>
 								</td>
 							</tr>
@@ -94,7 +94,7 @@
 								<th>E-mail</th>
 								<th>Created</th>
 								<th>Groups</th>
-								<th>Actions</th>
+								<th class="text-right">Actions</th>
 							</tr>
 						</tfoot>
 					</table>
