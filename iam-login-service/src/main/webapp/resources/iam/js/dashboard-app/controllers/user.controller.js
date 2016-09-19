@@ -83,9 +83,9 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 		var modalOptions = {
 				closeButtonText: 'Cancel',
 				user: user.userInfo.name.formatted,
-				actionButtonText: 'Send password reset e-mail?',
+				actionButtonText: 'Send password reset e-mail',
 				headerText: 'Password Reset',
-				bodyText: `Are you sure you want to send the reset password link to the user?`	
+				bodyText: `Are you sure you want to send the reset password link to ${user.userInfo.name.formatted}?`	
 			};
 				
 			ModalService.showModal({}, modalOptions).then(
