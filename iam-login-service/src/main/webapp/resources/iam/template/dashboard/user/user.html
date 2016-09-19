@@ -65,9 +65,6 @@
 						<li class="list-group-item"><strong>Last update</strong> <a
 							class="pull-right">{{user.userInfo.meta.lastModified |
 								relativeDate }}</a></li>
-						<li class="list-group-item"><strong>Groups</strong> <a
-							class="pull-right"><span class="label label-default">{{user.userInfo.groups.length
-									|| 0}}</span></a></li>
 						<li class="list-group-item"><strong>Password</strong>
 							<button class="pull-right btn btn-xs btn-success"
 								ng-click="user.sendResetMail()">Send reset e-mail</button>
