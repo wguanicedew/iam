@@ -22,7 +22,7 @@
 
 	<footer class="main-footer">
 		<div class="pull-right hidden-xs">
-			<b>Version</b> 0.3.0
+			<b>Version</b> 0.4.0
 		</div>
 		<strong> Copyright &copy; <a
 			href="https://www.indigo-datacloud.eu/the_project">The INDIGO
