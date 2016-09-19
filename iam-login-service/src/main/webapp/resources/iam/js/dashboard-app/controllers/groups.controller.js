@@ -62,10 +62,13 @@ function GroupsController($scope, $rootScope, $uibModal, $state, $filter,
 		$rootScope.groupsLoadingProgress = 0;
 		gc.loadingModal = $uibModal
 		.open({
+			animation: false,
 			templateUrl : '/resources/iam/template/dashboard/groups/loading-modal.html'
 		});
-		gc.getAllGroups();
-		
+
+		gc.loadingModal.opened.then(function() {
+			gc.getAllGroups();
+		});
 	}
 
 	function getAllGroups() {
@@ -93,7 +96,7 @@ function GroupsController($scope, $rootScope, $uibModal, $state, $filter,
 								gc.loadingModal.dismiss("Cancel");
 							}
 						}, function(error) {
-
+							console.log("Error: dismissing loading dialog");
 							gc.loadingModal.dismiss("Error");
 							$state.go("error", {
 								"error" : error

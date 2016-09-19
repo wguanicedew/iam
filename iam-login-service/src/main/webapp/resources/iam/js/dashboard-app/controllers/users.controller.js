@@ -55,9 +55,13 @@ function UsersController($scope, $rootScope, $uibModal, $state, $filter, filterF
 		$rootScope.usersLoadingProgress = 0;
 		users.loadingModal = $uibModal
 		.open({
+			animation: false,
 			templateUrl : '/resources/iam/template/dashboard/users/loading-modal.html'
 		});
-		getAllUsers(1, users.entryLimit);
+
+		users.loadingModal.opened.then(function() {
+			getAllUsers(1, users.entryLimit);
+		});
 	}
 
 	function getAllUsers(startIndex, count) {
