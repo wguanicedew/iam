@@ -26,26 +26,22 @@ function CommonController($scope, $rootScope, $state, Utils, scimFactory, Regist
 		console.log(response.data);
 		$rootScope.loggedUser.pendingRequests = response.data;
 	}, function(error) {
-		$state.go("error", {
-			"error": error
-		});
+		console.log(error);
+		$rootScope.loggedUser.pendingRequests = undefined;
 	});
 	
 	scimFactory.getUsers(1, 1).then(function(response) {
 		console.log(response.data);
 		$rootScope.loggedUser.totUsers = response.data.totalResults;
 	}, function(error) {
-		$state.go("error", {
-			"error": error
-		});
+		console.log(error);
+		$rootScope.loggedUser.totUsers = undefined;
 	});
 
 	scimFactory.getGroups(1, 1).then(function(response) {
 		console.log(response.data);
 		$rootScope.loggedUser.totGroups = response.data.totalResults;
 	}, function(error) {
-		$state.go("error", {
-			"error": error
-		});
+		$rootScope.loggedUser.totGroups = undefined;
 	});
 }

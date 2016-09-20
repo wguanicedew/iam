@@ -2,9 +2,9 @@
 
 angular.module('dashboardApp').controller('UserController', UserController);
 
-UserController.$inject = [ '$scope', '$rootScope', '$state', '$uibModal', '$filter', 'Utils', 'scimFactory', 'ModalService', 'ResetPasswordService' ];
+UserController.$inject = [ '$scope', '$rootScope', '$state', '$uibModal', '$filter', 'filterFilter', 'Utils', 'scimFactory', 'ModalService', 'ResetPasswordService', 'RegistrationRequestService' ];
 
-function UserController($scope, $rootScope, $state, $uibModal, $filter, Utils, scimFactory, ModalService, ResetPasswordService) {
+function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFilter, Utils, scimFactory, ModalService, ResetPasswordService, RegistrationRequestService) {
 
 	var user = this;
 
@@ -16,6 +16,8 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, Utils, s
 	user.oGroups = [];
 
 	user.userInfo = {};
+	user.filteredRequestsList = [];
+	user.requestsList = [];
 
 	// methods
 	user.getIndigoUserInfo = getIndigoUserInfo;
@@ -35,12 +37,18 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, Utils, s
 	user.deleteX509Certificate = deleteX509Certificate;
 	user.deleteSamlId = deleteSamlId;
 	user.setActive = setActive;
-	user.doPasswordReset = doPasswordReset;
 	
+	// password reset
+	user.doPasswordReset = doPasswordReset;
 	user.sendResetMail = sendResetMail;
+	
+	// history requests
+	user.buildFilteredList = buildFilteredList;
+	user.listRequests = listRequests;
 
-	getIndigoUserInfo();
-	getAllGroups(1, 10);
+	user.getIndigoUserInfo();
+	user.getAllGroups(1, 10);
+	user.listRequests();
 
 	function getIndigoUserInfo() {
 		scimFactory.getUser(user.id).then(function(response) {
@@ -59,6 +67,7 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, Utils, s
 			function(response) {
 				ModalService.showModal({}, {
 					closeButtonText: null,
+					user: user.userInfo.name.formatted,
 					actionButtonText: 'OK',
 					headerText: 'Passoword reset requested',
 					bodyText: `A password reset link has just been sent to your e-mail address`
@@ -73,9 +82,10 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, Utils, s
 		
 		var modalOptions = {
 				closeButtonText: 'Cancel',
-				actionButtonText: 'Send password reset e-mail?',
+				user: user.userInfo.name.formatted,
+				actionButtonText: 'Send password reset e-mail',
 				headerText: 'Password Reset',
-				bodyText: `Are you sure you want to send the reset password link to the user?`	
+				bodyText: `Are you sure you want to send the reset password link to ${user.userInfo.name.formatted}?`	
 			};
 				
 			ModalService.showModal({}, modalOptions).then(
@@ -261,8 +271,9 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, Utils, s
 		
 		var modalOptions = {
 			closeButtonText: 'Cancel',
+			user: user.userInfo.name.formatted,
 			actionButtonText: 'Remove user from group',
-			headerText: 'Remove membership?',
+			headerText: 'Remove membership',
 			bodyText: `Are you sure you want to remove user memebership to '${group.display}'?`	
 		};
 			
@@ -286,6 +297,7 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, Utils, s
 
 		ModalService.showModal({}, {
 			closeButtonText: null,
+			user: user.userInfo.name.formatted,
 			actionButtonText: 'OK',
 			headerText: 'SSH Key value',
 			bodyText: `${value}`
@@ -296,6 +308,7 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, Utils, s
 
 		ModalService.showModal({}, {
 			closeButtonText: null,
+			user: user.userInfo.name.formatted,
 			actionButtonText: 'OK',
 			headerText: 'x509 Certificate value',
 			bodyText: `${cert.value}`
@@ -304,13 +317,15 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, Utils, s
 
 	function deleteOidcAccount(oidcId) {
 
-		var summary = oidcId.issuer + ", " + oidcId.subject;
+		var summary = oidcId.issuer + " - " + oidcId.subject;
 		
 		var modalOptions = {
 				closeButtonText: 'Cancel',
+				user: user.userInfo.name.formatted,
 				actionButtonText: 'Remove Open ID Account',
-				headerText: 'Remove Open ID Account?',
-				bodyText: `Are you sure you want to remove the Open ID Account [${summary}]?`	
+				headerText: 'Remove Open ID Account',
+				bodyText: `Are you sure you want to remove the Open ID Account?`,
+				bodyDetail: `${summary}`
 			};
 				
 			ModalService.showModal({}, modalOptions).then(
@@ -333,8 +348,9 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, Utils, s
 		
 		var modalOptions = {
 				closeButtonText: 'Cancel',
+				user: user.userInfo.name.formatted,
 				actionButtonText: 'Remove ssh key',
-				headerText: 'Remove ssh key?',
+				headerText: 'Remove ssh key',
 				bodyText: `Are you sure you want to remove the ssh key [${sshKey.display}]?`	
 			};
 				
@@ -357,9 +373,11 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, Utils, s
 
 		var modalOptions = {
 				closeButtonText: 'Cancel',
+				user: user.userInfo.name.formatted,
 				actionButtonText: 'Remove x509 Certificate',
-				headerText: 'Remove ssh key?',
-				bodyText: `Are you sure you want to remove the x509 Certificate [${x509cert.display}]?`	
+				headerText: 'Remove x509 Certificate',
+				bodyText: `Are you sure you want to remove this x509 Certificate?`,
+				bodyDetail: `${x509cert.display}`	
 			};
 				
 			ModalService.showModal({}, modalOptions).then(
@@ -383,9 +401,11 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, Utils, s
 		
 		var modalOptions = {
 				closeButtonText: 'Cancel',
+				user: user.userInfo.name.formatted,
 				actionButtonText: 'Remove SAML Account',
-				headerText: 'Remove SAML account?',
-				bodyText: `Are you sure you want to remove SAML Account [${summary}]?`	
+				headerText: 'Remove SAML account',
+				bodyText: `Are you sure you want to remove this SAML Account?`,
+				bodyDetail: `${summary}`	
 			};
 				
 			ModalService.showModal({}, modalOptions).then(
@@ -410,6 +430,7 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, Utils, s
 		
 		var modalOptions = {
 				closeButtonText: 'Cancel',
+				user: user.userInfo.name.formatted,
 				actionButtonText: 'Change user status',
 				headerText: headerMsg,
 				bodyText: `Are you sure you want to ${action} '${user.userInfo.name.formatted}'?`	
@@ -429,4 +450,22 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, Utils, s
 						});
 				});
 	}
+	
+	function buildFilteredList() {
+		
+		user.filteredRequestsList = filterFilter(user.requestsList, {'accountId': user.userInfo.id }); ;
+	}
+	
+	function listRequests() {
+		RegistrationRequestService.listRequests().then(
+			function(result) {
+				console.log(result);
+				user.requestsList = result.data;
+				user.buildFilteredList();
+			},
+			function(errResponse) {
+				user.textAlert = errResponse.data.error_description || errResponse.data.detail;
+				user.operationResult = 'err';
+			})
+	};
 }

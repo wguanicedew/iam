@@ -9,7 +9,7 @@
 </section>
 
 <!-- Main content -->
-<section class="content">
+<section class="content" ng-cloak>
 
 	<div class="row">
 		<div class="col-md-3">
@@ -32,34 +32,35 @@
 						<li class="list-group-item"><b>E-mail</b> <a
 							class="pull-right" href="mailto:{{home.user.me.emails[0].value}}">{{home.user.me.emails[0].value}}</a>
 						</li>
-						<li class="list-group-item">
-                           <strong>Organisation</strong>
-                           <a class="pull-right">{{home.user.info.organisation_name}}</a>
-                       </li>
-						<li class="list-group-item">
-						  <strong>Status</strong> 
-						  <a class="pull-right"> <span ng-show="home.user.me.active"
-								class="label label-success">ACTIVE</span> <span
-								ng-show="!home.user.me.active" class="label label-danger">DISABLED</span>
+						<li class="list-group-item"><strong>Organisation</strong> <a
+							class="pull-right">{{home.user.info.organisation_name}}</a></li>
+						<li class="list-group-item"><strong>Status</strong>
+							<div class="pull-right btn-group btn-toggle"
+								ng-show="home.user.me.active">
+								<button class="btn btn-xs btn-success active">ACTIVE</button>
+								<button class="btn btn-xs btn-default">DISABLED</button>
+							</div>
+							<div class="pull-right btn-group btn-toggle"
+								ng-show="!home.user.me.active">
+								<button class="btn btn-xs btn-default">ACTIVE</button>
+								<button class="btn btn-xs btn-danger active">DISABLED</button>
+							</div></li>
 						</a></li>
-						<li class="list-group-item">
-						  <strong>Created</strong> <a
-                            class="pull-right">{{home.user.me.meta.created | relativeDate }}</a></li>
+						<li class="list-group-item"><strong>Created</strong> <a
+							class="pull-right">{{home.user.me.meta.created | relativeDate
+								}}</a></li>
 						<li class="list-group-item"><b>Last update</b> <a
-							class="pull-right">{{home.user.me.meta.lastModified | relativeDate }}</a></li>
-						<li class="list-group-item">
-						  <strong>Groups</strong> <a
-                            class="pull-right"><span class="label label-default">{{home.user.me.groups.length}}</span></a></li>
-                        <li class="list-group-item">
-                          <strong>Authorities</strong>
-                            <a class="pull-right"><span class="label label-info" ng-show="home.isUser">USER</span></a>
-                            <a class="pull-right"><span class="label label-success" ng-show="home.isAdmin">ADMIN</span></a>
-                        </li>
+							class="pull-right">{{home.user.me.meta.lastModified |
+								relativeDate }}</a></li>
+						<li class="list-group-item"><strong>Authorities</strong> <a
+							class="pull-right"><span class="label label-info"
+								ng-show="home.isUser">USER</span></a> <a class="pull-right"><span
+								class="label label-success" ng-show="home.isAdmin">ADMIN</span></a>
+						</li>
 					</ul>
 				</div>
 				<!-- /.box-body -->
-				<div class="box-footer bg-blue">
-				</div>
+				<div class="box-footer bg-blue"></div>
 			</div>
 			<!-- /.box -->
 
@@ -88,7 +89,8 @@
 								</tr>
 							</thead>
 							<tbody>
-								<tr ng-repeat="group in home.user.me.groups | orderBy:'display' ">
+								<tr
+									ng-repeat="group in home.user.me.groups | orderBy:'display' ">
 									<td>{{$index + 1}}</td>
 									<td><a>{{group.display}}</a></td>
 								</tr>
@@ -225,9 +227,10 @@
 				<!-- /.box-header -->
 				<div class="box-body">
 
-					<div ng-show="!home.user.me.x509Certificates">No x509 Certificate
-						found</div>
-					<div class="table-responsive" ng-show="home.user.me.x509Certificates">
+					<div ng-show="!home.user.me.x509Certificates">No x509
+						Certificate found</div>
+					<div class="table-responsive"
+						ng-show="home.user.me.x509Certificates">
 						<table class="table no-margin">
 							<thead>
 								<tr>
@@ -241,9 +244,10 @@
 								<tr ng-repeat="cert in home.user.me.x509Certificates">
 									<td>{{$index + 1}}</td>
 									<td>{{ cert.display }}</td>
-									<td><span ng-show="cert.primary" class="label label-success">primary</span>
-									</td>
-									<td><a ng-click=home.showCertValue(cert)>{{cert.value | limitTo : 30 : 0}}...</a></td>
+									<td><span ng-show="cert.primary"
+										class="label label-success">primary</span></td>
+									<td><a ng-click=home.showCertValue(cert)>{{cert.value
+											| limitTo : 30 : 0}}...</a></td>
 								</tr>
 							</tbody>
 						</table>
