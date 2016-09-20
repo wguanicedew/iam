@@ -93,7 +93,7 @@
 						This is a required field</span> <span class="help-block"
 						ng-show="userUpdateForm.username.$dirty && userUpdateForm.username.$error.minlength">Minimum
 						length required is 3</span> <span class="help-block"
-						ng-show="userUpdateForm.username.$dirty && userUpdateForm.username.$error.unique">Username
+						ng-show="userUpdateForm.username.$dirty && userUpdateForm.username.$error.unique && editUserCtrl.userToEdit.username != userUpdateForm.username">Username
 						already in use</span> <span class="help-block"
 						ng-show="userUpdateForm.username.$dirty && userUpdateForm.username.$invalid">This
 						field is invalid</span>

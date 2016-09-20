@@ -49,6 +49,7 @@
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/header.directive.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/mainsidebar.directive.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/sidebar.directive.js"></script>
+	<script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/registration.directive.js"></script>
 	
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/services/scim-factory.service.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/services/modal.service.js"></script>
