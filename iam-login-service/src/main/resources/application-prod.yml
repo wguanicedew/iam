@@ -1,6 +1,6 @@
 spring:
   profiles:
-    include: mysql,google,registration
+    include: mysql,google
     
 flyway:
   locations:
