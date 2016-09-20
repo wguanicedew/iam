@@ -44,19 +44,19 @@
 	<script type="text/javascript" src="/resources/iam/js/directive/angular-relative-date.min.js"></script>
 
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/dashboard-app.module.js"></script>
-	
+
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/box.directive.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/header.directive.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/mainsidebar.directive.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/sidebar.directive.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/registration.directive.js"></script>
-	
+
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/services/scim-factory.service.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/services/modal.service.js"></script>
     <script type="text/javascript" src="/resources/iam/js/dashboard-app/services/passwordreset.service.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/services/registration.service.js"></script>
     <script type="text/javascript" src="/resources/iam/js/dashboard-app/services/utils.service.js"></script>
-    
+
     <script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/common.controller.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/home.controller.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/user.controller.js"></script>
