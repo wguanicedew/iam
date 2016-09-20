@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Preconditions;
@@ -22,8 +23,8 @@ import it.infn.mw.iam.api.scim.model.ScimEmail;
 import it.infn.mw.iam.api.scim.model.ScimName;
 import it.infn.mw.iam.api.scim.model.ScimOidcId;
 import it.infn.mw.iam.api.scim.model.ScimPatchOperation;
-import it.infn.mw.iam.api.scim.model.ScimSshKey;
 import it.infn.mw.iam.api.scim.model.ScimSamlId;
+import it.infn.mw.iam.api.scim.model.ScimSshKey;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.model.ScimX509Certificate;
 import it.infn.mw.iam.persistence.model.IamAccount;
@@ -53,6 +54,9 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
   private final X509CertificateConverter certificateConverter;
   private final SshKeyConverter sshKeyConverter;
   private final SamlIdConverter samlIdConverter;
+
+  @Autowired
+  private PasswordEncoder passwordEncoder;
 
   @Autowired
   public UserUpdater(IamAccountRepository accountRepository, IamOidcIdRepository oidcIdRepository,
@@ -204,8 +208,8 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
   }
 
   private void patchPassword(IamAccount a, String password) {
-
-    a.setPassword(password != null ? password : a.getPassword());
+    String value = (password != null) ? password : a.getPassword();
+    a.setPassword(passwordEncoder.encode(value));
   }
 
   private void patchPicture(IamAccount a, String picture) {
@@ -435,8 +439,8 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
 
       if (sshKeyAccount.get().equals(owner)) {
 
-        throw new ScimResourceExistsException(String.format("Duplicated SSH Key (%s,%s)",
-            sshKey.getDisplay(), sshKey.getValue()));
+        throw new ScimResourceExistsException(
+            String.format("Duplicated SSH Key (%s,%s)", sshKey.getDisplay(), sshKey.getValue()));
 
       } else {
 

@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import it.infn.mw.iam.api.scim.converter.AddressConverter;
@@ -50,6 +51,9 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
   private final IamSamlIdRepository samlIdRepository;
 
   private final IamAuthoritiesRepository authorityRepository;
+
+  @Autowired
+  private PasswordEncoder passwordEncoder;
 
   @Autowired
   public ScimUserProvisioning(UserConverter converter, AddressConverter addressConverter,
@@ -124,6 +128,8 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
       account.setPassword(UUID.randomUUID().toString());
     }
 
+    account.setPassword(passwordEncoder.encode(account.getPassword()));
+
     authorityRepository.findByAuthority("ROLE_USER")
       .map(a -> account.getAuthorities().add(a))
       .orElseThrow(
@@ -151,7 +157,7 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
       account.getX509Certificates().forEach(cert -> checkX509CertificateNotExists(cert));
 
       long count = account.getX509Certificates().stream().filter(cert -> cert.isPrimary()).count();
-      
+
       if (count > 1) {
 
         throw new ScimException("Too many primary x509 certificates provided!");
@@ -173,7 +179,7 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
       account.getSshKeys().forEach(sshKey -> checkSshKeyNotExists(sshKey));
 
       long count = account.getSshKeys().stream().filter(sshKey -> sshKey.isPrimary()).count();
-      
+
       if (count > 1) {
 
         throw new ScimException("Too many primary ssh keys provided!");

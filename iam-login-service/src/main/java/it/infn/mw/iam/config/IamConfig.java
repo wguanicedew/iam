@@ -1,8 +1,8 @@
 package it.infn.mw.iam.config;
 
 import org.h2.server.web.WebServlet;
-import org.mitre.oauth2.service.impl.DefaultOAuth2AuthorizationCodeService;
 import org.mitre.oauth2.service.IntrospectionResultAssembler;
+import org.mitre.oauth2.service.impl.DefaultOAuth2AuthorizationCodeService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.embedded.FilterRegistrationBean;
 import org.springframework.boot.context.embedded.ServletRegistrationBean;
@@ -10,6 +10,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 
@@ -48,6 +50,11 @@ public class IamConfig {
   IntrospectionResultAssembler defaultIntrospectionResultAssembler() {
 
     return new IamIntrospectionResultAssembler();
+  }
+
+  @Bean
+  public PasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder();
   }
 
   @Bean

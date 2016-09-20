@@ -6,6 +6,7 @@ import static it.infn.mw.iam.api.scim.model.ScimConstants.SCIM_CONTENT_TYPE;
 import org.hamcrest.Matchers;
 import org.springframework.http.HttpStatus;
 
+import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.http.ContentType;
 
 import it.infn.mw.iam.core.IamRegistrationRequestStatus;
@@ -99,6 +100,22 @@ public class RegistrationUtils {
 
   public static void rejectRequest(String uuid) {
     makeDecision(uuid, IamRegistrationRequestStatus.REJECTED);
+  }
+
+  public static void changePassword(String resetKey, String newPassword) {
+    // @formatter:off
+    RestAssured.given()
+      .port(8080)
+      .param("resetkey", resetKey)
+      .param("password", newPassword)
+    .when()
+      .post("/iam/password-change")
+    .then()
+      .log()
+        .body(true)
+      .statusCode(HttpStatus.OK.value())
+    ;
+    // @formatter:on
   }
 
   private static void makeDecision(String uuid, IamRegistrationRequestStatus decision) {

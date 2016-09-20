@@ -20,6 +20,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationManager;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationProcessingFilter;
 import org.springframework.security.oauth2.provider.client.ClientCredentialsTokenEndpointFilter;
@@ -60,9 +61,15 @@ public class SecurityConfig {
     private UserDetailsService iamUserDetailsService;
 
     @Autowired
-    public void configureGlobal(final AuthenticationManagerBuilder auth) throws Exception {
+    private PasswordEncoder passwordEncoder;
 
-      auth.userDetailsService(iamUserDetailsService);
+    @Autowired
+    public void configureGlobal(final AuthenticationManagerBuilder auth) throws Exception {
+      // @formatter:off
+      auth
+        .userDetailsService(iamUserDetailsService)
+        .passwordEncoder(passwordEncoder);
+      // @formatter:on
     }
 
     @Override
@@ -339,12 +346,21 @@ public class SecurityConfig {
     protected void configure(final HttpSecurity http) throws Exception {
 
       // @formatter:off
-      http.antMatcher("/introspect/**").httpBasic()
-          .authenticationEntryPoint(authenticationEntryPoint).and()
-          .addFilterBefore(corsFilter, SecurityContextPersistenceFilter.class).exceptionHandling()
-          .authenticationEntryPoint(authenticationEntryPoint).and().sessionManagement()
-          .sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().csrf().disable()
-          .authorizeRequests().anyRequest().fullyAuthenticated();
+      http.antMatcher("/introspect/**")
+        .httpBasic()
+          .authenticationEntryPoint(authenticationEntryPoint)
+        .and()
+          .addFilterBefore(corsFilter, SecurityContextPersistenceFilter.class)
+            .exceptionHandling()
+          .authenticationEntryPoint(authenticationEntryPoint)
+        .and()
+          .sessionManagement()
+            .sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+        .csrf()
+          .disable()
+        .authorizeRequests()
+          .anyRequest()
+            .fullyAuthenticated();
       // @formatter:on
     }
   }

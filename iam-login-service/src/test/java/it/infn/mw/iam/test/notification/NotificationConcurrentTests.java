@@ -105,8 +105,7 @@ public class NotificationConcurrentTests {
     int expected = 1;
     int count = wiser.getMessages().size();
 
-    Assert.assertTrue(String.format("mail sent count. Got [%d] expected [%d]", count, expected),
-        count == expected);
+    Assert.assertEquals(expected, count);
 
     deleteUser(reg.getAccountId());
   }
@@ -117,7 +116,7 @@ public class NotificationConcurrentTests {
     RegistrationRequestDto reg = createRegistrationRequest(username);
 
     notificationService.sendPendingNotification();
-    Assert.assertTrue("element count", wiser.getMessages().size() == 1);
+    Assert.assertEquals(1, wiser.getMessages().size());
 
     Date fakeDate = DateUtils.addDays(new Date(), (notificationCleanUpAge + 1));
     timeProvider.setTime(fakeDate.getTime());
@@ -138,8 +137,8 @@ public class NotificationConcurrentTests {
       elem.get();
     }
 
-    Integer count = notificationRepository.countAllMessages();
-    Assert.assertTrue("messages count", count == 0);
+    int count = notificationRepository.countAllMessages();
+    Assert.assertEquals(0, count);
 
     deleteUser(reg.getAccountId());
   }

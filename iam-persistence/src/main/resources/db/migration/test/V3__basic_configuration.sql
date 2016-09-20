@@ -8,7 +8,7 @@ INSERT INTO iam_user_info(ID,GIVENNAME,FAMILYNAME, EMAIL, EMAILVERIFIED, BIRTHDA
 (1, 'Admin', 'User', 'admin@iam.test', true, '1950-01-01', null, 'M');
 
 INSERT INTO iam_account(id, uuid, username, password, user_info_id, creationtime, lastupdatetime, active) VALUES
-(1, '73f16d93-2441-4a50-88ff-85360d78c6b5', 'admin', 'password', 1, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), true);
+(1, '73f16d93-2441-4a50-88ff-85360d78c6b5', 'admin', '$2a$10$UZeOZKD1.dj5oiTsZKD03OETA9FXCKGqBuuijhsxYygZpOPtWMUni', 1, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), true);
 
 INSERT INTO iam_oidc_id(issuer, subject, account_id) VALUES
 ('https://accounts.google.com', '114132403455520317223', 1);
