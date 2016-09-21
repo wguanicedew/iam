@@ -18,7 +18,7 @@
 					<li class="header">You have {{$root.loggedUser.pendingRequests.length}} notifications</li>
 					<li>
 						<ul class="menu">
-						    <li ng-repeat="req in $root.loggedUser.pendingRequests">
+						    <li ng-repeat="req in $root.loggedUser.pendingRequests | orderBy:creationTime:true ">
 						      <a ui-sref="requests"> <i class="fa fa-user text-aqua"></i> {{req.username}} registration request</a>
 						    </li>
 						</ul>

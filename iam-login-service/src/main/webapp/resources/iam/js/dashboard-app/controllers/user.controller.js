@@ -36,63 +36,6 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 	user.sendResetMail = sendResetMail;
 	
 	user.getIndigoUserInfo();
-	
-//	user.loadRemoteUserInfo = loadRemoteUserInfo;
-//	
-//	user.loadRemoteUserInfo();
-//	
-//	function loadRemoteUserInfo() {
-//		
-//		var promises = [];
-//		
-//		promises.push(scimFactory.getUser(user.id).then(function(response) {
-//			user.userInfo = response.data;
-//			$rootScope.userLoadingProgress = $rootScope.userLoadingProgress + 29;
-//		}, function(error) {
-//			$state.go("error", {
-//				"error": error
-//			});
-//		}));
-//		
-//		var startIndex = 1;
-//		var count = 10;
-//		
-//		
-//		scimFactory.getGroups(startIndex, count)
-//		.then(
-//				function(response) {
-//
-//					angular.forEach(response.data.Resources, function(
-//							group) {
-//						user.groups.push(group);
-//					});
-//					user.groups = $filter('orderBy')(user.groups,
-//							"displayName", false);
-//
-//					if (response.data.totalResults > (response.data.startIndex + response.data.itemsPerPage)) {
-//						user.getAllGroups(startIndex + count, count);
-//					} else {
-//						user.oGroups = getNotMemberGroups();
-//					}
-//				}, function(error) {
-//					$state.go("error", {
-//						"error": error
-//					});
-//				});
-//		
-//		
-//		$q.all({
-//			indigo,
-//		    groups,
-//		    requests
-//		  }).then(function() {
-//			  $rootScope.userLoadingProgress = 100;
-//		  });
-//		
-//		user.getIndigoUserInfo();
-//		user.getAllGroups(1, 10);
-//		user.listRequests();
-//	}
 
 	function getIndigoUserInfo() {
 		scimFactory.getUser(user.id).then(function(response) {
@@ -137,44 +80,6 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 					user.doPasswordReset();
 				});
 	}
-
-//	function getAllGroups(startIndex, count) {
-//
-//		scimFactory
-//				.getGroups(startIndex, count)
-//				.then(
-//						function(response) {
-//
-//							angular.forEach(response.data.Resources, function(
-//									group) {
-//								user.groups.push(group);
-//							});
-//							user.groups = $filter('orderBy')(user.groups,
-//									"displayName", false);
-//
-//							if (response.data.totalResults > (response.data.startIndex + response.data.itemsPerPage)) {
-//								user.getAllGroups(startIndex + count, count);
-//							} else {
-//								user.oGroups = getNotMemberGroups();
-//							}
-//						}, function(error) {
-//							$state.go("error", {
-//								"error": error
-//							});
-//						});
-//	}
-
-//	function getNotMemberGroups() {
-//
-//		return user.groups.filter(function(group) {
-//			for ( var i in user.userInfo.groups) {
-//				if (group.id === user.userInfo.groups[i].value) {
-//					return false;
-//				}
-//			}
-//			return true;
-//		});
-//	}
 
 	function openEditUserDialog() {
 

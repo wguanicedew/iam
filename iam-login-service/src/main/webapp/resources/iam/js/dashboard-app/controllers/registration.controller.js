@@ -2,9 +2,9 @@
 
 angular.module('dashboardApp').controller('RequestManagementController', RequestManagementController);
 
-RequestManagementController.$inject = ['$scope', '$rootScope', '$state', 'RegistrationRequestService', 'ModalService'];
+RequestManagementController.$inject = ['$scope', '$rootScope', '$state', '$filter', 'RegistrationRequestService', 'ModalService'];
 
-function RequestManagementController($scope, $rootScope, $state, RegistrationRequestService, ModalService){
+function RequestManagementController($scope, $rootScope, $state, $filter, RegistrationRequestService, ModalService){
 
 	var vm = this;
 	vm.operationResult;
@@ -15,29 +15,14 @@ function RequestManagementController($scope, $rootScope, $state, RegistrationReq
 	vm.approveRequest = approveRequest;
 	vm.rejectRequest = rejectRequest;
 	vm.init = init;
-	vm.elementToDisplay = elementToDisplay;
-	vm.pageChanged = pageChanged;
 
 	vm.list = [];
-	vm.filteredList = [];
 	vm.sortType = 'creationTime';
 	vm.sortReverse = true;
 	vm.currentPage = 1;
 	vm.maxSize = 5;
 	vm.numPerPage = 10;
-	
-	
-	function elementToDisplay(){
-		var begin = ((vm.currentPage - 1) * vm.numPerPage);
-	    var end = begin + vm.numPerPage;
 
-	    vm.filteredList = vm.list.slice(begin, end);
-	}
-	
-	function pageChanged(){
-		vm.elementToDisplay();
-	}
-	
 	function init(){
 		vm.listPending();
 	};
@@ -58,7 +43,6 @@ function RequestManagementController($scope, $rootScope, $state, RegistrationReq
 			function(result) {
 				vm.list = result.data;
 				$rootScope.loggedUser.pendingRequests = result.data;
-				vm.elementToDisplay();
 			},
 			function(errResponse) {
 				vm.textAlert = errResponse.data.error_description || errResponse.data.detail;
