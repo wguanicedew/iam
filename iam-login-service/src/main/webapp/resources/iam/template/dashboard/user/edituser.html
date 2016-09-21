@@ -78,16 +78,14 @@
 
 		<div class="form-group">
 			<label class="control-label col-sm-2" for="username">Username</label>
-			<div
-				ng-class="{'has-error': userUpdateForm.username.$dirty && userUpdateForm.username.$invalid, 'has-success': userUpdateForm.username.$dirty && !userUpdateForm.username.$invalid}">
+			<div ng-class="{'has-error': userUpdateForm.username.$invalid && userUpdateForm.username.$dirty, 'has-success': !userUpdateForm.username.$invalid && userUpdateForm.username.$dirty}">
 				<div class="col-sm-10">
 					<input class="form-control" id="username" name="username" ng-disabled="$root.loggedUser.info.sub == editUserCtrl.user.id"
 						type="text" ng-model="editUserCtrl.user.userName"
 						placeholder="Username" required ng-minlength="3"
-						iam-username-available-validator
-						ng-model-options="{ debounce : { 'default' : 500 } }" /> <span
+						iam-username-available-validator /> <span
 						class="glyphicon form-control-feedback"
-						ng-class="{'glyphicon-remove': userUpdateForm.username.$dirty && userUpdateForm.username.$invalid, 'glyphicon-ok': userUpdateForm.username.$dirty && userUpdateForm.username.$valid}"
+						ng-class="{'glyphicon-remove': userUpdateForm.username.$invalid && userUpdateForm.username.$dirty, 'glyphicon-ok': !userUpdateForm.username.$invalid && userUpdateForm.username.$dirty }"
 						style="right: 15px"></span> <span class="help-block"
 						ng-show="userUpdateForm.username.$dirty && userUpdateForm.username.$error.required">
 						This is a required field</span> <span class="help-block"
@@ -115,7 +113,7 @@
                         This field is not a valid URL</span>
 				</div>
 				<div class="col-sm-12">
-					<br /> <img src="{{editUserCtrl.user.picture}}" ng-show="!(userUpdateForm.picture.$dirty && userUpdateForm.picture.$invalid) && editUserCtrl.user.picture"
+					<br /> <img ng-src="editUserCtrl.user.picture" ng-show="userUpdateForm.picture.$dirty && !userUpdateForm.picture.$invalid"
 						class="profile-user-img img-responsive img-circle"
 						 />
 				</div>
@@ -126,9 +124,9 @@
 
 	<div class="modal-footer">
 
-		<button class="btn btn-primary btn-sm" type="submit" name="create"
+		<button class="btn btn-primary btn-sm" type="submit" name="create" id="modal-btn-confirm"
 			ng-disabled="userUpdateForm.$invalid || !userUpdateForm.$dirty">Update</button>
-		<button class="btn btn-danger btn-sm" type="button" name="dismiss"
+		<button class="btn btn-danger btn-sm" type="button" name="dismiss" id="modal-btn-cancel"
 			ng-click="editUserCtrl.dismiss()">Cancel</button>
 	</div>
 

@@ -10,7 +10,7 @@
 	<div class="navbar-custom-menu">
 		<ul class="nav navbar-nav">
 			<!-- Notifications: style can be found in dropdown.less -->
-			<li class="dropdown notifications-menu" uib-dropdown><a href=""
+			<li class="dropdown notifications-menu" uib-dropdown ng-show="$root.loggedUser.isAdmin"><a href=""
 				class="dropdown-toggle" uib-dropdown-toggle> <i class="fa fa-bell-o"></i>
 					<span class="label label-warning" ng-show="$root.loggedUser.pendingRequests.length">{{$root.loggedUser.pendingRequests.length}}</span>
 			</a>

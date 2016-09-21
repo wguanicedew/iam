@@ -62,10 +62,13 @@ function GroupsController($scope, $rootScope, $uibModal, $state, $filter,
 		$rootScope.groupsLoadingProgress = 0;
 		gc.loadingModal = $uibModal
 		.open({
+			animation: false,
 			templateUrl : '/resources/iam/template/dashboard/groups/loading-modal.html'
 		});
-		gc.getAllGroups();
-		
+
+		gc.loadingModal.opened.then(function() {
+			gc.getAllGroups();
+		});
 	}
 
 	function getAllGroups() {
@@ -93,6 +96,8 @@ function GroupsController($scope, $rootScope, $uibModal, $state, $filter,
 								gc.loadingModal.dismiss("Cancel");
 							}
 						}, function(error) {
+							console.log("Error: dismissing loading dialog");
+							gc.loadingModal.dismiss("Error");
 							$state.go("error", {
 								"error" : error
 							});
@@ -130,8 +135,8 @@ function GroupsController($scope, $rootScope, $uibModal, $state, $filter,
 		var modalOptions = {
 			closeButtonText: 'Cancel',
 			actionButtonText: 'Delete Group',
-			headerText: 'Delete?',
-			bodyText: `Are you sure you want to delete group '${group.displayName}'?`	
+			headerText: "Delete Group «" + group.displayName + "»",
+			bodyText: `Are you sure you want to delete group «${group.displayName}»?`	
 		};
 		
 		ModalService.showModal({}, modalOptions).then(

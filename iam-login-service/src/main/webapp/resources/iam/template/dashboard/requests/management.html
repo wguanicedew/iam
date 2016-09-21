@@ -12,7 +12,7 @@
 	</ol>
 </section>
 
-<section class="content" ng-init="ctrl.init()">
+<section class="content" ng-init="ctrl.init()" ng-cloak>
     <div class="row">
         <div class="col-md-12">
             <div style="min-height: 650px;">
@@ -71,9 +71,9 @@
 								</div>
 							</div>
 						</div>
-            		</div>
-            		
-            		<div class="row col-sm-12 text-center">
+					</div>
+		
+					<div class="row col-sm-12 text-center">
 						<ul uib-pagination ng-model="ctrl.currentPage" ng-change="ctrl.pageChanged()" total-items="ctrl.list.length" max-size="ctrl.maxSize" boundary-links="true"></ul>
 					</div>
 					

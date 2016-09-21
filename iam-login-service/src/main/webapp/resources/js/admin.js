@@ -344,9 +344,11 @@ var UserProfileView = Backbone.View.extend({
         	if (key && value) {
         		
         		if (what.call(value) === '[object Array]'){
-        			$('dl', this.el).append(
-        					t({key: key, value: value.map(function(group){ return group.name; }).join(', ')})
-        					);	
+        			if (value.length > 0){
+						$('dl', this.el).append(
+								t({key: key, value: value.join(', ')})
+								);	
+        			}
         		} else if (typeof(value) === 'object') {
         			
         			var el = this.el;

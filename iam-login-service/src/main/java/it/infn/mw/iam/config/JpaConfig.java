@@ -86,4 +86,21 @@ public class JpaConfig extends JpaBaseConfiguration {
       }
     };
   }
+
+  @Bean
+  @Profile("flyway-repair")
+  public FlywayMigrationStrategy flywayRepairStrategy() {
+
+    return new FlywayMigrationStrategy() {
+
+      @Override
+      public void migrate(final Flyway flyway) {
+
+        flyway.repair();
+        flyway.migrate();
+        return;
+
+      }
+    };
+  }
 }
