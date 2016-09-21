@@ -64,6 +64,8 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 				user.loadingModal.dismiss("Cancel");
 				
 			}, function(error) {
+				
+				user.loadingModal.dismiss("Error");
 				$state.go("error", {
 					"error": error
 				});
