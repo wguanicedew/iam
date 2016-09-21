@@ -6,8 +6,7 @@
    \ \__\ \__\ \__\ \__\    \ \__\
     \|__|\|__|\|__|\|__|     \|__|
                                   
-                                  
-                                  
+IAM version: ${iam.version} 
+IAM git commit id: ${git.commit.id.abbrev}
 
-IAM version: ${application.version}
 Spring boot version: ${spring-boot.version}

@@ -96,17 +96,17 @@ public class NotificationTests {
     RegistrationRequestDto reg = createRegistrationRequest(username);
     notificationService.sendPendingNotification();
 
-    Assert.assertTrue("element count", wiser.getMessages().size() == 1);
+    Assert.assertEquals(1, wiser.getMessages().size());
     WiserMessage message = wiser.getMessages().get(0);
 
-    Assert.assertTrue("sender", properties.getMailFrom().equals(message.getEnvelopeSender()));
+    Assert.assertEquals(properties.getMailFrom(), message.getEnvelopeSender());
     Assert.assertTrue("receiver", message.getEnvelopeReceiver().startsWith(username));
-    Assert.assertTrue("subject",
-        properties.getSubject().get("confirmation").equals(message.getMimeMessage().getSubject()));
+    Assert.assertEquals(properties.getSubject().get("confirmation"),
+        message.getMimeMessage().getSubject());
 
     Iterable<IamEmailNotification> queue = notificationRepository.findAll();
     for (IamEmailNotification elem : queue) {
-      Assert.assertTrue("status", IamDeliveryStatus.DELIVERED.equals(elem.getDeliveryStatus()));
+      Assert.assertEquals(IamDeliveryStatus.DELIVERED, elem.getDeliveryStatus());
     }
 
     deleteUser(reg.getAccountId());
@@ -121,11 +121,11 @@ public class NotificationTests {
     properties.setDisable(true);
     notificationService.sendPendingNotification();
 
-    Assert.assertTrue("element count", wiser.getMessages().size() == 0);
+    Assert.assertEquals(0, wiser.getMessages().size());
 
     Iterable<IamEmailNotification> queue = notificationRepository.findAll();
     for (IamEmailNotification elem : queue) {
-      Assert.assertTrue("status", IamDeliveryStatus.DELIVERED.equals(elem.getDeliveryStatus()));
+      Assert.assertEquals(IamDeliveryStatus.DELIVERED, elem.getDeliveryStatus());
     }
 
     deleteUser(reg.getAccountId());
@@ -145,10 +145,11 @@ public class NotificationTests {
 
     notificationService.sendPendingNotification();
 
-    Assert.assertTrue("element count", wiser.getMessages().size() == count);
+    Assert.assertEquals(count, wiser.getMessages().size());
+
     Iterable<IamEmailNotification> queue = notificationRepository.findAll();
     for (IamEmailNotification elem : queue) {
-      Assert.assertTrue("status", IamDeliveryStatus.DELIVERED.equals(elem.getDeliveryStatus()));
+      Assert.assertEquals(IamDeliveryStatus.DELIVERED, elem.getDeliveryStatus());
     }
 
     for (RegistrationRequestDto elem : requestList) {
@@ -160,7 +161,7 @@ public class NotificationTests {
   public void testSendWithEmptyQueue() {
 
     notificationService.sendPendingNotification();
-    Assert.assertTrue("element count", wiser.getMessages().size() == 0);
+    Assert.assertEquals(0, wiser.getMessages().size());
   }
 
   @Test
@@ -174,8 +175,7 @@ public class NotificationTests {
 
     Iterable<IamEmailNotification> queue = notificationRepository.findAll();
     for (IamEmailNotification elem : queue) {
-      Assert.assertTrue("status",
-          IamDeliveryStatus.DELIVERY_ERROR.equals(elem.getDeliveryStatus()));
+      Assert.assertEquals(IamDeliveryStatus.DELIVERY_ERROR, elem.getDeliveryStatus());
     }
 
     deleteUser(reg.getAccountId());
@@ -203,19 +203,22 @@ public class NotificationTests {
     Assert.assertEquals(2, wiser.getMessages().size());
 
     message = wiser.getMessages().get(1);
-    Assert.assertTrue("subject handle", properties.getSubject()
-      .get("adminHandleRequest")
-      .equals(message.getMimeMessage().getSubject()));
+
+    Assert.assertEquals(properties.getSubject().get("adminHandleRequest"),
+        message.getMimeMessage().getSubject());
+
     Assert.assertTrue("receiver",
         message.getEnvelopeReceiver().startsWith(properties.getAdminAddress()));
 
     RegistrationUtils.approveRequest(reg.getUuid());
     notificationService.sendPendingNotification();
 
-    Assert.assertTrue("element count after approve", wiser.getMessages().size() == 3);
+    Assert.assertEquals(3, wiser.getMessages().size());
+
     message = wiser.getMessages().get(2);
-    Assert.assertTrue("subject activated",
-        properties.getSubject().get("activated").equals(message.getMimeMessage().getSubject()));
+
+    Assert.assertEquals(properties.getSubject().get("activated"),
+        message.getMimeMessage().getSubject());
 
     deleteUser(reg.getAccountId());
   }
@@ -227,30 +230,31 @@ public class NotificationTests {
     RegistrationRequestDto reg = createRegistrationRequest(username);
     notificationService.sendPendingNotification();
 
-    Assert.assertTrue("element count", wiser.getMessages().size() == 1);
+    Assert.assertEquals(1, wiser.getMessages().size());
+
     WiserMessage message = wiser.getMessages().get(0);
-    Assert.assertTrue("subject confirm",
-        properties.getSubject().get("confirmation").equals(message.getMimeMessage().getSubject()));
+    Assert.assertEquals(properties.getSubject().get("confirmation"),
+        message.getMimeMessage().getSubject());
 
     String confirmationKey = generator.getLastToken();
     confirmRegistrationRequest(confirmationKey);
     notificationService.sendPendingNotification();
 
-    Assert.assertTrue("element count after confirm", wiser.getMessages().size() == 2);
+    Assert.assertEquals(2, wiser.getMessages().size());
     message = wiser.getMessages().get(1);
-    Assert.assertTrue("subject handle", properties.getSubject()
-      .get("adminHandleRequest")
-      .equals(message.getMimeMessage().getSubject()));
+    Assert.assertEquals(properties.getSubject().get("adminHandleRequest"),
+        message.getMimeMessage().getSubject());
     Assert.assertTrue("receiver",
         message.getEnvelopeReceiver().startsWith(properties.getAdminAddress()));
 
     RegistrationUtils.rejectRequest(reg.getUuid());
     notificationService.sendPendingNotification();
 
-    Assert.assertTrue("element count after reject", wiser.getMessages().size() == 3);
+    Assert.assertEquals(3, wiser.getMessages().size());
+
     message = wiser.getMessages().get(2);
-    Assert.assertTrue("subject rejected",
-        properties.getSubject().get("rejected").equals(message.getMimeMessage().getSubject()));
+    Assert.assertEquals(properties.getSubject().get("rejected"),
+        message.getMimeMessage().getSubject());
 
     deleteUser(reg.getAccountId());
   }
@@ -261,15 +265,15 @@ public class NotificationTests {
 
     RegistrationRequestDto reg = createRegistrationRequest(username);
     notificationService.sendPendingNotification();
-    Assert.assertTrue("element count", wiser.getMessages().size() == 1);
+    Assert.assertEquals(1, wiser.getMessages().size());
 
     Date fakeDate = DateUtils.addDays(new Date(), (properties.getCleanupAge() + 1));
     timeProvider.setTime(fakeDate.getTime());
 
     notificationService.clearExpiredNotifications();
 
-    Integer count = notificationRepository.countAllMessages();
-    Assert.assertTrue("messages count", count == 0);
+    int count = notificationRepository.countAllMessages();
+    Assert.assertEquals(0, count);
 
     deleteUser(reg.getAccountId());
   }
