@@ -10,10 +10,10 @@
 	</ol>
 </section>
 
-<section class="content" ng-init="requests.init()" ng-cloak
+<section class="content" ng-init="requests.loadData()" ng-cloak
 	style="min-height: 650px;">
 
-	<div class="row">
+	<div class="row" ng-show="$root.requestsLoadingProgress == 100">
 		<div class="col-xs-12">
 
 			<div ng-show="requests.operationResult != null">

@@ -2,19 +2,19 @@
 
 angular.module('dashboardApp').controller('RequestManagementController', RequestManagementController);
 
-RequestManagementController.$inject = ['$scope', '$rootScope', '$state', '$filter', 'filterFilter', 'RegistrationRequestService', 'ModalService'];
+RequestManagementController.$inject = ['$scope', '$rootScope', '$state', '$filter', 'filterFilter', '$uibModal', 'RegistrationRequestService', 'ModalService'];
 
-function RequestManagementController($scope, $rootScope, $state, $filter, filterFilter, RegistrationRequestService, ModalService){
+function RequestManagementController($scope, $rootScope, $state, $filter, filterFilter, $uibModal, RegistrationRequestService, ModalService){
 
 	var requests = this;
 	requests.operationResult;
 	requests.textAlert;
 	
-	requests.listRequests = listRequests;
+//	requests.listRequests = listRequests;
 	requests.listPending = listPending;
 	requests.approveRequest = approveRequest;
 	requests.rejectRequest = rejectRequest;
-	requests.init = init;
+	requests.loadData = loadData;
 
 	requests.list = [];
 	requests.filtered = [];
@@ -68,20 +68,50 @@ function RequestManagementController($scope, $rootScope, $state, $filter, filter
 		requests.rebuildFilteredList();
 	});
 
-	function init(){
-		requests.listPending();
-	};
+	function loadData() {
+		
+		$rootScope.requestsLoadingProgress = 0;
+		
+		requests.loadingModal = $uibModal
+		.open({
+			animation: false,
+			templateUrl : '/resources/iam/template/dashboard/requests/loading-modal.html'
+		});
 
-	function listRequests(status) {
-		RegistrationRequestService.listRequests(status).then(
-			function(result) {
-				requests.list = result.data;
-			},
-			function(errResponse) {
-				requests.textAlert = errResponse.data.error_description || errResponse.data.detail;
-				requests.operationResult = 'err';
-			})
-	};
+		requests.loadingModal.opened.then(function() {
+		
+			RegistrationRequestService.listPending().then(
+				function(result) {
+					requests.list = result.data;
+					requests.rebuildFilteredList();
+					$rootScope.requestsLoadingProgress = 100;
+					$rootScope.loggedUser.pendingRequests = result.data;
+					
+					requests.loadingModal.dismiss("Cancel");
+				},
+				function(errResponse) {
+					requests.textAlert = errResponse.data.error_description || errResponse.data.detail;
+					requests.operationResult = 'err';
+					
+					requests.loadingModal.dismiss("Error");
+					
+					$state.go("error", {
+						"error" : errResponse
+					});
+				});
+		});
+	}
+
+//	function listRequests(status) {
+//		RegistrationRequestService.listRequests(status).then(
+//			function(result) {
+//				requests.list = result.data;
+//			},
+//			function(errResponse) {
+//				requests.textAlert = errResponse.data.error_description || errResponse.data.detail;
+//				requests.operationResult = 'err';
+//			})
+//	};
 	
 	function listPending() {
 		RegistrationRequestService.listPending().then(
