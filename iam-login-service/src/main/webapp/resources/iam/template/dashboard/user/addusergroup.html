@@ -1,7 +1,9 @@
 <div class="modal-header">
 	<h3 class="modal-title">Add group(s) to <strong>{{addGroupCtrl.user.name.formatted}}</strong></h3>
+	<uib-progressbar animate="false" class="progress-striped active" max="100" value="addGroupCtrl.loadingGroupsProgress" type="danger"><i>{{addGroupCtrl.loadingGroupsProgress}} / 100</i></uib-progressbar>
 </div>
-<div class="modal-body">
+<div class="modal-body" ng-disabled="addGroupCtrl.loadingGroupsProgress < 100">
+    
 
 	<ui-select multiple ng-model="addGroupCtrl.groupsSelected"
 		theme="bootstrap" ng-disabled="addGroupCtrl.disabled" sortable="true"
@@ -30,6 +32,6 @@
 	<button class="btn btn-primary" type="button" name="modal-btn-confirm"
 		ng-click="addGroupCtrl.addGroup()"
 		ng-disabled="addGroupCtrl.groupsSelected == null">Add Group</button>
-	<button class="btn btn-warning" type="button" name="modal-btn-cancel"
+	<button class="btn btn-danger" type="button" name="modal-btn-cancel"
 		ng-click="addGroupCtrl.cancel()">Cancel</button>
 </div>

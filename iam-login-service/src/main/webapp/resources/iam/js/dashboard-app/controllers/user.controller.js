@@ -11,18 +11,11 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 	console.log("User ID: ", $state.params.id);
 
 	user.id = $state.params.id;
-	
-	user.groups = [];
-	user.oGroups = [];
 
 	user.userInfo = {};
-	user.filteredRequestsList = [];
-	user.requestsList = [];
 
 	// methods
 	user.getIndigoUserInfo = getIndigoUserInfo;
-	user.getAllGroups = getAllGroups;
-	user.getNotMemberGroups = getNotMemberGroups;
 	user.showSshKeyValue = showSshKeyValue;
 	user.showCertValue = showCertValue;
 	user.openAddGroupDialog = openAddGroupDialog;
@@ -42,13 +35,64 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 	user.doPasswordReset = doPasswordReset;
 	user.sendResetMail = sendResetMail;
 	
-	// history requests
-	user.buildFilteredList = buildFilteredList;
-	user.listRequests = listRequests;
-
 	user.getIndigoUserInfo();
-	user.getAllGroups(1, 10);
-	user.listRequests();
+	
+//	user.loadRemoteUserInfo = loadRemoteUserInfo;
+//	
+//	user.loadRemoteUserInfo();
+//	
+//	function loadRemoteUserInfo() {
+//		
+//		var promises = [];
+//		
+//		promises.push(scimFactory.getUser(user.id).then(function(response) {
+//			user.userInfo = response.data;
+//			$rootScope.userLoadingProgress = $rootScope.userLoadingProgress + 29;
+//		}, function(error) {
+//			$state.go("error", {
+//				"error": error
+//			});
+//		}));
+//		
+//		var startIndex = 1;
+//		var count = 10;
+//		
+//		
+//		scimFactory.getGroups(startIndex, count)
+//		.then(
+//				function(response) {
+//
+//					angular.forEach(response.data.Resources, function(
+//							group) {
+//						user.groups.push(group);
+//					});
+//					user.groups = $filter('orderBy')(user.groups,
+//							"displayName", false);
+//
+//					if (response.data.totalResults > (response.data.startIndex + response.data.itemsPerPage)) {
+//						user.getAllGroups(startIndex + count, count);
+//					} else {
+//						user.oGroups = getNotMemberGroups();
+//					}
+//				}, function(error) {
+//					$state.go("error", {
+//						"error": error
+//					});
+//				});
+//		
+//		
+//		$q.all({
+//			indigo,
+//		    groups,
+//		    requests
+//		  }).then(function() {
+//			  $rootScope.userLoadingProgress = 100;
+//		  });
+//		
+//		user.getIndigoUserInfo();
+//		user.getAllGroups(1, 10);
+//		user.listRequests();
+//	}
 
 	function getIndigoUserInfo() {
 		scimFactory.getUser(user.id).then(function(response) {
@@ -94,43 +138,43 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 				});
 	}
 
-	function getAllGroups(startIndex, count) {
+//	function getAllGroups(startIndex, count) {
+//
+//		scimFactory
+//				.getGroups(startIndex, count)
+//				.then(
+//						function(response) {
+//
+//							angular.forEach(response.data.Resources, function(
+//									group) {
+//								user.groups.push(group);
+//							});
+//							user.groups = $filter('orderBy')(user.groups,
+//									"displayName", false);
+//
+//							if (response.data.totalResults > (response.data.startIndex + response.data.itemsPerPage)) {
+//								user.getAllGroups(startIndex + count, count);
+//							} else {
+//								user.oGroups = getNotMemberGroups();
+//							}
+//						}, function(error) {
+//							$state.go("error", {
+//								"error": error
+//							});
+//						});
+//	}
 
-		scimFactory
-				.getGroups(startIndex, count)
-				.then(
-						function(response) {
-
-							angular.forEach(response.data.Resources, function(
-									group) {
-								user.groups.push(group);
-							});
-							user.groups = $filter('orderBy')(user.groups,
-									"displayName", false);
-
-							if (response.data.totalResults > (response.data.startIndex + response.data.itemsPerPage)) {
-								user.getAllGroups(startIndex + count, count);
-							} else {
-								user.oGroups = getNotMemberGroups();
-							}
-						}, function(error) {
-							$state.go("error", {
-								"error": error
-							});
-						});
-	}
-
-	function getNotMemberGroups() {
-
-		return user.groups.filter(function(group) {
-			for ( var i in user.userInfo.groups) {
-				if (group.id === user.userInfo.groups[i].value) {
-					return false;
-				}
-			}
-			return true;
-		});
-	}
+//	function getNotMemberGroups() {
+//
+//		return user.groups.filter(function(group) {
+//			for ( var i in user.userInfo.groups) {
+//				if (group.id === user.userInfo.groups[i].value) {
+//					return false;
+//				}
+//			}
+//			return true;
+//		});
+//	}
 
 	function openEditUserDialog() {
 
@@ -156,7 +200,6 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 	}
 	
 	function openAddGroupDialog() {
-		user.oGroups = getNotMemberGroups();
 		var modalInstance = $uibModal
 				.open({
 					templateUrl : '/resources/iam/template/dashboard/user/addusergroup.html',
@@ -165,9 +208,6 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 					resolve : {
 						user : function() {
 							return user.userInfo;
-						},
-						oGroups : function() {
-							return user.oGroups;
 						}
 					}
 				});
@@ -425,47 +465,38 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 
 	function setActive(status) {
 
-		var headerMsg = status ? 'Enable user?' : 'Disable user?';
-		var action = status ? 'enable' : 'disable';
+		var modalOptions = {};
 		
-		var modalOptions = {
+		if (status) {
+			
+			modalOptions = {
 				closeButtonText: 'Cancel',
-				user: user.userInfo.name.formatted,
-				actionButtonText: 'Change user status',
-				headerText: headerMsg,
-				bodyText: `Are you sure you want to ${action} '${user.userInfo.name.formatted}'?`	
+				actionButtonText: 'Enable user',
+				headerText: 'Enable ' + user.userInfo.name.formatted,
+				bodyText: `Are you sure you want to enable '${user.userInfo.name.formatted}'?`	
 			};
-				
-			ModalService.showModal({}, modalOptions).then(
-				function (){
-					scimFactory.setUserActiveStatus(user.userInfo.id, status)
-						.then(function(response) {
-							console.log("Set active as: ", status);
-							getIndigoUserInfo();
-							user.textAlert = `User ${user.userInfo.name.formatted} status successfully set to ${action}`;
-							user.operationResult = 'ok';
-						}, function(error) {
-							user.textAlert = error.data.error_description || error.data.detail;
-							user.operationResult = 'err';
-						});
-				});
-	}
-	
-	function buildFilteredList() {
+		} else {
+			
+			modalOptions = {
+				closeButtonText: 'Cancel',
+				actionButtonText: 'Disable user',
+				headerText: 'Disable ' + user.userInfo.name.formatted,
+				bodyText: `Are you sure you want to disable '${user.userInfo.name.formatted}'?`	
+			};
+		}
 		
-		user.filteredRequestsList = filterFilter(user.requestsList, {'accountId': user.userInfo.id }); ;
+		ModalService.showModal({}, modalOptions).then(
+			function (){
+				scimFactory.setUserActiveStatus(user.userInfo.id, status)
+					.then(function(response) {
+						console.log("Set active as: ", status);
+						getIndigoUserInfo();
+						user.textAlert = `User ${user.userInfo.name.formatted} status successfully set to ${action}`;
+						user.operationResult = 'ok';
+					}, function(error) {
+						user.textAlert = error.data.error_description || error.data.detail;
+						user.operationResult = 'err';
+					});
+			});
 	}
-	
-	function listRequests() {
-		RegistrationRequestService.listRequests().then(
-			function(result) {
-				console.log(result);
-				user.requestsList = result.data;
-				user.buildFilteredList();
-			},
-			function(errResponse) {
-				user.textAlert = errResponse.data.error_description || errResponse.data.detail;
-				user.operationResult = 'err';
-			})
-	};
 }
