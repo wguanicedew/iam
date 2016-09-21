@@ -34,18 +34,43 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 	// password reset
 	user.doPasswordReset = doPasswordReset;
 	user.sendResetMail = sendResetMail;
-	
+
 	user.getIndigoUserInfo();
 
 	function getIndigoUserInfo() {
-		scimFactory.getUser(user.id).then(function(response) {
-			user.userInfo = response.data;
-			console.log("Added indigoUserInfo: ", user.userInfo);
-		}, function(error) {
-			$state.go("error", {
-				"error": error
-			});
+
+		$rootScope.userLoadingProgress = 0;
+		console.log("progress", $rootScope.userLoadingProgress);
+	
+		
+		user.loadingModal = $uibModal
+		.open({
+			animation: false,
+			templateUrl : '/resources/iam/template/dashboard/user/loading-modal.html'
 		});
+
+		user.loadingModal.opened.then(function() {
+
+			$rootScope.userLoadingProgress = 50;
+
+			scimFactory.getUser(user.id).then(function(response) {
+				
+				user.userInfo = response.data;
+				console.log("Added indigoUserInfo: ", user.userInfo);
+
+				$rootScope.userLoadingProgress = 100;
+				console.log("progress", $rootScope.userLoadingProgress);
+				console.log("dismissing");
+				user.loadingModal.dismiss("Cancel");
+				
+			}, function(error) {
+				$state.go("error", {
+					"error": error
+				});
+			});
+
+		});
+
 	}
 
 	function doPasswordReset() {
