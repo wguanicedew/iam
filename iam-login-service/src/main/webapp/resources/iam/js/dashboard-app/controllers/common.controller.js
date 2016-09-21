@@ -2,9 +2,9 @@
 
 angular.module('dashboardApp').controller('CommonController', CommonController);
 
-CommonController.$inject = ['$scope', '$rootScope', '$state', 'Utils', 'scimFactory', 'RegistrationRequestService'];
+CommonController.$inject = ['$scope', '$rootScope', '$state', '$window', 'Utils', 'scimFactory', 'RegistrationRequestService'];
 
-function CommonController($scope, $rootScope, $state, Utils, scimFactory, RegistrationRequestService) {
+function CommonController($scope, $rootScope, $state, $window, Utils, scimFactory, RegistrationRequestService) {
 
 	var commonCtrl = this;
 	commonCtrl.name = "CommonController";
@@ -44,4 +44,8 @@ function CommonController($scope, $rootScope, $state, Utils, scimFactory, Regist
 	}, function(error) {
 		$rootScope.loggedUser.totGroups = undefined;
 	});
+
+	$rootScope.reload = function() {
+		$window.location.reload();
+	}
 }
