@@ -10,37 +10,50 @@
 	</ol>
 </section>
 
-<section class="content" ng-init="ctrl.init()" ng-cloak
+<section class="content" ng-init="requests.init()" ng-cloak
 	style="min-height: 650px;">
 
 	<div class="row">
 		<div class="col-xs-12">
 
-			<div ng-show="ctrl.operationResult != null">
+			<div ng-show="requests.operationResult != null">
 				<div class="alert"
-					ng-class="{'alert-success': ctrl.operationResult=='ok', 'alert-danger': ctrl.operationResult=='err'}">
-					<button class="close" ng-click="ctrl.operationResult=null"
+					ng-class="{'alert-success': requests.operationResult=='ok', 'alert-danger': requests.operationResult=='err'}">
+					<button class="close" ng-click="requests.operationResult=null"
 						aria-label="close">&times;</button>
-					{{ctrl.textAlert}}
+					{{requests.textAlert}}
 				</div>
 			</div>
 
-			<div class="alert alert-info" ng-show="!ctrl.list.length">
+			<div class="alert alert-info" ng-show="!requests.list.length">
 				<h4>
 					<i class="icon fa fa-info"></i> No pending requests found!
 				</h4>
 			</div>
 
 		</div>
-		<div class="col-xs-12" ng-show="ctrl.list.length > 0" ng-cloak>
+		<div class="col-xs-12" ng-show="requests.list.length > 0" ng-cloak>
 
 			<div class="box">
-				<div class="box-header with-border"></div>
-				<div class="box-body">
+				<div class="box-header with-border">
+                    <div class="input-group">
+                        <input placeholder="Search.." ng-model="requests.searchText"
+                            class="form-control" />
+                        <div class="input-group-btn">
+                            <button type="button" class="btn btn-default"
+                                ng-click="requests.resetFilters()">Show all</button>
+                        </div>
+                        <!-- /btn-group -->
+                    </div>
+                </div>
+                <div class="box-body" ng-show="requests.filtered.length == 0">
+                    <p>No requests match!</p>
+                </div>
+				<div class="box-body" ng-show="requests.filtered.length > 0">
 
 					<div class="text-center">
-						<ul uib-pagination ng-model="ctrl.currentPage"
-							items-per-page="ctrl.numPerPage" total-items="ctrl.list.length"
+						<ul uib-pagination ng-model="requests.currentPage"
+							items-per-page="requests.numPerPage" total-items="requests.filtered.length"
 							max-size="10" boundary-links="true"></ul>
 					</div>
 					<table id="requestslist" class="table table-striped">
@@ -53,7 +66,7 @@
 						</thead>
 						<tbody>
 							<tr
-								ng-repeat-start="r in ctrl.list | orderBy:ctrl.sortType:ctrl.sortReverse | startFrom:(ctrl.currentPage-1)*ctrl.numPerPage | limitTo:ctrl.numPerPage">
+								ng-repeat-start="r in requests.filtered | orderBy:requests.sortType:requests.sortReverse | startFrom:(requests.currentPage-1)*requests.numPerPage | limitTo:requests.numPerPage">
 								<td>
 									<button class="btn btn-xs btn-link" ng-if="r.expanded"
 										ng-click="r.expanded = false">
@@ -70,12 +83,12 @@
 								<td>Registration request</td>
 								<td class="text-right">
 									<button class="btn btn-success btn-xs"
-										ng-click="ctrl.approveRequest(r)" name="btn_approve"
+										ng-click="requests.approveRequest(r)" name="btn_approve"
 										title="Approve request">
 										<i class="fa fa-check"></i> Approve
 									</button>
 									<button class="btn btn-danger btn-xs"
-										ng-click="ctrl.rejectRequest(r)" name="btn_reject"
+										ng-click="requests.rejectRequest(r)" name="btn_reject"
 										title="Reject request">
 										<i class="fa fa-times"></i> Reject
 									</button>
@@ -125,8 +138,8 @@
 						</tfoot>
 					</table>
 					<div class="text-center">
-						<ul uib-pagination ng-model="ctrl.currentPage"
-							items-per-page="ctrl.numPerPage" total-items="ctrl.list.length"
+						<ul uib-pagination ng-model="requests.currentPage"
+							items-per-page="requests.numPerPage" total-items="requests.filtered.length"
 							max-size="10" boundary-links="true"></ul>
 					</div>
 
