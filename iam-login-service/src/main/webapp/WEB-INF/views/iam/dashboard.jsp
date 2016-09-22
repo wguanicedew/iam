@@ -7,7 +7,23 @@
 <o:iamHeader title="INDIGO IAM | User Dashboard" />
 
 <body class="skin-blue" ng-app="dashboardApp">
-	<div class="wrapper" ng-controller="CommonController as commonCtrl">
+
+<script type="text/ng-template" id="noConnectionTemplate.html">
+<div class="modal-header">
+    <h3 class="modal-title">Connection to IAM server broken</h3>
+</div>
+<div class="modal-body">
+    <p>The connection was interrupted while the page was loading.</p>
+            <ul>
+                <li>The site could be temporarily unavailable or too busy. Try again in a few moments.</li>
+            </ul>
+</div>
+<div class="modal-footer" class="text-center">
+    <button class="btn btn-primary" data-dismiss="modal" type="button" data-ng-click="$root.refresh()">Retry</button>
+</div>
+</script>
+
+	<div class="wrapper">
 
 		<header class="main-header"></header>
 
@@ -18,6 +34,7 @@
 		<!-- Content Wrapper. Contains page content -->
 		<div class="content-wrapper" ui-view="content"></div>
 		<!-- /.content-wrapper -->
+
 	</div>
 
 	<footer class="main-footer">
@@ -51,13 +68,15 @@
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/sidebar.directive.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/registration.directive.js"></script>
 
+    <script type="text/javascript" src="/resources/iam/js/dashboard-app/factory/gatewayerror.interceptor.js"></script>
+    <script type="text/javascript" src="/resources/iam/js/dashboard-app/factory/sessionexpired.interceptor.js"></script>
+
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/services/scim-factory.service.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/services/modal.service.js"></script>
     <script type="text/javascript" src="/resources/iam/js/dashboard-app/services/passwordreset.service.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/services/registration.service.js"></script>
     <script type="text/javascript" src="/resources/iam/js/dashboard-app/services/utils.service.js"></script>
 
-    <script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/common.controller.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/home.controller.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/user.controller.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/group.controller.js"></script>

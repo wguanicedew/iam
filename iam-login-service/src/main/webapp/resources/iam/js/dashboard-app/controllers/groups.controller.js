@@ -96,11 +96,10 @@ function GroupsController($scope, $rootScope, $uibModal, $state, $filter,
 								gc.loadingModal.dismiss("Cancel");
 							}
 						}, function(error) {
-							console.log("Error: dismissing loading dialog");
+							console.log("getGroups error", error);
 							gc.loadingModal.dismiss("Error");
-							$state.go("error", {
-								"error" : error
-							});
+							gc.textAlert = error.data.error_description || error.data.detail;
+							gc.operationResult = 'err';
 						});
 	}
 

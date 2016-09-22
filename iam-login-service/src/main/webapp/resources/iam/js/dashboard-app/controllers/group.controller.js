@@ -20,9 +20,8 @@ function GroupController($state, $filter, scimFactory, ModalService) {
 						"display", false);
 
 			}, function(error) {
-				$state.go("error", {
-					"error" : error
-				});
+				group.textAlert = error.data.error_description || error.data.detail;
+				group.operationResult = 'err';
 			});
 
 	group.removeMemberFromList = removeMemberFromList;

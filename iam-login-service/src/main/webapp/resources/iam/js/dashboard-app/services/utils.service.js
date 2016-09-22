@@ -11,7 +11,7 @@ function Utils() {
 			isAdmin: isAdmin,
 			isUser: isUser,
 			getLoggedUser: getLoggedUser
-	    };
+		};
 
 	return service;
 	

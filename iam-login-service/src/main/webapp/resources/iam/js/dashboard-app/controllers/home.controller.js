@@ -23,9 +23,8 @@ function HomeController($state, Utils, scimFactory, ModalService) {
 	scimFactory.getMe().then(function(response) {
 		home.user.me = response.data;
 	}, function(error) {
-		$state.go("error", {
-			"error": error
-		});
+		home.textAlert = error.data.error_description || error.data.detail;
+		home.operationResult = 'err';
 	});
 
 	home.showSshKeyValue = showSshKeyValue;

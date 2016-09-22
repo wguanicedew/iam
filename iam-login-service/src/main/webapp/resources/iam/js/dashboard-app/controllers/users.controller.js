@@ -92,9 +92,8 @@ function UsersController($scope, $rootScope, $uibModal, $state, $filter, filterF
 						}, function(error) {
 							
 							users.loadingModal.dismiss("Error");
-							$state.go("error", {
-								"error" : error
-							});
+							users.textAlert = error.data.error_description || error.data.detail;
+							users.operationResult = 'err';
 						
 						});
 	}

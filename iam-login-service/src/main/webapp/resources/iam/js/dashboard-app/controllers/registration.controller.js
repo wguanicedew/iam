@@ -94,25 +94,10 @@ function RequestManagementController($scope, $rootScope, $state, $filter, filter
 					requests.operationResult = 'err';
 					
 					requests.loadingModal.dismiss("Error");
-					
-					$state.go("error", {
-						"error" : errResponse
-					});
 				});
 		});
 	}
 
-//	function listRequests(status) {
-//		RegistrationRequestService.listRequests(status).then(
-//			function(result) {
-//				requests.list = result.data;
-//			},
-//			function(errResponse) {
-//				requests.textAlert = errResponse.data.error_description || errResponse.data.detail;
-//				requests.operationResult = 'err';
-//			})
-//	};
-	
 	function listPending() {
 		RegistrationRequestService.listPending().then(
 			function(result) {
@@ -123,9 +108,6 @@ function RequestManagementController($scope, $rootScope, $state, $filter, filter
 			function(errResponse) {
 				requests.textAlert = errResponse.data.error_description || errResponse.data.detail;
 				requests.operationResult = 'err';
-				$state.go("error", {
-					"error" : errResponse
-				});
 			})
 	};
 

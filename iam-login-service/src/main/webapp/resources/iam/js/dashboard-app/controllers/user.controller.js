@@ -65,10 +65,11 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 				
 			}, function(error) {
 				
+				console.error("getUser", error)
 				user.loadingModal.dismiss("Error");
-				$state.go("error", {
-					"error": error
-				});
+				user.textAlert = error.data.error_description || error.data.detail;
+				user.operationResult = 'err';
+
 			});
 
 		});

@@ -11,6 +11,17 @@
 <!-- Main content -->
 <section class="content" ng-cloak>
 
+	<div class="row" ng-show="home.operationResult != null">
+		<div class="col-xs-12">
+			<div class="alert"
+				ng-class="{'alert-success': home.operationResult=='ok', 'alert-danger': home.operationResult=='err'}">
+				<button class="close" ng-click="home.operationResult=null"
+					aria-label="close">&times;</button>
+				{{home.textAlert}}
+			</div>
+		</div>
+	</div>
+
 	<div class="row">
 		<div class="col-md-3">
 
