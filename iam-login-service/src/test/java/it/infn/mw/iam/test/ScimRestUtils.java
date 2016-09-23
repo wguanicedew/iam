@@ -6,6 +6,8 @@ import org.springframework.http.HttpStatus;
 
 import com.jayway.restassured.response.ValidatableResponse;
 
+import it.infn.mw.iam.api.scim.model.ScimUser;
+
 public class ScimRestUtils {
 
   public static final String SCIM_CONTENT_TYPE = "application/scim+json";
@@ -137,4 +139,11 @@ public class ScimRestUtils {
 
     return doPatch(location, content, HttpStatus.NO_CONTENT);
   }
+
+  public void deleteUsers(ScimUser... scimUsers) {
+    for (ScimUser u : scimUsers) {
+      doDelete(u.getMeta().getLocation());
+    }
+  }
+
 }
