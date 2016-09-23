@@ -127,7 +127,7 @@ function UsersController($scope, $rootScope, $uibModal, $state, $filter, filterF
 		var modalOptions = {
 			closeButtonText: 'Cancel',
             actionButtonText: 'Delete User',
-            headerText: 'Delete?',
+            headerText: 'Delete user «' + user.name.formatted + '»',
             bodyText: `Are you sure you want to delete user '${user.name.formatted}'?`	
 		};
 		

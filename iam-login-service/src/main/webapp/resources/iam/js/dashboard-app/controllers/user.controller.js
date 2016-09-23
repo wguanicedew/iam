@@ -92,10 +92,9 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 		
 		var modalOptions = {
 				closeButtonText: 'Cancel',
-				user: user.userInfo.name.formatted,
 				actionButtonText: 'Send password reset e-mail',
-				headerText: 'Password Reset',
-				bodyText: `Are you sure you want to send the reset password link to ${user.userInfo.name.formatted}?`	
+				headerText: 'Send password reset e-mail',
+				bodyText: `Are you sure you want to send the password reset e-mail to ${user.userInfo.name.formatted}?`	
 			};
 				
 			ModalService.showModal({}, modalOptions).then(
@@ -233,10 +232,9 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 		
 		var modalOptions = {
 			closeButtonText: 'Cancel',
-			user: user.userInfo.name.formatted,
 			actionButtonText: 'Remove user from group',
-			headerText: 'Remove membership',
-			bodyText: `Are you sure you want to remove user memebership to '${group.display}'?`	
+			headerText: 'Remove ' + user.userInfo.name.formatted + ' from ' + group.display,
+			bodyText: `Are you sure you want to remove «${user.userInfo.name.formatted}» from «${group.display}»?`	
 		};
 			
 		ModalService.showModal({}, modalOptions).then(
@@ -253,14 +251,13 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 			});
 	}
 
-	function showSshKeyValue(value) {
+	function showSshKeyValue(sshKey) {
 
 		ModalService.showModal({}, {
 			closeButtonText: null,
-			user: user.userInfo.name.formatted,
 			actionButtonText: 'OK',
-			headerText: 'SSH Key value',
-			bodyText: `${value}`
+			headerText: sshKey.display,
+			bodyText: `${sshKey.value}`
 		});
 	}
 
@@ -268,9 +265,8 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 
 		ModalService.showModal({}, {
 			closeButtonText: null,
-			user: user.userInfo.name.formatted,
 			actionButtonText: 'OK',
-			headerText: 'x509 Certificate value',
+			headerText: cert.display,
 			bodyText: `${cert.value}`
 		});
 	}
@@ -281,10 +277,9 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 		
 		var modalOptions = {
 				closeButtonText: 'Cancel',
-				user: user.userInfo.name.formatted,
 				actionButtonText: 'Remove Open ID Account',
 				headerText: 'Remove Open ID Account',
-				bodyText: `Are you sure you want to remove the Open ID Account?`,
+				bodyText: `Are you sure you want to remove the following Open ID Account?`,
 				bodyDetail: `${summary}`
 			};
 				
@@ -306,10 +301,9 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 		
 		var modalOptions = {
 				closeButtonText: 'Cancel',
-				user: user.userInfo.name.formatted,
 				actionButtonText: 'Remove ssh key',
-				headerText: 'Remove ssh key',
-				bodyText: `Are you sure you want to remove the ssh key [${sshKey.display}]?`	
+				headerText: 'Remove ssh key «' + sshKey.display + '»',
+				bodyText: `Are you sure you want to remove '${sshKey.display} ssh key?`
 			};
 				
 			ModalService.showModal({}, modalOptions).then(
@@ -329,11 +323,9 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 
 		var modalOptions = {
 				closeButtonText: 'Cancel',
-				user: user.userInfo.name.formatted,
 				actionButtonText: 'Remove x509 Certificate',
-				headerText: 'Remove x509 Certificate',
-				bodyText: `Are you sure you want to remove this x509 Certificate?`,
-				bodyDetail: `${x509cert.display}`	
+				headerText: 'Remove «' + x509cert.display + '» x509 certificate?',
+				bodyText: `Are you sure you want to remove «${x509cert.display}» x509 Certificate?`,
 			};
 				
 			ModalService.showModal({}, modalOptions).then(
@@ -355,10 +347,9 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 		
 		var modalOptions = {
 				closeButtonText: 'Cancel',
-				user: user.userInfo.name.formatted,
 				actionButtonText: 'Remove SAML Account',
 				headerText: 'Remove SAML account',
-				bodyText: `Are you sure you want to remove this SAML Account?`,
+				bodyText: `Are you sure you want to remove the following SAML Account?`,
 				bodyDetail: `${summary}`	
 			};
 				

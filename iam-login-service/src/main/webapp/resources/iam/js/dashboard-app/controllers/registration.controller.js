@@ -122,9 +122,9 @@ function RequestManagementController($scope, $rootScope, $state, $filter, filter
 		
 		var modalOptions = {
 			closeButtonText: 'Cancel',
-            actionButtonText: 'Reject Request',
-            headerText: 'Reject?',
-            bodyText: `Are you sure you want to reject request for ${request.givenname} ${request.familyname}?`	
+            actionButtonText: 'Reject Registration Request',
+            headerText: 'Reject «' + request.givenname + " " + request.familyname + "» registration request",
+            bodyText: `Are you sure you want to reject '${request.givenname} ${request.familyname}' registration request?`	
 		};
 		
 		ModalService.showModal({}, modalOptions).then(
