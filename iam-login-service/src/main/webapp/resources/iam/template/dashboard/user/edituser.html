@@ -119,6 +119,9 @@
 
 		<button class="btn btn-primary btn-sm" type="submit" name="create" id="modal-btn-confirm"
 			ng-disabled="userUpdateForm.$invalid || !userUpdateForm.$dirty || !editUserCtrl.enabled">Update</button>
+		<button class="btn btn-warning btn-sm" type="button" name="reset" id="modal-btn-reset"
+            ng-click="editUserCtrl.reset()"
+            ng-disabled="userUpdateForm.$pristine">Reset Form</button>
 		<button class="btn btn-danger btn-sm" type="button" name="dismiss" id="modal-btn-cancel"
 			ng-click="editUserCtrl.dismiss()">Cancel</button>
 	</div>

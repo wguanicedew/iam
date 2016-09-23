@@ -10,27 +10,14 @@ function EditUserController($scope, $state, $uibModalInstance, Utils,
 		scimFactory, user) {
 
 	var editUserCtrl = this;
-
-	console.log("received user to edit: ", user);
-
-	editUserCtrl.userToEdit = user;
 	
-	editUserCtrl.user = {
-		givenName : user.name.givenName,
-		familyName : user.name.familyName,
-		userName : user.userName,
-		email : user.emails[0].value,
-		picture : user.picture,
-		id: user.id
-	}
-
-	console.log("builded user: ", editUserCtrl.user);
+	editUserCtrl.userToEdit = user;
 
 	editUserCtrl.submit = submit;
 	editUserCtrl.reset = reset;
 	editUserCtrl.dismiss = dismiss;
 
-	editUserCtrl.enabled = true;
+	editUserCtrl.reset();
 
 	function submit() {
 
@@ -72,12 +59,17 @@ function EditUserController($scope, $state, $uibModalInstance, Utils,
 
 	function reset() {
 		editUserCtrl.user = {
-			givenname : '',
-			familyname : '',
-			username : '',
-			email : ''
-		};
-		$scope.userCreationForm.$setPristine();
+				givenName : user.name.givenName,
+				familyName : user.name.familyName,
+				userName : user.userName,
+				email : user.emails[0].value,
+				picture : user.picture,
+				id: user.id
+			};
+		if ($scope.userUpdateForm) {
+			$scope.userUpdateForm.$setPristine();
+		}
+		editUserCtrl.enabled = true;
 	}
 
 	function dismiss() {
