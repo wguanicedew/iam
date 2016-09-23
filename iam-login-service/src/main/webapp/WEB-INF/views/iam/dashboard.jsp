@@ -81,7 +81,6 @@
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/home.controller.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/user.controller.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/group.controller.js"></script>
-	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/error.controller.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/users.controller.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/groups.controller.js"></script>
     <script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/registration.controller.js"></script>
