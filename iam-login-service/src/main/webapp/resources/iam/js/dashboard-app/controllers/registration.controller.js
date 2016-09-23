@@ -2,15 +2,12 @@
 
 angular.module('dashboardApp').controller('RequestManagementController', RequestManagementController);
 
-RequestManagementController.$inject = ['$scope', '$rootScope', '$state', '$filter', 'filterFilter', '$uibModal', 'RegistrationRequestService', 'ModalService'];
+RequestManagementController.$inject = ['$scope', '$rootScope', '$state', '$filter', 'filterFilter', '$uibModal', 'RegistrationRequestService', 'ModalService', 'Utils'];
 
-function RequestManagementController($scope, $rootScope, $state, $filter, filterFilter, $uibModal, RegistrationRequestService, ModalService){
+function RequestManagementController($scope, $rootScope, $state, $filter, filterFilter, $uibModal, RegistrationRequestService, ModalService, Utils){
 
 	var requests = this;
-	requests.operationResult;
-	requests.textAlert;
 	
-//	requests.listRequests = listRequests;
 	requests.listPending = listPending;
 	requests.approveRequest = approveRequest;
 	requests.rejectRequest = rejectRequest;
@@ -89,10 +86,9 @@ function RequestManagementController($scope, $rootScope, $state, $filter, filter
 					
 					requests.loadingModal.dismiss("Cancel");
 				},
-				function(errResponse) {
-					requests.textAlert = errResponse.data.error_description || errResponse.data.detail;
-					requests.operationResult = 'err';
-					
+				function(error) {
+
+					$scope.operationResult = Utils.buildErrorOperationResult(error);
 					requests.loadingModal.dismiss("Error");
 				});
 		});
@@ -105,22 +101,20 @@ function RequestManagementController($scope, $rootScope, $state, $filter, filter
 				requests.rebuildFilteredList();
 				$rootScope.loggedUser.pendingRequests = result.data;
 			},
-			function(errResponse) {
-				requests.textAlert = errResponse.data.error_description || errResponse.data.detail;
-				requests.operationResult = 'err';
+			function(error) {
+				$scope.operationResult = Utils.buildErrorOperationResult(error);
 			})
 	};
 
 	function approveRequest(request) {
 		RegistrationRequestService.updateRequest(request.uuid, 'APPROVED').then(
 			function() {
-				requests.textAlert = `${request.givenname} ${request.familyname} request approved successfully`;
-				requests.operationResult = 'ok';
+				var msg = request.givenname + " " + request.familyname + " request APPROVED successfully";
+				$scope.operationResult = Utils.buildSuccessOperationResult(msg);
 				requests.listPending();
 			},
-			function(errResponse) {
-				requests.textAlert = errResponse.data.error_description || errResponse.data.detail;
-				requests.operationResult = 'err';
+			function(error) {
+				$scope.operationResult = Utils.buildErrorOperationResult(error);
 			})
 	};
 
@@ -137,13 +131,12 @@ function RequestManagementController($scope, $rootScope, $state, $filter, filter
 				function (){
 					RegistrationRequestService.updateRequest(request.uuid, 'REJECTED').then(
 							function() {
-								requests.textAlert = `${request.givenname} ${request.familyname} request rejected successfully`;
-								requests.operationResult = 'ok';
+								var msg = request.givenname + " " + request.familyname + " request REJECTED successfully";
+								$scope.operationResult = Utils.buildSuccessOperationResult(msg);
 								requests.listPending();
 							},
-							function(errResponse) {
-								requests.textAlert = errResponse.data.error_description || errResponse.data.detail;
-								requests.operationResult = 'err';
+							function(error) {
+								$scope.operationResult = Utils.buildErrorOperationResult(error);
 							})
 				});
 	};

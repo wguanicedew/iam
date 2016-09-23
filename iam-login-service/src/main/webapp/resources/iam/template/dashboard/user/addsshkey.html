@@ -15,21 +15,16 @@
 			ng-model="addSshKeyCtrl.value"></textarea>
 	</div>
 
-	<div class="row" ng-show="addSshKeyCtrl.operationResult != null">
+	<div class="row">
 		<div class="col-xs-12">
-			<div class="alert"
-				ng-class="{'alert-success': addSshKeyCtrl.operationResult=='ok', 'alert-danger': addSshKeyCtrl.operationResult=='err'}">
-				<button class="close" ng-click="addSshKeyCtrl.operationResult=null"
-					aria-label="close">&times;</button>
-				{{addSshKeyCtrl.textAlert}}
-			</div>
+			<operationresult/>
 		</div>
 	</div>
 
 </div>
 <div class="modal-footer">
 	<button class="btn btn-primary" type="button" id="modal-btn-confirm"
-		ng-disabled="!addSshKeyCtrl.label ||  !addSshKeyCtrl.value"
+		ng-disabled="!addSshKeyCtrl.label ||  !addSshKeyCtrl.value || !addSshKeyCtrl.enabled"
 		ng-click="addSshKeyCtrl.addSshKey()">Add Key</button>
 	<button class="btn btn-danger" type="button" id="modal-btn-cancel"
 		ng-click="addSshKeyCtrl.cancel()">Cancel</button>

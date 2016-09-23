@@ -10,7 +10,9 @@ function Utils() {
 			isMe: isMe,
 			isAdmin: isAdmin,
 			isUser: isUser,
-			getLoggedUser: getLoggedUser
+			getLoggedUser: getLoggedUser,
+			buildErrorOperationResult: buildErrorOperationResult,
+			buildSuccessOperationResult: buildSuccessOperationResult
 		};
 
 	return service;
@@ -42,5 +44,21 @@ function Utils() {
 	function getLoggedUser() {
 		
 		return { info: getUserInfo(), auth: getUserAuthorities(), isAdmin: isAdmin() };
+	}
+	
+	function buildErrorOperationResult(error) {
+
+		return { 
+			type: "error",
+			text: error.data.error_description || error.data.detail
+		}
+	}
+
+	function buildSuccessOperationResult(message) {
+
+		return { 
+			type: "success",
+			text: message
+		}
 	}
 }

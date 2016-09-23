@@ -3,10 +3,10 @@
 angular.module('dashboardApp').controller('AddUserGroupController',
 		AddUserGroupController);
 
-AddUserGroupController.$inject = [ '$scope', '$state', '$filter', '$q',
+AddUserGroupController.$inject = [ '$scope', '$state', '$filter', 'Utils', '$q',
 		'$uibModalInstance', '$sanitize', 'scimFactory', 'user' ];
 
-function AddUserGroupController($scope, $state, $filter, $q, $uibModalInstance,
+function AddUserGroupController($scope, $state, $filter, Utils, $q, $uibModalInstance,
 		$sanitize, scimFactory, user) {
 
 	var addGroupCtrl = this;
@@ -27,7 +27,7 @@ function AddUserGroupController($scope, $state, $filter, $q, $uibModalInstance,
 	addGroupCtrl.groupsSelected = null;
 	addGroupCtrl.groups = [];
 	addGroupCtrl.oGroups = [];
-	addGroupCtrl.disabled = false;
+	addGroupCtrl.enabled = true;
 
 	addGroupCtrl.loadGroups();
 
@@ -49,6 +49,7 @@ function AddUserGroupController($scope, $state, $filter, $q, $uibModalInstance,
 
 	function addGroup() {
 
+		addGroupCtrl.enabled = false;
 		var requests = [];
 		angular.forEach(addGroupCtrl.groupsSelected, function(groupToAdd) {
 			requests.push(scimFactory.addUserToGroup(groupToAdd.id,
@@ -58,10 +59,11 @@ function AddUserGroupController($scope, $state, $filter, $q, $uibModalInstance,
 		$q.all(requests).then(function(response) {
 			console.log("Added ", addGroupCtrl.groupsSelected);
 			$uibModalInstance.close(response);
+			addGroupCtrl.enabled = true;
 		}, function(error) {
 			console.error(error);
-			addGroupCtrl.textAlert = error.data.error_description || error.data.detail;
-			addGroupCtrl.operationResult = 'err';
+			$scope.operationResult = Utils.buildErrorOperationResult(error);
+			addGroupCtrl.enabled = true;
 		});
 	}
 	
@@ -89,21 +91,20 @@ function AddUserGroupController($scope, $state, $filter, $q, $uibModalInstance,
 				}, function(error) {
 
 					console.error(error);
-					addGroupCtrl.textAlert = error.data.error_description || error.data.detail;
-					addGroupCtrl.operationResult = 'err';
+					$scope.operationResult = Utils.buildErrorOperationResult(error);
 				});
 	}
 
-		function getNotMemberGroups() {
+	function getNotMemberGroups() {
 	
-			return addGroupCtrl.groups.filter(function(group) {
-				for ( var i in addGroupCtrl.user.groups) {
-					if (group.id === addGroupCtrl.user.groups[i].value) {
-						return false;
-					}
+		return addGroupCtrl.groups.filter(function(group) {
+			for ( var i in addGroupCtrl.user.groups) {
+				if (group.id === addGroupCtrl.user.groups[i].value) {
+					return false;
 				}
-				return true;
-			});
-		}
+			}
+			return true;
+		});
+	}
 
 }

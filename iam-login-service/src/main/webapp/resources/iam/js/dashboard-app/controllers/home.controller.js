@@ -20,11 +20,13 @@ function HomeController($state, Utils, scimFactory, ModalService) {
 	home.isAdmin = Utils.isAdmin();
 	home.isUser = Utils.isUser();
 	
+	home.loaded = false;
+
 	scimFactory.getMe().then(function(response) {
 		home.user.me = response.data;
+		home.loaded = true;
 	}, function(error) {
-		home.textAlert = error.data.error_description || error.data.detail;
-		home.operationResult = 'err';
+		$scope.operationResult = Utils.buildErrorOperationResult(error);
 	});
 
 	home.showSshKeyValue = showSshKeyValue;

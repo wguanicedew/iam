@@ -3,10 +3,10 @@
 angular.module('dashboardApp').controller('UsersController', UsersController);
 
 UsersController.$inject = [ '$scope', '$rootScope', '$uibModal', '$state', '$filter',
-		'filterFilter', 'scimFactory', 'ModalService' ];
+		'filterFilter', 'scimFactory', 'ModalService' , 'Utils'];
 
 function UsersController($scope, $rootScope, $uibModal, $state, $filter, filterFilter,
-		scimFactory, ModalService) {
+		scimFactory, ModalService, Utils) {
 
 	var users = this;
 
@@ -92,8 +92,7 @@ function UsersController($scope, $rootScope, $uibModal, $state, $filter, filterF
 						}, function(error) {
 							
 							users.loadingModal.dismiss("Error");
-							users.textAlert = error.data.error_description || error.data.detail;
-							users.operationResult = 'err';
+							$scope.operationResult = Utils.buildErrorOperationResult(error);
 						
 						});
 	}
@@ -138,11 +137,9 @@ function UsersController($scope, $rootScope, $uibModal, $state, $filter, filterF
 						function(response) {
 							users.removeUserFromList(user);
 							$rootScope.loggedUser.totUsers = $rootScope.loggedUser.totUsers -1;
-							users.textAlert = `User ${user.displayName} deleted successfully`;
-							users.operationResult = 'ok';
+							$scope.operationResult = Utils.buildSuccessOperationResult("User " + user.displayName + " has been removed successfully");
 						}, function(error) {
-							users.textAlert = error.data.error_description || error.data.detail;
-							users.operationResult = 'err';
+							$scope.operationResult = Utils.buildErrorOperationResult(error);
 						});
 				});
 	};

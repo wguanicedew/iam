@@ -6,14 +6,7 @@
 	</div>
 
 	<div class="modal-body">
-		<div ng-show="addUserCtrl.operationResult != null">
-			<div class="alert"
-				ng-class="{'alert-success': addUserCtrl.operationResult=='ok', 'alert-danger': addUserCtrl.operationResult=='err'}">
-				<button class="close" ng-click="addUserCtrl.operationResult=null"
-					aria-label="close">&times;</button>
-				{{addUserCtrl.textAlert}}
-			</div>
-		</div>
+		<operationresult/>
 
 		<div class="form-group">
 			<label class="control-label col-sm-2" for="name">Name</label>
@@ -103,7 +96,7 @@
 	</div>
 	<div class="modal-footer">
 		<button class="btn btn-primary btn-sm" type="submit" name="create" id="modal-btn-confirm"
-			ng-disabled="!userCreationForm.$valid || userCreationForm.$pristine">
+			ng-disabled="!userCreationForm.$valid || userCreationForm.$pristine || !addUserCtrl.enabled">
 			Create</button>
 		<button class="btn btn-warning btn-sm" type="button" name="reset" id="modal-btn-reset"
 			ng-click="addUserCtrl.reset()"

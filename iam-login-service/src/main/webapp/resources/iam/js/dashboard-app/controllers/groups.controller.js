@@ -3,10 +3,10 @@
 angular.module('dashboardApp').controller('GroupsController', GroupsController);
 
 GroupsController.$inject = [ '$scope', '$rootScope', '$uibModal', '$state',
-		'$filter', 'filterFilter', 'scimFactory', 'ModalService' ];
+		'$filter', 'filterFilter', 'scimFactory', 'ModalService', 'Utils' ];
 
 function GroupsController($scope, $rootScope, $uibModal, $state, $filter,
-		filterFilter, scimFactory, ModalService) {
+		filterFilter, scimFactory, ModalService, Utils) {
 
 	var gc = this;
 
@@ -98,8 +98,7 @@ function GroupsController($scope, $rootScope, $uibModal, $state, $filter,
 						}, function(error) {
 							console.log("getGroups error", error);
 							gc.loadingModal.dismiss("Error");
-							gc.textAlert = error.data.error_description || error.data.detail;
-							gc.operationResult = 'err';
+							$scope.operationResult = Utils.buildErrorOperationResult(error);
 						});
 	}
 
@@ -113,8 +112,7 @@ function GroupsController($scope, $rootScope, $uibModal, $state, $filter,
 			console.info(createdGroup);
 			gc.groups.push(createdGroup);
 			gc.rebuildFilteredList();
-			gc.textAlert = `Group ${createdGroup.displayName} added successfully`;
-			gc.operationResult = 'ok';
+			$scope.operationResult = Utils.buildSuccessOperationResult("Group " + createdGroup.displayName + " CREATED successfully");
 		}, function() {
 			console.info('Modal dismissed at: ', new Date());
 		});
@@ -144,11 +142,9 @@ function GroupsController($scope, $rootScope, $uibModal, $state, $filter,
 					.then(function(response) {
 						gc.removeGroupFromList(group);
 						$rootScope.loggedUser.totGroups = $rootScope.loggedUser.totGroups -1;
-						gc.textAlert = `Group ${group.displayName} deleted successfully`;
-						gc.operationResult = 'ok';
+						$scope.operationResult = Utils.buildSuccessOperationResult("Group " + group.displayName + " DELETED successfully");
 					}, function(error) {
-						gc.textAlert = error.data.error_description || error.data.detail;
-						gc.operationResult = 'err';
+						$scope.operationResult = Utils.buildErrorOperationResult(error);
 					});
 			});
 	}

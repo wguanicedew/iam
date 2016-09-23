@@ -26,27 +26,15 @@ function EditUserController($scope, $state, $uibModalInstance, Utils,
 
 	console.log("builded user: ", editUserCtrl.user);
 
-	editUserCtrl.textAlert;
-	editUserCtrl.operationResult;
-
-	editUserCtrl.updateUser = updateUser;
 	editUserCtrl.submit = submit;
 	editUserCtrl.reset = reset;
 	editUserCtrl.dismiss = dismiss;
 
-	function updateUser(scimUser) {
-		scimFactory.updateUser(scimUser).then(
-				function(response) {
-					$uibModalInstance.close(response);
-				},
-				function(error) {
-					editUserCtrl.operationResult = 'err';
-					editUserCtrl.textAlert = error.data.error_description
-							|| error.data.detail;
-				});
-	}
+	editUserCtrl.enabled = true;
 
 	function submit() {
+
+		editUserCtrl.enabled = false;
 
 		var scimUser = {};
 
@@ -71,7 +59,15 @@ function EditUserController($scope, $state, $uibModalInstance, Utils,
 
 		console.info("Adding user ... ", scimUser);
 
-		editUserCtrl.updateUser(scimUser);
+		scimFactory.updateUser(scimUser).then(
+			function(response) {
+				$uibModalInstance.close(response);
+				editUserCtrl.enabled = true;
+			},
+			function(error) {
+				$scope.operationResult = Utils.buildErrorOperationResult(error);
+				editUserCtrl.enabled = true;
+			});
 	}
 
 	function reset() {

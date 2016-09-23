@@ -2,9 +2,9 @@
 
 angular.module('dashboardApp').controller('GroupController', GroupController);
 
-GroupController.$inject = [ '$state', '$filter', 'scimFactory', 'ModalService' ];
+GroupController.$inject = [ '$state', '$filter', 'scimFactory', 'ModalService', 'Utils' ];
 
-function GroupController($state, $filter, scimFactory, ModalService) {
+function GroupController($state, $filter, scimFactory, ModalService, Utils) {
 
 	var group = this;
 
@@ -20,8 +20,7 @@ function GroupController($state, $filter, scimFactory, ModalService) {
 						"display", false);
 
 			}, function(error) {
-				group.textAlert = error.data.error_description || error.data.detail;
-				group.operationResult = 'err';
+				$scope.operationResult = Utils.buildErrorOperationResult(error);
 			});
 
 	group.removeMemberFromList = removeMemberFromList;
@@ -40,7 +39,7 @@ function GroupController($state, $filter, scimFactory, ModalService) {
 				closeButtonText: 'Cancel',
 				actionButtonText: 'Remove membership',
 				headerText: 'Remove «' + user.display + "» from «" + group.data.displayName + "»",
-				bodyText: `Are you sure you want to remove '${user.display}' memebership to '${group.data.displayName}'?`	
+				bodyText: `Are you sure you want to remove '${user.display}' from '${group.data.displayName}'?`	
 			};
 				
 			ModalService.showModal({}, modalOptions).then(
@@ -50,11 +49,9 @@ function GroupController($state, $filter, scimFactory, ModalService) {
 						.then(function(response) {
 							console.log("Deleted: ", user.display);
 							group.removeMemberFromList(user);
-							group.textAlert = `User ${user.display} membership removed successfully`;
-							group.operationResult = 'ok';
+							$scope.operationResult = Utils.buildSuccessOperationResult("User " + user.display + " membership has been removed successfully");
 						}, function(error) {
-							group.textAlert = error.data.error_description || error.data.detail;
-							group.operationResult = 'err';
+							$scope.operationResult = Utils.buildErrorOperationResult(error);
 						});
 				});
 	}

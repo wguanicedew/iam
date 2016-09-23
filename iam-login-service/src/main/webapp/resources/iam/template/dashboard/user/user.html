@@ -13,14 +13,9 @@
 <!-- Main content -->
 <section class="content">
 
-	<div class="row" ng-show="user.operationResult != null">
-		<div class="col-xs-12">
-			<div class="alert"
-				ng-class="{'alert-success': user.operationResult=='ok', 'alert-danger': user.operationResult=='err'}">
-				<button class="close" ng-click="user.operationResult=null"
-					aria-label="close">&times;</button>
-				{{user.textAlert}}
-			</div>
+	<div class="row">
+		<div class="col-md-12">
+			<operationresult />
 		</div>
 	</div>
 

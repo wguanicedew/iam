@@ -16,14 +16,7 @@
 	<div class="row" ng-show="$root.requestsLoadingProgress == 100">
 		<div class="col-xs-12">
 
-			<div ng-show="requests.operationResult != null">
-				<div class="alert"
-					ng-class="{'alert-success': requests.operationResult=='ok', 'alert-danger': requests.operationResult=='err'}">
-					<button class="close" ng-click="requests.operationResult=null"
-						aria-label="close">&times;</button>
-					{{requests.textAlert}}
-				</div>
-			</div>
+			<operationresult/>
 
 			<div class="alert alert-info" ng-show="!requests.list.length">
 				<h4>
