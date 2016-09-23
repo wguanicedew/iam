@@ -69,8 +69,7 @@ public class DefaultNotificationService implements NotificationService {
     model.put("confirmURL", confirmURL);
 
     return createMessage("confirmRegistration.vm", model, IamNotificationType.CONFIRMATION,
-        properties.getSubject().get("confirmation"), request,
-        request.getAccount().getUserInfo().getEmail());
+        properties.getSubject().get("confirmation"), request.getAccount().getUserInfo().getEmail());
   }
 
   @Override
@@ -85,8 +84,7 @@ public class DefaultNotificationService implements NotificationService {
     model.put("resetPasswordUrl", resetPasswordUrl);
 
     return createMessage("accountActivated.vm", model, IamNotificationType.ACTIVATED,
-        properties.getSubject().get("activated"), request,
-        request.getAccount().getUserInfo().getEmail());
+        properties.getSubject().get("activated"), request.getAccount().getUserInfo().getEmail());
   }
 
   @Override
@@ -97,8 +95,7 @@ public class DefaultNotificationService implements NotificationService {
     model.put(RECIPIENT_FIELD, recipient);
 
     return createMessage("requestRejected.vm", model, IamNotificationType.REJECTED,
-        properties.getSubject().get("rejected"), request,
-        request.getAccount().getUserInfo().getEmail());
+        properties.getSubject().get("rejected"), request.getAccount().getUserInfo().getEmail());
   }
 
   @Override
@@ -113,7 +110,7 @@ public class DefaultNotificationService implements NotificationService {
     model.put("email", email);
 
     return createMessage("adminHandleRequest.vm", model, IamNotificationType.CONFIRMATION,
-        properties.getSubject().get("adminHandleRequest"), request, properties.getAdminAddress());
+        properties.getSubject().get("adminHandleRequest"), properties.getAdminAddress());
   }
 
   @Override
@@ -128,7 +125,7 @@ public class DefaultNotificationService implements NotificationService {
     model.put("resetPasswordUrl", resetPasswordUrl);
 
     return createMessage("resetPassword.vm", model, IamNotificationType.RESETPASSWD,
-        properties.getSubject().get("resetPassword"), null, account.getUserInfo().getEmail());
+        properties.getSubject().get("resetPassword"), account.getUserInfo().getEmail());
   }
 
   @Override
@@ -196,8 +193,7 @@ public class DefaultNotificationService implements NotificationService {
 
 
   private IamEmailNotification createMessage(String template, Map<String, Object> model,
-      IamNotificationType messageType, String subject, IamRegistrationRequest request,
-      String receiverAddress) {
+      IamNotificationType messageType, String subject, String receiverAddress) {
 
     String body =
         VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, template, "UTF-8", model);
@@ -209,7 +205,6 @@ public class DefaultNotificationService implements NotificationService {
     message.setBody(body);
     message.setCreationTime(new Date());
     message.setDeliveryStatus(IamDeliveryStatus.PENDING);
-    message.setRequest(request);
 
     List<IamNotificationReceiver> receivers = new ArrayList<>();
     IamNotificationReceiver rcv = new IamNotificationReceiver();

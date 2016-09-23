@@ -86,6 +86,8 @@ public class NotificationTests {
   public void tearDown() throws InterruptedException {
     wiser.stop();
     Thread.sleep(1000L);
+
+    notificationRepository.deleteAll();
   }
 
   @Test
@@ -255,8 +257,6 @@ public class NotificationTests {
     message = wiser.getMessages().get(2);
     Assert.assertEquals(properties.getSubject().get("rejected"),
         message.getMimeMessage().getSubject());
-
-    deleteUser(reg.getAccountId());
   }
 
   @Test
