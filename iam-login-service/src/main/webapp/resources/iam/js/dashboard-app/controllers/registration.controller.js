@@ -6,6 +6,11 @@ RequestManagementController.$inject = ['$scope', '$rootScope', '$state', '$filte
 
 function RequestManagementController($scope, $rootScope, $state, $filter, filterFilter, $uibModal, RegistrationRequestService, ModalService, Utils){
 
+	if (!$rootScope.isRegistrationEnabled) {
+		console.info("Registration is disabled");
+		return;
+	}
+
 	var requests = this;
 	
 	requests.listPending = listPending;

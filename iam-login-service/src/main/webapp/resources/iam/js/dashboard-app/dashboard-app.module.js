@@ -28,7 +28,7 @@ angular.module('dashboardApp').run(
 			console.log("Opening offline dialog");
 			$rootScope.offlineDialog = $uibModal
 				.open({
-					animation: false,
+					animation : false,
 					backdrop  : 'static',
 					keyboard  : false,
 					templateUrl: "noConnectionTemplate.html"
@@ -38,30 +38,30 @@ angular.module('dashboardApp').run(
 
 	// logged user
 	$rootScope.loggedUser = Utils.getLoggedUser();
+	$rootScope.isRegistrationEnabled = Utils.isRegistrationEnabled();
 
 	scimFactory.getMe().then(function(response) {
 		console.log(response.data);
 		$rootScope.loggedUser.me = response.data;
 	}, function(error) {
 		console.error(error);
-		$rootScope.errors.push(error);
 	});
-	
-	RegistrationRequestService.listPending().then(function(response) {
-		console.log(response.data);
-		$rootScope.loggedUser.pendingRequests = response.data;
-	}, function(error) {
-		console.error(error);
-		$rootScope.errors.push(error);
-		$rootScope.loggedUser.pendingRequests = undefined;
-	});
-	
+
+	if ($rootScope.isRegistrationEnabled) {
+		RegistrationRequestService.listPending().then(function(response) {
+			console.log(response.data);
+			$rootScope.loggedUser.pendingRequests = response.data;
+		}, function(error) {
+			console.error(error);
+			$rootScope.loggedUser.pendingRequests = undefined;
+		});
+	}
+
 	scimFactory.getUsers(1, 1).then(function(response) {
 		console.log(response.data);
 		$rootScope.loggedUser.totUsers = response.data.totalResults;
 	}, function(error) {
 		console.error(error);
-		$rootScope.errors.push(error);
 		$rootScope.loggedUser.totUsers = undefined;
 	});
 
@@ -70,7 +70,6 @@ angular.module('dashboardApp').run(
 		$rootScope.loggedUser.totGroups = response.data.totalResults;
 	}, function(error) {
 		console.error(error);
-		$rootScope.errors.push(error);
 		$rootScope.loggedUser.totGroups = undefined;
 	});
 

@@ -11,6 +11,7 @@ function Utils() {
 			isAdmin: isAdmin,
 			isUser: isUser,
 			getLoggedUser: getLoggedUser,
+			isRegistrationEnabled: isRegistrationEnabled,
 			buildErrorOperationResult: buildErrorOperationResult,
 			buildSuccessOperationResult: buildSuccessOperationResult
 		};
@@ -45,7 +46,12 @@ function Utils() {
 		
 		return { info: getUserInfo(), auth: getUserAuthorities(), isAdmin: isAdmin() };
 	}
-	
+
+	function isRegistrationEnabled() {
+
+		return getRegistrationEnabled();
+	}
+
 	function buildErrorOperationResult(error) {
 
 		return { 

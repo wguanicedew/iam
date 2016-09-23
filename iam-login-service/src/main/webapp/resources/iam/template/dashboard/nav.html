@@ -27,7 +27,7 @@
 					<small class="label pull-right bg-green">{{
 						$root.loggedUser.totGroups }}</small>
 			</span> </a></li>
-		<li ng-show="$root.loggedUser.isAdmin"><a ui-sref="requests"> <i class="fa fa-sign-in"></i> <span>Requests</span>
+		<li ng-show="$root.loggedUser.isAdmin && $root.isRegistrationEnabled"><a ui-sref="requests"> <i class="fa fa-sign-in"></i> <span>Requests</span>
 				<span class="pull-right-container" ng-show="$root.loggedUser.pendingRequests.length>0"> <small
 					class="label pull-right bg-red">{{ $root.loggedUser.pendingRequests.length }}</small>
 			</span>

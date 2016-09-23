@@ -10,21 +10,32 @@
 	</ol>
 </section>
 
-<section class="content" ng-init="requests.loadData()" ng-cloak
-	style="min-height: 650px;">
+<section class="content" ng-cloak style="min-height: 650px;">
 
-	<div class="row" ng-show="$root.requestsLoadingProgress == 100">
+	<div class="row" ng-show="!$root.isRegistrationEnabled">
 		<div class="col-xs-12">
+			<div class="alert alert-warning">
+				<h4>
+					<i class="icon fa fa-info"></i> Registration is disabled.
+				</h4>
+			</div>
+		</div>
+	</div>
 
+	<div class="row" ng-show="$root.isRegistrationEnabled && $root.requestsLoadingProgress == 100" ng-init="requests.loadData()">
+
+		<div class="col-xs-12">
 			<operationresult/>
+		</div>
 
+		<div class="col-xs-12">
 			<div class="alert alert-info" ng-show="!requests.list.length">
 				<h4>
 					<i class="icon fa fa-info"></i> No pending requests found!
 				</h4>
 			</div>
-
 		</div>
+
 		<div class="col-xs-12" ng-show="requests.list.length > 0" ng-cloak>
 
 			<div class="box">
