@@ -30,25 +30,19 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 
 import it.infn.mw.iam.api.scim.model.ScimConstants;
+import it.infn.mw.iam.api.scim.model.ScimGroup;
+import it.infn.mw.iam.api.scim.model.ScimGroupPatchRequest;
 import it.infn.mw.iam.api.scim.model.ScimListResponse;
-import it.infn.mw.iam.api.scim.model.ScimUser;
-import it.infn.mw.iam.api.scim.model.ScimUserPatchRequest;
-import it.infn.mw.iam.api.scim.provisioning.ScimUserProvisioning;
+import it.infn.mw.iam.api.scim.provisioning.ScimGroupProvisioning;
 import it.infn.mw.iam.api.scim.provisioning.paging.DefaultScimPageRequest;
 import it.infn.mw.iam.api.scim.provisioning.paging.ScimPageRequest;
 
 @RestController
-@RequestMapping("/scim/Users")
+@RequestMapping("/scim/Groups")
 @Transactional
-public class UserController {
+public class ScimGroupController {
 
-  private static final int SCIM_MAX_PAGE_SIZE = 100;
-
-  @Autowired
-  ScimUserProvisioning userProvisioningService;
-
-  FilterProvider excludePasswordFilter = new SimpleFilterProvider().addFilter("passwordFilter",
-      SimpleBeanPropertyFilter.serializeAllExcept("password"));
+  private static final int SCIM_MAX_PAGE_SIZE = 10;
 
   private Set<String> parseAttributes(final String attributesParameter) {
 
@@ -62,6 +56,8 @@ public class UserController {
     return result;
   }
 
+  @Autowired
+  ScimGroupProvisioning groupProvisioningService;
 
   private ScimPageRequest buildPageRequest(Integer count, Integer startIndex) {
 
@@ -85,13 +81,21 @@ public class UserController {
   }
 
   @PreAuthorize("#oauth2.hasScope('scim:read') or hasRole('ADMIN')")
+  @RequestMapping(value = "/{id}", method = RequestMethod.GET,
+      produces = ScimConstants.SCIM_CONTENT_TYPE)
+  public ScimGroup getGroup(@PathVariable final String id) {
+
+    return groupProvisioningService.getById(id);
+  }
+
+  @PreAuthorize("#oauth2.hasScope('scim:read') or hasRole('ADMIN')")
   @RequestMapping(method = RequestMethod.GET, produces = ScimConstants.SCIM_CONTENT_TYPE)
-  public MappingJacksonValue listUsers(@RequestParam(required = false) final Integer count,
+  public MappingJacksonValue listGroups(@RequestParam(required = false) final Integer count,
       @RequestParam(required = false) final Integer startIndex,
       @RequestParam(required = false) final String attributes) {
 
     ScimPageRequest pr = buildPageRequest(count, startIndex);
-    ScimListResponse<ScimUser> result = userProvisioningService.list(pr);
+    ScimListResponse<ScimGroup> result = groupProvisioningService.list(pr);
 
     MappingJacksonValue wrapper = new MappingJacksonValue(result);
 
@@ -107,62 +111,46 @@ public class UserController {
     return wrapper;
   }
 
-  @PreAuthorize("#oauth2.hasScope('scim:read') or hasRole('ADMIN')")
-  @RequestMapping(value = "/{id}", method = RequestMethod.GET,
-      produces = ScimConstants.SCIM_CONTENT_TYPE)
-  public ScimUser getUser(@PathVariable final String id) {
-
-    return userProvisioningService.getById(id);
-  }
-
   @PreAuthorize("#oauth2.hasScope('scim:write') or hasRole('ADMIN')")
   @RequestMapping(method = RequestMethod.POST, consumes = ScimConstants.SCIM_CONTENT_TYPE,
       produces = ScimConstants.SCIM_CONTENT_TYPE)
   @ResponseStatus(HttpStatus.CREATED)
-  public MappingJacksonValue create(
-      @RequestBody @Validated(ScimUser.NewUserValidation.class) final ScimUser user,
+  public ScimGroup create(@RequestBody @Validated final ScimGroup group,
       final BindingResult validationResult) {
 
-    handleValidationError("Invalid Scim User", validationResult);
-    ScimUser result = userProvisioningService.create(user);
-
-    MappingJacksonValue wrapper = new MappingJacksonValue(result);
-
-    return wrapper;
+    handleValidationError("Invalid Scim Group", validationResult);
+    ScimGroup result = groupProvisioningService.create(group);
+    return result;
   }
 
   @PreAuthorize("#oauth2.hasScope('scim:write') or hasRole('ADMIN')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PUT,
       consumes = ScimConstants.SCIM_CONTENT_TYPE, produces = ScimConstants.SCIM_CONTENT_TYPE)
   @ResponseStatus(HttpStatus.OK)
-  public ScimUser replaceUser(@PathVariable final String id,
-      @RequestBody @Validated(ScimUser.NewUserValidation.class) final ScimUser user,
-      final BindingResult validationResult) {
+  public ScimGroup replaceGroup(@PathVariable final String id,
+      @RequestBody @Validated final ScimGroup group, final BindingResult validationResult) {
 
-    handleValidationError("Invalid Scim User", validationResult);
+    handleValidationError("Invalid Scim Group", validationResult);
 
-    return userProvisioningService.replace(id, user);
+    return groupProvisioningService.replace(id, group);
 
   }
 
   @PreAuthorize("#oauth2.hasScope('scim:write') or hasRole('ADMIN')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH,
       consumes = ScimConstants.SCIM_CONTENT_TYPE)
-
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void updateUser(@PathVariable final String id,
-      @RequestBody final ScimUserPatchRequest patchRequest) {
+  public void updateGroup(@PathVariable final String id,
+      @RequestBody @Validated final ScimGroupPatchRequest groupPatchRequest) {
 
-    userProvisioningService.update(id, patchRequest.getOperations());
-
+    groupProvisioningService.update(id, groupPatchRequest.getOperations());
   }
 
   @PreAuthorize("#oauth2.hasScope('scim:write') or hasRole('ADMIN')")
   @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void deleteUser(@PathVariable final String id) {
+  public void deleteGroup(@PathVariable final String id) {
 
-    userProvisioningService.delete(id);
+    groupProvisioningService.delete(id);
   }
-
 }
