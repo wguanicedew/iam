@@ -18,4 +18,6 @@ public interface RegistrationRequestService {
 
   public Boolean usernameAvailable(String username);
 
+  public Boolean emailAvailable(String emailAddress);
+
 }

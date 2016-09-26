@@ -7,8 +7,6 @@ import java.util.stream.Collectors;
 import org.mitre.oauth2.model.OAuth2AccessTokenEntity;
 import org.mitre.oauth2.service.impl.DefaultIntrospectionResultAssembler;
 import org.mitre.openid.connect.model.UserInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
 
@@ -21,8 +19,6 @@ public class IamIntrospectionResultAssembler extends DefaultIntrospectionResultA
   public static final String EMAIL = "email";
   public static final String GROUPS = "groups";
   public static final String ORGANISATION_NAME = "organisation_name";
-
-  private static final Logger LOG = LoggerFactory.getLogger(IamIntrospectionResultAssembler.class);
 
   public IamIntrospectionResultAssembler() {}
 

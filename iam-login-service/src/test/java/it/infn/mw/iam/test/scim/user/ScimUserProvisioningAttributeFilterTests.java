@@ -2,6 +2,7 @@ package it.infn.mw.iam.test.scim.user;
 
 import static com.jayway.restassured.RestAssured.given;
 import static it.infn.mw.iam.api.scim.model.ScimConstants.SCIM_CONTENT_TYPE;
+import static it.infn.mw.iam.test.TestUtils.TOTAL_USERS_COUNT;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
@@ -57,7 +58,7 @@ public class ScimUserProvisioningAttributeFilterTests {
       .log()
       .all(true)
       .statusCode(HttpStatus.OK.value())
-      .body("totalResults", equalTo(250))
+      .body("totalResults", equalTo(TOTAL_USERS_COUNT))
       .body("itemsPerPage", equalTo(1))
       .body("startIndex", equalTo(1))
       .body("schemas", contains(ScimListResponse.SCHEMA))
@@ -98,7 +99,7 @@ public class ScimUserProvisioningAttributeFilterTests {
       .log()
       .all(true)
       .statusCode(HttpStatus.OK.value())
-      .body("totalResults", equalTo(250))
+      .body("totalResults", equalTo(TOTAL_USERS_COUNT))
       .body("itemsPerPage", equalTo(2))
       .body("startIndex", equalTo(1))
       .body("schemas", contains(ScimListResponse.SCHEMA))
