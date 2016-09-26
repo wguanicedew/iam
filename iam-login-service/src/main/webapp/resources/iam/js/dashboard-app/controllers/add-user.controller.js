@@ -24,6 +24,7 @@ function AddUserController($scope, $uibModalInstance, Utils, scimFactory,
 	addUserCtrl.submit = submit;
 	addUserCtrl.reset = reset;
 	addUserCtrl.dismiss = dismiss;
+	addUserCtrl.enabled = true;
 
 	function submit() {
 		

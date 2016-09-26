@@ -96,7 +96,7 @@
 	</div>
 	<div class="modal-footer">
 		<button class="btn btn-primary btn-sm" type="submit" name="create" id="modal-btn-confirm"
-			ng-disabled="!userCreationForm.$valid || userCreationForm.$pristine || !addUserCtrl.enabled">
+			ng-disabled="userCreationForm.$invalid || userCreationForm.$pristine || !addUserCtrl.enabled">
 			Create</button>
 		<button class="btn btn-warning btn-sm" type="button" name="reset" id="modal-btn-reset"
 			ng-click="addUserCtrl.reset()"
