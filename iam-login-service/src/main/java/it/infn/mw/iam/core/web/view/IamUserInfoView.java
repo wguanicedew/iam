@@ -21,6 +21,7 @@ public class IamUserInfoView extends UserInfoView {
 
   protected void addExternalAuthenticationInfo(JsonObject json, Map<String, Object> model) {
 
+    @SuppressWarnings("unchecked")
     Map<String, String> externalAuthnInfo = (Map<String, String>) model.get(EXTN_AUTHN_INFO_KEY);
 
     JsonObject extAuthn = new JsonObject();

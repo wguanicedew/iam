@@ -346,6 +346,16 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
 
     if (emails != null && !emails.isEmpty()) {
 
+      final String updatedEmail = emails.get(0).getValue();
+
+      accountRepository.findByEmail(updatedEmail).ifPresent(emailAccount -> {
+        if (!emailAccount.equals(a)) {
+          throw new ScimResourceExistsException("email already assigned to an existing user: "
+              + emailAccount.getUserInfo().getEmail());
+        }
+      });
+
+
       a.getUserInfo().setEmail(emails.get(0).getValue());
     }
   }

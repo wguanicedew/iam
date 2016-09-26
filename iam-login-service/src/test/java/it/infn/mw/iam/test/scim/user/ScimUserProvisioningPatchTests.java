@@ -1,6 +1,7 @@
 package it.infn.mw.iam.test.scim.user;
 
 import static it.infn.mw.iam.test.TestUtils.passwordTokenGetter;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.startsWith;
@@ -61,8 +62,7 @@ public class ScimUserProvisioningPatchTests {
             .buildName(firstName, LastName)
             .active(true)
             .build())
-      .extract()
-      .as(ScimUser.class);
+      .extract().as(ScimUser.class);
   }
 
   private ScimUserPatchRequest getPatchAddRequest(final ScimUser updates) {
@@ -678,5 +678,22 @@ public class ScimUserProvisioningPatchTests {
       .body("x509Certificates[1].primary", equalTo(true));
 
     restUtils.doDelete(lennon.getMeta().getLocation());
+  }
+
+  @Test
+  public void testEmailIsNotAlreadyLinkedOnPatch() {
+
+    ScimUser john = addTestUser("john_lennon", "lennon@email.test", "John", "Lennon");
+    ScimUser ringo = addTestUser("ringo_starr", "ringo@email.test", "Ringo", "Starr");
+
+    ScimUser johnUpdated = ScimUser.builder("john_lennon").buildEmail("ringo@email.test").build();
+
+    ScimUserPatchRequest req = getPatchAddRequest(johnUpdated);
+
+    restUtils.doPatch(john.getMeta().getLocation(), req, HttpStatus.CONFLICT).body("detail",
+        containsString("email already assigned to an existing user"));
+
+    restUtils.deleteUsers(john, ringo);
+
   }
 }
