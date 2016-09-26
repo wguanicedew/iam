@@ -13,6 +13,8 @@ function EditUserController($scope, $state, $uibModalInstance, Utils,
 
 	console.log("received user to edit: ", user);
 
+	editUserCtrl.userToEdit = user;
+	
 	editUserCtrl.user = {
 		givenName : user.name.givenName,
 		familyName : user.name.familyName,

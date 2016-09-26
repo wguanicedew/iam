@@ -115,6 +115,13 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
       throw new ScimResourceExistsException("userName is already taken: " + a.getUsername());
     });
 
+    final String userEmail = user.getEmails().get(0).getValue();
+
+    accountRepository.findByEmail(userEmail).ifPresent(a -> {
+      throw new ScimResourceExistsException(
+          "email already assigned to an existing user: " + a.getUserInfo().getEmail());
+    });
+
     String uuid = UUID.randomUUID().toString();
 
     IamAccount account = converter.fromScim(user);
@@ -288,8 +295,19 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
 
     if (accountRepository.findByUsernameWithDifferentId(scimItemToBeUpdated.getUserName(), id)
       .isPresent()) {
-      throw new IllegalArgumentException("userName is already mappped to another user");
+      throw new ScimResourceExistsException("userName is already mapped to another user");
+      // throw new IllegalArgumentException("userName is already mappped to another user");
     }
+
+    final String updatedEmail = scimItemToBeUpdated.getEmails().get(0).getValue();
+
+    accountRepository.findByEmail(updatedEmail).ifPresent(account -> {
+      if (!account.equals(existingAccount)) {
+        throw new ScimResourceExistsException(
+            "email already assigned to an existing user: " + updatedEmail);
+      }
+    });
+
 
     IamAccount updatedAccount = converter.fromScim(scimItemToBeUpdated);
 

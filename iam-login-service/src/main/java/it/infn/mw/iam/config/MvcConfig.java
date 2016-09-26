@@ -33,11 +33,15 @@ public class MvcConfig extends WebMvcConfigurerAdapter {
   @Qualifier("mitreServerConfigInterceptor")
   AsyncHandlerInterceptor serverConfigInterceptor;
 
+  @Autowired
+  AsyncHandlerInterceptor iamViewInfoInterceptor;
+
   @Override
   public void addInterceptors(final InterceptorRegistry registry) {
 
     registry.addInterceptor(userInfoInterceptor);
     registry.addInterceptor(serverConfigInterceptor);
+    registry.addInterceptor(iamViewInfoInterceptor);
 
   }
 

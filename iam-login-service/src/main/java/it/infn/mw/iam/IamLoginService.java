@@ -7,9 +7,14 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.h2.H2ConsoleAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.oauth2.OAuth2AutoConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+
+import it.infn.mw.iam.core.IamBanner;
 
 @SpringBootApplication
 @EnableTransactionManagement
@@ -40,7 +45,34 @@ excludeFilters = {
 public class IamLoginService {
 
   public static void main(final String[] args) {
+    SpringApplication iamLoginService = new SpringApplication(IamLoginService.class);
 
-    SpringApplication.run(IamLoginService.class, args);
+    iamLoginService.setBanner(new IamBanner(new ClassPathResource("iam-banner.txt")));
+
+    iamLoginService.run(args);
+
+  }
+
+  @Bean
+  PropertySourcesPlaceholderConfigurer iamVersionPlaceholderConfigurer() {
+    PropertySourcesPlaceholderConfigurer propsConfig = new PropertySourcesPlaceholderConfigurer();
+
+    propsConfig.setLocation(new ClassPathResource("iam.version.properties"));
+    propsConfig.setIgnoreResourceNotFound(true);
+    propsConfig.setIgnoreUnresolvablePlaceholders(true);
+
+    return propsConfig;
+  }
+
+
+  @Bean
+  PropertySourcesPlaceholderConfigurer gitCommitPlaceholderConfigurer() {
+    PropertySourcesPlaceholderConfigurer propsConfig = new PropertySourcesPlaceholderConfigurer();
+
+    propsConfig.setLocation(new ClassPathResource("git.properties"));
+    propsConfig.setIgnoreResourceNotFound(true);
+    propsConfig.setIgnoreUnresolvablePlaceholders(true);
+
+    return propsConfig;
   }
 }

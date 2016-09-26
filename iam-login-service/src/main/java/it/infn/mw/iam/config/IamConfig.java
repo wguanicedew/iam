@@ -26,6 +26,7 @@ public class IamConfig {
   @Value("${iam.organisation.name}")
   private String iamOrganisationName;
 
+
   @Bean
   AuthorizationCodeServices authorizationCodeServices() {
 

@@ -21,4 +21,11 @@ public class DashboardController {
     return new ModelAndView("iam/dashboard");
 
   }
+
+  @RequestMapping(method = RequestMethod.GET, value = "/expiredsession")
+  public ModelAndView showExpiredSession(HttpServletRequest request) {
+    
+    return new ModelAndView("iam/expiredsession");
+
+  }
 }

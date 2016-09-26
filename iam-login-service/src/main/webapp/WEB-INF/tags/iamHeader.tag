@@ -1,5 +1,6 @@
 <%@attribute name="title" required="false"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+
 <!DOCTYPE html>
 <html lang="${pageContext.response.locale}">
 <head>
@@ -44,13 +45,21 @@
 </head>
 
 <script>
-	//get the info of the current user, if available (null otherwise)
-	function getUserInfo() {
-		return ${userInfoJson};
-	}
+//get the info of the current user, if available (null otherwise)
+function getUserInfo() {
+  return ${userInfoJson};
+}
 
-	// get the authorities of the current user, if available (null otherwise)
-	function getUserAuthorities() {
-		return ${userAuthorities};
-	}
+// get the authorities of the current user, if available (null otherwise)
+function getUserAuthorities() {
+  return ${userAuthorities};
+}
+
+function getIamVersion() {
+  return '${iamVersion}';
+}
+
+function getIamGitCommitId() {
+  return '${gitCommitId}';
+}
 </script>

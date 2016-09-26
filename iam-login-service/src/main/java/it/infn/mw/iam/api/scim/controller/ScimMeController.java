@@ -18,13 +18,13 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
 @RestController
 @RequestMapping("/scim/Me")
-public class MeController {
+public class ScimMeController {
 
   private final IamAccountRepository iamAccountRepository;
   private final UserConverter userConverter;
 
   @Autowired
-  public MeController(IamAccountRepository iamAccountRepository, UserConverter userConverter) {
+  public ScimMeController(IamAccountRepository iamAccountRepository, UserConverter userConverter) {
 
     this.iamAccountRepository = iamAccountRepository;
     this.userConverter = userConverter;

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.0 (2016-09-26)
+
+TBD
+
 ## 0.3.0 (2016-07-12)
 
 This is the first public release of the INDIGO Identity and Access Management

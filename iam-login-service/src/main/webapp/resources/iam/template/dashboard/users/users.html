@@ -56,7 +56,7 @@
 								<th>E-mail</th>
 								<th>Created</th>
 								<th>Groups</th>
-								<th>Actions</th>
+								<th class="text-right">Actions</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -75,12 +75,13 @@
 								<td>{{user.emails[0].value}}</td>
 								<td>{{user.meta.created | relativeDate }}</td>
 								<td>
-									<button ng-repeat="g in user.groups"
+									<button ng-repeat="g in user.groups | limitTo: 4"
 										class="btn btn-xs btn-default">{{g.display}}</button>
+									<span ng-show="user.groups.length > 4">...</span>
 								</td>
-								<td>
+								<td class="text-right">
 									<button ng-disabled="user.id == $root.loggedUser.me.id" class="btn btn-danger btn-xs" ng-click="users.deleteUser(user)">
-										<i class="fa fa-times"></i> Delete
+										<i class="fa fa-times"></i> Remove
 									</button>
 								</td>
 							</tr>
@@ -94,7 +95,7 @@
 								<th>E-mail</th>
 								<th>Created</th>
 								<th>Groups</th>
-								<th>Actions</th>
+								<th class="text-right">Actions</th>
 							</tr>
 						</tfoot>
 					</table>

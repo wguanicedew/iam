@@ -136,11 +136,10 @@
 					<div id="registration" ng-controller="RegistrationFormModalController">
 					  <a class="btn btn-success btn-block" ng-click="open()">Register a new account</a>
 					</div>
+          <div id="forgot-password" ng-controller="ForgotPasswordModalController">
+            <a class="btn btn-link btn-block" ng-click="open()">Forgot your password?</a>
+          </div>
 				</c:if>
-				
-				<div id="forgot-password" ng-controller="ForgotPasswordModalController">
-				  <a class="btn btn-link btn-block" ng-click="open()">Forgot your password?</a>
-				</div>
 
       		</div>
     	</div>
