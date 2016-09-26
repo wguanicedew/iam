@@ -1,5 +1,5 @@
 <!-- Content Header (Page header) -->
-<section class="content-header">
+<section class="content-header" ng-show="$root.userLoadingProgress == 100">
 	<h1>
 		<strong>{{user.userInfo.name.formatted}}</strong> - Profile Page
 	</h1>
@@ -11,20 +11,15 @@
 </section>
 
 <!-- Main content -->
-<section class="content" ng-cloak>
+<section class="content">
 
-	<div class="row" ng-show="user.operationResult != null">
-		<div class="col-xs-12">
-			<div class="alert"
-				ng-class="{'alert-success': user.operationResult=='ok', 'alert-danger': user.operationResult=='err'}">
-				<button class="close" ng-click="user.operationResult=null"
-					aria-label="close">&times;</button>
-				{{user.textAlert}}
-			</div>
+	<div class="row">
+		<div class="col-md-12">
+			<operationresult />
 		</div>
 	</div>
 
-	<div class="row">
+	<div class="row" ng-show="$root.userLoadingProgress == 100">
 		<div class="col-md-3">
 
 			<!-- Profile Image -->
@@ -216,7 +211,7 @@
 									<td>{{$index + 1}}</td>
 									<td>{{ sshKey.display }}</td>
 									<td><a href=''
-										ng-click="user.showSshKeyValue(sshKey.value)">{{
+										ng-click="user.showSshKeyValue(sshKey)">{{
 											sshKey.fingerprint }}</a></td>
 									<td><span ng-show="sshKey.primary"
 										class="label label-success">primary</span>
@@ -350,43 +345,6 @@
 					</button>
 				</div>
 			</div>
-
-			<!-- Requests history box -->
-			<div class="box box-primary" ng-show="!user.filteredRequestsList">
-				<div class="box-header with-border">
-					<h3 class="box-title">
-						<strong>Requests History</strong>
-					</h3>
-					<i class="fa fa-sign-in pull-right"></i>
-				</div>
-				<!-- /.box-header -->
-				<div class="box-body">
-
-					<div class="table-responsive"
-						ng-show="user.filteredRequestsList.length">
-						<table class="table no-margin">
-							<thead>
-								<tr>
-									<th>#</th>
-									<th>Created</th>
-									<th>Description</th>
-									<th>Status</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr
-									ng-repeat="req in user.filteredRequestsList | orderBy:'createdAt' ">
-									<td>{{$index + 1}}</td>
-									<td>{{req.creationTime | relativeDate }}</td>
-									<td>Registration request</td>
-									<td>{{req.status}}</td>
-								</tr>
-							</tbody>
-						</table>
-					</div>
-				</div>
-			</div>
-
 
 		</div>
 	</div>

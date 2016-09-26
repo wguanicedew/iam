@@ -11,18 +11,11 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 	console.log("User ID: ", $state.params.id);
 
 	user.id = $state.params.id;
-	
-	user.groups = [];
-	user.oGroups = [];
 
 	user.userInfo = {};
-	user.filteredRequestsList = [];
-	user.requestsList = [];
 
 	// methods
 	user.getIndigoUserInfo = getIndigoUserInfo;
-	user.getAllGroups = getAllGroups;
-	user.getNotMemberGroups = getNotMemberGroups;
 	user.showSshKeyValue = showSshKeyValue;
 	user.showCertValue = showCertValue;
 	user.openAddGroupDialog = openAddGroupDialog;
@@ -41,24 +34,42 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 	// password reset
 	user.doPasswordReset = doPasswordReset;
 	user.sendResetMail = sendResetMail;
-	
-	// history requests
-	user.buildFilteredList = buildFilteredList;
-	user.listRequests = listRequests;
 
 	user.getIndigoUserInfo();
-	user.getAllGroups(1, 10);
-	user.listRequests();
 
 	function getIndigoUserInfo() {
-		scimFactory.getUser(user.id).then(function(response) {
-			user.userInfo = response.data;
-			console.log("Added indigoUserInfo: ", user.userInfo);
-		}, function(error) {
-			$state.go("error", {
-				"error": error
-			});
+
+		$rootScope.userLoadingProgress = 0;
+		console.log("progress", $rootScope.userLoadingProgress);
+	
+		
+		user.loadingModal = $uibModal
+		.open({
+			animation: false,
+			templateUrl : '/resources/iam/template/dashboard/user/loading-modal.html'
 		});
+
+		user.loadingModal.opened.then(function() {
+
+			$rootScope.userLoadingProgress = 50;
+
+			scimFactory.getUser(user.id).then(function(response) {
+				
+				user.userInfo = response.data;
+				console.log("Added indigoUserInfo: ", user.userInfo);
+
+				$rootScope.userLoadingProgress = 100;
+				user.loadingModal.dismiss("Cancel");
+				
+			}, function(error) {
+				
+				console.error("getUser", error)
+				user.loadingModal.dismiss("Error");
+				$scope.operationResult = Utils.buildErrorOperationResult(error);
+			});
+
+		});
+
 	}
 
 	function doPasswordReset() {
@@ -73,8 +84,7 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 					bodyText: `A password reset link has just been sent to your e-mail address`
 				});
 			}, function(error) {
-				user.textAlert = error.data.error_description || error.data.detail;
-				user.operationResult = 'err';
+				$scope.operationResult = Utils.buildErrorOperationResult(error);
 			});
 	}
 
@@ -82,54 +92,15 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 		
 		var modalOptions = {
 				closeButtonText: 'Cancel',
-				user: user.userInfo.name.formatted,
 				actionButtonText: 'Send password reset e-mail',
-				headerText: 'Password Reset',
-				bodyText: `Are you sure you want to send the reset password link to ${user.userInfo.name.formatted}?`	
+				headerText: 'Send password reset e-mail',
+				bodyText: `Are you sure you want to send the password reset e-mail to ${user.userInfo.name.formatted}?`	
 			};
 				
 			ModalService.showModal({}, modalOptions).then(
 				function (){
 					user.doPasswordReset();
 				});
-	}
-
-	function getAllGroups(startIndex, count) {
-
-		scimFactory
-				.getGroups(startIndex, count)
-				.then(
-						function(response) {
-
-							angular.forEach(response.data.Resources, function(
-									group) {
-								user.groups.push(group);
-							});
-							user.groups = $filter('orderBy')(user.groups,
-									"displayName", false);
-
-							if (response.data.totalResults > (response.data.startIndex + response.data.itemsPerPage)) {
-								user.getAllGroups(startIndex + count, count);
-							} else {
-								user.oGroups = getNotMemberGroups();
-							}
-						}, function(error) {
-							$state.go("error", {
-								"error": error
-							});
-						});
-	}
-
-	function getNotMemberGroups() {
-
-		return user.groups.filter(function(group) {
-			for ( var i in user.userInfo.groups) {
-				if (group.id === user.userInfo.groups[i].value) {
-					return false;
-				}
-			}
-			return true;
-		});
 	}
 
 	function openEditUserDialog() {
@@ -148,15 +119,13 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 				});
 		modalInstance.result.then(function() {
 			getIndigoUserInfo();
-			user.textAlert = `User's info updated successfully`;
-			user.operationResult = 'ok';
+			$scope.operationResult = Utils.buildSuccessOperationResult("User's info updated successfully");
 		}, function() {
 			console.info('Modal dismissed at: ', new Date());
 		});
 	}
 	
 	function openAddGroupDialog() {
-		user.oGroups = getNotMemberGroups();
 		var modalInstance = $uibModal
 				.open({
 					templateUrl : '/resources/iam/template/dashboard/user/addusergroup.html',
@@ -165,17 +134,13 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 					resolve : {
 						user : function() {
 							return user.userInfo;
-						},
-						oGroups : function() {
-							return user.oGroups;
 						}
 					}
 				});
 		modalInstance.result.then(function() {
 			console.info("Added group");
 			getIndigoUserInfo();
-			user.textAlert = `User's memberships updated successfully`;
-			user.operationResult = 'ok';
+			$scope.operationResult = Utils.buildSuccessOperationResult("User's memberships updated successfully");
 		}, function() {
 			console.info('Modal dismissed at: ', new Date());
 		});
@@ -195,8 +160,7 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 		modalInstance.result.then(function() {
 			console.info("Added oidc account");
 			getIndigoUserInfo();
-			user.textAlert = `User's Open ID Account created successfully`;
-			user.operationResult = 'ok';
+			$scope.operationResult = Utils.buildSuccessOperationResult("User's Open ID Account created successfully");
 		}, function() {
 			console.info('Modal dismissed at: ', new Date());
 		});
@@ -216,8 +180,7 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 		modalInstance.result.then(function() {
 			console.info("Added ssh key");
 			getIndigoUserInfo();
-			user.textAlert = `User's SSH Key added successfully`;
-			user.operationResult = 'ok';
+			$scope.operationResult = Utils.buildSuccessOperationResult("User's SSH Key added successfully");
 		}, function(error) {
 			console.info('Modal dismissed at: ', new Date());
 		});
@@ -238,8 +201,7 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 		modalInstance.result.then(function() {
 			console.info("Added saml account");
 			getIndigoUserInfo();
-			user.textAlert = `User's SAML Account created successfully`;
-			user.operationResult = 'ok';
+			$scope.operationResult = Utils.buildSuccessOperationResult("User's SAML Account created successfully");
 		}, function() {
 			console.info('Modal dismissed at: ', new Date());
 		});
@@ -260,8 +222,7 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 		modalInstance.result.then(function() {
 			console.info("Added x509 certificate");
 			getIndigoUserInfo();
-			user.textAlert = `User's x509 Certificate added successfully`;
-			user.operationResult = 'ok';
+			$scope.operationResult = Utils.buildSuccessOperationResult("User's x509 Certificate added successfully");
 		}, function() {
 			console.info('Modal dismissed at: ', new Date());
 		});
@@ -271,10 +232,9 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 		
 		var modalOptions = {
 			closeButtonText: 'Cancel',
-			user: user.userInfo.name.formatted,
 			actionButtonText: 'Remove user from group',
-			headerText: 'Remove membership',
-			bodyText: `Are you sure you want to remove user memebership to '${group.display}'?`	
+			headerText: 'Remove ' + user.userInfo.name.formatted + ' from ' + group.display,
+			bodyText: `Are you sure you want to remove «${user.userInfo.name.formatted}» from «${group.display}»?`	
 		};
 			
 		ModalService.showModal({}, modalOptions).then(
@@ -284,23 +244,20 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 					.then(function(response) {
 						console.log("Deleted: ", group);
 						getIndigoUserInfo();
-						user.textAlert = `Group ${group.display} membership removed successfully`;
-						user.operationResult = 'ok';
+						$scope.operationResult = Utils.buildSuccessOperationResult("Group " + group.display + " membership removed successfully");
 					}, function(error) {
-						user.textAlert = error.data.error_description || error.data.detail;
-						user.operationResult = 'err';
+						$scope.operationResult = Utils.buildErrorOperationResult(error);
 					});
 			});
 	}
 
-	function showSshKeyValue(value) {
+	function showSshKeyValue(sshKey) {
 
 		ModalService.showModal({}, {
 			closeButtonText: null,
-			user: user.userInfo.name.formatted,
 			actionButtonText: 'OK',
-			headerText: 'SSH Key value',
-			bodyText: `${value}`
+			headerText: sshKey.display,
+			bodyText: `${sshKey.value}`
 		});
 	}
 
@@ -308,9 +265,8 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 
 		ModalService.showModal({}, {
 			closeButtonText: null,
-			user: user.userInfo.name.formatted,
 			actionButtonText: 'OK',
-			headerText: 'x509 Certificate value',
+			headerText: cert.display,
 			bodyText: `${cert.value}`
 		});
 	}
@@ -321,10 +277,9 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 		
 		var modalOptions = {
 				closeButtonText: 'Cancel',
-				user: user.userInfo.name.formatted,
 				actionButtonText: 'Remove Open ID Account',
 				headerText: 'Remove Open ID Account',
-				bodyText: `Are you sure you want to remove the Open ID Account?`,
+				bodyText: `Are you sure you want to remove the following Open ID Account?`,
 				bodyDetail: `${summary}`
 			};
 				
@@ -335,11 +290,9 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 						.then(function(response) {
 							console.log("Removed: ", oidcId.issuer, oidcId.subject);
 							getIndigoUserInfo();
-							user.textAlert = `Open ID Account [${summary}] has been removed successfully`;
-							user.operationResult = 'ok';
+							$scope.operationResult = Utils.buildSuccessOperationResult("Open ID Account " + summary + " has been removed successfully");
 						}, function(error) {
-							user.textAlert = error.data.error_description || error.data.detail;
-							user.operationResult = 'err';
+							$scope.operationResult = Utils.buildErrorOperationResult(error);
 						});
 				});
 	}
@@ -348,10 +301,9 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 		
 		var modalOptions = {
 				closeButtonText: 'Cancel',
-				user: user.userInfo.name.formatted,
 				actionButtonText: 'Remove ssh key',
-				headerText: 'Remove ssh key',
-				bodyText: `Are you sure you want to remove the ssh key [${sshKey.display}]?`	
+				headerText: 'Remove ssh key «' + sshKey.display + '»',
+				bodyText: `Are you sure you want to remove '${sshKey.display} ssh key?`
 			};
 				
 			ModalService.showModal({}, modalOptions).then(
@@ -360,11 +312,9 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 						.then(function(response) {
 							console.log("Removed: ", sshKey.display, sshKey.fingerprint);
 							getIndigoUserInfo();
-							user.textAlert = `Ssh key [${sshKey.display}] has been removed successfully`;
-							user.operationResult = 'ok';
+							$scope.operationResult = Utils.buildSuccessOperationResult("Ssh key " + sshKey.display + " has been removed successfully");
 						}, function(error) {
-							user.textAlert = error.data.error_description || error.data.detail;
-							user.operationResult = 'err';
+							$scope.operationResult = Utils.buildErrorOperationResult(error);
 						});
 				});
 	}
@@ -373,11 +323,9 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 
 		var modalOptions = {
 				closeButtonText: 'Cancel',
-				user: user.userInfo.name.formatted,
 				actionButtonText: 'Remove x509 Certificate',
-				headerText: 'Remove x509 Certificate',
-				bodyText: `Are you sure you want to remove this x509 Certificate?`,
-				bodyDetail: `${x509cert.display}`	
+				headerText: 'Remove «' + x509cert.display + '» x509 certificate?',
+				bodyText: `Are you sure you want to remove «${x509cert.display}» x509 Certificate?`,
 			};
 				
 			ModalService.showModal({}, modalOptions).then(
@@ -386,11 +334,9 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 						.then(function(response) {
 							console.log("Removed: ", x509cert.display);
 							getIndigoUserInfo();
-							user.textAlert = `X509 Certificate [${x509cert.display}] has been removed successfully`;
-							user.operationResult = 'ok';
+							$scope.operationResult = Utils.buildSuccessOperationResult("X509 Certificate " + x509cert.display + " has been removed successfully");
 						}, function(error) {
-							user.textAlert = error.data.error_description || error.data.detail;
-							user.operationResult = 'err';
+							$scope.operationResult = Utils.buildErrorOperationResult(error);
 						});
 				});
 	}
@@ -401,10 +347,9 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 		
 		var modalOptions = {
 				closeButtonText: 'Cancel',
-				user: user.userInfo.name.formatted,
 				actionButtonText: 'Remove SAML Account',
 				headerText: 'Remove SAML account',
-				bodyText: `Are you sure you want to remove this SAML Account?`,
+				bodyText: `Are you sure you want to remove the following SAML Account?`,
 				bodyDetail: `${summary}`	
 			};
 				
@@ -414,58 +359,48 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 						.then(function(response) {
 							console.log("Removed: ", samlId.idpId, samlId.userId);
 							getIndigoUserInfo();
-							user.textAlert = `SAML account [${summary}] has been removed successfully`;
-							user.operationResult = 'ok';
+							$scope.operationResult = Utils.buildSuccessOperationResult("SAML account " + summary + " has been removed successfully");
 						}, function(error) {
-							user.textAlert = error.data.error_description || error.data.detail;
-							user.operationResult = 'err';
+							$scope.operationResult = Utils.buildErrorOperationResult(error);
 						});
 				});
 	}
 
 	function setActive(status) {
 
-		var headerMsg = status ? 'Enable user?' : 'Disable user?';
-		var action = status ? 'enable' : 'disable';
+		var modalOptions = {};
 		
-		var modalOptions = {
+		if (status) {
+			
+			modalOptions = {
 				closeButtonText: 'Cancel',
-				user: user.userInfo.name.formatted,
-				actionButtonText: 'Change user status',
-				headerText: headerMsg,
-				bodyText: `Are you sure you want to ${action} '${user.userInfo.name.formatted}'?`	
+				actionButtonText: 'Enable user',
+				headerText: 'Enable ' + user.userInfo.name.formatted,
+				bodyText: `Are you sure you want to enable '${user.userInfo.name.formatted}'?`	
 			};
-				
-			ModalService.showModal({}, modalOptions).then(
-				function (){
-					scimFactory.setUserActiveStatus(user.userInfo.id, status)
-						.then(function(response) {
-							console.log("Set active as: ", status);
-							getIndigoUserInfo();
-							user.textAlert = `User ${user.userInfo.name.formatted} status successfully set to ${action}`;
-							user.operationResult = 'ok';
-						}, function(error) {
-							user.textAlert = error.data.error_description || error.data.detail;
-							user.operationResult = 'err';
-						});
-				});
-	}
-	
-	function buildFilteredList() {
+		} else {
+			
+			modalOptions = {
+				closeButtonText: 'Cancel',
+				actionButtonText: 'Disable user',
+				headerText: 'Disable ' + user.userInfo.name.formatted,
+				bodyText: `Are you sure you want to disable '${user.userInfo.name.formatted}'?`	
+			};
+		}
 		
-		user.filteredRequestsList = filterFilter(user.requestsList, {'accountId': user.userInfo.id }); ;
+		ModalService.showModal({}, modalOptions).then(
+			function (){
+				scimFactory.setUserActiveStatus(user.userInfo.id, status)
+					.then(function(response) {
+						getIndigoUserInfo();
+						if (status) {
+							$scope.operationResult = Utils.buildSuccessOperationResult("User " + user.userInfo.name.formatted + " enabled");
+						} else {
+							$scope.operationResult = Utils.buildSuccessOperationResult("User " + user.userInfo.name.formatted + " disabled");
+						}
+					}, function(error) {
+						$scope.operationResult = Utils.buildErrorOperationResult(error);
+					});
+			});
 	}
-	
-	function listRequests() {
-		RegistrationRequestService.listRequests().then(
-			function(result) {
-				console.log(result);
-				user.requestsList = result.data;
-				user.buildFilteredList();
-			},
-			function(errResponse) {
-				user.textAlert = errResponse.data.error_description || errResponse.data.detail;
-				user.operationResult = 'err';
-			})
-	};
 }

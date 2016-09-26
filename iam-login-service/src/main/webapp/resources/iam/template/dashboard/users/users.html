@@ -16,14 +16,7 @@
 	<div class="row">
 
 		<div class="col-xs-12">
-			<div ng-show="users.operationResult != null">
-				<div class="alert"
-					ng-class="{'alert-success': users.operationResult=='ok', 'alert-danger': users.operationResult=='err'}">
-					<button class="close" ng-click="users.operationResult=null"
-						aria-label="close">&times;</button>
-					{{users.textAlert}}
-				</div>
-			</div>
+			<operationresult/>
 		</div>
 
 		<div class="col-xs-12">

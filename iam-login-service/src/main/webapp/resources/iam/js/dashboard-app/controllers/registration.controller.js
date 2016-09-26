@@ -2,83 +2,124 @@
 
 angular.module('dashboardApp').controller('RequestManagementController', RequestManagementController);
 
-RequestManagementController.$inject = ['$scope', '$rootScope', '$state', 'RegistrationRequestService', 'ModalService'];
+RequestManagementController.$inject = ['$scope', '$rootScope', '$state', '$filter', 'filterFilter', '$uibModal', 'RegistrationRequestService', 'ModalService', 'Utils'];
 
-function RequestManagementController($scope, $rootScope, $state, RegistrationRequestService, ModalService){
+function RequestManagementController($scope, $rootScope, $state, $filter, filterFilter, $uibModal, RegistrationRequestService, ModalService, Utils){
 
-	var vm = this;
-	vm.operationResult;
-	vm.textAlert;
-	
-	vm.listRequests = listRequests;
-	vm.listPending = listPending;
-	vm.approveRequest = approveRequest;
-	vm.rejectRequest = rejectRequest;
-	vm.init = init;
-	vm.elementToDisplay = elementToDisplay;
-	vm.pageChanged = pageChanged;
-
-	vm.list = [];
-	vm.filteredList = [];
-	vm.sortType = 'creationTime';
-	vm.sortReverse = true;
-	vm.currentPage = 1;
-	vm.maxSize = 5;
-	vm.numPerPage = 10;
-	
-	
-	function elementToDisplay(){
-		var begin = ((vm.currentPage - 1) * vm.numPerPage);
-	    var end = begin + vm.numPerPage;
-
-	    vm.filteredList = vm.list.slice(begin, end);
+	if (!$rootScope.isRegistrationEnabled) {
+		console.info("Registration is disabled");
+		return;
 	}
-	
-	function pageChanged(){
-		vm.elementToDisplay();
-	}
-	
-	function init(){
-		vm.listPending();
-	};
 
-	function listRequests(status) {
-		RegistrationRequestService.listRequests(status).then(
-			function(result) {
-				vm.list = result.data;
-			},
-			function(errResponse) {
-				vm.textAlert = errResponse.data.error_description || errResponse.data.detail;
-				vm.operationResult = 'err';
-			})
-	};
+	var requests = this;
 	
+	requests.listPending = listPending;
+	requests.approveRequest = approveRequest;
+	requests.rejectRequest = rejectRequest;
+	requests.loadData = loadData;
+
+	requests.list = [];
+	requests.filtered = [];
+	requests.sortType = 'creationTime';
+	requests.sortReverse = true;
+	requests.currentPage = 1;
+	requests.maxSize = 5;
+	requests.numPerPage = 10;
+
+	// search
+	requests.searchText = "";
+	requests.resetFilters = resetFilters;
+	requests.rebuildFilteredList = rebuildFilteredList;
+
+	function resetFilters() {
+		// needs to be a function or it won't trigger a $watch
+		requests.searchText = "";
+	}
+
+	function rebuildFilteredList() {
+
+		requests.filtered = filterFilter(requests.list, function(request) {
+
+			if (!requests.searchText) {
+				return true;
+			}
+
+			var query = requests.searchText.toLowerCase();
+			
+			if (request.familyname.toLowerCase().indexOf(query) != -1) {
+				return true;
+			}
+			if (request.givenname.toLowerCase().indexOf(query) != -1) {
+				return true;
+			}
+			if (request.username.toLowerCase().indexOf(query) != -1) {
+				return true;
+			}
+			if (request.email.toLowerCase().indexOf(query) != -1) {
+				return true;
+			}
+			if (request.notes.toLowerCase().indexOf(query) != -1) {
+				return true;
+			}
+			return false;
+		});
+	}
+
+	$scope.$watch('requests.searchText', function() {
+
+		requests.rebuildFilteredList();
+	});
+
+	function loadData() {
+		
+		$rootScope.requestsLoadingProgress = 0;
+		
+		requests.loadingModal = $uibModal
+		.open({
+			animation: false,
+			templateUrl : '/resources/iam/template/dashboard/requests/loading-modal.html'
+		});
+
+		requests.loadingModal.opened.then(function() {
+		
+			RegistrationRequestService.listPending().then(
+				function(result) {
+					requests.list = result.data;
+					requests.rebuildFilteredList();
+					$rootScope.requestsLoadingProgress = 100;
+					$rootScope.loggedUser.pendingRequests = result.data;
+					
+					requests.loadingModal.dismiss("Cancel");
+				},
+				function(error) {
+
+					$scope.operationResult = Utils.buildErrorOperationResult(error);
+					requests.loadingModal.dismiss("Error");
+				});
+		});
+	}
+
 	function listPending() {
 		RegistrationRequestService.listPending().then(
 			function(result) {
-				vm.list = result.data;
+				requests.list = result.data;
+				requests.rebuildFilteredList();
 				$rootScope.loggedUser.pendingRequests = result.data;
-				vm.elementToDisplay();
 			},
-			function(errResponse) {
-				vm.textAlert = errResponse.data.error_description || errResponse.data.detail;
-				vm.operationResult = 'err';
-				$state.go("error", {
-					"error" : errResponse
-				});
+			function(error) {
+				$scope.operationResult = Utils.buildErrorOperationResult(error);
 			})
 	};
 
 	function approveRequest(request) {
 		RegistrationRequestService.updateRequest(request.uuid, 'APPROVED').then(
 			function() {
-				vm.textAlert = `${request.givenname} ${request.familyname} request approved successfully`;
-				vm.operationResult = 'ok';
-				vm.listPending();
+				var msg = request.givenname + " " + request.familyname + " request APPROVED successfully";
+				$scope.operationResult = Utils.buildSuccessOperationResult(msg);
+				requests.listPending();
 			},
-			function(errResponse) {
-				vm.textAlert = errResponse.data.error_description || errResponse.data.detail;
-				vm.operationResult = 'err';
+			function(error) {
+				$scope.operationResult = Utils.buildErrorOperationResult(error);
 			})
 	};
 
@@ -86,22 +127,21 @@ function RequestManagementController($scope, $rootScope, $state, RegistrationReq
 		
 		var modalOptions = {
 			closeButtonText: 'Cancel',
-            actionButtonText: 'Reject Request',
-            headerText: 'Reject?',
-            bodyText: `Are you sure you want to reject request for ${request.givenname} ${request.familyname}?`	
+            actionButtonText: 'Reject Registration Request',
+            headerText: 'Reject «' + request.givenname + " " + request.familyname + "» registration request",
+            bodyText: `Are you sure you want to reject '${request.givenname} ${request.familyname}' registration request?`	
 		};
 		
 		ModalService.showModal({}, modalOptions).then(
 				function (){
 					RegistrationRequestService.updateRequest(request.uuid, 'REJECTED').then(
 							function() {
-								vm.textAlert = `${request.givenname} ${request.familyname} request rejected successfully`;
-								vm.operationResult = 'ok';
-								vm.listPending();
+								var msg = request.givenname + " " + request.familyname + " request REJECTED successfully";
+								$scope.operationResult = Utils.buildSuccessOperationResult(msg);
+								requests.listPending();
 							},
-							function(errResponse) {
-								vm.textAlert = errResponse.data.error_description || errResponse.data.detail;
-								vm.operationResult = 'err';
+							function(error) {
+								$scope.operationResult = Utils.buildErrorOperationResult(error);
 							})
 				});
 	};

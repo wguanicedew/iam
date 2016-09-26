@@ -12,14 +12,9 @@
 <!-- Main content -->
 <section class="content" ng-cloak>
 
-    <div class="row" ng-show="group.operationResult != null">
+    <div class="row">
         <div class="col-xs-12">
-            <div class="alert"
-                ng-class="{'alert-success': group.operationResult=='ok', 'alert-danger': group.operationResult=='err'}">
-                <button class="close" ng-click="group.operationResult=null"
-                    aria-label="close">&times;</button>
-                {{group.textAlert}}
-            </div>
+            <operationresult/>
         </div>
     </div>
 
