@@ -20,6 +20,7 @@ function RegistrationController($scope, $q, $uibModalInstance, $window, Registra
 	$scope.submit = submit;
 	$scope.reset = reset;
 	$scope.dismiss = dismiss;
+	$scope.submitButtonDisabled = false;
 	
 		
 	function createRequest(request) {
@@ -30,11 +31,13 @@ function RegistrationController($scope, $q, $uibModalInstance, $window, Registra
 			function(errResponse) {
 				$scope.operationResult = 'err';
 				$scope.textAlert = errResponse.data.error_description || errResponse.data.detail;
+				$scope.submitButtonDisabled = false;
 				return $q.reject(errResponse);
 			})
 	};
 
 	function submit() {
+		$scope.submitButtonDisabled = true;
 		$scope.createRequest($scope.request);
 	};
 
