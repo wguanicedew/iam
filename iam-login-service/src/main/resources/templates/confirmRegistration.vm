@@ -1,10 +1,11 @@
 Dear $recipient,
 
-you have requested to be a member of Indigo-DC.
+you have requested to be a member of $organisationName.
 
-In order for the registration to proceed, you should confirm this
-request by going to the following url:
+In order for the registration to proceed, please confirm this
+request by going to the following URL:
 
 $confirmURL
 
-The Indigo-DC Team
+
+The $organisationName registration service

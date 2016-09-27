@@ -53,6 +53,9 @@ public class DefaultNotificationService implements NotificationService {
   @Value("${iam.baseUrl}")
   private String baseUrl;
 
+  @Value("${iam.organisation.name}")
+  private String organisationName;
+
   @Autowired
   private TimeProvider timeProvider;
 
@@ -67,6 +70,7 @@ public class DefaultNotificationService implements NotificationService {
     Map<String, Object> model = new HashMap<>();
     model.put(RECIPIENT_FIELD, recipient);
     model.put("confirmURL", confirmURL);
+    model.put("organisationName", organisationName);
 
     return createMessage("confirmRegistration.vm", model, IamNotificationType.CONFIRMATION,
         properties.getSubject().get("confirmation"), request,
@@ -83,6 +87,7 @@ public class DefaultNotificationService implements NotificationService {
     Map<String, Object> model = new HashMap<>();
     model.put(RECIPIENT_FIELD, recipient);
     model.put("resetPasswordUrl", resetPasswordUrl);
+    model.put("organisationName", organisationName);
 
     return createMessage("accountActivated.vm", model, IamNotificationType.ACTIVATED,
         properties.getSubject().get("activated"), request,
@@ -95,6 +100,7 @@ public class DefaultNotificationService implements NotificationService {
 
     Map<String, Object> model = new HashMap<>();
     model.put(RECIPIENT_FIELD, recipient);
+    model.put("organisationName", organisationName);
 
     return createMessage("requestRejected.vm", model, IamNotificationType.REJECTED,
         properties.getSubject().get("rejected"), request,
@@ -113,6 +119,7 @@ public class DefaultNotificationService implements NotificationService {
     model.put("username", username);
     model.put("email", email);
     model.put("indigoDashboardUrl", indigoDashboardUrl);
+    model.put("organisationName", organisationName);
 
     return createMessage("adminHandleRequest.vm", model, IamNotificationType.CONFIRMATION,
         properties.getSubject().get("adminHandleRequest"), request, properties.getAdminAddress());
@@ -128,6 +135,7 @@ public class DefaultNotificationService implements NotificationService {
     Map<String, Object> model = new HashMap<>();
     model.put(RECIPIENT_FIELD, recipient);
     model.put("resetPasswordUrl", resetPasswordUrl);
+    model.put("organisationName", organisationName);
 
     return createMessage("resetPassword.vm", model, IamNotificationType.RESETPASSWD,
         properties.getSubject().get("resetPassword"), null, account.getUserInfo().getEmail());
