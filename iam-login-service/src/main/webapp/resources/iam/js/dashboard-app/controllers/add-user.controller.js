@@ -21,25 +21,15 @@ function AddUserController($scope, $uibModalInstance, Utils, scimFactory,
 	addUserCtrl.textAlert;
 	addUserCtrl.operationResult;
 
-	addUserCtrl.createUser = createUser; 
 	addUserCtrl.submit = submit;
 	addUserCtrl.reset = reset;
 	addUserCtrl.dismiss = dismiss;
-	
-	function createUser(scimUser) {
-		scimFactory.createUser(scimUser).then(
-			function(response) {
-				console.info("Returned created user", response.data);
-				$uibModalInstance.close(response.data);
-			},
-			function(error) {
-				addUserCtrl.operationResult = 'err';
-				addUserCtrl.textAlert = error.data.error_description || error.data.detail;
-			});
-	}
+	addUserCtrl.enabled = true;
 
 	function submit() {
 		
+		addUserCtrl.enabled = false;
+
 		var scimUser = {};
 		
 		scimUser.id = Utils.uuid();
@@ -62,7 +52,16 @@ function AddUserController($scope, $uibModalInstance, Utils, scimFactory,
 		
 		console.info("Adding user ... ", scimUser);
 
-		addUserCtrl.createUser(scimUser);
+		scimFactory.createUser(scimUser).then(
+			function(response) {
+				console.info("Returned created user", response.data);
+				$uibModalInstance.close(response.data);
+				addUserCtrl.enabled = true;
+			},
+			function(error) {
+				$scope.operationResult = Utils.buildErrorOperationResult(error);
+				addUserCtrl.enabled = true;
+			});
 	}
 
 	function reset() {

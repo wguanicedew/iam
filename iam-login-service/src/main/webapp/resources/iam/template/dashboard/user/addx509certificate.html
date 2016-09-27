@@ -15,22 +15,17 @@
 			ng-model="addX509CertCtrl.value"></textarea>
 	</div>
 
-	<div class="row" ng-show="addX509CertCtrl.operationResult != null">
+	<div class="row">
 		<div class="col-xs-12">
-			<div class="alert"
-				ng-class="{'alert-success': addX509CertCtrl.operationResult=='ok', 'alert-danger': addX509CertCtrl.operationResult=='err'}">
-				<button class="close" ng-click="addX509CertCtrl.operationResult=null"
-					aria-label="close">&times;</button>
-				{{addX509CertCtrl.textAlert}}
-			</div>
+			<operationresult/>
 		</div>
 	</div>
 
 </div>
 <div class="modal-footer">
 	<button class="btn btn-primary" type="button" id="modal-btn-confirm"
-		ng-disabled="!addX509CertCtrl.label || !addX509CertCtrl.value"
+		ng-disabled="!addX509CertCtrl.label || !addX509CertCtrl.value || !addX509CertCtrl.enabled"
 		ng-click="addX509CertCtrl.addCertificate()">Add Certificate</button>
-	<button class="btn btn-warning" type="button" id="modal-btn-cancel"
+	<button class="btn btn-danger" type="button" id="modal-btn-cancel"
 		ng-click="addX509CertCtrl.cancel()">Cancel</button>
 </div>

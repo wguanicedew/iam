@@ -19,13 +19,15 @@ function AddGroupController($scope, $rootScope, $uibModalInstance, Utils, scimFa
 
 		addGroupCtrl.group.id = "";
 		addGroupCtrl.group.displayName = "";
-		addGroupCtrl.group.description = "";
+		addGroupCtrl.enableAdd = true;
 
 	}
 
 	addGroupCtrl.resetGroup();
 
 	function addGroup() {
+
+		addGroupCtrl.enabled = false;
 
 		addGroupCtrl.group.id = Utils.uuid();
 		addGroupCtrl.group.schemas = [];
@@ -36,10 +38,11 @@ function AddGroupController($scope, $rootScope, $uibModalInstance, Utils, scimFa
 		scimFactory.createGroup(addGroupCtrl.group).then(function(response) {
 			$rootScope.loggedUser.totGroups = $rootScope.loggedUser.totGroups + 1;
 			$uibModalInstance.close(response.data);
+			addGroupCtrl.enabled = true;
 		}, function(error) {
 			console.error('Error creating group', error);
-			addGroupCtrl.textAlert = error.data.error_description || error.data.detail;
-			addGroupCtrl.operationResult = 'err';
+			$scope.operationResult = Utils.buildErrorOperationResult(error);
+			addGroupCtrl.enabled = true;
 		});
 	}
 
