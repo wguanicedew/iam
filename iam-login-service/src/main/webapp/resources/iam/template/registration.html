@@ -14,21 +14,20 @@
 
         <div class="form-group">
             <label class="control-label col-sm-2" for="name">Name</label>
-            <div ng-class="{'has-error': registrationForm.name.$dirty && registrationForm.name.$invalid, 'has-success': registrationForm.name.$dirty && !registrationForm.name.$invalid}">
+            <div ng-class="{'has-error': registrationForm.name.$dirty && registrationForm.name.$invalid, 'has-success': registrationForm.name.$dirty && registrationForm.name.$valid}">
                 <div class="col-sm-10">
                     <input class="form-control" name="name" id="name" type="text" ng-model="request.givenname" placeholder="First name" required ng-minlength="3"/>
                     <span class="glyphicon form-control-feedback" ng-class="{'glyphicon-remove': registrationForm.name.$dirty && registrationForm.name.$invalid, 'glyphicon-ok': registrationForm.name.$dirty && registrationForm.name.$valid}" style="right: 15px"></span>
                     <span class="help-block" ng-show="registrationForm.name.$dirty && registrationForm.name.$error.required">
                         This is a required field</span>
                     <span class="help-block" ng-show="registrationForm.name.$dirty && registrationForm.name.$error.minlength">Minimum length required is 3</span>
-                    <span class="help-block" ng-show="registrationForm.name.$dirty && registrationForm.name.$invalid">This field is invalid</span>
                 </div>
             </div>
         </div>
 
         <div class="form-group">
             <label class="control-label col-sm-2" for="surname">Surname</label>
-            <div ng-class="{'has-error': registrationForm.surname.$dirty && registrationForm.surname.$invalid, 'has-success': registrationForm.surname.$dirty && !registrationForm.surname.$invalid}">
+            <div ng-class="{'has-error': registrationForm.surname.$dirty && registrationForm.surname.$invalid, 'has-success': registrationForm.surname.$dirty && registrationForm.surname.$valid}">
                 <div class="col-sm-10">
                     <input class="form-control" name="surname" id="surname" type="text" ng-model="request.familyname" placeholder="Family name" required ng-minlength="3"/>
                     <span
@@ -38,14 +37,13 @@
                     <span class="help-block" ng-show="registrationForm.surname.$dirty && registrationForm.surname.$error.required">
                         This is a required field</span>
                     <span class="help-block" ng-show="registrationForm.surname.$dirty && registrationForm.surname.$error.minlength">Minimum length required is 3</span>
-                    <span class="help-block" ng-show="registrationForm.surname.$dirty && registrationForm.surname.$invalid">This field is invalid</span>
                 </div>
             </div>
         </div>
 
         <div class="form-group">
             <label class="control-label col-sm-2" for="email">Email</label>
-            <div ng-class="{'has-error': registrationForm.email.$dirty && registrationForm.email.$invalid, 'has-success': registrationForm.email.$dirty && !registrationForm.email.$invalid}">
+            <div ng-class="{'has-error': registrationForm.email.$dirty && registrationForm.email.$invalid, 'has-success': registrationForm.email.$dirty && registrationForm.email.$valid}">
                 <div class="col-sm-10">
                     <input class="form-control" 
                       name="email" id="email" type="email" 
@@ -57,16 +55,15 @@
                       ng-model-options="{ debounce : { 'default' : 500 } }"/>
                     <span class="glyphicon form-control-feedback" ng-class="{'glyphicon-remove': registrationForm.email.$dirty && registrationForm.email.$invalid, 'glyphicon-ok': registrationForm.email.$dirty && registrationForm.email.$valid}" style="right: 15px"></span>
                     <span class="help-block" ng-show="registrationForm.email.$dirty && registrationForm.email.$error.required">This is a required field</span>
-                    <span class="help-block" ng-show="registrationForm.email.$dirty && registrationForm.email.$invalid">This field is invalid
-                    <span class="help-block" ng-show="registrationForm.email.$dirty && registrationForm.email.$error.unique">Email already taken by another user</span>
-                    </span>
+                    <span class="help-block" ng-show="registrationForm.email.$dirty && registrationForm.email.$error.email">This is not a valid email</span>
+                    <span class="help-block" ng-show="registrationForm.email.$dirty && registrationForm.email.$error.emailAvailable">Email already taken by another user</span>
                 </div>
             </div>
         </div>
 
         <div class="form-group">
             <label class="control-label col-sm-2" for="username">Username</label>
-            <div ng-class="{'has-error': registrationForm.username.$dirty && registrationForm.username.$invalid, 'has-success': registrationForm.username.$dirty && !registrationForm.username.$invalid}">
+            <div ng-class="{'has-error': registrationForm.username.$dirty && registrationForm.username.$invalid, 'has-success': registrationForm.username.$dirty && registrationForm.username.$valid}">
                 <div class="col-sm-10">
                     <input class="form-control" id="username" name="username" type="text" ng-model="request.username" placeholder="Username" required 
                     ng-minlength="3" 
@@ -77,9 +74,8 @@
                         style="right: 15px"></span>
                     <span class="help-block" ng-show="registrationForm.username.$dirty && registrationForm.username.$error.required">
                         This is a required field</span>
-                    <span class="help-block" ng-show="registrationForm.username.$dirty && registrationForm.username.$error.minlength">Minimum length required is 3</span>
-                    <span class="help-block" ng-show="registrationForm.username.$dirty && registrationForm.username.$error.unique">Username already taken by another user</span>
-                    <span class="help-block" ng-show="registrationForm.username.$dirty && registrationForm.username.$invalid">This field is invalid</span>
+                    <span class="help-block" ng-show="registrationForm.username.$dirty && registrationForm.username.$error.minlength">Minimum username length is 3 characters</span>
+                    <span class="help-block" ng-show="registrationForm.username.$dirty && registrationForm.username.$error.usernameAvailable">Username already taken by another user</span>
                 </div>
             </div>
         </div>
