@@ -16,22 +16,23 @@ import it.infn.mw.iam.core.web.LoginPageConfiguration;
 @RequestMapping(value = "/dashboard")
 @Transactional
 public class DashboardController {
-  
+
   @Autowired
   LoginPageConfiguration loginPageConfiguration;
 
-  @PreAuthorize("hasRole('USER')")
+  @PreAuthorize("hasRole('ADMIN')")
   @RequestMapping(method = RequestMethod.GET)
   public ModelAndView showDashboard(HttpServletRequest request) {
-    
+
     ModelAndView dashboard = new ModelAndView("iam/dashboard");
-    dashboard.getModelMap().addAttribute("isRegistrationEnabled", loginPageConfiguration.isRegistrationEnabled());
+    dashboard.getModelMap().addAttribute("isRegistrationEnabled",
+        loginPageConfiguration.isRegistrationEnabled());
     return dashboard;
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "/expiredsession")
   public ModelAndView showExpiredSession(HttpServletRequest request) {
-    
+
     return new ModelAndView("iam/expiredsession");
 
   }
