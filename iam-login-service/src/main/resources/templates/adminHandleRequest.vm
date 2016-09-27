@@ -6,6 +6,11 @@ Username: $username
 Email: $email
 ---------------------
 	
-As Indigo administrator, approve or reject this request.
+As Indigo administrator, go to the Indigo admin dashboard following the link below
+and approve or reject this request:
+
+---------------------
+$indigoDashboardUrl
+---------------------
 
 The Indigo-DC Team
