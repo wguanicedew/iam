@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 
 import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
@@ -52,18 +52,16 @@ public class DefaultRegistrationRequestService implements RegistrationRequestSer
   @Autowired
   private IamAccountRepository iamAccountRepo;
 
-  private static Table<IamRegistrationRequestStatus, IamRegistrationRequestStatus, Boolean> transictions;
-
-  {
-    transictions = HashBasedTable.create();
-    transictions.put(NEW, CONFIRMED, true);
-    transictions.put(NEW, APPROVED, true);
-    transictions.put(NEW, REJECTED, true);
-    transictions.put(CONFIRMED, APPROVED, true);
-    transictions.put(CONFIRMED, REJECTED, true);
-    transictions.put(APPROVED, CONFIRMED, true);
-    transictions.put(REJECTED, CONFIRMED, true);
-  }
+  private static final Table<IamRegistrationRequestStatus, IamRegistrationRequestStatus, Boolean> allowedStateTransitions =
+      new ImmutableTable.Builder<IamRegistrationRequestStatus, IamRegistrationRequestStatus, Boolean>()
+        .put(NEW, CONFIRMED, true)
+        .put(NEW, APPROVED, true)
+        .put(NEW, REJECTED, true)
+        .put(CONFIRMED, APPROVED, true)
+        .put(CONFIRMED, REJECTED, true)
+        .put(APPROVED, CONFIRMED, true)
+        .put(REJECTED, CONFIRMED, true)
+        .build();
 
   @Override
   public RegistrationRequestDto createRequest(RegistrationRequestDto request) {
@@ -139,7 +137,7 @@ public class DefaultRegistrationRequestService implements RegistrationRequestSer
         requestRepository.findByUuid(uuid).orElseThrow(() -> new ScimResourceNotFoundException(
             String.format("No request mapped to uuid [%s]", uuid)));
 
-    if (!checkStateTransiction(request.getStatus(), status)) {
+    if (!checkStateTransition(request.getStatus(), status)) {
       throw new IllegalArgumentException(
           String.format("Bad status transition from [%s] to [%s]", request.getStatus(), status));
     }
@@ -176,10 +174,15 @@ public class DefaultRegistrationRequestService implements RegistrationRequestSer
     return !account.isPresent();
   }
 
-  private boolean checkStateTransiction(IamRegistrationRequestStatus currentStatus,
+  @Override
+  public Boolean emailAvailable(String emailAddress) {
+    return !iamAccountRepo.findByEmail(emailAddress).isPresent();
+  }
+
+  private boolean checkStateTransition(IamRegistrationRequestStatus currentStatus,
       final IamRegistrationRequestStatus newStatus) {
 
-    return transictions.contains(currentStatus, newStatus);
+    return allowedStateTransitions.contains(currentStatus, newStatus);
   }
 
   private RegistrationRequestDto handleApprove(IamRegistrationRequest request) {

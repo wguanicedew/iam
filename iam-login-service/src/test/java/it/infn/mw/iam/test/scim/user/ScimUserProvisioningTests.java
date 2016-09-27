@@ -292,8 +292,8 @@ public class ScimUserProvisioningTests {
 
     restUtils
       .doPut(lennonCreationResult.getMeta().getLocation(), lennonWantsToBeMcCartney,
-          HttpStatus.BAD_REQUEST)
-      .body("detail", equalTo("userName is already mappped to another user"));
+          HttpStatus.CONFLICT)
+      .body("detail", containsString("userName is already mapped to another user"));
 
     restUtils.doDelete(lennonCreationResult.getMeta().getLocation());
     restUtils.doDelete(mccartneyCreationResult.getMeta().getLocation());
@@ -564,5 +564,58 @@ public class ScimUserProvisioningTests {
       .as(ScimUser.class);
 
     restUtils.doDelete(creationResult.getMeta().getLocation());
+  }
+
+
+  @Test
+  public void testEmailIsNotAlreadyLinkedOnCreate() {
+    ScimUser user0 = ScimUser.builder("test_same_email_0")
+      .buildEmail("same_email@test.org")
+      .buildName("Test", "Same Email 0")
+      .active(true)
+      .build();
+
+    ScimUser user1 = ScimUser.builder("test_same_email_1")
+      .buildEmail("same_email@test.org")
+      .buildName("Test", "Same Email 1")
+      .active(true)
+      .build();
+
+    user0 = restUtils.doPost("/scim/Users/", user0).extract().as(ScimUser.class);
+
+    restUtils.doPost("/scim/Users/", user1, HttpStatus.CONFLICT).body("detail",
+        containsString("email already assigned to an existing user"));
+
+    restUtils.deleteUsers(user0);
+
+  }
+
+  @Test
+  public void testEmailIsNotAlreadyLinkedOnUpdate() {
+    ScimUser user0 = ScimUser.builder("user0")
+      .buildEmail("user0@test.org")
+      .buildName("Test", "User 0")
+      .active(true)
+      .build();
+
+    ScimUser user1 = ScimUser.builder("user1")
+      .buildEmail("user1@test.org")
+      .buildName("Test", "User 1")
+      .active(true)
+      .build();
+
+    user0 = restUtils.doPost("/scim/Users/", user0).extract().as(ScimUser.class);
+    user1 = restUtils.doPost("/scim/Users/", user1).extract().as(ScimUser.class);
+
+    ScimUser updatedUser0 = ScimUser.builder("user0")
+      .buildEmail("user1@test.org")
+      .buildName("Test", "User 0")
+      .active(true)
+      .build();
+
+    restUtils.doPut(user0.getMeta().getLocation(), updatedUser0, HttpStatus.CONFLICT).body("detail",
+        containsString("email already assigned to an existing user"));
+
+    restUtils.deleteUsers(user0, user1);
   }
 }
