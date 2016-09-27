@@ -12,22 +12,17 @@
         <input class="form-control" type="text" placeholder="Saml ID User id ..." ng-model="addSamlAccountCtrl.userId">
     </div>
 
-    <div class="row" ng-show="addSamlAccountCtrl.operationResult != null">
+    <div class="row">
         <div class="col-xs-12">
-            <div class="alert"
-                ng-class="{'alert-success': addSamlAccountCtrl.operationResult=='ok', 'alert-danger': addSamlAccountCtrl.operationResult=='err'}">
-                <button class="close" ng-click="addSamlAccountCtrl.operationResult=null"
-                    aria-label="close">&times;</button>
-                {{addSamlAccountCtrl.textAlert}}
-            </div>
+            <operationresult/>
         </div>
     </div>
 
 </div>
 <div class="modal-footer">
 	<button class="btn btn-primary" type="button" id="modal-btn-confirm"
-	   ng-disabled="!addSamlAccountCtrl.idpId ||  !addSamlAccountCtrl.userId"
+	   ng-disabled="!addSamlAccountCtrl.idpId ||  !addSamlAccountCtrl.userId || !addSamlAccountCtrl.enabled"
 	   ng-click="addSamlAccountCtrl.addSamlAccount()">Add Account</button>
-	<button class="btn btn-warning" type="button" id="modal-btn-cancel"
+	<button class="btn btn-danger" type="button" id="modal-btn-cancel"
 		ng-click="addSamlAccountCtrl.cancel()">Cancel</button>
 </div>

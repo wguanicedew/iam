@@ -2,9 +2,9 @@
 
 angular.module('dashboardApp').controller('AddSamlAccountController', AddSamlAccountController);
 
-AddSamlAccountController.$inject = ['$scope', '$uibModalInstance', 'scimFactory', '$state', 'user'];
+AddSamlAccountController.$inject = ['$scope', '$uibModalInstance', 'scimFactory', 'Utils', '$state', 'user'];
 
-function AddSamlAccountController($scope, $uibModalInstance, scimFactory, $state, user) {
+function AddSamlAccountController($scope, $uibModalInstance, scimFactory, Utils, $state, user) {
 	
 	var addSamlAccountCtrl = this;
 	addSamlAccountCtrl.user = user;
@@ -13,20 +13,25 @@ function AddSamlAccountController($scope, $uibModalInstance, scimFactory, $state
 	addSamlAccountCtrl.addSamlAccount = addSamlAccount;
 	addSamlAccountCtrl.reset = reset;
 	
+	addSamlAccountCtrl.reset();
+	
 	function reset() {
 
 		addSamlAccountCtrl.idpId = "";
 		addSamlAccountCtrl.userId = "";
+		addSamlAccountCtrl.enabled = true;
 	};
 	
 	function addSamlAccount() {
-		
+
+		addSamlAccountCtrl.enabled = false;
 		scimFactory.addSamlId(addSamlAccountCtrl.user.id, addSamlAccountCtrl.idpId, addSamlAccountCtrl.userId).then(function(response) {
 			$uibModalInstance.close(response.data);
+			addSamlAccountCtrl.enabled = true;
 		},function(error) {
 			console.error('Error creating new saml account: ' + error);
-			addSamlAccountCtrl.textAlert = error.data.error_description || error.data.detail;
-			addSamlAccountCtrl.operationResult = 'err';
+			$scope.operationResult = Utils.buildErrorOperationResult(error);
+			addSamlAccountCtrl.enabled = true;
 		});
 	}
 	

@@ -62,4 +62,8 @@ function getIamVersion() {
 function getIamGitCommitId() {
   return '${gitCommitId}';
 }
+
+function getRegistrationEnabled() {
+  return ${isRegistrationEnabled};
+}
 </script>

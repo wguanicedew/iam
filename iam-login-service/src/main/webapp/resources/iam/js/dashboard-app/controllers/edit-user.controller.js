@@ -10,43 +10,18 @@ function EditUserController($scope, $state, $uibModalInstance, Utils,
 		scimFactory, user) {
 
 	var editUserCtrl = this;
-
-	console.log("received user to edit: ", user);
-
-	editUserCtrl.userToEdit = user;
 	
-	editUserCtrl.user = {
-		givenName : user.name.givenName,
-		familyName : user.name.familyName,
-		userName : user.userName,
-		email : user.emails[0].value,
-		picture : user.picture,
-		id: user.id
-	}
+	editUserCtrl.userToEdit = user;
 
-	console.log("builded user: ", editUserCtrl.user);
-
-	editUserCtrl.textAlert;
-	editUserCtrl.operationResult;
-
-	editUserCtrl.updateUser = updateUser;
 	editUserCtrl.submit = submit;
 	editUserCtrl.reset = reset;
 	editUserCtrl.dismiss = dismiss;
 
-	function updateUser(scimUser) {
-		scimFactory.updateUser(scimUser).then(
-				function(response) {
-					$uibModalInstance.close(response);
-				},
-				function(error) {
-					editUserCtrl.operationResult = 'err';
-					editUserCtrl.textAlert = error.data.error_description
-							|| error.data.detail;
-				});
-	}
+	editUserCtrl.reset();
 
 	function submit() {
+
+		editUserCtrl.enabled = false;
 
 		var scimUser = {};
 
@@ -71,17 +46,30 @@ function EditUserController($scope, $state, $uibModalInstance, Utils,
 
 		console.info("Adding user ... ", scimUser);
 
-		editUserCtrl.updateUser(scimUser);
+		scimFactory.updateUser(scimUser).then(
+			function(response) {
+				$uibModalInstance.close(response);
+				editUserCtrl.enabled = true;
+			},
+			function(error) {
+				$scope.operationResult = Utils.buildErrorOperationResult(error);
+				editUserCtrl.enabled = true;
+			});
 	}
 
 	function reset() {
 		editUserCtrl.user = {
-			givenname : '',
-			familyname : '',
-			username : '',
-			email : ''
-		};
-		$scope.userCreationForm.$setPristine();
+				givenName : user.name.givenName,
+				familyName : user.name.familyName,
+				userName : user.userName,
+				email : user.emails[0].value,
+				picture : user.picture,
+				id: user.id
+			};
+		if ($scope.userUpdateForm) {
+			$scope.userUpdateForm.$setPristine();
+		}
+		editUserCtrl.enabled = true;
 	}
 
 	function dismiss() {
