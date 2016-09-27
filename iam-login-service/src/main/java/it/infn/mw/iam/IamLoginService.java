@@ -1,5 +1,6 @@
 package it.infn.mw.iam;
 
+import org.mitre.openid.connect.web.RootController;
 import org.mitre.openid.connect.web.UserInfoEndpoint;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -36,7 +37,9 @@ import it.infn.mw.iam.core.IamBanner;
     "org.mitre.discovery.view"},
 excludeFilters = {
     @ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE,
-        value=UserInfoEndpoint.class)
+        value=UserInfoEndpoint.class),
+    @ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE,
+    value=RootController.class),
 })
 // @formatter:on
 
