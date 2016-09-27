@@ -112,13 +112,13 @@ public class DefaultNotificationService implements NotificationService {
     String name = request.getAccount().getUserInfo().getName();
     String username = request.getAccount().getUsername();
     String email = request.getAccount().getUserInfo().getEmail();
-    String indigoDashboardUrl = String.format("%s/dashboard#/requests", baseUrl);
+    String dashboardUrl = String.format("%s/dashboard#/requests", baseUrl);
 
     Map<String, Object> model = new HashMap<>();
     model.put("name", name);
     model.put("username", username);
     model.put("email", email);
-    model.put("indigoDashboardUrl", indigoDashboardUrl);
+    model.put("indigoDashboardUrl", dashboardUrl);
     model.put("organisationName", organisationName);
 
     return createMessage("adminHandleRequest.vm", model, IamNotificationType.CONFIRMATION,
