@@ -55,7 +55,7 @@
 						<tbody>
 							<tr
 								ng-repeat="user in users.filtered | startFrom:(users.currentPage-1)*users.entryLimit | limitTo:users.entryLimit">
-								<td>{{$index + (users.currentPage-1)*users.entryLimit + 1}}</td>
+								<td class="uuid" id="{{user.id}}">{{$index + (users.currentPage-1)*users.entryLimit + 1}}</td>
 								<td><img class="img-circle" width="22"
 									ng-src="{{user.picture}}" alt="User profile picture"
 									ng-show="user.picture"> <img class="img-circle"
@@ -73,7 +73,7 @@
 									<span ng-show="user.groups.length > 4">...</span>
 								</td>
 								<td class="text-right">
-									<button ng-disabled="user.id == $root.loggedUser.me.id" class="btn btn-danger btn-xs" ng-click="users.deleteUser(user)">
+									<button id="delete_user_{{user.id}}" ng-disabled="user.id == $root.loggedUser.me.id" class="btn btn-danger btn-xs" ng-click="users.deleteUser(user)">
 										<i class="fa fa-times"></i> Delete
 									</button>
 								</td>

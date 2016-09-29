@@ -155,7 +155,7 @@
 							<tbody>
 								<tr
 									ng-repeat="oidcId in user.userInfo['urn:indigo-dc:scim:schemas:IndigoUser'].oidcIds">
-									<td>{{$index + 1}}</td>
+									<td class="oidcId" id="{{ oidcId.issuer }}_{{ oidcId.subject }}">{{$index + 1}}</td>
 									<td>{{ oidcId.issuer }}</td>
 									<td>{{ oidcId.subject }}</td>
 									<td class="text-right">
@@ -195,7 +195,7 @@
 						No SSH Key found</div>
 					<div class="table-responsive"
 						ng-show="user.userInfo['urn:indigo-dc:scim:schemas:IndigoUser'].sshKeys">
-						<table class="table no-margin">
+						<table class="table no-margin" id="ssh_keys_list">
 							<thead>
 								<tr>
 									<th>#</th>
@@ -254,7 +254,7 @@
 						No SAML Id found</div>
 					<div class="table-responsive"
 						ng-show="user.userInfo['urn:indigo-dc:scim:schemas:IndigoUser'].samlIds">
-						<table class="table no-margin">
+						<table class="table no-margin" id="saml_account_list">
 							<thead>
 								<tr>
 									<th>#</th>
@@ -266,7 +266,7 @@
 							<tbody>
 								<tr
 									ng-repeat="samlId in user.userInfo['urn:indigo-dc:scim:schemas:IndigoUser'].samlIds">
-									<td>{{$index + 1}}</td>
+									<td class="samlId" id="{{ samlId.idpId }}_{{ samlId.userId }}">{{$index + 1}}</td>
 									<td>{{ samlId.idpId }}</td>
 									<td>{{ samlId.userId }}</td>
 									<td class="text-right">
@@ -305,7 +305,7 @@
 						Certificate found</div>
 					<div class="table-responsive"
 						ng-show="user.userInfo.x509Certificates">
-						<table class="table no-margin">
+						<table class="table no-margin" id="x509_list">
 							<thead>
 								<tr>
 									<th>#</th>
