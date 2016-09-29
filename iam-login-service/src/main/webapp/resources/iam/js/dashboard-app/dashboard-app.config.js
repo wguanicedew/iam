@@ -1,6 +1,9 @@
 angular.module('dashboardApp').value('getUserInfo', getUserInfo);
 
-angular.module('dashboardApp').config(function($stateProvider, $urlRouterProvider) {
+angular.module('dashboardApp').config(function($stateProvider, $urlRouterProvider, $httpProvider) {
+
+    $httpProvider.interceptors.push('gatewayErrorInterceptor');
+    $httpProvider.interceptors.push('sessionExpiredInterceptor');
 
 	$urlRouterProvider.otherwise('/home');
 	$stateProvider.state('home', {
@@ -63,25 +66,7 @@ angular.module('dashboardApp').config(function($stateProvider, $urlRouterProvide
 		      'content' : {
 		        templateUrl: '/resources/iam/template/dashboard/requests/management.html',
 		        controller: 'RequestManagementController',
-		        controllerAs: 'ctrl'
-		      }
-		    }
-	}).state('error', {
-		url : '/error',
-		params: {
-			error: {
-				statusText: "Unknonwn error",
-				data: {
-					status: "500",
-					detail: ""
-				}
-			}
-		},
-		views: {
-		      'content' : {
-		        templateUrl: '/resources/iam/template/dashboard/error.html',
-		        controller: 'ErrorController',
-		        controllerAs: 'errorCtrl'
+		        controllerAs: 'requests'
 		      }
 		    }
 	});

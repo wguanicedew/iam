@@ -1,0 +1,8 @@
+<div ng-show="operationResult != null">
+	<div class="alert"
+		ng-class="{'alert-success': operationResult.type == 'success', 'alert-danger': operationResult.type == 'error'}">
+		<button class="close" ng-click="operationResult = null"
+			aria-label="close">&times;</button>
+		{{operationResult.text}}
+	</div>
+</div>

@@ -1,7 +1,14 @@
 <div class="modal-header">
-	<h3 class="modal-title">Add group(s) to <strong>{{addGroupCtrl.user.name.formatted}}</strong></h3>
+	<h3 class="modal-title">
+		Add group(s) to <strong>{{addGroupCtrl.user.name.formatted}}</strong>
+	</h3>
+	<uib-progressbar animate="true" class="progress-striped active"
+		max="100" value="addGroupCtrl.loadingGroupsProgress" type="danger" ng-show="addGroupCtrl.loadingGroupsProgress < 100">
+	<i>{{addGroupCtrl.loadingGroupsProgress}} / 100</i></uib-progressbar>
 </div>
-<div class="modal-body">
+<div class="modal-body"
+	ng-disabled="addGroupCtrl.loadingGroupsProgress < 100">
+
 
 	<ui-select multiple ng-model="addGroupCtrl.groupsSelected"
 		theme="bootstrap" ng-disabled="addGroupCtrl.disabled" sortable="true"
@@ -10,18 +17,11 @@
 	<ui-select-choices
 		repeat="group in addGroupCtrl.oGroups | filter: {displayName: $select.search}">
 	<div ng-bind-html="group.displayName | highlight: $select.search"></div>
-	</ui-select-choices> 
-	<ui-select-no-choice> No results found </ui-select-no-choice>
-	</ui-select>
+	</ui-select-choices> <ui-select-no-choice> No results found </ui-select-no-choice> </ui-select>
 
-	<div class="row" ng-show="addGroupCtrl.operationResult != null">
+	<div class="row">
 		<div class="col-xs-12">
-			<div class="alert"
-				ng-class="{'alert-success': addGroupCtrl.operationResult=='ok', 'alert-danger': addGroupCtrl.operationResult=='err'}">
-				<button class="close" ng-click="addGroupCtrl.operationResult=null"
-					aria-label="close">&times;</button>
-				{{addGroupCtrl.textAlert}}
-			</div>
+			<operationresult/>
 		</div>
 	</div>
 
@@ -30,6 +30,6 @@
 	<button class="btn btn-primary" type="button" name="modal-btn-confirm"
 		ng-click="addGroupCtrl.addGroup()"
 		ng-disabled="addGroupCtrl.groupsSelected == null">Add Group</button>
-	<button class="btn btn-warning" type="button" name="modal-btn-cancel"
+	<button class="btn btn-danger" type="button" name="modal-btn-cancel"
 		ng-click="addGroupCtrl.cancel()">Cancel</button>
 </div>

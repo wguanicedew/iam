@@ -12,11 +12,17 @@
         <input id="add-oidc-subject" class="form-control" type="text" placeholder="Open ID Account subject ..." ng-model="addOidcCtrl.subject">
     </div>
 
+    <div class="row">
+        <div class="col-xs-12">
+            <operationresult/>
+        </div>
+    </div>
+
 </div>
 <div class="modal-footer">
 	<button class="btn btn-primary" type="button" id="modal-btn-confirm"
-	   ng-disabled="!addOidcCtrl.issuer ||  !addOidcCtrl.subject"
+	   ng-disabled="!addOidcCtrl.issuer ||  !addOidcCtrl.subject || !addOidcCtrl.enabled"
 	   ng-click="addOidcCtrl.addOidcAccount()">Add Account</button>
-	<button class="btn btn-warning" type="button" id="modal-btn-cancel"
+	<button class="btn btn-danger" type="button" id="modal-btn-cancel"
 		ng-click="addOidcCtrl.cancel()">Cancel</button>
 </div>

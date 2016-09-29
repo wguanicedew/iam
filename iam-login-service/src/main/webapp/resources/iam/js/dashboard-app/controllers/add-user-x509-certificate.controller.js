@@ -4,9 +4,9 @@ angular.module('dashboardApp').controller('AddX509CertificateController',
 		AddX509CertificateController);
 
 AddX509CertificateController.$inject = [ '$scope', '$uibModalInstance',
-		'scimFactory', '$state', 'user' ];
+		'scimFactory', 'Utils', '$state', 'user' ];
 
-function AddX509CertificateController($scope, $uibModalInstance, scimFactory,
+function AddX509CertificateController($scope, $uibModalInstance, scimFactory, Utils,
 		$state, user) {
 
 	var addX509CertCtrl = this;
@@ -16,10 +16,13 @@ function AddX509CertificateController($scope, $uibModalInstance, scimFactory,
 	addX509CertCtrl.addCertificate = addCertificate;
 	addX509CertCtrl.reset = reset;
 
+	addX509CertCtrl.reset();
+
 	function reset() {
 
 		addX509CertCtrl.label = "";
 		addX509CertCtrl.value = "";
+		addX509CertCtrl.enabled = true;
 	}
 
 	function checkBase64Encoding() {
@@ -31,12 +34,17 @@ function AddX509CertificateController($scope, $uibModalInstance, scimFactory,
 
 	function addCertificate() {
 
+		addX509CertCtrl.enabled = false;
+		
 		console.log("Adding Certificate ", addX509CertCtrl.label,
 				addX509CertCtrl.value);
 
 		if (!checkBase64Encoding()) {
-			addX509CertCtrl.textAlert = "Key is not a base64 encoded string!";
-			addX509CertCtrl.operationResult = 'err';
+			$scope.operationResult = Utils.buildErrorOperationResult({
+				data: {
+					detail: "Key is not a base64 encoded string!"
+				}
+			});
 			return;
 		}
 
@@ -46,10 +54,11 @@ function AddX509CertificateController($scope, $uibModalInstance, scimFactory,
 					console.log("Added x509 Certificate: ",
 							addX509CertCtrl.label, addX509CertCtrl.value);
 					$uibModalInstance.close(response.data);
+					addX509CertCtrl.enabled = true;
 				}, function(error) {
 					console.error('Error creating x509 certificate: ', error);
-					addX509CertCtrl.textAlert = error.data.error_description || error.data.detail;
-					addX509CertCtrl.operationResult = 'err';
+					$scope.operationResult = Utils.buildErrorOperationResult(error);
+					addX509CertCtrl.enabled = true;
 				});
 	}
 
