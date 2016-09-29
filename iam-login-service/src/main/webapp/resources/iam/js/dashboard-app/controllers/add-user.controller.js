@@ -10,24 +10,14 @@ function AddUserController($scope, $uibModalInstance, Utils, scimFactory,
 		$state) {
 	
 	var addUserCtrl = this;
-	
-	addUserCtrl.user = {
-			givenname : '',
-			familyname : '',
-			username : '',
-			email : ''
-	};
-
-	addUserCtrl.textAlert;
-	addUserCtrl.operationResult;
 
 	addUserCtrl.submit = submit;
 	addUserCtrl.reset = reset;
 	addUserCtrl.dismiss = dismiss;
-	addUserCtrl.enabled = true;
 
 	function submit() {
 		
+		console.log("User info to add ", addUserCtrl.user);
 		addUserCtrl.enabled = false;
 
 		var scimUser = {};
@@ -35,11 +25,11 @@ function AddUserController($scope, $uibModalInstance, Utils, scimFactory,
 		scimUser.id = Utils.uuid();
 		scimUser.schemas = [];
 		scimUser.schemas[0] = "urn:ietf:params:scim:schemas:core:2.0:User";
-		scimUser.displayName = addUserCtrl.user.givenname + " " + addUserCtrl.user.surname;
+		scimUser.displayName = addUserCtrl.user.name + " " + addUserCtrl.user.surname;
 		scimUser.name = {
-			givenName: addUserCtrl.user.givenname,
-			familyName: addUserCtrl.user.familyname,
-			middleName: ""				
+			givenName: addUserCtrl.user.name,
+			familyName: addUserCtrl.user.surname,
+			middleName: ""
 		};
 		scimUser.emails = [{
 			type: "work",
@@ -48,7 +38,7 @@ function AddUserController($scope, $uibModalInstance, Utils, scimFactory,
 		}];
 		scimUser.userName = addUserCtrl.user.username;
 		scimUser.active = true;
-		scimUser.picture = "resources/iam/img/default-avatar.png";
+		scimUser.picture = "";
 		
 		console.info("Adding user ... ", scimUser);
 
@@ -66,12 +56,15 @@ function AddUserController($scope, $uibModalInstance, Utils, scimFactory,
 
 	function reset() {
 		addUserCtrl.user = {
-				givenname : '',
-				familyname : '',
+				name : '',
+				surname : '',
 				username : '',
 				email : ''
 		};
-		$scope.userCreationForm.$setPristine();
+		if ($scope.userCreationForm) {
+			$scope.userCreationForm.setPristine();
+		}
+		addUserCtrl.enabled = true;
 	}
 
 	function dismiss() {
