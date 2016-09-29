@@ -58,9 +58,10 @@ public class NotificationConcurrentTests {
 
   private Wiser wiser;
 
+  private RegistrationRequestDto reg;
+
   public static final int NUM_THREADS = 3;
   final CyclicBarrier barrier = new CyclicBarrier(NUM_THREADS + 1);
-
 
   @BeforeClass
   public static void init() {
@@ -74,18 +75,20 @@ public class NotificationConcurrentTests {
     wiser.setHostname(mailHost);
     wiser.setPort(mailPort);
     wiser.start();
+
+    reg = createRegistrationRequest("test_user");
   }
 
   @After
   public void tearDown() {
     wiser.stop();
+
+    deleteUser(reg.getAccountId());
+    notificationRepository.deleteAll();
   }
 
   @Test
   public void testConcurrentDelivery() throws Exception {
-
-    String username = "test_user";
-    RegistrationRequestDto reg = createRegistrationRequest(username);
 
     ExecutorService executorService = Executors.newFixedThreadPool(NUM_THREADS + 1);
     List<Future<Integer>> futuresList = new ArrayList<>();
@@ -106,14 +109,10 @@ public class NotificationConcurrentTests {
     int count = wiser.getMessages().size();
 
     Assert.assertEquals(expected, count);
-
-    deleteUser(reg.getAccountId());
   }
 
   @Test
   public void testConcurrentCleanUp() throws Exception {
-    String username = "test_user";
-    RegistrationRequestDto reg = createRegistrationRequest(username);
 
     notificationService.sendPendingNotification();
     Assert.assertEquals(1, wiser.getMessages().size());
@@ -139,8 +138,6 @@ public class NotificationConcurrentTests {
 
     int count = notificationRepository.countAllMessages();
     Assert.assertEquals(0, count);
-
-    deleteUser(reg.getAccountId());
   }
 
   public class WorkerSend implements Callable<Integer> {
