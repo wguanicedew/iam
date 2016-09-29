@@ -817,7 +817,7 @@ When a new request is confirmed, IAM administrators are notified with an email t
 
 #### Requests approval or rejection 
 
-Only users with role `ROLE_ADMIN` can decide to approve or reject a registration request.
+Only users with role `ROLE_ADMIN` or `registration:write` scope, can decide to approve or reject a registration request.
 To performe this operation, log into IAM as administrator and go to the new dashboard.
 On the left, the link "Request" opens the requests management page.
 From this page, the administrator can approve or reject the request.
