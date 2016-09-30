@@ -106,10 +106,10 @@ public class RegistrationUtils {
     // @formatter:off
     RestAssured.given()
       .port(8080)
-      .param("resetkey", resetKey)
+      .param("token", resetKey)
       .param("password", newPassword)
     .when()
-      .post("/iam/password-change")
+      .post("/iam/password-reset")
     .then()
       .log()
         .body(true)

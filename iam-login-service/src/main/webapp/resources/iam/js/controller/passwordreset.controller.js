@@ -15,18 +15,21 @@ function ResetPasswordController($scope, ResetPasswordService){
 	vm.submit = submit;
 	vm.reset = reset;
 	
-	vm.messages = {
-		'ok': "Your password has been update successfully. Go back to home page and log into Indigo!",
-		'err': "An error occuors. Password has not been changed!"
-	};
+	
 	
 	
 	function submit(){
 		ResetPasswordService.changePassword(vm.resetKey, vm.password).then(
 			function(response){
-				vm.operationResult = response.data;
-				vm.textAlert = vm.messages[vm.operationResult];
+				vm.operationResult = 'ok';
 				vm.reset();
+			}, function(data){
+				vm.operationResult = 'err';
+				if (data.status == -1 ){
+					vm.textAlert = 'Could not enstabilish a connection to the IAM server. Are you online?'
+				} else {
+					vm.textAlert = data.statusText+': '+data.data;
+				}
 			}
 		);
 	};
@@ -48,9 +51,17 @@ function ForgotPasswordController($scope, $uibModalInstance, ResetPasswordServic
 	$scope.email;
 	
 	$scope.submit = function(){
-		ResetPasswordService.forgotPassword($scope.email);
-		$scope.operationResult = 'ok';
-		$scope.textAlert='If the email address specified is registered within a valid user, an email will be sent with a URL for reset password.'
+		ResetPasswordService.forgotPassword($scope.email).then(
+				function(response){
+					$scope.operationResult = 'ok';
+				}, function(data) {
+					$scope.operationResult = 'err';
+					if (data.status == -1 ){
+						$scope.textAlert = 'Could not enstabilish a connection to the IAM server. Are you online?'
+					} else {
+						$scope.textAlert = data.statusText+': '+data.data;
+					}
+				});
 		$scope.reset();
 	}
 	

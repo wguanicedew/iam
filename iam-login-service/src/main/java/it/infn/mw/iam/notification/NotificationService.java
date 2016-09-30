@@ -16,8 +16,11 @@ public interface NotificationService {
 
   public IamEmailNotification createResetPasswordMessage(IamAccount account);
 
-  public void sendPendingNotification();
+  public void sendPendingNotifications();
 
   public void clearExpiredNotifications();
 
+  public int countPendingNotifications();
+
+  public void clearAllNotifications();
 }

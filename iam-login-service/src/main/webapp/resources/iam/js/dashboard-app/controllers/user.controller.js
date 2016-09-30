@@ -80,7 +80,7 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 					closeButtonText: null,
 					user: user.userInfo.name.formatted,
 					actionButtonText: 'OK',
-					headerText: 'Passoword reset requested',
+					headerText: 'Password reset requested',
 					bodyText: `A password reset link has just been sent to your e-mail address`
 				});
 			}, function(error) {
@@ -244,7 +244,7 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 					.then(function(response) {
 						console.log("Deleted: ", group);
 						getIndigoUserInfo();
-						$scope.operationResult = Utils.buildSuccessOperationResult("Group " + group.display + " membership removed successfully");
+						$scope.operationResult = Utils.buildSuccessOperationResult("Group membership removed successfully");
 					}, function(error) {
 						$scope.operationResult = Utils.buildErrorOperationResult(error);
 					});
@@ -290,7 +290,7 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 						.then(function(response) {
 							console.log("Removed: ", oidcId.issuer, oidcId.subject);
 							getIndigoUserInfo();
-							$scope.operationResult = Utils.buildSuccessOperationResult("Open ID Account " + summary + " has been removed successfully");
+							$scope.operationResult = Utils.buildSuccessOperationResult("Open ID Account has been removed successfully");
 						}, function(error) {
 							$scope.operationResult = Utils.buildErrorOperationResult(error);
 						});
@@ -312,7 +312,7 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 						.then(function(response) {
 							console.log("Removed: ", sshKey.display, sshKey.fingerprint);
 							getIndigoUserInfo();
-							$scope.operationResult = Utils.buildSuccessOperationResult("Ssh key " + sshKey.display + " has been removed successfully");
+							$scope.operationResult = Utils.buildSuccessOperationResult("Ssh key has been removed successfully");
 						}, function(error) {
 							$scope.operationResult = Utils.buildErrorOperationResult(error);
 						});
@@ -334,7 +334,7 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 						.then(function(response) {
 							console.log("Removed: ", x509cert.display);
 							getIndigoUserInfo();
-							$scope.operationResult = Utils.buildSuccessOperationResult("X509 Certificate " + x509cert.display + " has been removed successfully");
+							$scope.operationResult = Utils.buildSuccessOperationResult("X509 Certificate has been removed successfully");
 						}, function(error) {
 							$scope.operationResult = Utils.buildErrorOperationResult(error);
 						});
@@ -343,7 +343,7 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 
 	function deleteSamlId(samlId) {
 
-		var summary = samlId.idpId + ", " + samlId.userId;
+		var summary = samlId.idpId + " - " + samlId.userId;
 		
 		var modalOptions = {
 				closeButtonText: 'Cancel',
@@ -359,7 +359,7 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 						.then(function(response) {
 							console.log("Removed: ", samlId.idpId, samlId.userId);
 							getIndigoUserInfo();
-							$scope.operationResult = Utils.buildSuccessOperationResult("SAML account " + summary + " has been removed successfully");
+							$scope.operationResult = Utils.buildSuccessOperationResult("SAML Account has been removed successfully");
 						}, function(error) {
 							$scope.operationResult = Utils.buildErrorOperationResult(error);
 						});

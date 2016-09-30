@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.velocity.VelocityEngineUtils;
 
+import it.infn.mw.iam.api.account.PasswordResetController;
 import it.infn.mw.iam.core.IamDeliveryStatus;
 import it.infn.mw.iam.core.IamNotificationType;
 import it.infn.mw.iam.core.time.TimeProvider;
@@ -53,6 +54,9 @@ public class DefaultNotificationService implements NotificationService {
   @Value("${iam.baseUrl}")
   private String baseUrl;
 
+  @Value("${iam.organisation.name}")
+  private String organisationName;
+
   @Autowired
   private TimeProvider timeProvider;
 
@@ -67,26 +71,26 @@ public class DefaultNotificationService implements NotificationService {
     Map<String, Object> model = new HashMap<>();
     model.put(RECIPIENT_FIELD, recipient);
     model.put("confirmURL", confirmURL);
+    model.put("organisationName", organisationName);
 
     return createMessage("confirmRegistration.vm", model, IamNotificationType.CONFIRMATION,
-        properties.getSubject().get("confirmation"), request,
-        request.getAccount().getUserInfo().getEmail());
+        properties.getSubject().get("confirmation"), request.getAccount().getUserInfo().getEmail());
   }
 
   @Override
   public IamEmailNotification createAccountActivatedMessage(IamRegistrationRequest request) {
 
     String recipient = request.getAccount().getUserInfo().getName();
-    String resetPasswordUrl =
-        String.format("%s/iam/password-reset/%s", baseUrl, request.getAccount().getResetKey());
+    String resetPasswordUrl = String.format("%s%s/%s", baseUrl,
+        PasswordResetController.BASE_TOKEN_URL, request.getAccount().getResetKey());
 
     Map<String, Object> model = new HashMap<>();
     model.put(RECIPIENT_FIELD, recipient);
     model.put("resetPasswordUrl", resetPasswordUrl);
+    model.put("organisationName", organisationName);
 
     return createMessage("accountActivated.vm", model, IamNotificationType.ACTIVATED,
-        properties.getSubject().get("activated"), request,
-        request.getAccount().getUserInfo().getEmail());
+        properties.getSubject().get("activated"), request.getAccount().getUserInfo().getEmail());
   }
 
   @Override
@@ -95,10 +99,10 @@ public class DefaultNotificationService implements NotificationService {
 
     Map<String, Object> model = new HashMap<>();
     model.put(RECIPIENT_FIELD, recipient);
+    model.put("organisationName", organisationName);
 
     return createMessage("requestRejected.vm", model, IamNotificationType.REJECTED,
-        properties.getSubject().get("rejected"), request,
-        request.getAccount().getUserInfo().getEmail());
+        properties.getSubject().get("rejected"), request.getAccount().getUserInfo().getEmail());
   }
 
   @Override
@@ -106,34 +110,38 @@ public class DefaultNotificationService implements NotificationService {
     String name = request.getAccount().getUserInfo().getName();
     String username = request.getAccount().getUsername();
     String email = request.getAccount().getUserInfo().getEmail();
+    String dashboardUrl = String.format("%s/dashboard#/requests", baseUrl);
 
     Map<String, Object> model = new HashMap<>();
     model.put("name", name);
     model.put("username", username);
     model.put("email", email);
+    model.put("indigoDashboardUrl", dashboardUrl);
+    model.put("organisationName", organisationName);
 
     return createMessage("adminHandleRequest.vm", model, IamNotificationType.CONFIRMATION,
-        properties.getSubject().get("adminHandleRequest"), request, properties.getAdminAddress());
+        properties.getSubject().get("adminHandleRequest"), properties.getAdminAddress());
   }
 
   @Override
   public IamEmailNotification createResetPasswordMessage(IamAccount account) {
 
     String recipient = account.getUserInfo().getName();
-    String resetPasswordUrl =
-        String.format("%s/iam/password-reset/%s", baseUrl, account.getResetKey());
+    String resetPasswordUrl = String.format("%s%s/%s", baseUrl,
+        PasswordResetController.BASE_TOKEN_URL, account.getResetKey());
 
     Map<String, Object> model = new HashMap<>();
     model.put(RECIPIENT_FIELD, recipient);
     model.put("resetPasswordUrl", resetPasswordUrl);
+    model.put("organisationName", organisationName);
 
     return createMessage("resetPassword.vm", model, IamNotificationType.RESETPASSWD,
-        properties.getSubject().get("resetPassword"), null, account.getUserInfo().getEmail());
+        properties.getSubject().get("resetPassword"), account.getUserInfo().getEmail());
   }
 
   @Override
   @Transactional
-  public void sendPendingNotification() {
+  public void sendPendingNotifications() {
 
     SimpleMailMessage messageTemplate = new SimpleMailMessage();
     messageTemplate.setFrom(properties.getMailFrom());
@@ -196,8 +204,7 @@ public class DefaultNotificationService implements NotificationService {
 
 
   private IamEmailNotification createMessage(String template, Map<String, Object> model,
-      IamNotificationType messageType, String subject, IamRegistrationRequest request,
-      String receiverAddress) {
+      IamNotificationType messageType, String subject, String receiverAddress) {
 
     String body =
         VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, template, "UTF-8", model);
@@ -209,7 +216,6 @@ public class DefaultNotificationService implements NotificationService {
     message.setBody(body);
     message.setCreationTime(new Date());
     message.setDeliveryStatus(IamDeliveryStatus.PENDING);
-    message.setRequest(request);
 
     List<IamNotificationReceiver> receivers = new ArrayList<>();
     IamNotificationReceiver rcv = new IamNotificationReceiver();
@@ -222,6 +228,17 @@ public class DefaultNotificationService implements NotificationService {
     notificationRepository.save(message);
 
     return message;
+  }
+
+  @Override
+  public int countPendingNotifications() {
+
+    return notificationRepository.countByDeliveryStatus(IamDeliveryStatus.PENDING);
+  }
+
+  @Override
+  public void clearAllNotifications() {
+    notificationRepository.deleteAll();
   }
 
 }

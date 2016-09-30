@@ -43,10 +43,10 @@ public class ScimMeEndpointTests {
 
   }
 
-
+  @Test
   public void meEndpointFailsForClientWithoutUser() {
 
-    String accessToken = clientCredentialsTokenGetter().getAccessToken();
+    String accessToken = clientCredentialsTokenGetter("registration-client", "secret").getAccessToken();
     // TBD: the test that fails with
 
     given().port(8080)
@@ -62,7 +62,7 @@ public class ScimMeEndpointTests {
       .log()
       .all(true)
       .statusCode(HttpStatus.BAD_REQUEST.value())
-      .body("status", equalTo("404"))
+      .body("status", equalTo("400"))
       .body("detail", equalTo("No user linked to the current OAuth token"));
   }
 

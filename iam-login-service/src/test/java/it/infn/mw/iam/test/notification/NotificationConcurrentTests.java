@@ -56,11 +56,12 @@ public class NotificationConcurrentTests {
   @Autowired
   private MockTimeProvider timeProvider;
 
-  private Wiser wiser;
+  private Wiser wiserSmtpServer;
+
+  private RegistrationRequestDto registrationRequest;
 
   public static final int NUM_THREADS = 3;
   final CyclicBarrier barrier = new CyclicBarrier(NUM_THREADS + 1);
-
 
   @BeforeClass
   public static void init() {
@@ -70,22 +71,24 @@ public class NotificationConcurrentTests {
 
   @Before
   public void setUp() {
-    wiser = new Wiser();
-    wiser.setHostname(mailHost);
-    wiser.setPort(mailPort);
-    wiser.start();
+    wiserSmtpServer = new Wiser();
+    wiserSmtpServer.setHostname(mailHost);
+    wiserSmtpServer.setPort(mailPort);
+    wiserSmtpServer.start();
+
+    registrationRequest = createRegistrationRequest("test_user");
   }
 
   @After
   public void tearDown() {
-    wiser.stop();
+    wiserSmtpServer.stop();
+
+    deleteUser(registrationRequest.getAccountId());
+    notificationRepository.deleteAll();
   }
 
   @Test
   public void testConcurrentDelivery() throws Exception {
-
-    String username = "test_user";
-    RegistrationRequestDto reg = createRegistrationRequest(username);
 
     ExecutorService executorService = Executors.newFixedThreadPool(NUM_THREADS + 1);
     List<Future<Integer>> futuresList = new ArrayList<>();
@@ -102,21 +105,16 @@ public class NotificationConcurrentTests {
       elem.get();
     }
 
-    int expected = 1;
-    int count = wiser.getMessages().size();
+    int count = wiserSmtpServer.getMessages().size();
+    Assert.assertEquals(1, count);
 
-    Assert.assertEquals(expected, count);
-
-    deleteUser(reg.getAccountId());
   }
 
   @Test
   public void testConcurrentCleanUp() throws Exception {
-    String username = "test_user";
-    RegistrationRequestDto reg = createRegistrationRequest(username);
 
-    notificationService.sendPendingNotification();
-    Assert.assertEquals(1, wiser.getMessages().size());
+    notificationService.sendPendingNotifications();
+    Assert.assertEquals(1, wiserSmtpServer.getMessages().size());
 
     Date fakeDate = DateUtils.addDays(new Date(), (notificationCleanUpAge + 1));
     timeProvider.setTime(fakeDate.getTime());
@@ -139,8 +137,6 @@ public class NotificationConcurrentTests {
 
     int count = notificationRepository.countAllMessages();
     Assert.assertEquals(0, count);
-
-    deleteUser(reg.getAccountId());
   }
 
   public class WorkerSend implements Callable<Integer> {
@@ -162,7 +158,7 @@ public class NotificationConcurrentTests {
         ex.printStackTrace();
       }
 
-      this.notificationService.sendPendingNotification();
+      this.notificationService.sendPendingNotifications();
       return null;
     }
   }
