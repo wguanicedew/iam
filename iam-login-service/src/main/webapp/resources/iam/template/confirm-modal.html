@@ -11,9 +11,9 @@
 	<p class="text-justify text-wrapped"><i>{{modalOptions.bodyDetail}}</i></p>
 </div>
 <div class="modal-footer">
-    <button class="btn btn-primary" data-dismiss="modal" type="button"
+    <button class="btn btn-primary" id="btn-confirm" data-dismiss="modal" type="button"
         data-ng-click="modalOptions.ok();">{{modalOptions.actionButtonText}}</button>
-	<button class="btn btn-danger" data-dismiss="modal" type="button"
+	<button class="btn btn-danger" id="btn-cancel" data-dismiss="modal" type="button"
 		ng-show="modalOptions.closeButtonText != null"
 		data-ng-click="modalOptions.close()">{{modalOptions.closeButtonText}}</button>
 </div>

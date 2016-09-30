@@ -7,6 +7,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.WebIntegrationTest;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import com.jayway.restassured.RestAssured;
 
 import it.infn.mw.iam.IamLoginService;
+import it.infn.mw.iam.persistence.repository.IamEmailNotificationRepository;
 import it.infn.mw.iam.registration.PersistentUUIDTokenGenerator;
 import it.infn.mw.iam.registration.RegistrationRequestDto;
 import it.infn.mw.iam.test.RegistrationUtils;
@@ -25,8 +27,14 @@ import it.infn.mw.iam.test.TestUtils;
 @WebIntegrationTest
 public class PasswordResetTests {
 
+  @Value("${server.port}")
+  private Integer iamPort;
+
   @Autowired
   private PersistentUUIDTokenGenerator tokenGenerator;
+
+  @Autowired
+  private IamEmailNotificationRepository notificationRepository;
 
   private RegistrationRequestDto reg;
 
@@ -48,6 +56,7 @@ public class PasswordResetTests {
   @After
   public void tearDown() {
     RegistrationUtils.deleteUser(reg.getAccountId());
+    notificationRepository.deleteAll();
   }
 
 
@@ -59,7 +68,7 @@ public class PasswordResetTests {
 
     // @formatter:off
     Boolean retval = RestAssured.given()
-      .port(8080)
+      .port(iamPort)
       .pathParam("token", resetKey)
     .when()
       .get("/iam/password/reset-key/{token}")
@@ -75,7 +84,7 @@ public class PasswordResetTests {
 
     // @formatter:off
     RestAssured.given()
-      .port(8080)
+      .port(iamPort)
       .param("resetkey", resetKey)
       .param("password", newPassword)
     .when()
@@ -95,7 +104,7 @@ public class PasswordResetTests {
 
     // @formatter:off
     RestAssured.given()
-      .port(8080)
+      .port(iamPort)
       .pathParam("token", resetKey)
     .when()
       .get("/iam/password/reset-key/{token}")
@@ -114,7 +123,7 @@ public class PasswordResetTests {
 
     // @formatter:off
     RestAssured.given()
-      .port(8080)
+      .port(iamPort)
       .pathParam("email", emailAddress)
     .when()
       .get("/iam/password-forgot/{email}", emailAddress)
@@ -133,7 +142,7 @@ public class PasswordResetTests {
 
     // @formatter:off
     Object retval = RestAssured.given()
-      .port(8080)
+      .port(iamPort)
       .pathParam("token", resetKey)
     .when()
       .get("/iam/password/reset-key/{token}")
@@ -150,7 +159,7 @@ public class PasswordResetTests {
     // update password
     // @formatter:off
     retval = RestAssured.given()
-      .port(8080)
+      .port(iamPort)
       .param("resetkey", resetKey)
       .param("password", newPassword)
     .when()
@@ -167,7 +176,7 @@ public class PasswordResetTests {
     
     // try re-update with same key
     retval = RestAssured.given()
-      .port(8080)
+      .port(iamPort)
       .param("resetkey", resetKey)
       .param("password", newPassword)
     .when()

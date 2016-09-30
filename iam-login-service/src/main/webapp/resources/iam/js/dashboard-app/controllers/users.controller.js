@@ -41,7 +41,28 @@ function UsersController($scope, $rootScope, $uibModal, $state, $filter, filterF
 
 	function rebuildFilteredList() {
 		
-		users.filtered = filterFilter(users.list, {$: users.searchText});
+		users.filtered = filterFilter(users.list, function(user) {
+
+			if (!users.searchText) {
+				return true;
+			}
+
+			var query = users.searchText.toLowerCase();
+
+			if (user.displayName.toLowerCase().indexOf(query) != -1) {
+				return true;
+			}
+			if (user.name.formatted.toLowerCase().indexOf(query) != -1) {
+				return true;
+			}
+			if (user.userName.toLowerCase().indexOf(query) != -1) {
+				return true;
+			}
+			if (user.emails[0].value.toLowerCase().indexOf(query) != -1) {
+				return true;
+			}
+			return false;
+		});
 		users.filtered = $filter('orderBy')(users.filtered,	"name.formatted", false);
 	}
 
