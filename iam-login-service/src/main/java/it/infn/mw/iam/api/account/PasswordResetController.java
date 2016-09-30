@@ -18,8 +18,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Controller
-@RequestMapping("/iam/password-reset")
+@RequestMapping(PasswordResetController.BASE_RESOURCE)
 public class PasswordResetController {
+
+  public static final String BASE_RESOURCE = "/iam/password-reset";
+  public static final String BASE_TOKEN_URL = BASE_RESOURCE + "/token";
 
   @Autowired
   private PasswordResetService service;

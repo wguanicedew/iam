@@ -4,6 +4,7 @@ import static it.infn.mw.iam.test.RegistrationUtils.confirmRegistrationRequest;
 import static it.infn.mw.iam.test.RegistrationUtils.createRegistrationRequest;
 import static it.infn.mw.iam.test.RegistrationUtils.deleteUser;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.List;
 import javax.mail.MessagingException;
 
 import org.apache.commons.lang.time.DateUtils;
+import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -55,6 +57,12 @@ public class NotificationTests {
 
   @Value("${spring.mail.port}")
   private Integer mailPort;
+
+  @Value("${iam.organisation.name}")
+  private String organisationName;
+
+  @Value("${iam.baseUrl}")
+  private String baseUrl;
 
   @Autowired
   private IamEmailNotificationRepository notificationRepository;
@@ -278,6 +286,98 @@ public class NotificationTests {
     Assert.assertEquals(0, count);
 
 
+  }
+
+  @Test
+  public void testEveryMailShouldContainSignature() throws MessagingException, IOException {
+    String signature = String.format("The %s registration service", organisationName);
+
+    String username = "test_user";
+
+    RegistrationRequestDto reg = createRegistrationRequest(username);
+    String confirmationKey = generator.getLastToken();
+    confirmRegistrationRequest(confirmationKey);
+    RegistrationUtils.approveRequest(reg.getUuid());
+
+    notificationService.sendPendingNotifications();
+
+    for (WiserMessage message : wiser.getMessages()) {
+      Assert.assertTrue("text/plain", message.getMimeMessage().isMimeType("text/plain"));
+      String content = message.getMimeMessage().getContent().toString();
+      Assert.assertThat(content, Matchers.containsString(signature));
+    }
+
+    deleteUser(reg.getAccountId());
+  }
+
+  @Test
+  public void testConfirmMailShouldContainsConfirmationLink()
+      throws MessagingException, IOException {
+
+    String username = "test_user";
+
+    RegistrationRequestDto reg = createRegistrationRequest(username);
+    String confirmationKey = generator.getLastToken();
+
+    String confirmURL = String.format("%s/registration/verify/%s", baseUrl, confirmationKey);
+
+    notificationService.sendPendingNotifications();
+
+    WiserMessage message = wiser.getMessages().get(0);
+
+    Assert.assertTrue("text/plain", message.getMimeMessage().isMimeType("text/plain"));
+    String content = message.getMimeMessage().getContent().toString();
+    Assert.assertThat(content, Matchers.containsString(confirmURL));
+
+    deleteUser(reg.getAccountId());
+  }
+
+  @Test
+  public void testActivationMailShouldContainsResetPasswordLink()
+      throws MessagingException, IOException {
+
+    String username = "test_user";
+
+    RegistrationRequestDto reg = createRegistrationRequest(username);
+    String confirmationKey = generator.getLastToken();
+    RegistrationUtils.confirmRegistrationRequest(confirmationKey);
+    RegistrationUtils.approveRequest(reg.getUuid());
+    String resetKey = generator.getLastToken();
+
+    String resetPasswordUrl = String.format("%s/iam/password-reset/%s", baseUrl, resetKey);
+
+    notificationService.sendPendingNotifications();
+
+    WiserMessage message = wiser.getMessages().get(2);
+
+    Assert.assertTrue("text/plain", message.getMimeMessage().isMimeType("text/plain"));
+    String content = message.getMimeMessage().getContent().toString();
+    Assert.assertThat(content, Matchers.containsString(resetPasswordUrl));
+
+    deleteUser(reg.getAccountId());
+  }
+
+  @Test
+  public void testAdminNotificationMailShouldContainsDashboardLink()
+      throws MessagingException, IOException {
+
+    String username = "test_user";
+
+    RegistrationRequestDto reg = createRegistrationRequest(username);
+    String confirmationKey = generator.getLastToken();
+    RegistrationUtils.confirmRegistrationRequest(confirmationKey);
+
+    String dashboardUrl = String.format("%s/dashboard#/requests", baseUrl);
+
+    notificationService.sendPendingNotifications();
+
+    WiserMessage message = wiser.getMessages().get(1);
+
+    Assert.assertTrue("text/plain", message.getMimeMessage().isMimeType("text/plain"));
+    String content = message.getMimeMessage().getContent().toString();
+    Assert.assertThat(content, Matchers.containsString(dashboardUrl));
+
+    deleteUser(reg.getAccountId());
   }
 
 }

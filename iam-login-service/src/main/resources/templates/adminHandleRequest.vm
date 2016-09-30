@@ -1,11 +1,12 @@
-The following user has submitted and confirmed his membership request:
+The following user has submitted his membership request:
 
----------------------
 Name: $name
 Username: $username
 Email: $email
----------------------
 	
-As Indigo administrator, approve or reject this request.
+You can approve or reject this request by following the link below:
 
-The Indigo-DC Team
+$indigoDashboardUrl
+
+
+The $organisationName registration service

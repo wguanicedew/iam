@@ -2,8 +2,9 @@ Dear $recipient,
 
 your registration request has been approved.
 
-Please set your password by following this link:
+You can set your password by following this link:
 
 $resetPasswordUrl
 
-The Indigo-DC Team
+
+The $organisationName registration service
