@@ -20,15 +20,16 @@ import it.infn.mw.iam.api.scim.model.ScimUser;
 
 public class TestUtils {
 
-  public static String CLIENT_CRED_GRANT_CLIENT_ID = "client-cred";
-  public static String CLIENT_CRED_GRANT_CLIENT_SECRET = "secret";
-  public static String PASSWORD_GRANT_CLIENT_ID = "password-grant";
-  public static String PASSWORD_GRANT_CLIENT_SECRET = "secret";
+  public static final int TOTAL_USERS_COUNT = 253;
+  public static final String CLIENT_CRED_GRANT_CLIENT_ID = "client-cred";
+  public static final String CLIENT_CRED_GRANT_CLIENT_SECRET = "secret";
+  public static final String PASSWORD_GRANT_CLIENT_ID = "password-grant";
+  public static final String PASSWORD_GRANT_CLIENT_SECRET = "secret";
 
-  public static List<SshKey> sshKeys = new ArrayList<SshKey>();
-  public static List<X509Cert> x509Certs = new ArrayList<X509Cert>();
-  public static List<SamlId> samlIds = new ArrayList<SamlId>();
-  public static List<OidcId> oidcIds = new ArrayList<OidcId>();
+  public static final List<SshKey> sshKeys = new ArrayList<SshKey>();
+  public static final List<X509Cert> x509Certs = new ArrayList<X509Cert>();
+  public static final List<SamlId> samlIds = new ArrayList<SamlId>();
+  public static final List<OidcId> oidcIds = new ArrayList<OidcId>();
 
   static {
 
@@ -43,7 +44,7 @@ public class TestUtils {
         + "WR3KKs3FXKRmbJDiKESh3mDccJidfkjzNLPyDf3JHI2b/C/mcvtJsoAtkIWuVll2B"
         + "hBBiqkYt3tX2llZCYGtF7rZOYTsqhw+LPnsJtsX+W7e4iN";
     sshKeys.add(sshKey);
-    
+
     sshKey = new SshKey();
     sshKey.fingerprintSHA256 = "dowJH1al1DJII+i7DYux1BGQkx3P+XVpaz3TIX5zt5Y=";
     sshKey.fingerprintMD5Formatted = "26:5a:f5:c5:56:42:1a:4e:94:32:f6:5e:48:b3:7d:91";
@@ -80,10 +81,9 @@ public class TestUtils {
         + "fU1Nso4rqBj8Qy609Y60PEFHhfLnjhvd/d+pXu6F1QTzUMwA2k7z5M+ykh7L46/z"
         + "1vwvcdvCgtWZ+FedvLuKh7miTCfxEIRLcpRPggbC856BSKet7jPdkMxkUwbFa34Z"
         + "qOuDQ6MvcrFA/lLgqN1c1OoE9tnf/uyOjVYq8hyXqOAhi2heE1e+s4o3/PQsaP5x"
-        + "LetVho/J33BExHo+hCMt1rN89DO5qU7FFijLlbmOZROacpjkPNn2V4wkd5WeX2dm"
-        + "b6UoBRqPsAiQL0mY";
+        + "LetVho/J33BExHo+hCMt1rN89DO5qU7FFijLlbmOZROacpjkPNn2V4wkd5WeX2dm" + "b6UoBRqPsAiQL0mY";
     x509Certs.add(x509Cert);
-    
+
     x509Cert = new X509Cert();
     x509Cert.display = "Personal Certificate";
     x509Cert.certificate = "MIIDnjCCAoagAwIBAgIBCTANBgkqhkiG9w0BAQUFADAtMQswCQYDVQQGEwJJVDE"
@@ -107,22 +107,22 @@ public class TestUtils {
         + "s+PrehSRR8Gn0IjlEgC68EY6KPE+FKySuS7Ur7lTAjNdddfdAgKV6hJyST6/dx8"
         + "ymIkb8nxCPnxCcT2I2NvDxcPMc/wmnMa+smNal0sJ6m";
     x509Certs.add(x509Cert);
-    
+
     SamlId samlId = new SamlId();
     samlId.idpId = "Saml IDP ID";
     samlId.userId = "User1 ID";
     samlIds.add(samlId);
-    
+
     samlId = new SamlId();
     samlId.idpId = "Saml IDP ID";
     samlId.userId = "User2 ID";
     samlIds.add(samlId);
-    
+
     OidcId oidcId = new OidcId();
     oidcId.issuer = "Oidc ID Issuer";
     oidcId.subject = "User1 subject";
     oidcIds.add(oidcId);
-    
+
     oidcId = new OidcId();
     oidcId.issuer = "Oidc ID Issuer";
     oidcId.subject = "User2 subject";

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Preconditions;
@@ -16,13 +17,14 @@ import it.infn.mw.iam.api.scim.converter.X509CertificateConverter;
 import it.infn.mw.iam.api.scim.exception.ScimException;
 import it.infn.mw.iam.api.scim.exception.ScimResourceExistsException;
 import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
+import it.infn.mw.iam.api.scim.exception.ScimValidationException;
 import it.infn.mw.iam.api.scim.model.ScimAddress;
 import it.infn.mw.iam.api.scim.model.ScimEmail;
 import it.infn.mw.iam.api.scim.model.ScimName;
 import it.infn.mw.iam.api.scim.model.ScimOidcId;
 import it.infn.mw.iam.api.scim.model.ScimPatchOperation;
-import it.infn.mw.iam.api.scim.model.ScimSshKey;
 import it.infn.mw.iam.api.scim.model.ScimSamlId;
+import it.infn.mw.iam.api.scim.model.ScimSshKey;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.model.ScimX509Certificate;
 import it.infn.mw.iam.persistence.model.IamAccount;
@@ -52,6 +54,9 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
   private final X509CertificateConverter certificateConverter;
   private final SshKeyConverter sshKeyConverter;
   private final SamlIdConverter samlIdConverter;
+
+  @Autowired
+  private PasswordEncoder passwordEncoder;
 
   @Autowired
   public UserUpdater(IamAccountRepository accountRepository, IamOidcIdRepository oidcIdRepository,
@@ -102,6 +107,7 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
     patchEmail(a, u.getEmails());
     patchAddress(a, u.getAddresses());
     patchPassword(a, u.getPassword());
+    patchPicture(a, u.getPicture());
 
     if (u.hasX509Certificates()) {
 
@@ -173,11 +179,12 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
     patchEmail(a, u.getEmails());
     patchAddress(a, u.getAddresses());
     patchPassword(a, u.getPassword());
+    patchPicture(a, u.getPicture());
 
     if (u.hasX509Certificates()) {
 
       u.getX509Certificates().forEach(x509Cert -> replaceX509Certificate(a, x509Cert));
-      
+
       /* if there's no primary x509 cert, set the first as it */
       if (a.getX509Certificates().stream().noneMatch(x509Cert -> x509Cert.isPrimary())) {
 
@@ -201,12 +208,17 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
   }
 
   private void patchPassword(IamAccount a, String password) {
+    String value = (password != null) ? password : a.getPassword();
+    a.setPassword(passwordEncoder.encode(value));
+  }
 
-    a.setPassword(password != null ? password : a.getPassword());
+  private void patchPicture(IamAccount a, String picture) {
+
+    a.getUserInfo().setPicture(picture != null ? picture : a.getUserInfo().getPicture());
   }
 
   private void addX509Certificate(IamAccount a, ScimX509Certificate cert)
-      throws ScimResourceExistsException {
+      throws ScimResourceExistsException, ScimValidationException {
 
     Preconditions.checkNotNull(cert, "X509Certificate is null");
 
@@ -334,6 +346,16 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
 
     if (emails != null && !emails.isEmpty()) {
 
+      final String updatedEmail = emails.get(0).getValue();
+
+      accountRepository.findByEmail(updatedEmail).ifPresent(emailAccount -> {
+        if (!emailAccount.equals(a)) {
+          throw new ScimResourceExistsException("email already assigned to an existing user: "
+              + emailAccount.getUserInfo().getEmail());
+        }
+      });
+
+
       a.getUserInfo().setEmail(emails.get(0).getValue());
     }
   }
@@ -427,8 +449,8 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
 
       if (sshKeyAccount.get().equals(owner)) {
 
-        throw new ScimResourceExistsException(String.format("Duplicated SSH Key (%s,%s)",
-            sshKey.getDisplay(), sshKey.getFingerprint()));
+        throw new ScimResourceExistsException(
+            String.format("Duplicated SSH Key (%s,%s)", sshKey.getDisplay(), sshKey.getValue()));
 
       } else {
 

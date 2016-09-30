@@ -16,6 +16,7 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
@@ -35,7 +36,7 @@ import org.springframework.security.oauth2.provider.implicit.ImplicitTokenGrante
 import org.springframework.security.oauth2.provider.password.ResourceOwnerPasswordTokenGranter;
 import org.springframework.security.oauth2.provider.refresh.RefreshTokenGranter;
 
-import it.infn.mw.iam.core.TokenExchangeTokenGranter;
+import it.infn.mw.iam.core.oauth.TokenExchangeTokenGranter;
 
 @Configuration
 @EnableAuthorizationServer
@@ -63,6 +64,9 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
   @Autowired
   private UserApprovalHandler approvalHandler;
 
+  @Autowired
+  private PasswordEncoder passwordEncoder;
+
   @Bean
   WebResponseExceptionTranslator webResponseExceptionTranslator() {
 
@@ -74,6 +78,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 
     DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
     provider.setUserDetailsService(iamUserDetailsService);
+    provider.setPasswordEncoder(passwordEncoder);
     return new ProviderManager(Collections.<AuthenticationProvider>singletonList(provider));
 
   }
@@ -100,10 +105,15 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
   public void configure(final AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
 
     // @formatter:off
-    endpoints.requestValidator(requestValidator).pathMapping("/oauth/token", "/token")
-        .pathMapping("/oauth/authorize", "/authorize").tokenServices(tokenServices)
-        .userApprovalHandler(approvalHandler).requestFactory(requestFactory)
-        .tokenGranter(tokenGranter()).authorizationCodeServices(authorizationCodeServices);
+    endpoints
+      .requestValidator(requestValidator)
+      .pathMapping("/oauth/token", "/token")
+      .pathMapping("/oauth/authorize", "/authorize")
+      .tokenServices(tokenServices)
+      .userApprovalHandler(approvalHandler)
+      .requestFactory(requestFactory)
+      .tokenGranter(tokenGranter())
+      .authorizationCodeServices(authorizationCodeServices);
     // @formatter:on
   }
 

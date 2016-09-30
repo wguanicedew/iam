@@ -1,0 +1,109 @@
+<!-- Content Header (Page header) -user-image -->
+<section class="content-header">
+	<h1>
+		<i class="fa fa-user"></i>&nbsp;&nbsp;Users
+	</h1>
+	<ol class="breadcrumb">
+		<li><a href=""><i class="fa fa-users"></i> Users</a></li>
+		<li><a ui-sref="users"><i class="fa fa-list"></i> List of
+				users</a></li>
+	</ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+
+	<div class="row">
+
+		<div class="col-xs-12">
+			<operationresult/>
+		</div>
+
+		<div class="col-xs-12">
+
+			<div class="box" ng-show="$root.usersLoadingProgress == 100">
+				<div class="box-header with-border">
+					<div class="input-group">
+						<input placeholder="Search.." ng-model="users.searchText"
+							class="form-control" />
+						<div class="input-group-btn">
+							<button type="button" class="btn btn-default"
+								ng-click="users.resetFilters()">Show all</button>
+						</div>
+						<!-- /btn-group -->
+					</div>
+				</div>
+				<div class="box-body">
+				    <div class="text-center">
+						<ul uib-pagination ng-model="users.currentPage"
+							items-per-page="users.entryLimit" total-items="users.filtered.length"
+							max-size="10" boundary-links="true"></ul>
+					</div>
+					<table id="userslist" class="table table-striped">
+						<thead>
+							<tr>
+								<th>#</th>
+								<th>Pic</th>
+								<th>Name</th>
+								<th class="text-center">Active</th>
+								<th>E-mail</th>
+								<th>Created</th>
+								<th>Groups</th>
+								<th class="text-right">Actions</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr
+								ng-repeat="user in users.filtered | startFrom:(users.currentPage-1)*users.entryLimit | limitTo:users.entryLimit">
+								<td class="uuid" id="{{user.id}}">{{$index + (users.currentPage-1)*users.entryLimit + 1}}</td>
+								<td><img class="img-circle" width="22"
+									ng-src="{{user.picture}}" alt="User profile picture"
+									ng-show="user.picture"> <img class="img-circle"
+									width="22" ng-src="resources/iam/img/default-avatar.png"
+									alt="User profile picture" ng-show="!user.picture"></td>
+								<td><a ui-sref="user({id: user.id})">{{user.name.formatted}}</a></td>
+								<td class="text-center"><i
+									class="fa fa-circle text-success" ng-show="user.active"></i> <i
+									class="fa fa-circle text-danger" ng-show="!user.active"></i></td>
+								<td>{{user.emails[0].value}}</td>
+								<td>{{user.meta.created | relativeDate }}</td>
+								<td>
+									<button ng-repeat="g in user.groups | limitTo: 4"
+										class="btn btn-xs btn-default">{{g.display}}</button>
+									<span ng-show="user.groups.length > 4">...</span>
+								</td>
+								<td class="text-right">
+									<button id="delete_user_{{user.id}}" ng-disabled="user.id == $root.loggedUser.me.id" class="btn btn-danger btn-xs" ng-click="users.deleteUser(user)">
+										<i class="fa fa-times"></i> Delete
+									</button>
+								</td>
+							</tr>
+						</tbody>
+						<tfoot>
+							<tr>
+								<th>#</th>
+								<th>Pic</th>
+								<th>Name</th>
+								<th class="text-center">Active</th>
+								<th>E-mail</th>
+								<th>Created</th>
+								<th>Groups</th>
+								<th class="text-right">Actions</th>
+							</tr>
+						</tfoot>
+					</table>
+					<div class="text-center">
+						<ul uib-pagination ng-model="users.currentPage"
+							items-per-page="users.entryLimit" total-items="users.filtered.length"
+							max-size="10" boundary-links="true"></ul>
+					</div>
+
+				</div>
+				<div class="box-footer">
+					<button class="btn btn-success" ng-click="users.openAddUserDialog()" id="add-user-btn"> <i class="fa fa-plus"></i> Add
+						User</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>

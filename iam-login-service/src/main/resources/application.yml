@@ -12,13 +12,23 @@ server:
   use-forward-headers: ${IAM_USE_FORWARDED_HEADERS:false}
 
 spring:
+  profiles:
+    active: h2-test,google,registration,saml
+
   application:
     name: INDIGO IAM
+    
   jpa:
     generate-ddl: true
 
-  profiles:
-    active: google,h2,dev,registration
+  mail:
+    host: ${IAM_MAIL_HOST:localhost}
+    port: ${IAM_MAIL_PORT:25}
+    username: ${IAM_MAIL_USERNAME:}
+    password: ${IAM_MAIL_PASSWORD:}
+
+  velocity:
+    enabled: false
 
 iam:
   baseUrl: ${IAM_BASE_URL:http://localhost:8080}
@@ -28,7 +38,7 @@ iam:
     lifetime: 86400
 
   organisation:
-    name: indigo-dc
+    name: ${IAM_ORGANISATION_NAME:indigo-dc}
 
   keyStoreLocation: ${IAM_KEY_STORE_LOCATION:classpath:keystore.jwks}
 
@@ -57,99 +67,16 @@ github:
     scope: user:email
   resource:
     userInfoUri: https://api.github.com/user
----
-spring:
-  profiles: h2
-  datasource:
-    driverClassName: org.h2.Driver
-    url: jdbc:h2:mem:iam;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    username: sa
-    password:
-
-flyway:
-  locations:
-    - classpath:db/migration/h2
-    - classpath:db/migration/test
----
-spring:
-  profiles: mysql
-
-  datasource:
-    dataSourceClassName: com.mysql.jdbc.jdbc2.optional.MysqlDataSource
-    url: jdbc:mysql://${IAM_DB_HOST:dev.local.io}:${IAM_DB_PORT:3306}/${IAM_DB_NAME:iam}
-    username: ${IAM_DB_USERNAME:iam}
-    password: ${IAM_DB_PASSWORD:pwd}
-    max-active: ${IAM_DB_MAX_ACTIVE:20}
-    initial-size: ${IAM_DB_INITIAL_SIZE:8}
-    test-while-idle: ${IAM_DB_TEST_WHILE_IDLE:true}
-    test-on-borrow: ${IAM_DB_TEST_ON_BORROW:true}
-    validation-query: ${IAM_DB_VALIDATION_QUERY:SELECT 1}
-    time-between-eviction-runs-millis: ${IAM_DB_TIME_BETWEEN_EVICTION_RUNS_MILLIS:5000}
-    min-evictable-idle-time-millis: ${IAM_DB_MIN_EVICTABLE_IDLE_TIME_MILLIS:60000}
-
-  jpa:
-    openInView: false
-
-flyway:
-  locations:
-    - classpath:db/migration/mysql
-    - classpath:db/migration/prod
----
-spring:
-  profiles: mysql-test
-
-  datasource:
-    dataSourceClassName: com.mysql.jdbc.jdbc2.optional.MysqlDataSource
-    url: jdbc:mysql://${IAM_DB_HOST:dev.local.io}:${IAM_DB_PORT:3306}/${IAM_DB_NAME:iam}
-    username: ${IAM_DB_USERNAME:iam}
-    password: ${IAM_DB_PASSWORD:pwd}
-    max-active: ${IAM_DB_MAX_ACTIVE:20}
-    initial-size: ${IAM_DB_INITIAL_SIZE:8}
-    test-while-idle: ${IAM_DB_TEST_WHILE_IDLE:true}
-    test-on-borrow: ${IAM_DB_TEST_ON_BORROW:true}
-    validation-query: ${IAM_DB_VALIDATION_QUERY:SELECT 1}
-    time-between-eviction-runs-millis: ${IAM_DB_TIME_BETWEEN_EVICTION_RUNS_MILLIS:5000}
-    min-evictable-idle-time-millis: ${IAM_DB_MIN_EVICTABLE_IDLE_TIME_MILLIS:60000}
-
-  jpa:
-    openInView: false
-
-flyway:
-  locations:
-    - classpath:db/migration/mysql
-    - classpath:db/migration/test
----
-spring:
-  profiles: mysql-import
-
-  datasource:
-    dataSourceClassName: com.mysql.jdbc.jdbc2.optional.MysqlDataSource
-    url: jdbc:mysql://${IAM_DB_HOST:dev.local.io}:${IAM_DB_PORT:3306}/${IAM_DB_NAME:iam}
-    username: ${IAM_DB_USERNAME:iam}
-    password: ${IAM_DB_PASSWORD:pwd}
-    max-active: ${IAM_DB_MAX_ACTIVE:20}
-    initial-size: ${IAM_DB_INITIAL_SIZE:8}
-    test-while-idle: ${IAM_DB_TEST_WHILE_IDLE:true}
-    test-on-borrow: ${IAM_DB_TEST_ON_BORROW:true}
-    validation-query: ${IAM_DB_VALIDATION_QUERY:SELECT 1}
-    time-between-eviction-runs-millis: ${IAM_DB_TIME_BETWEEN_EVICTION_RUNS_MILLIS:5000}
-    min-evictable-idle-time-millis: ${IAM_DB_MIN_EVICTABLE_IDLE_TIME_MILLIS:60000}
-
-  jpa:
-    openInView: false
-
-flyway:
-  locations:
-    - classpath:db/migration/mysql
-    - classpath:db/migration/import
----
-spring:
-  profiles: saml
-
-saml:
-  entity-id: ${IAM_SAML_ENTITY_ID:urn:iam:iam-devel}
-  keystore: ${IAM_SAML_KEYSTORE:classpath:/saml/samlKeystore.jks}
-  keystore-password: ${IAM_SAML_KEYSTORE_PASSWORD:password}
-  key-id: ${IAM_SAML_KEY_ID:iam}
-  key-password: ${IAM_SAML_KEY_PASSWORD:password}
-  idp-metadata: ${IAM_SAML_IDP_METADATA:classpath:/saml/idp-metadata.xml}
+    
+notification:
+  disable: ${IAM_NOTIFICATION_DISABLE:false}
+  mailFrom: ${IAM_NOTIFICATION_FROM:indigo@localhost}
+  taskDelay: ${IAM_NOTIFICATION_TASK_DELAY:30000}
+  cleanupAge: ${IAM_NOTIFICATION_CLEANUP_AGE:30}
+  adminAddress: ${IAM_NOTIFICATION_ADMIN_ADDRESS:indigo-alerts@localhost}
+  subject:
+    confirmation: Confirm Indigo registration request
+    activated: Indigo Account activated
+    rejected: Indigo Account request rejected
+    adminHandleRequest: New Indigo account request
+    resetPassword: Indigo account reset password

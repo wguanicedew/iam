@@ -1,0 +1,31 @@
+<div class="modal-header">
+	<h3 class="modal-title">Add SSH Key to <strong>{{addSshKeyCtrl.user.name.formatted}}</strong></h3>
+</div>
+<div class="modal-body">
+
+	<div class="form-group">
+		<label>Label</label> <input class="form-control" type="text"
+			placeholder="Insert label here ..." ng-model="addSshKeyCtrl.label">
+	</div>
+
+	<div class="form-group">
+		<label>Key</label>
+		<textarea class="form-control" rows="3"
+			placeholder="Insert RSA key value here ..."
+			ng-model="addSshKeyCtrl.value"></textarea>
+	</div>
+
+	<div class="row">
+		<div class="col-xs-12">
+			<operationresult/>
+		</div>
+	</div>
+
+</div>
+<div class="modal-footer">
+	<button class="btn btn-primary" type="button" id="modal-btn-confirm"
+		ng-disabled="!addSshKeyCtrl.label ||  !addSshKeyCtrl.value || !addSshKeyCtrl.enabled"
+		ng-click="addSshKeyCtrl.addSshKey()">Add Key</button>
+	<button class="btn btn-danger" type="button" id="modal-btn-cancel"
+		ng-click="addSshKeyCtrl.cancel()">Cancel</button>
+</div>

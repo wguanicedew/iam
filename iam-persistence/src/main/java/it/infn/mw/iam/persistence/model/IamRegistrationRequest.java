@@ -44,6 +44,9 @@ public class IamRegistrationRequest {
   @Column(nullable = true)
   private Date lastUpdateTime;
 
+  @Column(nullable = true)
+  private String notes;
+
   public IamRegistrationRequest() {}
 
   public Long getId() {
@@ -106,6 +109,14 @@ public class IamRegistrationRequest {
     this.lastUpdateTime = lastUpdateTime;
   }
 
+  public String getNotes() {
+    return notes;
+  }
+
+  public void setNotes(String notes) {
+    this.notes = notes;
+  }
+
   @Override
   public int hashCode() {
 
@@ -137,9 +148,10 @@ public class IamRegistrationRequest {
 
   @Override
   public String toString() {
-
-    return "IamRegRequest [id=" + id + ", account=" + account + ", creationTime=" + creationTime
+    return "IamRegistrationRequest [id=" + id + ", uuid=" + uuid + ", creationTime=" + creationTime
         + ", status=" + status + ", lastUpdateTime=" + lastUpdateTime + "]";
   }
+
+
 
 }

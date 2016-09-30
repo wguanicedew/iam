@@ -10,6 +10,7 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.UUID;
 
@@ -196,13 +197,20 @@ public class ScimUserProvisioningTests {
       .active(true)
       .build();
 
-    restUtils.doPut(createdUser.getMeta().getLocation(), updatedUser)
+    long creationTimeMs = createdUser.getMeta().getCreated().getTime();
+
+    String returnedCreationTime = restUtils.doPut(createdUser.getMeta().getLocation(), updatedUser)
       .body("id", equalTo(createdUser.getId()))
       .body("userName", equalTo("j.lennon"))
       .body("emails[0].value", equalTo(createdUser.getEmails().get(0).getValue()))
-      .body("meta.created",
-          equalTo(dateTimeFormatter.print(createdUser.getMeta().getCreated().getTime())))
-      .body("active", equalTo(true));
+      .body("active", equalTo(true))
+      .extract()
+      .path("meta.created");
+
+    long returnedTimeMs = dateTimeFormatter.parseDateTime(returnedCreationTime).getMillis();
+
+    // We need to do this since milliseconds are truncated for the creation time in MySQL
+    assertTrue(Math.abs(returnedTimeMs - creationTimeMs) <= 1000);
 
     restUtils.doDelete(createdUser.getMeta().getLocation());
 
@@ -284,8 +292,8 @@ public class ScimUserProvisioningTests {
 
     restUtils
       .doPut(lennonCreationResult.getMeta().getLocation(), lennonWantsToBeMcCartney,
-          HttpStatus.BAD_REQUEST)
-      .body("detail", equalTo("userName is already mappped to another user"));
+          HttpStatus.CONFLICT)
+      .body("detail", containsString("userName is already mapped to another user"));
 
     restUtils.doDelete(lennonCreationResult.getMeta().getLocation());
     restUtils.doDelete(mccartneyCreationResult.getMeta().getLocation());
@@ -364,7 +372,8 @@ public class ScimUserProvisioningTests {
     ScimUser creationResult = restUtils.doPost("/scim/Users/", user)
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys", hasSize(equalTo(1)))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].display", equalTo("Personal"))
-      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].value", equalTo(TestUtils.sshKeys.get(0).key))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].value",
+          equalTo(TestUtils.sshKeys.get(0).key))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].fingerprint",
           equalTo(TestUtils.sshKeys.get(0).fingerprintSHA256))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].primary", equalTo(true))
@@ -374,7 +383,8 @@ public class ScimUserProvisioningTests {
     restUtils.doGet(creationResult.getMeta().getLocation())
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys", hasSize(equalTo(1)))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].display", equalTo("Personal"))
-      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].value", equalTo(TestUtils.sshKeys.get(0).key))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].value",
+          equalTo(TestUtils.sshKeys.get(0).key))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].fingerprint",
           equalTo(TestUtils.sshKeys.get(0).fingerprintSHA256))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].primary", equalTo(true));
@@ -398,7 +408,8 @@ public class ScimUserProvisioningTests {
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys", hasSize(equalTo(1)))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].display",
           equalTo(user.getUserName() + "'s personal ssh key"))
-      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].value", equalTo(TestUtils.sshKeys.get(0).key))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].value",
+          equalTo(TestUtils.sshKeys.get(0).key))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].fingerprint",
           equalTo(TestUtils.sshKeys.get(0).fingerprintSHA256))
       .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].primary", equalTo(true))
@@ -418,16 +429,15 @@ public class ScimUserProvisioningTests {
       .active(true)
       .build();
 
-    ScimUser creationResult =
-        restUtils.doPost("/scim/Users/", user)
-          .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys", hasSize(equalTo(1)))
-          .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].display", equalTo("Personal"))
-          .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].value",
-              equalTo(TestUtils.sshKeys.get(0).key))
-          .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].fingerprint",
-              equalTo(TestUtils.sshKeys.get(0).fingerprintSHA256))
-          .extract()
-          .as(ScimUser.class);
+    ScimUser creationResult = restUtils.doPost("/scim/Users/", user)
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys", hasSize(equalTo(1)))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].display", equalTo("Personal"))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].value",
+          equalTo(TestUtils.sshKeys.get(0).key))
+      .body(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys[0].fingerprint",
+          equalTo(TestUtils.sshKeys.get(0).fingerprintSHA256))
+      .extract()
+      .as(ScimUser.class);
 
     ScimUser anotherUser = ScimUser.builder("another_user_with_sshkey")
       .buildEmail("another_test_user@test.org")
@@ -554,5 +564,58 @@ public class ScimUserProvisioningTests {
       .as(ScimUser.class);
 
     restUtils.doDelete(creationResult.getMeta().getLocation());
+  }
+
+
+  @Test
+  public void testEmailIsNotAlreadyLinkedOnCreate() {
+    ScimUser user0 = ScimUser.builder("test_same_email_0")
+      .buildEmail("same_email@test.org")
+      .buildName("Test", "Same Email 0")
+      .active(true)
+      .build();
+
+    ScimUser user1 = ScimUser.builder("test_same_email_1")
+      .buildEmail("same_email@test.org")
+      .buildName("Test", "Same Email 1")
+      .active(true)
+      .build();
+
+    user0 = restUtils.doPost("/scim/Users/", user0).extract().as(ScimUser.class);
+
+    restUtils.doPost("/scim/Users/", user1, HttpStatus.CONFLICT).body("detail",
+        containsString("email already assigned to an existing user"));
+
+    restUtils.deleteUsers(user0);
+
+  }
+
+  @Test
+  public void testEmailIsNotAlreadyLinkedOnUpdate() {
+    ScimUser user0 = ScimUser.builder("user0")
+      .buildEmail("user0@test.org")
+      .buildName("Test", "User 0")
+      .active(true)
+      .build();
+
+    ScimUser user1 = ScimUser.builder("user1")
+      .buildEmail("user1@test.org")
+      .buildName("Test", "User 1")
+      .active(true)
+      .build();
+
+    user0 = restUtils.doPost("/scim/Users/", user0).extract().as(ScimUser.class);
+    user1 = restUtils.doPost("/scim/Users/", user1).extract().as(ScimUser.class);
+
+    ScimUser updatedUser0 = ScimUser.builder("user0")
+      .buildEmail("user1@test.org")
+      .buildName("Test", "User 0")
+      .active(true)
+      .build();
+
+    restUtils.doPut(user0.getMeta().getLocation(), updatedUser0, HttpStatus.CONFLICT).body("detail",
+        containsString("email already assigned to an existing user"));
+
+    restUtils.deleteUsers(user0, user1);
   }
 }

@@ -1,0 +1,19 @@
+<div class="modal-header">
+	<h3 class="modal-title" ng-show="modalOptions.user != null">
+		<strong>{{modalOptions.user}}</strong> - {{modalOptions.headerText}}
+	</h3>
+	<h3 class="modal-title" ng-show="modalOptions.user == null">
+        {{modalOptions.headerText}}
+    </h3>
+</div>
+<div class="modal-body">
+	<p class="text-justify text-wrapped">{{modalOptions.bodyText}}</p>
+	<p class="text-justify text-wrapped"><i>{{modalOptions.bodyDetail}}</i></p>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-primary" id="btn-confirm" data-dismiss="modal" type="button"
+        data-ng-click="modalOptions.ok();">{{modalOptions.actionButtonText}}</button>
+	<button class="btn btn-danger" id="btn-cancel" data-dismiss="modal" type="button"
+		ng-show="modalOptions.closeButtonText != null"
+		data-ng-click="modalOptions.close()">{{modalOptions.closeButtonText}}</button>
+</div>

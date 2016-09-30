@@ -1,0 +1,12 @@
+The following user has submitted his membership request:
+
+Name: $name
+Username: $username
+Email: $email
+	
+You can approve or reject this request by following the link below:
+
+$indigoDashboardUrl
+
+
+The $organisationName registration service

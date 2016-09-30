@@ -344,9 +344,11 @@ var UserProfileView = Backbone.View.extend({
         	if (key && value) {
         		
         		if (what.call(value) === '[object Array]'){
-        			$('dl', this.el).append(
-        					t({key: key, value: value.map(function(group){ return group.name; }).join(', ')})
-        					);	
+        			if (value.length > 0){
+						$('dl', this.el).append(
+								t({key: key, value: value.join(', ')})
+								);	
+        			}
         		} else if (typeof(value) === 'object') {
         			
         			var el = this.el;
@@ -913,7 +915,7 @@ var AppRouter = Backbone.Router.extend({
     	this.breadCrumbView.collection.add([
              {text:$.t('admin.home'), href:""},
              {text:$.t('admin.self-service-resource'), href:"manage/#dev/resource"},
-             {text:$.t('rsreg.new'), href:"manage/#dev/resource/new"}
+             {text:$.t('rsreg.new-client'), href:"manage/#dev/resource/new"}
         ]);
     	
         this.updateSidebar('dev/resource');
@@ -937,7 +939,7 @@ var AppRouter = Backbone.Router.extend({
     	
     		$('#content').html(view.render().el);
     		view.delegateEvents();
-    		setPageTitle($.t('rsreg.new'));
+    		setPageTitle($.t('rsreg.new-client'));
     		
     	});
     	

@@ -8,7 +8,7 @@ public class NameUtils {
     StringBuilder builder = new StringBuilder();
     builder.append(givenName);
 
-    if (middleName != null) {
+    if (middleName != null && !middleName.isEmpty()) {
       builder.append(" ");
       builder.append(middleName);
     }

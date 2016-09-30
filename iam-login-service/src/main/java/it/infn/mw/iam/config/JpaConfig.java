@@ -56,9 +56,11 @@ public class JpaConfig extends JpaBaseConfiguration {
 
       final EntityManagerFactoryBuilder factoryBuilder) {
 
-    LocalContainerEntityManagerFactoryBean emf =
-        factoryBuilder.dataSource(dataSource).packages("org.mitre", "it.infn.mw.iam.persistence")
-            .persistenceUnit("defaultPersistenceUnit").properties(getVendorProperties()).build();
+    LocalContainerEntityManagerFactoryBean emf = factoryBuilder.dataSource(dataSource)
+      .packages("org.mitre", "it.infn.mw.iam.persistence")
+      .persistenceUnit("defaultPersistenceUnit")
+      .properties(getVendorProperties())
+      .build();
 
     return emf;
 
@@ -79,6 +81,23 @@ public class JpaConfig extends JpaBaseConfiguration {
       @Override
       public void migrate(final Flyway flyway) {
 
+        return;
+
+      }
+    };
+  }
+
+  @Bean
+  @Profile("flyway-repair")
+  public FlywayMigrationStrategy flywayRepairStrategy() {
+
+    return new FlywayMigrationStrategy() {
+
+      @Override
+      public void migrate(final Flyway flyway) {
+
+        flyway.repair();
+        flyway.migrate();
         return;
 
       }

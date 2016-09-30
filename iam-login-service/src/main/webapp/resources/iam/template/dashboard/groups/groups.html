@@ -1,0 +1,83 @@
+<!-- Content Header (Page header) -user-image -->
+<section class="content-header">
+	<h1>
+		<i class="fa fa-users"></i>&nbsp;&nbsp;Groups
+	</h1>
+	<ol class="breadcrumb">
+		<li><a href=""><i class="fa fa-users"></i> Groups</a></li>
+		<li><a ui-sref="groups"><i class="fa fa-list"></i> List of
+				groups</a></li>
+	</ol>
+</section>
+
+<!-- Main content -->
+<section class="content" ng-cloak>
+
+	<div class="row">
+
+		<div class="col-xs-12">
+			<operationresult/>
+		</div>
+
+		<div class="col-xs-12">
+			<div class="box" ng-show="$root.groupsLoadingProgress == 100">
+				<div class="box-header with-border">
+					<div class="input-group">
+						<input placeholder="Search.." ng-model="gc.searchText"
+							class="form-control" />
+						<div class="input-group-btn">
+							<button type="button" class="btn btn-default"
+								ng-click="gc.resetFilters()">Show all</button>
+						</div>
+						<!-- /btn-group -->
+					</div>
+				</div>
+				<div class="box-body">
+				    <div class="text-center">
+						<ul uib-pagination ng-model="gc.currentPage"
+							items-per-page="gc.entryLimit" total-items="gc.filtered.length"
+							max-size="10" boundary-links="true"></ul>
+				    </div>
+					<table class="table table-striped" id="groupslist">
+						<thead>
+							<tr>
+								<th>#</th>
+								<th>Name</th>
+								<th class="text-right">Actions</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr
+								ng-repeat="group in gc.filtered | startFrom:(gc.currentPage-1)*gc.entryLimit | limitTo:gc.entryLimit">
+								<td>{{$index + (gc.currentPage-1)*gc.entryLimit + 1}}</td>
+								<td><a ui-sref="group({id: group.id})">{{group.displayName}}</a>
+								</td>
+								<td class="text-right">
+									<button class="btn btn-danger btn-xs" ng-click="gc.deleteGroup(group)">
+										<i class="fa fa-times"></i> Remove
+									</button>
+								</td>
+							</tr>
+						</tbody>
+						<tfoot>
+							<tr>
+								<th>#</th>
+								<th>Name</th>
+								<th class="text-right">Actions</th>
+							</tr>
+						</tfoot>
+					</table>
+					<div class="text-center">
+						<ul uib-pagination ng-model="gc.currentPage"
+							items-per-page="gc.entryLimit" total-items="gc.filtered.length"
+							max-size="10" boundary-links="true"></ul>
+					</div>
+				</div>
+				<div class="box-footer">
+					<button class="btn btn-success" ng-click="gc.clickToOpen()">Add
+						Group</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>

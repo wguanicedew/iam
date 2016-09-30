@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import it.infn.mw.iam.api.scim.converter.AddressConverter;
@@ -50,6 +51,9 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
   private final IamSamlIdRepository samlIdRepository;
 
   private final IamAuthoritiesRepository authorityRepository;
+
+  @Autowired
+  private PasswordEncoder passwordEncoder;
 
   @Autowired
   public ScimUserProvisioning(UserConverter converter, AddressConverter addressConverter,
@@ -111,6 +115,13 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
       throw new ScimResourceExistsException("userName is already taken: " + a.getUsername());
     });
 
+    final String userEmail = user.getEmails().get(0).getValue();
+
+    accountRepository.findByEmail(userEmail).ifPresent(a -> {
+      throw new ScimResourceExistsException(
+          "email already assigned to an existing user: " + a.getUserInfo().getEmail());
+    });
+
     String uuid = UUID.randomUUID().toString();
 
     IamAccount account = converter.fromScim(user);
@@ -123,6 +134,8 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
     if (account.getPassword() == null) {
       account.setPassword(UUID.randomUUID().toString());
     }
+
+    account.setPassword(passwordEncoder.encode(account.getPassword()));
 
     authorityRepository.findByAuthority("ROLE_USER")
       .map(a -> account.getAuthorities().add(a))
@@ -151,7 +164,7 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
       account.getX509Certificates().forEach(cert -> checkX509CertificateNotExists(cert));
 
       long count = account.getX509Certificates().stream().filter(cert -> cert.isPrimary()).count();
-      
+
       if (count > 1) {
 
         throw new ScimException("Too many primary x509 certificates provided!");
@@ -173,7 +186,7 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
       account.getSshKeys().forEach(sshKey -> checkSshKeyNotExists(sshKey));
 
       long count = account.getSshKeys().stream().filter(sshKey -> sshKey.isPrimary()).count();
-      
+
       if (count > 1) {
 
         throw new ScimException("Too many primary ssh keys provided!");
@@ -282,8 +295,19 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
 
     if (accountRepository.findByUsernameWithDifferentId(scimItemToBeUpdated.getUserName(), id)
       .isPresent()) {
-      throw new IllegalArgumentException("userName is already mappped to another user");
+      throw new ScimResourceExistsException("userName is already mapped to another user");
+      // throw new IllegalArgumentException("userName is already mappped to another user");
     }
+
+    final String updatedEmail = scimItemToBeUpdated.getEmails().get(0).getValue();
+
+    accountRepository.findByEmail(updatedEmail).ifPresent(account -> {
+      if (!account.equals(existingAccount)) {
+        throw new ScimResourceExistsException(
+            "email already assigned to an existing user: " + updatedEmail);
+      }
+    });
+
 
     IamAccount updatedAccount = converter.fromScim(scimItemToBeUpdated);
 
