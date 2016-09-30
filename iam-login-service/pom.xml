@@ -32,7 +32,7 @@
         </exclusion>
       </exclusions>
     </dependency>
-    
+
     <!-- Web Jars -->
     <dependency>
       <groupId>org.webjars</groupId>
@@ -274,9 +274,7 @@
         </exclusion>
       </exclusions>
     </dependency>
-    
   </dependencies>
-
   <build>
     <finalName>iam-login-service</finalName>
     <resources>
@@ -295,6 +293,9 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <mainClass>it.infn.mw.iam.IamLoginService</mainClass>
+        </configuration>
         <executions>
           <execution>
             <goals>

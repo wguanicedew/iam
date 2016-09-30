@@ -102,12 +102,12 @@ public class NotificationConcurrentTests {
       elem.get();
     }
 
-    int expected = 1;
-    int count = wiser.getMessages().size();
-
-    Assert.assertEquals(expected, count);
-
     deleteUser(reg.getAccountId());
+
+    int count = wiser.getMessages().size();
+    Assert.assertEquals(1, count);
+
+
   }
 
   @Test
@@ -115,7 +115,7 @@ public class NotificationConcurrentTests {
     String username = "test_user";
     RegistrationRequestDto reg = createRegistrationRequest(username);
 
-    notificationService.sendPendingNotification();
+    notificationService.sendPendingNotifications();
     Assert.assertEquals(1, wiser.getMessages().size());
 
     Date fakeDate = DateUtils.addDays(new Date(), (notificationCleanUpAge + 1));
@@ -137,10 +137,12 @@ public class NotificationConcurrentTests {
       elem.get();
     }
 
+    deleteUser(reg.getAccountId());
+
     int count = notificationRepository.countAllMessages();
     Assert.assertEquals(0, count);
 
-    deleteUser(reg.getAccountId());
+
   }
 
   public class WorkerSend implements Callable<Integer> {
@@ -162,7 +164,7 @@ public class NotificationConcurrentTests {
         ex.printStackTrace();
       }
 
-      this.notificationService.sendPendingNotification();
+      this.notificationService.sendPendingNotifications();
       return null;
     }
   }

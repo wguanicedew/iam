@@ -23,7 +23,6 @@ public class PersistentUUIDTokenGenerator implements TokenGenerator {
   }
 
   public String getLastToken() {
-
     return lastToken;
   }
 

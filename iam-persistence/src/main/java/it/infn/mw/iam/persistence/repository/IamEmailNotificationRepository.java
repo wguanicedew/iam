@@ -27,4 +27,6 @@ public interface IamEmailNotificationRepository
 
   @Query("select count(n) from IamEmailNotification n")
   Integer countAllMessages();
+
+  Integer countByDeliveryStatus(IamDeliveryStatus deliveryStatus);
 }

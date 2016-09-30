@@ -1,5 +1,6 @@
 package it.infn.mw.iam.test.account;
 
+import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -15,6 +16,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import com.jayway.restassured.RestAssured;
 
 import it.infn.mw.iam.IamLoginService;
+import it.infn.mw.iam.notification.NotificationService;
 import it.infn.mw.iam.registration.PersistentUUIDTokenGenerator;
 import it.infn.mw.iam.registration.RegistrationRequestDto;
 import it.infn.mw.iam.test.RegistrationUtils;
@@ -27,6 +29,9 @@ public class PasswordResetTests {
 
   @Autowired
   private PersistentUUIDTokenGenerator tokenGenerator;
+
+  @Autowired
+  private NotificationService notificationService;
 
   private RegistrationRequestDto reg;
 
@@ -48,6 +53,7 @@ public class PasswordResetTests {
   @After
   public void tearDown() {
     RegistrationUtils.deleteUser(reg.getAccountId());
+    notificationService.clearAllNotifications();
   }
 
 
@@ -55,50 +61,84 @@ public class PasswordResetTests {
   @Test
   public void testChangePassword() {
     String newPassword = "secure_password";
-    String resetKey = tokenGenerator.getLastToken();
-
-    // @formatter:off
-    Boolean retval = RestAssured.given()
-      .port(8080)
-      .pathParam("token", resetKey)
-    .when()
-      .get("/iam/password/reset-key/{token}")
-    .then()
-      .log()
-        .body(true)
-      .statusCode(HttpStatus.OK.value())
-      .extract()
-        .as(Boolean.class);
-    ;
-    // @formatter:on
-    Assert.assertEquals(Boolean.TRUE, retval);
 
     // @formatter:off
     RestAssured.given()
       .port(8080)
-      .param("resetkey", resetKey)
-      .param("password", newPassword)
+      .formParam("email", "test_user@example.org")
     .when()
-      .post("/iam/password-change")
+      .post("/iam/password-reset/token")
     .then()
       .log()
-        .body(true)
-      .statusCode(HttpStatus.OK.value())
-    ;
+        .all(true)
+      .statusCode(HttpStatus.OK.value());
     // @formatter:on
+
+    String resetToken = tokenGenerator.getLastToken();
+
+
+    // Check token is valid
+
+    // @formatter:off
+    RestAssured.given()
+      .log().all()
+      .port(8080)
+      .pathParam("token", resetToken)
+    .when()
+      .head("/iam/password-reset/token/{token}")
+    .then()
+      .log()
+        .all(true)
+      .statusCode(HttpStatus.OK.value());
+    // @formatter:on
+
+
+    // Reset password
+
+    // @formatter:off
+    RestAssured.given()
+      .log().all()
+      .port(8080)
+      .param("token", resetToken)
+      .param("password", newPassword)
+    .when()
+      .post("/iam/password-reset")
+    .then()
+      .log()
+        .all(true)
+      .statusCode(HttpStatus.OK.value());
+    // @formatter:on
+
+
+    // Check token is invalid
+
+    // @formatter:off
+    RestAssured.given()
+      .log().all()
+      .port(8080)
+      .pathParam("token", resetToken)
+    .when()
+      .head("/iam/password-reset/token/{token}")
+    .then()
+      .log()
+        .all(true)
+      .statusCode(HttpStatus.NOT_FOUND.value());
+    // @formatter:on
+
   }
 
   @Test
-  public void testResetPasswordWithInvalidResetKey() {
+  public void testResetPasswordWithInvalidResetToken() {
 
-    String resetKey = "abcdefghilmnopqrstuvz";
+    String resetToken = "abcdefghilmnopqrstuvz";
 
     // @formatter:off
     RestAssured.given()
+      .log().all()
       .port(8080)
-      .pathParam("token", resetKey)
+      .pathParam("token", resetToken)
     .when()
-      .get("/iam/password/reset-key/{token}")
+      .head("/iam/password-reset/token/{token}")
     .then()
       .log()
         .body(true)
@@ -108,79 +148,64 @@ public class PasswordResetTests {
   }
 
   @Test
-  public void testForgotPassword() {
+  public void testCreatePasswordResetTokenReturnsOkForUnknownAddress() {
 
     String emailAddress = "test@foo.bar";
 
+    // This is needed to "forget" the token generated for the user
+    // created by the setup method (which is not used by this test)
+    String lastToken = tokenGenerator.getLastToken();
+
     // @formatter:off
     RestAssured.given()
+      .log().all()
       .port(8080)
-      .pathParam("email", emailAddress)
+      .formParam("email", emailAddress)
     .when()
-      .get("/iam/password-forgot/{email}", emailAddress)
+      .post("/iam/password-reset/token")
     .then()
       .log()
-        .body(true)
+        .all(true)
       .statusCode(HttpStatus.OK.value())
     ;
     // @formatter:on
+
+
+    // This checks that the token generator has not been called
+    Assert.assertThat(tokenGenerator.getLastToken(), Matchers.equalTo(lastToken));
+
   }
 
   @Test
-  public void testReuseSameResetKeyFailure() {
-    String newPassword = "secure_password";
-    String resetKey = tokenGenerator.getLastToken();
+  public void testEmailValidationForPasswordResetTokenCreation() {
+    String invalidEmailAddress = "this_is_not_an_email";
 
     // @formatter:off
-    Object retval = RestAssured.given()
+    RestAssured.given()
+      .log().all()
       .port(8080)
-      .pathParam("token", resetKey)
+      .formParam("email", invalidEmailAddress)
     .when()
-      .get("/iam/password/reset-key/{token}")
+      .post("/iam/password-reset/token")
     .then()
       .log()
-        .body(true)
-      .statusCode(HttpStatus.OK.value())
-      .extract()
-        .as(Boolean.class)
-    ;
-    // @formatter:on
-    Assert.assertEquals(Boolean.TRUE, retval);
-
-    // update password
+        .all(true)
+      .statusCode(HttpStatus.BAD_REQUEST.value())
+      .body(Matchers.equalTo("validation error: please specify a valid email address"));
+    ; 
+    
     // @formatter:off
-    retval = RestAssured.given()
+    RestAssured.given()
+      .log().all()
       .port(8080)
-      .param("resetkey", resetKey)
-      .param("password", newPassword)
     .when()
-      .post("/iam/password-change")
+      .post("/iam/password-reset/token")
     .then()
       .log()
-        .body(true)
-      .statusCode(HttpStatus.OK.value())
-      .extract()
-        .asString()
-    ;
-    
-    Assert.assertEquals("ok", retval);
-    
-    // try re-update with same key
-    retval = RestAssured.given()
-      .port(8080)
-      .param("resetkey", resetKey)
-      .param("password", newPassword)
-    .when()
-      .post("/iam/password-change")
-    .then()
-      .log()
-        .body(true)
-      .statusCode(HttpStatus.OK.value())
-      .extract()
-        .asString()
-    ;
-    // @formatter:on
-    Assert.assertEquals("err", retval);
+        .all(true)
+      .statusCode(HttpStatus.BAD_REQUEST.value())
+      .body(Matchers.equalTo("validation error: please specify an email address"));
+    ; 
   }
 
 }
