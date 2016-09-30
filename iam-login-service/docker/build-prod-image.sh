@@ -31,9 +31,13 @@ docker build -f Dockerfile.prod \
   --rm=true --no-cache=true \
   -t ${IAM_LOGIN_SERVICE_IMAGE} .
 
-pushd ../../
-POM_VERSION="v$(sh utils/print-pom-version.sh)"
-popd
+if [[ -z ${IAM_LOGIN_SERVICE_VERSION} ]]; then
+  pushd ../../
+  POM_VERSION="v$(sh utils/print-pom-version.sh)"
+  popd
+else
+  POM_VERSION="${IAM_LOGIN_SERVICE_VERSION}"
+fi
 
 GIT_COMMIT_SHA=$(git rev-parse --short HEAD)
 
