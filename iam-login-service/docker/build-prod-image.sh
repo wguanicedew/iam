@@ -31,4 +31,13 @@ docker build -f Dockerfile.prod \
   --rm=true --no-cache=true \
   -t ${IAM_LOGIN_SERVICE_IMAGE} .
 
+pushd ../../
+POM_VERSION="v$(sh utils/print-pom-version.sh)"
+popd
+
+GIT_COMMIT_SHA=$(git rev-parse --short HEAD)
+
+docker tag ${IAM_LOGIN_SERVICE_IMAGE} ${IAM_LOGIN_SERVICE_IMAGE}:${POM_VERSION}-${GIT_COMMIT_SHA}
+docker tag ${IAM_LOGIN_SERVICE_IMAGE} ${IAM_LOGIN_SERVICE_IMAGE}:${POM_VERSION}-latest
+
 rm iam-login-service.war
