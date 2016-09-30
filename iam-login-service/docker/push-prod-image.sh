@@ -9,9 +9,13 @@ default_image_name="indigoiam/iam-login-service"
 
 IAM_LOGIN_SERVICE_IMAGE=${IAM_LOGIN_SERVICE_IMAGE:-${default_image_name}}
 
-pushd ../../
-POM_VERSION="v$(sh utils/print-pom-version.sh)"
-popd
+if [[ -z ${IAM_LOGIN_SERVICE_VERSION} ]]; then
+  pushd ../../
+  POM_VERSION="v$(sh utils/print-pom-version.sh)"
+  popd
+else
+  POM_VERSION="${IAM_LOGIN_SERVICE_VERSION}"
+fi
 
 GIT_COMMIT_SHA=$(git rev-parse --short HEAD)
 
