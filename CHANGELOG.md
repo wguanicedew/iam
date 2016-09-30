@@ -1,8 +1,25 @@
 # Changelog
 
-## 0.4.0 (2016-09-26)
+## 0.4.0 (2016-09-30)
 
-TBD
+This release provides new functionality and some fixes:
+
+- Groups are now encoded in the JSON returned by the IAM /userinfo
+  endpoint as an array of group names.
+- Group information is also exposed by the token introspection endpoint
+- External authentication information (i.e. when a user authenticates with
+  Google or SAML instead of username/password) is now provided in the JSON
+  returned by the /userinfo endpoint
+- The first incarnation of the administrative dashboard is now included in the
+  service 
+- The first incarnation of the registration service is now included. The
+  registration service implements a "self-register with admin approval"
+  registration flow 
+- User passwords are now encoded in the database using the Bcrypt encoder
+- A password forgotten service is now provided
+
+More information about bug fixes and other developments can be found on
+our [JIRA release board][jira-v0.4.0]
 
 ## 0.3.0 (2016-07-12)
 
@@ -29,3 +46,4 @@ GitBook manual][gitbook-manual] or on [Github][github-doc].
 [token-exchange]: https://tools.ietf.org/html/draft-ietf-oauth-token-exchange-05
 [gitbook-manual]: https://www.gitbook.com/book/andreaceccanti/iam/details
 [github-doc]: https://github.com/indigo-iam/iam/blob/master/SUMMARY.md
+[jira-v0.4.0]: https://issues.infn.it/jira/browse/INDIAM/fixforversion/13811 
