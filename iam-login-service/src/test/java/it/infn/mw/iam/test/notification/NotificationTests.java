@@ -29,6 +29,7 @@ import org.subethamail.wiser.Wiser;
 import org.subethamail.wiser.WiserMessage;
 
 import it.infn.mw.iam.IamLoginService;
+import it.infn.mw.iam.api.account.PasswordResetController;
 import it.infn.mw.iam.core.IamDeliveryStatus;
 import it.infn.mw.iam.notification.MockTimeProvider;
 import it.infn.mw.iam.notification.NotificationProperties;
@@ -344,7 +345,8 @@ public class NotificationTests {
     RegistrationUtils.approveRequest(reg.getUuid());
     String resetKey = generator.getLastToken();
 
-    String resetPasswordUrl = String.format("%s/iam/password-reset/%s", baseUrl, resetKey);
+    String resetPasswordUrl =
+        String.format("%s%s/%s", baseUrl, PasswordResetController.BASE_TOKEN_URL, resetKey);
 
     notificationService.sendPendingNotifications();
 
