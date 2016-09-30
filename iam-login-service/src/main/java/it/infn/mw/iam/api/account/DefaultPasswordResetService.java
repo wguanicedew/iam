@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
 import it.infn.mw.iam.notification.NotificationService;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
@@ -32,33 +31,38 @@ public class DefaultPasswordResetService implements PasswordResetService {
   private PasswordEncoder passwordEncoder;
 
   @Override
-  public Boolean checkResetKey(String resetKey) {
+  public void validateResetToken(String resetToken) {
 
-    IamAccount account = accountRepository.findByResetKey(resetKey)
-      .orElseThrow(() -> new ScimResourceNotFoundException(
-          String.format("No account found for reset_key [%s]", resetKey)));
+    IamAccount account = accountRepository.findByResetKey(resetToken)
+      .orElseThrow(() -> new InvalidPasswordResetTokenError(
+          String.format("No account found for reset_key [%s]", resetToken)));
 
-    return isAccountEnabled(account);
-  }
-
-  @Override
-  public void changePassword(String resetKey, String password) {
-
-    if (checkResetKey(resetKey)) {
-      IamAccount account = accountRepository.findByResetKey(resetKey).get();
-      account.setPassword(passwordEncoder.encode(password));
-      account.setResetKey(null);
-
-      accountRepository.save(account);
+    if (!accountActiveAndEmailVerified(account)) {
+      throw new InvalidPasswordResetTokenError(
+          "The user account is not active or is linked to an email that has not been verified");
     }
   }
 
   @Override
-  public void forgotPassword(String email) {
+  public void resetPassword(String resetToken, String password) {
+
+    validateResetToken(resetToken);
+
+    IamAccount account = accountRepository.findByResetKey(resetToken).get();
+
+    account.setPassword(passwordEncoder.encode(password));
+    account.setResetKey(null);
+
+    accountRepository.save(account);
+  }
+
+
+  @Override
+  public void createPasswordResetToken(String email) {
     try {
       IamAccount account = accountRepository.findByEmail(email).get();
 
-      if (isAccountEnabled(account)) {
+      if (accountActiveAndEmailVerified(account)) {
         String resetKey = tokenGenerator.generateToken();
         account.setResetKey(resetKey);
         accountRepository.save(account);
@@ -71,7 +75,7 @@ public class DefaultPasswordResetService implements PasswordResetService {
   }
 
 
-  private boolean isAccountEnabled(IamAccount account) {
+  private boolean accountActiveAndEmailVerified(IamAccount account) {
     return account.isActive() && (account.getUserInfo().getEmailVerified() != null
         && account.getUserInfo().getEmailVerified());
   }

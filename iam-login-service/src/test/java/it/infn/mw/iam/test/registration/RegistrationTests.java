@@ -1,6 +1,7 @@
 package it.infn.mw.iam.test.registration;
 
 import static com.jayway.restassured.RestAssured.given;
+import static it.infn.mw.iam.api.scim.model.ScimConstants.SCIM_CONTENT_TYPE;
 import static it.infn.mw.iam.test.RegistrationUtils.confirmRegistrationRequest;
 import static it.infn.mw.iam.test.RegistrationUtils.createRegistrationRequest;
 import static it.infn.mw.iam.test.RegistrationUtils.deleteUser;
@@ -269,7 +270,24 @@ public class RegistrationTests {
       .body("uuid", Matchers.equalTo(reg.getUuid()));
     // @formatter:on
 
-    deleteUser(reg.getAccountId());
+    // Reject delete user: verify user not found
+    accessToken = TestUtils.getAccessToken("registration-client", "secret", "scim:read");
+
+    // @formatter:off
+    given()
+      .port(iamPort)
+        .auth()
+          .preemptive()
+          .oauth2(accessToken)
+      .contentType(SCIM_CONTENT_TYPE)
+      .pathParam("uuid", reg.getAccountId())
+    .when()
+      .get("scim/Users/{uuid}")
+    .then()
+      .statusCode(HttpStatus.NOT_FOUND.value())
+      .body("status", Matchers.equalTo("404"))
+    ;
+    // @formatter:on
   }
 
   @Test

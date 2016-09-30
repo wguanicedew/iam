@@ -11,7 +11,6 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -55,9 +54,6 @@ public class IamEmailNotification {
   @Temporal(TemporalType.TIMESTAMP)
   @Column(name = "last_update", nullable = true)
   private Date lastUpdate;
-
-  @JoinColumn(name = "request_id")
-  private IamRegistrationRequest request;
 
   public IamEmailNotification() {}
 
@@ -133,14 +129,6 @@ public class IamEmailNotification {
 
   public void setLastUpdate(Date lastUpdate) {
     this.lastUpdate = lastUpdate;
-  }
-
-  public IamRegistrationRequest getRequest() {
-    return request;
-  }
-
-  public void setRequest(IamRegistrationRequest request) {
-    this.request = request;
   }
 
   @Override

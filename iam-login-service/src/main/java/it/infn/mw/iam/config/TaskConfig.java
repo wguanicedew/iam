@@ -51,7 +51,7 @@ public class TaskConfig implements SchedulingConfigurer {
 
   @Scheduled(fixedDelayString = "${notification.taskDelay}", initialDelay = 60000)
   public void sendNotifications() {
-    notificationService.sendPendingNotification();
+    notificationService.sendPendingNotifications();
   }
 
   @Scheduled(fixedDelay = 30000, initialDelay = 60000)

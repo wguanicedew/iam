@@ -16,12 +16,14 @@ function AddOIDCAccountController($scope, $uibModalInstance, scimFactory,
 	addOidcCtrl.addOidcAccount = addOidcAccount;
 	addOidcCtrl.reset = reset;
 
+	addOidcCtrl.reset();
+
 	function reset() {
 
 		addOidcCtrl.issuer = "";
 		addOidcCtrl.subject = "";
+		addOidcCtrl.enabled = true;
 	}
-	;
 
 	function addOidcAccount() {
 

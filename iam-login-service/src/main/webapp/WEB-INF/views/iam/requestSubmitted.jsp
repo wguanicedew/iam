@@ -16,7 +16,7 @@
 		<div style="font-size: medium;">
 			<p class="text-center">Your Indigo registration request has been submitted successfully.</p>
 			<p class="text-center">Now, an email with a confirmation link will be sent to the email address specified in the request.
-			   Check you mailbox!</p>
+			   Check your mailbox!</p>
 			<p class="text-center">After confirmation, you have to wait for approval from Indigo Admin before start using Indigo services.</p>
 		</div>
 		

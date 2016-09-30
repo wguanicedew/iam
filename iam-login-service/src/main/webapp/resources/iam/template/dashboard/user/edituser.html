@@ -5,15 +5,7 @@
     </div>
 
     <div class="modal-body">
-
-	<operationresult/>
-
-        <div ng-show="editUserCtrl.operationResult != null">
-            <div class="alert" ng-class="{'alert-success': editUserCtrl.operationResult=='ok', 'alert-danger': editUserCtrl.operationResult=='err'}">
-                <button class="close" ng-click="editUserCtrl.operationResult=null" aria-label="close">&times;</button>
-                {{editUserCtrl.textAlert}}
-            </div>
-        </div>
+        <operationresult/>
 
         <div class="form-group">
             <label class="control-label col-sm-2" for="name">Name</label>
@@ -118,8 +110,8 @@
     </div>
 
     <div class="modal-footer">
-        <button class="btn btn-primary btn-sm" type="submit" name="create" id="modal-btn-confirm" ng-disabled="userUpdateForm.$invalid || !userUpdateForm.$dirty">Update</button>
-	<button class="btn btn-warning btn-sm" type="button" name="reset" id="modal-btn-reset" ng-click="editUserCtrl.reset()" ng-disabled="userUpdateForm.$pristine">Reset Form</button>
+        <button class="btn btn-primary btn-sm" type="submit" name="create" id="modal-btn-confirm" ng-disabled="userUpdateForm.$invalid || !userUpdateForm.$dirty || !editUserCtrl.enabled">Update</button>
+        <button class="btn btn-warning btn-sm" type="button" name="reset" id="modal-btn-reset" ng-click="editUserCtrl.reset()" ng-disabled="userUpdateForm.$pristine">Reset Form</button>
         <button class="btn btn-danger btn-sm" type="button" name="dismiss" id="modal-btn-cancel" ng-click="editUserCtrl.dismiss()">Cancel</button>
     </div>
 </form>
