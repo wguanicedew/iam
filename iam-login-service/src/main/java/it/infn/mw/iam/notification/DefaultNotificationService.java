@@ -118,7 +118,7 @@ public class DefaultNotificationService implements NotificationService {
 
     String recipient = account.getUserInfo().getName();
     String resetPasswordUrl =
-        String.format("%s/iam/password-reset/%s", baseUrl, account.getResetKey());
+        String.format("%s/iam/password-reset/token/%s", baseUrl, account.getResetKey());
 
     Map<String, Object> model = new HashMap<>();
     model.put(RECIPIENT_FIELD, recipient);
@@ -130,7 +130,7 @@ public class DefaultNotificationService implements NotificationService {
 
   @Override
   @Transactional
-  public void sendPendingNotification() {
+  public void sendPendingNotifications() {
 
     SimpleMailMessage messageTemplate = new SimpleMailMessage();
     messageTemplate.setFrom(properties.getMailFrom());
@@ -217,6 +217,17 @@ public class DefaultNotificationService implements NotificationService {
     notificationRepository.save(message);
 
     return message;
+  }
+
+  @Override
+  public int countPendingNotifications() {
+
+    return notificationRepository.countByDeliveryStatus(IamDeliveryStatus.PENDING);
+  }
+
+  @Override
+  public void clearAllNotifications() {
+    notificationRepository.deleteAll();
   }
 
 }

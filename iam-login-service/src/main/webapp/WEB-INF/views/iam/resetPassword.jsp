@@ -21,15 +21,19 @@
 				
 				<c:otherwise>
 					<div ng-controller="ResetPasswordController as ctrl">
-						<div style="text-align: center;">
+						<div style="text-align: center;" ng-show="ctrl.operationResult != 'ok'">
 							<h3>Change your Indigo password</h3>
 						</div>
-						<div ng-show="ctrl.operationResult != null">
-							<div class="alert" ng-class="{'alert-success': ctrl.operationResult=='ok', 'alert-danger': ctrl.operationResult=='err'}">
-								<button class="close" ng-click="ctrl.operationResult=null" aria-label="close">&times;</button>
+            <div style="text-align: center;" ng-show="ctrl.operationResult == 'ok'">
+              <h3>Your password has been reset succesfully!</h3>
+            </div>
+						
+            <div ng-show="ctrl.operationResult != null">
+              
+							<div class="alert alert-danger alert-dismissable" ng-show="ctrl.operationResult == 'err'">
 								{{ctrl.textAlert}}
 							</div>
-							
+              
 							<div class="row text-center" ng-show="ctrl.operationResult == 'ok'">
 								<a class="btn btn-primary" href='/login'>Back to Login Page</a>
 							</div>

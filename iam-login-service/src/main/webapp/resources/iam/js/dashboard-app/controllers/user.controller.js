@@ -80,7 +80,7 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 					closeButtonText: null,
 					user: user.userInfo.name.formatted,
 					actionButtonText: 'OK',
-					headerText: 'Passoword reset requested',
+					headerText: 'Password reset requested',
 					bodyText: `A password reset link has just been sent to your e-mail address`
 				});
 			}, function(error) {

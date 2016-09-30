@@ -96,7 +96,7 @@ public class NotificationTests {
     String username = "test_user";
 
     RegistrationRequestDto reg = createRegistrationRequest(username);
-    notificationService.sendPendingNotification();
+    notificationService.sendPendingNotifications();
 
     Assert.assertEquals(1, wiser.getMessages().size());
     WiserMessage message = wiser.getMessages().get(0);
@@ -121,7 +121,7 @@ public class NotificationTests {
     RegistrationRequestDto reg = createRegistrationRequest(username);
 
     properties.setDisable(true);
-    notificationService.sendPendingNotification();
+    notificationService.sendPendingNotifications();
 
     Assert.assertEquals(0, wiser.getMessages().size());
 
@@ -145,7 +145,7 @@ public class NotificationTests {
       requestList.add(reg);
     }
 
-    notificationService.sendPendingNotification();
+    notificationService.sendPendingNotifications();
 
     Assert.assertEquals(count, wiser.getMessages().size());
 
@@ -162,7 +162,7 @@ public class NotificationTests {
   @Test
   public void testSendWithEmptyQueue() {
 
-    notificationService.sendPendingNotification();
+    notificationService.sendPendingNotifications();
     Assert.assertEquals(0, wiser.getMessages().size());
   }
 
@@ -173,7 +173,7 @@ public class NotificationTests {
 
     wiser.stop();
 
-    notificationService.sendPendingNotification();
+    notificationService.sendPendingNotifications();
 
     Iterable<IamEmailNotification> queue = notificationRepository.findAll();
     for (IamEmailNotification elem : queue) {
@@ -189,7 +189,7 @@ public class NotificationTests {
     String username = "test_user";
 
     RegistrationRequestDto reg = createRegistrationRequest(username);
-    notificationService.sendPendingNotification();
+    notificationService.sendPendingNotifications();
 
     Assert.assertEquals(1, wiser.getMessages().size());
 
@@ -200,7 +200,7 @@ public class NotificationTests {
 
     String confirmationKey = generator.getLastToken();
     confirmRegistrationRequest(confirmationKey);
-    notificationService.sendPendingNotification();
+    notificationService.sendPendingNotifications();
 
     Assert.assertEquals(2, wiser.getMessages().size());
 
@@ -213,7 +213,7 @@ public class NotificationTests {
         message.getEnvelopeReceiver().startsWith(properties.getAdminAddress()));
 
     RegistrationUtils.approveRequest(reg.getUuid());
-    notificationService.sendPendingNotification();
+    notificationService.sendPendingNotifications();
 
     Assert.assertEquals(3, wiser.getMessages().size());
 
@@ -230,7 +230,7 @@ public class NotificationTests {
     String username = "test_user";
 
     RegistrationRequestDto reg = createRegistrationRequest(username);
-    notificationService.sendPendingNotification();
+    notificationService.sendPendingNotifications();
 
     Assert.assertEquals(1, wiser.getMessages().size());
 
@@ -240,7 +240,7 @@ public class NotificationTests {
 
     String confirmationKey = generator.getLastToken();
     confirmRegistrationRequest(confirmationKey);
-    notificationService.sendPendingNotification();
+    notificationService.sendPendingNotifications();
 
     Assert.assertEquals(2, wiser.getMessages().size());
     message = wiser.getMessages().get(1);
@@ -250,7 +250,7 @@ public class NotificationTests {
         message.getEnvelopeReceiver().startsWith(properties.getAdminAddress()));
 
     RegistrationUtils.rejectRequest(reg.getUuid());
-    notificationService.sendPendingNotification();
+    notificationService.sendPendingNotifications();
 
     Assert.assertEquals(3, wiser.getMessages().size());
 
@@ -264,7 +264,7 @@ public class NotificationTests {
     String username = "test_user";
 
     RegistrationRequestDto reg = createRegistrationRequest(username);
-    notificationService.sendPendingNotification();
+    notificationService.sendPendingNotifications();
     Assert.assertEquals(1, wiser.getMessages().size());
 
     Date fakeDate = DateUtils.addDays(new Date(), (properties.getCleanupAge() + 1));
@@ -272,10 +272,12 @@ public class NotificationTests {
 
     notificationService.clearExpiredNotifications();
 
+    deleteUser(reg.getAccountId());
+
     int count = notificationRepository.countAllMessages();
     Assert.assertEquals(0, count);
 
-    deleteUser(reg.getAccountId());
+
   }
 
 }

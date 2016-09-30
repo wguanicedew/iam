@@ -56,9 +56,9 @@ public class NotificationConcurrentTests {
   @Autowired
   private MockTimeProvider timeProvider;
 
-  private Wiser wiser;
+  private Wiser wiserSmtpServer;
 
-  private RegistrationRequestDto reg;
+  private RegistrationRequestDto registrationRequest;
 
   public static final int NUM_THREADS = 3;
   final CyclicBarrier barrier = new CyclicBarrier(NUM_THREADS + 1);
@@ -71,19 +71,19 @@ public class NotificationConcurrentTests {
 
   @Before
   public void setUp() {
-    wiser = new Wiser();
-    wiser.setHostname(mailHost);
-    wiser.setPort(mailPort);
-    wiser.start();
+    wiserSmtpServer = new Wiser();
+    wiserSmtpServer.setHostname(mailHost);
+    wiserSmtpServer.setPort(mailPort);
+    wiserSmtpServer.start();
 
-    reg = createRegistrationRequest("test_user");
+    registrationRequest = createRegistrationRequest("test_user");
   }
 
   @After
   public void tearDown() {
-    wiser.stop();
+    wiserSmtpServer.stop();
 
-    deleteUser(reg.getAccountId());
+    deleteUser(registrationRequest.getAccountId());
     notificationRepository.deleteAll();
   }
 
@@ -105,17 +105,16 @@ public class NotificationConcurrentTests {
       elem.get();
     }
 
-    int expected = 1;
-    int count = wiser.getMessages().size();
+    int count = wiserSmtpServer.getMessages().size();
+    Assert.assertEquals(1, count);
 
-    Assert.assertEquals(expected, count);
   }
 
   @Test
   public void testConcurrentCleanUp() throws Exception {
 
-    notificationService.sendPendingNotification();
-    Assert.assertEquals(1, wiser.getMessages().size());
+    notificationService.sendPendingNotifications();
+    Assert.assertEquals(1, wiserSmtpServer.getMessages().size());
 
     Date fakeDate = DateUtils.addDays(new Date(), (notificationCleanUpAge + 1));
     timeProvider.setTime(fakeDate.getTime());
@@ -159,7 +158,7 @@ public class NotificationConcurrentTests {
         ex.printStackTrace();
       }
 
-      this.notificationService.sendPendingNotification();
+      this.notificationService.sendPendingNotifications();
       return null;
     }
   }

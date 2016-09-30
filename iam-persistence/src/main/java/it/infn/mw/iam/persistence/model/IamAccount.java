@@ -64,14 +64,14 @@ public class IamAccount {
 
   @ManyToMany
   @JoinTable(name = "iam_account_authority",
-      joinColumns = @JoinColumn(name = "account_id", referencedColumnName = "id"),
-      inverseJoinColumns = @JoinColumn(name = "authority_id", referencedColumnName = "id"))
+      joinColumns = @JoinColumn(name = "account_id", referencedColumnName = "id") ,
+      inverseJoinColumns = @JoinColumn(name = "authority_id", referencedColumnName = "id") )
   private Set<IamAuthority> authorities = new HashSet<>();
 
   @ManyToMany
   @JoinTable(name = "iam_account_group",
-      joinColumns = @JoinColumn(name = "account_id", referencedColumnName = "id"),
-      inverseJoinColumns = @JoinColumn(name = "group_id", referencedColumnName = "id"))
+      joinColumns = @JoinColumn(name = "account_id", referencedColumnName = "id") ,
+      inverseJoinColumns = @JoinColumn(name = "group_id", referencedColumnName = "id") )
   private Set<IamGroup> groups = new HashSet<>();
 
   @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
