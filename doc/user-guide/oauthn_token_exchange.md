@@ -38,8 +38,7 @@ The current implementation of Token Exchange in Indigo IAM, has some limitations
 This section describe a typical scenario of token exchange flow.
 
 A client requests to the Authorization Service (AS) an access token (T1) to access a protected resource (PR).
-In this example, we use a registered client with `client_credentials` grant type to obtain the token and `curl`
-to build and send the HTTP request.
+In this example, we use a registered client with `client_credentials` grant type to obtain the token and `curl` to send the HTTP request.
 
 ```bash
  $ export IAM_TOKEN_ENDPOINT=https://iam.local.io/token

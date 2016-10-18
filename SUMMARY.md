@@ -8,3 +8,4 @@
     * [OpenID-connect Authorization Server](doc/user-guide/oidc_auth_server.md)
     * [OAuthN Token exchange support](doc/user-guide/oauthn_token_exchange.md)
     * [SCIM API reference](doc/user-guide/scim_api.md)
+    * [Registration Service](doc/user-guide/registration_service.md)
