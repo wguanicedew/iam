@@ -61,40 +61,36 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
       throw new InvalidRequestException("Delegation not yet supported in Token Exchange");
     }
 
+    // read audience: can contain a valid client_id
+    String incomingAudience = tokenRequest.getRequestParameters().get("audience");
+
     // read and load up the existing token
     String incomingTokenValue = tokenRequest.getRequestParameters().get("subject_token");
 
     OAuth2AccessTokenEntity incomingToken = tokenServices.readAccessToken(incomingTokenValue);
-
-    // read audience: must contain a valid client_id
-    String incomingAudience = tokenRequest.getRequestParameters().get("audience");
-
-    if (Strings.isNullOrEmpty(incomingAudience)) {
-      throw new InvalidRequestException("Missing audience field in Token Exchange");
-    }
-
-    ClientDetailsEntity targetClient = clientDetailsService.loadClientByClientId(incomingAudience);
+    ClientDetailsEntity subjectClient = incomingToken.getClient();
 
     // check for scoping in the request, can't up-scope with a chained request
     Set<String> requestedScopes = tokenRequest.getScope();
-    Set<String> targetClientScopes = targetClient.getScope();
-    Set<String> incomingTokenScopes = incomingToken.getScope();
+    Set<String> actorScopes = client.getScope();
+    Set<String> subjectScopes = incomingToken.getScope();
 
     // if our scopes are a valid subset of what's allowed, we can continue
-    if (targetClientScopes.containsAll(requestedScopes)) {
+    if (actorScopes.containsAll(requestedScopes)) {
 
-      LOG.info("Client with id [{}] requests token exchange for audience [{}] with scopes {}",
-          client.getClientId(), incomingAudience, requestedScopes);
+      LOG.info(
+          "Client with id [{}] requests token exchange impersonating [{}] for audience [{}] with scopes {}",
+          client.getClientId(), subjectClient.getClientId(), incomingAudience, requestedScopes);
 
       // check chained scopes
       for (String scope : CHAINED_SCOPES) {
-        if (requestedScopes.contains(scope) && !incomingTokenScopes.contains(scope)) {
+        if (requestedScopes.contains(scope) && !subjectScopes.contains(scope)) {
           throw new InvalidScopeException(
               String.format("Subject Token MUST contain requested scope [%s]", scope));
         }
       }
 
-      tokenRequest.setScope(Sets.intersection(requestedScopes, targetClientScopes));
+      tokenRequest.setScope(Sets.intersection(requestedScopes, actorScopes));
 
       // NOTE: don't revoke the existing access token
 
@@ -109,7 +105,6 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
     } else {
       throw new InvalidScopeException("Invalid scope in Token Exchange request", requestedScopes);
     }
-
   }
 
   @Override
@@ -119,6 +114,11 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
     OAuth2Authentication auth = getOAuth2Authentication(client, tokenRequest);
     OAuth2AccessToken accessToken = tokenServices.createAccessToken(auth);
     accessToken.getAdditionalInformation().put("issued_token_type", TOKEN_TYPE);
+
+    String audience = tokenRequest.getRequestParameters().get("audience");
+    if (!Strings.isNullOrEmpty(audience)) {
+      accessToken.getAdditionalInformation().put("audience", audience);
+    }
 
     return accessToken;
   }
