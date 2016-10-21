@@ -1,7 +1,6 @@
 package it.infn.mw.iam.test.oauth;
 
 import static com.jayway.restassured.RestAssured.given;
-import static it.infn.mw.iam.test.TestUtils.clientCredentialsTokenGetter;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 
@@ -18,6 +17,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.test.TestUtils;
+
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = IamLoginService.class)
@@ -41,7 +41,6 @@ public class TokenExchangeTests {
 
     String audClientId = "tasks-app";
 
-    // get access token
     String accessToken = TestUtils.getAccessToken(clientId, clientSecret, "openid profile");
 
     // @formatter:off
@@ -205,11 +204,13 @@ public class TokenExchangeTests {
 
     String audClientId = "client";
 
-    String subjectToken =
-        clientCredentialsTokenGetter(clientId, clientSecret).scope("openid").getAccessToken();
+    String subjectToken = TestUtils.clientCredentialsTokenGetter(clientId, clientSecret)
+      .scope("openid")
+      .getAccessToken();
 
-    String actorToken = clientCredentialsTokenGetter(actorClientId, actorClientSecret)
-      .scope("openid").getAccessToken();
+    String actorToken = TestUtils.clientCredentialsTokenGetter(actorClientId, actorClientSecret)
+      .scope("openid")
+      .getAccessToken();
 
     // @formatter:off
     given()
@@ -242,7 +243,6 @@ public class TokenExchangeTests {
     String actorClientId = "token-exchange-actor";
     String actorClientSecret = "secret";
 
-    // get access token
     String accessToken = "abcdefghilmnopqrstuvz0123456789";
 
     // @formatter:off
@@ -267,7 +267,7 @@ public class TokenExchangeTests {
   }
 
   @Test
-  public void testWithAudience() {
+  public void testWithAudienceField() {
     String clientId = "token-exchange-subject";
     String clientSecret = "secret";
 
@@ -276,7 +276,6 @@ public class TokenExchangeTests {
 
     String audClientId = "tasks-app";
 
-    // get access token
     String accessToken = TestUtils.getAccessToken(clientId, clientSecret, "openid profile");
 
     // @formatter:off
@@ -313,7 +312,6 @@ public class TokenExchangeTests {
     String actorClientId = "token-exchange-actor";
     String actorClientSecret = "secret";
 
-    // get access token
     String accessToken = TestUtils.getAccessToken(clientId, clientSecret, "openid profile");
 
     // @formatter:off
@@ -338,5 +336,6 @@ public class TokenExchangeTests {
       .body("access_token", notNullValue())
       .body("audience", Matchers.isEmptyOrNullString() )
       ;
+    // @formatter:on
   }
 }

@@ -11,7 +11,6 @@ import org.mitre.oauth2.service.OAuth2TokenEntityService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
 import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
@@ -31,17 +30,18 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
 
   private static final String GRANT_TYPE = "urn:ietf:params:oauth:grant-type:token-exchange";
   private static final String TOKEN_TYPE = "urn:ietf:params:oauth:token-type:jwt";
+  private static final String AUDIENCE_FIELD = "audience";
 
   /**
    * These scopes, in order to be "exchanged" across services, need to be present in the set of
    * scopes linked to the subject token that is presented for the exchange.
    */
-  private static final List<String> CHAINED_SCOPES = Arrays.asList("openid", "profile", "email",
-      "address", "phone", "offline_access", "scim:read", "scim:write");
+  private static final List<String> CHAINED_SCOPES =
+      Arrays.asList("openid", "profile", "email", "address", "phone", "offline_access", "scim:read",
+          "scim:write", "registration:read", "registration:write");
 
   // keep down-cast versions so we can get to the right queries
   private OAuth2TokenEntityService tokenServices;
-  private ClientDetailsEntityService clientDetailsService;
 
   @Autowired
   public TokenExchangeTokenGranter(final OAuth2TokenEntityService tokenServices,
@@ -49,12 +49,11 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
       final OAuth2RequestFactory requestFactory) {
     super(tokenServices, clientDetailsService, requestFactory, GRANT_TYPE);
     this.tokenServices = tokenServices;
-    this.clientDetailsService = clientDetailsService;
   }
 
   @Override
   protected OAuth2Authentication getOAuth2Authentication(final ClientDetails client,
-      final TokenRequest tokenRequest) throws AuthenticationException, InvalidTokenException {
+      final TokenRequest tokenRequest) throws InvalidTokenException {
 
     if (tokenRequest.getRequestParameters().get("actor_token") != null
         || tokenRequest.getRequestParameters().get("want_composite") != null) {
@@ -62,7 +61,7 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
     }
 
     // read audience: can contain a valid client_id
-    String incomingAudience = tokenRequest.getRequestParameters().get("audience");
+    String incomingAudience = tokenRequest.getRequestParameters().get(AUDIENCE_FIELD);
 
     // read and load up the existing token
     String incomingTokenValue = tokenRequest.getRequestParameters().get("subject_token");
@@ -115,9 +114,9 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
     OAuth2AccessToken accessToken = tokenServices.createAccessToken(auth);
     accessToken.getAdditionalInformation().put("issued_token_type", TOKEN_TYPE);
 
-    String audience = tokenRequest.getRequestParameters().get("audience");
+    String audience = tokenRequest.getRequestParameters().get(AUDIENCE_FIELD);
     if (!Strings.isNullOrEmpty(audience)) {
-      accessToken.getAdditionalInformation().put("audience", audience);
+      accessToken.getAdditionalInformation().put(AUDIENCE_FIELD, audience);
     }
 
     return accessToken;
