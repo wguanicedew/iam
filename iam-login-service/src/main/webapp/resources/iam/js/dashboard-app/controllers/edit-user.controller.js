@@ -20,7 +20,7 @@ function EditUserController($scope, $state, $uibModalInstance, Utils,
 		surname: user.name.familyName,
 		username : user.userName,
 		email : user.emails[0].value,
-		picture : user.picture
+		picture : user.picture == undefined ? "" : user.picture
 	};
 
 	console.info("Copied user ", editUserCtrl.userToEdit);
@@ -28,6 +28,7 @@ function EditUserController($scope, $state, $uibModalInstance, Utils,
 	editUserCtrl.submit = submit;
 	editUserCtrl.reset = reset;
 	editUserCtrl.dismiss = dismiss;
+	editUserCtrl.isSubmitDisabled = isSubmitDisabled;
 
 	editUserCtrl.reset();
 
@@ -90,5 +91,19 @@ function EditUserController($scope, $state, $uibModalInstance, Utils,
 
 	function dismiss() {
 		$uibModalInstance.dismiss('Cancel');
+	}
+
+	function isSubmitDisabled() {
+		console.log(!editUserCtrl.enabled, !$scope.userUpdateForm.$dirty, 
+				$scope.userUpdateForm.name.$invalid, $scope.userUpdateForm.surname.$invalid, 
+				$scope.userUpdateForm.email.$invalid, $scope.userUpdateForm.username.$invalid, 
+				$scope.userUpdateForm.picture.$invalid);
+		return !editUserCtrl.enabled 
+				|| !$scope.userUpdateForm.$dirty 
+				|| $scope.userUpdateForm.name.$invalid
+				|| $scope.userUpdateForm.surname.$invalid
+				|| $scope.userUpdateForm.email.$invalid
+				|| $scope.userUpdateForm.username.$invalid
+				|| $scope.userUpdateForm.picture.$invalid;
 	}
 }

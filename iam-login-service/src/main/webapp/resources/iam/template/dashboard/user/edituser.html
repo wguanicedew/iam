@@ -1,4 +1,4 @@
-<form class="form-horizontal" ng-submit="editUserCtrl.submit()" name="userUpdateForm" id="userUpdateForm">
+<form class="form-horizontal" ng-submit="editUserCtrl.submit()" name="userUpdateForm">
 
     <div class="modal-header">
         <h3 class="modal-title">User update form</h3>
@@ -42,8 +42,7 @@
                         ng-model="editUserCtrl.user.email"
                         placeholder="Email"
                         required ng-minlength="3"
-                        iam-email-available-validator
-                        ng-model-options="{ debounce : { 'default' : 500 } }"/>
+                        iam-email-available-validator />
 
                     <span class="glyphicon form-control-feedback"
                       ng-class="{'glyphicon-remove': userUpdateForm.email.$dirty && userUpdateForm.email.$invalid, 'glyphicon-ok': userUpdateForm.email.$dirty && userUpdateForm.email.$valid}" style="right: 15px"></span>
@@ -110,7 +109,7 @@
     </div>
 
     <div class="modal-footer">
-        <button class="btn btn-primary btn-sm" type="submit" name="create" id="modal-btn-confirm" ng-disabled="userUpdateForm.$invalid || !userUpdateForm.$dirty || !editUserCtrl.enabled">Update</button>
+        <button class="btn btn-primary btn-sm" type="submit" name="create" id="modal-btn-confirm" ng-disabled="editUserCtrl.isSubmitDisabled()">Update</button>
         <button class="btn btn-warning btn-sm" type="button" name="reset" id="modal-btn-reset" ng-click="editUserCtrl.reset()" ng-disabled="userUpdateForm.$pristine">Reset Form</button>
         <button class="btn btn-danger btn-sm" type="button" name="dismiss" id="modal-btn-cancel" ng-click="editUserCtrl.dismiss()">Cancel</button>
     </div>
