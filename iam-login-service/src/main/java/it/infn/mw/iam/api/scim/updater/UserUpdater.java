@@ -208,8 +208,10 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
   }
 
   private void patchPassword(IamAccount a, String password) {
-    String value = (password != null) ? password : a.getPassword();
-    a.setPassword(passwordEncoder.encode(value));
+
+    if (password != null) {
+      a.setPassword(passwordEncoder.encode(password));
+    }
   }
 
   private void patchPicture(IamAccount a, String picture) {
@@ -328,18 +330,20 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
 
   private void patchName(IamAccount a, ScimName name) {
 
-    if (name != null) {
-
-      a.getUserInfo().setFamilyName(
-          name.getFamilyName() != null ? name.getFamilyName() : a.getUserInfo().getFamilyName());
-      a.getUserInfo().setGivenName(
-          name.getGivenName() != null ? name.getGivenName() : a.getUserInfo().getGivenName());
-      a.getUserInfo().setMiddleName(
-          name.getMiddleName() != null ? name.getMiddleName() : a.getUserInfo().getGivenName());
-      a.getUserInfo()
-        .setName(name.getFormatted() != null ? name.getFormatted() : a.getUserInfo().getName());
-
+    if (name == null) {
+      return;
     }
+
+    if (name.getGivenName() != null) {
+      a.getUserInfo().setGivenName(name.getGivenName());
+    }
+    if (name.getFamilyName() != null) {
+      a.getUserInfo().setFamilyName(name.getFamilyName());
+    }
+    if (name.getMiddleName() != null) {
+      a.getUserInfo().setMiddleName(name.getMiddleName());
+    }
+    a.getUserInfo().setName(name.getFormatted());
   }
 
   private void patchEmail(IamAccount a, List<ScimEmail> emails) {
@@ -354,7 +358,6 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
               + emailAccount.getUserInfo().getEmail());
         }
       });
-
 
       a.getUserInfo().setEmail(emails.get(0).getValue());
     }
