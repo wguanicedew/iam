@@ -29,9 +29,8 @@ A client who wants to exchange an access token with a new one (or a couple of ne
 must send a request to the `/token` endpoint, specifying the following properties:
 
 1. Provide a valid IAM access token in the `subject_token` request field.
-2. Specify a valid client_id in `audience` field: this is the ID of the target resource which client wants to access.
-3. Specify a set of scopes requested for the new token using the `scope` parameter; 
-note that the set of scope must be a subset of the scopes enabled for the target client.
+2. Specify a set of scopes requested for the new token using the `scope` parameter; 
+note that the set of scope must be a subset of the scopes enabled for both the subject and the actor.
 
 Some scopes, called _"Internal"_ scopes, are handled in a special way. These scopes are:
 
@@ -46,8 +45,8 @@ The current implementation of Token Exchange in Indigo IAM has some limitations.
 
  * Delegation is not yet supported: if `actor_token` or the flag `want_composite` are specified within the request, an error
  response is returned by the authorization server.
- * The `audience` field is mandatory and not optional, as mentioned into the specification: it must be a valid client identifier.
  * The `resource` field is ignored.
+ * The `audience` field is optional: its value is not validated by the IAM.
 
  
 ### Token Exchange example
@@ -96,7 +95,7 @@ curl -s --get -H "Authorization: Bearer $ACCESS_TOKEN_T1" http://pr1.example.org
 
 Then, PR1 needs access to a resource on another protected resource (PR2).
 
-In Token Exchange terms, the client is the `subject`, PR1 acts as `actor` and PR2 is the `audience`.
+In Token Exchange terms, the client is the `subject` and PR1 acts as `actor` and PR2 can be the `audience`.
 So PR1 goes to the Authorization Service to exchange access token T1 with another access token (T2).
 
 In the Token Exchange request, PR1 specify the following parameters:
@@ -107,7 +106,7 @@ In the Token Exchange request, PR1 specify the following parameters:
 | subject_token      | The access token supplied by the client. In this example T1 | 
 | subject_token_type | `urn:ietf:params:oauth:token-type:access_token` or `urn:ietf:params:oauth:token-type:jwt` |
 | scope              | Space separated list of scopes  desired |
-| audience           | A valid client id |
+| audience           | Optional. An identifier of the resource where the actor intends to use the token |
 
 ```
 $ export ACTOR_ID=token-exchange-actor
@@ -131,6 +130,7 @@ The response is like the following:
   "token_type": "Bearer",
   "expires_in": 3599,
   "scope": "read-tasks",
+  "audience": "tasks-app",
   "issued_token_type": "urn:ietf:params:oauth:token-type:jwt"
 }
 
