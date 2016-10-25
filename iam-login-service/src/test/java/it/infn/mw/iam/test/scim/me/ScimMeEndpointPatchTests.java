@@ -1,15 +1,7 @@
 package it.infn.mw.iam.test.scim.me;
 
-import static com.jayway.restassured.RestAssured.given;
-import static it.infn.mw.iam.api.scim.model.ScimConstants.SCIM_CONTENT_TYPE;
 import static it.infn.mw.iam.test.TestUtils.passwordTokenGetter;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.apache.http.util.Asserts;
 import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Assert;
@@ -20,26 +12,14 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.WebIntegrationTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.fasterxml.jackson.databind.deser.DataFormatReaders.Match;
-import com.jayway.restassured.RestAssured;
-
 import it.infn.mw.iam.IamLoginService;
-import it.infn.mw.iam.api.scim.converter.UserConverter;
 import it.infn.mw.iam.api.scim.model.ScimName;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.model.ScimUserPatchRequest;
 import it.infn.mw.iam.api.scim.provisioning.ScimUserProvisioning;
-import it.infn.mw.iam.persistence.model.IamAccount;
-import it.infn.mw.iam.persistence.model.IamAuthority;
-import it.infn.mw.iam.persistence.model.IamUserInfo;
-import it.infn.mw.iam.persistence.repository.IamAccountRepository;
-import it.infn.mw.iam.persistence.repository.IamAuthoritiesRepository;
 import it.infn.mw.iam.test.ScimRestUtils;
-import it.infn.mw.iam.test.TestUtils;
 import it.infn.mw.iam.util.JacksonUtils;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -49,7 +29,6 @@ public class ScimMeEndpointPatchTests {
 
   private ScimRestUtils userRestUtils;
   private ScimUser testUser;
-  private ScimUser updatesToRestore;
 
   @Autowired
   private ScimUserProvisioning userService;
