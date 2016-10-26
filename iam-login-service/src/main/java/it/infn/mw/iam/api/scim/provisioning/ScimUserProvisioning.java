@@ -156,6 +156,7 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
 
     if (!user.getEmails().isEmpty()) {
       userInfo.setEmail(user.getEmails().get(0).getValue());
+      userInfo.setEmailVerified(true);
     }
     account.setUserInfo(userInfo);
 
