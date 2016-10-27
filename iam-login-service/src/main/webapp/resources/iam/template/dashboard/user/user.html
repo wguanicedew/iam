@@ -37,6 +37,9 @@
 					<p class="text-muted text-center">{{user.userInfo.displayName}}</p>
 
 					<ul class="list-group list-group-unbordered">
+                        <li class="list-group-item"><strong>UUID</strong> <a
+                            class="pull-right">{{user.userInfo.id}}</a>
+                        </li>
 						<li class="list-group-item"><strong>E-mail</strong> <a
 							class="pull-right"
 							href="mailto:{{user.userInfo.emails[0].value}}">{{user.userInfo.emails[0].value}}</a>
