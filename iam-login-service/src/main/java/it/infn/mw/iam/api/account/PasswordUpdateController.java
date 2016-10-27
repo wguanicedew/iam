@@ -19,8 +19,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.google.common.base.Preconditions;
-
 import it.infn.mw.iam.api.scim.controller.utils.ValidationErrorMessageHelper;
 
 @RestController
@@ -54,12 +52,11 @@ public class PasswordUpdateController {
   private String getUsernameFromSecurityContext() {
 
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    Preconditions.checkArgument(auth instanceof OAuth2Authentication,
-        "Authentication provided is not OAuth2");
-    OAuth2Authentication oauth = (OAuth2Authentication) auth;
-    Preconditions.checkNotNull(oauth.getUserAuthentication(),
-        "No user linked to the current OAuth token");
-    return oauth.getUserAuthentication().getName();
+    if (auth instanceof OAuth2Authentication) {
+      OAuth2Authentication oauth = (OAuth2Authentication) auth;
+      auth = oauth.getUserAuthentication();
+    }
+    return auth.getName();
   }
 
   @ResponseStatus(value = HttpStatus.BAD_REQUEST)
