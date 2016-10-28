@@ -14,13 +14,14 @@
 
     <!-- Admin sidebar menu -->
     <ul class="sidebar-menu" name="sidebar-menu" ng-show="$root.loggedUser.isAdmin">
-        <li class="header">IAM</li>
-		<li>
-		  <a ui-sref="user({id: $root.loggedUser.info.sub})">
-		    <i class="fa fa-home"></i>
-		    <span>Home</span>
-		  </a>
-		</li>
+        <li class="header">USER</li>
+        <li>
+          <a ui-sref="home">
+            <i class="fa fa-home"></i>
+            <span>Home</span>
+          </a>
+        </li>
+        <li class="header">IAM - Administration</li>
 		<li>
 		  <a ui-sref="users">
 		    <i class="fa fa-user"></i>
@@ -59,7 +60,7 @@
 	
 	<!-- User sidebar menu -->
     <ul class="sidebar-menu" name="sidebar-menu" ng-show="!$root.loggedUser.isAdmin">
-        <li class="header">IAM</li>
+        <li class="header">USER</li>
         <li>
           <a ui-sref="home">
             <i class="fa fa-home"></i>

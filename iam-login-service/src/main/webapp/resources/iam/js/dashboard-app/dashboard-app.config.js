@@ -5,7 +5,14 @@ angular.module('dashboardApp').config(function($stateProvider, $urlRouterProvide
     $httpProvider.interceptors.push('gatewayErrorInterceptor');
     $httpProvider.interceptors.push('sessionExpiredInterceptor');
 
-	$urlRouterProvider.otherwise('/home');
+	$urlRouterProvider.otherwise(function($injector, $location){
+		if (getUserAuthorities().indexOf("ROLE_ADMIN") != -1) {
+			return '/user/' + getUserInfo().sub;
+		} else {
+			return '/home';
+		}
+	});
+
 	$stateProvider.state('home', {
 		url : '/home',
 		views: {
