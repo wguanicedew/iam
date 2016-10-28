@@ -52,57 +52,68 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
   }
 
   @Override
-  protected OAuth2Authentication getOAuth2Authentication(final ClientDetails client,
+  protected OAuth2Authentication getOAuth2Authentication(final ClientDetails actorClient,
       final TokenRequest tokenRequest) throws InvalidTokenException {
 
     if (tokenRequest.getRequestParameters().get("actor_token") != null
         || tokenRequest.getRequestParameters().get("want_composite") != null) {
-      throw new InvalidRequestException("Delegation not yet supported in Token Exchange");
+      throw new InvalidRequestException("Delegation not supported");
     }
 
-    // read audience: can contain a valid client_id
-    String incomingAudience = tokenRequest.getRequestParameters().get(AUDIENCE_FIELD);
 
-    // read and load up the existing token
-    String incomingTokenValue = tokenRequest.getRequestParameters().get("subject_token");
+    String subjectTokenValue = tokenRequest.getRequestParameters().get("subject_token");
+    OAuth2AccessTokenEntity subjectToken = tokenServices.readAccessToken(subjectTokenValue);
 
-    OAuth2AccessTokenEntity incomingToken = tokenServices.readAccessToken(incomingTokenValue);
-    ClientDetailsEntity subjectClient = incomingToken.getClient();
+    // Does token exchange among clients acting on behalf of themselves make sense?
+    if (subjectToken.getAuthenticationHolder().getUserAuth() == null) {
+      throw new InvalidRequestException("No user identity linked to subject token.");
+    }
+
+    ClientDetailsEntity subjectClient = subjectToken.getClient();
 
     // check for scoping in the request, can't up-scope with a chained request
     Set<String> requestedScopes = tokenRequest.getScope();
-    Set<String> actorScopes = client.getScope();
-    Set<String> subjectScopes = incomingToken.getScope();
+    Set<String> actorScopes = actorClient.getScope();
+    Set<String> subjectTokenScopes = subjectToken.getScope();
 
-    // if our scopes are a valid subset of what's allowed, we can continue
+    // if actor is requesting scopes that is allowed to request, the exchange can happen
     if (actorScopes.containsAll(requestedScopes)) {
 
-      LOG.info(
-          "Client with id [{}] requests token exchange impersonating [{}] for audience [{}] with scopes {}",
-          client.getClientId(), subjectClient.getClientId(), incomingAudience, requestedScopes);
+      String audience = tokenRequest.getRequestParameters().get(AUDIENCE_FIELD);
 
-      // check chained scopes
+      LOG.info(
+          "Client '{}' requests token exchange from client '{}' to impersonate user '{}' on audience '{}' with scopes '{}'",
+          actorClient.getClientId(), subjectClient.getClientId(),
+          subjectToken.getAuthenticationHolder().getUserAuth().getName(), audience,
+          requestedScopes);
+
+      // Chained scopes must be among the allowed scopes for the actor client
+      // and must also be linked to the subject token
       for (String scope : CHAINED_SCOPES) {
-        if (requestedScopes.contains(scope) && !subjectScopes.contains(scope)) {
+        if (requestedScopes.contains(scope) && !subjectTokenScopes.contains(scope)) {
           throw new InvalidScopeException(
-              String.format("Subject Token MUST contain requested scope [%s]", scope));
+              String.format("Requested scope '%s' not found in subject token", scope));
         }
       }
 
       tokenRequest.setScope(Sets.intersection(requestedScopes, actorScopes));
 
-      // NOTE: don't revoke the existing access token
+      OAuth2Authentication authentication = new OAuth2Authentication(
+          getRequestFactory().createOAuth2Request(actorClient, tokenRequest),
+          subjectToken.getAuthenticationHolder().getAuthentication().getUserAuthentication());
 
-      // create a new access token
-      OAuth2Authentication authentication =
-          new OAuth2Authentication(getRequestFactory().createOAuth2Request(client, tokenRequest),
-              incomingToken.getAuthenticationHolder().getAuthentication().getUserAuthentication());
-      authentication.getOAuth2Request().getExtensions();
+      if (!Strings.isNullOrEmpty(audience)) {
+        authentication.getOAuth2Request().getExtensions().put("aud", audience);
+      }
 
       return authentication;
 
     } else {
-      throw new InvalidScopeException("Invalid scope in Token Exchange request", requestedScopes);
+      String errorMsg =
+          String.format("Client '%s' requested to exchange a scope that is not allowed to request",
+              actorClient.getClientId());
+
+      throw new InvalidScopeException(errorMsg, requestedScopes);
     }
   }
 
@@ -113,11 +124,6 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
     OAuth2Authentication auth = getOAuth2Authentication(client, tokenRequest);
     OAuth2AccessToken accessToken = tokenServices.createAccessToken(auth);
     accessToken.getAdditionalInformation().put("issued_token_type", TOKEN_TYPE);
-
-    String audience = tokenRequest.getRequestParameters().get(AUDIENCE_FIELD);
-    if (!Strings.isNullOrEmpty(audience)) {
-      accessToken.getAdditionalInformation().put(AUDIENCE_FIELD, audience);
-    }
 
     return accessToken;
   }
