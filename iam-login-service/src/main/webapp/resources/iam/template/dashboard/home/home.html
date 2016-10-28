@@ -35,8 +35,17 @@
 
           <ul class="list-group list-group-unbordered">
             <li class="list-group-item"><strong>UUID</strong> <a class="pull-right">{{home.user.me.id}}</a></li>
-            <li class="list-group-item"><strong>E-mail</strong> <a class="pull-right" href="mailto:{{home.user.me.emails[0].value}}">{{home.user.me.emails[0].value}}</a></li>
+            <li class="list-group-item"><strong>E-mail</strong>
+                <a class="pull-right" href="mailto:{{home.user.me.emails[0].value}}">{{home.user.me.emails[0].value}}</a>
+            </li>
             <li class="list-group-item"><strong>Organization</strong> <a class="pull-right">{{home.user.info.organisation_name}}</a></li>
+            <li class="list-group-item"><strong>Gender</strong>
+                <a class="pull-right" ng-show="home.user.info.gender == 'M'">Male&nbsp;&nbsp;<i class="fa fa-male"></i></a>
+                <a class="pull-right" ng-show="home.user.info.gender == 'F'">Female&nbsp;&nbsp;<i class="fa fa-female"></i></a>
+            </li>
+            <li class="list-group-item"><strong>Birthdate</strong>
+                <a class="pull-right">{{home.user.info.birthdate | date : format : 'dd MMMM yyyy' }}</a>
+            </li>
             <li class="list-group-item"><strong>Status</strong>
               <button class="pull-right btn btn-xs btn-success" ng-show="home.user.me.active"><i class="fa fa-check"></i> Active</button>
               <button class="pull-right btn btn-xs btn-danger" ng-show="!home.user.me.active"><i class="fa fa-ban"></i> Disabled</button>
@@ -44,7 +53,7 @@
             <li class="list-group-item"><strong>Created</strong> <a class="pull-right">{{home.user.me.meta.created | relativeDate }}</a></li>
             <li class="list-group-item"><strong>Last update</strong> <a class="pull-right">{{home.user.me.meta.lastModified | relativeDate }}</a></li>
             <li class="list-group-item"><strong>Password</strong>
-              <button class="pull-right btn btn-xs btn-success" ng-click="home.openEditPasswordDialog()">Change Password</button></li>
+              <button class="pull-right btn btn-xs btn-success" ng-click="home.openEditPasswordDialog()" name="change-password-btn">Change Password</button></li>
           </ul>
         </div>
         <!-- /.box-body -->
