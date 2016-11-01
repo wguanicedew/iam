@@ -16,12 +16,17 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 
+import it.infn.mw.iam.api.scim.model.ScimEmail.ScimEmailType;
+
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonFilter("attributeFilter")
 public class ScimUser extends ScimResource {
 
   public interface NewUserValidation {
-  }
+  };
+
+  public interface UpdateUserValidation {
+  };
 
   public static final String USER_SCHEMA = "urn:ietf:params:scim:schemas:core:2.0:User";
   public static final String RESOURCE_TYPE = "User";
@@ -505,7 +510,7 @@ public class ScimUser extends ScimResource {
 
     public Builder buildEmail(String email) {
 
-      emails.add(ScimEmail.builder().email(email).build());
+      emails.add(ScimEmail.builder().email(email).primary(true).type(ScimEmailType.work).build());
       return this;
     }
 
