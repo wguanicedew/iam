@@ -42,7 +42,10 @@ function EditUserController($scope, $state, $uibModalInstance, Utils,
 		} ];
 		scimUser.userName = editUserCtrl.user.userName;
 		scimUser.active = true;
-		scimUser.picture = editUserCtrl.user.picture;
+		scimUser.photos = [{
+			type : "photo",
+			value : editUserCtrl.user.picture
+		}];
 
 		console.info("Adding user ... ", scimUser);
 

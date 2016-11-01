@@ -2,20 +2,16 @@
 
 angular.module('dashboardApp').controller('HomeController', HomeController);
 
-HomeController.$inject = [ '$state', 'Utils', 'scimFactory', 'ModalService', '$uibModal' ];
+HomeController.$inject = [ '$scope', '$state', 'Utils', 'scimFactory', 'ModalService', '$uibModal' ];
 
-function HomeController($state, Utils, scimFactory, ModalService, $uibModal) {
+function HomeController($scope, $state, Utils, scimFactory, ModalService, $uibModal) {
 
 	var home = this;
-
-	home.user = Utils.getLoggedUser();
-	home.isAdmin = Utils.isAdmin();
-	home.isUser = Utils.isUser();
 
 	home.loaded = false;
 
 	scimFactory.getMe().then(function(response) {
-		home.user.me = response.data;
+		$scope.user = response.data;
 		home.loaded = true;
 	}, function(error) {
 		$scope.operationResult = Utils.buildErrorOperationResult(error);
@@ -52,8 +48,7 @@ function HomeController($state, Utils, scimFactory, ModalService, $uibModal) {
 					controllerAs : 'editPasswordCtrl',
 					resolve : {
 						user : function() {
-							console.log(home.user);
-							return home.user;
+							return $scope.user;
 						}
 					}
 				});

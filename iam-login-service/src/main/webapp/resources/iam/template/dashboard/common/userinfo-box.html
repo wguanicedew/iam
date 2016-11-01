@@ -1,0 +1,71 @@
+<!-- Profile image -->
+<div ng-if="user.photos[0].value">
+  <img class="profile-user-img img-responsive img-circle" ng-src="{{user.photos[0].value}}" alt="User profile picture" />
+</div>
+<div ng-if="!user.photos">
+  <img class="profile-user-img img-responsive img-circle" ng-src="resources/iam/img/default-avatar.png" alt="User profile picture" />
+</div>
+
+<!-- Full name -->
+<h3 class="profile-username text-center">{{user.name.formatted}}</h3>
+
+<!-- Username -->
+<p class="text-muted text-center">{{user.userName}}</p>
+
+<ul class="list-group list-group-unbordered">
+  <li class="list-group-item">
+    <div class="row">
+      <div class="col-md-2">
+        <strong>UUID</strong>
+      </div>
+      <div class="col-md-10 text-right">
+        <a>{{user.id}}</a>
+      </div>
+    </div>
+  </li>
+  <li class="list-group-item">
+    <div class="row">
+      <div class="col-md-3">
+        <strong>E-mail</strong>
+      </div>
+      <div class="col-md-9 text-right">
+        <a href="mailto:{{user.emails[0].value}}">{{user.emails[0].value}}</a>
+      </div>
+    </div>
+  </li>
+  <li class="list-group-item">
+    <div class="row">
+      <div class="col-md-3">
+        <strong>Status</strong>
+      </div>
+      <div class="col-md-9 text-right">
+        <span class="label label-success" ng-show="user.active">
+          <i class="fa fa-check"></i> Active
+        </span>
+        <span class="label label-warning" ng-show="!user.active">
+          <i class="fa fa-check"></i> Disabled
+        </span>
+      </div>
+    </div>
+  </li>
+  <li class="list-group-item">
+    <div class="row">
+      <div class="col-md-3">
+        <strong>Created</strong>
+      </div>
+      <div class="col-md-9 text-right">
+        <a>{{user.meta.created | relativeDate }}</a>
+      </div>
+    </div>
+  </li>
+  <li class="list-group-item">
+    <div class="row">
+      <div class="col-md-3">
+        <strong>Updated</strong>
+      </div>
+      <div class="col-md-9 text-right">
+        <a>{{user.meta.lastModified | relativeDate }}</a>
+      </div>
+    </div>
+  </li>
+</ul>

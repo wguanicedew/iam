@@ -23,6 +23,7 @@ import it.infn.mw.iam.api.scim.model.ScimEmail;
 import it.infn.mw.iam.api.scim.model.ScimName;
 import it.infn.mw.iam.api.scim.model.ScimOidcId;
 import it.infn.mw.iam.api.scim.model.ScimPatchOperation;
+import it.infn.mw.iam.api.scim.model.ScimPhoto;
 import it.infn.mw.iam.api.scim.model.ScimSamlId;
 import it.infn.mw.iam.api.scim.model.ScimSshKey;
 import it.infn.mw.iam.api.scim.model.ScimUser;
@@ -107,7 +108,7 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
     patchEmail(a, u.getEmails());
     patchAddress(a, u.getAddresses());
     patchPassword(a, u.getPassword());
-    patchPicture(a, u.getPicture());
+    patchPicture(a, u.getPhotos());
 
     if (u.hasX509Certificates()) {
 
@@ -179,7 +180,7 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
     patchEmail(a, u.getEmails());
     patchAddress(a, u.getAddresses());
     patchPassword(a, u.getPassword());
-    patchPicture(a, u.getPicture());
+    patchPicture(a, u.getPhotos());
 
     if (u.hasX509Certificates()) {
 
@@ -210,13 +211,17 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
   private void patchPassword(IamAccount a, String password) {
 
     if (password != null) {
+
       a.setPassword(passwordEncoder.encode(password));
     }
   }
 
-  private void patchPicture(IamAccount a, String picture) {
+  private void patchPicture(IamAccount a, List<ScimPhoto> photos) {
 
-    a.getUserInfo().setPicture(picture != null ? picture : a.getUserInfo().getPicture());
+    if (photos != null && !photos.isEmpty()) {
+
+      a.getUserInfo().setPicture(photos.get(0).getValue());
+    }
   }
 
   private void addX509Certificate(IamAccount a, ScimX509Certificate cert)

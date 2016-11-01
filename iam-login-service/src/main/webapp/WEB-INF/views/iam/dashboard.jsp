@@ -68,6 +68,7 @@
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/sidebar.directive.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/registration.directive.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/operation-result.directive.js"></script>
+    <script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/userinfo-box.directive.js"></script>
 
     <script type="text/javascript" src="/resources/iam/js/dashboard-app/factory/gatewayerror.interceptor.js"></script>
     <script type="text/javascript" src="/resources/iam/js/dashboard-app/factory/sessionexpired.interceptor.js"></script>

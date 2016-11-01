@@ -10,6 +10,7 @@ import it.infn.mw.iam.api.scim.model.ScimGroupRef;
 import it.infn.mw.iam.api.scim.model.ScimIndigoUser;
 import it.infn.mw.iam.api.scim.model.ScimMeta;
 import it.infn.mw.iam.api.scim.model.ScimName;
+import it.infn.mw.iam.api.scim.model.ScimPhoto;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamGroup;
@@ -69,7 +70,10 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
     userInfo.setFamilyName(scimUser.getName().getFamilyName());
     userInfo.setMiddleName(scimUser.getName().getMiddleName());
     userInfo.setName(scimUser.getName().getFormatted());
-    userInfo.setPicture(scimUser.getPicture());
+
+    if (scimUser.hasPhotos()) {
+      userInfo.setPicture(scimUser.getPhotos().get(0).getValue());
+    }
 
     account.setUserInfo(userInfo);
 
@@ -147,6 +151,7 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
     ScimName name = getScimName(entity);
     ScimIndigoUser indigoUser = getScimIndigoUser(entity);
     ScimAddress address = getScimAddress(entity);
+    ScimPhoto picture = getScimPhoto(entity);
 
     ScimUser.Builder builder = new ScimUser.Builder(entity.getUsername()).id(entity.getUuid())
       .meta(meta)
@@ -156,7 +161,6 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
       .locale(entity.getUserInfo().getLocale())
       .nickName(entity.getUserInfo().getNickname())
       .profileUrl(entity.getUserInfo().getProfile())
-      .picture(entity.getUserInfo().getPicture())
       .timezone(entity.getUserInfo().getZoneinfo())
       .addEmail(getScimEmail(entity))
       .indigoUserInfo(indigoUser);
@@ -164,6 +168,11 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
     if (address != null) {
 
       builder.addAddress(address);
+    }
+
+    if (picture != null) {
+
+      builder.addPhoto(picture);
     }
 
     entity.getGroups().forEach(group -> builder.addGroupRef(getScimGroupRef(group)));
@@ -229,5 +238,18 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
       return addressConverter.toScim(entity.getUserInfo().getAddress());
     }
     return null;
+  }
+
+  private ScimPhoto getScimPhoto(IamAccount entity) {
+
+    if (entity.getUserInfo() == null) {
+      return null;
+    }
+
+    if (entity.getUserInfo().getPicture() == null) {
+      return null;
+    }
+
+    return ScimPhoto.builder().value(entity.getUserInfo().getPicture()).build();
   }
 }

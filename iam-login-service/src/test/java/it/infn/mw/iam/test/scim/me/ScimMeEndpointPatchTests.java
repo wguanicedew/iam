@@ -127,13 +127,13 @@ public class ScimMeEndpointPatchTests {
     final String PICTURE = "http://notarealurl.com/image.jpg";
 
     ScimUserPatchRequest patchRequest =
-        ScimUserPatchRequest.builder().add(ScimUser.builder().picture(PICTURE).build()).build();
+        ScimUserPatchRequest.builder().add(ScimUser.builder().buildPhoto(PICTURE).build()).build();
 
     doPatch(patchRequest);
 
     ScimUser updatedUser = doGet();
 
-    Assert.assertThat(updatedUser.getPicture(), Matchers.equalTo(PICTURE));
+    Assert.assertThat(updatedUser.getPhotos().get(0).getValue(), Matchers.equalTo(PICTURE));
   }
 
   @Test
