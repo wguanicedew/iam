@@ -29,7 +29,7 @@
 
 <link
   rel="stylesheet"
-  href="resources/iam/css/skins/_all-skins.min.css"></link>
+  href="resources/iam/css/skins/skin-blue.css"></link>
 
 <link
   rel="stylesheet"

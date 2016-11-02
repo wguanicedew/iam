@@ -4,9 +4,9 @@
   <div class="user-panel">
     <a class="pull-left image" ui-sref="home">
       <!-- if user picture is defined -->
-      <img class="img-circle hoverZoomLink" ng-src="{{$root.loggedUser.me.photos[0].value}}" ng-show="$root.loggedUser.me.photos" alt="User profile picture" />
+      <img class="medium-profile-user-img img-circle hoverZoomLink" ng-src="{{$root.loggedUser.me.photos[0].value}}" ng-show="$root.loggedUser.me.photos" alt="User profile picture" />
       <!-- if user picture is not defined -->
-      <img class="img-circle hoverZoomLink" src="resources/iam/img/default-avatar.png" ng-show="!$root.loggedUser.me.photos" alt="User profile picture" />
+      <img class="medium-profile-user-img img-circle hoverZoomLink" src="resources/iam/img/default-avatar.png" ng-show="!$root.loggedUser.me.photos" alt="User profile picture" />
     </a>
     <div class="pull-left info">
       <p>
