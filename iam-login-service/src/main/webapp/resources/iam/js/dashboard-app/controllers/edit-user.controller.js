@@ -3,27 +3,16 @@
 angular.module('dashboardApp').controller('EditUserController',
 		EditUserController);
 
-EditUserController.$inject = [ '$scope', '$state', '$uibModalInstance',
+EditUserController.$inject = [ '$scope', '$rootScope', '$state', '$uibModalInstance',
 		'Utils', 'scimFactory', 'user' ];
 
-function EditUserController($scope, $state, $uibModalInstance, Utils,
+function EditUserController($scope, $rootScope, $state, $uibModalInstance, Utils,
 		scimFactory, user) {
 
 	var editUserCtrl = this;
-	
-	console.info("Editing user ", user);
 
+	editUserCtrl.oUser = user;
 	editUserCtrl.id = user.id;
-
-	editUserCtrl.userToEdit = {
-		name : user.name.givenName,
-		surname: user.name.familyName,
-		username : user.userName,
-		email : user.emails[0].value,
-		picture : user.picture == undefined ? "" : user.picture
-	};
-
-	console.info("Copied user ", editUserCtrl.userToEdit);
 
 	editUserCtrl.submit = submit;
 	editUserCtrl.reset = reset;
@@ -39,32 +28,44 @@ function EditUserController($scope, $state, $uibModalInstance, Utils,
 		var scimUser = {};
 
 		if ($scope.userUpdateForm.name.$dirty || $scope.userUpdateForm.surname.$dirty) {
-			scimUser.displayName = editUserCtrl.user.name + " "
-					+ editUserCtrl.user.surname;
+			scimUser.displayName = editUserCtrl.eUser.name + " "
+					+ editUserCtrl.eUser.surname;
 			scimUser.name = {
-					givenName : editUserCtrl.user.name,
-					familyName : editUserCtrl.user.surname,
+					givenName : editUserCtrl.eUser.name,
+					familyName : editUserCtrl.eUser.surname,
 					middleName : ""
 			};
 		}
 		if ($scope.userUpdateForm.email.$dirty) {
 			scimUser.emails = [ {
 				type : "work",
-				value : editUserCtrl.user.email,
+				value : editUserCtrl.eUser.email,
 				primary : true
 			} ];
 		}
 		if ($scope.userUpdateForm.username.$dirty) {
-			scimUser.userName = editUserCtrl.user.username;
+			scimUser.userName = editUserCtrl.eUser.username;
 		}
 		if ($scope.userUpdateForm.picture.$dirty) {
-			scimUser.picture = editUserCtrl.user.picture;
+			if (!editUserCtrl.eUser.picture) {
+				scimUser.photos = [];
+			} else {
+				scimUser.photos = [{
+					type : "photo",
+					value : editUserCtrl.eUser.picture
+				}];
+			}
 		}
 
 		console.info("Edited user ... ", scimUser);
 
 		scimFactory.updateUser(user.id, scimUser).then(
 			function(response) {
+
+				if (Utils.isMe(user.id)) {
+					$rootScope.reloadUser();
+				}
+
 				$uibModalInstance.close(response);
 				editUserCtrl.enabled = true;
 			},
@@ -75,8 +76,13 @@ function EditUserController($scope, $state, $uibModalInstance, Utils,
 	}
 
 	function reset() {
-		editUserCtrl.user = angular.copy(editUserCtrl.userToEdit);
-		console.info(editUserCtrl.user);
+		editUserCtrl.eUser = {
+				name : editUserCtrl.oUser.name.givenName,
+				surname : editUserCtrl.oUser.name.familyName,
+				picture : editUserCtrl.oUser.photos ? editUserCtrl.oUser.photos[0].value : "",
+				email : editUserCtrl.oUser.emails[0].value,
+				username : editUserCtrl.oUser.userName
+			};
 		if ($scope.userUpdateForm) {
 			$scope.userUpdateForm.$setPristine();
 		}

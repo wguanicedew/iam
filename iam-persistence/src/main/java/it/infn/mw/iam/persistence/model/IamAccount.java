@@ -262,6 +262,11 @@ public class IamAccount {
     return !samlIds.isEmpty();
   }
 
+  public boolean hasPicture() {
+
+    return userInfo.getPicture() != null && !userInfo.getPicture().isEmpty();
+  }
+
   public String getConfirmationKey() {
 
     return confirmationKey;

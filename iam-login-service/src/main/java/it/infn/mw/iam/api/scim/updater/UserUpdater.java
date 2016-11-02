@@ -180,7 +180,7 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
     patchEmail(a, u.getEmails());
     patchAddress(a, u.getAddresses());
     patchPassword(a, u.getPassword());
-    patchPicture(a, u.getPhotos());
+    replacePicture(a, u.getPhotos());
 
     if (u.hasX509Certificates()) {
 
@@ -220,6 +220,19 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
 
     if (photos != null && !photos.isEmpty()) {
 
+      a.getUserInfo().setPicture(photos.get(0).getValue());
+    }
+  }
+
+  private void replacePicture(IamAccount a, List<ScimPhoto> photos) {
+
+    if (photos == null || photos.isEmpty()) {
+      if (a.hasPicture()) {
+        // replace with null
+        a.getUserInfo().setPicture(null);
+      }
+      // nothing to do
+    } else {
       a.getUserInfo().setPicture(photos.get(0).getValue());
     }
   }

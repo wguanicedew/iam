@@ -30,7 +30,7 @@ function Utils() {
 	
 	function isMe(id) {
 		
-		return (id != getUserInfo().sub);
+		return (id == getUserInfo().sub);
 	}
 	
 	function isAdmin() {
