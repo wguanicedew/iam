@@ -1,65 +1,64 @@
 ## Registration service
 
-Current release Indigo IAM introduces the functionality that allows users to submit an IAM membership request.
-to Indigo.
-
+IAM provides a registration service that allows users to submit a memberhip
+request. Such request is then approved or rejected by the IAM administrators.
 
 #### New registration
 
-For insert a new registration request, users can go to IAM login page and click the _Register a new account_ button.
+To submit a new registration request, users can go to IAM login page and click
+the _Register a new account_ button.
 
-![INDIGO IAM Registration button](../images/IAM-registration-1.png)
+![INDIGO IAM Registration button](images/IAM-registration-1.png)
 
-Name, surname, email and username are mandatory fields. With _notes_ field, 
-users can tell to the IAM administrators any extra information about their request of membership.
+The name, surname, email and username fields are mandatory.
+The _notes_ field can used to include extra information targeted at IAM
+administrators.
 
-![INDIGO IAM Registration form](../images/IAM-registration-2.png)
+![INDIGO IAM Registration form](images/IAM-registration-2.png)
 
 
 #### Confirm registration request
 
-If the submission ends successfully, an email with a verification link is sent to the user for 
-confirm his registration request and "validate" his email address.
+If the submission ends successfully, an email verification link is sent to the
+user email address with a request to confirm his registration request.
 
-![INDIGO IAM Registration validation page](../images/IAM-registration-3.png)
+![INDIGO IAM Registration validation page](images/IAM-registration-3.png)
 
-When a new request is confirmed, IAM administrators are notified with an email too.
+Once the request is confirmed, IAM administrators are notified with an email.
 
+#### Requests management
 
-#### Requests approval or rejection 
+Only IAM users with administrative privileges have the rights to approve or
+reject a registration request. 
 
-Only users with role `ROLE_ADMIN` or `registration:write` scope, have the rights to approve or reject a registration request.
-To performe this operation, log into IAM as administrator and open the new dashboard by clicking the _New Admin Dashboard_ button 
-in the left-side menu.
+To performe this operation, log into IAM as administrator and open the new
+dashboard by clicking the _New Admin Dashboard_ button in the left-side menu.
+
 On the left, the link _Request_ opens the requests management page.
-From this page, the administrator can approve or reject membership requests.
 
-![INDIGO IAM Registration management page](../images/IAM-registration-4.png)
+From this page, an administrator can approve or reject membership requests.
 
+![INDIGO IAM Registration management page](images/IAM-registration-4.png)
 
-#### Set the new login password
+#### Password setup 
 
-When the IAM administrator approves a registration request, an email is sent to the user with a reset password link.
-This URL points to an IAM page where user can choose a password for their IAM account.
+Once a request is approved, an email is sent to the user with a reset password
+link. This URL points to page where the user can choose a password for the IAM
+account.
 
-![INDIGO IAM Registration change password form](../images/IAM-registration-5.png)
+![INDIGO IAM Registration change password form](images/IAM-registration-5.png)
 
-Once the password is set, users can login to the IAM using the username chosen at registration
-time and the password.
-
+Once the password is set, users can login to the IAM using the username chosen
+at registration time and the password.
 
 ## Reset password
 
+To reset their password, users can go to the IAM  login page and click the link _Forgot your password?_.
 
-#### Change password
+![INDIGO IAM Forgot Password](images/IAM-forgot-passwd-1.png)
 
-For reset their password, users can go to the IAM  login page and click the link _Forgot your password?_.
+Users can then enter their email address, and if the entered email address is
+linked to a registered user a reset password link will be sent to such email
+address.
 
-![INDIGO IAM Forgot Password](../images/IAM-forgot-passwd-1.png)
-
-A dialog is opened that allows to enter an email address to which send the reset password link.  
-
-![INDIGO IAM Forgot Password submission form](../images/IAM-forgot-passwd-2.png)
-
-If the email specified is linked to a registered user, that user will receive
-an email with a reset password link.
+![INDIGO IAM Forgot Password submission form](images/IAM-forgot-passwd-2.png)
