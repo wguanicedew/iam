@@ -43,8 +43,8 @@
           <button class="btn btn-warning btn-block" ng-show="!user.active" ng-click="userCtrl.setActive(true)" name="enable-user-btn">
             <i class="fa fa-power-off"></i> <strong>Enable User</strong>
           </button>
-          <button class="btn btn-success btn-block" disabled ng-click="userCtrl.openEditPasswordDialog()" name="change-password-btn">
-            <i class="fa fa-key"></i> <strong>Change Password</strong>
+          <button class="btn btn-success btn-block" ng-click="userCtrl.sendResetMail()" name="reset-password-btn">
+            <i class="fa fa-key"></i> <strong>Send password reset e-mail</strong>
           </button>
         </div>
       </div>

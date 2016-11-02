@@ -21,6 +21,8 @@ function UsersController($scope, $rootScope, $uibModal, $state, $filter, filterF
 	users.currentPage = 1;
 	users.entryLimit = 10; // items per page
 
+	$scope.promises = [];
+
 	// functions
 	users.resetFilters = resetFilters;
 	users.rebuildFilteredList = rebuildFilteredList;
@@ -76,23 +78,24 @@ function UsersController($scope, $rootScope, $uibModal, $state, $filter, filterF
 
 	function loadUserList() {
 
-		$rootScope.usersLoadingProgress = 0;
-		users.loadingModal = $uibModal
-		.open({
-			animation: false,
-			templateUrl : '/resources/iam/template/dashboard/users/loading-modal.html'
-		});
+//		$rootScope.usersLoadingProgress = 0;
+//		users.loadingModal = $uibModal
+//		.open({
+//			animation: false,
+//			templateUrl : '/resources/iam/template/dashboard/users/loading-modal.html'
+//		});
 
-		users.loadingModal.opened.then(function() {
+//		users.loadingModal.opened.then(function() {
 			getAllUsers(1, users.entryLimit);
-		});
+//		});
 	}
 
 	function getAllUsers(startIndex, count) {
 
-		scimFactory
-				.getUsers(startIndex, count)
-				.then(
+		var p = scimFactory.getUsers(startIndex, count);
+		$scope.promises.push(p);
+		console.log($scope.promises);
+		p.then(
 						function(response) {
 							
 							angular.forEach(response.data.Resources, function(
@@ -105,12 +108,12 @@ function UsersController($scope, $rootScope, $uibModal, $state, $filter, filterF
 							if (response.data.totalResults > (response.data.startIndex - 1 + response.data.itemsPerPage)) {
 							
 								users.getAllUsers(startIndex + count, count);
-								$rootScope.usersLoadingProgress = Math.floor((startIndex + count) * 100 / response.data.totalResults);
+//								$rootScope.usersLoadingProgress = Math.floor((startIndex + count) * 100 / response.data.totalResults);
 							
 							} else {
 							
-								$rootScope.usersLoadingProgress = 100;
-								users.loadingModal.dismiss("Cancel");
+//								$rootScope.usersLoadingProgress = 100;
+//								users.loadingModal.dismiss("Cancel");
 							
 							}
 						}, function(error) {
