@@ -8,11 +8,9 @@ function UserController($scope, $rootScope, $state, $uibModal, Utils, scimFactor
 
 	var userCtrl = this;
 
-	console.log("User ID: ", $state.params.id);
-	userCtrl.id = $state.params.id;
-
 	// methods
-	userCtrl.getIndigoUserInfo = getIndigoUserInfo;
+	userCtrl.isPageLoaded = isPageLoaded;
+	userCtrl.loadUserData = loadUserData;
 	userCtrl.showSshKeyValue = showSshKeyValue;
 	userCtrl.showCertValue = showCertValue;
 	userCtrl.openAddGroupDialog = openAddGroupDialog;
@@ -27,44 +25,47 @@ function UserController($scope, $rootScope, $state, $uibModal, Utils, scimFactor
 	userCtrl.deleteX509Certificate = deleteX509Certificate;
 	userCtrl.deleteSamlId = deleteSamlId;
 	userCtrl.setActive = setActive;
-	
-	// password reset
 	userCtrl.doPasswordReset = doPasswordReset;
 	userCtrl.sendResetMail = sendResetMail;
 
-	userCtrl.getIndigoUserInfo();
+	// do
+	console.log("User ID: ", $state.params.id);
+	userCtrl.id = $state.params.id;
 
-	function getIndigoUserInfo() {
+	userCtrl.isEditUserDisabled = false;
+	userCtrl.isSendResetDisabled = false;
+	userCtrl.isEnableUserDisabled = false;
+	userCtrl.loadUserData();
 
-		$rootScope.userLoadingProgress = 0;
+	function loadUserData() {
 
 		userCtrl.loadingModal = $uibModal
-			.open({
-				animation: false,
-				templateUrl : '/resources/iam/template/dashboard/user/loading-modal.html'
-			});
+		.open({
+			animation: false,
+			templateUrl : '/resources/iam/template/dashboard/user/loading-modal.html'
+		});
 
 		userCtrl.loadingModal.opened.then(function() {
 
-			$rootScope.userLoadingProgress = 50;
+			$rootScope.userLoadingProgress = 30;
 
 			scimFactory.getUser(userCtrl.id).then(function(response) {
-				
-				$scope.user = response.data;
-				console.log("loaded indigoUserInfo into $scope.user");
 
-				$rootScope.userLoadingProgress = 100;
-				userCtrl.loadingModal.dismiss("Cancel");
-				
-			}, function(error) {
-				
-				console.error("getUser", error)
-				userCtrl.loadingModal.dismiss("Error");
-				$scope.operationResult = Utils.buildErrorOperationResult(error);
-			});
+					$scope.user = response.data;
+					$rootScope.userLoadingProgress = 100;
+					userCtrl.loadingModal.dismiss("Done");
 
+				}, function(error) {
+
+					$scope.operationResult = Utils.buildErrorOperationResult(error);
+					userCtrl.loadingModal.dismiss("Error");
+				});
 		});
+	}
 
+	function isPageLoaded() {
+
+		return $rootScope.userLoadingProgress == 100;
 	}
 
 	function doPasswordReset() {
@@ -84,7 +85,8 @@ function UserController($scope, $rootScope, $state, $uibModal, Utils, scimFactor
 	}
 
 	function sendResetMail() {
-		
+
+		userCtrl.isSendResetDisabled = true;
 		var modalOptions = {
 				closeButtonText: 'Cancel',
 				actionButtonText: 'Send password reset e-mail',
@@ -92,13 +94,18 @@ function UserController($scope, $rootScope, $state, $uibModal, Utils, scimFactor
 				bodyText: `Are you sure you want to send the password reset e-mail to ${$scope.user.name.formatted}?`	
 			};
 				
-			ModalService.showModal({}, modalOptions).then(
-				function (){
-					userCtrl.doPasswordReset();
-				});
+		ModalService.showModal({}, modalOptions).then(
+			function (){
+				userCtrl.doPasswordReset();
+				userCtrl.isSendResetDisabled = false;
+			}, function () {
+				userCtrl.isSendResetDisabled = false;
+			});
 	}
 
 	function openEditUserDialog() {
+
+		userCtrl.isEditUserDisabled = true;
 
 		var modalInstance = $uibModal
 				.open({
@@ -112,10 +119,12 @@ function UserController($scope, $rootScope, $state, $uibModal, Utils, scimFactor
 					}
 				});
 		modalInstance.result.then(function() {
-			getIndigoUserInfo();
+			userCtrl.loadUserData();
 			$scope.operationResult = Utils.buildSuccessOperationResult("User's info updated successfully");
+			userCtrl.isEditUserDisabled = false;
 		}, function() {
 			console.log('Modal dismissed at: ', new Date());
+			userCtrl.isEditUserDisabled = false;
 		});
 	}
 	
@@ -133,7 +142,7 @@ function UserController($scope, $rootScope, $state, $uibModal, Utils, scimFactor
 				});
 		modalInstance.result.then(function() {
 			console.info("Added group");
-			getIndigoUserInfo();
+			userCtrl.loadUserData();
 			$scope.operationResult = Utils.buildSuccessOperationResult("User's memberships updated successfully");
 		}, function() {
 			console.log('Modal dismissed at: ', new Date());
@@ -153,7 +162,7 @@ function UserController($scope, $rootScope, $state, $uibModal, Utils, scimFactor
 		});
 		modalInstance.result.then(function() {
 			console.info("Added oidc account");
-			getIndigoUserInfo();
+			userCtrl.loadUserData();
 			$scope.operationResult = Utils.buildSuccessOperationResult("User's Open ID Account created successfully");
 		}, function() {
 			console.log('Modal dismissed at: ', new Date());
@@ -173,7 +182,7 @@ function UserController($scope, $rootScope, $state, $uibModal, Utils, scimFactor
 		});
 		modalInstance.result.then(function() {
 			console.info("Added ssh key");
-			getIndigoUserInfo();
+			userCtrl.loadUserData();
 			$scope.operationResult = Utils.buildSuccessOperationResult("User's SSH Key added successfully");
 		}, function(error) {
 			console.log('Modal dismissed at: ', new Date());
@@ -194,7 +203,7 @@ function UserController($scope, $rootScope, $state, $uibModal, Utils, scimFactor
 				});
 		modalInstance.result.then(function() {
 			console.info("Added saml account");
-			getIndigoUserInfo();
+			userCtrl.loadUserData();
 			$scope.operationResult = Utils.buildSuccessOperationResult("User's SAML Account created successfully");
 		}, function() {
 			console.log('Modal dismissed at: ', new Date());
@@ -215,7 +224,7 @@ function UserController($scope, $rootScope, $state, $uibModal, Utils, scimFactor
 				});
 		modalInstance.result.then(function() {
 			console.info("Added x509 certificate");
-			getIndigoUserInfo();
+			userCtrl.loadUserData();
 			$scope.operationResult = Utils.buildSuccessOperationResult("User's x509 Certificate added successfully");
 		}, function() {
 			console.log('Modal dismissed at: ', new Date());
@@ -237,7 +246,7 @@ function UserController($scope, $rootScope, $state, $uibModal, Utils, scimFactor
 						$scope.user.meta.location, $scope.user.name.formatted)
 					.then(function(response) {
 						console.info("Removed group", group);
-						getIndigoUserInfo();
+						userCtrl.loadUserData();
 						$scope.operationResult = Utils.buildSuccessOperationResult("Group membership removed successfully");
 					}, function(error) {
 						$scope.operationResult = Utils.buildErrorOperationResult(error);
@@ -283,7 +292,7 @@ function UserController($scope, $rootScope, $state, $uibModal, Utils, scimFactor
 							oidcId.subject)
 						.then(function(response) {
 							console.info("Remove OIDC Account", oidcId.issuer, oidcId.subject);
-							getIndigoUserInfo();
+							userCtrl.loadUserData();
 							$scope.operationResult = Utils.buildSuccessOperationResult("Open ID Account has been removed successfully");
 						}, function(error) {
 							$scope.operationResult = Utils.buildErrorOperationResult(error);
@@ -305,7 +314,7 @@ function UserController($scope, $rootScope, $state, $uibModal, Utils, scimFactor
 					scimFactory.removeSshKey($scope.user.id, sshKey.fingerprint)
 						.then(function(response) {
 							console.info("Removed SSH Key", sshKey.display, sshKey.fingerprint);
-							getIndigoUserInfo();
+							userCtrl.loadUserData();
 							$scope.operationResult = Utils.buildSuccessOperationResult("Ssh key has been removed successfully");
 						}, function(error) {
 							$scope.operationResult = Utils.buildErrorOperationResult(error);
@@ -327,7 +336,7 @@ function UserController($scope, $rootScope, $state, $uibModal, Utils, scimFactor
 					scimFactory.removeX509Certificate($scope.user.id, x509cert.value)
 						.then(function(response) {
 							console.info("Removed x509 Certificate", x509cert.display);
-							getIndigoUserInfo();
+							userCtrl.loadUserData();
 							$scope.operationResult = Utils.buildSuccessOperationResult("X509 Certificate has been removed successfully");
 						}, function(error) {
 							$scope.operationResult = Utils.buildErrorOperationResult(error);
@@ -352,7 +361,7 @@ function UserController($scope, $rootScope, $state, $uibModal, Utils, scimFactor
 					scimFactory.removeSamlId($scope.user.id, samlId)
 						.then(function(response) {
 							console.info("Removed SAML Id", samlId.idpId, samlId.userId);
-							getIndigoUserInfo();
+							userCtrl.loadUserData();
 							$scope.operationResult = Utils.buildSuccessOperationResult("SAML Account has been removed successfully");
 						}, function(error) {
 							$scope.operationResult = Utils.buildErrorOperationResult(error);
@@ -362,6 +371,7 @@ function UserController($scope, $rootScope, $state, $uibModal, Utils, scimFactor
 
 	function setActive(status) {
 
+		userCtrl.isEnableUserDisabled = true;
 		var modalOptions = {};
 		
 		if (status) {
@@ -386,15 +396,19 @@ function UserController($scope, $rootScope, $state, $uibModal, Utils, scimFactor
 			function (){
 				scimFactory.setUserActiveStatus($scope.user.id, status)
 					.then(function(response) {
-						getIndigoUserInfo();
+						userCtrl.loadUserData();
 						if (status) {
 							$scope.operationResult = Utils.buildSuccessOperationResult("User " + $scope.user.name.formatted + " enabled");
 						} else {
 							$scope.operationResult = Utils.buildSuccessOperationResult("User " + $scope.user.name.formatted + " disabled");
 						}
+						userCtrl.isEnableUserDisabled = false;
 					}, function(error) {
 						$scope.operationResult = Utils.buildErrorOperationResult(error);
+						userCtrl.isEnableUserDisabled = false;
 					});
+			}, function () {
+				userCtrl.isEnableUserDisabled = false;
 			});
 	}
 }
