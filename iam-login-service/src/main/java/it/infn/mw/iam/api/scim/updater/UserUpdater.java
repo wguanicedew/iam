@@ -226,13 +226,14 @@ public class UserUpdater implements Updater<IamAccount, ScimUser> {
 
   private void replacePicture(IamAccount a, List<ScimPhoto> photos) {
 
-    if (photos == null || photos.isEmpty()) {
-      if (a.hasPicture()) {
-        // replace with null
-        a.getUserInfo().setPicture(null);
-      }
-      // nothing to do
-    } else {
+    if (photos == null) {
+      return;
+    }
+    if (photos.isEmpty() && a.hasPicture()) {
+      a.getUserInfo().setPicture(null);
+      return;
+    }
+    if (!photos.isEmpty()) {
       a.getUserInfo().setPicture(photos.get(0).getValue());
     }
   }
