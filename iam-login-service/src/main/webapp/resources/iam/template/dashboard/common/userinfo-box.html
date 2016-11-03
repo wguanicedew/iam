@@ -1,9 +1,9 @@
 <!-- Profile image -->
 <div ng-if="user.photos[0].value">
-  <img class="profile-user-img img-responsive img-circle" ng-src="{{user.photos[0].value}}" alt="User profile picture" />
+  <img class="profile-user-img big-profile-user-img light-bordered-profile-img img-responsive img-circle" ng-src="{{user.photos[0].value}}" alt="User profile picture" />
 </div>
 <div ng-if="!user.photos">
-  <img class="profile-user-img img-responsive img-circle" ng-src="resources/iam/img/default-avatar.png" alt="User profile picture" />
+  <img class="profile-user-img big-profile-user-img light-bordered-profile-img img-responsive img-circle" ng-src="resources/iam/img/default-avatar.png" alt="User profile picture" />
 </div>
 
 <!-- Full name -->
@@ -12,60 +12,54 @@
 <!-- Username -->
 <p class="text-muted text-center">{{user.userName}}</p>
 
-<ul class="list-group list-group-unbordered">
-  <li class="list-group-item">
-    <div class="row">
-      <div class="col-md-2">
-        <strong>UUID</strong>
-      </div>
-      <div class="col-md-10 text-right">
-        <a>{{user.id}}</a>
-      </div>
-    </div>
-  </li>
-  <li class="list-group-item">
-    <div class="row">
-      <div class="col-md-3">
-        <strong>E-mail</strong>
-      </div>
-      <div class="col-md-9 text-right">
-        <a href="mailto:{{user.emails[0].value}}">{{user.emails[0].value}}</a>
-      </div>
-    </div>
-  </li>
-  <li class="list-group-item">
-    <div class="row">
-      <div class="col-md-3">
-        <strong>Status</strong>
-      </div>
-      <div class="col-md-9 text-right">
-        <span class="label label-success" ng-show="user.active">
-          <i class="fa fa-check"></i> Active
-        </span>
-        <span class="label label-warning" ng-show="!user.active">
-          <i class="fa fa-check"></i> Disabled
-        </span>
-      </div>
-    </div>
-  </li>
-  <li class="list-group-item">
-    <div class="row">
-      <div class="col-md-3">
-        <strong>Created</strong>
-      </div>
-      <div class="col-md-9 text-right">
-        <a>{{user.meta.created | relativeDate }}</a>
-      </div>
-    </div>
-  </li>
-  <li class="list-group-item">
-    <div class="row">
-      <div class="col-md-3">
-        <strong>Updated</strong>
-      </div>
-      <div class="col-md-9 text-right">
-        <a>{{user.meta.lastModified | relativeDate }}</a>
-      </div>
-    </div>
-  </li>
-</ul>
+<div class="table-responsive">
+  <table class="table no-border table-striped table-sm">
+    <tbody>
+      <tr>
+        <td class="text-bold text-left">
+          UUID
+        </td>
+        <td class="text-right">
+          <a>{{user.id}}</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="text-bold text-left">
+          Email
+        </td>
+        <td class="text-right">
+          <a href="mailto:{{user.emails[0].value}}">{{user.emails[0].value}}</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="text-bold text-left">
+          Status
+        </td>
+        <td class="text-right">
+          <span class="label label-success" ng-show="user.active">
+            <i class="fa fa-check"></i> Active
+          </span>
+          <span class="label label-warning" ng-show="!user.active">
+            <i class="fa fa-check"></i> Disabled
+          </span>
+        </td>
+      </tr>
+      <tr>
+        <td class="text-bold text-left">
+          Created
+        </td>
+        <td class="text-right">
+          <a>{{user.meta.created | relativeDate }}</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="text-bold text-left">
+          Updated
+        </td>
+        <td class="text-right">
+          <a>{{user.meta.lastModified | relativeDate }}</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
