@@ -121,9 +121,9 @@ angular.module('dashboardApp').factory("scimFactory", [ '$http', '$httpParamSeri
 		return $http.delete(url);
 	};
 	
-	function addUserToGroup(groupId, userId) {
+	function addUserToGroup(groupId, scimUser) {
 		
-		console.info("Patch groupId, add user ", groupId, userId);
+		console.info("Patch groupId, add user ", groupId, scimUser);
 		
 		var config = {
 				headers: { 'Content-Type': 'application/scim+json' }
@@ -136,7 +136,9 @@ angular.module('dashboardApp').factory("scimFactory", [ '$http', '$httpParamSeri
 					op: "add",
 					path: "members",
 					value: [{
-						value: userId,
+						value: scimUser.id,
+						$ref: scimUser.meta.location,
+						display: scimUser.displayName
 					}]
 				}]
 		};
