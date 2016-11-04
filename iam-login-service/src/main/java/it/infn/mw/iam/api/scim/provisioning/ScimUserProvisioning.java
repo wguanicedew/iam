@@ -289,26 +289,25 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
   }
 
   @Override
-  public ScimUser replace(final String id, final ScimUser scimItemToBeUpdated) {
+  public ScimUser replace(final String uuid, final ScimUser scimItemToBeUpdated) {
 
-    IamAccount existingAccount = accountRepository.findByUuid(id)
-      .orElseThrow(() -> new ScimResourceNotFoundException("No user mapped to id '" + id + "'"));
+    // user must exist
+    IamAccount existingAccount = accountRepository.findByUuid(uuid)
+      .orElseThrow(() -> new ScimResourceNotFoundException("No user mapped to id '" + uuid + "'"));
 
-    if (accountRepository.findByUsernameWithDifferentId(scimItemToBeUpdated.getUserName(), id)
-      .isPresent()) {
-      throw new ScimResourceExistsException("userName is already mapped to another user");
-      // throw new IllegalArgumentException("userName is already mappped to another user");
+    // username must be available
+    final String username = scimItemToBeUpdated.getUserName();
+    if (accountRepository.findByUsernameWithDifferentUUID(username, uuid).isPresent()) {
+      throw new ScimResourceExistsException(
+          "username " + username + " already assigned to another user");
     }
 
+    // email must be unique
     final String updatedEmail = scimItemToBeUpdated.getEmails().get(0).getValue();
-
-    accountRepository.findByEmail(updatedEmail).ifPresent(account -> {
-      if (!account.equals(existingAccount)) {
-        throw new ScimResourceExistsException(
-            "email already assigned to an existing user: " + updatedEmail);
-      }
-    });
-
+    if (accountRepository.findByEmailWithDifferentUUID(updatedEmail, uuid).isPresent()) {
+      throw new ScimResourceExistsException(
+          "email " + updatedEmail + " already assigned to another user");
+    }
 
     IamAccount updatedAccount = converter.fromScim(scimItemToBeUpdated);
 
