@@ -1,7 +1,6 @@
 package it.infn.mw.iam.test.actuator;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.Set;
 
 import org.hamcrest.Matchers;
 import org.junit.Test;
@@ -12,6 +11,7 @@ import org.springframework.boot.test.WebIntegrationTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import com.google.common.collect.Sets;
 import com.jayway.restassured.RestAssured;
 
 import it.infn.mw.iam.IamLoginService;
@@ -30,8 +30,8 @@ public class ActuatorEndpointsTests {
   private static final String USER_USERNAME = "test";
   private static final String USER_PASSWORD = "password";
 
-  private static final List<String> SENSITIVE_ENDPOINTS =
-      Arrays.asList("/metrics", "/configprops", "/env", "mappings");
+  private static final Set<String> SENSITIVE_ENDPOINTS = Sets.newHashSet("/metrics", "/configprops",
+      "/env", "/mappings", "/flyway", "/autoconfig", "/beans", "/dump", "/trace");
 
   @Test
   public void testHealthEndpoint() {
@@ -103,6 +103,8 @@ public class ActuatorEndpointsTests {
         .body(true)
       .statusCode(HttpStatus.OK.value())
       .body("git", Matchers.notNullValue())
+      .body("app", Matchers.notNullValue())
+      .body("app.name", Matchers.equalTo("IAM Login Service"))
     ;
     // @formatter:on
   }
@@ -122,6 +124,8 @@ public class ActuatorEndpointsTests {
         .body(true)
       .statusCode(HttpStatus.OK.value())
       .body("git", Matchers.notNullValue())
+      .body("app", Matchers.notNullValue())
+      .body("app.name", Matchers.equalTo("IAM Login Service"))
     ;
     // @formatter:on
   }
@@ -141,6 +145,8 @@ public class ActuatorEndpointsTests {
         .body(true)
       .statusCode(HttpStatus.OK.value())
       .body("git", Matchers.notNullValue())
+      .body("app", Matchers.notNullValue())
+      .body("app.name", Matchers.equalTo("IAM Login Service"))
     ;
     // @formatter:on
   }
@@ -183,7 +189,7 @@ public class ActuatorEndpointsTests {
   }
 
   @Test
-  public void testMetricsEndpointAsAdmin() {
+  public void testSensitiveEndpointAsAdmin() {
     for (String endpoint : SENSITIVE_ENDPOINTS) {
       // @formatter:off
 	  RestAssured.given()
