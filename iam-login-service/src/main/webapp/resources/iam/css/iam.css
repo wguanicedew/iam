@@ -101,9 +101,10 @@ aside {
 }
 
 body.skin-blue {
-  background-color: #ecf0f5;
+  background-color: #222d32;
 }
 
 .content-wrapper {
-  margin-bottom: 48px;
+  padding-bottom: 48px;
+  background-color: #ecf0f5;
 }
