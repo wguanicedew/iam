@@ -34,10 +34,10 @@
 <link
   rel="stylesheet"
   href="resources/iam/css/ionicons/ionicons.min.css"></link>
-    
+
 <link
-  href="resources/font-awesome/css/font-awesome.css"
-  rel="stylesheet">
+  rel="stylesheet"
+  href="<c:url value='/webjars/font-awesome/css/font-awesome.css'/>"></link>
 
 <link
   href="resources/bootstrap-social/bootstrap-social.css"
