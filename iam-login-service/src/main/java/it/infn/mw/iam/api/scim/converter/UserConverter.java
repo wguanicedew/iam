@@ -240,7 +240,7 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
       return null;
     }
 
-    if (entity.getUserInfo().getPicture() == null) {
+    if (entity.getUserInfo().getPicture() == null || entity.getUserInfo().getPicture().isEmpty()) {
       return null;
     }
 
