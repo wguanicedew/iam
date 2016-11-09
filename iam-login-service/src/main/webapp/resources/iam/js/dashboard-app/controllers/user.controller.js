@@ -39,15 +39,16 @@ function UserController($scope, $rootScope, $state, $uibModal, Utils, scimFactor
 
 	function loadUserData() {
 
+		$rootScope.pageLoadingProgress = 0;
 		userCtrl.loadingModal = $uibModal
 		.open({
 			animation: false,
-			templateUrl : '/resources/iam/template/dashboard/user/loading-modal.html'
+			templateUrl : '/resources/iam/template/dashboard/loading-modal.html'
 		});
 
 		userCtrl.loadingModal.opened.then(function() {
 
-			$rootScope.userLoadingProgress = 30;
+			$rootScope.pageLoadingProgress = 30;
 
 			scimFactory.getUser(userCtrl.id).then(function(response) {
 
@@ -65,7 +66,7 @@ function UserController($scope, $rootScope, $state, $uibModal, Utils, scimFactor
 
 	function isPageLoaded() {
 
-		return $rootScope.userLoadingProgress == 100;
+		return $rootScope.pageLoadingProgress == 100;
 	}
 
 	function doPasswordReset() {

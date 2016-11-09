@@ -92,9 +92,9 @@ INSERT INTO client_grant_type (owner_id, grant_type) VALUES
   (6, 'client_credentials'),
   (7, 'client_credentials'),
   (8, 'urn:ietf:params:oauth:grant-type:token-exchange'),
-  (8, 'client_credentials'),
+  (8, 'password'),
   (8, 'refresh_token'),
-  (9, 'client_credentials'),
+  (9, 'password'),
   (9, 'refresh_token'),
   (10, 'client_credentials'),
   (10, 'refresh_token');
