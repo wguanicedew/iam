@@ -3,6 +3,7 @@ angular.module('dashboardApp').factory("scimFactory", [ '$http', '$httpParamSeri
 	var urlBase = '/scim';
 	var urlUsers = urlBase + '/Users';
 	var urlGroups = urlBase + '/Groups';
+	var urlMe = urlBase + '/Me';
 	
 	var service = {
 		
@@ -26,7 +27,8 @@ angular.module('dashboardApp').factory("scimFactory", [ '$http', '$httpParamSeri
 		addSamlId: addSamlId,
 		removeSamlId: removeSamlId,
 		setUserActiveStatus: setUserActiveStatus,
-		updateUser: updateUser
+		updateUser: updateUser,
+		updateMe: updateMe
 	}
 	
 	return service;
@@ -404,25 +406,37 @@ angular.module('dashboardApp').factory("scimFactory", [ '$http', '$httpParamSeri
 		
 		return $http.patch(url, data, config);
 	};
-	
-	function updateUser(userId, scimUser) {
-		
-		console.info("Patch user ", userId, scimUser);
-		
+
+	function updateUser(userId, ops) {
+
+		console.info("Patch user ", userId, ops);
+
 		var config = {
 				headers: { 'Content-Type': 'application/scim+json' }
 			};
 		var data = {
 				schemas: ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
-				operations: [{
-					op: "replace",
-					value: scimUser
-				}]
+				operations: ops
 			};
 		var url = urlUsers + '/' + userId;
-		
+
 		return $http.patch(url, data, config);
 	};
-	
+
+	function updateMe(ops) {
+
+		console.info("Patch current user", ops);
+
+		var config = {
+				headers: { 'Content-Type': 'application/scim+json' }
+			};
+		var data = {
+				schemas: ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
+				operations: ops
+			};
+
+		return $http.patch(urlMe, data, config);
+	};
+
 	return scimFactory;
 } ]);

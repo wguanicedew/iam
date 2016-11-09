@@ -15,6 +15,7 @@ import it.infn.mw.iam.api.scim.converter.AddressConverter;
 import it.infn.mw.iam.api.scim.converter.UserConverter;
 import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
 import it.infn.mw.iam.api.scim.exception.ScimException;
+import it.infn.mw.iam.api.scim.exception.ScimPatchOperationNotSupported;
 import it.infn.mw.iam.api.scim.exception.ScimResourceExistsException;
 import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
 import it.infn.mw.iam.api.scim.model.ScimListResponse;
@@ -337,8 +338,24 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
     IamAccount iamAccount = accountRepository.findByUuid(id)
       .orElseThrow(() -> new ScimResourceNotFoundException("No user mapped to id '" + id + "'"));
 
-    updater.update(iamAccount, operations);
+    for (ScimPatchOperation<ScimUser> op: operations) {
 
+      if (op.getPath() != null) {
+        throw new ScimPatchOperationNotSupported("Path " + op.getPath() + " is not supported");
+      }
+
+      switch (op.getOp()) {
+        case add:
+          updater.add(iamAccount, op.getValue());
+          break;
+        case remove:
+          updater.remove(iamAccount, op.getValue());
+          break;
+        case replace:
+          updater.replace(iamAccount, op.getValue());
+          break;
+      }
+    }
   }
 
 }

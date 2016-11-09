@@ -27,7 +27,7 @@
           <h3 class="box-title">
             <strong>Personal Data</strong>
           </h3>
-          <i class="fa fa-info pull-right"></i>
+          <i class="fa fa-th-list pull-right"></i>
         </div>
         <div class="box-body">
 
@@ -36,7 +36,7 @@
 
         </div>
         <div class="box-footer">
-          <button class="btn btn-primary btn-block" ng-click="home.openEditUserDialog()" name="edit-user-btn">
+          <button class="btn btn-primary btn-block" ng-click="home.openEditUserDialog()" ng-disabled="home.isEditUserDisabled" name="edit-user-btn">
             <i class="fa fa-pencil"></i>
             <strong>Edit Details</strong>
           </button>

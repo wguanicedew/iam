@@ -25,41 +25,70 @@ function EditUserController($scope, $rootScope, $state, $uibModalInstance, Utils
 
 		editUserCtrl.enabled = false;
 
-		var scimUser = {};
+		var operations = [];
+
+		// remove picture if it's dirty and empty
+		if ($scope.userUpdateForm.picture.$dirty && !editUserCtrl.eUser.picture) {
+			operations.push({
+				op: "remove",
+				value: {
+					photos: editUserCtrl.oUser.photos
+				}
+			});
+		}
 
 		if ($scope.userUpdateForm.name.$dirty || $scope.userUpdateForm.surname.$dirty) {
-			scimUser.displayName = editUserCtrl.eUser.name + " "
-					+ editUserCtrl.eUser.surname;
-			scimUser.name = {
-					givenName : editUserCtrl.eUser.name,
-					familyName : editUserCtrl.eUser.surname,
-					middleName : ""
-			};
+			
+			operations.push({
+				op: "replace",
+				value: {
+					displayName: editUserCtrl.eUser.name + " " + editUserCtrl.eUser.surname,
+					name: {
+						givenName : editUserCtrl.eUser.name,
+						familyName : editUserCtrl.eUser.surname,
+						middleName : ""
+					}
+				}
+			});
 		}
 		if ($scope.userUpdateForm.email.$dirty) {
-			scimUser.emails = [ {
-				type : "work",
-				value : editUserCtrl.eUser.email,
-				primary : true
-			} ];
+			
+			operations.push({
+				op: "replace",
+				value: {
+					emails: [ {
+						type : "work",
+						value : editUserCtrl.eUser.email,
+						primary : true
+					} ]
+				}
+			});
 		}
 		if ($scope.userUpdateForm.username.$dirty) {
-			scimUser.userName = editUserCtrl.eUser.username;
+			
+			operations.push({
+				op: "replace",
+				value: {
+					userName: editUserCtrl.eUser.username
+				}
+			});
 		}
 		if ($scope.userUpdateForm.picture.$dirty) {
-			if (!editUserCtrl.eUser.picture) {
-				scimUser.photos = [];
-			} else {
-				scimUser.photos = [{
-					type : "photo",
-					value : editUserCtrl.eUser.picture
-				}];
-			}
+
+			operations.push({
+				op: "replace",
+				value: {
+					photos: [{
+						type : "photo",
+						value : editUserCtrl.eUser.picture
+					}]
+				}
+			});
 		}
 
-		console.info("Edited user ... ", scimUser);
+		console.info("Operations ... ", operations);
 
-		scimFactory.updateUser(user.id, scimUser).then(
+		scimFactory.updateUser(user.id, operations).then(
 			function(response) {
 
 				if (Utils.isMe(user.id)) {

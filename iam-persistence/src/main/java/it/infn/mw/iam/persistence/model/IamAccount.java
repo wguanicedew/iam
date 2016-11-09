@@ -168,6 +168,11 @@ public class IamAccount {
     this.groups = groups;
   }
 
+  public boolean isMemberOf(IamGroup group) {
+
+    return groups.contains(group);
+  }
+
   public Date getCreationTime() {
 
     return creationTime;
