@@ -1,4 +1,4 @@
-package it.infn.mw.iam.util;
+package it.infn.mw.iam.test.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
@@ -10,15 +10,10 @@ import com.jayway.restassured.mapper.factory.Jackson2ObjectMapperFactory;
 
 public class JacksonUtils {
 
-  public JacksonUtils() {
-    // TODO Auto-generated constructor stub
-  }
-
   public static void initRestAssured() {
 
     RestAssured.config = RestAssuredConfig.config().objectMapperConfig(
 	new ObjectMapperConfig().jackson2ObjectMapperFactory(JacksonUtils.getJacksonObjectMapperFactory()));
-
   }
 
   public static Jackson2ObjectMapperFactory getJacksonObjectMapperFactory() {
