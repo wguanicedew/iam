@@ -15,32 +15,32 @@ public class JacksonUtils {
   }
 
   public static void initRestAssured() {
-  
+
     RestAssured.config = RestAssuredConfig.config().objectMapperConfig(
-        new ObjectMapperConfig().jackson2ObjectMapperFactory(JacksonUtils.getJacksonObjectMapperFactory()));
-  
+	new ObjectMapperConfig().jackson2ObjectMapperFactory(JacksonUtils.getJacksonObjectMapperFactory()));
+
   }
 
   public static Jackson2ObjectMapperFactory getJacksonObjectMapperFactory() {
-  
+
     return new Jackson2ObjectMapperFactory() {
-  
+
       @Override
       public ObjectMapper create(@SuppressWarnings("rawtypes") Class cls, String charset) {
-  
-        return createJacksonObjectMapper();
+
+	return createJacksonObjectMapper();
       }
     };
   }
 
   public static ObjectMapper createJacksonObjectMapper() {
-  
+
     FilterProvider filters = new SimpleFilterProvider().setFailOnUnknownId(false);
-  
+
     ObjectMapper mapper = new ObjectMapper();
     mapper.setFilterProvider(filters);
     return mapper;
-  
+
   }
 
 }
