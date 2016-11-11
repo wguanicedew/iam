@@ -73,11 +73,11 @@ function UsersController($scope, $rootScope, $uibModal, $state, $filter, filterF
 
 	function loadUserList() {
 
-		$rootScope.usersLoadingProgress = 0;
+		$rootScope.pageLoadingProgress = 0;
 		users.loadingModal = $uibModal
 		.open({
 			animation: false,
-			templateUrl : '/resources/iam/template/dashboard/users/loading-modal.html'
+			templateUrl : '/resources/iam/template/dashboard/loading-modal.html'
 		});
 
 		users.loadingModal.opened.then(function() {
@@ -102,11 +102,11 @@ function UsersController($scope, $rootScope, $uibModal, $state, $filter, filterF
 							if (response.data.totalResults > (response.data.startIndex - 1 + response.data.itemsPerPage)) {
 							
 								users.getAllUsers(startIndex + count, count);
-								$rootScope.usersLoadingProgress = Math.floor((startIndex + count) * 100 / response.data.totalResults);
+								$rootScope.pageLoadingProgress = Math.floor((startIndex + count) * 100 / response.data.totalResults);
 							
 							} else {
 							
-								$rootScope.usersLoadingProgress = 100;
+								$rootScope.pageLoadingProgress = 100;
 								users.loadingModal.dismiss("Cancel");
 							
 							}
