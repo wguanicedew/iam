@@ -50,4 +50,7 @@ public interface IamAccountRepository extends PagingAndSortingRepository<IamAcco
   Optional<IamAccount> findByConfirmationKey(@Param("confirmationKey") String confirmationKey);
 
   Optional<IamAccount> findByResetKey(@Param("resetKey") String resetKey);
+
+  @Query("select a from IamAccount a join a.authorities auth where auth.authority = :authority")
+  List<IamAccount> findByAuthority(@Param("authority") String authority);
 }

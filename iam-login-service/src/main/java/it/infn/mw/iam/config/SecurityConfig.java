@@ -519,18 +519,19 @@ public class SecurityConfig {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
       http.antMatcher("/iam/authn-info/**")
-	.exceptionHandling()
-	.authenticationEntryPoint(authenticationEntryPoint)
-	.and()
-	.sessionManagement()
-	.sessionCreationPolicy(SessionCreationPolicy.NEVER)
-	.and()
-	.authorizeRequests()
-	.antMatchers("/iam/authn-info/**")
-	.authenticated();
+        .exceptionHandling()
+        .authenticationEntryPoint(authenticationEntryPoint)
+        .and()
+        .sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.NEVER)
+        .and()
+        .authorizeRequests()
+        .antMatchers("/iam/authn-info/**")
+        .authenticated();
     }
 
   }
+
   @Configuration
   @Order(21)
   public static class AccountLinkingEndpointConfig extends WebSecurityConfigurerAdapter {
@@ -540,15 +541,39 @@ public class SecurityConfig {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
       http.antMatcher("/iam/account-linking/**")
-	.exceptionHandling()
-	.authenticationEntryPoint(authenticationEntryPoint)
-	.and()
-	.sessionManagement()
-	.sessionCreationPolicy(SessionCreationPolicy.NEVER)
-	.and()
-	.authorizeRequests()
-	.antMatchers("/iam/account-linking/**")
-	.authenticated();
+        .exceptionHandling()
+        .authenticationEntryPoint(authenticationEntryPoint)
+        .and()
+        .sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.NEVER)
+        .and()
+        .authorizeRequests()
+        .antMatchers("/iam/account-linking/**")
+        .authenticated();
+    }
+  }
+
+  @Configuration
+  @Order(22)
+  public static class AccountAuthorityEndpointConfig extends WebSecurityConfigurerAdapter {
+    @Autowired
+    private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+      http.antMatcher("/iam/account/**")
+        .exceptionHandling()
+        .authenticationEntryPoint(authenticationEntryPoint)
+        .and()
+        .sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.NEVER)
+        .and()
+        .authorizeRequests()
+        .antMatchers("/iam/account/**")
+        .authenticated()
+        .and()
+        .csrf()
+        .disable();
     }
   }
 
