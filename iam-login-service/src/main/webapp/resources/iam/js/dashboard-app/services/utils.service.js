@@ -13,7 +13,8 @@ function Utils() {
 			getLoggedUser: getLoggedUser,
 			isRegistrationEnabled: isRegistrationEnabled,
 			buildErrorOperationResult: buildErrorOperationResult,
-			buildSuccessOperationResult: buildSuccessOperationResult
+			buildSuccessOperationResult: buildSuccessOperationResult,
+			buildErrorResult: buildErrorResult
 		};
 
 	return service;
@@ -52,6 +53,14 @@ function Utils() {
 		return getRegistrationEnabled();
 	}
 
+	function buildErrorResult(errorString) {
+
+		return { 
+			type: "error",
+			text: errorString
+		}
+	}
+	
 	function buildErrorOperationResult(error) {
 
 		return { 

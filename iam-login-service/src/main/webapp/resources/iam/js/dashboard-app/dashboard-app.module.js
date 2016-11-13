@@ -2,7 +2,7 @@
 
 angular.module('dashboardApp', [ 'ui.router', 'ui.bootstrap',
 		'ui.bootstrap.tpls', 'ui.select', 'ngAnimate', 'ngSanitize',
-		'relativeDate' ]);
+		'relativeDate', 'ngResource' ]);
 
 angular.module('dashboardApp').run(
 		function($window, $rootScope, $state, $stateParams, $uibModal, Utils,

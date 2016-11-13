@@ -2,9 +2,12 @@
 
 angular.module('dashboardApp').controller('UserController', UserController);
 
-UserController.$inject = [ '$scope', '$rootScope', '$state', '$uibModal', '$filter', 'filterFilter', 'Utils', 'scimFactory', 'ModalService', 'ResetPasswordService', 'RegistrationRequestService' ];
+UserController.$inject = [ '$scope', '$rootScope', '$state', '$uibModal', '$filter', '$q', 
+                           'filterFilter', 'Utils', 'scimFactory', 'ModalService', 'ResetPasswordService', 
+                           'RegistrationRequestService', 'Authorities'];
 
-function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFilter, Utils, scimFactory, ModalService, ResetPasswordService, RegistrationRequestService) {
+function UserController($scope, $rootScope, $state, $uibModal, $filter, $q, filterFilter, 
+		Utils, scimFactory, ModalService, ResetPasswordService, RegistrationRequestService, Authorities) {
 
 	var user = this;
 
@@ -12,10 +15,11 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 
 	user.id = $state.params.id;
 
+	user.loaded = false;
 	user.userInfo = {};
-
+	
 	// methods
-	user.getIndigoUserInfo = getIndigoUserInfo;
+	user.loadUserInfo = loadUserInfo;
 	user.showSshKeyValue = showSshKeyValue;
 	user.showCertValue = showCertValue;
 	user.openAddGroupDialog = openAddGroupDialog;
@@ -30,15 +34,51 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 	user.deleteX509Certificate = deleteX509Certificate;
 	user.deleteSamlId = deleteSamlId;
 	user.setActive = setActive;
+	user.openLoadingModal = openLoadingModal;
+	user.closeLoadingModal = closeLoadingModal;
+	user.closeLoadingModalAndSetError = closeLoadingModalAndSetError;
+	
+	user.isVoAdmin = isVoAdmin;
+	user.openAssignVoAdminPrivilegesDialog = openAssignVoAdminPrivilegesDialog;
+	user.openRevokeVoAdminPrivilegesDialog = openRevokeVoAdminPrivilegesDialog;
+	user.isMe = isMe;
 	
 	// password reset
 	user.doPasswordReset = doPasswordReset;
 	user.sendResetMail = sendResetMail;
-
-	user.getIndigoUserInfo();
-
-	function getIndigoUserInfo() {
-
+	
+	user.authorities = [];
+		
+	user.loadUserInfo();
+	
+	function loadUserInfo() {
+		user.loaded = false;
+		
+		var modalPromise = openLoadingModal();
+		var authPromise = Authorities.getAuthorities(user.id);
+		var scimPromise = scimFactory.getUser(user.id);
+		
+		var loadAuthoritiesSuccess = function(result){
+			user.authorities = result.data.authorities;
+		}
+		
+		var loadScimUserSuccess = function(result){
+			user.userInfo = result.data;
+		}
+		
+		$q.all([modalPromise,authPromise,scimPromise]).then(
+				function(data) {
+					authPromise.then(loadAuthoritiesSuccess);
+					scimPromise.then(loadScimUserSuccess);
+					user.loaded = true;
+					closeLoadingModal();
+				}, function(error) {
+					console.error("Error loading user information:", error);
+					closeLoadingModalAndSetError(error.data);
+				});
+	}
+	
+	function openLoadingModal() {
 		$rootScope.pageLoadingProgress = 0;
 
 		user.loadingModal = $uibModal
@@ -46,31 +86,21 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 			animation: false,
 			templateUrl : '/resources/iam/template/dashboard/loading-modal.html'
 		});
-
-		user.loadingModal.opened.then(function() {
-
-			$rootScope.pageLoadingProgress = 50;
-
-			scimFactory.getUser(user.id).then(function(response) {
-
-				user.userInfo = response.data;
-				console.log("Added indigoUserInfo: ", user.userInfo);
-
-				$rootScope.pageLoadingProgress = 100;
-				user.loadingModal.dismiss("Cancel");
-
-			}, function(error) {
-
-				$rootScope.pageLoadingProgress = 100;
-				console.error("getUser", error)
-				user.loadingModal.dismiss("Error");
-				$scope.operationResult = Utils.buildErrorOperationResult(error);
-			});
-
-		});
-
+		
+		return user.loadingModal.opened;
 	}
-
+	
+	function closeLoadingModal(){
+		$rootScope.pageLoadingProgress = 100;
+		user.loadingModal.dismiss("Cancel");
+	}
+	
+	function closeLoadingModalAndSetError(error){
+		$rootScope.pageLoadingProgress = 100;
+		user.loadingModal.dismiss("Error");
+		$scope.operationResult = Utils.buildErrorOperationResult(error);
+	}
+	
 	function doPasswordReset() {
 		
 		ResetPasswordService.forgotPassword(user.userInfo.emails[0].value).then(
@@ -117,7 +147,7 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 					}
 				});
 		modalInstance.result.then(function() {
-			getIndigoUserInfo();
+			loadUserInfo();
 			$scope.operationResult = Utils.buildSuccessOperationResult("User's info updated successfully");
 		}, function() {
 			console.info('Modal dismissed at: ', new Date());
@@ -138,7 +168,7 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 				});
 		modalInstance.result.then(function() {
 			console.info("Added group");
-			getIndigoUserInfo();
+			loadUserInfo();
 			$scope.operationResult = Utils.buildSuccessOperationResult("User's memberships updated successfully");
 		}, function() {
 			console.info('Modal dismissed at: ', new Date());
@@ -158,7 +188,7 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 		});
 		modalInstance.result.then(function() {
 			console.info("Added oidc account");
-			getIndigoUserInfo();
+			loadUserInfo();
 			$scope.operationResult = Utils.buildSuccessOperationResult("User's Open ID Account created successfully");
 		}, function() {
 			console.info('Modal dismissed at: ', new Date());
@@ -178,7 +208,7 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 		});
 		modalInstance.result.then(function() {
 			console.info("Added ssh key");
-			getIndigoUserInfo();
+			loadUserInfo();
 			$scope.operationResult = Utils.buildSuccessOperationResult("User's SSH Key added successfully");
 		}, function(error) {
 			console.info('Modal dismissed at: ', new Date());
@@ -199,7 +229,7 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 				});
 		modalInstance.result.then(function() {
 			console.info("Added saml account");
-			getIndigoUserInfo();
+			loadUserInfo();
 			$scope.operationResult = Utils.buildSuccessOperationResult("User's SAML Account created successfully");
 		}, function() {
 			console.info('Modal dismissed at: ', new Date());
@@ -220,7 +250,7 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 				});
 		modalInstance.result.then(function() {
 			console.info("Added x509 certificate");
-			getIndigoUserInfo();
+			loadUserInfo();
 			$scope.operationResult = Utils.buildSuccessOperationResult("User's x509 Certificate added successfully");
 		}, function() {
 			console.info('Modal dismissed at: ', new Date());
@@ -242,7 +272,7 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 						user.userInfo.meta.location, user.userInfo.name.formatted)
 					.then(function(response) {
 						console.log("Deleted: ", group);
-						getIndigoUserInfo();
+						loadUserInfo();
 						$scope.operationResult = Utils.buildSuccessOperationResult("Group membership removed successfully");
 					}, function(error) {
 						$scope.operationResult = Utils.buildErrorOperationResult(error);
@@ -288,7 +318,7 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 							oidcId.subject)
 						.then(function(response) {
 							console.log("Removed: ", oidcId.issuer, oidcId.subject);
-							getIndigoUserInfo();
+							loadUserInfo();
 							$scope.operationResult = Utils.buildSuccessOperationResult("Open ID Account has been removed successfully");
 						}, function(error) {
 							$scope.operationResult = Utils.buildErrorOperationResult(error);
@@ -310,7 +340,7 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 					scimFactory.removeSshKey(user.userInfo.id, sshKey.fingerprint)
 						.then(function(response) {
 							console.log("Removed: ", sshKey.display, sshKey.fingerprint);
-							getIndigoUserInfo();
+							loadUserInfo();
 							$scope.operationResult = Utils.buildSuccessOperationResult("Ssh key has been removed successfully");
 						}, function(error) {
 							$scope.operationResult = Utils.buildErrorOperationResult(error);
@@ -332,7 +362,7 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 					scimFactory.removeX509Certificate(user.userInfo.id, x509cert.value)
 						.then(function(response) {
 							console.log("Removed: ", x509cert.display);
-							getIndigoUserInfo();
+							loadUserInfo();
 							$scope.operationResult = Utils.buildSuccessOperationResult("X509 Certificate has been removed successfully");
 						}, function(error) {
 							$scope.operationResult = Utils.buildErrorOperationResult(error);
@@ -357,7 +387,7 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 					scimFactory.removeSamlId(user.userInfo.id, samlId)
 						.then(function(response) {
 							console.log("Removed: ", samlId.idpId, samlId.userId);
-							getIndigoUserInfo();
+							loadUserInfo();
 							$scope.operationResult = Utils.buildSuccessOperationResult("SAML Account has been removed successfully");
 						}, function(error) {
 							$scope.operationResult = Utils.buildErrorOperationResult(error);
@@ -391,7 +421,7 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 			function (){
 				scimFactory.setUserActiveStatus(user.userInfo.id, status)
 					.then(function(response) {
-						getIndigoUserInfo();
+						loadUserInfo();
 						if (status) {
 							$scope.operationResult = Utils.buildSuccessOperationResult("User " + user.userInfo.name.formatted + " enabled");
 						} else {
@@ -401,5 +431,64 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, filterFi
 						$scope.operationResult = Utils.buildErrorOperationResult(error);
 					});
 			});
+	}
+	
+	function openRevokeVoAdminPrivilegesDialog() {
+		var modalInstance = $uibModal
+		.open({
+			templateUrl : '/resources/iam/template/dashboard/user/revoke-vo-admin-privileges.html',
+			controller : 'AccountPrivilegesController',
+			controllerAs : 'ctrl',
+			resolve : {
+				user : function() {
+					return user;
+				}
+			}
+		});
+		
+		modalInstance.result.then(function() {
+			loadUserInfo();
+			$scope.operationResult = Utils.buildSuccessOperationResult("Vo admin privileges revoked succesfully");
+		}, function() {
+			console.info('Modal dismissed at: ', new Date());
+		});
+	}
+	
+	function openAssignVoAdminPrivilegesDialog() {
+		var modalInstance = $uibModal
+		.open({
+			templateUrl : '/resources/iam/template/dashboard/user/assign-vo-admin-privileges.html',
+			controller : 'AccountPrivilegesController',
+			controllerAs : 'ctrl',
+			resolve : {
+				user : function() {
+					return user;
+				}
+			}
+		});
+		
+		modalInstance.result.then(function() {
+			loadUserInfo();
+			$scope.operationResult = Utils.buildSuccessOperationResult("Vo admin privileges assigned succesfully");
+		}, function() {
+			console.info('Modal dismissed at: ', new Date());
+		});
+	}
+	
+	function isMe(){
+		var authenticatedUserSub = getUserInfo().sub; 
+		return user.id == authenticatedUserSub;
+	}
+	
+	
+	
+	function isVoAdmin() {
+		if (user.authorities){
+			if (user.authorities.indexOf("ROLE_ADMIN") > -1){
+				return true;
+			}
+		}
+		
+		return false;
 	}
 }
