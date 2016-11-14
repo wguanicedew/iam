@@ -7,56 +7,59 @@ import com.google.common.base.Preconditions;
 
 import it.infn.mw.iam.api.scim.exception.ScimPatchOperationNotSupported;
 import it.infn.mw.iam.api.scim.exception.ScimResourceExistsException;
+import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.updater.Updater;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
 @Component
-public class UsernameUpdater implements Updater<IamAccount, String> {
+public class UsernameUpdater implements Updater<IamAccount, ScimUser> {
 
   @Autowired
   private IamAccountRepository accountRepository;
 
-  private boolean isValid(IamAccount account, String username) {
+  private void validate(IamAccount account, ScimUser user) {
 
     Preconditions.checkNotNull(account);
+    Preconditions.checkNotNull(user);
+    Preconditions.checkNotNull(user.getUserName());
 
-    if (username != null) {
-      if (accountRepository.findByUsernameWithDifferentUUID(username, account.getUuid())
-        .isPresent()) {
-        throw new ScimResourceExistsException(
-            "username " + username + " already assigned to another user");
-      }
+    final String username = user.getUserName();
+    final String uuid = account.getUuid();
+
+    if (accountRepository.findByUsernameWithDifferentUUID(username, uuid).isPresent()) {
+      throw new ScimResourceExistsException(
+          "username " + username + " already assigned to another user");
     }
-
-    return true;
   }
 
   @Override
-  public boolean add(IamAccount account, String username) {
+  public boolean add(IamAccount account, ScimUser user) {
 
-    return replace(account, username);
+    return replace(account, user);
   }
 
   @Override
-  public boolean remove(IamAccount accpunt, String username) {
+  public boolean remove(IamAccount accpunt, ScimUser user) {
 
     throw new ScimPatchOperationNotSupported("Remove username is not supported");
   }
 
   @Override
-  public boolean replace(IamAccount account, String username) {
+  public boolean replace(IamAccount account, ScimUser user) {
 
-    if (!isValid(account, username)) {
+    validate(account, user);
+
+    if (user.getUserName().equals(account.getUsername())) {
       return false;
     }
-    if (username == null) {
-      return false;
-    }
-    if (account.getUsername().equals(username)) {
-      return false;
-    }
-    account.setUsername(username);
+    account.setUsername(user.getUserName());
     return true;
+  }
+
+  @Override
+  public boolean accept(ScimUser updates) {
+
+    return updates.getUserName() != null;
   }
 }

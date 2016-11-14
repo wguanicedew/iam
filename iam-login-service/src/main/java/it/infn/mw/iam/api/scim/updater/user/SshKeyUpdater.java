@@ -13,6 +13,7 @@ import it.infn.mw.iam.api.scim.exception.ScimException;
 import it.infn.mw.iam.api.scim.exception.ScimResourceExistsException;
 import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
 import it.infn.mw.iam.api.scim.model.ScimSshKey;
+import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.updater.Updater;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamSshKey;
@@ -21,7 +22,7 @@ import it.infn.mw.iam.persistence.repository.IamSshKeyRepository;
 import it.infn.mw.iam.util.ssh.RSAPublicKeyUtils;
 
 @Component
-public class SshKeyUpdater implements Updater<IamAccount, List<ScimSshKey>> {
+public class SshKeyUpdater implements Updater<IamAccount, ScimUser> {
 
   @Autowired
   private IamAccountRepository accountRepository;
@@ -31,17 +32,14 @@ public class SshKeyUpdater implements Updater<IamAccount, List<ScimSshKey>> {
   @Autowired
   private SshKeyConverter sshKeyConverter;
 
-  private boolean isValid(IamAccount account, List<ScimSshKey> sshKeys) throws ScimException {
+  private void validate(IamAccount account, ScimUser user) {
 
     Preconditions.checkNotNull(account);
+    Preconditions.checkNotNull(user);
+    Preconditions.checkNotNull(user.getIndigoUser());
+    Preconditions.checkNotNull(user.getIndigoUser().getSshKeys());
+    Preconditions.checkArgument(!user.getIndigoUser().getSshKeys().isEmpty());
 
-    if (sshKeys == null) {
-      return false;
-    }
-    if (sshKeys.isEmpty()) {
-      return false;
-    }
-    return true;
   }
 
   private boolean setFirstAsPrimaryIfNone(IamAccount account) {
@@ -67,18 +65,16 @@ public class SshKeyUpdater implements Updater<IamAccount, List<ScimSshKey>> {
   }
 
   @Override
-  public boolean add(IamAccount account, List<ScimSshKey> sshKeys) {
+  public boolean add(IamAccount account, ScimUser user) {
 
-    if (!isValid(account, sshKeys)) {
-      return false;
-    }
+    validate(account, user);
 
-    boolean hasChanged = false;
-
-    for (ScimSshKey sshKey : sshKeys) {
-
-      hasChanged |= addSshKey(account, sshKey);
-    }
+    boolean hasChanged = user.getIndigoUser()
+      .getSshKeys()
+      .stream()
+      .map(sshKey -> addSshKey(account, sshKey))
+      .filter(result -> result)
+      .count() > 1;
 
     checkForPrimaryDuplicates(account.getSshKeys());
     hasChanged |= setFirstAsPrimaryIfNone(account);
@@ -87,18 +83,16 @@ public class SshKeyUpdater implements Updater<IamAccount, List<ScimSshKey>> {
   }
 
   @Override
-  public boolean remove(IamAccount account, List<ScimSshKey> sshKeys) {
+  public boolean remove(IamAccount account, ScimUser user) {
 
-    if (!isValid(account, sshKeys)) {
-      return false;
-    }
+    validate(account, user);
 
-    boolean hasChanged = false;
-
-    for (ScimSshKey sshKey : sshKeys) {
-
-      hasChanged |= removeSshKey(account, sshKey);
-    }
+    boolean hasChanged = user.getIndigoUser()
+        .getSshKeys()
+        .stream()
+        .map(sshKey -> removeSshKey(account, sshKey))
+        .filter(result -> result)
+        .count() > 1;
 
     hasChanged |= setFirstAsPrimaryIfNone(account);
 
@@ -106,18 +100,16 @@ public class SshKeyUpdater implements Updater<IamAccount, List<ScimSshKey>> {
   }
 
   @Override
-  public boolean replace(IamAccount account, List<ScimSshKey> sshKeys) {
+  public boolean replace(IamAccount account, ScimUser user) {
 
-    if (!isValid(account, sshKeys)) {
-      return false;
-    }
+    validate(account, user);
 
-    boolean hasChanged = false;
-
-    for (ScimSshKey sshKey : sshKeys) {
-
-      hasChanged |= replaceSshKey(account, sshKey);
-    }
+    boolean hasChanged = user.getIndigoUser()
+        .getSshKeys()
+        .stream()
+        .map(sshKey -> replaceSshKey(account, sshKey))
+        .filter(result -> result)
+        .count() > 1;
 
     checkForPrimaryDuplicates(account.getSshKeys());
     hasChanged |= setFirstAsPrimaryIfNone(account);
@@ -216,5 +208,12 @@ public class SshKeyUpdater implements Updater<IamAccount, List<ScimSshKey>> {
       sshKeyRepository.save(toReplace);
     }
     return hasChanged;
+  }
+
+  @Override
+  public boolean accept(ScimUser user) {
+
+    return user.getIndigoUser() != null && user.getIndigoUser().getSshKeys() != null
+        && !user.getIndigoUser().getSshKeys().isEmpty();
   }
 }

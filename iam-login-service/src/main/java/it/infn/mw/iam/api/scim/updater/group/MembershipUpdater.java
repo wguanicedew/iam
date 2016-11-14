@@ -43,4 +43,10 @@ public class MembershipUpdater implements Updater<IamAccount, IamGroup> {
 
     return add(account, group);
   }
+
+  @Override
+  public boolean accept(IamGroup updates) {
+
+    return true;
+  }
 }

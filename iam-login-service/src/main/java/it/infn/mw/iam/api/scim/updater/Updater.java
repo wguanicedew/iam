@@ -8,4 +8,6 @@ public interface Updater<T, U> {
 
   boolean replace(T target, U updates);
 
+  boolean accept(U updates);
+
 }

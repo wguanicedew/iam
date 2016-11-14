@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import it.infn.mw.iam.api.scim.converter.GroupConverter;
 import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
 import it.infn.mw.iam.api.scim.exception.ScimException;
-import it.infn.mw.iam.api.scim.exception.ScimPatchOperationNotSupported;
 import it.infn.mw.iam.api.scim.exception.ScimResourceExistsException;
 import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
 import it.infn.mw.iam.api.scim.model.ScimGroup;
@@ -23,7 +22,7 @@ import it.infn.mw.iam.api.scim.model.ScimMemberRef;
 import it.infn.mw.iam.api.scim.model.ScimPatchOperation;
 import it.infn.mw.iam.api.scim.provisioning.paging.OffsetPageable;
 import it.infn.mw.iam.api.scim.provisioning.paging.ScimPageRequest;
-import it.infn.mw.iam.api.scim.updater.GroupUpdater;
+import it.infn.mw.iam.api.scim.updater.ScimGroupUpdater;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.repository.IamGroupRepository;
@@ -35,7 +34,7 @@ public class ScimGroupProvisioning implements ScimProvisioning<ScimGroup, List<S
   private GroupConverter converter;
 
   @Autowired
-  private GroupUpdater groupUpdater;
+  private ScimGroupUpdater groupUpdater;
 
   @Autowired
   private IamGroupRepository groupRepository;
@@ -160,24 +159,7 @@ public class ScimGroupProvisioning implements ScimProvisioning<ScimGroup, List<S
     IamGroup iamGroup = groupRepository.findByUuid(id)
       .orElseThrow(() -> new ScimResourceNotFoundException("No group mapped to id '" + id + "'"));
 
-    for (ScimPatchOperation<List<ScimMemberRef>> op : operations) {
-
-      if (!op.getPath().equals("members")) {
-        throw new ScimPatchOperationNotSupported("path " + op.getPath() + " not supported");
-      }
-
-      switch (op.getOp()) {
-        case add:
-          groupUpdater.add(iamGroup, op.getValue());
-          break;
-        case remove:
-          groupUpdater.remove(iamGroup, op.getValue());
-          break;
-        case replace:
-          groupUpdater.replace(iamGroup, op.getValue());
-          break;
-      }
-    }
+    groupUpdater.update(iamGroup, operations);
   }
 
 }

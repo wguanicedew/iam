@@ -254,12 +254,13 @@ public class ScimUserProvisioningPatchReplaceTests {
     ScimUser updated_user =
         restUtils.doGet(user.getMeta().getLocation()).extract().as(ScimUser.class);
 
+    String sshKeyValue = user.getIndigoUser().getSshKeys().get(0).getValue();
+
     Assert.assertTrue(
         updated_user.getIndigoUser()
           .getSshKeys()
           .stream()
-          .filter(sshKey -> sshKey.getValue()
-            .equals(user.getIndigoUser().getSshKeys().get(0).getValue()) && !sshKey.isPrimary())
+          .filter(sshKey -> (sshKey.getValue().equals(sshKeyValue) && !sshKey.isPrimary()))
           .findFirst()
           .isPresent());
 

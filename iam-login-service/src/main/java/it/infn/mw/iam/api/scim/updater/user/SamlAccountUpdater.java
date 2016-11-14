@@ -1,6 +1,5 @@
 package it.infn.mw.iam.api.scim.updater.user;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,11 +8,11 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Preconditions;
 
 import it.infn.mw.iam.api.scim.converter.SamlIdConverter;
-import it.infn.mw.iam.api.scim.exception.ScimException;
 import it.infn.mw.iam.api.scim.exception.ScimPatchOperationNotSupported;
 import it.infn.mw.iam.api.scim.exception.ScimResourceExistsException;
 import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
 import it.infn.mw.iam.api.scim.model.ScimSamlId;
+import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.updater.Updater;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamSamlId;
@@ -21,7 +20,7 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamSamlIdRepository;
 
 @Component
-public class SamlAccountUpdater implements Updater<IamAccount, List<ScimSamlId>> {
+public class SamlAccountUpdater implements Updater<IamAccount, ScimUser> {
 
   @Autowired
   private IamAccountRepository accountRepository;
@@ -31,55 +30,43 @@ public class SamlAccountUpdater implements Updater<IamAccount, List<ScimSamlId>>
   @Autowired
   private SamlIdConverter samlIdConverter;
 
-  private boolean isValid(IamAccount account, List<ScimSamlId> samlIds) throws ScimException {
+  private void validate(IamAccount account, ScimUser user) {
 
     Preconditions.checkNotNull(account);
-
-    if (samlIds == null) {
-      return false;
-    }
-    if (samlIds.isEmpty()) {
-      return false;
-    }
-    return true;
+    Preconditions.checkNotNull(user);
+    Preconditions.checkNotNull(user.getIndigoUser());
+    Preconditions.checkNotNull(user.getIndigoUser().getSamlIds());
+    Preconditions.checkArgument(!user.getIndigoUser().getSamlIds().isEmpty());
   }
 
   @Override
-  public boolean add(IamAccount account, List<ScimSamlId> samlIds) {
+  public boolean add(IamAccount account, ScimUser user) {
 
-    if (!isValid(account, samlIds)) {
-      return false;
-    }
+    validate(account, user);
 
-    boolean hasChanged = false;
-
-    for (ScimSamlId samlId : samlIds) {
-
-      hasChanged |= addSamlAccount(account, samlId);
-    }
-
-    return hasChanged;
+    return user.getIndigoUser()
+      .getSamlIds()
+      .stream()
+      .map(samlId -> addSamlAccount(account, samlId))
+      .filter(result -> result)
+      .count() > 1;
   }
 
   @Override
-  public boolean remove(IamAccount account, List<ScimSamlId> samlIds) {
+  public boolean remove(IamAccount account, ScimUser user) {
 
-    if (!isValid(account, samlIds)) {
-      return false;
-    }
+    validate(account, user);
 
-    boolean hasChanged = false;
-
-    for (ScimSamlId samlId : samlIds) {
-
-      hasChanged |= removeSamlAccount(account, samlId);
-    }
-
-    return hasChanged;
+    return user.getIndigoUser()
+        .getSamlIds()
+        .stream()
+        .map(samlId -> removeSamlAccount(account, samlId))
+        .filter(result -> result)
+        .count() > 1;
   }
 
   @Override
-  public boolean replace(IamAccount account, List<ScimSamlId> samlIds) {
+  public boolean replace(IamAccount account, ScimUser user) {
 
     throw new ScimPatchOperationNotSupported("Replace SAML account is not supported");
   }
@@ -128,5 +115,12 @@ public class SamlAccountUpdater implements Updater<IamAccount, List<ScimSamlId>>
     samlIdRepository.delete(toRemove);
     account.getSamlIds().remove(toRemove);
     return true;
+  }
+
+  @Override
+  public boolean accept(ScimUser user) {
+
+    return user.getIndigoUser() != null && user.getIndigoUser().getSamlIds() != null
+        && !user.getIndigoUser().getSamlIds().isEmpty();  
   }
 }

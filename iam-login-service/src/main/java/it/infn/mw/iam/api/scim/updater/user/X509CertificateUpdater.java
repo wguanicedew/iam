@@ -1,6 +1,5 @@
 package it.infn.mw.iam.api.scim.updater.user;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +11,7 @@ import it.infn.mw.iam.api.scim.converter.X509CertificateConverter;
 import it.infn.mw.iam.api.scim.exception.ScimException;
 import it.infn.mw.iam.api.scim.exception.ScimResourceExistsException;
 import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
+import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.model.ScimX509Certificate;
 import it.infn.mw.iam.api.scim.updater.Updater;
 import it.infn.mw.iam.persistence.model.IamAccount;
@@ -20,7 +20,7 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamX509CertificateRepository;
 
 @Component
-public class X509CertificateUpdater implements Updater<IamAccount, List<ScimX509Certificate>> {
+public class X509CertificateUpdater implements Updater<IamAccount, ScimUser> {
 
   @Autowired
   private X509CertificateConverter certificateConverter;
@@ -30,30 +30,23 @@ public class X509CertificateUpdater implements Updater<IamAccount, List<ScimX509
   @Autowired
   private IamX509CertificateRepository x509CertificateRepository;
 
-  private boolean isValid(IamAccount account, List<ScimX509Certificate> certs)
+  private void validate(IamAccount account, ScimUser user)
       throws ScimException {
 
     Preconditions.checkNotNull(account);
-
-    if (certs == null) {
-      return false;
-    }
-    if (certs.isEmpty()) {
-      return false;
-    }
-    return true;
+    Preconditions.checkNotNull(user);
+    Preconditions.checkNotNull(user.getX509Certificates());
+    Preconditions.checkArgument(!user.getX509Certificates().isEmpty());
   }
 
   @Override
-  public boolean add(IamAccount account, List<ScimX509Certificate> certs) {
+  public boolean add(IamAccount account, ScimUser user) {
 
-    if (!isValid(account, certs)) {
-      return false;
-    }
+    validate(account, user);
 
     boolean hasChanged = false;
 
-    for (ScimX509Certificate cert : certs) {
+    for (ScimX509Certificate cert : user.getX509Certificates()) {
       hasChanged |= addX509Certificate(account, cert);
     }
 
@@ -71,15 +64,13 @@ public class X509CertificateUpdater implements Updater<IamAccount, List<ScimX509
   }
 
   @Override
-  public boolean remove(IamAccount account, List<ScimX509Certificate> certs) {
+  public boolean remove(IamAccount account, ScimUser user) {
 
-    if (!isValid(account, certs)) {
-      return false;
-    }
+    validate(account, user);
     
     boolean hasChanged = false;
 
-    for (ScimX509Certificate cert : certs) {
+    for (ScimX509Certificate cert : user.getX509Certificates()) {
       hasChanged |= removeX509Certificate(account, cert);
     }
 
@@ -94,15 +85,13 @@ public class X509CertificateUpdater implements Updater<IamAccount, List<ScimX509
   }
 
   @Override
-  public boolean replace(IamAccount account, List<ScimX509Certificate> certs) {
+  public boolean replace(IamAccount account, ScimUser user) {
 
-    if (!isValid(account, certs)) {
-      return false;
-    }
+    validate(account, user);
 
     boolean hasChanged = false;
 
-    for (ScimX509Certificate cert : certs) {
+    for (ScimX509Certificate cert : user.getX509Certificates()) {
       hasChanged |= replaceX509Certificate(account, cert);
     }
 
@@ -190,6 +179,12 @@ public class X509CertificateUpdater implements Updater<IamAccount, List<ScimX509
       x509CertificateRepository.save(toReplace);
     }
     return hasChanged;
+  }
+
+  @Override
+  public boolean accept(ScimUser user) {
+
+    return user.getX509Certificates() != null && !user.getX509Certificates().isEmpty();
   }
 
 }

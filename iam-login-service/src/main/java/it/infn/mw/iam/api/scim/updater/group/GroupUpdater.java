@@ -1,4 +1,4 @@
-package it.infn.mw.iam.api.scim.updater;
+package it.infn.mw.iam.api.scim.updater.group;
 
 import java.util.List;
 
@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import it.infn.mw.iam.api.scim.exception.ScimException;
 import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
 import it.infn.mw.iam.api.scim.model.ScimMemberRef;
+import it.infn.mw.iam.api.scim.updater.Updater;
 import it.infn.mw.iam.api.scim.updater.group.MembershipUpdater;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamGroup;
@@ -106,5 +107,10 @@ public class GroupUpdater implements Updater<IamGroup, List<ScimMemberRef>> {
       .orElseThrow(() -> new ScimResourceNotFoundException("No user mapped to id '" + uuid + "'"));
 
     return membershipUpdater.remove(account, group);
+  }
+
+  @Override
+  public boolean accept(List<ScimMemberRef> updates) {
+    return true;
   }
 }

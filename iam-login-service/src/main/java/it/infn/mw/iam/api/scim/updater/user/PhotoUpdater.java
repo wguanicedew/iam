@@ -1,60 +1,50 @@
 package it.infn.mw.iam.api.scim.updater.user;
 
-import java.util.List;
-
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Preconditions;
 
 import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
-import it.infn.mw.iam.api.scim.model.ScimPhoto;
+import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.updater.Updater;
 import it.infn.mw.iam.persistence.model.IamAccount;
 
 @Component
-public class PhotoUpdater implements Updater<IamAccount, List<ScimPhoto>> {
+public class PhotoUpdater implements Updater<IamAccount, ScimUser> {
 
-  private boolean isValid(IamAccount account, List<ScimPhoto> photos) {
+  private void validate(IamAccount account, ScimUser user) {
 
     Preconditions.checkNotNull(account);
-    if (photos == null) {
-      return false;
-    }
-    if (photos.isEmpty()) {
-      return false;
-    }
-    Preconditions.checkArgument(photos.size() == 1,
-        "Specifying more than one photo is not supported!");
-    Preconditions.checkNotNull(photos.get(0), "Null photo found");
-    Preconditions.checkNotNull(photos.get(0).getValue(), "Null photo value found");
-    return true;
+    Preconditions.checkNotNull(user);
+    Preconditions.checkNotNull(user.getPhotos());
+    Preconditions.checkArgument(!user.getPhotos().isEmpty());
+    Preconditions.checkArgument(user.getPhotos().size() == 1);
+    Preconditions.checkNotNull(user.getPhotos().get(0), "Null photo found");
+    Preconditions.checkNotNull(user.getPhotos().get(0).getValue(), "Null photo value found");
   }
 
   @Override
-  public boolean add(IamAccount account, List<ScimPhoto> photos) {
+  public boolean add(IamAccount account, ScimUser user) {
 
-    if (!isValid(account, photos)) {
-      return false;
-    }
+    validate(account, user);
 
-    final String picture = photos.get(0).getValue();
+    final String picture = user.getPhotos().get(0).getValue();
 
     if (picture.equals(account.getUserInfo().getPicture())) {
       return false;
     }
 
-    account.getUserInfo().setPicture(photos.get(0).getValue());
+    account.getUserInfo().setPicture(picture);
     return true;
   }
 
   @Override
-  public boolean remove(IamAccount account, List<ScimPhoto> photos) {
+  public boolean remove(IamAccount account, ScimUser user) {
 
-    if (!isValid(account, photos)) {
-      return false;
-    }
+    validate(account, user);
 
-    final String picture = photos.get(0).getValue();
+    final String picture = user.getPhotos().get(0).getValue();
+
     if (!picture.equals(account.getUserInfo().getPicture())) {
       throw new ScimResourceNotFoundException("Photo value " + picture + " not found");
     }
@@ -63,19 +53,23 @@ public class PhotoUpdater implements Updater<IamAccount, List<ScimPhoto>> {
   }
 
   @Override
-  public boolean replace(IamAccount account, List<ScimPhoto> photos) {
+  public boolean replace(IamAccount account, ScimUser user) {
 
-    if (!isValid(account, photos)) {
-      return false;
-    }
+    validate(account, user);
 
-    final String picture = photos.get(0).getValue();
+    final String picture = user.getPhotos().get(0).getValue();
 
     if (picture.equals(account.getUserInfo().getPicture())) {
       return false;
     }
     account.getUserInfo().setPicture(picture);
     return true;
+  }
+
+  @Override
+  public boolean accept(ScimUser user) {
+
+    return user.getPhotos() != null && !user.getPhotos().isEmpty();
   }
 
 }

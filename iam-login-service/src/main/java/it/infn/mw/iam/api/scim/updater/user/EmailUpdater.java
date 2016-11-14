@@ -1,7 +1,5 @@
 package it.infn.mw.iam.api.scim.updater.user;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -9,65 +7,63 @@ import com.google.common.base.Preconditions;
 
 import it.infn.mw.iam.api.scim.exception.ScimPatchOperationNotSupported;
 import it.infn.mw.iam.api.scim.exception.ScimResourceExistsException;
-import it.infn.mw.iam.api.scim.model.ScimEmail;
+import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.updater.Updater;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
 @Component
-public class EmailUpdater implements Updater<IamAccount, List<ScimEmail>> {
+public class EmailUpdater implements Updater<IamAccount, ScimUser> {
 
   @Autowired
   private IamAccountRepository accountRepository;
-  
-  private boolean isValid(IamAccount account, List<ScimEmail> emails) {
+
+  private void validate(IamAccount account, ScimUser user) {
 
     Preconditions.checkNotNull(account);
-    if (emails == null) {
-      return false;
-    }
-    if (emails.isEmpty()) {
-      return false;
-    }
-    Preconditions.checkArgument(emails.size() == 1,
+    Preconditions.checkNotNull(user);
+    Preconditions.checkNotNull(user.getEmails());
+    Preconditions.checkArgument(user.getEmails().size() == 1,
         "Specifying more than one email is not supported!");
-    Preconditions.checkNotNull(emails.get(0), "Null email found");
-    Preconditions.checkNotNull(emails.get(0).getValue(), "Null email value found");
+    Preconditions.checkNotNull(user.getEmails().get(0), "Null email found");
+    Preconditions.checkNotNull(user.getEmails().get(0).getValue(), "Null email value found");
 
-    if (accountRepository.findByEmailWithDifferentUUID(emails.get(0).getValue(), account.getUuid())
-      .isPresent()) {
-      throw new ScimResourceExistsException(
-          "email " + emails.get(0).getValue() + " already assigned to another user");
+    final String email = user.getEmails().get(0).getValue();
+    if (accountRepository.findByEmailWithDifferentUUID(email, account.getUuid()).isPresent()) {
+      throw new ScimResourceExistsException("email " + email + " already assigned to another user");
     }
-    return true;
   }
 
   @Override
-  public boolean add(IamAccount account, List<ScimEmail> emails) {
+  public boolean add(IamAccount account, ScimUser user) {
 
-    return replace(account, emails);
+    return replace(account, user);
   }
 
   @Override
-  public boolean remove(IamAccount account, List<ScimEmail> emails) {
+  public boolean remove(IamAccount account, ScimUser user) {
 
     throw new ScimPatchOperationNotSupported("Remove email is not supported");
   }
 
   @Override
-  public boolean replace(IamAccount account, List<ScimEmail> emails) {
+  public boolean replace(IamAccount account, ScimUser user) {
 
-    if (!isValid(account, emails)) {
-      return false;
-    }
+    validate(account, user);
 
-    final String email = emails.get(0).getValue();
+    final String email = user.getEmails().get(0).getValue();
 
     if (email.equals(account.getUserInfo().getEmail())) {
       return false;
     }
     account.getUserInfo().setEmail(email);
     return true;
+  }
+
+  @Override
+  public boolean accept(ScimUser user) {
+
+    return user.getEmails() != null && !user.getEmails().isEmpty();
   }
 
 }

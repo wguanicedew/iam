@@ -5,78 +5,71 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Preconditions;
 
-import it.infn.mw.iam.api.scim.exception.ScimException;
-import it.infn.mw.iam.api.scim.model.ScimIndigoUser;
+import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.updater.Updater;
 import it.infn.mw.iam.persistence.model.IamAccount;
 
 @Component
-public class IndigoUserUpdater implements Updater<IamAccount, ScimIndigoUser> {
+public class IndigoUserUpdater implements Updater<IamAccount, ScimUser> {
+
+  private UserUpdaterCollection addUpdaters;
+  private UserUpdaterCollection replaceUpdaters;
+  private UserUpdaterCollection removeUpdaters;
 
   @Autowired
-  private OpenIDConnectAccountUpdater oidcIdConnectAccountUpdater;
-  @Autowired
-  private SshKeyUpdater sshKeyUpdater;
-  @Autowired
-  private SamlAccountUpdater samlAccountUpdater;
+  public IndigoUserUpdater(OpenIDConnectAccountUpdater openIDConnectAccountUpdater,
+      SshKeyUpdater sshKeyUpdater, SamlAccountUpdater samlAccountUpdater) {
+    
+    addUpdaters = new UserUpdaterCollection();
+    addUpdaters.addUpdater(openIDConnectAccountUpdater);
+    addUpdaters.addUpdater(sshKeyUpdater);
+    addUpdaters.addUpdater(samlAccountUpdater);
 
-  private boolean isValid(IamAccount account, ScimIndigoUser indigoUser) throws ScimException {
+    replaceUpdaters = new UserUpdaterCollection();
+    replaceUpdaters.addUpdater(sshKeyUpdater);
+
+    removeUpdaters = new UserUpdaterCollection();
+    removeUpdaters.addUpdater(openIDConnectAccountUpdater);
+    removeUpdaters.addUpdater(sshKeyUpdater);
+    removeUpdaters.addUpdater(samlAccountUpdater);
+  }
+
+  private void validate(IamAccount account, ScimUser user) {
 
     Preconditions.checkNotNull(account);
-
-    if (indigoUser == null) {
-      return false;
-    }
-    if (indigoUser.isEmpty()) {
-      return false;
-    }
-    return true;
+    Preconditions.checkNotNull(user);
+    Preconditions.checkNotNull(user.getIndigoUser());
+    Preconditions.checkArgument(!user.getIndigoUser().isEmpty());
   }
 
   @Override
-  public boolean add(IamAccount account, ScimIndigoUser indigoUser) {
+  public boolean add(IamAccount account, ScimUser user) {
 
-    if (!isValid(account, indigoUser)) {
-      return false;
-    }
+    validate(account, user);
 
-    boolean hasChanged = false;
-
-    hasChanged |= oidcIdConnectAccountUpdater.add(account, indigoUser.getOidcIds());
-    hasChanged |= sshKeyUpdater.add(account, indigoUser.getSshKeys());
-    hasChanged |= samlAccountUpdater.add(account, indigoUser.getSamlIds());
-
-    return hasChanged;
+    return addUpdaters.add(account,  user);
   }
 
   @Override
-  public boolean remove(IamAccount account, ScimIndigoUser indigoUser) {
+  public boolean remove(IamAccount account, ScimUser user) {
 
-    if (!isValid(account, indigoUser)) {
-      return false;
-    }
+    validate(account, user);
 
-    boolean hasChanged = false;
-
-    hasChanged |= oidcIdConnectAccountUpdater.remove(account, indigoUser.getOidcIds());
-    hasChanged |= sshKeyUpdater.remove(account, indigoUser.getSshKeys());
-    hasChanged |= samlAccountUpdater.remove(account, indigoUser.getSamlIds());
-
-    return hasChanged;
+    return removeUpdaters.remove(account,  user);
   }
 
   @Override
-  public boolean replace(IamAccount account, ScimIndigoUser indigoUser) {
+  public boolean replace(IamAccount account, ScimUser user) {
 
-    if (!isValid(account, indigoUser)) {
-      return false;
-    }
+    validate(account, user);
 
-    boolean hasChanged = false;
+    return replaceUpdaters.replace(account,  user);
+  }
 
-    hasChanged |= sshKeyUpdater.replace(account, indigoUser.getSshKeys());
+  @Override
+  public boolean accept(ScimUser user) {
 
-    return hasChanged;
+    return user.getIndigoUser() != null && !user.getIndigoUser().isEmpty();
   }
 
 }

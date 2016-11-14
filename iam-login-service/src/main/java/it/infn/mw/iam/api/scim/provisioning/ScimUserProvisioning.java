@@ -15,7 +15,6 @@ import it.infn.mw.iam.api.scim.converter.AddressConverter;
 import it.infn.mw.iam.api.scim.converter.UserConverter;
 import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
 import it.infn.mw.iam.api.scim.exception.ScimException;
-import it.infn.mw.iam.api.scim.exception.ScimPatchOperationNotSupported;
 import it.infn.mw.iam.api.scim.exception.ScimResourceExistsException;
 import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
 import it.infn.mw.iam.api.scim.model.ScimListResponse;
@@ -23,7 +22,7 @@ import it.infn.mw.iam.api.scim.model.ScimPatchOperation;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.provisioning.paging.OffsetPageable;
 import it.infn.mw.iam.api.scim.provisioning.paging.ScimPageRequest;
-import it.infn.mw.iam.api.scim.updater.UserUpdater;
+import it.infn.mw.iam.api.scim.updater.ScimUserUpdater;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamOidcId;
 import it.infn.mw.iam.persistence.model.IamSamlId;
@@ -41,37 +40,27 @@ import it.infn.mw.iam.util.ssh.RSAPublicKeyUtils;
 @Service
 public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser> {
 
-  private final UserConverter converter;
-  private final AddressConverter addressConverter;
+  @Autowired
+  private UserConverter converter;
+  @Autowired
+  private AddressConverter addressConverter;
 
-  private final UserUpdater updater;
+  @Autowired
+  private ScimUserUpdater updater;
 
-  private final IamAccountRepository accountRepository;
-  private final IamOidcIdRepository oidcIdRepository;
-  private final IamSshKeyRepository sshKeyRepository;
-  private final IamSamlIdRepository samlIdRepository;
-
-  private final IamAuthoritiesRepository authorityRepository;
+  @Autowired
+  private IamAccountRepository accountRepository;
+  @Autowired
+  private IamOidcIdRepository oidcIdRepository;
+  @Autowired
+  private IamSshKeyRepository sshKeyRepository;
+  @Autowired
+  private IamSamlIdRepository samlIdRepository;
+  @Autowired
+  private IamAuthoritiesRepository authorityRepository;
 
   @Autowired
   private PasswordEncoder passwordEncoder;
-
-  @Autowired
-  public ScimUserProvisioning(UserConverter converter, AddressConverter addressConverter,
-      UserUpdater updater, IamAccountRepository accountRepo, IamOidcIdRepository oidcIdRepository,
-      IamSshKeyRepository sshKeyRepository, IamSamlIdRepository samlIdRepository,
-      IamAuthoritiesRepository authorityRepo) {
-
-    this.converter = converter;
-    this.addressConverter = addressConverter;
-    this.updater = updater;
-    this.accountRepository = accountRepo;
-    this.oidcIdRepository = oidcIdRepository;
-    this.sshKeyRepository = sshKeyRepository;
-    this.samlIdRepository = samlIdRepository;
-    this.authorityRepository = authorityRepo;
-
-  }
 
   private void idSanityChecks(final String id) {
 
@@ -338,24 +327,7 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
     IamAccount iamAccount = accountRepository.findByUuid(id)
       .orElseThrow(() -> new ScimResourceNotFoundException("No user mapped to id '" + id + "'"));
 
-    for (ScimPatchOperation<ScimUser> op: operations) {
-
-      if (op.getPath() != null) {
-        throw new ScimPatchOperationNotSupported("Path " + op.getPath() + " is not supported");
-      }
-
-      switch (op.getOp()) {
-        case add:
-          updater.add(iamAccount, op.getValue());
-          break;
-        case remove:
-          updater.remove(iamAccount, op.getValue());
-          break;
-        case replace:
-          updater.replace(iamAccount, op.getValue());
-          break;
-      }
-    }
+    updater.update(iamAccount, operations);
   }
 
 }

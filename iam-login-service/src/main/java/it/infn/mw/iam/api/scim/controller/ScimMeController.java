@@ -2,6 +2,8 @@ package it.infn.mw.iam.api.scim.controller;
 
 import static it.infn.mw.iam.api.scim.controller.utils.ValidationHelper.handleValidationError;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,10 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import it.infn.mw.iam.api.scim.converter.UserConverter;
 import it.infn.mw.iam.api.scim.exception.ScimException;
-import it.infn.mw.iam.api.scim.exception.ScimPatchOperationNotSupported;
 import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
 import it.infn.mw.iam.api.scim.model.ScimConstants;
-import it.infn.mw.iam.api.scim.model.ScimPatchOperation;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.model.ScimUserPatchRequest;
 import it.infn.mw.iam.api.scim.updater.MeUpdater;
@@ -30,6 +30,7 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
 @RestController
 @RequestMapping("/scim/Me")
+@Transactional
 public class ScimMeController {
 
   @Autowired
@@ -61,24 +62,7 @@ public class ScimMeController {
 
     IamAccount account = getCurrentUserAccount();
 
-    for (ScimPatchOperation<ScimUser> op : patchRequest.getOperations()) {
-
-      if (op.getPath() != null) {
-        throw new ScimPatchOperationNotSupported("Path " + op.getPath() + " is not supported");
-      }
-
-      switch (op.getOp()) {
-        case add:
-          meUpdater.add(account, op.getValue());
-          break;
-        case remove:
-          meUpdater.remove(account, op.getValue());
-          break;
-        case replace:
-          meUpdater.replace(account, op.getValue());
-          break;
-      }
-    }
+    meUpdater.update(account, patchRequest.getOperations());
   }
 
   private IamAccount getCurrentUserAccount() throws ScimException, ScimResourceNotFoundException {
