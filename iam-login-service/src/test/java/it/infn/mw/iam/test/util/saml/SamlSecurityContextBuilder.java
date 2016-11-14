@@ -19,10 +19,17 @@ public class SamlSecurityContextBuilder extends SecurityContextBuilderSupport {
 
   SAMLCredential samlCredential;
 
+  String subjectAttribute = SamlAttributeNames.eduPersonUniqueId;
+
   public SamlSecurityContextBuilder() {
     samlCredential = Mockito.mock(SAMLCredential.class);
     issuer = SamlExternalAuthenticationTestSupport.DEFAULT_IDP_ID;
     subject = "test-saml-user";
+  }
+
+  public SamlSecurityContextBuilder subjectAttribute(String subjectAttr) {
+    this.subjectAttribute = subjectAttr;
+    return this;
   }
 
   @Override
@@ -48,11 +55,13 @@ public class SamlSecurityContextBuilder extends SecurityContextBuilderSupport {
 
     when(samlCredential.getRemoteEntityID()).thenReturn(issuer);
 
+    when(samlCredential.getAttributeAsString(subjectAttribute)).thenReturn(subject);
+
     ExpiringUsernameAuthenticationToken samlToken = new ExpiringUsernameAuthenticationToken(
-	expirationTime, username, samlCredential, authorities);
+        expirationTime, subject, samlCredential, authorities);
 
     SamlExternalAuthenticationToken token = new SamlExternalAuthenticationToken(samlToken,
-	samlToken.getTokenExpiration(), username, samlToken.getCredentials(), authorities);
+        samlToken.getTokenExpiration(), subject, samlToken.getCredentials(), authorities);
 
     context.setAuthentication(token);
 

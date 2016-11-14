@@ -79,13 +79,13 @@ public class DefaultRegistrationRequestService implements RegistrationRequestSer
 
     if (OIDC.equals(extAuthnInfo.getType())) {
       ScimOidcId oidcId = new ScimOidcId.Builder().issuer(extAuthnInfo.getIssuer())
-	.subject(extAuthnInfo.getSubject())
-	.build();
+        .subject(extAuthnInfo.getSubject())
+        .build();
       user.addOidcId(oidcId);
     } else if (ExternalAuthenticationType.SAML.equals(extAuthnInfo.getType())) {
       ScimSamlId samlId = new ScimSamlId.Builder().idpId(extAuthnInfo.getIssuer())
-	.userId(extAuthnInfo.getSubject())
-	.build();
+        .userId(extAuthnInfo.getSubject())
+        .build();
       user.addSamlId(samlId);
     }
   }
@@ -108,9 +108,12 @@ public class DefaultRegistrationRequestService implements RegistrationRequestSer
     IamRegistrationRequest regRequest = new IamRegistrationRequest();
     regRequest.setUuid(UUID.randomUUID().toString());
     regRequest.setCreationTime(new Date());
-    regRequest.setAccount(newAccount);
+
     regRequest.setStatus(NEW);
     regRequest.setNotes(request.getNotes());
+
+    regRequest.setAccount(newAccount);
+    newAccount.setRegistrationRequest(regRequest);
 
     requestRepository.save(regRequest);
 

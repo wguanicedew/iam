@@ -18,6 +18,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import javax.transaction.Transactional;
+
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Before;
@@ -47,6 +49,7 @@ import it.infn.mw.iam.test.util.oidc.MockOIDCProvider;
 @SpringApplicationConfiguration(classes = {IamLoginService.class, OidcTestConfig.class,
     FullyMockedOidcClientConfiguration.class})
 @WebAppConfiguration
+@Transactional
 public class OidcAccountLinkingTests {
   @Autowired
   private WebApplicationContext context;
@@ -82,11 +85,11 @@ public class OidcAccountLinkingTests {
       .andExpect(status().isFound())
       .andExpect(redirectedUrl("/openid_connect_login"))
       .andExpect(
-	  request().sessionAttribute(ACCOUNT_LINKING_SESSION_EXT_AUTHENTICATION, nullValue()))
+          request().sessionAttribute(ACCOUNT_LINKING_SESSION_EXT_AUTHENTICATION, nullValue()))
       .andExpect(
-	  request().sessionAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION, notNullValue()))
+          request().sessionAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION, notNullValue()))
       .andExpect(request().sessionAttribute(ACCOUNT_LINKING_SESSION_KEY,
-	  Matchers.equalTo("/iam/account-linking/OIDC")))
+          Matchers.equalTo("/iam/account-linking/OIDC")))
       .andReturn()
       .getRequest()
       .getSession();
@@ -94,7 +97,7 @@ public class OidcAccountLinkingTests {
     session = (MockHttpSession) mvc.perform(get("/openid_connect_login").session(session))
       .andExpect(status().isFound())
       .andExpect(MockMvcResultMatchers
-	.redirectedUrlPattern(OidcTestConfig.TEST_OIDC_AUTHORIZATION_ENDPOINT_URI + "**"))
+        .redirectedUrlPattern(OidcTestConfig.TEST_OIDC_AUTHORIZATION_ENDPOINT_URI + "**"))
       .andReturn()
       .getRequest()
       .getSession();
@@ -105,33 +108,37 @@ public class OidcAccountLinkingTests {
     oidcProvider.prepareTokenResponse(TEST_OIDC_CLIENT_ID, TEST_100_USER, nonce);
 
     session =
-	(MockHttpSession) mvc
-	  .perform(get("/openid_connect_login").param("state", state)
-	    .param("code", "1234")
-	    .session(session))
-	  .andExpect(status().isOk())
-	  .andExpect(forwardedUrl("/iam/account-linking/OIDC/done"))
-	  .andReturn()
-	  .getRequest()
-	  .getSession();
+        (MockHttpSession) mvc
+          .perform(get("/openid_connect_login").param("state", state)
+            .param("code", "1234")
+            .session(session))
+          .andExpect(status().isOk())
+          .andExpect(forwardedUrl("/iam/account-linking/OIDC/done"))
+          .andReturn()
+          .getRequest()
+          .getSession();
 
     session = (MockHttpSession) mvc.perform(get("/iam/account-linking/OIDC/done").session(session))
       .andExpect(status().isFound())
       .andExpect(redirectedUrl("/dashboard"))
       .andExpect(
-	  request().sessionAttribute(ACCOUNT_LINKING_SESSION_EXT_AUTHENTICATION, nullValue()))
+          request().sessionAttribute(ACCOUNT_LINKING_SESSION_EXT_AUTHENTICATION, nullValue()))
       .andExpect(
-	  request().sessionAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION, nullValue()))
+          request().sessionAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION, nullValue()))
       .andExpect(request().sessionAttribute(ACCOUNT_LINKING_SESSION_KEY, nullValue()))
       .andReturn()
       .getRequest()
       .getSession();
 
     IamAccount userAccount =
-	iamAccountRepo.findByOidcId(OidcTestConfig.TEST_OIDC_ISSUER, TEST_100_USER)
-	  .orElseThrow(() -> new UsernameNotFoundException("User not found!"));
+        iamAccountRepo.findByOidcId(OidcTestConfig.TEST_OIDC_ISSUER, TEST_100_USER)
+          .orElseThrow(() -> new UsernameNotFoundException("User not found!"));
 
     Assert.assertThat(userAccount.getUsername(), Matchers.equalTo(TEST_100_USER));
+
+    userAccount.getOidcIds().stream().forEach(i -> i.setAccount(null));
+    userAccount.getOidcIds().clear();
+    iamAccountRepo.save(userAccount);
 
   }
 
@@ -143,11 +150,11 @@ public class OidcAccountLinkingTests {
       .andExpect(status().isFound())
       .andExpect(redirectedUrl("/openid_connect_login"))
       .andExpect(
-	  request().sessionAttribute(ACCOUNT_LINKING_SESSION_EXT_AUTHENTICATION, nullValue()))
+          request().sessionAttribute(ACCOUNT_LINKING_SESSION_EXT_AUTHENTICATION, nullValue()))
       .andExpect(
-	  request().sessionAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION, notNullValue()))
+          request().sessionAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION, notNullValue()))
       .andExpect(request().sessionAttribute(ACCOUNT_LINKING_SESSION_KEY,
-	  Matchers.equalTo("/iam/account-linking/OIDC")))
+          Matchers.equalTo("/iam/account-linking/OIDC")))
       .andReturn()
       .getRequest()
       .getSession();
@@ -155,7 +162,7 @@ public class OidcAccountLinkingTests {
     session = (MockHttpSession) mvc.perform(get("/openid_connect_login").session(session))
       .andExpect(status().isFound())
       .andExpect(MockMvcResultMatchers
-	.redirectedUrlPattern(OidcTestConfig.TEST_OIDC_AUTHORIZATION_ENDPOINT_URI + "**"))
+        .redirectedUrlPattern(OidcTestConfig.TEST_OIDC_AUTHORIZATION_ENDPOINT_URI + "**"))
       .andReturn()
       .getRequest()
       .getSession();
@@ -166,23 +173,23 @@ public class OidcAccountLinkingTests {
     oidcProvider.prepareTokenResponse(TEST_OIDC_CLIENT_ID, "test-user", nonce);
 
     session =
-	(MockHttpSession) mvc
-	  .perform(get("/openid_connect_login").param("state", state)
-	    .param("code", "1234")
-	    .session(session))
-	  .andExpect(status().isOk())
-	  .andExpect(forwardedUrl("/iam/account-linking/OIDC/done"))
-	  .andReturn()
-	  .getRequest()
-	  .getSession();
+        (MockHttpSession) mvc
+          .perform(get("/openid_connect_login").param("state", state)
+            .param("code", "1234")
+            .session(session))
+          .andExpect(status().isOk())
+          .andExpect(forwardedUrl("/iam/account-linking/OIDC/done"))
+          .andReturn()
+          .getRequest()
+          .getSession();
 
     session = (MockHttpSession) mvc.perform(get("/iam/account-linking/OIDC/done").session(session))
       .andExpect(status().isFound())
       .andExpect(redirectedUrl("/dashboard"))
       .andExpect(
-	  request().sessionAttribute(ACCOUNT_LINKING_SESSION_EXT_AUTHENTICATION, nullValue()))
+          request().sessionAttribute(ACCOUNT_LINKING_SESSION_EXT_AUTHENTICATION, nullValue()))
       .andExpect(
-	  request().sessionAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION, nullValue()))
+          request().sessionAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION, nullValue()))
       .andExpect(request().sessionAttribute(ACCOUNT_LINKING_SESSION_KEY, nullValue()))
       .andExpect(request().sessionAttribute(ACCOUNT_LINKING_ERROR_KEY, notNullValue()))
       .andReturn()
@@ -190,11 +197,11 @@ public class OidcAccountLinkingTests {
       .getSession();
 
     String expectedErrorMessage =
-	String.format("OpenID connect account '[%s] %s' is already linked to another user",
-	    OidcTestConfig.TEST_OIDC_ISSUER, "test-user");
+        String.format("OpenID connect account '[%s] %s' is already linked to another user",
+            OidcTestConfig.TEST_OIDC_ISSUER, "test-user");
 
     AccountAlreadyLinkedError e =
-	(AccountAlreadyLinkedError) session.getAttribute(ACCOUNT_LINKING_ERROR_KEY);
+        (AccountAlreadyLinkedError) session.getAttribute(ACCOUNT_LINKING_ERROR_KEY);
     assertThat(expectedErrorMessage, equalTo(e.getMessage()));
 
   }
@@ -208,11 +215,11 @@ public class OidcAccountLinkingTests {
       .andExpect(status().isFound())
       .andExpect(redirectedUrl("/openid_connect_login"))
       .andExpect(
-	  request().sessionAttribute(ACCOUNT_LINKING_SESSION_EXT_AUTHENTICATION, nullValue()))
+          request().sessionAttribute(ACCOUNT_LINKING_SESSION_EXT_AUTHENTICATION, nullValue()))
       .andExpect(
-	  request().sessionAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION, notNullValue()))
+          request().sessionAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION, notNullValue()))
       .andExpect(request().sessionAttribute(ACCOUNT_LINKING_SESSION_KEY,
-	  Matchers.equalTo("/iam/account-linking/OIDC")))
+          Matchers.equalTo("/iam/account-linking/OIDC")))
       .andReturn()
       .getRequest()
       .getSession();
@@ -220,7 +227,7 @@ public class OidcAccountLinkingTests {
     session = (MockHttpSession) mvc.perform(get("/openid_connect_login").session(session))
       .andExpect(status().isFound())
       .andExpect(MockMvcResultMatchers
-	.redirectedUrlPattern(OidcTestConfig.TEST_OIDC_AUTHORIZATION_ENDPOINT_URI + "**"))
+        .redirectedUrlPattern(OidcTestConfig.TEST_OIDC_AUTHORIZATION_ENDPOINT_URI + "**"))
       .andReturn()
       .getRequest()
       .getSession();
@@ -230,23 +237,23 @@ public class OidcAccountLinkingTests {
 
     oidcProvider.prepareTokenResponse(TEST_OIDC_CLIENT_ID, "test-user", nonce);
     session =
-	(MockHttpSession) mvc
-	  .perform(get("/openid_connect_login").param("state", state)
-	    .param("code", "1234")
-	    .session(session))
-	  .andExpect(status().isOk())
-	  .andExpect(forwardedUrl("/iam/account-linking/OIDC/done"))
-	  .andReturn()
-	  .getRequest()
-	  .getSession();
+        (MockHttpSession) mvc
+          .perform(get("/openid_connect_login").param("state", state)
+            .param("code", "1234")
+            .session(session))
+          .andExpect(status().isOk())
+          .andExpect(forwardedUrl("/iam/account-linking/OIDC/done"))
+          .andReturn()
+          .getRequest()
+          .getSession();
 
     session = (MockHttpSession) mvc.perform(get("/iam/account-linking/OIDC/done").session(session))
       .andExpect(status().isFound())
       .andExpect(redirectedUrl("/dashboard"))
       .andExpect(
-	  request().sessionAttribute(ACCOUNT_LINKING_SESSION_EXT_AUTHENTICATION, nullValue()))
+          request().sessionAttribute(ACCOUNT_LINKING_SESSION_EXT_AUTHENTICATION, nullValue()))
       .andExpect(
-	  request().sessionAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION, nullValue()))
+          request().sessionAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION, nullValue()))
       .andExpect(request().sessionAttribute(ACCOUNT_LINKING_SESSION_KEY, nullValue()))
       .andExpect(request().sessionAttribute(ACCOUNT_LINKING_ERROR_KEY, notNullValue()))
       .andReturn()
@@ -254,11 +261,11 @@ public class OidcAccountLinkingTests {
       .getSession();
 
     String expectedErrorMessage =
-	String.format("OpenID connect account '[%s] %s' is already linked to user '%s'",
-	    OidcTestConfig.TEST_OIDC_ISSUER, "test-user", "test");
+        String.format("OpenID connect account '[%s] %s' is already linked to user '%s'",
+            OidcTestConfig.TEST_OIDC_ISSUER, "test-user", "test");
 
     AccountAlreadyLinkedError e =
-	(AccountAlreadyLinkedError) session.getAttribute(ACCOUNT_LINKING_ERROR_KEY);
+        (AccountAlreadyLinkedError) session.getAttribute(ACCOUNT_LINKING_ERROR_KEY);
     assertThat(expectedErrorMessage, equalTo(e.getMessage()));
 
   }
@@ -270,11 +277,11 @@ public class OidcAccountLinkingTests {
       .andExpect(status().isFound())
       .andExpect(redirectedUrl("/openid_connect_login"))
       .andExpect(
-	  request().sessionAttribute(ACCOUNT_LINKING_SESSION_EXT_AUTHENTICATION, nullValue()))
+          request().sessionAttribute(ACCOUNT_LINKING_SESSION_EXT_AUTHENTICATION, nullValue()))
       .andExpect(
-	  request().sessionAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION, notNullValue()))
+          request().sessionAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION, notNullValue()))
       .andExpect(request().sessionAttribute(ACCOUNT_LINKING_SESSION_KEY,
-	  Matchers.equalTo("/iam/account-linking/OIDC")))
+          Matchers.equalTo("/iam/account-linking/OIDC")))
       .andReturn()
       .getRequest()
       .getSession();
@@ -283,7 +290,7 @@ public class OidcAccountLinkingTests {
     session = (MockHttpSession) mvc.perform(get("/openid_connect_login").session(session))
       .andExpect(status().isFound())
       .andExpect(MockMvcResultMatchers
-	.redirectedUrlPattern(OidcTestConfig.TEST_OIDC_AUTHORIZATION_ENDPOINT_URI + "**"))
+        .redirectedUrlPattern(OidcTestConfig.TEST_OIDC_AUTHORIZATION_ENDPOINT_URI + "**"))
       .andReturn()
       .getRequest()
       .getSession();
@@ -294,13 +301,13 @@ public class OidcAccountLinkingTests {
 
     mvc
       .perform(
-	  get("/openid_connect_login").param("state", state).param("code", "1234").session(session))
+          get("/openid_connect_login").param("state", state).param("code", "1234").session(session))
       .andExpect(status().isFound())
       .andExpect(redirectedUrl("/dashboard"))
       .andExpect(
-	  request().sessionAttribute(ACCOUNT_LINKING_SESSION_EXT_AUTHENTICATION, nullValue()))
+          request().sessionAttribute(ACCOUNT_LINKING_SESSION_EXT_AUTHENTICATION, nullValue()))
       .andExpect(
-	  request().sessionAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION, nullValue()))
+          request().sessionAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION, nullValue()))
       .andExpect(request().sessionAttribute(ACCOUNT_LINKING_SESSION_KEY, nullValue()))
       .andExpect(request().sessionAttribute(EXT_AUTH_ERROR_KEY, notNullValue()))
       .andExpect(authenticated().withUsername(TEST_100_USER));

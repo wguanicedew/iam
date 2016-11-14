@@ -61,7 +61,7 @@ public class OidcExternalAuthenticationTests extends OidcExternalAuthenticationT
     CodeRequestUtil ru = buildCodeRequest(sessionCookie, response);
 
     String tokenResponse = mockOidcProvider.prepareTokenResponse(OidcTestConfig.TEST_OIDC_CLIENT_ID,
-	"unregistered", ru.nonce);
+        "unregistered", ru.nonce);
 
     prepareSuccessResponse(tokenResponse);
 
@@ -72,15 +72,15 @@ public class OidcExternalAuthenticationTests extends OidcExternalAuthenticationT
     assertNotNull(response.getHeaders().getLocation());
 
     UriComponents locationUri =
-	UriComponentsBuilder.fromUri(response.getHeaders().getLocation()).build();
+        UriComponentsBuilder.fromUri(response.getHeaders().getLocation()).build();
 
-    assertThat(locationUri.getPath(), equalTo("/register"));
+    assertThat(locationUri.getPath(), equalTo("/"));
 
     HttpEntity<ExternalAuthenticationRegistrationInfo> requestEntity =
-	new HttpEntity<ExternalAuthenticationRegistrationInfo>(null, requestHeaders);
+        new HttpEntity<ExternalAuthenticationRegistrationInfo>(null, requestHeaders);
 
     ResponseEntity<ExternalAuthenticationRegistrationInfo> res = rt.exchange(authnInfoURL(),
-	HttpMethod.GET, requestEntity, ExternalAuthenticationRegistrationInfo.class);
+        HttpMethod.GET, requestEntity, ExternalAuthenticationRegistrationInfo.class);
 
     assertThat(res.getStatusCode(), equalTo(HttpStatus.OK));
     ExternalAuthenticationRegistrationInfo info = res.getBody();
@@ -111,7 +111,7 @@ public class OidcExternalAuthenticationTests extends OidcExternalAuthenticationT
     CodeRequestUtil ru = buildCodeRequest(sessionCookie, response);
 
     String tokenResponse = mockOidcProvider.prepareTokenResponse(OidcTestConfig.TEST_OIDC_CLIENT_ID,
-	"test-user", ru.nonce);
+        "test-user", ru.nonce);
 
     prepareSuccessResponse(tokenResponse);
 
@@ -140,7 +140,7 @@ public class OidcExternalAuthenticationTests extends OidcExternalAuthenticationT
     CodeRequestUtil ru = buildCodeRequest(sessionCookie, response);
 
     String errorResponse =
-	mockOidcProvider.prepareErrorResponse("invalid_request", "malformed request");
+        mockOidcProvider.prepareErrorResponse("invalid_request", "malformed request");
 
     prepareErrorResponse(errorResponse);
     response = rt.postForEntity(openidConnectLoginURL(), ru.requestEntity, String.class);

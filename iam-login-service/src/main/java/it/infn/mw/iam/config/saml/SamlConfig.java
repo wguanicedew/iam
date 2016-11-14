@@ -97,9 +97,10 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import it.infn.mw.iam.authn.ExternalAuthenticationFailureHandler;
 import it.infn.mw.iam.authn.ExternalAuthenticationSuccessHandler;
+import it.infn.mw.iam.authn.InactiveAccountAuthenticationHander;
 import it.infn.mw.iam.authn.TimestamperSuccessHandler;
+import it.infn.mw.iam.authn.saml.DefaultSAMLUserDetailsService;
 import it.infn.mw.iam.authn.saml.IamSamlAuthenticationProvider;
-import it.infn.mw.iam.authn.saml.SAMLUserDetailsServiceImpl;
 import it.infn.mw.iam.authn.saml.SamlExceptionMessageHelper;
 import it.infn.mw.iam.authn.saml.util.FirstApplicableChainedSamlIdResolver;
 import it.infn.mw.iam.authn.saml.util.SamlUserIdentifierResolver;
@@ -131,6 +132,9 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
 
   @Autowired
   ServerProperties serverProperties;
+
+  @Autowired
+  InactiveAccountAuthenticationHander inactiveAccountHandler;
 
   @ConfigurationProperties(prefix = "iam")
   public static class IamProperties {
@@ -175,9 +179,9 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
 
   @Bean
   public SAMLUserDetailsService samlUserDetailsService(SamlUserIdentifierResolver resolver,
-      IamAccountRepository accountRepo) {
+      IamAccountRepository accountRepo, InactiveAccountAuthenticationHander handler) {
 
-    return new SAMLUserDetailsServiceImpl(resolver, accountRepo);
+    return new DefaultSAMLUserDetailsService(resolver, accountRepo, handler);
 
   }
 
@@ -217,10 +221,11 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
   // messages
   @Bean
   public SAMLAuthenticationProvider samlAuthenticationProvider(SamlUserIdentifierResolver resolver,
-      IamAccountRepository accountRepo) {
+      IamAccountRepository accountRepo, InactiveAccountAuthenticationHander handler) {
 
     IamSamlAuthenticationProvider samlAuthenticationProvider = new IamSamlAuthenticationProvider();
-    samlAuthenticationProvider.setUserDetails(samlUserDetailsService(resolver, accountRepo));
+    samlAuthenticationProvider
+      .setUserDetails(samlUserDetailsService(resolver, accountRepo, handler));
     samlAuthenticationProvider.setForcePrincipalAsString(false);
     return samlAuthenticationProvider;
   }
@@ -443,7 +448,7 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
     successRedirectHandler.setDefaultTargetUrl("/");
 
     ExternalAuthenticationSuccessHandler successHandler = new ExternalAuthenticationSuccessHandler(
-	new TimestamperSuccessHandler(successRedirectHandler), "/register");
+        new TimestamperSuccessHandler(successRedirectHandler), "/");
     return successHandler;
   }
 
@@ -611,6 +616,6 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
   @Override
   protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 
-    auth.authenticationProvider(samlAuthenticationProvider(resolver, repo));
+    auth.authenticationProvider(samlAuthenticationProvider(resolver, repo, inactiveAccountHandler));
   }
 }

@@ -84,15 +84,16 @@ public class SecurityConfig {
       // @formatter:off
 
       http.requestMatchers()
-        .antMatchers("/", "/login**", "/logout", "/authorize", "/manage/**", "/dashboard**")
+        .antMatchers("/", "/login**", "/logout", "/authorize", "/manage/**", "/dashboard**", "/register")
         .and()
         .sessionManagement()
           .enableSessionUrlRewriting(false)
         .and()
           .authorizeRequests()
             .antMatchers("/login**", "/webjars/**").permitAll()
-          .antMatchers("/authorize**").permitAll()
-          .antMatchers("/").authenticated()
+            .antMatchers("/register").permitAll()
+            .antMatchers("/authorize**").permitAll()
+            .antMatchers("/").authenticated()
         .and()
           .formLogin()
             .loginPage("/login")
@@ -519,15 +520,15 @@ public class SecurityConfig {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
       http.antMatcher("/iam/authn-info/**")
-	.exceptionHandling()
-	.authenticationEntryPoint(authenticationEntryPoint)
-	.and()
-	.sessionManagement()
-	.sessionCreationPolicy(SessionCreationPolicy.NEVER)
-	.and()
-	.authorizeRequests()
-	.antMatchers("/iam/authn-info/**")
-	.authenticated();
+        .exceptionHandling()
+        .authenticationEntryPoint(authenticationEntryPoint)
+        .and()
+        .sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.NEVER)
+        .and()
+        .authorizeRequests()
+        .antMatchers("/iam/authn-info/**")
+        .authenticated();
     }
 
   }
@@ -540,15 +541,15 @@ public class SecurityConfig {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
       http.antMatcher("/iam/account-linking/**")
-	.exceptionHandling()
-	.authenticationEntryPoint(authenticationEntryPoint)
-	.and()
-	.sessionManagement()
-	.sessionCreationPolicy(SessionCreationPolicy.NEVER)
-	.and()
-	.authorizeRequests()
-	.antMatchers("/iam/account-linking/**")
-	.authenticated();
+        .exceptionHandling()
+        .authenticationEntryPoint(authenticationEntryPoint)
+        .and()
+        .sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.NEVER)
+        .and()
+        .authorizeRequests()
+        .antMatchers("/iam/account-linking/**")
+        .authenticated();
     }
   }
 

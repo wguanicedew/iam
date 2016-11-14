@@ -36,6 +36,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import it.infn.mw.iam.authn.ExternalAuthenticationFailureHandler;
 import it.infn.mw.iam.authn.ExternalAuthenticationSuccessHandler;
+import it.infn.mw.iam.authn.InactiveAccountAuthenticationHander;
 import it.infn.mw.iam.authn.TimestamperSuccessHandler;
 import it.infn.mw.iam.authn.oidc.DefaultOidcTokenRequestor;
 import it.infn.mw.iam.authn.oidc.DefaultRestTemplateFactory;
@@ -46,6 +47,7 @@ import it.infn.mw.iam.authn.oidc.OidcTokenRequestor;
 import it.infn.mw.iam.authn.oidc.RestTemplateFactory;
 import it.infn.mw.iam.authn.oidc.service.DefaultOidcUserDetailsService;
 import it.infn.mw.iam.authn.oidc.service.OidcUserDetailsService;
+import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
 @Configuration
 @Profile("google")
@@ -107,9 +109,9 @@ public class GoogleClient {
   public AuthenticationSuccessHandler successHandler() {
 
     AuthenticationSuccessHandler successHandler =
-	new TimestamperSuccessHandler(new SavedRequestAwareAuthenticationSuccessHandler());
+        new TimestamperSuccessHandler(new SavedRequestAwareAuthenticationSuccessHandler());
 
-    return new ExternalAuthenticationSuccessHandler(successHandler, "/register");
+    return new ExternalAuthenticationSuccessHandler(successHandler, "/");
 
   }
 
@@ -170,9 +172,10 @@ public class GoogleClient {
   }
 
   @Bean
-  public OidcUserDetailsService userDetailService() {
+  public OidcUserDetailsService userDetailService(IamAccountRepository repo,
+      InactiveAccountAuthenticationHander handler) {
 
-    return new DefaultOidcUserDetailsService();
+    return new DefaultOidcUserDetailsService(repo, handler);
   }
 
   @Bean

@@ -14,14 +14,23 @@ import org.springframework.security.core.userdetails.User;
 import com.google.common.base.Strings;
 
 import it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport;
+import it.infn.mw.iam.authn.InactiveAccountAuthenticationHander;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamAuthority;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
 public class DefaultOidcUserDetailsService implements OidcUserDetailsService {
 
-  @Autowired
+
   IamAccountRepository repo;
+  InactiveAccountAuthenticationHander inactiveAccountHandler;
+
+  @Autowired
+  public DefaultOidcUserDetailsService(IamAccountRepository repo,
+      InactiveAccountAuthenticationHander handler) {
+    this.repo = repo;
+    this.inactiveAccountHandler = handler;
+  }
 
   List<GrantedAuthority> convertAuthorities(IamAccount a) {
 
@@ -36,7 +45,11 @@ public class DefaultOidcUserDetailsService implements OidcUserDetailsService {
   }
 
   protected User buildUserFromIamAccount(IamAccount account) {
-    return new User(account.getUsername(), account.getPassword(), convertAuthorities(account));
+
+    inactiveAccountHandler.handleInactiveAccount(account);
+
+    return new User(account.getUsername(), account.getPassword(), account.isActive(), true, true,
+        true, convertAuthorities(account));
   }
 
   protected User buildUserFromOIDCAuthentication(OIDCAuthenticationToken token) {
@@ -44,12 +57,12 @@ public class DefaultOidcUserDetailsService implements OidcUserDetailsService {
 
     if (token.getUserInfo() != null) {
       if (!Strings.isNullOrEmpty(token.getUserInfo().getName())) {
-	username = token.getUserInfo().getName();
+        username = token.getUserInfo().getName();
       }
     }
 
-    return new User(username, "", Arrays
-      .asList(ExternalAuthenticationHandlerSupport.EXT_AUTHN_UNREGISTERED_USER_AUTH));
+    return new User(username, "",
+        Arrays.asList(ExternalAuthenticationHandlerSupport.EXT_AUTHN_UNREGISTERED_USER_AUTH));
   }
 
   @Override

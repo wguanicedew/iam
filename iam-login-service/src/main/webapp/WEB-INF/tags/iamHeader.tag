@@ -23,9 +23,11 @@
   rel="stylesheet"
   href="resources/iam/css/iam.css"></link>
 
+
 <link
   rel="stylesheet"
   href="resources/iam/css/AdminLTE.css"></link>
+
 
 <link
   rel="stylesheet"
@@ -36,12 +38,13 @@
   href="resources/iam/css/ionicons/ionicons.min.css"></link>
     
 <link
-  href="resources/font-awesome/css/font-awesome.css"
-  rel="stylesheet">
+  rel="stylesheet"
+  href="resources/font-awesome/css/font-awesome.css">
 
 <link
-  href="resources/bootstrap-social/bootstrap-social.css"
-  rel="stylesheet">
+  rel="stylesheet"
+  href="resources/bootstrap-social/bootstrap-social.css">
+
 </head>
 
 <script>
@@ -64,6 +67,10 @@ function getIamGitCommitId() {
 }
 
 function getRegistrationEnabled() {
-  return ${isRegistrationEnabled};
+  return ${loginPageConfiguration.registrationEnabled};
+}
+
+function getOrganisationName() {
+ return '${iamProperties.organisationName}'; 
 }
 </script>

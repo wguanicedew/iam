@@ -17,59 +17,45 @@
 
 <o:iamHeader title="Log In" />
 
-<body class="ng-cloack">
-
-  <c:if test="${loginPageConfiguration.samlEnabled}">
-
-  </c:if>
+<body class="ng-cloak">
   
   <div class="row">
 
     <div class="absolute-center is-responsive">
-      <div class="col-sm-12 col-md-10 col-md-offset-1" >
+        <div id="logo-container">
+          <a href="/"></a>
+        </div>
 
-        <div id="logo-container"></div>
+        <div id="login-error">
+          <c:if test="${accessDeniedError != null}">
+            <div class="alert alert-danger">Access denied: ${accessDeniedError}</div>
+          </c:if>
 
-        <c:if test="${accessDeniedError != null}">
-          <div class="alert alert-danger">Access denied: ${accessDeniedError}</div>
-        </c:if>
+          <c:if test="${ param.externalAuthenticationError != null }">
+            <div class="alert alert-danger">
+              <strong>External authentication error</strong>
+              <div>${param.externalAuthenticationError}</div>
+            </div>
+          </c:if>
+          
+          <c:if test="${ param.error != null }">
+            <div class="alert alert-danger">
+              <spring:message code="login.error" />
+            </div>
+          </c:if>
+          
+          <c:if test="${resetPasswordMessage != null}">
+            <div class="alert alert-${resetPasswordStyle}">
+              ${resetPasswordMessage} 
+            </div>
+          </c:if>
+        </div>
 
-        <c:if test="${userNotFoundError != null}">
-          <div class="alert alert-danger">
-            <strong>Unknown user</strong><br> ${externalAuthenticationToken.userInfo.name} is not a registered user
-            in this organisation. Identity information:
-            <ul>
-              <li><strong>Account issuer</strong>: ${externalAuthenticationToken.issuer}</li>
-              <li><strong>Account subject</strong>: ${externalAuthenticationToken.sub}</li>
-              <li><strong>Email</strong>: ${externalAuthenticationToken.userInfo.email}</li>
-            </ul>
-          </div>
-        </c:if>
-
-        <c:if test="${ param.externalAuthenticationError != null }">
-          <div class="alert alert-danger">
-            <strong>External authentication error</strong>
-            <div>${param.externalAuthenticationError}</div>
-          </div>
-        </c:if>
-        
-        <c:if test="${ param.error != null }">
-          <div class="alert alert-danger">
-            <spring:message code="login.error" />
-          </div>
-        </c:if>
-        
-        <c:if test="${resetPasswordMessage != null}">
-			<div class="alert alert-${resetPasswordStyle}">
-				${resetPasswordMessage} 
-			</div>
-		</c:if>
-        
-        
         <form
           id="login-form"
           action="${loginUrl}"
           method="post">
+
           <div class="form-group">
             <div class="input-group">
               <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span> <input
@@ -114,9 +100,9 @@
           </div>
         </form>
 
-		        <div id="external-authn">
+        <div id="login-external-authn">
 		          <c:if test="${loginPageConfiguration.googleEnabled}">
-		            <div id="google-login">
+		            <div id="google-login" class="ext-authn-login-button">
 		              <a
 		                class='btn btn-block btn-social btn-google'
 		                href="/openid_connect_login"> <i class="fa fa-google"></i> Sign in with Google
@@ -125,7 +111,7 @@
 		          </c:if>
 
 					<c:if test="${loginPageConfiguration.samlEnabled}">
-						<div id="saml-login" ng-controller="idp-selection-modal-ctrl">
+						<div id="saml-login" ng-controller="idp-selection-modal-ctrl" class="ext-authn-login-button">
 							<c:url var="samlLoginUrl" value="/saml/login" />
 							<a class="btn btn-block btn-default" ng-click="open()"> Sign in with SAML</a>
 						</div>
@@ -133,15 +119,13 @@
 				</div>
         
 				<c:if test="${loginPageConfiguration.registrationEnabled}">
-					<div id="registration" ng-controller="RegistrationFormModalController">
-					  <a class="btn btn-success btn-block" ng-click="open()">Register a new account</a>
+					<div id="login-registration">
+					  <a class="btn btn-success btn-block" href="/register">Register a new account</a>
 					</div>
           <div id="forgot-password" ng-controller="ForgotPasswordModalController">
             <a class="btn btn-link btn-block" ng-click="open()">Forgot your password?</a>
           </div>
-				</c:if>
-
-      		</div>
+				</c:if>	
     	</div>
   	</div>
   	
@@ -150,18 +134,13 @@
 	<script type="text/javascript" src="<c:url value='/webjars/angular-ui-bootstrap/ui-bootstrap-tpls.min.js'/>"></script>
 	<script type="text/javascript" src="/resources/iam/js/iam-login-app.js"></script>
 
-	<script type="text/javascript" src="/resources/iam/js/registration.app.js"></script>
-	<script type="text/javascript" src="/resources/iam/js/service/registration.service.js"></script>
-	<script type="text/javascript" src="/resources/iam/js/controller/registration.controller.js"></script>
-	<script type="text/javascript" src="/resources/iam/js/directive/registration.directive.js"></script>
-	
 	<script type="text/javascript" src="/resources/iam/js/passwordreset.app.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/service/passwordreset.service.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/controller/passwordreset.controller.js"></script>
 	
 	<script type="text/javascript">
 		angular.element(document).ready(function() {
-			angular.bootstrap(document, ['iam-login-app', 'registrationApp', 'passwordResetApp']);
+			angular.bootstrap(document, ['iam-login-app', 'passwordResetApp']);
 		});
 	</script>
 	

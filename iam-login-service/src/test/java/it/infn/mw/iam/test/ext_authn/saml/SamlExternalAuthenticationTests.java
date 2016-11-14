@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import org.hamcrest.Matchers;
 import org.junit.Test;
@@ -38,28 +39,29 @@ public class SamlExternalAuthenticationTests extends SamlExternalAuthenticationT
   public void testSuccessfulExternalUnregisteredUserAuthentication() throws Throwable {
 
     MockHttpSession session =
-	(MockHttpSession) mvc.perform(MockMvcRequestBuilders.get(samlLoginUrl()))
-	  .andExpect(MockMvcResultMatchers.status().isOk())
-	  .andReturn()
-	  .getRequest()
-	  .getSession();
+        (MockHttpSession) mvc.perform(MockMvcRequestBuilders.get(samlLoginUrl()))
+          .andExpect(MockMvcResultMatchers.status().isOk())
+          .andReturn()
+          .getRequest()
+          .getSession();
 
     AuthnRequest authnRequest = getAuthnRequestFromSession(session);
 
     assertThat(authnRequest.getAssertionConsumerServiceURL(),
-	Matchers.equalTo("http://localhost:8080/saml/SSO"));
+        Matchers.equalTo("http://localhost:8080/saml/SSO"));
 
     Response r = buildTest1Response(authnRequest);
 
     session = (MockHttpSession) mvc
       .perform(post(authnRequest.getAssertionConsumerServiceURL())
-	.contentType(MediaType.APPLICATION_FORM_URLENCODED)
-	.param("SAMLResponse", SamlUtils.signAndSerializeToBase64(r))
-	.session(session))
-      .andExpect(redirectedUrl("/register"))
-      .andReturn()
-      .getRequest()
-      .getSession();
+        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+        .param("SAMLResponse", SamlUtils.signAndSerializeToBase64(r))
+        .session(session))
+      .andExpect(redirectedUrl("/")).andReturn().getRequest().getSession();
+
+    mvc.perform(get("/").session(session))
+      .andExpect(status().isOk())
+      .andExpect(view().name("iam/register"));
 
     mvc.perform(get(EXT_AUTHN_URL).session(session))
       .andExpect(status().isOk())
@@ -76,24 +78,24 @@ public class SamlExternalAuthenticationTests extends SamlExternalAuthenticationT
   public void testExternalAuthenticationFailureRedirectsToLoginPage() throws Throwable {
 
     MockHttpSession session =
-	(MockHttpSession) mvc.perform(MockMvcRequestBuilders.get(samlLoginUrl()))
-	  .andExpect(MockMvcResultMatchers.status().isOk())
-	  .andReturn()
-	  .getRequest()
-	  .getSession();
+        (MockHttpSession) mvc.perform(MockMvcRequestBuilders.get(samlLoginUrl()))
+          .andExpect(MockMvcResultMatchers.status().isOk())
+          .andReturn()
+          .getRequest()
+          .getSession();
 
     AuthnRequest authnRequest = getAuthnRequestFromSession(session);
 
     assertThat(authnRequest.getAssertionConsumerServiceURL(),
-	Matchers.equalTo("http://localhost:8080/saml/SSO"));
+        Matchers.equalTo("http://localhost:8080/saml/SSO"));
 
     Response r = buildNoAttributesInvalidResponse(authnRequest);
 
     session = (MockHttpSession) mvc
       .perform(post(authnRequest.getAssertionConsumerServiceURL())
-	.contentType(MediaType.APPLICATION_FORM_URLENCODED)
-	.param("SAMLResponse", SamlUtils.signAndSerializeToBase64(r))
-	.session(session))
+        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+        .param("SAMLResponse", SamlUtils.signAndSerializeToBase64(r))
+        .session(session))
       .andExpect(redirectedUrlPattern("/login**"))
       .andExpect(request().sessionAttribute(EXT_AUTH_ERROR_KEY, notNullValue()))
       .andReturn()

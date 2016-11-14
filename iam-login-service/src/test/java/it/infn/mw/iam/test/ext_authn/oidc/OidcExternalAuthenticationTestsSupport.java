@@ -73,9 +73,9 @@ public class OidcExternalAuthenticationTestsSupport {
 
     SimpleClientHttpRequestFactory rf = new SimpleClientHttpRequestFactory() {
       protected void prepareConnection(java.net.HttpURLConnection connection, String httpMethod)
-	  throws java.io.IOException {
-	super.prepareConnection(connection, httpMethod);
-	connection.setInstanceFollowRedirects(false);
+          throws java.io.IOException {
+        super.prepareConnection(connection, httpMethod);
+        connection.setInstanceFollowRedirects(false);
       }
     };
 
@@ -91,10 +91,10 @@ public class OidcExternalAuthenticationTestsSupport {
     assertNotNull(response.getHeaders().getLocation());
 
     assertThat(response.getHeaders().getLocation().toString(),
-	startsWith(TEST_OIDC_AUTHORIZATION_ENDPOINT_URI));
+        startsWith(TEST_OIDC_AUTHORIZATION_ENDPOINT_URI));
 
     UriComponents locationUri =
-	UriComponentsBuilder.fromUri(response.getHeaders().getLocation()).build();
+        UriComponentsBuilder.fromUri(response.getHeaders().getLocation()).build();
 
     Assert.assertFalse(locationUri.getQueryParams().get("state").isEmpty());
     Assert.assertFalse(locationUri.getQueryParams().get("nonce").isEmpty());
@@ -103,10 +103,6 @@ public class OidcExternalAuthenticationTestsSupport {
   }
 
   String extractSessionCookie(ResponseEntity<String> response) {
-
-    HttpHeaders requestHeaders = new HttpHeaders();
-    UriComponents locationUri =
-	UriComponentsBuilder.fromUri(response.getHeaders().getLocation()).build();
 
     return response.getHeaders().get("Set-Cookie").get(0);
 
@@ -118,7 +114,7 @@ public class OidcExternalAuthenticationTestsSupport {
 
     HttpHeaders requestHeaders = new HttpHeaders();
     UriComponents locationUri =
-	UriComponentsBuilder.fromUri(response.getHeaders().getLocation()).build();
+        UriComponentsBuilder.fromUri(response.getHeaders().getLocation()).build();
 
     String state = locationUri.getQueryParams().get("state").get(0);
     String nonce = locationUri.getQueryParams().get("nonce").get(0);
@@ -132,7 +128,7 @@ public class OidcExternalAuthenticationTestsSupport {
     params.add("code", "1234");
 
     HttpEntity<MultiValueMap<String, String>> requestEntity =
-	new HttpEntity<MultiValueMap<String, String>>(params, requestHeaders);
+        new HttpEntity<MultiValueMap<String, String>>(params, requestHeaders);
 
     result.nonce = nonce;
     result.requestEntity = requestEntity;
@@ -155,8 +151,8 @@ public class OidcExternalAuthenticationTestsSupport {
       .andExpect(method(HttpMethod.POST))
       .andExpect(content().contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE))
       .andRespond(MockRestResponseCreators.withBadRequest()
-	.contentType(MediaType.APPLICATION_JSON)
-	.body(errorResponse));
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(errorResponse));
   }
 
   void verifyMockServerCalls() {

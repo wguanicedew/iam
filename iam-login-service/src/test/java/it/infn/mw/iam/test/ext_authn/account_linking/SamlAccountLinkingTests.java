@@ -17,7 +17,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 
 import org.hamcrest.Matchers;
@@ -54,9 +53,6 @@ public class SamlAccountLinkingTests extends SamlExternalAuthenticationTestSuppo
   @Autowired
   private IamAccountRepository iamAccountRepo;
 
-  @Autowired
-  private EntityManager em;
-
   @Test
   @WithMockUser(username = TEST_100_USER)
   public void samlAccountLinkingWorks() throws Throwable {
@@ -65,11 +61,11 @@ public class SamlAccountLinkingTests extends SamlExternalAuthenticationTestSuppo
       .andExpect(status().isFound())
       .andExpect(redirectedUrl("/saml/login"))
       .andExpect(
-	  request().sessionAttribute(ACCOUNT_LINKING_SESSION_EXT_AUTHENTICATION, nullValue()))
+          request().sessionAttribute(ACCOUNT_LINKING_SESSION_EXT_AUTHENTICATION, nullValue()))
       .andExpect(
-	  request().sessionAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION, notNullValue()))
+          request().sessionAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION, notNullValue()))
       .andExpect(request().sessionAttribute(ACCOUNT_LINKING_SESSION_KEY,
-	  Matchers.equalTo("/iam/account-linking/SAML")))
+          Matchers.equalTo("/iam/account-linking/SAML")))
       .andReturn()
       .getRequest()
       .getSession();
@@ -83,15 +79,15 @@ public class SamlAccountLinkingTests extends SamlExternalAuthenticationTestSuppo
     AuthnRequest authnRequest = getAuthnRequestFromSession(session);
 
     assertThat(authnRequest.getAssertionConsumerServiceURL(),
-	Matchers.equalTo("http://localhost:8080/saml/SSO"));
+        Matchers.equalTo("http://localhost:8080/saml/SSO"));
 
     Response r = buildTest1Response(authnRequest);
 
     session = (MockHttpSession) mvc
       .perform(post(authnRequest.getAssertionConsumerServiceURL())
-	.contentType(MediaType.APPLICATION_FORM_URLENCODED)
-	.param("SAMLResponse", SamlUtils.signAndSerializeToBase64(r))
-	.session(session))
+        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+        .param("SAMLResponse", SamlUtils.signAndSerializeToBase64(r))
+        .session(session))
       .andExpect(status().isOk())
       .andExpect(request().sessionAttribute(EXT_AUTH_ERROR_KEY, nullValue()))
       .andExpect(forwardedUrl("/iam/account-linking/SAML/done"))
@@ -104,9 +100,9 @@ public class SamlAccountLinkingTests extends SamlExternalAuthenticationTestSuppo
       .andExpect(status().isFound())
       .andExpect(redirectedUrl("/dashboard"))
       .andExpect(
-	  request().sessionAttribute(ACCOUNT_LINKING_SESSION_EXT_AUTHENTICATION, nullValue()))
+          request().sessionAttribute(ACCOUNT_LINKING_SESSION_EXT_AUTHENTICATION, nullValue()))
       .andExpect(
-	  request().sessionAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION, nullValue()))
+          request().sessionAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION, nullValue()))
       .andExpect(request().sessionAttribute(ACCOUNT_LINKING_SESSION_KEY, nullValue()));
 
     IamAccount account = iamAccountRepo.findBySamlId(DEFAULT_IDP_ID, T1_EPUID)
@@ -128,11 +124,11 @@ public class SamlAccountLinkingTests extends SamlExternalAuthenticationTestSuppo
       .andExpect(status().isFound())
       .andExpect(redirectedUrl("/saml/login"))
       .andExpect(
-	  request().sessionAttribute(ACCOUNT_LINKING_SESSION_EXT_AUTHENTICATION, nullValue()))
+          request().sessionAttribute(ACCOUNT_LINKING_SESSION_EXT_AUTHENTICATION, nullValue()))
       .andExpect(
-	  request().sessionAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION, notNullValue()))
+          request().sessionAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION, notNullValue()))
       .andExpect(request().sessionAttribute(ACCOUNT_LINKING_SESSION_KEY,
-	  Matchers.equalTo("/iam/account-linking/SAML")))
+          Matchers.equalTo("/iam/account-linking/SAML")))
       .andReturn()
       .getRequest()
       .getSession();
@@ -146,15 +142,15 @@ public class SamlAccountLinkingTests extends SamlExternalAuthenticationTestSuppo
     AuthnRequest authnRequest = getAuthnRequestFromSession(session);
 
     assertThat(authnRequest.getAssertionConsumerServiceURL(),
-	Matchers.equalTo("http://localhost:8080/saml/SSO"));
+        Matchers.equalTo("http://localhost:8080/saml/SSO"));
 
     Response r = buildTest2Response(authnRequest);
 
     session = (MockHttpSession) mvc
       .perform(post(authnRequest.getAssertionConsumerServiceURL())
-	.contentType(MediaType.APPLICATION_FORM_URLENCODED)
-	.param("SAMLResponse", SamlUtils.signAndSerializeToBase64(r))
-	.session(session))
+        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+        .param("SAMLResponse", SamlUtils.signAndSerializeToBase64(r))
+        .session(session))
       .andExpect(status().isOk())
       .andExpect(request().sessionAttribute(EXT_AUTH_ERROR_KEY, nullValue()))
       .andExpect(forwardedUrl("/iam/account-linking/SAML/done"))
@@ -169,12 +165,12 @@ public class SamlAccountLinkingTests extends SamlExternalAuthenticationTestSuppo
       .andExpect(status().isFound())
       .andExpect(redirectedUrl("/dashboard"))
       .andExpect(
-	  request().sessionAttribute(ACCOUNT_LINKING_SESSION_EXT_AUTHENTICATION, nullValue()))
+          request().sessionAttribute(ACCOUNT_LINKING_SESSION_EXT_AUTHENTICATION, nullValue()))
       .andExpect(
-	  request().sessionAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION, nullValue()))
+          request().sessionAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION, nullValue()))
       .andExpect(request().sessionAttribute(ACCOUNT_LINKING_SESSION_KEY, nullValue()))
       .andExpect(request().sessionAttribute(
-	  ExternalAuthenticationHandlerSupport.ACCOUNT_LINKING_ERROR_KEY, notNullValue()))
+          ExternalAuthenticationHandlerSupport.ACCOUNT_LINKING_ERROR_KEY, notNullValue()))
       .andReturn()
       .getRequest()
       .getSession();
@@ -183,7 +179,7 @@ public class SamlAccountLinkingTests extends SamlExternalAuthenticationTestSuppo
       .format("SAML account '[%s] %s' is already linked to another user", DEFAULT_IDP_ID, T2_EPUID);
 
     AccountAlreadyLinkedError e =
-	(AccountAlreadyLinkedError) session.getAttribute(ACCOUNT_LINKING_ERROR_KEY);
+        (AccountAlreadyLinkedError) session.getAttribute(ACCOUNT_LINKING_ERROR_KEY);
     assertThat(expectedErrorMessage, equalTo(e.getMessage()));
 
   }
@@ -196,11 +192,11 @@ public class SamlAccountLinkingTests extends SamlExternalAuthenticationTestSuppo
       .andExpect(status().isFound())
       .andExpect(redirectedUrl("/saml/login"))
       .andExpect(
-	  request().sessionAttribute(ACCOUNT_LINKING_SESSION_EXT_AUTHENTICATION, nullValue()))
+          request().sessionAttribute(ACCOUNT_LINKING_SESSION_EXT_AUTHENTICATION, nullValue()))
       .andExpect(
-	  request().sessionAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION, notNullValue()))
+          request().sessionAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION, notNullValue()))
       .andExpect(request().sessionAttribute(ACCOUNT_LINKING_SESSION_KEY,
-	  Matchers.equalTo("/iam/account-linking/SAML")))
+          Matchers.equalTo("/iam/account-linking/SAML")))
       .andReturn()
       .getRequest()
       .getSession();
@@ -214,15 +210,15 @@ public class SamlAccountLinkingTests extends SamlExternalAuthenticationTestSuppo
     AuthnRequest authnRequest = getAuthnRequestFromSession(session);
 
     assertThat(authnRequest.getAssertionConsumerServiceURL(),
-	Matchers.equalTo("http://localhost:8080/saml/SSO"));
+        Matchers.equalTo("http://localhost:8080/saml/SSO"));
 
     Response r = buildTest2Response(authnRequest);
 
     session = (MockHttpSession) mvc
       .perform(post(authnRequest.getAssertionConsumerServiceURL())
-	.contentType(MediaType.APPLICATION_FORM_URLENCODED)
-	.param("SAMLResponse", SamlUtils.signAndSerializeToBase64(r))
-	.session(session))
+        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+        .param("SAMLResponse", SamlUtils.signAndSerializeToBase64(r))
+        .session(session))
       .andExpect(status().isOk())
       .andExpect(request().sessionAttribute(EXT_AUTH_ERROR_KEY, nullValue()))
       .andExpect(forwardedUrl("/iam/account-linking/SAML/done"))
@@ -237,12 +233,12 @@ public class SamlAccountLinkingTests extends SamlExternalAuthenticationTestSuppo
       .andExpect(status().isFound())
       .andExpect(redirectedUrl("/dashboard"))
       .andExpect(
-	  request().sessionAttribute(ACCOUNT_LINKING_SESSION_EXT_AUTHENTICATION, nullValue()))
+          request().sessionAttribute(ACCOUNT_LINKING_SESSION_EXT_AUTHENTICATION, nullValue()))
       .andExpect(
-	  request().sessionAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION, nullValue()))
+          request().sessionAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION, nullValue()))
       .andExpect(request().sessionAttribute(ACCOUNT_LINKING_SESSION_KEY, nullValue()))
       .andExpect(request().sessionAttribute(
-	  ExternalAuthenticationHandlerSupport.ACCOUNT_LINKING_ERROR_KEY, notNullValue()))
+          ExternalAuthenticationHandlerSupport.ACCOUNT_LINKING_ERROR_KEY, notNullValue()))
       .andReturn()
       .getRequest()
       .getSession();
@@ -251,7 +247,7 @@ public class SamlAccountLinkingTests extends SamlExternalAuthenticationTestSuppo
       .format("SAML account '[%s] %s' is already linked to user 'test'", DEFAULT_IDP_ID, T2_EPUID);
 
     AccountAlreadyLinkedError e =
-	(AccountAlreadyLinkedError) session.getAttribute(ACCOUNT_LINKING_ERROR_KEY);
+        (AccountAlreadyLinkedError) session.getAttribute(ACCOUNT_LINKING_ERROR_KEY);
     assertThat(expectedErrorMessage, equalTo(e.getMessage()));
 
   }
@@ -263,11 +259,11 @@ public class SamlAccountLinkingTests extends SamlExternalAuthenticationTestSuppo
       .andExpect(status().isFound())
       .andExpect(redirectedUrl("/saml/login"))
       .andExpect(
-	  request().sessionAttribute(ACCOUNT_LINKING_SESSION_EXT_AUTHENTICATION, nullValue()))
+          request().sessionAttribute(ACCOUNT_LINKING_SESSION_EXT_AUTHENTICATION, nullValue()))
       .andExpect(
-	  request().sessionAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION, notNullValue()))
+          request().sessionAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION, notNullValue()))
       .andExpect(request().sessionAttribute(ACCOUNT_LINKING_SESSION_KEY,
-	  Matchers.equalTo("/iam/account-linking/SAML")))
+          Matchers.equalTo("/iam/account-linking/SAML")))
       .andReturn()
       .getRequest()
       .getSession();
@@ -281,22 +277,22 @@ public class SamlAccountLinkingTests extends SamlExternalAuthenticationTestSuppo
     AuthnRequest authnRequest = getAuthnRequestFromSession(session);
 
     assertThat(authnRequest.getAssertionConsumerServiceURL(),
-	Matchers.equalTo("http://localhost:8080/saml/SSO"));
+        Matchers.equalTo("http://localhost:8080/saml/SSO"));
 
     Response r = buildNoAudienceInvalidResponse(authnRequest);
 
     session = (MockHttpSession) mvc
       .perform(post(authnRequest.getAssertionConsumerServiceURL())
-	.contentType(MediaType.APPLICATION_FORM_URLENCODED)
-	.param("SAMLResponse", SamlUtils.signAndSerializeToBase64(r))
-	.session(session))
+        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+        .param("SAMLResponse", SamlUtils.signAndSerializeToBase64(r))
+        .session(session))
       .andExpect(authenticated().withUsername("test"))
       .andExpect(status().isFound())
       .andExpect(redirectedUrl("/dashboard"))
       .andExpect(
-	  request().sessionAttribute(ACCOUNT_LINKING_SESSION_EXT_AUTHENTICATION, nullValue()))
+          request().sessionAttribute(ACCOUNT_LINKING_SESSION_EXT_AUTHENTICATION, nullValue()))
       .andExpect(
-	  request().sessionAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION, nullValue()))
+          request().sessionAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION, nullValue()))
       .andExpect(request().sessionAttribute(ACCOUNT_LINKING_SESSION_KEY, nullValue()))
       .andExpect(request().sessionAttribute(EXT_AUTH_ERROR_KEY, notNullValue()))
       .andReturn()

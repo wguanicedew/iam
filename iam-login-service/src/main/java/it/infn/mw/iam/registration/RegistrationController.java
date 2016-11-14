@@ -43,7 +43,7 @@ public class RegistrationController {
     if (authn instanceof AbstractExternalAuthenticationToken<?>) {
 
       return Optional
-	.of(((AbstractExternalAuthenticationToken<?>) authn).toExernalAuthenticationInfo());
+        .of(((AbstractExternalAuthenticationToken<?>) authn).toExernalAuthenticationInfo());
     }
 
     return Optional.empty();
@@ -118,17 +118,19 @@ public class RegistrationController {
     try {
       service.confirmRequest(token);
       model.addAttribute("verificationSuccess", true);
+      SecurityContextHolder.clearContext();
     } catch (ScimResourceNotFoundException e) {
       String message = "Activation failed: " + e.getMessage();
       model.addAttribute("verificationMessage", message);
       model.addAttribute("verificationFailure", true);
     }
 
-    return new ModelAndView("iam/verify");
+    return new ModelAndView("iam/requestVerified");
   }
 
   @RequestMapping(value = "/registration/submitted", method = RequestMethod.GET)
   public ModelAndView submissionSuccess() {
+    SecurityContextHolder.clearContext();
     return new ModelAndView("iam/requestSubmitted");
   }
 

@@ -74,7 +74,7 @@ public class ExternalAuthenticationRegistrationTests {
 
     byte[] requestBytes = mvc
       .perform(post("/registration/create").contentType(MediaType.APPLICATION_JSON_UTF8)
-	.content(objectMapper.writeValueAsBytes(request)))
+        .content(objectMapper.writeValueAsBytes(request)))
       .andExpect(status().isOk())
       .andReturn()
       .getResponse()
@@ -87,8 +87,8 @@ public class ExternalAuthenticationRegistrationTests {
 
     mvc
       .perform(post("/registration/{uuid}/{decision}", request.getUuid(),
-	  IamRegistrationRequestStatus.APPROVED)
-	    .with(SecurityMockMvcRequestPostProcessors.user("admin").roles("ADMIN", "USER")))
+          IamRegistrationRequestStatus.APPROVED)
+            .with(SecurityMockMvcRequestPostProcessors.user("admin").roles("ADMIN", "USER")))
       .andExpect(status().isOk());
 
     IamAccount account = accountRepository.findByUsername("test-oidc-subject").get();
@@ -118,7 +118,7 @@ public class ExternalAuthenticationRegistrationTests {
 
     byte[] requestBytes = mvc
       .perform(post("/registration/create").contentType(MediaType.APPLICATION_JSON_UTF8)
-	.content(objectMapper.writeValueAsBytes(request)))
+        .content(objectMapper.writeValueAsBytes(request)))
       .andExpect(status().isOk())
       .andReturn()
       .getResponse()
@@ -131,8 +131,8 @@ public class ExternalAuthenticationRegistrationTests {
 
     mvc
       .perform(post("/registration/{uuid}/{decision}", request.getUuid(),
-	  IamRegistrationRequestStatus.APPROVED)
-	    .with(SecurityMockMvcRequestPostProcessors.user("admin").roles("ADMIN", "USER")))
+          IamRegistrationRequestStatus.APPROVED)
+            .with(SecurityMockMvcRequestPostProcessors.user("admin").roles("ADMIN", "USER")))
       .andExpect(status().isOk());
 
     IamAccount account = accountRepository.findByUsername("test-saml-user").get();
