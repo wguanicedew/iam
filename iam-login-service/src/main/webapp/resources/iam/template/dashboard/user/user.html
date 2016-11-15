@@ -92,7 +92,7 @@
 
 					<div ng-show="!user.userInfo.groups.length">No groups found</div>
 					<div class="table-responsive" ng-show="user.userInfo.groups.length">
-						<table class="table no-margin">
+						<table class="table no-margin" id="groupslist">
 							<thead>
 								<tr>
 									<th>#</th>
@@ -107,7 +107,7 @@
 									<td><a ui-sref="group({id: group.value})">{{group.display}}</a></td>
 									<td class="text-right">
 										<div class="btn-group">
-											<button class="btn btn-xs btn-danger"
+											<button class="btn btn-xs btn-danger" name="btn-delete"
 												ng-click="user.deleteGroup(group)">
 												<i class="fa fa-times"></i> Remove
 											</button>
