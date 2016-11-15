@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.velocity.VelocityEngineUtils;
 
-import it.infn.mw.iam.api.account.PasswordResetController;
+import it.infn.mw.iam.api.account.password_reset.PasswordResetController;
 import it.infn.mw.iam.core.IamDeliveryStatus;
 import it.infn.mw.iam.core.IamNotificationType;
 import it.infn.mw.iam.core.time.TimeProvider;

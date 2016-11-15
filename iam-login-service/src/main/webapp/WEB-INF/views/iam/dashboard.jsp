@@ -77,6 +77,7 @@
     <script type="text/javascript" src="/resources/iam/js/dashboard-app/services/passwordreset.service.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/services/registration.service.js"></script>
     <script type="text/javascript" src="/resources/iam/js/dashboard-app/services/utils.service.js"></script>
+    <script type="text/javascript" src="/resources/iam/js/dashboard-app/services/authorities.service.js"></script>
 
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/home.controller.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/user.controller.js"></script>
@@ -92,6 +93,7 @@
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/add-user-x509-certificate.controller.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/add-user-group.controller.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/edit-user.controller.js"></script>
+	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/account-privileges.controller.js"></script>
 	
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/filters/start-from.filter.js"></script>
 	

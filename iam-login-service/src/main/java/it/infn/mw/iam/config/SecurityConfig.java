@@ -532,6 +532,7 @@ public class SecurityConfig {
     }
 
   }
+
   @Configuration
   @Order(21)
   public static class AccountLinkingEndpointConfig extends WebSecurityConfigurerAdapter {
@@ -550,6 +551,30 @@ public class SecurityConfig {
         .authorizeRequests()
         .antMatchers("/iam/account-linking/**")
         .authenticated();
+    }
+  }
+
+  @Configuration
+  @Order(22)
+  public static class AccountAuthorityEndpointConfig extends WebSecurityConfigurerAdapter {
+    @Autowired
+    private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+      http.antMatcher("/iam/account/**")
+        .exceptionHandling()
+        .authenticationEntryPoint(authenticationEntryPoint)
+        .and()
+        .sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.NEVER)
+        .and()
+        .authorizeRequests()
+        .antMatchers("/iam/account/**")
+        .authenticated()
+        .and()
+        .csrf()
+        .disable();
     }
   }
 

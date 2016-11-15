@@ -33,10 +33,13 @@
 						alt="User profile picture" ng-show="!user.userInfo.picture">
 
 					<h3 class="profile-username text-center">{{user.userInfo.name.formatted}}</h3>
-
+          <p class="text-center" ng-show="user.isVoAdmin()">VO administrator</p>
+          
 					<p class="text-muted text-center">{{user.userInfo.displayName}}</p>
-
+          
+          
 					<ul class="list-group list-group-unbordered">
+            
 						<li class="list-group-item"><strong>E-mail</strong> <a
 							class="pull-right"
 							href="mailto:{{user.userInfo.emails[0].value}}">{{user.userInfo.emails[0].value}}</a>
@@ -72,6 +75,18 @@
 						ng-click="user.openEditUserDialog()">
 						<strong>Edit</strong>
 					</button>
+          <button ng-show="user.loaded && !user.isVoAdmin()" class="btn btn-primary btn-block" name="assign-vo-admin-privileges"
+            ng-click="user.openAssignVoAdminPrivilegesDialog()">
+            <strong>Assign admin privileges</strong>
+          </button>
+          
+          <button ng-show="user.loaded && user.isVoAdmin() && !user.isMe()" class="btn btn-primary btn-block" name="revoke-vo-admin-privileges"
+            ng-click="user.openRevokeVoAdminPrivilegesDialog()">
+            <strong>Revoke admin privileges</strong>
+          </button>
+          
+          
+
 				</div>
 			</div>
 			<!-- /.box -->

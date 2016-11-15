@@ -2,10 +2,10 @@
 
 angular.module('dashboardApp').controller('UsersController', UsersController);
 
-UsersController.$inject = [ '$scope', '$rootScope', '$uibModal', '$state', '$filter',
+UsersController.$inject = [ '$scope', '$rootScope', '$uibModal', '$state', '$filter','$q',
 		'filterFilter', 'scimFactory', 'ModalService' , 'Utils'];
 
-function UsersController($scope, $rootScope, $uibModal, $state, $filter, filterFilter,
+function UsersController($scope, $rootScope, $uibModal, $state, $filter, $q, filterFilter,
 		scimFactory, ModalService, Utils) {
 
 	var users = this;
@@ -24,15 +24,15 @@ function UsersController($scope, $rootScope, $uibModal, $state, $filter, filterF
 	// functions
 	users.resetFilters = resetFilters;
 	users.rebuildFilteredList = rebuildFilteredList;
-	users.getAllUsers = getAllUsers;
 	users.openAddUserDialog = openAddUserDialog;
 	users.deleteUser = deleteUser;
 	users.removeUserFromList = removeUserFromList;
-	users.loadUserList = loadUserList;
+	users.loadAllUsers = loadAllUsers;
 
 	// Controller actions:
 	users.resetFilters();
-	users.loadUserList();
+	// users.loadUserList();
+	users.loadAllUsers();
 
 	function resetFilters() {
 		// needs to be a function or it won't trigger a $watch
@@ -73,54 +73,59 @@ function UsersController($scope, $rootScope, $uibModal, $state, $filter, filterF
 
 		users.rebuildFilteredList();
 	});
-
-	function loadUserList() {
-
+	
+	function loadAllUsers() {
+		
+		var promises = [];
+		var chunkRequestSize = 100;
+		
+		var handleResponse = function(response){
+			angular.forEach(response.data.Resources, function(user){
+				users.list.push(user);
+			});
+		}
+		
+		var handleError = function(error) {
+			users.loadingModal.dismiss("Error");
+			$scope.operationResult = Utils.buildErrorOperationResult(error);
+		}
+		
+		var handleFirstResponse = function(response){
+			var totalResults = response.data.totalResults;
+			var lastLoaded = chunkRequestSize;
+			
+			while (lastLoaded < totalResults) {
+				promises.push(scimFactory.getUsers(lastLoaded+1, chunkRequestSize));
+				lastLoaded = lastLoaded + chunkRequestSize;
+			}
+			
+			angular.forEach(response.data.Resources, function(user){
+				users.list.push(user);
+			});
+			
+			$q.all(promises).then(function(response){
+				angular.forEach(promises, function(p){
+					p.then(handleResponse);
+				});
+				$rootScope.pageLoadingProgress = 100;
+				users.rebuildFilteredList();
+				users.loadingModal.dismiss("Cancel");
+			}, handleError);
+		}
+		
 		$rootScope.pageLoadingProgress = 0;
-		users.loadingModal = $uibModal
-		.open({
+		
+		users.loadingModal = $uibModal.open({
 			animation: false,
 			templateUrl : '/resources/iam/template/dashboard/loading-modal.html'
 		});
-
-		users.loadingModal.opened.then(function() {
-			getAllUsers(1, users.entryLimit);
+		
+		users.loadingModal.opened.then(function(){
+			scimFactory.getUsers(1, chunkRequestSize).then(handleFirstResponse,	handleError);
 		});
 	}
 
-	function getAllUsers(startIndex, count) {
-
-		scimFactory
-				.getUsers(startIndex, count)
-				.then(
-						function(response) {
-							
-							angular.forEach(response.data.Resources, function(
-									user) {
-								users.list.push(user);
-							});
-							
-							users.rebuildFilteredList();
-							
-							if (response.data.totalResults > (response.data.startIndex - 1 + response.data.itemsPerPage)) {
-							
-								users.getAllUsers(startIndex + count, count);
-								$rootScope.pageLoadingProgress = Math.floor((startIndex + count) * 100 / response.data.totalResults);
-							
-							} else {
-							
-								$rootScope.pageLoadingProgress = 100;
-								users.loadingModal.dismiss("Cancel");
-							
-							}
-						}, function(error) {
-							
-							users.loadingModal.dismiss("Error");
-							$scope.operationResult = Utils.buildErrorOperationResult(error);
-						
-						});
-	}
-
+	
 	function openAddUserDialog() {
 
 		var modalInstance = $uibModal
