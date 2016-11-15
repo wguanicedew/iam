@@ -46,6 +46,7 @@ public class MeUpdater {
     replaceUpdaters.addUpdater(emailUpdater);
 
     removeUpdaters = new UserUpdaterCollection();
+    removeUpdaters.addUpdater(addressUpdater);
     removeUpdaters.addUpdater(photoUpdater);
   }
 

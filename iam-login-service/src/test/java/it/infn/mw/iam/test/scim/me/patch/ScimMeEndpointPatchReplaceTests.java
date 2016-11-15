@@ -1,26 +1,27 @@
 package it.infn.mw.iam.test.scim.me.patch;
 
 import static it.infn.mw.iam.test.TestUtils.passwordTokenGetter;
+import static org.hamcrest.Matchers.equalTo;
 
-import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.WebIntegrationTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.scim.model.ScimAddress;
+import it.infn.mw.iam.api.scim.model.ScimEmail;
 import it.infn.mw.iam.api.scim.model.ScimName;
+import it.infn.mw.iam.api.scim.model.ScimPhoto;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.model.ScimUserPatchRequest;
-import it.infn.mw.iam.api.scim.provisioning.ScimUserProvisioning;
 import it.infn.mw.iam.test.ScimRestUtils;
+import it.infn.mw.iam.test.TestUtils;
 import it.infn.mw.iam.util.JacksonUtils;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -28,11 +29,26 @@ import it.infn.mw.iam.util.JacksonUtils;
 @WebIntegrationTest
 public class ScimMeEndpointPatchReplaceTests {
 
+  private ScimRestUtils adminRestUtils;
   private ScimRestUtils userRestUtils;
   private ScimUser testUser;
 
-  @Autowired
-  private ScimUserProvisioning userService;
+  final String ANOTHERUSER_USERNAME = "test";
+  final ScimEmail ANOTHERUSER_EMAIL = ScimEmail.builder().email("test@iam.test").build();
+
+  final String TESTUSER_USERNAME = "patchReplaceUser";
+  final String TESTUSER_PASSWORD = "password";
+  final ScimName TESTUSER_NAME = ScimName.builder().givenName("John").familyName("Lennon").build();
+  final ScimEmail TESTUSER_EMAIL = ScimEmail.builder().email("john.lennon@liverpool.uk").build();
+  final ScimPhoto TESTUSER_PHOTO = ScimPhoto.builder().value("http://site.org/user.png").build();
+  final ScimAddress TESTUSER_ADDRESS = ScimAddress.builder()
+    .country("IT")
+    .formatted("viale Berti Pichat 6/2\nBologna IT")
+    .locality("Bologna")
+    .postalCode("40121")
+    .region("Emilia Romagna")
+    .streetAddress("viale Berti Pichat")
+    .build();
 
   @BeforeClass
   public static void init() {
@@ -40,33 +56,35 @@ public class ScimMeEndpointPatchReplaceTests {
     JacksonUtils.initRestAssured();
   }
 
-  private ScimUser createTestUser(final String username, final String password,
-      final String givenname, final String familyname, final String email) {
-
-    return userService.create(ScimUser.builder()
-      .active(true)
-      .buildEmail(email)
-      .buildName(givenname, familyname)
-      .displayName(username)
-      .userName(username)
-      .password(password)
-      .build());
-  }
-
   @Before
   public void testSetup() {
 
-    testUser =
-        createTestUser("johnLennon", "password", "John", "Lennon", "john.lennon@liverpool.uk");
-    userRestUtils = ScimRestUtils.getInstance(passwordTokenGetter().username(testUser.getUserName())
-      .password("password")
+    adminRestUtils = ScimRestUtils
+      .getInstance(TestUtils.getAccessToken("scim-client-rw", "secret", "scim:read scim:write"));
+
+    testUser = adminRestUtils
+      .doPost("/scim/Users/",
+          ScimUser.builder()
+            .active(true)
+            .userName(TESTUSER_USERNAME)
+            .password(TESTUSER_PASSWORD)
+            .addEmail(TESTUSER_EMAIL)
+            .name(TESTUSER_NAME)
+            .addAddress(TESTUSER_ADDRESS)
+            .addPhoto(TESTUSER_PHOTO)
+            .build())
+      .extract()
+      .as(ScimUser.class);
+
+    userRestUtils = ScimRestUtils.getInstance(passwordTokenGetter().username(TESTUSER_USERNAME)
+      .password(TESTUSER_PASSWORD)
       .getAccessToken());
   }
 
   @After
   public void testTeardown() {
 
-    userService.delete(testUser.getId());
+    adminRestUtils.doDelete(testUser.getMeta().getLocation());
   }
 
   private ScimUser doGet() {
@@ -80,7 +98,7 @@ public class ScimMeEndpointPatchReplaceTests {
   }
 
   @Test
-  public void testPatchPassword() {
+  public void testPatchReplacePassword() {
 
     final String NEW_PASSWORD = "newpassword";
 
@@ -91,132 +109,186 @@ public class ScimMeEndpointPatchReplaceTests {
     doPatch(patchRequest);
 
     // Verify that password has been changed
-    passwordTokenGetter().username(testUser.getUserName()).password(NEW_PASSWORD).getAccessToken();
+    passwordTokenGetter().username(TESTUSER_USERNAME).password(NEW_PASSWORD).getAccessToken();
   }
 
   @Test
-  public void testPatchName() {
-
-    final String GIVEN_NAME = "John";
-    final String MIDDLE_NAME = "Fitzgerald";
-    final String FAMILY_NAME = "Kennedy";
-
-    ScimName updatedName = ScimName.builder()
-      .givenName(GIVEN_NAME)
-      .middleName(MIDDLE_NAME)
-      .familyName(FAMILY_NAME)
-      .build();
+  public void testPatchReplacePasswordNoUpdates() {
 
     ScimUserPatchRequest patchRequest = ScimUserPatchRequest.builder()
-      .replace(ScimUser.builder().name(updatedName).build())
+      .replace(ScimUser.builder().password(TESTUSER_PASSWORD).build())
       .build();
 
     doPatch(patchRequest);
 
-    ScimUser updatedUser = doGet();
-
-    Assert.assertThat(updatedUser.getName(), Matchers.equalTo(updatedName));
+    passwordTokenGetter().username(TESTUSER_USERNAME).password(TESTUSER_PASSWORD).getAccessToken();
   }
 
   @Test
-  public void testPatchPicture() {
+  public void testPatchReplaceName() {
 
-    final String PICTURE = "http://notarealurl.com/image.jpg";
+    ScimName name =
+        ScimName.builder().givenName("John").middleName("Fitzgerald").familyName("Kennedy").build();
+
+    ScimUserPatchRequest patchRequest =
+        ScimUserPatchRequest.builder().replace(ScimUser.builder().name(name).build()).build();
+
+    doPatch(patchRequest);
+
+    ScimName updatedName = doGet().getName();
+
+    Assert.assertTrue(updatedName.equals(name));
+  }
+
+  @Test
+  public void testPatchReplaceNameNoUpdates() {
+
+    ScimUserPatchRequest patchRequest = ScimUserPatchRequest.builder()
+      .replace(ScimUser.builder().name(TESTUSER_NAME).build())
+      .build();
+
+    doPatch(patchRequest);
+
+    ScimName updatedName = doGet().getName();
+
+    Assert.assertTrue(updatedName.equals(TESTUSER_NAME));
+  }
+
+  @Test
+  public void testPatchReplacePicture() {
+
+    final ScimPhoto newPhoto = ScimPhoto.builder().value("http://site.org/user2.png").build();
+
+    final ScimUserPatchRequest patchRequest =
+        ScimUserPatchRequest.builder().add(ScimUser.builder().addPhoto(newPhoto).build()).build();
+
+    doPatch(patchRequest);
+
+    ScimPhoto updatedPhoto = doGet().getPhotos().get(0);
+
+    Assert.assertTrue(updatedPhoto.equals(newPhoto));
+  }
+
+  @Test
+  public void testPatchReplacePictureNoUpdates() {
+
+    ScimUserPatchRequest patchRequest = ScimUserPatchRequest.builder()
+      .replace(ScimUser.builder().addPhoto(TESTUSER_PHOTO).build())
+      .build();
+
+    doPatch(patchRequest);
+
+    ScimPhoto updatedPhoto = doGet().getPhotos().get(0);
+
+    Assert.assertTrue(updatedPhoto.equals(TESTUSER_PHOTO));
+  }
+
+  @Test
+  public void testPatchReplaceEmail() {
+
+    final ScimEmail email = ScimEmail.builder().email("john.kennedy@washington.us").build();
+
+    final ScimUserPatchRequest patchRequest =
+        ScimUserPatchRequest.builder().replace(ScimUser.builder().addEmail(email).build()).build();
+
+    doPatch(patchRequest);
+
+    ScimEmail updatedEmail = doGet().getEmails().get(0);
+
+    Assert.assertTrue(updatedEmail.equals(email));
+  }
+
+  @Test
+  public void testPatchReplaceAlreadyUsedEmail() {
 
     final ScimUserPatchRequest patchRequest = ScimUserPatchRequest.builder()
-      .replace(ScimUser.builder().buildPhoto(PICTURE).build())
+      .replace(ScimUser.builder().addEmail(ANOTHERUSER_EMAIL).build())
       .build();
 
-    doPatch(patchRequest);
-
-    ScimUser updatedUser = doGet();
-
-    Assert.assertThat(updatedUser.getPhotos().get(0).getValue(), Matchers.equalTo(PICTURE));
+    userRestUtils.doPatch(testUser.getMeta().getLocation(), patchRequest, HttpStatus.CONFLICT)
+      .body("status", equalTo("409"))
+      .body("detail",
+          equalTo("email " + ANOTHERUSER_EMAIL.getValue() + " already assigned to another user"));
   }
 
   @Test
-  public void testPatchEmail() {
-
-    final String EMAIL = "john.kennedy@washington.us";
+  public void testPatchReplaceEmailNoUpdates() {
 
     final ScimUserPatchRequest patchRequest = ScimUserPatchRequest.builder()
-      .replace(ScimUser.builder().buildEmail(EMAIL).build())
+      .replace(ScimUser.builder().addEmail(TESTUSER_EMAIL).build())
       .build();
 
     doPatch(patchRequest);
 
-    ScimUser updatedUser = doGet();
+    ScimEmail updatedEmail = doGet().getEmails().get(0);
 
-    Assert.assertThat(updatedUser.getEmails().get(0).getValue(), Matchers.equalTo(EMAIL));
+    Assert.assertTrue(updatedEmail.equals(TESTUSER_EMAIL));
   }
 
   @Test
-  public void testPatchAddress() {
+  public void testPatchReplaceAddress() {
 
-    final ScimAddress ADDRESS = ScimAddress.builder()
-      .country("IT")
-      .formatted("viale Berti Pichat 6/2\nBologna IT")
-      .locality("Bologna")
-      .postalCode("40121")
-      .region("Emilia Romagna")
-      .streetAddress("viale Berti Pichat")
+    final ScimAddress newAddress = ScimAddress.builder()
+      .country("US")
+      .formatted("5th Avenue, 12345 New York")
+      .locality("New York")
+      .postalCode("12345")
+      .region("New York")
+      .streetAddress("5th Avenue")
       .build();
 
     final ScimUserPatchRequest patchRequest = ScimUserPatchRequest.builder()
-      .replace(ScimUser.builder().addAddress(ADDRESS).build())
+      .replace(ScimUser.builder().addAddress(newAddress).build())
       .build();
 
     doPatch(patchRequest);
 
-    ScimUser updatedUser = doGet();
+    ScimAddress updatedAddress = doGet().getAddresses().get(0);
 
-    Assert.assertThat(updatedUser.getAddresses().get(0).getCountry(),
-        Matchers.equalTo(ADDRESS.getCountry()));
-    Assert.assertThat(updatedUser.getAddresses().get(0).getLocality(),
-        Matchers.equalTo(ADDRESS.getLocality()));
-    Assert.assertThat(updatedUser.getAddresses().get(0).getPostalCode(),
-        Matchers.equalTo(ADDRESS.getPostalCode()));
-    Assert.assertThat(updatedUser.getAddresses().get(0).getRegion(),
-        Matchers.equalTo(ADDRESS.getRegion()));
-    Assert.assertThat(updatedUser.getAddresses().get(0).getStreetAddress(),
-        Matchers.equalTo(ADDRESS.getStreetAddress()));
-    Assert.assertThat(updatedUser.getAddresses().get(0).getFormatted(),
-        Matchers.equalTo(ADDRESS.getFormatted()));
+    Assert.assertTrue(updatedAddress.equals(newAddress));
   }
 
   @Test
-  public void testPatchAll() {
+  public void testPatchReplaceAddressNoUpdates() {
 
-    final String GIVEN_NAME = "John";
-    final String MIDDLE_NAME = "Fitzgerald";
-    final String FAMILY_NAME = "Kennedy";
-
-    final ScimName updatedName = ScimName.builder()
-      .givenName(GIVEN_NAME)
-      .middleName(MIDDLE_NAME)
-      .familyName(FAMILY_NAME)
+    final ScimUserPatchRequest patchRequest = ScimUserPatchRequest.builder()
+      .replace(ScimUser.builder().addAddress(TESTUSER_ADDRESS).build())
       .build();
+
+    doPatch(patchRequest);
+
+    ScimAddress updatedAddress = doGet().getAddresses().get(0);
+
+    Assert.assertTrue(updatedAddress.equals(TESTUSER_ADDRESS));
+  }
+
+  @Test
+  public void testPatchReplaceAll() {
+
+    final ScimName NEW_NAME =
+        ScimName.builder().givenName("John").middleName("Fitzgerald").familyName("Kennedy").build();
 
     final String NEW_PASSWORD = "newpassword";
-    final String EMAIL = "john.kennedy@washington.us";
-    final String PICTURE = "http://notarealurl.com/image.jpg";
+    final ScimEmail NEW_EMAIL = ScimEmail.builder().email("john.kennedy@washington.us").build();
+    final ScimPhoto NEW_PHOTO =
+        ScimPhoto.builder().value("http://notarealurl.com/image.jpg").build();
 
-    final ScimAddress ADDRESS = ScimAddress.builder()
-      .country("IT")
-      .formatted("viale Berti Pichat 6/2\nBologna IT")
-      .locality("Bologna")
-      .postalCode("40121")
-      .region("Emilia Romagna")
-      .streetAddress("viale Berti Pichat")
+    final ScimAddress NEW_ADDRESS = ScimAddress.builder()
+      .country("US")
+      .formatted("5th Avenue, 12345 New York")
+      .locality("New York")
+      .postalCode("12345")
+      .region("New York")
+      .streetAddress("5th Avenue")
       .build();
 
     final ScimUserPatchRequest patchRequest = ScimUserPatchRequest.builder()
       .replace(ScimUser.builder()
-        .name(updatedName)
+        .name(NEW_NAME)
         .password(NEW_PASSWORD)
-        .buildEmail(EMAIL)
-        .addAddress(ADDRESS)
-        .buildPhoto(PICTURE)
+        .addEmail(NEW_EMAIL)
+        .addAddress(NEW_ADDRESS)
+        .addPhoto(NEW_PHOTO)
         .build())
       .build();
 
@@ -224,30 +296,36 @@ public class ScimMeEndpointPatchReplaceTests {
 
     ScimUser updatedUser = doGet();
 
-    Assert.assertThat(updatedUser.getName(), Matchers.equalTo(updatedName));
-    Assert.assertThat(updatedUser.getName().getGivenName(),
-        Matchers.equalTo(updatedName.getGivenName()));
-    Assert.assertThat(updatedUser.getName().getMiddleName(),
-        Matchers.equalTo(updatedName.getMiddleName()));
-    Assert.assertThat(updatedUser.getName().getFamilyName(),
-        Matchers.equalTo(updatedName.getFamilyName()));
-    Assert.assertThat(updatedUser.getPhotos().get(0).getValue(), Matchers.equalTo(PICTURE));
-    Assert.assertThat(updatedUser.getEmails().get(0).getValue(), Matchers.equalTo(EMAIL));
-    Assert.assertThat(updatedUser.getAddresses().get(0), Matchers.equalTo(ADDRESS));
-    Assert.assertNotNull(updatedUser.getAddresses().get(0));
-    Assert.assertThat(updatedUser.getAddresses().get(0).getCountry(),
-        Matchers.equalTo(ADDRESS.getCountry()));
-    Assert.assertThat(updatedUser.getAddresses().get(0).getLocality(),
-        Matchers.equalTo(ADDRESS.getLocality()));
-    Assert.assertThat(updatedUser.getAddresses().get(0).getPostalCode(),
-        Matchers.equalTo(ADDRESS.getPostalCode()));
-    Assert.assertThat(updatedUser.getAddresses().get(0).getRegion(),
-        Matchers.equalTo(ADDRESS.getRegion()));
-    Assert.assertThat(updatedUser.getAddresses().get(0).getStreetAddress(),
-        Matchers.equalTo(ADDRESS.getStreetAddress()));
-    Assert.assertThat(updatedUser.getAddresses().get(0).getFormatted(),
-        Matchers.equalTo(ADDRESS.getFormatted()));
+    Assert.assertTrue(updatedUser.getName().equals(NEW_NAME));
+    Assert.assertTrue(updatedUser.getPhotos().get(0).equals(NEW_PHOTO));
+    Assert.assertTrue(updatedUser.getEmails().get(0).equals(NEW_EMAIL));
+    Assert.assertTrue(updatedUser.getAddresses().get(0).equals(NEW_ADDRESS));
 
-    passwordTokenGetter().username(testUser.getUserName()).password(NEW_PASSWORD).getAccessToken();
+    passwordTokenGetter().username(TESTUSER_USERNAME).password(NEW_PASSWORD).getAccessToken();
+  }
+
+  @Test
+  public void testPatchReplaceAllNoUpdates() {
+
+    final ScimUserPatchRequest patchRequest = ScimUserPatchRequest.builder()
+      .replace(ScimUser.builder()
+        .name(TESTUSER_NAME)
+        .password(TESTUSER_PASSWORD)
+        .addEmail(TESTUSER_EMAIL)
+        .addAddress(TESTUSER_ADDRESS)
+        .addPhoto(TESTUSER_PHOTO)
+        .build())
+      .build();
+
+    doPatch(patchRequest);
+
+    ScimUser updatedUser = doGet();
+
+    Assert.assertTrue(updatedUser.getName().equals(TESTUSER_NAME));
+    Assert.assertTrue(updatedUser.getPhotos().get(0).equals(TESTUSER_PHOTO));
+    Assert.assertTrue(updatedUser.getEmails().get(0).equals(TESTUSER_EMAIL));
+    Assert.assertTrue(updatedUser.getAddresses().get(0).equals(TESTUSER_ADDRESS));
+
+    passwordTokenGetter().username(TESTUSER_USERNAME).password(TESTUSER_PASSWORD).getAccessToken();
   }
 }

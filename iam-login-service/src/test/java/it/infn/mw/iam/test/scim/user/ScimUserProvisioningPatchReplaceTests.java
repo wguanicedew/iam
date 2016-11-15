@@ -377,4 +377,17 @@ public class ScimUserProvisioningPatchReplaceTests {
 
     restUtils.doPatch(user.getMeta().getLocation(), req);
   }
+
+  @Test
+  public void testReplaceUsername() {
+
+    final String ANOTHERUSER_USERNAME = "test";
+
+    ScimUser user = testUsers.get(0);
+
+    ScimUserPatchRequest req =
+        getPatchReplaceRequest(ScimUser.builder().userName(ANOTHERUSER_USERNAME).build());
+
+    restUtils.doPatch(user.getMeta().getLocation(), req, HttpStatus.CONFLICT);
+  }
 }

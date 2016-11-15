@@ -9,7 +9,6 @@ import it.infn.mw.iam.api.scim.exception.ScimException;
 import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
 import it.infn.mw.iam.api.scim.model.ScimMemberRef;
 import it.infn.mw.iam.api.scim.updater.Updater;
-import it.infn.mw.iam.api.scim.updater.group.MembershipUpdater;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
@@ -18,22 +17,16 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 public class GroupUpdater implements Updater<IamGroup, List<ScimMemberRef>> {
 
   @Autowired
-  private MembershipUpdater membershipUpdater;
-
-  @Autowired
   private IamAccountRepository accountRepository;
 
   @Override
   public boolean add(IamGroup group, List<ScimMemberRef> members) {
 
-    if (members == null) {
-      throw new ScimException("PATCH add members to group: expected not null list of members");
+    if (members == null || members.isEmpty()) {
+      throw new ScimException("Empty list of members");
     }
-    if (members.isEmpty()) {
-      return false;
-    }
-    boolean hasChanged = false;
 
+    boolean hasChanged = false;
     for (ScimMemberRef member : members) {
       hasChanged |= addMembership(member.getValue(), group);
     }
@@ -43,54 +36,62 @@ public class GroupUpdater implements Updater<IamGroup, List<ScimMemberRef>> {
   @Override
   public boolean remove(IamGroup group, List<ScimMemberRef> members) {
 
-    if (members == null) {
-      if (group.getAccounts().isEmpty()) {
-        return false;
-      }
+    if (members == null || members.isEmpty()) {
       return removeAllMembers(group);
-    } else {
-      boolean hasChanged = false;
-      for (ScimMemberRef member : members) {
-        hasChanged |= removeMembership(member.getValue(), group);
-      }
-      return hasChanged;
     }
+    for (ScimMemberRef member : members) {
+      removeMembership(member.getValue(), group);
+    }
+    return true;
   }
 
   @Override
   public boolean replace(IamGroup group, List<ScimMemberRef> members) {
 
-    if (members == null) {
-      throw new ScimException("PATCH replace members to group: expected not null list of members");
+    if (members == null || members.isEmpty()) {
+      throw new ScimException("Empty list of members");
     }
 
     boolean hasChanged = false;
+
     // update groups of removed members
     for (IamAccount member : group.getAccounts()) {
+
       boolean found = false;
+
       for (ScimMemberRef newMember : members) {
         if (newMember.getValue().equals(member.getUuid())) {
           found = true;
         }
       }
+
       if (!found) {
-        hasChanged |= removeMembership(member.getUuid(), group);
+        removeMembership(member.getUuid(), group);
+        hasChanged = true;
       }
     }
+
     // add new members
     for (ScimMemberRef member : members) {
       hasChanged |= addMembership(member.getValue(), group);
     }
+
     return hasChanged;
   }
 
   private boolean removeAllMembers(IamGroup group) {
 
-    boolean hasChanged = false;
-    for (IamAccount account : group.getAccounts()) {
-      hasChanged |= membershipUpdater.remove(account, group);
+    if (group.getAccounts().size() == 0) {
+      return false;
     }
-    return hasChanged;
+
+    for (IamAccount account : group.getAccounts()) {
+
+      account.getGroups().remove(group);
+      account.touch();
+      accountRepository.save(account);
+    }
+    return true;
   }
 
   private boolean addMembership(String uuid, IamGroup group) {
@@ -98,15 +99,28 @@ public class GroupUpdater implements Updater<IamGroup, List<ScimMemberRef>> {
     IamAccount account = accountRepository.findByUuid(uuid)
       .orElseThrow(() -> new ScimResourceNotFoundException("No user mapped to id '" + uuid + "'"));
 
-    return membershipUpdater.add(account, group);
+    if (account.isMemberOf(group)) {
+      return false;
+    }
+    account.getGroups().add(group);
+    account.touch();
+    accountRepository.save(account);
+    return true;
   }
 
-  private boolean removeMembership(String uuid, IamGroup group) {
+  private void removeMembership(String uuid, IamGroup group) {
 
     IamAccount account = accountRepository.findByUuid(uuid)
       .orElseThrow(() -> new ScimResourceNotFoundException("No user mapped to id '" + uuid + "'"));
 
-    return membershipUpdater.remove(account, group);
+    if (!account.isMemberOf(group)) {
+      throw new ScimResourceNotFoundException(
+          "User " + account.getUsername() + " is not member of " + group.getName());
+    }
+
+    account.getGroups().remove(group);
+    account.touch();
+    accountRepository.save(account);
   }
 
   @Override

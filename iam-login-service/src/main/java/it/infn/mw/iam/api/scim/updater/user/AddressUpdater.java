@@ -10,6 +10,7 @@ import com.google.common.base.Preconditions;
 
 import it.infn.mw.iam.api.scim.converter.AddressConverter;
 import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
+import it.infn.mw.iam.api.scim.model.ScimAddress;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.updater.Updater;
 import it.infn.mw.iam.persistence.model.IamAccount;
@@ -44,13 +45,19 @@ public class AddressUpdater implements Updater<IamAccount, ScimUser> {
   public boolean remove(IamAccount account, ScimUser user) {
 
     validate(account, user);
-    
-    final Address address = addressConverter.fromScim(user.getAddresses().get(0));
 
-    if (address.equals(account.getUserInfo().getAddress())) {
-      throw new ScimResourceNotFoundException("Address " + address + " not found");
-    }
+    Address currentAddress = account.getUserInfo().getAddress();
     
+    if (currentAddress == null) {
+      // nothing to remove
+      throw new ScimResourceNotFoundException("Address not found for user");
+    }
+
+    ScimAddress address = addressConverter.toScim(account.getUserInfo().getAddress());
+    if (!address.equals(user.getAddresses().get(0))) {
+      throw new ScimResourceNotFoundException("Address not found for user");
+    }
+
     Address oldAddress = account.getUserInfo().getAddress();
     account.getUserInfo().setAddress(null);
     entityManager.remove(oldAddress);
@@ -63,12 +70,14 @@ public class AddressUpdater implements Updater<IamAccount, ScimUser> {
 
     validate(account, user);
 
-    final Address address = addressConverter.fromScim(user.getAddresses().get(0));
-
-    if (address.equals(account.getUserInfo().getAddress())) {
-      return false;
+    if (account.getUserInfo().getAddress() != null) {
+      ScimAddress address = addressConverter.toScim(account.getUserInfo().getAddress());
+      if (address.equals(user.getAddresses().get(0))) {
+        return false;
+      }
     }
 
+    final Address address = addressConverter.fromScim(user.getAddresses().get(0));
     entityManager.persist(address);
 
     account.getUserInfo().setAddress(address);

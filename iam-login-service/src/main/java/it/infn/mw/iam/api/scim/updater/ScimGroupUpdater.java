@@ -27,7 +27,7 @@ public class ScimGroupUpdater {
     for (ScimPatchOperation<List<ScimMemberRef>> op : operations) {
 
       if (!op.getPath().equals("members")) {
-        throw new ScimPatchOperationNotSupported("Path " + op.getPath() + " is not supported");
+        throw new ScimPatchOperationNotSupported("Not supported operation path " + op.getPath());
       }
 
       switch (op.getOp()) {
@@ -40,6 +40,8 @@ public class ScimGroupUpdater {
         case replace:
           groupUpdater.replace(group, op.getValue());
           break;
+        default:
+          throw new ScimPatchOperationNotSupported("Not supported operation type " + op.getOp());
       }
     }
   }
