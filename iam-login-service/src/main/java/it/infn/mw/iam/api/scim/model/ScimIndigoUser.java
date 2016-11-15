@@ -82,29 +82,6 @@ public class ScimIndigoUser {
       return this;
     }
 
-    public Builder buildOidcId(String issuer, String subject) {
-
-      oidcIds.add(ScimOidcId.builder().subject(subject).issuer(issuer).build());
-      return this;
-    }
-
-    public Builder buildSshKey(String label, String key, String fingerprint, boolean isPrimary) {
-
-      sshKeys.add(ScimSshKey.builder()
-        .display(label)
-        .value(key)
-        .fingerprint(fingerprint)
-        .primary(isPrimary)
-        .build());
-      return this;
-    }
-
-    public Builder buildSamlId(String idpId, String userId) {
-
-      samlIds.add(ScimSamlId.builder().idpId(idpId).userId(userId).build());
-      return this;
-    }
-
     public ScimIndigoUser build() {
 
       return new ScimIndigoUser(this);

@@ -29,9 +29,10 @@ function UsersController($scope, $rootScope, $uibModal, $state, $filter, $q, fil
 	users.removeUserFromList = removeUserFromList;
 	users.loadAllUsers = loadAllUsers;
 
+	users.loaded = undefined;
+
 	// Controller actions:
 	users.resetFilters();
-	// users.loadUserList();
 	users.loadAllUsers();
 
 	function resetFilters() {
@@ -75,6 +76,7 @@ function UsersController($scope, $rootScope, $uibModal, $state, $filter, $q, fil
 	});
 	
 	function loadAllUsers() {
+		users.loaded = false;
 		
 		var promises = [];
 		var chunkRequestSize = 100;
@@ -108,6 +110,7 @@ function UsersController($scope, $rootScope, $uibModal, $state, $filter, $q, fil
 					p.then(handleResponse);
 				});
 				$rootScope.pageLoadingProgress = 100;
+				users.loaded = true;
 				users.rebuildFilteredList();
 				users.loadingModal.dismiss("Cancel");
 			}, handleError);
@@ -125,7 +128,6 @@ function UsersController($scope, $rootScope, $uibModal, $state, $filter, $q, fil
 		});
 	}
 
-	
 	function openAddUserDialog() {
 
 		var modalInstance = $uibModal

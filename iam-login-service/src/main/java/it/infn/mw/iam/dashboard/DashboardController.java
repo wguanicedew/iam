@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @RequestMapping(value = "/dashboard")
 public class DashboardController {
 
-  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("hasRole('USER')")
   @RequestMapping(method = RequestMethod.GET)
   public String showDashboard(HttpServletRequest request) {
 

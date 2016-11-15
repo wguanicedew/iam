@@ -9,6 +9,7 @@ import it.infn.mw.iam.api.scim.model.ScimGroupRef;
 import it.infn.mw.iam.api.scim.model.ScimIndigoUser;
 import it.infn.mw.iam.api.scim.model.ScimMeta;
 import it.infn.mw.iam.api.scim.model.ScimName;
+import it.infn.mw.iam.api.scim.model.ScimPhoto;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamGroup;
@@ -49,38 +50,24 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
   public IamAccount fromScim(ScimUser scimUser) {
 
     IamAccount account = new IamAccount();
-    IamUserInfo userInfo = new IamUserInfo();
 
     account.setUuid(scimUser.getId());
+    account.setUsername(scimUser.getUserName());
 
     if (scimUser.getActive() != null) {
+
       account.setActive(scimUser.getActive());
     }
 
-    account.setUsername(scimUser.getUserName());
-
     if (scimUser.getPassword() != null) {
+
       account.setPassword(scimUser.getPassword());
-    }
-
-    userInfo.setEmail(scimUser.getEmails().get(0).getValue());
-    userInfo.setGivenName(scimUser.getName().getGivenName());
-    userInfo.setFamilyName(scimUser.getName().getFamilyName());
-    userInfo.setMiddleName(scimUser.getName().getMiddleName());
-    userInfo.setName(scimUser.getName().getFormatted());
-    userInfo.setPicture(scimUser.getPicture());
-
-    account.setUserInfo(userInfo);
-
-    if (scimUser.hasAddresses()) {
-
-      userInfo.setAddress(addressConverter.fromScim(scimUser.getAddresses().get(0)));
-
     }
 
     if (scimUser.hasX509Certificates()) {
 
       scimUser.getX509Certificates().forEach(scimCert -> {
+
         IamX509Certificate iamCert = x509CertificateConverter.fromScim(scimCert);
         iamCert.setAccount(account);
         account.getX509Certificates().add(iamCert);
@@ -135,8 +122,24 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
       });
     }
 
-    return account;
+    IamUserInfo userInfo = new IamUserInfo();
 
+    userInfo.setEmail(scimUser.getEmails().get(0).getValue());
+    userInfo.setGivenName(scimUser.getName().getGivenName());
+    userInfo.setFamilyName(scimUser.getName().getFamilyName());
+    userInfo.setMiddleName(scimUser.getName().getMiddleName());
+
+    if (scimUser.hasPhotos()) {
+      userInfo.setPicture(scimUser.getPhotos().get(0).getValue());
+    }
+
+    if (scimUser.hasAddresses()) {
+      userInfo.setAddress(addressConverter.fromScim(scimUser.getAddresses().get(0)));
+    }
+
+    account.setUserInfo(userInfo);
+
+    return account;
   }
 
   @Override
@@ -146,6 +149,7 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
     ScimName name = getScimName(entity);
     ScimIndigoUser indigoUser = getScimIndigoUser(entity);
     ScimAddress address = getScimAddress(entity);
+    ScimPhoto picture = getScimPhoto(entity);
 
     ScimUser.Builder builder = new ScimUser.Builder(entity.getUsername()).id(entity.getUuid())
       .meta(meta)
@@ -155,7 +159,6 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
       .locale(entity.getUserInfo().getLocale())
       .nickName(entity.getUserInfo().getNickname())
       .profileUrl(entity.getUserInfo().getProfile())
-      .picture(entity.getUserInfo().getPicture())
       .timezone(entity.getUserInfo().getZoneinfo())
       .buildEmail(entity.getUserInfo().getEmail())
       .indigoUserInfo(indigoUser);
@@ -163,6 +166,11 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
     if (address != null) {
 
       builder.addAddress(address);
+    }
+
+    if (picture != null) {
+
+      builder.addPhoto(picture);
     }
 
     entity.getGroups().forEach(group -> builder.addGroupRef(getScimGroupRef(group)));
@@ -223,5 +231,18 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
       return addressConverter.toScim(entity.getUserInfo().getAddress());
     }
     return null;
+  }
+
+  private ScimPhoto getScimPhoto(IamAccount entity) {
+
+    if (entity.getUserInfo() == null) {
+      return null;
+    }
+
+    if (entity.getUserInfo().getPicture() == null || entity.getUserInfo().getPicture().isEmpty()) {
+      return null;
+    }
+
+    return ScimPhoto.builder().value(entity.getUserInfo().getPicture()).build();
   }
 }

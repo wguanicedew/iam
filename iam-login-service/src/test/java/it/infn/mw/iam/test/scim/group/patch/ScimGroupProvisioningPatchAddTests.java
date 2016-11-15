@@ -1,4 +1,4 @@
-package it.infn.mw.iam.test.scim.group;
+package it.infn.mw.iam.test.scim.group.patch;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -27,7 +28,7 @@ import it.infn.mw.iam.test.util.JacksonUtils;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = IamLoginService.class)
 @WebIntegrationTest
-public class ScimGroupProvisioningPatchTests {
+public class ScimGroupProvisioningPatchAddTests {
 
   public static final String SCIM_CONTENT_TYPE = "application/scim+json";
 
@@ -78,33 +79,13 @@ public class ScimGroupProvisioningPatchTests {
     return restUtils.doPost("/scim/Users/", lennon).extract().as(ScimUser.class);
   }
 
-  private ScimGroupPatchRequest getPatchAddUsersRequest(List<ScimUser> users) {
-
-    return ScimGroupPatchRequest.builder().add(TestUtils.buildScimMemberRefList(users)).build();
-  }
-
-  private ScimGroupPatchRequest getPatchRemoveUsersRequest(List<ScimUser> users) {
-
-    return ScimGroupPatchRequest.builder().remove(TestUtils.buildScimMemberRefList(users)).build();
-  }
-
-  private ScimGroupPatchRequest getPatchRemoveAllUsersRequest() {
-
-    return ScimGroupPatchRequest.builder().remove(null).build();
-  }
-
-  private ScimGroupPatchRequest getPatchReplaceUsersRequest(List<ScimUser> users) {
-
-    return ScimGroupPatchRequest.builder().replace(TestUtils.buildScimMemberRefList(users)).build();
-  }
-
   @Test
-  public void testAddMemberToGroup() {
+  public void testGroupPatchAddMember() {
 
     List<ScimUser> members = new ArrayList<ScimUser>();
     members.add(lennon);
 
-    ScimGroupPatchRequest patchReq = getPatchAddUsersRequest(members);
+    ScimGroupPatchRequest patchReq = ScimGroupPatchUtils.getPatchAddUsersRequest(members);
 
     restUtils.doPatch(engineers.getMeta().getLocation(), patchReq);
 
@@ -119,52 +100,37 @@ public class ScimGroupProvisioningPatchTests {
   }
 
   @Test
-  public void testRemoveNonMemberFromGroup() {
-
-    List<ScimUser> members = new ArrayList<ScimUser>();
-    members.add(lennon);
-
-    ScimGroupPatchRequest patchReq = getPatchRemoveUsersRequest(members);
-
-    restUtils.doPatch(engineers.getMeta().getLocation(), patchReq);
-  }
-
-  @Test
-  public void testAddAndRemoveMultipleMembersToGroup() {
+  public void testGroupPatchAddMembers() {
 
     List<ScimUser> members = new ArrayList<ScimUser>();
     members.add(lennon);
     members.add(lincoln);
 
-    ScimGroupPatchRequest patchAddReq = getPatchAddUsersRequest(members);
+    ScimGroupPatchRequest patchAddReq = ScimGroupPatchUtils.getPatchAddUsersRequest(members);
 
     restUtils.doPatch(engineers.getMeta().getLocation(), patchAddReq);
 
-    restUtils.doGet(engineers.getMeta().getLocation())
+    ScimGroup group = restUtils.doGet(engineers.getMeta().getLocation())
       .body("id", equalTo(engineers.getId()))
       .body("displayName", equalTo(engineers.getDisplayName()))
-      .body("members", hasSize(equalTo(2)));
+      .extract()
+      .as(ScimGroup.class);
 
-    ScimGroupPatchRequest patchRemoveReq = getPatchRemoveUsersRequest(members);
-
-    restUtils.doPatch(engineers.getMeta().getLocation(), patchRemoveReq);
-
-    restUtils.doGet(engineers.getMeta().getLocation())
-      .body("id", equalTo(engineers.getId()))
-      .body("displayName", equalTo(engineers.getDisplayName()))
-      .body("members", equalTo(null));
+    Assert.assertTrue(group.getMembers().size() == 2);
+    Assert.assertTrue(group.getMembers().contains(TestUtils.getMemberRef(lennon)));
+    Assert.assertTrue(group.getMembers().contains(TestUtils.getMemberRef(lincoln)));
   }
 
   @Test
-  public void testAddMultipleMembersToGroup() {
+  public void testGroupPatchAddMembersWithFakeUser() {
 
     List<ScimUser> members = new ArrayList<ScimUser>();
-    ScimUser fakeUser = addTestUser("fake_user", "mail@domain.com", "Fake", "User");
+    ScimUser ringo = addTestUser("ringo", "mail@domain.com", "Ringo", "Star");
     members.add(lennon);
-    members.add(fakeUser);
-    restUtils.doDelete(fakeUser.getMeta().getLocation());
+    members.add(ringo);
+    restUtils.doDelete(ringo.getMeta().getLocation());
 
-    ScimGroupPatchRequest patchAddReq = getPatchAddUsersRequest(members);
+    ScimGroupPatchRequest patchAddReq = ScimGroupPatchUtils.getPatchAddUsersRequest(members);
 
     restUtils.doPatch(engineers.getMeta().getLocation(), patchAddReq, HttpStatus.NOT_FOUND);
 
@@ -175,59 +141,16 @@ public class ScimGroupProvisioningPatchTests {
   }
 
   @Test
-  public void testRemoveMultipleMembersToGroup() {
+  public void testGroupPatchAddMEmptyMembersList() {
 
-    List<ScimUser> members = new ArrayList<ScimUser>();
-    members.add(lennon);
-    members.add(lincoln);
+    ScimGroupPatchRequest patchAddReq =
+        ScimGroupPatchUtils.getPatchAddUsersRequest(new ArrayList<ScimUser>());
 
-    ScimGroupPatchRequest patchAddReq = getPatchAddUsersRequest(members);
-
-    restUtils.doPatch(engineers.getMeta().getLocation(), patchAddReq);
-
-    restUtils.doGet(engineers.getMeta().getLocation())
-      .body("id", equalTo(engineers.getId()))
-      .body("displayName", equalTo(engineers.getDisplayName()))
-      .body("members", hasSize(equalTo(2)));
-
-    ScimGroupPatchRequest patchRemoveReq = getPatchRemoveAllUsersRequest();
-
-    restUtils.doPatch(engineers.getMeta().getLocation(), patchRemoveReq);
+    restUtils.doPatch(engineers.getMeta().getLocation(), patchAddReq, HttpStatus.BAD_REQUEST);
 
     restUtils.doGet(engineers.getMeta().getLocation())
       .body("id", equalTo(engineers.getId()))
       .body("displayName", equalTo(engineers.getDisplayName()))
       .body("members", equalTo(null));
   }
-
-  @Test
-  public void testReplaceMember() {
-
-    List<ScimUser> members = new ArrayList<ScimUser>();
-    members.add(lennon);
-
-    List<ScimUser> replacedMembers = new ArrayList<ScimUser>();
-    replacedMembers.add(lincoln);
-
-    ScimGroupPatchRequest patchAddReq = getPatchAddUsersRequest(members);
-
-    restUtils.doPatch(engineers.getMeta().getLocation(), patchAddReq);
-
-    restUtils.doGet(engineers.getMeta().getLocation())
-      .body("id", equalTo(engineers.getId()))
-      .body("displayName", equalTo(engineers.getDisplayName()))
-      .body("members", hasSize(equalTo(1)))
-      .body("members[0].display", equalTo(lennon.getUserName()));
-
-    ScimGroupPatchRequest patchReplaceReq = getPatchReplaceUsersRequest(replacedMembers);
-
-    restUtils.doPatch(engineers.getMeta().getLocation(), patchReplaceReq);
-
-    restUtils.doGet(engineers.getMeta().getLocation())
-      .body("id", equalTo(engineers.getId()))
-      .body("displayName", equalTo(engineers.getDisplayName()))
-      .body("members", hasSize(equalTo(1)))
-      .body("members[0].display", equalTo(lincoln.getUserName()));
-  }
-
 }

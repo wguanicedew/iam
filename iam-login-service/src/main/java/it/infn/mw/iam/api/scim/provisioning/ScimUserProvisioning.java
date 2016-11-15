@@ -6,12 +6,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import javax.persistence.EntityManager;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import it.infn.mw.iam.api.scim.converter.AddressConverter;
+import com.google.common.base.Preconditions;
+
 import it.infn.mw.iam.api.scim.converter.UserConverter;
 import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
 import it.infn.mw.iam.api.scim.exception.ScimException;
@@ -22,12 +25,11 @@ import it.infn.mw.iam.api.scim.model.ScimPatchOperation;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.provisioning.paging.OffsetPageable;
 import it.infn.mw.iam.api.scim.provisioning.paging.ScimPageRequest;
-import it.infn.mw.iam.api.scim.updater.UserUpdater;
+import it.infn.mw.iam.api.scim.updater.ScimUserUpdater;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamOidcId;
 import it.infn.mw.iam.persistence.model.IamSamlId;
 import it.infn.mw.iam.persistence.model.IamSshKey;
-import it.infn.mw.iam.persistence.model.IamUserInfo;
 import it.infn.mw.iam.persistence.model.IamX509Certificate;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamAuthoritiesRepository;
@@ -40,37 +42,28 @@ import it.infn.mw.iam.util.ssh.RSAPublicKeyUtils;
 @Service
 public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser> {
 
-  private final UserConverter converter;
-  private final AddressConverter addressConverter;
+  @Autowired
+  private UserConverter converter;
 
-  private final UserUpdater updater;
+  @Autowired
+  private ScimUserUpdater updater;
 
-  private final IamAccountRepository accountRepository;
-  private final IamOidcIdRepository oidcIdRepository;
-  private final IamSshKeyRepository sshKeyRepository;
-  private final IamSamlIdRepository samlIdRepository;
-
-  private final IamAuthoritiesRepository authorityRepository;
+  @Autowired
+  private IamAccountRepository accountRepository;
+  @Autowired
+  private IamOidcIdRepository oidcIdRepository;
+  @Autowired
+  private IamSshKeyRepository sshKeyRepository;
+  @Autowired
+  private IamSamlIdRepository samlIdRepository;
+  @Autowired
+  private IamAuthoritiesRepository authorityRepository;
 
   @Autowired
   private PasswordEncoder passwordEncoder;
 
   @Autowired
-  public ScimUserProvisioning(UserConverter converter, AddressConverter addressConverter,
-      UserUpdater updater, IamAccountRepository accountRepo, IamOidcIdRepository oidcIdRepository,
-      IamSshKeyRepository sshKeyRepository, IamSamlIdRepository samlIdRepository,
-      IamAuthoritiesRepository authorityRepo) {
-
-    this.converter = converter;
-    this.addressConverter = addressConverter;
-    this.updater = updater;
-    this.accountRepository = accountRepo;
-    this.oidcIdRepository = oidcIdRepository;
-    this.sshKeyRepository = sshKeyRepository;
-    this.samlIdRepository = samlIdRepository;
-    this.authorityRepository = authorityRepo;
-
-  }
+  private EntityManager entityManager;
 
   private void idSanityChecks(final String id) {
 
@@ -107,29 +100,44 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
 
   }
 
-  public IamAccount createAccount(final ScimUser user) {
+  private void checkForDuplicates(ScimUser user) throws ScimResourceExistsException {
 
-    Date creationTime = new Date();
+    Preconditions.checkNotNull(user.getEmails());
+    Preconditions.checkNotNull(user.getEmails().get(0));
+    Preconditions.checkNotNull(user.getEmails().get(0).getValue());
 
     accountRepository.findByUsername(user.getUserName()).ifPresent(a -> {
       throw new ScimResourceExistsException("userName is already taken: " + a.getUsername());
     });
 
-    final String userEmail = user.getEmails().get(0).getValue();
-
-    accountRepository.findByEmail(userEmail).ifPresent(a -> {
+    accountRepository.findByEmail(user.getEmails().get(0).getValue()).ifPresent(a -> {
       throw new ScimResourceExistsException(
           "email already assigned to an existing user: " + a.getUserInfo().getEmail());
     });
+  }
 
-    String uuid = UUID.randomUUID().toString();
+  public IamAccount createAccount(final ScimUser user) {
+
+    checkForDuplicates(user);
+
+    final Date creationTime = new Date();
+    final String uuid = UUID.randomUUID().toString();
 
     IamAccount account = converter.fromScim(user);
     account.setUuid(uuid);
     account.setCreationTime(creationTime);
     account.setLastUpdateTime(creationTime);
     account.setUsername(user.getUserName());
-    account.setActive(user.getActive() == null ? false : user.getActive());
+
+    if (user.getActive() != null) {
+      account.setActive(user.getActive());
+    } else {
+      /* if no active status is specified, disable user */
+      account.setActive(false);
+    }
+
+    /* users created via SCIM are set with email-verified as true */
+    account.getUserInfo().setEmailVerified(true);
 
     if (account.getPassword() == null) {
       account.setPassword(UUID.randomUUID().toString());
@@ -141,23 +149,6 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
       .map(a -> account.getAuthorities().add(a))
       .orElseThrow(
           () -> new IllegalStateException("ROLE_USER not found in database. This is a bug"));
-
-    IamUserInfo userInfo = new IamUserInfo();
-
-    if (user.getName() != null) {
-      userInfo.setGivenName(user.getName().getGivenName());
-      userInfo.setFamilyName(user.getName().getFamilyName());
-      userInfo.setMiddleName(user.getName().getMiddleName());
-    }
-
-    if (user.getAddresses() != null && !user.getAddresses().isEmpty()) {
-      userInfo.setAddress(addressConverter.fromScim(user.getAddresses().get(0)));
-    }
-
-    if (!user.getEmails().isEmpty()) {
-      userInfo.setEmail(user.getEmails().get(0).getValue());
-    }
-    account.setUserInfo(userInfo);
 
     if (account.hasX509Certificates()) {
 
@@ -203,6 +194,9 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
       account.getSamlIds().forEach(samlId -> checkSamlIdNotExists(samlId));
     }
 
+    if (account.getUserInfo().getAddress() != null) {
+      entityManager.persist(account.getUserInfo().getAddress());
+    }
     accountRepository.save(account);
 
     return account;
@@ -288,26 +282,25 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
   }
 
   @Override
-  public ScimUser replace(final String id, final ScimUser scimItemToBeUpdated) {
+  public ScimUser replace(final String uuid, final ScimUser scimItemToBeUpdated) {
 
-    IamAccount existingAccount = accountRepository.findByUuid(id)
-      .orElseThrow(() -> new ScimResourceNotFoundException("No user mapped to id '" + id + "'"));
+    // user must exist
+    IamAccount existingAccount = accountRepository.findByUuid(uuid)
+      .orElseThrow(() -> new ScimResourceNotFoundException("No user mapped to id '" + uuid + "'"));
 
-    if (accountRepository.findByUsernameWithDifferentId(scimItemToBeUpdated.getUserName(), id)
-      .isPresent()) {
-      throw new ScimResourceExistsException("userName is already mapped to another user");
-      // throw new IllegalArgumentException("userName is already mappped to another user");
+    // username must be available
+    final String username = scimItemToBeUpdated.getUserName();
+    if (accountRepository.findByUsernameWithDifferentUUID(username, uuid).isPresent()) {
+      throw new ScimResourceExistsException(
+          "username " + username + " already assigned to another user");
     }
 
+    // email must be unique
     final String updatedEmail = scimItemToBeUpdated.getEmails().get(0).getValue();
-
-    accountRepository.findByEmail(updatedEmail).ifPresent(account -> {
-      if (!account.equals(existingAccount)) {
-        throw new ScimResourceExistsException(
-            "email already assigned to an existing user: " + updatedEmail);
-      }
-    });
-
+    if (accountRepository.findByEmailWithDifferentUUID(updatedEmail, uuid).isPresent()) {
+      throw new ScimResourceExistsException(
+          "email " + updatedEmail + " already assigned to another user");
+    }
 
     IamAccount updatedAccount = converter.fromScim(scimItemToBeUpdated);
 
@@ -338,7 +331,6 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
       .orElseThrow(() -> new ScimResourceNotFoundException("No user mapped to id '" + id + "'"));
 
     updater.update(iamAccount, operations);
-
   }
 
 }

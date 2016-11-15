@@ -97,7 +97,8 @@ public class DefaultRegistrationRequestService implements RegistrationRequestSer
     ScimUser.Builder userBuilder = ScimUser.builder()
       .buildName(request.getGivenname(), request.getFamilyname())
       .buildEmail(request.getEmail())
-      .userName(request.getUsername());
+      .userName(request.getUsername())
+      .password(request.getPassword());
 
     extAuthnInfo.ifPresent(i -> addExternalAuthnInfo(userBuilder, i));
 

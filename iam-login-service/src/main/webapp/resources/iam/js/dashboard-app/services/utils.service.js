@@ -30,7 +30,7 @@ function Utils() {
 	
 	function isMe(id) {
 		
-		return (id != getUserInfo().sub);
+		return (id == getUserInfo().sub);
 	}
 	
 	function isAdmin() {
@@ -65,13 +65,13 @@ function Utils() {
 
 		return { 
 			type: "error",
-			text: error.data.error_description || error.data.detail
+			text: error.data.error_description || error.data.detail || error.data.message
 		}
 	}
 
 	function buildSuccessOperationResult(message) {
 
-		return { 
+		return {
 			type: "success",
 			text: message
 		}

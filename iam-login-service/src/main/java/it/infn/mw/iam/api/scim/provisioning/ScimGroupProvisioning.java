@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,30 +22,22 @@ import it.infn.mw.iam.api.scim.model.ScimMemberRef;
 import it.infn.mw.iam.api.scim.model.ScimPatchOperation;
 import it.infn.mw.iam.api.scim.provisioning.paging.OffsetPageable;
 import it.infn.mw.iam.api.scim.provisioning.paging.ScimPageRequest;
-import it.infn.mw.iam.api.scim.updater.GroupUpdater;
+import it.infn.mw.iam.api.scim.updater.ScimGroupUpdater;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamGroup;
-import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamGroupRepository;
 
 @Service
 public class ScimGroupProvisioning implements ScimProvisioning<ScimGroup, List<ScimMemberRef>> {
 
-  private final GroupConverter converter;
-  private final GroupUpdater updater;
-
-  private final IamGroupRepository groupRepository;
-  private final IamAccountRepository accountRepository;
+  @Autowired
+  private GroupConverter converter;
 
   @Autowired
-  public ScimGroupProvisioning(GroupConverter converter, GroupUpdater updater,
-      IamGroupRepository groupRepository, IamAccountRepository accountRepository) {
+  private ScimGroupUpdater groupUpdater;
 
-    this.updater = updater;
-    this.converter = converter;
-    this.groupRepository = groupRepository;
-    this.accountRepository = accountRepository;
-  }
+  @Autowired
+  private IamGroupRepository groupRepository;
 
   private void idSanityChecks(String id) {
 
@@ -64,13 +55,10 @@ public class ScimGroupProvisioning implements ScimProvisioning<ScimGroup, List<S
 
     idSanityChecks(id);
 
-    Optional<IamGroup> group = groupRepository.findByUuid(id);
+    IamGroup group = groupRepository.findByUuid(id)
+      .orElseThrow(() -> new ScimResourceNotFoundException("No group mapped to id '" + id + "'"));
 
-    if (group.isPresent()) {
-      return converter.toScim(group.get());
-    }
-
-    throw new ScimResourceNotFoundException("No group mapped to id '" + id + "'");
+    return converter.toScim(group);
   }
 
   @Override
@@ -104,9 +92,7 @@ public class ScimGroupProvisioning implements ScimProvisioning<ScimGroup, List<S
     IamGroup group = groupRepository.findByUuid(id)
       .orElseThrow(() -> new ScimResourceNotFoundException("No group mapped to id '" + id + "'"));
 
-    List<IamAccount> accounts = accountRepository.findByGroupId(group.getId());
-
-    if (!accounts.isEmpty()) {
+    if (!group.getAccounts().isEmpty()) {
 
       throw new ScimException("Not empty group");
     }
@@ -123,7 +109,7 @@ public class ScimGroupProvisioning implements ScimProvisioning<ScimGroup, List<S
     /* displayname is required */
     String displayName = scimItemToBeReplaced.getDisplayName();
 
-    if (groupRepository.findByNameWithDifferentId(displayName, id).isPresent()) {
+    if (!isGroupNameAvailable(displayName, id)) {
       throw new ScimResourceExistsException(displayName + " is already mappped to another group");
     }
 
@@ -140,6 +126,11 @@ public class ScimGroupProvisioning implements ScimProvisioning<ScimGroup, List<S
 
     groupRepository.save(updatedGroup);
     return converter.toScim(updatedGroup);
+  }
+
+  private boolean isGroupNameAvailable(String displayName, String id) {
+
+    return !groupRepository.findByNameWithDifferentId(displayName, id).isPresent();
   }
 
   @Override
@@ -162,13 +153,13 @@ public class ScimGroupProvisioning implements ScimProvisioning<ScimGroup, List<S
         op.getOffset() + 1);
   }
 
+  @Override
   public void update(String id, List<ScimPatchOperation<List<ScimMemberRef>>> operations) {
 
     IamGroup iamGroup = groupRepository.findByUuid(id)
       .orElseThrow(() -> new ScimResourceNotFoundException("No group mapped to id '" + id + "'"));
 
-    updater.update(iamGroup, operations);
-
+    groupUpdater.update(iamGroup, operations);
   }
 
 }

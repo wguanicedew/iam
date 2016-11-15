@@ -94,9 +94,19 @@ public class ScimUserProvisioningPatchReplaceTests {
     testUsers.forEach(user -> restUtils.doDelete(user.getMeta().getLocation()));
   }
 
+  private ScimUserPatchRequest getPatchAddRequest(ScimUser updates) {
+
+    return ScimUserPatchRequest.builder().add(updates).build();
+  }
+
   private ScimUserPatchRequest getPatchReplaceRequest(ScimUser updates) {
 
     return ScimUserPatchRequest.builder().replace(updates).build();
+  }
+
+  private ScimUserPatchRequest getPatchRemoveRequest(ScimUser updates) {
+
+    return ScimUserPatchRequest.builder().remove(updates).build();
   }
 
   @Test
@@ -244,12 +254,13 @@ public class ScimUserProvisioningPatchReplaceTests {
     ScimUser updated_user =
         restUtils.doGet(user.getMeta().getLocation()).extract().as(ScimUser.class);
 
+    String sshKeyValue = user.getIndigoUser().getSshKeys().get(0).getValue();
+
     Assert.assertTrue(
         updated_user.getIndigoUser()
           .getSshKeys()
           .stream()
-          .filter(sshKey -> sshKey.getValue()
-            .equals(user.getIndigoUser().getSshKeys().get(0).getValue()) && !sshKey.isPrimary())
+          .filter(sshKey -> (sshKey.getValue().equals(sshKeyValue) && !sshKey.isPrimary()))
           .findFirst()
           .isPresent());
 
@@ -319,6 +330,64 @@ public class ScimUserProvisioningPatchReplaceTests {
         ScimUser.builder().buildEmail("fakeEmail").build());
 
     restUtils.doPatch(user.getMeta().getLocation(), req, HttpStatus.BAD_REQUEST).body("detail",
-        containsString("scimUserPatchRequest.operations[0].value.emails[0].value : not a well-formed email address"));;
+        containsString("scimUserPatchRequest.operations[0].value.emails[0].value : not a well-formed email address"));
+  }
+
+  @Test
+  public void testReplacePicture() {
+
+    final String pictureURL = "http://iosicongallery.com/img/512/angry-birds-2-2016.png";
+    final String pictureURL2 = "https://fallofthewall25.com/img/default-user.jpg";
+    ScimUser user = testUsers.get(0);
+
+    ScimUser uUser1 = restUtils.doGet(user.getMeta().getLocation()).extract().as(ScimUser.class);
+
+    Assert.assertTrue(uUser1.getPhotos() == null);
+
+    ScimUserPatchRequest req = getPatchAddRequest(ScimUser.builder().buildPhoto(pictureURL).build());
+
+    restUtils.doPatch(user.getMeta().getLocation(), req);
+
+    uUser1 = restUtils.doGet(user.getMeta().getLocation()).extract().as(ScimUser.class);
+
+    Assert.assertFalse(uUser1.getPhotos().isEmpty());
+    Assert.assertTrue(uUser1.getPhotos().get(0).getValue().equals(pictureURL));
+
+    req = getPatchReplaceRequest(ScimUser.builder().buildPhoto(pictureURL).build());
+
+    restUtils.doPatch(user.getMeta().getLocation(), req);
+
+    ScimUser uUser2 = restUtils.doGet(user.getMeta().getLocation()).extract().as(ScimUser.class);
+
+    Assert.assertFalse(uUser2.getPhotos().isEmpty());
+    Assert.assertTrue(uUser2.getPhotos().get(0).getValue().equals(pictureURL));
+    Assert.assertTrue(uUser2.getMeta().getLastModified().equals(uUser1.getMeta().getLastModified()));
+
+    req = getPatchReplaceRequest(ScimUser.builder().buildPhoto(pictureURL2).build());
+
+    restUtils.doPatch(user.getMeta().getLocation(), req);
+
+    ScimUser uUser3 = restUtils.doGet(user.getMeta().getLocation()).extract().as(ScimUser.class);
+
+    Assert.assertFalse(uUser3.getPhotos().isEmpty());
+    Assert.assertTrue(uUser3.getPhotos().get(0).getValue().equals(pictureURL2));
+    Assert.assertFalse(uUser3.getMeta().getLastModified().equals(uUser2.getMeta().getLastModified()));
+
+    req = getPatchRemoveRequest(ScimUser.builder().buildPhoto(pictureURL2).build());
+
+    restUtils.doPatch(user.getMeta().getLocation(), req);
+  }
+
+  @Test
+  public void testReplaceUsername() {
+
+    final String ANOTHERUSER_USERNAME = "test";
+
+    ScimUser user = testUsers.get(0);
+
+    ScimUserPatchRequest req =
+        getPatchReplaceRequest(ScimUser.builder().userName(ANOTHERUSER_USERNAME).build());
+
+    restUtils.doPatch(user.getMeta().getLocation(), req, HttpStatus.CONFLICT);
   }
 }

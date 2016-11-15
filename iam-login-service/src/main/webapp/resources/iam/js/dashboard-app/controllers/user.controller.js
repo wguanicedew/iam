@@ -42,6 +42,10 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, $q, filt
 	user.openAssignVoAdminPrivilegesDialog = openAssignVoAdminPrivilegesDialog;
 	user.openRevokeVoAdminPrivilegesDialog = openRevokeVoAdminPrivilegesDialog;
 	user.isMe = isMe;
+
+	user.isEditUserDisabled = false;
+	user.isSendResetDisabled = false;
+	user.isEnableUserDisabled = false;
 	
 	// password reset
 	user.doPasswordReset = doPasswordReset;
@@ -63,6 +67,7 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, $q, filt
 		}
 		
 		var loadScimUserSuccess = function(result){
+			$scope.user = result.data;
 			user.userInfo = result.data;
 		}
 		
@@ -80,13 +85,11 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, $q, filt
 	
 	function openLoadingModal() {
 		$rootScope.pageLoadingProgress = 0;
-
-		user.loadingModal = $uibModal
-		.open({
+		user.loadingModal = $uibModal.open({
 			animation: false,
 			templateUrl : '/resources/iam/template/dashboard/loading-modal.html'
 		});
-		
+
 		return user.loadingModal.opened;
 	}
 	
@@ -103,13 +106,13 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, $q, filt
 	
 	function doPasswordReset() {
 		
-		ResetPasswordService.forgotPassword(user.userInfo.emails[0].value).then(
+		ResetPasswordService.forgotPassword($scope.user.emails[0].value).then(
 			function(response) {
 				ModalService.showModal({}, {
 					closeButtonText: null,
-					user: user.userInfo.name.formatted,
+					user: $scope.user.name.formatted,
 					actionButtonText: 'OK',
-					headerText: 'Password reset requested',
+					headerText: 'Password reset requested for user',
 					bodyText: `A password reset link has just been sent to your e-mail address`
 				});
 			}, function(error) {
@@ -118,21 +121,27 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, $q, filt
 	}
 
 	function sendResetMail() {
-		
+
+		user.isSendResetDisabled = true;
 		var modalOptions = {
 				closeButtonText: 'Cancel',
 				actionButtonText: 'Send password reset e-mail',
 				headerText: 'Send password reset e-mail',
-				bodyText: `Are you sure you want to send the password reset e-mail to ${user.userInfo.name.formatted}?`	
+				bodyText: `Are you sure you want to send the password reset e-mail to ${$scope.user.name.formatted}?`	
 			};
 				
-			ModalService.showModal({}, modalOptions).then(
-				function (){
-					user.doPasswordReset();
-				});
+		ModalService.showModal({}, modalOptions).then(
+			function (){
+				user.doPasswordReset();
+				user.isSendResetDisabled = false;
+			}, function () {
+				user.isSendResetDisabled = false;
+			});
 	}
 
 	function openEditUserDialog() {
+
+		user.isEditUserDisabled = true;
 
 		var modalInstance = $uibModal
 				.open({
@@ -141,16 +150,18 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, $q, filt
 					controllerAs : 'editUserCtrl',
 					resolve : {
 						user : function() {
-							console.log(user.userInfo);
-							return user.userInfo;
+							return $scope.user;
 						}
 					}
 				});
+		
 		modalInstance.result.then(function() {
 			loadUserInfo();
 			$scope.operationResult = Utils.buildSuccessOperationResult("User's info updated successfully");
+			user.isEditUserDisabled = false;
 		}, function() {
-			console.info('Modal dismissed at: ', new Date());
+			console.log('Modal dismissed at: ', new Date());
+			user.isEditUserDisabled = false;
 		});
 	}
 	
@@ -162,16 +173,16 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, $q, filt
 					controllerAs : 'addGroupCtrl',
 					resolve : {
 						user : function() {
-							return user.userInfo;
+							return $scope.user;
 						}
 					}
 				});
 		modalInstance.result.then(function() {
 			console.info("Added group");
 			loadUserInfo();
-			$scope.operationResult = Utils.buildSuccessOperationResult("User's memberships updated successfully");
+			$scope.operationResult = Utils.buildSuccessOperationResult("User's groups updated successfully");
 		}, function() {
-			console.info('Modal dismissed at: ', new Date());
+			console.log('Modal dismissed at: ', new Date());
 		});
 	}
 
@@ -182,16 +193,17 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, $q, filt
 			controllerAs : 'addOidcCtrl',
 			resolve : {
 				user : function() {
-					return user.userInfo;
+					return $scope.user;
 				}
 			}
 		});
 		modalInstance.result.then(function() {
 			console.info("Added oidc account");
+
 			loadUserInfo();
 			$scope.operationResult = Utils.buildSuccessOperationResult("User's Open ID Account created successfully");
 		}, function() {
-			console.info('Modal dismissed at: ', new Date());
+			console.log('Modal dismissed at: ', new Date());
 		});
 	}
 
@@ -202,16 +214,17 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, $q, filt
 			controllerAs : 'addSshKeyCtrl',
 			resolve : {
 				user : function() {
-					return user.userInfo;
+					return $scope.user;
 				}
 			}
 		});
 		modalInstance.result.then(function() {
 			console.info("Added ssh key");
+
 			loadUserInfo();
 			$scope.operationResult = Utils.buildSuccessOperationResult("User's SSH Key added successfully");
 		}, function(error) {
-			console.info('Modal dismissed at: ', new Date());
+			console.log('Modal dismissed at: ', new Date());
 		});
 	}
 
@@ -223,16 +236,17 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, $q, filt
 					controllerAs : 'addSamlAccountCtrl',
 					resolve : {
 						user : function() {
-							return user.userInfo;
+							return $scope.user;
 						}
 					}
 				});
 		modalInstance.result.then(function() {
 			console.info("Added saml account");
+
 			loadUserInfo();
 			$scope.operationResult = Utils.buildSuccessOperationResult("User's SAML Account created successfully");
 		}, function() {
-			console.info('Modal dismissed at: ', new Date());
+			console.log('Modal dismissed at: ', new Date());
 		});
 	}
 
@@ -244,16 +258,17 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, $q, filt
 					controllerAs : 'addX509CertCtrl',
 					resolve : {
 						user : function() {
-							return user.userInfo;
+							return $scope.user;
 						}
 					}
 				});
 		modalInstance.result.then(function() {
 			console.info("Added x509 certificate");
+
 			loadUserInfo();
 			$scope.operationResult = Utils.buildSuccessOperationResult("User's x509 Certificate added successfully");
 		}, function() {
-			console.info('Modal dismissed at: ', new Date());
+			console.log('Modal dismissed at: ', new Date());
 		});
 	}
 
@@ -262,16 +277,17 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, $q, filt
 		var modalOptions = {
 			closeButtonText: 'Cancel',
 			actionButtonText: 'Remove user from group',
-			headerText: 'Remove ' + user.userInfo.name.formatted + ' from ' + group.display,
-			bodyText: `Are you sure you want to remove «${user.userInfo.name.formatted}» from «${group.display}»?`	
+			headerText: 'Remove ' + $scope.user.name.formatted + ' from ' + group.display,
+			bodyText: `Are you sure you want to remove «${$scope.user.name.formatted}» from «${group.display}»?`	
 		};
 			
 		ModalService.showModal({}, modalOptions).then(
 			function (){
-				scimFactory.removeUserFromGroup(group.value, user.userInfo.id,
-						user.userInfo.meta.location, user.userInfo.name.formatted)
+				scimFactory.removeUserFromGroup(group.value, $scope.user.id,
+						$scope.user.meta.location, $scope.user.name.formatted)
 					.then(function(response) {
-						console.log("Deleted: ", group);
+
+						console.log("Removed group: ", group);
 						loadUserInfo();
 						$scope.operationResult = Utils.buildSuccessOperationResult("Group membership removed successfully");
 					}, function(error) {
@@ -314,10 +330,11 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, $q, filt
 				
 			ModalService.showModal({}, modalOptions).then(
 				function (){
-					scimFactory.removeOpenIDAccount(user.userInfo.id, oidcId.issuer,
+					scimFactory.removeOpenIDAccount($scope.user.id, oidcId.issuer,
 							oidcId.subject)
 						.then(function(response) {
-							console.log("Removed: ", oidcId.issuer, oidcId.subject);
+
+							console.info("Remove OIDC Account", oidcId.issuer, oidcId.subject);				
 							loadUserInfo();
 							$scope.operationResult = Utils.buildSuccessOperationResult("Open ID Account has been removed successfully");
 						}, function(error) {
@@ -337,11 +354,13 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, $q, filt
 				
 			ModalService.showModal({}, modalOptions).then(
 				function (){
-					scimFactory.removeSshKey(user.userInfo.id, sshKey.fingerprint)
+					scimFactory.removeSshKey($scope.user.id, sshKey.fingerprint)
 						.then(function(response) {
-							console.log("Removed: ", sshKey.display, sshKey.fingerprint);
+
+							console.info("Removed SSH Key", sshKey.display, sshKey.fingerprint);
 							loadUserInfo();
 							$scope.operationResult = Utils.buildSuccessOperationResult("Ssh key has been removed successfully");
+
 						}, function(error) {
 							$scope.operationResult = Utils.buildErrorOperationResult(error);
 						});
@@ -359,11 +378,14 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, $q, filt
 				
 			ModalService.showModal({}, modalOptions).then(
 				function (){
-					scimFactory.removeX509Certificate(user.userInfo.id, x509cert.value)
+					scimFactory.removeX509Certificate($scope.user.id, x509cert.value)
 						.then(function(response) {
-							console.log("Removed: ", x509cert.display);
+
+							console.info("Removed x509 Certificate", x509cert.display);
+
 							loadUserInfo();
 							$scope.operationResult = Utils.buildSuccessOperationResult("X509 Certificate has been removed successfully");
+
 						}, function(error) {
 							$scope.operationResult = Utils.buildErrorOperationResult(error);
 						});
@@ -384,11 +406,13 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, $q, filt
 				
 			ModalService.showModal({}, modalOptions).then(
 				function (){
-					scimFactory.removeSamlId(user.userInfo.id, samlId)
+					scimFactory.removeSamlId($scope.user.id, samlId)
 						.then(function(response) {
-							console.log("Removed: ", samlId.idpId, samlId.userId);
+
+							console.info("Removed SAML Id", samlId.idpId, samlId.userId);
 							loadUserInfo();
 							$scope.operationResult = Utils.buildSuccessOperationResult("SAML Account has been removed successfully");
+
 						}, function(error) {
 							$scope.operationResult = Utils.buildErrorOperationResult(error);
 						});
@@ -397,6 +421,7 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, $q, filt
 
 	function setActive(status) {
 
+		user.isEnableUserDisabled = true;
 		var modalOptions = {};
 		
 		if (status) {
@@ -404,32 +429,38 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, $q, filt
 			modalOptions = {
 				closeButtonText: 'Cancel',
 				actionButtonText: 'Enable user',
-				headerText: 'Enable ' + user.userInfo.name.formatted,
-				bodyText: `Are you sure you want to enable '${user.userInfo.name.formatted}'?`	
+				headerText: 'Enable ' + $scope.user.name.formatted,
+				bodyText: `Are you sure you want to enable '${$scope.user.name.formatted}'?`	
 			};
 		} else {
 			
 			modalOptions = {
 				closeButtonText: 'Cancel',
 				actionButtonText: 'Disable user',
-				headerText: 'Disable ' + user.userInfo.name.formatted,
-				bodyText: `Are you sure you want to disable '${user.userInfo.name.formatted}'?`	
+				headerText: 'Disable ' + $scope.user.name.formatted,
+				bodyText: `Are you sure you want to disable '${$scope.user.name.formatted}'?`	
 			};
 		}
 		
 		ModalService.showModal({}, modalOptions).then(
 			function (){
-				scimFactory.setUserActiveStatus(user.userInfo.id, status)
+				scimFactory.setUserActiveStatus($scope.user.id, status)
 					.then(function(response) {
+
 						loadUserInfo();
+						
 						if (status) {
-							$scope.operationResult = Utils.buildSuccessOperationResult("User " + user.userInfo.name.formatted + " enabled");
+							$scope.operationResult = Utils.buildSuccessOperationResult("User " + $scope.user.name.formatted + " enabled");
 						} else {
-							$scope.operationResult = Utils.buildSuccessOperationResult("User " + user.userInfo.name.formatted + " disabled");
+							$scope.operationResult = Utils.buildSuccessOperationResult("User " + $scope.user.name.formatted + " disabled");
 						}
+						user.isEnableUserDisabled = false;
 					}, function(error) {
 						$scope.operationResult = Utils.buildErrorOperationResult(error);
+						user.isEnableUserDisabled = false;
 					});
+			}, function () {
+				user.isEnableUserDisabled = false;
 			});
 	}
 	
