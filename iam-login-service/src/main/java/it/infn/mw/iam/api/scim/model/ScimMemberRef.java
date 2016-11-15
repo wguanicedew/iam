@@ -12,10 +12,7 @@ public final class ScimMemberRef {
   @NotEmpty
   private final String value;
 
-  @NotEmpty
   private final String display;
-
-  @NotEmpty
   private final String ref;
 
   @JsonCreator
