@@ -35,6 +35,9 @@ public class DiscoveryEndpointTests {
       "urn:ietf:params:oauth:grant-type:jwt-bearer", "urn:ietf:params:oauth:grant_type:redelegate",
       "urn:ietf:params:oauth:grant-type:token-exchange"));
 
+  private static final String IAM_ORGANISATION_NAME_CLAIM = "organisation_name";
+  private static final String IAM_GROUPS_CLAIM = "groups";
+
   @Test
   public void testGrantTypesSupported() {
 
@@ -55,5 +58,26 @@ public class DiscoveryEndpointTests {
 
     Set<String> grantsSet = Sets.newLinkedHashSet(response.getBody().path("grant_types_supported"));
     Assert.assertThat(Sets.difference(iamSupportedGrants, grantsSet), Matchers.empty());
+  }
+
+  @Test
+  public void testSupportedClaims() {
+    // @formatter:off
+    Response response =RestAssured.given()
+      .port(iamPort)
+    .when()
+      .post(endpoint)
+    .then()
+      .log()
+        .body(true)
+      .statusCode(HttpStatus.OK.value())
+      .body("claims_supported", Matchers.notNullValue())
+      .extract()
+        .response()
+     ;
+    // @formatter:on
+    Set<String> claimsSet = Sets.newLinkedHashSet(response.getBody().path("claims_supported"));
+    Assert.assertThat(claimsSet, Matchers.hasItem(IAM_ORGANISATION_NAME_CLAIM));
+    Assert.assertThat(claimsSet, Matchers.hasItem(IAM_GROUPS_CLAIM));
   }
 }
