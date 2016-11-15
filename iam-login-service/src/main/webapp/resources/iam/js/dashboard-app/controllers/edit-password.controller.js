@@ -49,7 +49,7 @@ function EditPasswordController($scope, $state, $uibModalInstance, Utils,
 				function(error) {
 					console.error(error);
 					$scope.operationResult = Utils
-							.buildGenericErrorOperationResult(error.data);
+							.buildErrorResult(error.data);
 				});
 	};
 
