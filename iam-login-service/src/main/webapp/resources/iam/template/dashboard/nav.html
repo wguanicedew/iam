@@ -19,13 +19,13 @@
   <ul class="sidebar-menu" name="sidebar-menu">
     <li class="header">MENU</li>
     <li>
-        <a ui-sref="home">
+        <a ui-sref="home" ui-sref-opts="{reload: true}">
             <i class="fa fa-home"></i>
             <span>Home</span>
         </a>
     </li>
     <li ng-show="$root.loggedUser.isAdmin">
-        <a ui-sref="users">
+        <a ui-sref="users" ui-sref-opts="{reload: true}">
             <i class="fa fa-user"></i>
             <span>Users</span>
             <span class="pull-right-container" ng-show="$root.loggedUser.totUsers>0">
@@ -34,7 +34,7 @@
         </a>
     </li>
     <li ng-show="$root.loggedUser.isAdmin">
-        <a ui-sref="groups">
+        <a ui-sref="groups" ui-sref-opts="{reload: true}">
             <i class="fa fa-users"></i>
             <span>Groups</span>
             <span class="pull-right-container" ng-show="$root.loggedUser.totGroups>0">
@@ -43,7 +43,7 @@
         </a>
     </li>
     <li ng-show="$root.loggedUser.isAdmin && $root.isRegistrationEnabled">
-        <a ui-sref="requests">
+        <a ui-sref="requests" ui-sref-opts="{reload: true}">
             <i class="fa fa-sign-in"></i>
             <span>Requests</span>
             <span class="pull-right-container" ng-show="$root.loggedUser.pendingRequests.length>0">
