@@ -359,7 +359,8 @@ public class IamDiscoveryEndpoint {
         "phone_number_verified", 
         "address", 
         "organisation_name", 
-        "groups"));
+        "groups",
+        "external_authn"));
     // @formatter:on
 
     m.put("service_documentation", baseUrl + ABOUT_URL);

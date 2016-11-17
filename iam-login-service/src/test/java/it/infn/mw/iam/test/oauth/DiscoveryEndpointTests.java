@@ -37,6 +37,7 @@ public class DiscoveryEndpointTests {
 
   private static final String IAM_ORGANISATION_NAME_CLAIM = "organisation_name";
   private static final String IAM_GROUPS_CLAIM = "groups";
+  private static final String IAM_EXTERNAL_AUTHN_CLAIM = "external_authn";
 
   @Test
   public void testGrantTypesSupported() {
@@ -79,5 +80,6 @@ public class DiscoveryEndpointTests {
     Set<String> claimsSet = Sets.newLinkedHashSet(response.getBody().path("claims_supported"));
     Assert.assertThat(claimsSet, Matchers.hasItem(IAM_ORGANISATION_NAME_CLAIM));
     Assert.assertThat(claimsSet, Matchers.hasItem(IAM_GROUPS_CLAIM));
+    Assert.assertThat(claimsSet, Matchers.hasItem(IAM_EXTERNAL_AUTHN_CLAIM));
   }
 }
