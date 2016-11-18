@@ -30,13 +30,13 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import it.infn.mw.iam.authn.ExternalAuthenticationFailureHandler;
 import it.infn.mw.iam.authn.ExternalAuthenticationSuccessHandler;
 import it.infn.mw.iam.authn.InactiveAccountAuthenticationHander;
+import it.infn.mw.iam.authn.RootIsDashboardSuccessHandler;
 import it.infn.mw.iam.authn.TimestamperSuccessHandler;
 import it.infn.mw.iam.authn.oidc.DefaultOidcTokenRequestor;
 import it.infn.mw.iam.authn.oidc.DefaultRestTemplateFactory;
@@ -108,8 +108,8 @@ public class GoogleClient {
   @Bean(name = "OIDCExternalAuthenticationSuccessHandler")
   public AuthenticationSuccessHandler successHandler() {
 
-    AuthenticationSuccessHandler successHandler =
-        new TimestamperSuccessHandler(new SavedRequestAwareAuthenticationSuccessHandler());
+    RootIsDashboardSuccessHandler sa = new RootIsDashboardSuccessHandler(iamBaseUrl);
+    AuthenticationSuccessHandler successHandler = new TimestamperSuccessHandler(sa);
 
     return new ExternalAuthenticationSuccessHandler(successHandler, "/");
 

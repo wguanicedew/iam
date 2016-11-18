@@ -29,6 +29,11 @@ public class IamOidcId {
 
   public IamOidcId() {}
 
+  public IamOidcId(String issuer, String subject) {
+    setIssuer(issuer);
+    setSubject(subject);
+  }
+
   public Long getId() {
 
     return id;

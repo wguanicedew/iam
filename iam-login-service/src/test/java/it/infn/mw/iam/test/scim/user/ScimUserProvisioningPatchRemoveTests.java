@@ -6,11 +6,14 @@ import static org.hamcrest.Matchers.hasSize;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.transaction.Transactional;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.WebIntegrationTest;
 import org.springframework.http.HttpStatus;
@@ -24,6 +27,7 @@ import it.infn.mw.iam.api.scim.model.ScimSshKey;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.model.ScimUserPatchRequest;
 import it.infn.mw.iam.api.scim.model.ScimX509Certificate;
+import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.test.ScimRestUtils;
 import it.infn.mw.iam.test.TestUtils;
 import it.infn.mw.iam.test.util.JacksonUtils;
@@ -31,10 +35,14 @@ import it.infn.mw.iam.test.util.JacksonUtils;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = IamLoginService.class)
 @WebIntegrationTest
+@Transactional
 public class ScimUserProvisioningPatchRemoveTests {
 
   private String accessToken;
   private ScimRestUtils restUtils;
+
+  @Autowired
+  IamAccountRepository iamAccountRepo;
 
   private List<ScimUser> testUsers = new ArrayList<ScimUser>();
 
@@ -46,51 +54,57 @@ public class ScimUserProvisioningPatchRemoveTests {
 
   private void initTestUsers() {
 
-    testUsers.add(restUtils.doPost("/scim/Users/", ScimUser.builder("john_lennon")
-      .buildEmail("lennon@email.test")
-      .buildName("John", "Lennon")
-      .addOidcId(ScimOidcId.builder()
-        .issuer(TestUtils.oidcIds.get(0).issuer)
-        .subject(TestUtils.oidcIds.get(0).subject)
-        .build())
-      .addSshKey(ScimSshKey.builder()
-        .value(TestUtils.sshKeys.get(0).key)
-        .fingerprint(TestUtils.sshKeys.get(0).fingerprintSHA256)
-        .primary(true)
-        .build())
-      .addSamlId(ScimSamlId.builder()
-        .idpId(TestUtils.samlIds.get(0).idpId)
-        .userId(TestUtils.samlIds.get(0).userId)
-        .build())
-      .addX509Certificate(ScimX509Certificate.builder()
-        .display(TestUtils.x509Certs.get(0).display)
-        .value(TestUtils.x509Certs.get(0).certificate)
-        .primary(true)
-        .build())
-      .build()).extract().as(ScimUser.class));
+    testUsers.add(restUtils
+      .doPost("/scim/Users/",
+          ScimUser.builder("john_lennon")
+            .buildEmail("lennon@email.test")
+            .buildName("John", "Lennon")
+            .addOidcId(ScimOidcId.builder()
+              .issuer(TestUtils.oidcIds.get(0).issuer)
+              .subject(TestUtils.oidcIds.get(0).subject)
+              .build())
+            .addSshKey(ScimSshKey.builder()
+              .value(TestUtils.sshKeys.get(0).key)
+              .fingerprint(TestUtils.sshKeys.get(0).fingerprintSHA256)
+              .primary(true)
+              .build())
+            .addSamlId(ScimSamlId.builder()
+              .idpId(TestUtils.samlIds.get(0).idpId)
+              .userId(TestUtils.samlIds.get(0).userId)
+              .build())
+            .addX509Certificate(ScimX509Certificate.builder()
+              .display(TestUtils.x509Certs.get(0).display)
+              .value(TestUtils.x509Certs.get(0).certificate)
+              .primary(true)
+              .build())
+            .build())
+      .extract().as(ScimUser.class));
 
-    testUsers.add(restUtils.doPost("/scim/Users/", ScimUser.builder("abraham_lincoln")
-      .buildEmail("lincoln@email.test")
-      .buildName("Abraham", "Lincoln")
-      .addOidcId(ScimOidcId.builder()
-        .issuer(TestUtils.oidcIds.get(1).issuer)
-        .subject(TestUtils.oidcIds.get(1).subject)
-        .build())
-      .addSshKey(ScimSshKey.builder()
-        .value(TestUtils.sshKeys.get(1).key)
-        .fingerprint(TestUtils.sshKeys.get(1).fingerprintSHA256)
-        .primary(true)
-        .build())
-      .addSamlId(ScimSamlId.builder()
-        .idpId(TestUtils.samlIds.get(1).idpId)
-        .userId(TestUtils.samlIds.get(1).userId)
-        .build())
-      .addX509Certificate(ScimX509Certificate.builder()
-        .display(TestUtils.x509Certs.get(1).display)
-        .value(TestUtils.x509Certs.get(1).certificate)
-        .primary(true)
-        .build())
-      .build()).extract().as(ScimUser.class));
+    testUsers.add(restUtils
+      .doPost("/scim/Users/",
+          ScimUser.builder("abraham_lincoln")
+            .buildEmail("lincoln@email.test")
+            .buildName("Abraham", "Lincoln")
+            .addOidcId(ScimOidcId.builder()
+              .issuer(TestUtils.oidcIds.get(1).issuer)
+              .subject(TestUtils.oidcIds.get(1).subject)
+              .build())
+            .addSshKey(ScimSshKey.builder()
+              .value(TestUtils.sshKeys.get(1).key)
+              .fingerprint(TestUtils.sshKeys.get(1).fingerprintSHA256)
+              .primary(true)
+              .build())
+            .addSamlId(ScimSamlId.builder()
+              .idpId(TestUtils.samlIds.get(1).idpId)
+              .userId(TestUtils.samlIds.get(1).userId)
+              .build())
+            .addX509Certificate(ScimX509Certificate.builder()
+              .display(TestUtils.x509Certs.get(1).display)
+              .value(TestUtils.x509Certs.get(1).certificate)
+              .primary(true)
+              .build())
+            .build())
+      .extract().as(ScimUser.class));
   }
 
   @Before
@@ -169,8 +183,9 @@ public class ScimUserProvisioningPatchRemoveTests {
 
     restUtils.doPatch(user.getMeta().getLocation(), req);
 
-    restUtils.doGet(user.getMeta().getLocation()).body("id", equalTo(user.getId())).body(
-        "x509certificates", equalTo(null));
+    restUtils.doGet(user.getMeta().getLocation())
+      .body("id", equalTo(user.getId()))
+      .body("x509certificates", equalTo(null));
   }
 
   @Test
@@ -184,8 +199,9 @@ public class ScimUserProvisioningPatchRemoveTests {
 
     restUtils.doPatch(user1.getMeta().getLocation(), req, HttpStatus.NOT_FOUND);
 
-    restUtils.doGet(user1.getMeta().getLocation()).body("id", equalTo(user1.getId())).body(
-        "x509certificates", equalTo(null));
+    restUtils.doGet(user1.getMeta().getLocation())
+      .body("id", equalTo(user1.getId()))
+      .body("x509certificates", equalTo(null));
   }
 
 
@@ -200,7 +216,7 @@ public class ScimUserProvisioningPatchRemoveTests {
     restUtils.doPatch(user1.getMeta().getLocation(), req);
     restUtils.doPatch(user1.getMeta().getLocation(), req, HttpStatus.NOT_FOUND);
   }
-  
+
   @Test
   public void testPatchRemoveSshKey() {
 
@@ -214,7 +230,7 @@ public class ScimUserProvisioningPatchRemoveTests {
     restUtils.doGet(user.getMeta().getLocation()).body("id", equalTo(user.getId())).body(
         ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys", equalTo(null));
   }
-  
+
   @Test
   public void testPatchRemoveAnotherUserSshKey() {
 
@@ -241,7 +257,7 @@ public class ScimUserProvisioningPatchRemoveTests {
     restUtils.doPatch(user1.getMeta().getLocation(), req);
     restUtils.doPatch(user1.getMeta().getLocation(), req, HttpStatus.NOT_FOUND);
   }
-  
+
   @Test
   public void testPatchRemoveSamlId() {
 

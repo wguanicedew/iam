@@ -62,7 +62,7 @@ public class OidcExternalAuthenticationTestsSupport {
   }
 
   String landingPageURL() {
-    return baseIamURL() + "/";
+    return baseIamURL() + "/dashboard";
   }
 
   String loginPageURL() {

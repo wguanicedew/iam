@@ -1,4 +1,4 @@
-package it.infn.mw.iam.api.account;
+package it.infn.mw.iam.api.account.password_reset;
 
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotEmpty;

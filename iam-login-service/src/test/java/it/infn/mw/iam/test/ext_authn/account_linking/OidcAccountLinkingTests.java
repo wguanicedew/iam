@@ -10,9 +10,12 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
@@ -79,9 +82,17 @@ public class OidcAccountLinkingTests {
 
   @Test
   @WithMockUser(username = TEST_100_USER)
+  public void accountLinkingFinalizationFailsForUserWithoutExternalAuthtToken() throws Exception {
+    mvc.perform(get("/iam/account-linking/OIDC")).andExpect(status().isFound());
+  }
+
+  @Test
+  @WithMockUser(username = TEST_100_USER)
   public void oidcAccountLinkingWorks() throws Exception {
 
-    MockHttpSession session = (MockHttpSession) mvc.perform(get("/iam/account-linking/OIDC"))
+    MockHttpSession session = (MockHttpSession) mvc
+      .perform(post("/iam/account-linking/OIDC").with(csrf().asHeader()))
+      .andDo(print())
       .andExpect(status().isFound())
       .andExpect(redirectedUrl("/openid_connect_login"))
       .andExpect(
@@ -146,7 +157,8 @@ public class OidcAccountLinkingTests {
   @WithMockUser(username = TEST_100_USER)
   public void oidcAccountLinkingFailsSinceOidcIdIsAlreadyBoundToAnotherUser() throws Exception {
 
-    MockHttpSession session = (MockHttpSession) mvc.perform(get("/iam/account-linking/OIDC"))
+    MockHttpSession session = (MockHttpSession) mvc
+      .perform(post("/iam/account-linking/OIDC").with(csrf().asHeader()))
       .andExpect(status().isFound())
       .andExpect(redirectedUrl("/openid_connect_login"))
       .andExpect(
@@ -211,7 +223,8 @@ public class OidcAccountLinkingTests {
   public void oidcAccountLinkingFailsSinceOidcIdIsAlreadyBoundToAuthenticatedUser()
       throws Exception {
 
-    MockHttpSession session = (MockHttpSession) mvc.perform(get("/iam/account-linking/OIDC"))
+    MockHttpSession session = (MockHttpSession) mvc
+      .perform(post("/iam/account-linking/OIDC").with(csrf().asHeader()))
       .andExpect(status().isFound())
       .andExpect(redirectedUrl("/openid_connect_login"))
       .andExpect(
@@ -273,7 +286,8 @@ public class OidcAccountLinkingTests {
   @Test
   @WithMockUser(username = TEST_100_USER)
   public void oidcAccountLinkingExternalAuthnFailureRedirectsToDashboard() throws Exception {
-    MockHttpSession session = (MockHttpSession) mvc.perform(get("/iam/account-linking/OIDC"))
+    MockHttpSession session = (MockHttpSession) mvc
+      .perform(post("/iam/account-linking/OIDC").with(csrf().asHeader()))
       .andExpect(status().isFound())
       .andExpect(redirectedUrl("/openid_connect_login"))
       .andExpect(

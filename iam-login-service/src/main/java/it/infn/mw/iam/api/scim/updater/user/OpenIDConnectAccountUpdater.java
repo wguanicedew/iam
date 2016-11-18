@@ -17,15 +17,12 @@ import it.infn.mw.iam.api.scim.updater.Updater;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamOidcId;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
-import it.infn.mw.iam.persistence.repository.IamOidcIdRepository;
 
 @Component
 public class OpenIDConnectAccountUpdater implements Updater<IamAccount, ScimUser> {
 
   @Autowired
   private IamAccountRepository accountRepository;
-  @Autowired
-  private IamOidcIdRepository oidcIdRepository;
 
   @Autowired
   private OidcIdConverter oidcIdConverter;
@@ -58,11 +55,11 @@ public class OpenIDConnectAccountUpdater implements Updater<IamAccount, ScimUser
     validate(account, user);
 
     return user.getIndigoUser()
-        .getOidcIds()
-        .stream()
-        .map(oidcId -> removeOpenIdConnectAccount(account, oidcId))
-        .filter(result -> result)
-        .count() > 1;
+      .getOidcIds()
+      .stream()
+      .map(oidcId -> removeOpenIdConnectAccount(account, oidcId))
+      .filter(result -> result)
+      .count() > 1;
   }
 
   @Override
@@ -77,23 +74,23 @@ public class OpenIDConnectAccountUpdater implements Updater<IamAccount, ScimUser
     Preconditions.checkNotNull(oidcId.getIssuer(), "Add OpenID account: null issuer");
     Preconditions.checkNotNull(oidcId.getSubject(), "Add OpenID account: null subject");
 
-    Optional<IamAccount> oidcAccount =
+    Optional<IamAccount> targetAccount =
         accountRepository.findByOidcId(oidcId.getIssuer(), oidcId.getSubject());
 
-    if (oidcAccount.isPresent()) {
+    if (targetAccount.isPresent()) {
 
-      if (!oidcAccount.get().equals(account)) {
+      if (!targetAccount.get().equals(account)) {
         throw new ScimResourceExistsException(
             String.format("OpenID account (%s,%s) is already mapped to another user",
                 oidcId.getIssuer(), oidcId.getSubject()));
       }
+
       return false;
     }
 
     IamOidcId iamOidcId = oidcIdConverter.fromScim(oidcId);
     iamOidcId.setAccount(account);
 
-    oidcIdRepository.save(iamOidcId);
     account.getOidcIds().add(iamOidcId);
 
     return true;
@@ -103,20 +100,17 @@ public class OpenIDConnectAccountUpdater implements Updater<IamAccount, ScimUser
 
     Preconditions.checkNotNull(oidcId, "Remove OpenID account: null OpenID account");
 
-    Optional<IamOidcId> toRemove = account.getOidcIds()
+    IamOidcId toBeRemoved = account.getOidcIds()
       .stream()
       .filter(o -> o.getIssuer().equals(oidcId.getIssuer())
           && o.getSubject().equals(oidcId.getSubject()))
-      .findFirst();
+      .findFirst()
+      .orElseThrow(() -> new ScimResourceNotFoundException(
+          String.format("No Open ID connect account found for (%s,%s)", oidcId.getSubject(),
+              oidcId.getIssuer())));
 
-    if (!toRemove.isPresent()) {
-
-      throw new ScimResourceNotFoundException(String.format(
-          "No Open ID connect account found for (%s,%s)", oidcId.getSubject(), oidcId.getIssuer()));
-    }
-
-    oidcIdRepository.delete(toRemove.get());
-    account.getOidcIds().remove(toRemove.get());
+    toBeRemoved.setAccount(null);
+    account.getOidcIds().remove(toBeRemoved);
     return true;
   }
 
@@ -124,6 +118,6 @@ public class OpenIDConnectAccountUpdater implements Updater<IamAccount, ScimUser
   public boolean accept(ScimUser user) {
 
     return user.getIndigoUser() != null && user.getIndigoUser().getOidcIds() != null
-        && !user.getIndigoUser().getOidcIds().isEmpty();  
+        && !user.getIndigoUser().getOidcIds().isEmpty();
   }
 }

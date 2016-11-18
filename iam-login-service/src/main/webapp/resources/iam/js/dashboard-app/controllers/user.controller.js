@@ -64,6 +64,7 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, $q, filt
 		
 		var loadAuthoritiesSuccess = function(result){
 			user.authorities = result.data.authorities;
+			$scope.user.isAdmin = user.isVoAdmin();
 		}
 		
 		var loadScimUserSuccess = function(result){
@@ -73,8 +74,9 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, $q, filt
 		
 		$q.all([modalPromise,authPromise,scimPromise]).then(
 				function(data) {
-					authPromise.then(loadAuthoritiesSuccess);
 					scimPromise.then(loadScimUserSuccess);
+					authPromise.then(loadAuthoritiesSuccess);
+					
 					user.loaded = true;
 					closeLoadingModal();
 				}, function(error) {

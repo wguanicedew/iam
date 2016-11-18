@@ -30,20 +30,19 @@ public class ExternalAuthenticationSuccessHandler extends ExternalAuthentication
       saveExternalAuthenticationInSession(request.getSession(), authentication);
       restoreSavedAuthentication(request.getSession());
 
-
       request.getRequestDispatcher(getAccountLinkingForwardTarget(request)).forward(request,
-	  response);
-
-      return;
-    }
-
-    if (isExternalUnregisteredUser(authentication)) {
-      response.sendRedirect(unregisteredUserTargetURL);
+          response);
 
     } else {
-      delegate.onAuthenticationSuccess(request, response, authentication);
-    }
 
+      if (isExternalUnregisteredUser(authentication)) {
+        response.sendRedirect(unregisteredUserTargetURL);
+
+      } else {
+        delegate.onAuthenticationSuccess(request, response, authentication);
+      }
+
+    }
   }
 
 }

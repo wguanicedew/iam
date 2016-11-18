@@ -1,4 +1,4 @@
-package it.infn.mw.iam.api.account.password_reset;
+package it.infn.mw.iam.api.account.password_reset.error;
 
 public class InvalidPasswordResetTokenError extends RuntimeException {
 

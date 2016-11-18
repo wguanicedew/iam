@@ -5,6 +5,7 @@ import org.mitre.oauth2.web.CorsFilter;
 import org.mitre.openid.connect.web.AuthenticationTimeStamper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.embedded.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,6 +27,7 @@ import org.springframework.security.oauth2.provider.authentication.OAuth2Authent
 import org.springframework.security.oauth2.provider.client.ClientCredentialsTokenEndpointFilter;
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
 import org.springframework.security.oauth2.provider.expression.OAuth2WebSecurityExpressionHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
@@ -34,6 +36,8 @@ import org.springframework.security.web.context.request.async.WebAsyncManagerInt
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.filter.GenericFilterBean;
 
+import it.infn.mw.iam.authn.RootIsDashboardSuccessHandler;
+import it.infn.mw.iam.authn.TimestamperSuccessHandler;
 import it.infn.mw.iam.authn.oidc.OidcAccessDeniedHandler;
 import it.infn.mw.iam.authn.oidc.OidcAuthenticationProvider;
 import it.infn.mw.iam.authn.oidc.OidcClientFilter;
@@ -42,9 +46,14 @@ import it.infn.mw.iam.authn.oidc.OidcClientFilter;
 @EnableWebSecurity
 public class SecurityConfig {
 
+
+
   @Configuration
   @Order(100)
   public static class UserLoginConfig extends WebSecurityConfigurerAdapter {
+
+    @Value("${iam.baseUrl}")
+    private String iamBaseUrl;
 
     @Autowired
     private AuthenticationTimeStamper authenticationTimeStamper;
@@ -84,7 +93,8 @@ public class SecurityConfig {
       // @formatter:off
 
       http.requestMatchers()
-        .antMatchers("/", "/login**", "/logout", "/authorize", "/manage/**", "/dashboard**", "/register")
+        .antMatchers("/", "/login**", "/logout", "/authorize", "/manage/**", "/dashboard**", "/register",
+            "/reset-session")
         .and()
         .sessionManagement()
           .enableSessionUrlRewriting(false)
@@ -93,12 +103,13 @@ public class SecurityConfig {
             .antMatchers("/login**", "/webjars/**").permitAll()
             .antMatchers("/register").permitAll()
             .antMatchers("/authorize**").permitAll()
+            .antMatchers("/reset-session").permitAll()
             .antMatchers("/").authenticated()
         .and()
           .formLogin()
             .loginPage("/login")
             .failureUrl("/login?error=failure")
-            .successHandler(authenticationTimeStamper)
+            .successHandler(successHandler())
         .and()
           .exceptionHandling()
             .accessDeniedHandler(new OidcAccessDeniedHandler())
@@ -117,6 +128,11 @@ public class SecurityConfig {
     public OAuth2WebSecurityExpressionHandler oAuth2WebSecurityExpressionHandler() {
 
       return new OAuth2WebSecurityExpressionHandler();
+    }
+
+    public AuthenticationSuccessHandler successHandler() {
+
+      return new TimestamperSuccessHandler(new RootIsDashboardSuccessHandler(iamBaseUrl));
     }
   }
 

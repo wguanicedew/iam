@@ -19,7 +19,7 @@ import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.response.ValidatableResponse;
 
 import it.infn.mw.iam.IamLoginService;
-import it.infn.mw.iam.api.account.PasswordUpdateController;
+import it.infn.mw.iam.api.account.password_reset.PasswordUpdateController;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.provisioning.ScimUserProvisioning;
 import it.infn.mw.iam.test.TestUtils;

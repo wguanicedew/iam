@@ -48,12 +48,12 @@
 </head>
 
 <script>
-//get the info of the current user, if available (null otherwise)
+//get the info of the currently authenticated user, if available (null otherwise)
 function getUserInfo() {
   return ${userInfoJson};
 }
 
-// get the authorities of the current user, if available (null otherwise)
+// get the authorities of the currently authenticated user, if available (null otherwise)
 function getUserAuthorities() {
   return ${userAuthorities};
 }
@@ -72,5 +72,13 @@ function getRegistrationEnabled() {
 
 function getOrganisationName() {
  return '${iamProperties.organisationName}'; 
+}
+
+function getAccountLinkingError(){
+ return '${account-linking.error}'; 
+}
+
+function getAccountLinkingMessage(){
+   return '${account-linking.message}'; 
 }
 </script>

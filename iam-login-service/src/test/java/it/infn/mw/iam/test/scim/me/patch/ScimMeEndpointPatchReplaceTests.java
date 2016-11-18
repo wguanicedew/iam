@@ -13,6 +13,7 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.WebIntegrationTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.scim.model.ScimAddress;
 import it.infn.mw.iam.api.scim.model.ScimEmail;
@@ -22,7 +23,7 @@ import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.model.ScimUserPatchRequest;
 import it.infn.mw.iam.test.ScimRestUtils;
 import it.infn.mw.iam.test.TestUtils;
-import it.infn.mw.iam.util.JacksonUtils;
+import it.infn.mw.iam.test.util.JacksonUtils;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = IamLoginService.class)
@@ -73,8 +74,7 @@ public class ScimMeEndpointPatchReplaceTests {
             .addAddress(TESTUSER_ADDRESS)
             .addPhoto(TESTUSER_PHOTO)
             .build())
-      .extract()
-      .as(ScimUser.class);
+      .extract().as(ScimUser.class);
 
     userRestUtils = ScimRestUtils.getInstance(passwordTokenGetter().username(TESTUSER_USERNAME)
       .password(TESTUSER_PASSWORD)

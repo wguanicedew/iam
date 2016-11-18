@@ -11,6 +11,7 @@ import org.junit.runner.RunWith;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.WebIntegrationTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.scim.model.ScimAddress;
 import it.infn.mw.iam.api.scim.model.ScimEmail;
@@ -20,7 +21,7 @@ import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.model.ScimUserPatchRequest;
 import it.infn.mw.iam.test.ScimRestUtils;
 import it.infn.mw.iam.test.TestUtils;
-import it.infn.mw.iam.util.JacksonUtils;
+import it.infn.mw.iam.test.util.JacksonUtils;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = IamLoginService.class)
@@ -55,20 +56,22 @@ public class ScimMeEndpointPatchAddTests {
   public void testSetup() {
 
     adminRestUtils = ScimRestUtils
-        .getInstance(TestUtils.getAccessToken("scim-client-rw", "secret", "scim:read scim:write"));
+      .getInstance(TestUtils.getAccessToken("scim-client-rw", "secret", "scim:read scim:write"));
 
-      testUser = adminRestUtils
-        .doPost("/scim/Users/", ScimUser.builder()
-      .active(true)
-      .userName(TESTUSER_USERNAME)
-      .password(TESTUSER_PASSWORD)
-      .addEmail(TESTUSER_EMAIL)
-      .name(TESTUSER_NAME)
-      .build()).extract().as(ScimUser.class);
+    testUser = adminRestUtils
+      .doPost("/scim/Users/",
+          ScimUser.builder()
+            .active(true)
+            .userName(TESTUSER_USERNAME)
+            .password(TESTUSER_PASSWORD)
+            .addEmail(TESTUSER_EMAIL)
+            .name(TESTUSER_NAME)
+            .build())
+      .extract().as(ScimUser.class);
 
     userRestUtils = ScimRestUtils.getInstance(passwordTokenGetter().username(TESTUSER_USERNAME)
-        .password(TESTUSER_PASSWORD)
-        .getAccessToken());
+      .password(TESTUSER_PASSWORD)
+      .getAccessToken());
   }
 
   @After

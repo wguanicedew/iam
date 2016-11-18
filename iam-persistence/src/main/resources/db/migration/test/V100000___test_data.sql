@@ -99,8 +99,8 @@ INSERT INTO client_grant_type (owner_id, grant_type) VALUES
   (10, 'client_credentials'),
   (10, 'refresh_token');
     
-INSERT INTO iam_user_info(ID,GIVENNAME,FAMILYNAME, EMAIL, EMAILVERIFIED, BIRTHDATE, PICTURE, GENDER) VALUES
-(2, 'Test', 'User', 'test@iam.test', true, '1950-01-01', '/resources/iam/img/default-avatar.png', 'M');
+INSERT INTO iam_user_info(ID,GIVENNAME,FAMILYNAME, EMAIL, EMAILVERIFIED, BIRTHDATE, GENDER) VALUES
+(2, 'Test', 'User', 'test@iam.test', true, '1950-01-01','M');
 
 
 INSERT INTO iam_account(id, uuid, username, password, user_info_id, creationtime, lastupdatetime, active) VALUES

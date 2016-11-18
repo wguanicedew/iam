@@ -3,10 +3,10 @@
 angular.module('registrationApp').controller('RegistrationController',
 		RegistrationController);
 
-RegistrationController.$inject = [ '$scope', '$q', '$window',
+RegistrationController.$inject = [ '$scope', '$q', '$window', '$cookies',
 		'RegistrationRequestService', 'AuthnInfo' ];
 
-function RegistrationController($scope, $q, $window,
+function RegistrationController($scope, $q, $window, $cookies,
 		RegistrationRequestService, AuthnInfo) {
 
 	var vm = this;
@@ -17,7 +17,6 @@ function RegistrationController($scope, $q, $window,
 	
 	$scope.textAlert = undefined;
 	$scope.operationResult = undefined;
-
 
 	$scope.submitDisabled = false;
 
@@ -30,6 +29,7 @@ function RegistrationController($scope, $q, $window,
 	vm.reset = reset;
 	vm.fieldValid = fieldValid;
 	vm.fieldInvalid = fieldInvalid;
+	vm.clearSessionCookies = clearSessionCookies;
 	
 	vm.activate();
 	
@@ -112,6 +112,10 @@ function RegistrationController($scope, $q, $window,
 	function reset() {
 		resetRequest();
 		$scope.registrationForm.$setPristine();
+	}
+
+	function clearSessionCookies() {
+		$window.location.href = "/reset-session";
 	}
 
 	function fieldValid(name){

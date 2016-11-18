@@ -58,11 +58,11 @@ public class SamlAccountUpdater implements Updater<IamAccount, ScimUser> {
     validate(account, user);
 
     return user.getIndigoUser()
-        .getSamlIds()
-        .stream()
-        .map(samlId -> removeSamlAccount(account, samlId))
-        .filter(result -> result)
-        .count() > 1;
+      .getSamlIds()
+      .stream()
+      .map(samlId -> removeSamlAccount(account, samlId))
+      .filter(result -> result)
+      .count() > 1;
   }
 
   @Override
@@ -121,6 +121,6 @@ public class SamlAccountUpdater implements Updater<IamAccount, ScimUser> {
   public boolean accept(ScimUser user) {
 
     return user.getIndigoUser() != null && user.getIndigoUser().getSamlIds() != null
-        && !user.getIndigoUser().getSamlIds().isEmpty();  
+        && !user.getIndigoUser().getSamlIds().isEmpty();
   }
 }

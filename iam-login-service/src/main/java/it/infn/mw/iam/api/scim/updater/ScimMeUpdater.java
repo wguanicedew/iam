@@ -18,7 +18,7 @@ import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
 @Component
-public class MeUpdater {
+public class ScimMeUpdater {
 
   @Autowired
   private IamAccountRepository accountRepository;
@@ -28,10 +28,12 @@ public class MeUpdater {
   private UserUpdaterCollection removeUpdaters;
 
   @Autowired
-  public MeUpdater(NameUpdater nameUpdater, AddressUpdater addressUpdater,
+  public ScimMeUpdater(NameUpdater nameUpdater, AddressUpdater addressUpdater,
       PasswordUpdater passwordUpdater, PhotoUpdater photoUpdater, EmailUpdater emailUpdater) {
 
     addUpdaters = new UserUpdaterCollection();
+    
+    
     addUpdaters.addUpdater(nameUpdater);
     addUpdaters.addUpdater(addressUpdater);
     addUpdaters.addUpdater(passwordUpdater);

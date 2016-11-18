@@ -14,7 +14,6 @@ public class DashboardController {
   @PreAuthorize("hasRole('USER')")
   @RequestMapping(method = RequestMethod.GET)
   public String showDashboard(HttpServletRequest request) {
-
     return "iam/dashboard";
   }
 

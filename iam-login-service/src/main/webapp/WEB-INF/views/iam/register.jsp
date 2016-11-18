@@ -19,6 +19,7 @@
 
 <script type="text/javascript" src="<c:url value='/webjars/angularjs/angular.min.js'/>"></script>
 <script type="text/javascript" src="<c:url value='/webjars/angularjs/angular-animate.js'/>"></script>
+<script type="text/javascript" src="<c:url value='/webjars/angularjs/angular-cookies.js'/>"></script>
 <script type="text/javascript" src="<c:url value='/webjars/angular-ui-bootstrap/ui-bootstrap-tpls.min.js'/>"></script>
 
 <body ng-app="registrationApp">

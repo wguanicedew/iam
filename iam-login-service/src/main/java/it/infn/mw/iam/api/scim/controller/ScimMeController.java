@@ -24,7 +24,7 @@ import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
 import it.infn.mw.iam.api.scim.model.ScimConstants;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.model.ScimUserPatchRequest;
-import it.infn.mw.iam.api.scim.updater.MeUpdater;
+import it.infn.mw.iam.api.scim.updater.ScimMeUpdater;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
@@ -40,7 +40,7 @@ public class ScimMeController {
   private UserConverter userConverter;
 
   @Autowired
-  private MeUpdater meUpdater;
+  private ScimMeUpdater meUpdater;
 
   @PreAuthorize("#oauth2.hasScope('scim:read') or hasRole('USER')")
   @RequestMapping(method = RequestMethod.GET)

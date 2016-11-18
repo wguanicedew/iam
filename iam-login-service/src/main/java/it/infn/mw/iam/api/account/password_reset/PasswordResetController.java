@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import it.infn.mw.iam.api.account.password_reset.error.InvalidEmailAddressError;
+import it.infn.mw.iam.api.account.password_reset.error.InvalidPasswordResetTokenError;
+
 @Controller
 @RequestMapping(PasswordResetController.BASE_RESOURCE)
 public class PasswordResetController {

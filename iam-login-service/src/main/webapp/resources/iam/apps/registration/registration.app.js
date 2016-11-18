@@ -1,3 +1,3 @@
 'use strict';
 
-angular.module('registrationApp', ['ui.bootstrap']);
+angular.module('registrationApp', ['ui.bootstrap', 'ngCookies']);

@@ -6,7 +6,7 @@
 
 <o:iamHeader title="INDIGO IAM | User Dashboard" />
 
-<body class="skin-blue" ng-app="dashboardApp">
+<body class="skin-blue" ng-app="dashboardApp" ng-cloak>
 
 <script type="text/ng-template" id="noConnectionTemplate.html">
 <div class="modal-header">
@@ -23,14 +23,14 @@
 </div>
 </script>
 
-    <header class="main-header"></header>
+    <header class="main-header" ng-cloak></header>
 
-    <aside class="main-sidebar">
+    <aside class="main-sidebar" ng-cloak>
       <mainsidebar />
     </aside>
 
     <!-- Content Wrapper. Contains page content -->
-    <div class="content-wrapper" ui-view="content"></div>
+    <div class="content-wrapper" ui-view="content" ng-cloak></div>
     <!-- /.content-wrapper -->
 
     <footer class="footer">
@@ -46,12 +46,18 @@
     </footer>
 
 	<script type="text/javascript" src="<c:url value='/webjars/jquery/jquery.min.js'/>"></script>
-	<script type="text/javascript" src="<c:url value='/webjars/angularjs/angular.min.js'/>"></script>
+	
+  <script type="text/javascript" src="<c:url value='/webjars/angularjs/angular.min.js'/>"></script>
 	<script type="text/javascript" src="<c:url value='/webjars/angularjs/angular-animate.js'/>"></script>
+  <script type="text/javascript" src="<c:url value='/webjars/angularjs/angular-resource.min.js'/>"></script>
+  <script type="text/javascript" src="<c:url value='/webjars/angularjs/angular-cookies.min.js'/>"></script>
+  
 	<script type="text/javascript" src="<c:url value='/webjars/angular-ui-router/angular-ui-router.min.js'/>"></script>
 	<script type="text/javascript" src="<c:url value='/webjars/angular-ui-select/select.min.js'/>"></script>
 	<script type="text/javascript" src="<c:url value='/webjars/angular-sanitize/angular-sanitize.min.js'/>"></script>
-	<script type="text/javascript" src="<c:url value='/webjars/angularjs/angular-resource.min.js'/>"></script>
+	
+  
+  
 	<script type="text/javascript" src="<c:url value='/webjars/angular-ui-bootstrap/ui-bootstrap-tpls.min.js'/>"></script>
 	<script type="text/javascript" src="<c:url value='/webjars/bootstrap/bootstrap.min.js'/>"></script>
 
@@ -95,6 +101,8 @@
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/edit-user.controller.js"></script>
 
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/account-privileges.controller.js"></script>
+
+	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/account-linking.controller.js"></script>
 	
     <script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/edit-me.controller.js"></script>
 

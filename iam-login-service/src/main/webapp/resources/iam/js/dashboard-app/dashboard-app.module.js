@@ -1,12 +1,13 @@
 'use strict';
 
 angular.module('dashboardApp', [ 'ui.router', 'ui.bootstrap',
-		'ui.bootstrap.tpls', 'ui.select', 'ngAnimate', 'ngSanitize',
+		'ui.bootstrap.tpls', 'ui.select', 'ngCookies', 'ngSanitize',
 		'relativeDate', 'ngResource' ]);
 
 angular.module('dashboardApp').run(
-		function($window, $rootScope, $state, $stateParams, $uibModal, Utils,
+		function($window, $rootScope, $state, $stateParams, $q, $uibModal, Utils,
 				scimFactory, RegistrationRequestService) {
+	
 
 	// Offline dialog
 	$rootScope.closeOfflineDialog = function() {
@@ -40,41 +41,47 @@ angular.module('dashboardApp').run(
 	$rootScope.loggedUser = Utils.getLoggedUser();
 	$rootScope.isRegistrationEnabled = Utils.isRegistrationEnabled();
 
-	$rootScope.reloadUser = function() {
-		scimFactory.getMe().then(function(response) {
+	var promises = [];
+
+	var getMePromise = scimFactory.getMe();
+	promises.push(getMePromise);
+
+	var getUserCountPromise = scimFactory.getUsers(1,1);
+	promises.push(getUserCountPromise);
+	
+	var getGroupCountPromise = scimFactory.getGroups(1,1);
+	promises.push(getGroupCountPromise);
+
+	if ($rootScope.isRegistrationEnabled){
+		var getPendingRequestsPromise = RegistrationRequestService.listPending();
+		promises.push(getPendingRequestsPromise);
+	}
+
+	$q.all(promises).then(function(data){
+		getMePromise.then(function(response) {
 			console.log(response);
 			$rootScope.loggedUser.me = response.data;
-		}, function(error) {
-			console.error(error);
 		});
-	}
 
-	$rootScope.reloadUser();
-
-	if ($rootScope.isRegistrationEnabled) {
-		RegistrationRequestService.listPending().then(function(response) {
+		getUserCountPromise.then(function(response){
 			console.log(response.data);
-			$rootScope.loggedUser.pendingRequests = response.data;
-		}, function(error) {
-			console.error(error);
-			$rootScope.loggedUser.pendingRequests = undefined;
+			$rootScope.loggedUser.totUsers = response.data.totalResults;
 		});
-	}
+		
+		getGroupCountPromise.then(function(response) {
+			console.log(response.data);
+			$rootScope.loggedUser.totGroups = response.data.totalResults;
+		});
 
-	scimFactory.getUsers(1, 1).then(function(response) {
-		console.log(response.data);
-		$rootScope.loggedUser.totUsers = response.data.totalResults;
-	}, function(error) {
-		console.error(error);
-		$rootScope.loggedUser.totUsers = undefined;
-	});
+		if ($rootScope.isRegistrationEnabled){
+			getPendingRequestsPromise.then(function(response) {
+				console.log(response.data);
+				$rootScope.loggedUser.pendingRequests = response.data;
+			});
+		}
 
-	scimFactory.getGroups(1, 1).then(function(response) {
-		console.log(response.data);
-		$rootScope.loggedUser.totGroups = response.data.totalResults;
-	}, function(error) {
-		console.error(error);
-		$rootScope.loggedUser.totGroups = undefined;
+	}, function(err){
+		console.error(error);		
 	});
 
 	// ctrl+R refresh

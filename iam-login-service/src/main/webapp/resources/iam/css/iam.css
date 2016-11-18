@@ -1,3 +1,7 @@
+[ng\:cloak], [ng-cloak], .ng-cloak {
+  display: none !important;
+}
+
 /*
  * Overlay this file to provide local style overrides.
  */
@@ -115,13 +119,15 @@
 }
 
 .footer {
-  height:48px; /* Replace with the height your footer should be */
+  height:48px; /* Replace with the height your footer should be */ 
   width: 100%; /* Don't change */
   background-color: #fff;
-  background-image: none;
+  
+  /* background-image: none;
   background-repeat: repeat;
   background-attachment: scroll;
-  background-position: 0% 0%;
+  background-position: 0% 0%; */
+
   position: fixed;
   bottom: 0pt;
   left: 0pt;
@@ -131,9 +137,9 @@
 }
 
 .footer_contents {
-  height:48px; /* Replace with the height your footer should be */
+  /* height:48px; /* Replace with the height your footer should be */
   width: 100%; /* Visible width of footer */
-  margin:auto;
+  /* margin:auto; */
   padding: 15px;
 }
 
@@ -158,3 +164,4 @@ body.skin-blue {
   padding-bottom: 48px;
   background-color: #ecf0f5;
 }
+

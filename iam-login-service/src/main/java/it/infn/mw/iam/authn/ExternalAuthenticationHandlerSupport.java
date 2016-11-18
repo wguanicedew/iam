@@ -2,7 +2,9 @@ package it.infn.mw.iam.authn;
 
 import java.util.Optional;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.security.core.Authentication;
@@ -30,6 +32,9 @@ public class ExternalAuthenticationHandlerSupport {
   public static final String ACCOUNT_LINKING_ERROR_KEY =
       ExternalAuthenticationHandlerSupport.class.getName() + ".ERROR.LINKING";
 
+  public static final String ACCOUNT_LINKING_DONE_KEY =
+      ExternalAuthenticationHandlerSupport.class.getName() + ".DONE";
+
   public static final String EXT_AUTHN_UNREGISTERED_USER_ROLE = "EXT_AUTH_UNREGISTERED";
 
   public static final GrantedAuthority EXT_AUTHN_UNREGISTERED_USER_AUTH =
@@ -37,6 +42,13 @@ public class ExternalAuthenticationHandlerSupport {
 
   public static final String EXT_AUTH_ERROR_KEY =
       ExternalAuthenticationHandlerSupport.class.getName() + ".ERROR";
+
+  public static final String ACCOUNT_LINKING_DASHBOARD_ERROR_KEY = "account-linking.error";
+  public static final String ACCOUNT_LINKING_DASHBOARD_MESSAGE_KEY = "account-linking.message";
+
+  protected void setAccountLinkingDone(HttpServletRequest request) {
+    request.setAttribute(ACCOUNT_LINKING_DONE_KEY, null);;
+  }
 
   protected boolean isExternalUnregisteredUser(Authentication authentication) {
 
@@ -57,8 +69,19 @@ public class ExternalAuthenticationHandlerSupport {
     return (Authentication) session.getAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION);
   }
 
-  protected void saveAccountLinkingError(HttpSession session, Exception ex) {
+  protected void saveAccountLinkingSuccess(HttpServletResponse response) {
+
+    Cookie cookie = new Cookie(ACCOUNT_LINKING_DASHBOARD_MESSAGE_KEY, "Account linked succesfully");
+    response.addCookie(cookie);
+  }
+
+  protected void saveAccountLinkingError(HttpSession session, Exception ex,
+      HttpServletResponse response) {
     session.setAttribute(ACCOUNT_LINKING_ERROR_KEY, ex);
+
+    Cookie cookie = new Cookie(ACCOUNT_LINKING_DASHBOARD_ERROR_KEY, ex.getMessage());
+    response.addCookie(cookie);
+
   }
 
   protected void clearAccountLinkingError(HttpSession session) {
@@ -74,7 +97,7 @@ public class ExternalAuthenticationHandlerSupport {
   protected void setupAccountLinkingSessionKey(HttpSession session,
       ExternalAuthenticationType type) {
     session.setAttribute(ACCOUNT_LINKING_SESSION_KEY,
-	String.format("%s/%s", ACCCOUNT_LINKING_BASE_RESOURCE, type.name()));
+        String.format("%s/%s", ACCCOUNT_LINKING_BASE_RESOURCE, type.name()));
   }
 
   protected void saveAuthenticationInSession(HttpSession session, Authentication authn) {
@@ -96,13 +119,13 @@ public class ExternalAuthenticationHandlerSupport {
       ExternalAuthenticationType type) {
     switch (type) {
       case OIDC:
-	return "/openid_connect_login";
+        return "/openid_connect_login";
 
       case SAML:
-	return "/saml/login";
+        return "/saml/login";
 
       default:
-	throw new IllegalArgumentException("Unsupported external authentication type: " + type);
+        throw new IllegalArgumentException("Unsupported external authentication type: " + type);
     }
   }
 

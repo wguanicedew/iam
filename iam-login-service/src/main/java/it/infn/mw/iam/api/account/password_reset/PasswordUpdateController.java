@@ -1,4 +1,4 @@
-package it.infn.mw.iam.api.account;
+package it.infn.mw.iam.api.account.password_reset;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -19,6 +19,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import it.infn.mw.iam.api.account.password_reset.error.BadUserPasswordError;
+import it.infn.mw.iam.api.account.password_reset.error.InvalidCredentialsError;
+import it.infn.mw.iam.api.account.password_reset.error.InvalidPasswordError;
+import it.infn.mw.iam.api.account.password_reset.error.UserNotActiveOrNotVerified;
 import it.infn.mw.iam.api.scim.controller.utils.ValidationErrorMessageHelper;
 
 @RestController

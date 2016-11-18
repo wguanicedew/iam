@@ -8,6 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import it.infn.mw.iam.api.account.password_reset.error.BadUserPasswordError;
+import it.infn.mw.iam.api.account.password_reset.error.InvalidPasswordResetTokenError;
+import it.infn.mw.iam.api.account.password_reset.error.UserNotActiveOrNotVerified;
+import it.infn.mw.iam.api.account.password_reset.error.UserNotFoundError;
 import it.infn.mw.iam.notification.NotificationService;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;

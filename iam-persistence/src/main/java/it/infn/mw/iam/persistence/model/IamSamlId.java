@@ -27,6 +27,11 @@ public class IamSamlId {
   @Column(nullable = false, length = 256)
   String userId;
 
+  public IamSamlId(String idpId, String userId) {
+    setIdpId(idpId);
+    setUserId(userId);
+  }
+
   public IamSamlId() {}
 
   public Long getId() {
