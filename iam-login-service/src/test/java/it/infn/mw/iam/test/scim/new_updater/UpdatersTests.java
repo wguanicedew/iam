@@ -25,9 +25,11 @@ import com.google.common.collect.Lists;
 import it.infn.mw.iam.api.scim.exception.ScimResourceExistsException;
 import it.infn.mw.iam.api.scim.new_updater.Updater;
 import it.infn.mw.iam.api.scim.new_updater.Updaters;
-import it.infn.mw.iam.api.scim.new_updater.Updaters.Adders;
+import it.infn.mw.iam.api.scim.new_updater.builders.Adders;
+import it.infn.mw.iam.api.scim.new_updater.builders.Removers;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamOidcId;
+import it.infn.mw.iam.persistence.model.IamSamlId;
 import it.infn.mw.iam.persistence.model.IamUserInfo;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
@@ -37,8 +39,11 @@ public class UpdatersTests {
   public static final String OLD = "old";
   public static final String NEW = "new";
 
-  public static final IamOidcId OLD_ID = new IamOidcId(OLD, OLD);
-  public static final IamOidcId NEW_ID = new IamOidcId(NEW, NEW);
+  public static final IamOidcId OLD_OIDC_ID = new IamOidcId(OLD, OLD);
+  public static final IamOidcId NEW_OIDC_ID = new IamOidcId(NEW, NEW);
+
+  public static final IamSamlId OLD_SAML_ID = new IamSamlId(OLD, OLD);
+  public static final IamSamlId NEW_SAML_ID = new IamSamlId(NEW, NEW);
 
   @Mock
   IamAccountRepository repo;
@@ -58,8 +63,12 @@ public class UpdatersTests {
   }
 
 
-  private Adders addToAccount() {
+  private Adders adder() {
     return Updaters.adders(repo, encoder, account);
+  }
+
+  private Removers removers() {
+    return Updaters.removers(repo, account);
   }
 
   @Before
@@ -70,6 +79,9 @@ public class UpdatersTests {
     Mockito.when(repo.findByOidcId(Matchers.anyString(), Matchers.anyString()))
       .thenReturn(Optional.empty());
 
+    Mockito.when(repo.findBySamlId(Matchers.anyString(), Matchers.anyString()))
+      .thenReturn(Optional.empty());
+
     Mockito.when(repo.findByEmail(Matchers.anyString())).thenReturn(Optional.empty());
   }
 
@@ -78,18 +90,22 @@ public class UpdatersTests {
     Mockito.when(repo.findByOidcId(id.getIssuer(), id.getSubject())).thenReturn(Optional.of(a));
   }
 
+  private void repoBindSamlIdToAccount(IamSamlId id, IamAccount a) {
+
+    Mockito.when(repo.findBySamlId(id.getIdpId(), id.getUserId())).thenReturn(Optional.of(a));
+  }
+
   private void repoBindEmailToAccount(String email, IamAccount a) {
 
-    Mockito.when(repo.findByEmailWithDifferentUUID(email, account.getUuid()))
-      .thenReturn(Optional.of(a));
+    Mockito.when(repo.findByEmail(email)).thenReturn(Optional.of(a));
   }
 
   @Test
-  public void testPasswordUpdaterWorks() {
+  public void testPasswordAdderWorks() {
 
     account.setPassword(encoder.encode(OLD));
 
-    Updater u = addToAccount().password(NEW);
+    Updater u = adder().password(NEW);
 
     assertThat(u.update(), is(true));
     assertThat(u.update(), is(false));
@@ -97,147 +113,280 @@ public class UpdatersTests {
   }
 
   @Test
-  public void testGivenNameUpdaterWorks() {
+  public void testGivenNameAdderWorks() {
 
     account.setUserInfo(new IamUserInfo());
     account.getUserInfo().setGivenName(OLD);
 
-    Updater u = addToAccount().givenName(NEW);
+    Updater u = adder().givenName(NEW);
 
     assertThat(u.update(), is(true));
     assertThat(u.update(), is(false));
   }
 
   @Test
-  public void testFamilyNameUpdaterWorks() {
+  public void testFamilyNameAdderWorks() {
 
     account.getUserInfo().setFamilyName(OLD);
 
-    Updater u = addToAccount().familyName(NEW);
+    Updater u = adder().familyName(NEW);
 
     assertThat(u.update(), is(true));
     assertThat(u.update(), is(false));
   }
 
   @Test(expected = ScimResourceExistsException.class)
-  public void testEmailUpdaterFailsWhenEmailIsBoundToAnotherUser() {
+  public void testEmailAdderFailsWhenEmailIsBoundToAnotherUser() {
+
+    account.getUserInfo().setEmail(OLD);
+    repoBindEmailToAccount(OLD, account);
 
     other.getUserInfo().setEmail(NEW);
     repoBindEmailToAccount(NEW, other);
 
-    account.getUserInfo().setEmail(OLD);
-
-    addToAccount().email(NEW).update();
+    adder().email(NEW).update();
   }
 
   @Test
-  public void testEmailUpdaterWorks() {
+  public void testEmailAdderWorks() {
 
     account.getUserInfo().setEmail(OLD);
 
     Mockito.when(repo.findByEmailWithDifferentUUID(NEW, account.getUuid()))
       .thenReturn(Optional.empty());
 
-    Updater u = addToAccount().email(NEW);
+    Updater u = adder().email(NEW);
     assertThat(u.update(), is(true));
     assertThat(u.update(), is(false));
 
   }
 
   @Test
-  public void testPictureUpdaterWorks() {
+  public void testPictureAdderWorks() {
     account.getUserInfo().setPicture(OLD);
 
-    Updater u = addToAccount().picture(NEW);
+    Updater u = adder().picture(NEW);
 
     assertThat(u.update(), is(true));
     assertThat(u.update(), is(false));
   }
 
   @Test
-  public void testPictureUpdaterWorksForNullValue() {
+  public void testPictureAdderWorksForNullValue() {
     account.getUserInfo().setPicture(OLD);
 
-    Updater u = addToAccount().picture(null);
+    Updater u = adder().picture(null);
 
     assertThat(u.update(), is(true));
     assertThat(u.update(), is(false));
   }
 
   @Test
-  public void testOidcIdUpdaterWorks() {
+  public void testOidcIdAdderWorks() {
 
-    Updater u = addToAccount().oidcId(Lists.newArrayList(NEW_ID));
+    Updater u = adder().oidcId(Lists.newArrayList(NEW_OIDC_ID));
 
     assertThat(u.update(), is(true));
     assertThat(u.update(), is(false));
 
+    assertThat(account.getOidcIds(), hasSize(1));
+    assertThat(account.getOidcIds(), hasItems(NEW_OIDC_ID));
+
   }
 
   @Test
-  public void testOidcIdUpdaterWorksWithNoUpdate() {
+  public void testOidcIdAdderWorksWithNoUpdate() {
 
-    account.getOidcIds().add(NEW_ID);
-    repoBindOidcIdToAccount(NEW_ID, account);
+    account.getOidcIds().add(NEW_OIDC_ID);
+    repoBindOidcIdToAccount(NEW_OIDC_ID, account);
 
-    Updater u = addToAccount().oidcId(Lists.newArrayList(NEW_ID));
+    Updater u = adder().oidcId(Lists.newArrayList(NEW_OIDC_ID));
 
     assertThat(u.update(), is(false));
 
   }
 
   @Test(expected = ScimResourceExistsException.class)
-  public void testOidcIdUpdaterFailsWhenOidcIdIsLinkedToAnotherAccount() {
+  public void testOidcIdAdderFailsWhenOidcIdIsLinkedToAnotherAccount() {
 
-    repoBindOidcIdToAccount(NEW_ID, other);
-    addToAccount().oidcId(Lists.newArrayList(NEW_ID)).update();
+    repoBindOidcIdToAccount(NEW_OIDC_ID, other);
+    adder().oidcId(Lists.newArrayList(NEW_OIDC_ID)).update();
 
   }
 
   @Test
-  public void testOidcIdUpdaterWorksWithUpdate() {
+  public void testOidcIdAdderWorksWithUpdate() {
 
-    repoBindOidcIdToAccount(NEW_ID, account);
+    repoBindOidcIdToAccount(NEW_OIDC_ID, account);
 
-    Updater u = addToAccount().oidcId(newArrayList(NEW_ID, OLD_ID));
+    Updater u = adder().oidcId(newArrayList(NEW_OIDC_ID, OLD_OIDC_ID));
 
     assertThat(u.update(), is(true));
     assertThat(account.getOidcIds(), hasSize(2));
-    assertThat(account.getOidcIds(), hasItems(NEW_ID, OLD_ID));
+    assertThat(account.getOidcIds(), hasItems(NEW_OIDC_ID, OLD_OIDC_ID));
 
-    repoBindOidcIdToAccount(OLD_ID, account);
+    repoBindOidcIdToAccount(OLD_OIDC_ID, account);
 
     assertThat(u.update(), is(false));
     assertThat(account.getOidcIds(), hasSize(2));
-    assertThat(account.getOidcIds(), hasItems(NEW_ID, OLD_ID));
+    assertThat(account.getOidcIds(), hasItems(NEW_OIDC_ID, OLD_OIDC_ID));
 
   }
 
   @Test
-  public void testOidcIdUpdaterWorksWithListContainingNull() {
+  public void testOidcIdAdderWorksWithListContainingNull() {
 
-    account.getOidcIds().add(NEW_ID);
-    repoBindOidcIdToAccount(NEW_ID, account);
+    account.getOidcIds().add(NEW_OIDC_ID);
+    repoBindOidcIdToAccount(NEW_OIDC_ID, account);
 
-    Updater u = addToAccount().oidcId(newArrayList(NEW_ID, null));
+    Updater u = adder().oidcId(newArrayList(NEW_OIDC_ID, null));
 
     assertThat(u.update(), is(false));
     assertThat(account.getOidcIds(), hasSize(1));
-    assertThat(account.getOidcIds(), hasItems(NEW_ID));
+    assertThat(account.getOidcIds(), hasItems(NEW_OIDC_ID));
 
   }
 
   @Test
-  public void testOidcIdUpdaterWorksWithListContainingDuplicates() {
+  public void testOidcIdAdderWorksWithListContainingDuplicates() {
 
-    repoBindOidcIdToAccount(NEW_ID, account);
+    account.getOidcIds().add(NEW_OIDC_ID);
+    repoBindOidcIdToAccount(NEW_OIDC_ID, account);
 
-    Updater u = addToAccount().oidcId(newArrayList(NEW_ID, NEW_ID, OLD_ID));
+    Updater u = adder().oidcId(newArrayList(NEW_OIDC_ID, NEW_OIDC_ID, OLD_OIDC_ID));
 
     assertThat(u.update(), is(true));
     assertThat(account.getOidcIds(), hasSize(2));
-    assertThat(account.getOidcIds(), hasItems(NEW_ID, OLD_ID));
+    assertThat(account.getOidcIds(), hasItems(NEW_OIDC_ID, OLD_OIDC_ID));
 
   }
+
+
+  @Test
+  public void testSamlIdAdderWorks() {
+
+    Updater u = adder().samlId(newArrayList(NEW_SAML_ID));
+
+    assertThat(u.update(), is(true));
+    assertThat(u.update(), is(false));
+
+    assertThat(account.getSamlIds(), hasSize(1));
+    assertThat(account.getSamlIds(), hasItems(NEW_SAML_ID));
+
+  }
+
+  @Test
+  public void testSamlIdAdderWorksWithNoUpdate() {
+
+    account.getSamlIds().add(NEW_SAML_ID);
+    repoBindSamlIdToAccount(NEW_SAML_ID, account);
+
+    Updater u = adder().samlId(newArrayList(NEW_SAML_ID));
+
+    assertThat(u.update(), is(false));
+
+    assertThat(account.getSamlIds(), hasSize(1));
+    assertThat(account.getSamlIds(), hasItems(NEW_SAML_ID));
+
+  }
+
+
+  @Test(expected = ScimResourceExistsException.class)
+  public void testSamlIdAdderFailsWhenSamlIdLinkedToAnotherAccount() {
+    other.getSamlIds().add(NEW_SAML_ID);
+    repoBindSamlIdToAccount(NEW_SAML_ID, other);
+
+    adder().samlId(newArrayList(NEW_SAML_ID)).update();
+
+  }
+
+  @Test
+  public void testSamlAdderWorksWithListContainingNull() {
+    account.getSamlIds().add(NEW_SAML_ID);
+    repoBindSamlIdToAccount(NEW_SAML_ID, account);
+
+    Updater u = adder().samlId(newArrayList(NEW_SAML_ID, null, null));
+    assertThat(u.update(), is(false));
+
+    assertThat(account.getSamlIds(), hasSize(1));
+    assertThat(account.getSamlIds(), hasItems(NEW_SAML_ID));
+
+  }
+
+  @Test
+  public void testSamlAdderWorksWithListContainingDuplicates() {
+    account.getSamlIds().add(NEW_SAML_ID);
+    repoBindSamlIdToAccount(NEW_SAML_ID, account);
+
+    Updater u = adder().samlId(newArrayList(NEW_SAML_ID, NEW_SAML_ID, OLD_SAML_ID));
+    assertThat(u.update(), is(true));
+
+    assertThat(account.getSamlIds(), hasSize(2));
+    assertThat(account.getSamlIds(), hasItems(NEW_SAML_ID, OLD_SAML_ID));
+
+  }
+
+
+  @Test
+  public void testSamlRemoverWorks() {
+    account.getSamlIds().add(NEW_SAML_ID);
+    repoBindSamlIdToAccount(NEW_SAML_ID, account);
+
+    Updater u = removers().samlId(newArrayList(NEW_SAML_ID));
+    assertThat(u.update(), is(true));
+    assertThat(account.getSamlIds(), hasSize(0));
+  }
+
+  @Test
+  public void testSamlRemoverWorksWithNoUpdate() {
+    account.getSamlIds().add(NEW_SAML_ID);
+    repoBindSamlIdToAccount(NEW_SAML_ID, account);
+
+    Updater u = removers().samlId(newArrayList(OLD_SAML_ID));
+    assertThat(u.update(), is(false));
+    assertThat(account.getSamlIds(), hasSize(1));
+    assertThat(account.getSamlIds(), hasItems(NEW_SAML_ID));
+  }
+
+  @Test
+  public void testSamlRemoverNoUpdateWithEmptyList() {
+
+    Updater u = removers().samlId(newArrayList(OLD_SAML_ID));
+    assertThat(u.update(), is(false));
+    assertThat(account.getSamlIds(), hasSize(0));
+
+  }
+
+  @Test
+  public void testSamlRemoverNoUpdateWithEmptyList2() {
+
+    Updater u = removers().samlId(newArrayList());
+    assertThat(u.update(), is(false));
+    assertThat(account.getSamlIds(), hasSize(0));
+
+  }
+
+  @Test
+  public void testSamlRemoverWorksWithMultipleValues() {
+    account.getSamlIds().add(NEW_SAML_ID);
+    account.getSamlIds().add(OLD_SAML_ID);
+
+    Updater u = removers().samlId(newArrayList(NEW_SAML_ID, OLD_SAML_ID));
+    assertThat(u.update(), is(true));
+    assertThat(account.getSamlIds(), hasSize(0));
+
+  }
+
+  @Test
+  public void testSamlRemoverWorksWithNullAndDuplicatesValues() {
+    account.getSamlIds().add(NEW_SAML_ID);
+
+
+    Updater u = removers().samlId(newArrayList(NEW_SAML_ID, OLD_SAML_ID, null, OLD_SAML_ID));
+    assertThat(u.update(), is(true));
+    assertThat(account.getSamlIds(), hasSize(0));
+
+  }
+
 
 }

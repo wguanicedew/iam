@@ -5,6 +5,7 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -27,8 +28,11 @@ public class ExternalAuthenticationSuccessHandler extends ExternalAuthentication
 
     if (hasOngoingAccountLinking(request)) {
 
-      saveExternalAuthenticationInSession(request.getSession(), authentication);
-      restoreSavedAuthentication(request.getSession());
+      HttpSession session = request.getSession();
+
+      saveExternalAuthenticationInSession(session, authentication);
+      restoreSavedAuthentication(session);
+      setAccountLinkingDone(session);
 
       request.getRequestDispatcher(getAccountLinkingForwardTarget(request)).forward(request,
           response);

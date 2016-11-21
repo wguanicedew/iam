@@ -82,8 +82,8 @@ public class OidcAccountLinkingTests {
 
   @Test
   @WithMockUser(username = TEST_100_USER)
-  public void accountLinkingFinalizationFailsForUserWithoutExternalAuthtToken() throws Exception {
-    mvc.perform(get("/iam/account-linking/OIDC")).andExpect(status().isFound());
+  public void accountLinkingFinalizationFailsForUserWithoutExternalAuthToken() throws Exception {
+
   }
 
   @Test

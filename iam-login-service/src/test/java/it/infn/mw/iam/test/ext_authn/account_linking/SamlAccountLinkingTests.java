@@ -9,6 +9,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -32,6 +33,7 @@ import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport;
@@ -57,7 +59,9 @@ public class SamlAccountLinkingTests extends SamlExternalAuthenticationTestSuppo
   @WithMockUser(username = TEST_100_USER)
   public void samlAccountLinkingWorks() throws Throwable {
 
-    MockHttpSession session = (MockHttpSession) mvc.perform(get("/iam/account-linking/SAML"))
+    MockHttpSession session = (MockHttpSession) mvc
+      .perform(post("/iam/account-linking/SAML").with(csrf().asHeader()))
+      .andDo(MockMvcResultHandlers.print())
       .andExpect(status().isFound())
       .andExpect(redirectedUrl("/saml/login"))
       .andExpect(
@@ -120,7 +124,8 @@ public class SamlAccountLinkingTests extends SamlExternalAuthenticationTestSuppo
   @Test
   @WithMockUser(username = TEST_100_USER)
   public void samlAccountLinkingFailsSinceSamlAccountAlreadyLinkedToAnotherUser() throws Throwable {
-    MockHttpSession session = (MockHttpSession) mvc.perform(get("/iam/account-linking/SAML"))
+    MockHttpSession session = (MockHttpSession) mvc
+      .perform(post("/iam/account-linking/SAML").with(csrf().asHeader()))
       .andExpect(status().isFound())
       .andExpect(redirectedUrl("/saml/login"))
       .andExpect(
@@ -188,7 +193,8 @@ public class SamlAccountLinkingTests extends SamlExternalAuthenticationTestSuppo
   @WithMockUser(username = "test")
   public void samlAccountLinkingFailsSinceSamlAccountIsAlreadyBoundToAuthenticatedUser()
       throws Throwable {
-    MockHttpSession session = (MockHttpSession) mvc.perform(get("/iam/account-linking/SAML"))
+    MockHttpSession session = (MockHttpSession) mvc
+      .perform(post("/iam/account-linking/SAML").with(csrf().asHeader()))
       .andExpect(status().isFound())
       .andExpect(redirectedUrl("/saml/login"))
       .andExpect(
@@ -255,7 +261,8 @@ public class SamlAccountLinkingTests extends SamlExternalAuthenticationTestSuppo
   @Test
   @WithMockUser(username = "test")
   public void samlAccountLinkingExternalAuthnErrorRedirectsToDashboard() throws Throwable {
-    MockHttpSession session = (MockHttpSession) mvc.perform(get("/iam/account-linking/SAML"))
+    MockHttpSession session = (MockHttpSession) mvc
+      .perform(post("/iam/account-linking/SAML").with(csrf().asHeader()))
       .andExpect(status().isFound())
       .andExpect(redirectedUrl("/saml/login"))
       .andExpect(

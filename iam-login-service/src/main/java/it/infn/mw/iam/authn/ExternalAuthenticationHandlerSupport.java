@@ -46,8 +46,17 @@ public class ExternalAuthenticationHandlerSupport {
   public static final String ACCOUNT_LINKING_DASHBOARD_ERROR_KEY = "account-linking.error";
   public static final String ACCOUNT_LINKING_DASHBOARD_MESSAGE_KEY = "account-linking.message";
 
-  protected void setAccountLinkingDone(HttpServletRequest request) {
-    request.setAttribute(ACCOUNT_LINKING_DONE_KEY, null);;
+  protected boolean hasAccountLinkingDoneKey(HttpSession session) {
+    Object value = session.getAttribute(ACCOUNT_LINKING_DONE_KEY);
+    if (value != null) {
+      session.removeAttribute(ACCOUNT_LINKING_DONE_KEY);
+      return true;
+    }
+    return false;
+  }
+
+  protected void setAccountLinkingDone(HttpSession session) {
+    session.setAttribute(ACCOUNT_LINKING_DONE_KEY, "DONE");;
   }
 
   protected boolean isExternalUnregisteredUser(Authentication authentication) {

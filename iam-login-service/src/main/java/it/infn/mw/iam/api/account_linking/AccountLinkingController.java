@@ -9,13 +9,16 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import it.infn.mw.iam.authn.AbstractExternalAuthenticationToken;
 import it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport;
@@ -53,9 +56,14 @@ public class AccountLinkingController extends ExternalAuthenticationHandlerSuppo
 
     HttpSession session = request.getSession();
 
+    if (!hasAccountLinkingDoneKey(session)) {
+      throw new IllegalArgumentException("No account linking done key found in request.");
+    }
+
     AbstractExternalAuthenticationToken<?> externalAuthenticationToken =
         getExternalAuthenticationTokenFromSession(session).orElseThrow(() -> {
           clearAccountLinkingSessionAttributes(session);
+
           return new IllegalArgumentException("No external authentication token found in session");
         });
 
@@ -66,7 +74,7 @@ public class AccountLinkingController extends ExternalAuthenticationHandlerSuppo
 
     } catch (Exception ex) {
 
-      saveAccountLinkingError(request.getSession(), ex, response);
+      saveAccountLinkingError(session, ex, response);
 
     } finally {
       clearAccountLinkingSessionAttributes(session);
@@ -83,6 +91,12 @@ public class AccountLinkingController extends ExternalAuthenticationHandlerSuppo
 
     linkingService.unlinkExternalAccount(principal, type, issuer, subject);
 
+    return "iam/dashboard";
+  }
+
+  @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(IllegalArgumentException.class)
+  public String handleIllegalArgumentException(HttpServletRequest request, Exception ex) {
     return "iam/dashboard";
   }
 }
