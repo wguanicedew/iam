@@ -5,22 +5,28 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.google.common.collect.Lists;
 
 import it.infn.mw.iam.api.scim.converter.OidcIdConverter;
 import it.infn.mw.iam.api.scim.converter.SamlIdConverter;
+import it.infn.mw.iam.api.scim.converter.SshKeyConverter;
+import it.infn.mw.iam.api.scim.model.ScimOidcId;
 import it.infn.mw.iam.api.scim.model.ScimPatchOperation;
+import it.infn.mw.iam.api.scim.model.ScimSamlId;
+import it.infn.mw.iam.api.scim.model.ScimSshKey;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.new_updater.builders.Adders;
 import it.infn.mw.iam.api.scim.new_updater.builders.Removers;
+import it.infn.mw.iam.api.scim.new_updater.builders.Replacers;
 import it.infn.mw.iam.api.scim.new_updater.builders.UpdaterBuilder;
 import it.infn.mw.iam.api.scim.new_updater.util.CollectionHelpers;
-import it.infn.mw.iam.api.scim.new_updater.util.ScimOidcIdCollectionConverter;
-import it.infn.mw.iam.api.scim.new_updater.util.ScimSamlIdCollectionConverter;
+import it.infn.mw.iam.api.scim.new_updater.util.ScimCollectionConverter;
 import it.infn.mw.iam.persistence.model.IamAccount;
+import it.infn.mw.iam.persistence.model.IamOidcId;
+import it.infn.mw.iam.persistence.model.IamSamlId;
+import it.infn.mw.iam.persistence.model.IamSshKey;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
 public class DefaultAccountUpdaterFactory implements UpdaterFactory<IamAccount, ScimUser> {
@@ -31,22 +37,34 @@ public class DefaultAccountUpdaterFactory implements UpdaterFactory<IamAccount, 
 
   final OidcIdConverter oidcIdConverter;
   final SamlIdConverter samlIdConverter;
+  final SshKeyConverter sshKeyConverter;
 
   public DefaultAccountUpdaterFactory(PasswordEncoder encoder, IamAccountRepository repo,
-      OidcIdConverter oidcIdConverter, SamlIdConverter samlIdConverter) {
+      OidcIdConverter oidcIdConverter, SamlIdConverter samlIdConverter,
+      SshKeyConverter sshKeyConverter) {
     this.encoder = encoder;
     this.repo = repo;
     this.oidcIdConverter = oidcIdConverter;
     this.samlIdConverter = samlIdConverter;
+    this.sshKeyConverter = sshKeyConverter;
   }
 
-  private ScimOidcIdCollectionConverter oidcIdConverter(ScimUser user) {
-    return new ScimOidcIdCollectionConverter(oidcIdConverter, user);
+  private ScimCollectionConverter<IamSshKey, ScimSshKey> sshKeyConverter(ScimUser user) {
+
+    return new ScimCollectionConverter<IamSshKey, ScimSshKey>(user.getIndigoUser()::getSshKeys,
+        sshKeyConverter::fromScim);
   }
 
-  private ScimSamlIdCollectionConverter samlIdConverter(ScimUser user) {
-    return new ScimSamlIdCollectionConverter(samlIdConverter, user);
+  private ScimCollectionConverter<IamOidcId, ScimOidcId> oidcIdConverter(ScimUser user) {
+    return new ScimCollectionConverter<IamOidcId, ScimOidcId>(user.getIndigoUser()::getOidcIds,
+        oidcIdConverter::fromScim);
   }
+
+  private ScimCollectionConverter<IamSamlId, ScimSamlId> samlIdConverter(ScimUser user) {
+    return new ScimCollectionConverter<IamSamlId, ScimSamlId>(user.getIndigoUser()::getSamlIds,
+        samlIdConverter::fromScim);
+  }
+
 
   private static <T> Updater buildUpdater(UpdaterBuilder<T> factory, Supplier<T> valueSupplier) {
     return factory.build(valueSupplier.get());
@@ -79,6 +97,10 @@ public class DefaultAccountUpdaterFactory implements UpdaterFactory<IamAccount, 
     if (user.hasSamlIds()) {
       addUpdater(updaters, CollectionHelpers::notNullOrEmpty, samlIdConverter(user), add::samlId);
     }
+
+    if (user.hasSshKeys()) {
+      addUpdater(updaters, CollectionHelpers::notNullOrEmpty, sshKeyConverter(user), add::sshKey);
+    }
   }
 
   private void prepareRemovers(List<Updater> updaters, ScimUser user, IamAccount account) {
@@ -91,7 +113,9 @@ public class DefaultAccountUpdaterFactory implements UpdaterFactory<IamAccount, 
   }
 
   private void prepareReplacers(List<Updater> updaters, ScimUser user, IamAccount account) {
-    throw new NotImplementedException(); // TBD
+    Replacers replace = Updaters.replacers(repo, encoder, account);
+
+    // TBD
   }
 
   @Override

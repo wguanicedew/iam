@@ -19,7 +19,9 @@ public class Updaters {
     return new Removers(repo, account);
   }
 
-  public static Replacers replacers(IamAccountRepository repo, IamAccount account) {
-    return null;
+  public static Replacers replacers(IamAccountRepository repo, PasswordEncoder encoder,
+      IamAccount account) {
+    return new Replacers(repo, encoder, account);
   }
+
 }

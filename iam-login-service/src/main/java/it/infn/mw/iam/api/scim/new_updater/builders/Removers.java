@@ -1,7 +1,7 @@
 package it.infn.mw.iam.api.scim.new_updater.builders;
 
-import static it.infn.mw.iam.api.scim.new_updater.AccountUpdater.removeOidcId;
-import static it.infn.mw.iam.api.scim.new_updater.AccountUpdater.removeSamlId;
+import static it.infn.mw.iam.api.scim.new_updater.AccountUpdater.REMOVE_OIDC_ID;
+import static it.infn.mw.iam.api.scim.new_updater.AccountUpdater.REMOVE_SAML_ID;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -22,14 +22,14 @@ public class Removers extends BuilderSupport {
   public Updater oidcId(Collection<IamOidcId> toBeRemoved) {
     Collection<IamOidcId> oidcIds = account.getOidcIds();
 
-    return new DefaultUpdater<Collection<IamOidcId>>(removeOidcId, oidcIds::removeAll, toBeRemoved,
+    return new DefaultUpdater<Collection<IamOidcId>>(REMOVE_OIDC_ID, oidcIds::removeAll, toBeRemoved,
         i -> !Collections.disjoint(oidcIds, i));
   }
 
   public Updater samlId(Collection<IamSamlId> toBeRemoved) {
     Collection<IamSamlId> samlIds = account.getSamlIds();
 
-    return new DefaultUpdater<Collection<IamSamlId>>(removeSamlId, samlIds::removeAll, toBeRemoved,
+    return new DefaultUpdater<Collection<IamSamlId>>(REMOVE_SAML_ID, samlIds::removeAll, toBeRemoved,
         i -> !Collections.disjoint(samlIds, i));
   }
 }

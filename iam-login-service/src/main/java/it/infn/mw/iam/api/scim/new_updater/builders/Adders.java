@@ -1,17 +1,12 @@
 package it.infn.mw.iam.api.scim.new_updater.builders;
 
-import static it.infn.mw.iam.api.scim.new_updater.AccountUpdater.addEmail;
-import static it.infn.mw.iam.api.scim.new_updater.AccountUpdater.addFamilyName;
-import static it.infn.mw.iam.api.scim.new_updater.AccountUpdater.addGivenName;
-import static it.infn.mw.iam.api.scim.new_updater.AccountUpdater.addOidcId;
-import static it.infn.mw.iam.api.scim.new_updater.AccountUpdater.addPassword;
-import static it.infn.mw.iam.api.scim.new_updater.AccountUpdater.addPicture;
-import static it.infn.mw.iam.api.scim.new_updater.AccountUpdater.addSamlId;
+import static it.infn.mw.iam.api.scim.new_updater.AccountUpdater.ADD_OIDC_ID;
+import static it.infn.mw.iam.api.scim.new_updater.AccountUpdater.ADD_SAML_ID;
+import static it.infn.mw.iam.api.scim.new_updater.AccountUpdater.ADD_SSH_KEY;
 import static it.infn.mw.iam.api.scim.new_updater.util.AddIfNotFound.addIfNotFound;
 
 import java.util.Collection;
 import java.util.Objects;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,21 +19,19 @@ import it.infn.mw.iam.api.scim.new_updater.util.IdNotBoundChecker;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamOidcId;
 import it.infn.mw.iam.persistence.model.IamSamlId;
-import it.infn.mw.iam.persistence.model.IamUserInfo;
+import it.infn.mw.iam.persistence.model.IamSshKey;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
-public class Adders extends BuilderSupport {
+public class Adders extends Replacers {
 
-  final Predicate<String> emailAddChecks;
+
   final Predicate<Collection<IamOidcId>> oidcIdAddChecks;
   final Predicate<Collection<IamSamlId>> samlIdAddChecks;
-
-  final Consumer<String> encodedPasswordSetter;
-  final Predicate<String> encodedPasswordChecker;
+  final Predicate<Collection<IamSshKey>> sshKeyAddChecks;
 
   final AccountFinder<IamOidcId> findByOidcId;
   final AccountFinder<IamSamlId> findBySamlId;
-  final AccountFinder<String> findByEmail;
+  final AccountFinder<IamSshKey> findBySshKey;
 
 
   private Predicate<Collection<IamOidcId>> buildOidcIdsAddChecks() {
@@ -84,15 +77,25 @@ public class Adders extends BuilderSupport {
 
   }
 
-  private Predicate<String> buildEmailAddChecks() {
-    Predicate<String> emailNotBound =
-        new IdNotBoundChecker<String>(findByEmail, account, (e, a) -> {
-          throw new ScimResourceExistsException("Email " + e + " already bound to another user");
+  private Predicate<Collection<IamSshKey>> buildSshKeyAddChecks() {
+    Predicate<IamSshKey> sshKeyNotBound =
+        new IdNotBoundChecker<IamSshKey>(findBySshKey, account, (key, a) -> {
+          throw new ScimResourceExistsException(
+              "SSH key '" + key.getFingerprint() + "' already bound to another user");
         });
 
-    Predicate<String> emailNotOwned = e -> !account.getUserInfo().getEmail().equals(e);
+    Predicate<Collection<IamSshKey>> sshKeysNotBound = c -> {
+      c.removeIf(Objects::isNull);
+      c.stream().forEach(id -> sshKeyNotBound.test(id));
+      return true;
+    };
 
-    return emailNotBound.and(emailNotOwned);
+    Predicate<Collection<IamSshKey>> sshKeysNotOwned = c -> {
+      return !account.getSshKeys().containsAll(c);
+    };
+
+
+    return sshKeysNotBound.and(sshKeysNotOwned);
   }
 
 
@@ -101,58 +104,31 @@ public class Adders extends BuilderSupport {
 
     findByOidcId = id -> repo.findByOidcId(id.getIssuer(), id.getSubject());
     findBySamlId = id -> repo.findBySamlId(id.getIdpId(), id.getUserId());
-    findByEmail = e -> repo.findByEmail(e);
-
-    encodedPasswordSetter = t -> account.setPassword(encoder.encode(t));
-    encodedPasswordChecker = t -> !encoder.matches(t, account.getPassword());
+    findBySshKey = key -> repo.findBySshKeyFingerprint(key.getFingerprint());
 
     oidcIdAddChecks = buildOidcIdsAddChecks();
     samlIdAddChecks = buildSamlIdsAddChecks();
-    emailAddChecks = buildEmailAddChecks();
-
-  }
-
-  public Updater givenName(String givenName) {
-
-    IamUserInfo ui = account.getUserInfo();
-    return new DefaultUpdater<String>(addGivenName, ui::getGivenName, ui::setGivenName, givenName);
-  }
-
-  public Updater familyName(String familyName) {
-    final IamUserInfo ui = account.getUserInfo();
-    return new DefaultUpdater<String>(addFamilyName, ui::getFamilyName, ui::setFamilyName,
-        familyName);
-  }
-
-  public Updater picture(String newPicture) {
-
-    final IamUserInfo ui = account.getUserInfo();
-    return new DefaultUpdater<String>(addPicture, ui::getPicture, ui::setPicture, newPicture);
-
-  }
-
-  public Updater email(String email) {
-    final IamUserInfo ui = account.getUserInfo();
-
-    return new DefaultUpdater<String>(addEmail, ui::setEmail, email, emailAddChecks);
-  }
-
-  public Updater password(String newPassword) {
-    return new DefaultUpdater<String>(addPassword, encodedPasswordSetter, newPassword,
-        encodedPasswordChecker);
+    sshKeyAddChecks = buildSshKeyAddChecks();
   }
 
   public Updater oidcId(Collection<IamOidcId> newOidcIds) {
     final Collection<IamOidcId> oidcIds = account.getOidcIds();
 
-    return new DefaultUpdater<Collection<IamOidcId>>(addOidcId, addIfNotFound(oidcIds), newOidcIds,
-        oidcIdAddChecks);
+    return new DefaultUpdater<Collection<IamOidcId>>(ADD_OIDC_ID, addIfNotFound(oidcIds),
+        newOidcIds, oidcIdAddChecks);
   }
 
   public Updater samlId(Collection<IamSamlId> newSamlIds) {
     final Collection<IamSamlId> samlIds = account.getSamlIds();
 
-    return new DefaultUpdater<Collection<IamSamlId>>(addSamlId, addIfNotFound(samlIds), newSamlIds,
-        samlIdAddChecks);
+    return new DefaultUpdater<Collection<IamSamlId>>(ADD_SAML_ID, addIfNotFound(samlIds),
+        newSamlIds, samlIdAddChecks);
+  }
+
+  public Updater sshKey(Collection<IamSshKey> newSshKeys) {
+    final Collection<IamSshKey> sshKeys = account.getSshKeys();
+
+    return new DefaultUpdater<Collection<IamSshKey>>(ADD_SSH_KEY, addIfNotFound(sshKeys),
+        newSshKeys, sshKeyAddChecks);
   }
 }

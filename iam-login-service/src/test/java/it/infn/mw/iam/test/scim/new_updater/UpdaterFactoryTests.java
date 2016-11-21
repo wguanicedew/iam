@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import it.infn.mw.iam.api.scim.converter.OidcIdConverter;
 import it.infn.mw.iam.api.scim.converter.SamlIdConverter;
+import it.infn.mw.iam.api.scim.converter.SshKeyConverter;
 import it.infn.mw.iam.api.scim.model.ScimPatchOperation;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.model.ScimUserPatchRequest;
@@ -47,13 +48,14 @@ public class UpdaterFactoryTests {
 
   OidcIdConverter oidcConverter = new OidcIdConverter();
   SamlIdConverter samlConverter = new SamlIdConverter();
+  SshKeyConverter sshKeyConverter = new SshKeyConverter();
 
 
   @Test
   public void testGivenNamePatchOpParsing() {
 
-    UpdaterFactory<IamAccount, ScimUser> factory =
-        new DefaultAccountUpdaterFactory(encoder, repo, oidcConverter, samlConverter);
+    UpdaterFactory<IamAccount, ScimUser> factory = new DefaultAccountUpdaterFactory(encoder, repo,
+        oidcConverter, samlConverter, sshKeyConverter);
 
     IamAccount account = new IamAccount();
 
