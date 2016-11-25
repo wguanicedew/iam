@@ -1,6 +1,7 @@
 package it.infn.mw.iam.test.scim.me.patch;
 
 import static it.infn.mw.iam.test.TestUtils.passwordTokenGetter;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 
 import org.junit.After;
@@ -207,8 +208,7 @@ public class ScimMeEndpointPatchReplaceTests {
 
     userRestUtils.doPatch(testUser.getMeta().getLocation(), patchRequest, HttpStatus.CONFLICT)
       .body("status", equalTo("409"))
-      .body("detail",
-          equalTo("email " + ANOTHERUSER_EMAIL.getValue() + " already assigned to another user"));
+      .body("detail", containsString("already bound to another user"));
   }
 
   @Test

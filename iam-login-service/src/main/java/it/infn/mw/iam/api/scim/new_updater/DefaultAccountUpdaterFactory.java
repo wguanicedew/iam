@@ -1,5 +1,9 @@
 package it.infn.mw.iam.api.scim.new_updater;
 
+import static it.infn.mw.iam.api.scim.model.ScimPatchOperation.ScimPatchOperationType.add;
+import static it.infn.mw.iam.api.scim.model.ScimPatchOperation.ScimPatchOperationType.remove;
+import static it.infn.mw.iam.api.scim.model.ScimPatchOperation.ScimPatchOperationType.replace;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -12,11 +16,16 @@ import com.google.common.collect.Lists;
 import it.infn.mw.iam.api.scim.converter.OidcIdConverter;
 import it.infn.mw.iam.api.scim.converter.SamlIdConverter;
 import it.infn.mw.iam.api.scim.converter.SshKeyConverter;
+import it.infn.mw.iam.api.scim.converter.X509CertificateConverter;
+import it.infn.mw.iam.api.scim.exception.ScimPatchOperationNotSupported;
+import it.infn.mw.iam.api.scim.model.ScimIndigoUser;
 import it.infn.mw.iam.api.scim.model.ScimOidcId;
 import it.infn.mw.iam.api.scim.model.ScimPatchOperation;
+import it.infn.mw.iam.api.scim.model.ScimPatchOperation.ScimPatchOperationType;
 import it.infn.mw.iam.api.scim.model.ScimSamlId;
 import it.infn.mw.iam.api.scim.model.ScimSshKey;
 import it.infn.mw.iam.api.scim.model.ScimUser;
+import it.infn.mw.iam.api.scim.model.ScimX509Certificate;
 import it.infn.mw.iam.api.scim.new_updater.builders.Adders;
 import it.infn.mw.iam.api.scim.new_updater.builders.Removers;
 import it.infn.mw.iam.api.scim.new_updater.builders.Replacers;
@@ -27,6 +36,7 @@ import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamOidcId;
 import it.infn.mw.iam.persistence.model.IamSamlId;
 import it.infn.mw.iam.persistence.model.IamSshKey;
+import it.infn.mw.iam.persistence.model.IamX509Certificate;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
 public class DefaultAccountUpdaterFactory implements UpdaterFactory<IamAccount, ScimUser> {
@@ -38,15 +48,18 @@ public class DefaultAccountUpdaterFactory implements UpdaterFactory<IamAccount, 
   final OidcIdConverter oidcIdConverter;
   final SamlIdConverter samlIdConverter;
   final SshKeyConverter sshKeyConverter;
+  final X509CertificateConverter x509CertificateConverter;
 
   public DefaultAccountUpdaterFactory(PasswordEncoder encoder, IamAccountRepository repo,
       OidcIdConverter oidcIdConverter, SamlIdConverter samlIdConverter,
-      SshKeyConverter sshKeyConverter) {
+      SshKeyConverter sshKeyConverter, X509CertificateConverter x509CertificateConverter) {
+
     this.encoder = encoder;
     this.repo = repo;
     this.oidcIdConverter = oidcIdConverter;
     this.samlIdConverter = samlIdConverter;
     this.sshKeyConverter = sshKeyConverter;
+    this.x509CertificateConverter = x509CertificateConverter;
   }
 
   private ScimCollectionConverter<IamSshKey, ScimSshKey> sshKeyConverter(ScimUser user) {
@@ -65,6 +78,11 @@ public class DefaultAccountUpdaterFactory implements UpdaterFactory<IamAccount, 
         samlIdConverter::fromScim);
   }
 
+  private ScimCollectionConverter<IamX509Certificate, ScimX509Certificate> x509CertificateConverter(
+      ScimUser user) {
+    return new ScimCollectionConverter<IamX509Certificate, ScimX509Certificate>(
+        user::getX509Certificates, x509CertificateConverter::fromScim);
+  }
 
   private static <T> Updater buildUpdater(UpdaterBuilder<T> factory, Supplier<T> valueSupplier) {
     return factory.build(valueSupplier.get());
@@ -82,9 +100,19 @@ public class DefaultAccountUpdaterFactory implements UpdaterFactory<IamAccount, 
 
     Adders add = Updaters.adders(repo, encoder, account);
 
-    addUpdater(updaters, Objects::nonNull, user.getName()::getGivenName, add::givenName);
-    addUpdater(updaters, Objects::nonNull, user.getName()::getFamilyName, add::familyName);
+    if (user.hasName()) {
+
+      addUpdater(updaters, Objects::nonNull, user.getName()::getGivenName, add::givenName);
+      addUpdater(updaters, Objects::nonNull, user.getName()::getFamilyName, add::familyName);
+    }
+
+    addUpdater(updaters, Objects::nonNull, user::getUserName, add::username);
     addUpdater(updaters, Objects::nonNull, user::getPassword, add::password);
+    addUpdater(updaters, Objects::nonNull, user::getActive, add::active);
+
+    if (user.hasEmails()) {
+      addUpdater(updaters, Objects::nonNull, user.getEmails().get(0)::getValue, add::email);
+    }
 
     if (user.hasPhotos()) {
       addUpdater(updaters, Objects::nonNull, user.getPhotos().get(0)::getValue, add::picture);
@@ -101,6 +129,11 @@ public class DefaultAccountUpdaterFactory implements UpdaterFactory<IamAccount, 
     if (user.hasSshKeys()) {
       addUpdater(updaters, CollectionHelpers::notNullOrEmpty, sshKeyConverter(user), add::sshKey);
     }
+
+    if (user.hasX509Certificates()) {
+      addUpdater(updaters, CollectionHelpers::notNullOrEmpty, x509CertificateConverter(user),
+          add::x509Certificate);
+    }
   }
 
   private void prepareRemovers(List<Updater> updaters, ScimUser user, IamAccount account) {
@@ -110,12 +143,72 @@ public class DefaultAccountUpdaterFactory implements UpdaterFactory<IamAccount, 
       addUpdater(updaters, CollectionHelpers::notNullOrEmpty, oidcIdConverter(user),
           remove::oidcId);
     }
+
+    if (user.hasSamlIds()) {
+      addUpdater(updaters, CollectionHelpers::notNullOrEmpty, samlIdConverter(user),
+          remove::samlId);
+    }
+
+    if (user.hasSshKeys()) {
+      addUpdater(updaters, CollectionHelpers::notNullOrEmpty, sshKeyConverter(user),
+          remove::sshKey);
+    }
+
+    if (user.hasX509Certificates()) {
+      addUpdater(updaters, CollectionHelpers::notNullOrEmpty, x509CertificateConverter(user),
+          remove::x509Certificate);
+    }
   }
 
   private void prepareReplacers(List<Updater> updaters, ScimUser user, IamAccount account) {
+
     Replacers replace = Updaters.replacers(repo, encoder, account);
 
-    // TBD
+    if (user.hasName()) {
+      addUpdater(updaters, Objects::nonNull, user.getName()::getGivenName, replace::givenName);
+      addUpdater(updaters, Objects::nonNull, user.getName()::getFamilyName, replace::familyName);
+    }
+
+    addUpdater(updaters, Objects::nonNull, user::getUserName, replace::username);
+    addUpdater(updaters, Objects::nonNull, user::getPassword, replace::password);
+    addUpdater(updaters, Objects::nonNull, user::getActive, replace::active);
+
+    if (user.hasEmails()) {
+      addUpdater(updaters, Objects::nonNull, user.getEmails().get(0)::getValue, replace::email);
+    }
+
+    if (user.hasPhotos()) {
+      addUpdater(updaters, Objects::nonNull, user.getPhotos().get(0)::getValue, replace::picture);
+    }
+
+    /* UNSUPPORTED: */
+
+    if (user.hasSshKeys()) {
+      patchOperationNotSupported(ScimPatchOperationType.replace,
+          ScimIndigoUser.INDIGO_USER_SCHEMA.SSH_KEYS.toString());
+    }
+
+    if (user.hasOidcIds()) {
+      patchOperationNotSupported(ScimPatchOperationType.replace,
+          ScimIndigoUser.INDIGO_USER_SCHEMA.OIDC_IDS.toString());
+    }
+
+    if (user.hasSamlIds()) {
+      patchOperationNotSupported(ScimPatchOperationType.replace,
+          ScimIndigoUser.INDIGO_USER_SCHEMA.SAML_IDS.toString());
+    }
+
+    if (user.hasX509Certificates()) {
+      patchOperationNotSupported(ScimPatchOperationType.replace, "ScimUser.x509certificates");
+    }
+
+    if (user.hasAddresses()) {
+      patchOperationNotSupported(ScimPatchOperationType.replace, "ScimUser.addresses");
+    }
+  }
+
+  private void patchOperationNotSupported(ScimPatchOperationType replace, String propertyName) {
+    throw new ScimPatchOperationNotSupported("replace not supported on: " + propertyName);
   }
 
   @Override
@@ -126,23 +219,20 @@ public class DefaultAccountUpdaterFactory implements UpdaterFactory<IamAccount, 
 
     final ScimUser user = op.getValue();
 
-    switch (op.getOp()) {
-      case add:
-        prepareAdders(updaters, user, account);
-        break;
+    if (op.getOp().equals(add)) {
 
-      case remove:
-        prepareRemovers(updaters, user, account);
-        break;
+      prepareAdders(updaters, user, account);
 
-      case replace:
-        prepareReplacers(updaters, user, account);
-        break;
-
-      default:
-        throw new IllegalArgumentException("Unsupported operation type: " + op.getOp());
     }
+    if (op.getOp().equals(remove)) {
 
+      prepareRemovers(updaters, user, account);
+
+    }
+    if (op.getOp().equals(replace)) {
+
+      prepareReplacers(updaters, user, account);
+    }
     return updaters;
   }
 

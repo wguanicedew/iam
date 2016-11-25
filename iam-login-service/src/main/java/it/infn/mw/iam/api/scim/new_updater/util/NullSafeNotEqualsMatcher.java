@@ -18,6 +18,9 @@ public class NullSafeNotEqualsMatcher<T> implements Predicate<T> {
     if (supplier.get() == null && t == null) {
       return false;
     }
+    if (supplier.get() == null) {
+      return true;
+    }
 
     return !supplier.get().equals(t);
 

@@ -15,7 +15,11 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.base.Preconditions;
 
+import it.infn.mw.iam.api.scim.converter.OidcIdConverter;
+import it.infn.mw.iam.api.scim.converter.SamlIdConverter;
+import it.infn.mw.iam.api.scim.converter.SshKeyConverter;
 import it.infn.mw.iam.api.scim.converter.UserConverter;
+import it.infn.mw.iam.api.scim.converter.X509CertificateConverter;
 import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
 import it.infn.mw.iam.api.scim.exception.ScimException;
 import it.infn.mw.iam.api.scim.exception.ScimResourceExistsException;
@@ -23,9 +27,11 @@ import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
 import it.infn.mw.iam.api.scim.model.ScimListResponse;
 import it.infn.mw.iam.api.scim.model.ScimPatchOperation;
 import it.infn.mw.iam.api.scim.model.ScimUser;
+import it.infn.mw.iam.api.scim.new_updater.DefaultAccountUpdaterFactory;
+import it.infn.mw.iam.api.scim.new_updater.Updater;
+import it.infn.mw.iam.api.scim.new_updater.UpdaterFactory;
 import it.infn.mw.iam.api.scim.provisioning.paging.OffsetPageable;
 import it.infn.mw.iam.api.scim.provisioning.paging.ScimPageRequest;
-import it.infn.mw.iam.api.scim.updater.ScimUserUpdater;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamOidcId;
 import it.infn.mw.iam.persistence.model.IamSamlId;
@@ -33,37 +39,35 @@ import it.infn.mw.iam.persistence.model.IamSshKey;
 import it.infn.mw.iam.persistence.model.IamX509Certificate;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamAuthoritiesRepository;
-import it.infn.mw.iam.persistence.repository.IamOidcIdRepository;
-import it.infn.mw.iam.persistence.repository.IamSamlIdRepository;
-import it.infn.mw.iam.persistence.repository.IamSshKeyRepository;
-import it.infn.mw.iam.util.ssh.InvalidSshKeyException;
-import it.infn.mw.iam.util.ssh.RSAPublicKeyUtils;
 
 @Service
 public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser> {
 
-  @Autowired
-  private UserConverter converter;
-
-  @Autowired
-  private ScimUserUpdater updater;
-
-  @Autowired
   private IamAccountRepository accountRepository;
-  @Autowired
-  private IamOidcIdRepository oidcIdRepository;
-  @Autowired
-  private IamSshKeyRepository sshKeyRepository;
-  @Autowired
-  private IamSamlIdRepository samlIdRepository;
-  @Autowired
   private IamAuthoritiesRepository authorityRepository;
 
-  @Autowired
-  private PasswordEncoder passwordEncoder;
+  private final UpdaterFactory<IamAccount, ScimUser> updatersFactory;
+
+  private final PasswordEncoder passwordEncoder;
+
+  private final UserConverter userConverter;
 
   @Autowired
   private EntityManager entityManager;
+
+  @Autowired
+  public ScimUserProvisioning(IamAccountRepository accountRepository,
+      IamAuthoritiesRepository authorityRepository, PasswordEncoder passwordEncoder,
+      UserConverter userConverter, OidcIdConverter oidcIdConverter, SamlIdConverter samlIdConverter,
+      SshKeyConverter sshKeyConverter, X509CertificateConverter x509CertificateConverter) {
+
+    this.accountRepository = accountRepository;
+    this.authorityRepository = authorityRepository;
+    this.passwordEncoder = passwordEncoder;
+    this.userConverter = userConverter;
+    this.updatersFactory = new DefaultAccountUpdaterFactory(passwordEncoder, accountRepository,
+        oidcIdConverter, samlIdConverter, sshKeyConverter, x509CertificateConverter);
+  }
 
   private void idSanityChecks(final String id) {
 
@@ -84,7 +88,7 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
     IamAccount account = accountRepository.findByUuid(id)
       .orElseThrow(() -> new ScimResourceNotFoundException("No user mapped to id '" + id + "'"));
 
-    return converter.toScim(account);
+    return userConverter.toScim(account);
 
   }
 
@@ -123,7 +127,7 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
     final Date creationTime = new Date();
     final String uuid = UUID.randomUUID().toString();
 
-    IamAccount account = converter.fromScim(user);
+    IamAccount account = userConverter.fromScim(user);
     account.setUuid(uuid);
     account.setCreationTime(creationTime);
     account.setLastUpdateTime(creationTime);
@@ -169,7 +173,7 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
 
     if (account.hasOidcIds()) {
 
-      account.getOidcIds().forEach(oidcId -> checkOidcIdNotExists(oidcId));
+      account.getOidcIds().forEach(oidcId -> checkOidcIdNotAlreadyBounded(oidcId));
     }
 
     if (account.hasSshKeys()) {
@@ -191,7 +195,7 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
 
     if (account.hasSamlIds()) {
 
-      account.getSamlIds().forEach(samlId -> checkSamlIdNotExists(samlId));
+      account.getSamlIds().forEach(samlId -> checkSamlIdNotAlreadyBounded(samlId));
     }
 
     if (account.getUserInfo().getAddress() != null) {
@@ -207,58 +211,50 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
 
     IamAccount account = createAccount(user);
 
-    return converter.toScim(account);
+    return userConverter.toScim(account);
   }
 
   private void checkX509CertificateNotExists(IamX509Certificate cert) {
 
-    if (accountRepository.findByCertificateSubject(cert.getCertificateSubject()).isPresent()) {
+    if (accountRepository.findByCertificate(cert.getCertificate()).isPresent()) {
 
-      throw new ScimResourceExistsException(String
-        .format("X509 Certificate %s is already mapped to a user", cert.getCertificateSubject()));
+      throw new ScimResourceExistsException(
+          String.format("X509 Certificate %s is already mapped to a user", cert.getCertificate()));
     }
   }
 
-  private void checkOidcIdNotExists(IamOidcId oidcId) {
+  private void checkOidcIdNotAlreadyBounded(IamOidcId oidcId) {
 
-    if (oidcIdRepository.findByIssuerAndSubject(oidcId.getIssuer(), oidcId.getSubject())
-      .isPresent()) {
-
+    Preconditions.checkNotNull(oidcId);
+    Preconditions.checkNotNull(oidcId.getIssuer());
+    Preconditions.checkNotNull(oidcId.getSubject());
+    accountRepository.findByOidcId(oidcId.getIssuer(), oidcId.getSubject()).ifPresent(account -> {
       throw new ScimResourceExistsException(
-          String.format("OIDC id (%s,%s) is already mapped to another user", oidcId.getIssuer(),
+          String.format("OIDC id (%s,%s) already bounded to another user", oidcId.getIssuer(),
               oidcId.getSubject()));
-    }
+    });
   }
 
   private void checkSshKeyNotExists(IamSshKey sshKey) {
 
-    /* Generate fingerprint if null */
-    if (sshKey.getFingerprint() == null && sshKey.getValue() != null) {
-
-      try {
-        sshKey.setFingerprint(RSAPublicKeyUtils.getSHA256Fingerprint(sshKey.getValue()));
-      } catch (InvalidSshKeyException e) {
-        throw new ScimException(e.getMessage());
-      }
-    }
-
-    if (sshKeyRepository.findByFingerprint(sshKey.getFingerprint()).isPresent()) {
-
+    Preconditions.checkNotNull(sshKey);
+    Preconditions.checkNotNull(sshKey.getValue());
+    accountRepository.findBySshKeyValue(sshKey.getValue()).ifPresent(account -> {
       throw new ScimResourceExistsException(
-          "ssh key " + sshKey.getFingerprint() + " is already mapped to another user");
-    }
-
+          String.format("Ssh key (%s) already bounded to another user", sshKey.getValue()));
+    });
   }
 
-  private void checkSamlIdNotExists(IamSamlId samlId) {
+  private void checkSamlIdNotAlreadyBounded(IamSamlId samlId) {
 
-    if (samlIdRepository.findByIdpIdAndUserId(samlId.getIdpId(), samlId.getUserId()).isPresent()) {
-
+    Preconditions.checkNotNull(samlId);
+    Preconditions.checkNotNull(samlId.getIdpId());
+    Preconditions.checkNotNull(samlId.getUserId());
+    accountRepository.findBySamlId(samlId.getIdpId(), samlId.getUserId()).ifPresent(account -> {
       throw new ScimResourceExistsException(
-          String.format("Saml id {},{} is already mapped to another user", samlId.getIdpId(),
+          String.format("SAML id (%s,%s) already bounded to another user", samlId.getIdpId(),
               samlId.getUserId()));
-    }
-
+    });
   }
 
   @Override
@@ -275,7 +271,7 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
 
     List<ScimUser> resources = new ArrayList<>();
 
-    results.getContent().forEach(a -> resources.add(converter.toScim(a)));
+    results.getContent().forEach(a -> resources.add(userConverter.toScim(a)));
 
     return new ScimListResponse<>(resources, results.getTotalElements(), resources.size(),
         op.getOffset() + 1);
@@ -302,7 +298,7 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
           "email " + updatedEmail + " already assigned to another user");
     }
 
-    IamAccount updatedAccount = converter.fromScim(scimItemToBeUpdated);
+    IamAccount updatedAccount = userConverter.fromScim(scimItemToBeUpdated);
 
     updatedAccount.setId(existingAccount.getId());
     updatedAccount.setUuid(existingAccount.getUuid());
@@ -321,16 +317,34 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
     updatedAccount.touch();
 
     accountRepository.save(updatedAccount);
-    return converter.toScim(updatedAccount);
+    return userConverter.toScim(updatedAccount);
+  }
+
+  private void executePatchOperation(IamAccount account, ScimPatchOperation<ScimUser> op) {
+
+    List<Updater> updaters = updatersFactory.getUpdatersForPatchOperation(account, op);
+
+    boolean hasChanged = false;
+
+    for (Updater u : updaters) {
+      hasChanged |= u.update();
+    }
+
+    if (hasChanged) {
+
+      account.touch();
+      accountRepository.save(account);
+
+    }
   }
 
   @Override
   public void update(final String id, final List<ScimPatchOperation<ScimUser>> operations) {
 
-    IamAccount iamAccount = accountRepository.findByUuid(id)
+    IamAccount account = accountRepository.findByUuid(id)
       .orElseThrow(() -> new ScimResourceNotFoundException("No user mapped to id '" + id + "'"));
 
-    updater.update(iamAccount, operations);
+    operations.forEach(op -> executePatchOperation(account, op));
   }
 
 }

@@ -1,5 +1,7 @@
 package it.infn.mw.iam.api.scim.model;
 
+import static it.infn.mw.iam.api.scim.model.ScimConstants.INDIGO_USER_SCHEMA;
+
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -75,7 +77,7 @@ public class ScimUser extends ScimResource {
       @JsonProperty("photos") List<ScimPhoto> photos,
       @JsonProperty("groups") Set<ScimGroupRef> groups,
       @JsonProperty("x509Certificates") List<ScimX509Certificate> x509Certificates,
-      @JsonProperty("urn:indigo-dc:scim:schemas:IndigoUser") ScimIndigoUser indigoUser) {
+      @JsonProperty(INDIGO_USER_SCHEMA) ScimIndigoUser indigoUser) {
 
     super(id, externalId, meta, schemas);
 
@@ -243,6 +245,16 @@ public class ScimUser extends ScimResource {
 
     return indigoUser != null && indigoUser.getSamlIds() != null
         && !indigoUser.getSamlIds().isEmpty();
+  }
+
+  public boolean hasEmails() {
+
+    return emails != null && !emails.isEmpty();
+  }
+
+  public boolean hasName() {
+
+    return name != null;
   }
 
   @Override

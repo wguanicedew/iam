@@ -13,4 +13,11 @@ public interface Updater {
    * <li><code>false</code>, otherwise</li> </ul>
    */
   boolean update();
+
+  /**
+   * The updater type
+   *
+   * @return the updater type (see {@link UpdaterType})
+   */
+  UpdaterType getType();
 }
