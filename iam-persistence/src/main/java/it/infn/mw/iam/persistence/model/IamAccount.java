@@ -367,6 +367,32 @@ public class IamAccount {
     }
   }
 
+  public void linkMembers(Collection<IamGroup> groupsToAdd) {
+
+    Preconditions.checkNotNull(groupsToAdd);
+    for (IamGroup groupToAdd : groupsToAdd) {
+      if (groupToAdd == null) {
+        continue;
+      }
+      if (!isMemberOf(groupToAdd)) {
+        this.groups.add(groupToAdd);
+      }
+    }
+  }
+
+  public void unlinkMembers(Collection<IamGroup> groupsToRemove) {
+
+    Preconditions.checkNotNull(groupsToRemove);
+    for (IamGroup groupToRemove : groupsToRemove) {
+      if (groupToRemove == null) {
+        continue;
+      }
+      if (isMemberOf(groupToRemove)) {
+        this.groups.remove(groupToRemove);
+      }
+    }
+  }
+
   public String getConfirmationKey() {
 
     return confirmationKey;

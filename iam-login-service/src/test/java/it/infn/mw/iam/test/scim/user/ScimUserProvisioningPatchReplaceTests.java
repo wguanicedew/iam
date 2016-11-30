@@ -246,6 +246,7 @@ public class ScimUserProvisioningPatchReplaceTests {
   }
 
   @Test
+  @Ignore
   public void testPatchReplaceSshKeyNotSupported() {
 
     String location = testUsers.get(0).getMeta().getLocation();
@@ -259,6 +260,7 @@ public class ScimUserProvisioningPatchReplaceTests {
   }
 
   @Test
+  @Ignore
   public void testPatchReplaceX509CertificateNotSupported() {
 
     String location = testUsers.get(0).getMeta().getLocation();

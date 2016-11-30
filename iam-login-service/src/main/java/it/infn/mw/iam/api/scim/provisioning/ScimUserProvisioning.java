@@ -1,12 +1,27 @@
 package it.infn.mw.iam.api.scim.provisioning;
 
+import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_ADD_OIDC_ID;
+import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_ADD_SAML_ID;
+import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_ADD_SSH_KEY;
+import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_ADD_X509_CERTIFICATE;
+import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REMOVE_OIDC_ID;
+import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REMOVE_SAML_ID;
+import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REMOVE_SSH_KEY;
+import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REMOVE_X509_CERTIFICATE;
+import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REPLACE_ACTIVE;
+import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REPLACE_EMAIL;
+import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REPLACE_FAMILY_NAME;
+import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REPLACE_GIVEN_NAME;
+import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REPLACE_PASSWORD;
+import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REPLACE_PICTURE;
+import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REPLACE_USERNAME;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
-
-import javax.persistence.EntityManager;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -22,16 +37,17 @@ import it.infn.mw.iam.api.scim.converter.UserConverter;
 import it.infn.mw.iam.api.scim.converter.X509CertificateConverter;
 import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
 import it.infn.mw.iam.api.scim.exception.ScimException;
+import it.infn.mw.iam.api.scim.exception.ScimPatchOperationNotSupported;
 import it.infn.mw.iam.api.scim.exception.ScimResourceExistsException;
 import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
 import it.infn.mw.iam.api.scim.model.ScimListResponse;
 import it.infn.mw.iam.api.scim.model.ScimPatchOperation;
 import it.infn.mw.iam.api.scim.model.ScimUser;
-import it.infn.mw.iam.api.scim.new_updater.DefaultAccountUpdaterFactory;
-import it.infn.mw.iam.api.scim.new_updater.Updater;
-import it.infn.mw.iam.api.scim.new_updater.UpdaterFactory;
 import it.infn.mw.iam.api.scim.provisioning.paging.OffsetPageable;
 import it.infn.mw.iam.api.scim.provisioning.paging.ScimPageRequest;
+import it.infn.mw.iam.api.scim.updater.AccountUpdater;
+import it.infn.mw.iam.api.scim.updater.UpdaterType;
+import it.infn.mw.iam.api.scim.updater.factory.DefaultAccountUpdaterFactory;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamOidcId;
 import it.infn.mw.iam.persistence.model.IamSamlId;
@@ -43,17 +59,18 @@ import it.infn.mw.iam.persistence.repository.IamAuthoritiesRepository;
 @Service
 public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser> {
 
-  private IamAccountRepository accountRepository;
-  private IamAuthoritiesRepository authorityRepository;
+  public static final EnumSet<UpdaterType> SUPPORTED_UPDATER_TYPES =
+      EnumSet.of(ACCOUNT_ADD_OIDC_ID, ACCOUNT_REMOVE_OIDC_ID, ACCOUNT_ADD_SAML_ID,
+          ACCOUNT_REMOVE_SAML_ID, ACCOUNT_ADD_SSH_KEY, ACCOUNT_REMOVE_SSH_KEY,
+          ACCOUNT_ADD_X509_CERTIFICATE, ACCOUNT_REMOVE_X509_CERTIFICATE, ACCOUNT_REPLACE_ACTIVE,
+          ACCOUNT_REPLACE_EMAIL, ACCOUNT_REPLACE_FAMILY_NAME, ACCOUNT_REPLACE_GIVEN_NAME,
+          ACCOUNT_REPLACE_PASSWORD, ACCOUNT_REPLACE_PICTURE, ACCOUNT_REPLACE_USERNAME);
 
-  private final UpdaterFactory<IamAccount, ScimUser> updatersFactory;
-
+  private final IamAccountRepository accountRepository;
+  private final IamAuthoritiesRepository authorityRepository;
+  private final DefaultAccountUpdaterFactory updatersFactory;
   private final PasswordEncoder passwordEncoder;
-
   private final UserConverter userConverter;
-
-  @Autowired
-  private EntityManager entityManager;
 
   @Autowired
   public ScimUserProvisioning(IamAccountRepository accountRepository,
@@ -198,9 +215,6 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
       account.getSamlIds().forEach(samlId -> checkSamlIdNotAlreadyBounded(samlId));
     }
 
-    if (account.getUserInfo().getAddress() != null) {
-      entityManager.persist(account.getUserInfo().getAddress());
-    }
     accountRepository.save(account);
 
     return account;
@@ -322,11 +336,14 @@ public class ScimUserProvisioning implements ScimProvisioning<ScimUser, ScimUser
 
   private void executePatchOperation(IamAccount account, ScimPatchOperation<ScimUser> op) {
 
-    List<Updater> updaters = updatersFactory.getUpdatersForPatchOperation(account, op);
+    List<AccountUpdater> updaters = updatersFactory.getUpdatersForPatchOperation(account, op);
 
     boolean hasChanged = false;
 
-    for (Updater u : updaters) {
+    for (AccountUpdater u : updaters) {
+      if (!SUPPORTED_UPDATER_TYPES.contains(u.getType())) {
+        throw new ScimPatchOperationNotSupported(u.getType().getDescription() + " not supported");
+      }
       hasChanged |= u.update();
     }
 
