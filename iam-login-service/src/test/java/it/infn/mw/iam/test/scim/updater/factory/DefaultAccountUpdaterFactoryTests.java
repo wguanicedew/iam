@@ -5,6 +5,7 @@ import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_ADD_SAML_ID;
 import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_ADD_SSH_KEY;
 import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_ADD_X509_CERTIFICATE;
 import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REMOVE_OIDC_ID;
+import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REMOVE_PICTURE;
 import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REMOVE_SAML_ID;
 import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REMOVE_SSH_KEY;
 import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REMOVE_X509_CERTIFICATE;
@@ -139,6 +140,29 @@ public class DefaultAccountUpdaterFactoryTests {
     assertThat(updaters.get(0).getType(), equalTo(ACCOUNT_REPLACE_PICTURE));
     assertThat(updaters.get(0).update(), equalTo(true));
     assertThat(account.getUserInfo().getPicture(), equalTo(NEW));
+
+  }
+
+  @Test
+  public void testPictureRemoveOpParsing() {
+
+    IamAccount account = newAccount(OLD);
+    account.getUserInfo().setPicture(OLD);
+
+    ScimUser user = ScimUser.builder().buildPhoto(OLD).build();
+
+    ScimUserPatchRequest req = ScimUserPatchRequest.builder().remove(user).build();
+
+    ScimPatchOperation<ScimUser> op = req.getOperations().get(0);
+
+    List<AccountUpdater> updaters = factory.getUpdatersForPatchOperation(account, op);
+
+    assertThat(updaters.size(), equalTo(1));
+
+    assertThat(updaters.get(0).getType(), equalTo(ACCOUNT_REMOVE_PICTURE));
+    assertThat(updaters.get(0).update(), equalTo(true));
+    assertThat(account.getUserInfo().getPicture(), equalTo(null));
+    assertThat(updaters.get(0).update(), equalTo(false));
 
   }
 

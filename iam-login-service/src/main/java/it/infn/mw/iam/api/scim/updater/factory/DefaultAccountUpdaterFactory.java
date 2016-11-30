@@ -158,6 +158,10 @@ public class DefaultAccountUpdaterFactory implements AccountUpdaterFactory<IamAc
       addUpdater(updaters, CollectionHelpers::notNullOrEmpty, x509CertificateConverter(user),
           remove::x509Certificate);
     }
+
+    if (user.hasPhotos()) {
+      addUpdater(updaters, Objects::nonNull, user.getPhotos().get(0)::getValue, remove::picture);
+    }
   }
 
   private void prepareReplacers(List<AccountUpdater> updaters, ScimUser user, IamAccount account) {

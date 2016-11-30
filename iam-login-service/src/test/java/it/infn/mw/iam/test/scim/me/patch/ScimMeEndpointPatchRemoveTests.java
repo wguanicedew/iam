@@ -8,7 +8,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.SpringApplicationConfiguration;
@@ -94,7 +93,6 @@ public class ScimMeEndpointPatchRemoveTests {
   }
 
   @Test
-  @Ignore
   public void testPatchRemovePicture() {
 
     final ScimUserPatchRequest patchAddRequest = ScimUserPatchRequest.builder()

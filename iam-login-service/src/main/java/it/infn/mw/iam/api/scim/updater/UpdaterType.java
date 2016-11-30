@@ -21,7 +21,8 @@ public enum UpdaterType {
   ACCOUNT_REMOVE_X509_CERTIFICATE("Remove user's x509 certificate"),
 
   ACCOUNT_ADD_GROUP_MEMBERSHIP("Add group membership to user"),
-  ACCOUNT_REMOVE_GROUP_MEMBERSHIP("Remove user's group membership");
+  ACCOUNT_REMOVE_GROUP_MEMBERSHIP("Remove user's group membership"), 
+  ACCOUNT_REMOVE_PICTURE("Remove user's picture");
 
   private String description;
 

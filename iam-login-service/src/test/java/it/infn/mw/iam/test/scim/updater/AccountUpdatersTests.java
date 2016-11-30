@@ -847,13 +847,13 @@ public class AccountUpdatersTests {
     assertThat(account.getGroups(), hasSize(0));
   }
 
-//  @Test
-//  public void testPictureRemoverWorks() {
-//    account.getUserInfo().setPicture(OLD);
-//
-//    Updater u = removers().picture();
-//
-//    assertThat(u.update(), is(true));
-//    assertThat(u.update(), is(false));
-//  }
+  @Test
+  public void testPictureRemoverWorks() {
+    account.getUserInfo().setPicture(OLD);
+
+    Updater u = removers().picture(OLD);
+
+    assertThat(u.update(), is(true));
+    assertThat(u.update(), is(false));
+  }
 }
