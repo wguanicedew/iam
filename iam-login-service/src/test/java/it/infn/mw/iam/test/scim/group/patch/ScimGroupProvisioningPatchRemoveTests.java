@@ -1,12 +1,14 @@
 package it.infn.mw.iam.test.scim.group.patch;
 
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -32,6 +34,7 @@ import it.infn.mw.iam.test.util.JacksonUtils;
 @WebIntegrationTest
 public class ScimGroupProvisioningPatchRemoveTests {
 
+  private final DateTimeFormatter dateTimeFormatter = ISODateTimeFormat.dateTime();
   public static final String SCIM_CONTENT_TYPE = "application/scim+json";
 
   private String accessToken;
@@ -129,6 +132,11 @@ public class ScimGroupProvisioningPatchRemoveTests {
     assertMembership(lincoln, engineersBeforeUpdate, true);
     assertMembership(kennedy, engineersBeforeUpdate, true);
 
+    try {
+      Thread.sleep(1000);
+    } catch (InterruptedException e) {
+    }
+
     restUtils.doPatch(engineers.getMeta().getLocation(), patchRemoveRequest);
 
     ScimGroup engineersAfterUpdate = getGroup(engineers.getMeta().getLocation());
@@ -138,8 +146,11 @@ public class ScimGroupProvisioningPatchRemoveTests {
     assertMembership(lincoln, engineersAfterUpdate, true);
     assertMembership(kennedy, engineersAfterUpdate, true);
 
-    assertThat(engineersBeforeUpdate.getMeta().getLastModified(),
-        not(equalTo(engineersAfterUpdate.getMeta().getLastModified())));
+    final long dateBeforeUpdate = engineersBeforeUpdate.getMeta().getLastModified().getTime();
+    final long dateAfterUpdate = engineersAfterUpdate.getMeta().getLastModified().getTime();
+
+    assertTrue(dateBeforeUpdate < dateAfterUpdate);
+
   }
 
   @Test
