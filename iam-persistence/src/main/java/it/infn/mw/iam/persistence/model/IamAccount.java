@@ -74,13 +74,16 @@ public class IamAccount {
       inverseJoinColumns = @JoinColumn(name = "group_id", referencedColumnName = "id") )
   private Set<IamGroup> groups = new HashSet<>();
 
-  @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.EAGER,
+      orphanRemoval = true)
   private List<IamSamlId> samlIds = new LinkedList<>();
 
-  @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.EAGER,
+      orphanRemoval = true)
   private List<IamOidcId> oidcIds = new LinkedList<>();
 
-  @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.EAGER,
+      orphanRemoval = true)
   private List<IamSshKey> sshKeys = new LinkedList<>();
 
   @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.EAGER,

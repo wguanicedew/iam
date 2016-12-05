@@ -17,7 +17,7 @@ function AccountPrivilegesController($scope, $rootScope, $uibModalInstance, Util
 	ctrl.assign = assign;
 	ctrl.revoke = revoke;
 	
-	ctrl.userName = user.userInfo.name.formatted;
+	ctrl.userName = user.name.formatted;
 	
 	function successHandler(result){
 		$uibModalInstance.close(result);
@@ -39,13 +39,13 @@ function AccountPrivilegesController($scope, $rootScope, $uibModalInstance, Util
 	function assign() {
 		ctrl.enabled = false;
 				
-		Authorities.assignAdminPrivileges(ctrl.user.userInfo.id).then(successHandler, errorHandler);
+		Authorities.assignAdminPrivileges(ctrl.user.id).then(successHandler, errorHandler);
 	}
 	
 	function revoke() {
 		ctrl.enabled = false;
 				
-		Authorities.revokeAdminPrivileges(ctrl.user.userInfo.id).then(
+		Authorities.revokeAdminPrivileges(ctrl.user.id).then(
 				successHandler,
 				errorHandler);
 	}

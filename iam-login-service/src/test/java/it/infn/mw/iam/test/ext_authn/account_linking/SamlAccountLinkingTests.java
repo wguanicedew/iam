@@ -1,6 +1,6 @@
 package it.infn.mw.iam.test.ext_authn.account_linking;
 
-import static it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport.ACCOUNT_LINKING_ERROR_KEY;
+import static it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport.ACCOUNT_LINKING_DASHBOARD_ERROR_KEY;
 import static it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport.ACCOUNT_LINKING_SESSION_EXT_AUTHENTICATION;
 import static it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport.ACCOUNT_LINKING_SESSION_KEY;
 import static it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport.ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION;
@@ -13,6 +13,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
@@ -36,8 +37,6 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 import it.infn.mw.iam.IamLoginService;
-import it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport;
-import it.infn.mw.iam.authn.error.AccountAlreadyLinkedError;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.test.ext_authn.saml.SamlExternalAuthenticationTestSupport;
@@ -164,9 +163,10 @@ public class SamlAccountLinkingTests extends SamlExternalAuthenticationTestSuppo
       .getRequest()
       .getSession();
 
+    String expectedErrorMessage = String
+      .format("SAML account '[%s] %s' is already linked to another user", DEFAULT_IDP_ID, T2_EPUID);
 
-
-    session = (MockHttpSession) mvc.perform(get("/iam/account-linking/SAML/done").session(session))
+    mvc.perform(get("/iam/account-linking/SAML/done").session(session))
       .andExpect(status().isFound())
       .andExpect(redirectedUrl("/dashboard"))
       .andExpect(
@@ -174,18 +174,9 @@ public class SamlAccountLinkingTests extends SamlExternalAuthenticationTestSuppo
       .andExpect(
           request().sessionAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION, nullValue()))
       .andExpect(request().sessionAttribute(ACCOUNT_LINKING_SESSION_KEY, nullValue()))
-      .andExpect(request().sessionAttribute(
-          ExternalAuthenticationHandlerSupport.ACCOUNT_LINKING_ERROR_KEY, notNullValue()))
-      .andReturn()
-      .getRequest()
-      .getSession();
+      .andExpect(
+          flash().attribute(ACCOUNT_LINKING_DASHBOARD_ERROR_KEY, equalTo(expectedErrorMessage)));
 
-    String expectedErrorMessage = String
-      .format("SAML account '[%s] %s' is already linked to another user", DEFAULT_IDP_ID, T2_EPUID);
-
-    AccountAlreadyLinkedError e =
-        (AccountAlreadyLinkedError) session.getAttribute(ACCOUNT_LINKING_ERROR_KEY);
-    assertThat(expectedErrorMessage, equalTo(e.getMessage()));
 
   }
 
@@ -234,8 +225,10 @@ public class SamlAccountLinkingTests extends SamlExternalAuthenticationTestSuppo
       .getSession();
 
 
+    String expectedErrorMessage = String
+      .format("SAML account '[%s] %s' is already linked to user 'test'", DEFAULT_IDP_ID, T2_EPUID);
 
-    session = (MockHttpSession) mvc.perform(get("/iam/account-linking/SAML/done").session(session))
+    mvc.perform(get("/iam/account-linking/SAML/done").session(session))
       .andExpect(status().isFound())
       .andExpect(redirectedUrl("/dashboard"))
       .andExpect(
@@ -243,18 +236,8 @@ public class SamlAccountLinkingTests extends SamlExternalAuthenticationTestSuppo
       .andExpect(
           request().sessionAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION, nullValue()))
       .andExpect(request().sessionAttribute(ACCOUNT_LINKING_SESSION_KEY, nullValue()))
-      .andExpect(request().sessionAttribute(
-          ExternalAuthenticationHandlerSupport.ACCOUNT_LINKING_ERROR_KEY, notNullValue()))
-      .andReturn()
-      .getRequest()
-      .getSession();
-
-    String expectedErrorMessage = String
-      .format("SAML account '[%s] %s' is already linked to user 'test'", DEFAULT_IDP_ID, T2_EPUID);
-
-    AccountAlreadyLinkedError e =
-        (AccountAlreadyLinkedError) session.getAttribute(ACCOUNT_LINKING_ERROR_KEY);
-    assertThat(expectedErrorMessage, equalTo(e.getMessage()));
+      .andExpect(
+          flash().attribute(ACCOUNT_LINKING_DASHBOARD_ERROR_KEY, equalTo(expectedErrorMessage)));
 
   }
 
@@ -302,6 +285,25 @@ public class SamlAccountLinkingTests extends SamlExternalAuthenticationTestSuppo
           request().sessionAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION, nullValue()))
       .andExpect(request().sessionAttribute(ACCOUNT_LINKING_SESSION_KEY, nullValue()))
       .andExpect(request().sessionAttribute(EXT_AUTH_ERROR_KEY, notNullValue()))
+      .andReturn()
+      .getRequest()
+      .getSession();
+  }
+
+  @Test
+  @WithMockUser(username = TEST_100_USER)
+  public void samlAccountLinkingUnderstandsIdParam() throws Exception {
+    mvc
+      .perform(
+          post("/iam/account-linking/SAML").param("id", "https://test.idp").with(csrf().asHeader()))
+      .andExpect(status().isFound())
+      .andExpect(redirectedUrl("/saml/login?idpId=https://test.idp"))
+      .andExpect(
+          request().sessionAttribute(ACCOUNT_LINKING_SESSION_EXT_AUTHENTICATION, nullValue()))
+      .andExpect(
+          request().sessionAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION, notNullValue()))
+      .andExpect(request().sessionAttribute(ACCOUNT_LINKING_SESSION_KEY,
+          Matchers.equalTo("/iam/account-linking/SAML")))
       .andReturn()
       .getRequest()
       .getSession();

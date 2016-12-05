@@ -1,6 +1,6 @@
 package it.infn.mw.iam.test.ext_authn.account_linking;
 
-import static it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport.ACCOUNT_LINKING_ERROR_KEY;
+import static it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport.ACCOUNT_LINKING_DASHBOARD_ERROR_KEY;
 import static it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport.ACCOUNT_LINKING_SESSION_EXT_AUTHENTICATION;
 import static it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport.ACCOUNT_LINKING_SESSION_KEY;
 import static it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport.ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION;
@@ -9,13 +9,13 @@ import static it.infn.mw.iam.test.ext_authn.oidc.OidcTestConfig.TEST_OIDC_CLIENT
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
@@ -41,7 +41,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import it.infn.mw.iam.IamLoginService;
-import it.infn.mw.iam.authn.error.AccountAlreadyLinkedError;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.test.ext_authn.oidc.FullyMockedOidcClientConfiguration;
@@ -195,7 +194,12 @@ public class OidcAccountLinkingTests {
           .getRequest()
           .getSession();
 
-    session = (MockHttpSession) mvc.perform(get("/iam/account-linking/OIDC/done").session(session))
+
+    String expectedErrorMessage =
+        String.format("OpenID connect account '[%s] %s' is already linked to another user",
+            OidcTestConfig.TEST_OIDC_ISSUER, "test-user");
+
+    mvc.perform(get("/iam/account-linking/OIDC/done").session(session))
       .andExpect(status().isFound())
       .andExpect(redirectedUrl("/dashboard"))
       .andExpect(
@@ -203,18 +207,8 @@ public class OidcAccountLinkingTests {
       .andExpect(
           request().sessionAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION, nullValue()))
       .andExpect(request().sessionAttribute(ACCOUNT_LINKING_SESSION_KEY, nullValue()))
-      .andExpect(request().sessionAttribute(ACCOUNT_LINKING_ERROR_KEY, notNullValue()))
-      .andReturn()
-      .getRequest()
-      .getSession();
-
-    String expectedErrorMessage =
-        String.format("OpenID connect account '[%s] %s' is already linked to another user",
-            OidcTestConfig.TEST_OIDC_ISSUER, "test-user");
-
-    AccountAlreadyLinkedError e =
-        (AccountAlreadyLinkedError) session.getAttribute(ACCOUNT_LINKING_ERROR_KEY);
-    assertThat(expectedErrorMessage, equalTo(e.getMessage()));
+      .andExpect(
+          flash().attribute(ACCOUNT_LINKING_DASHBOARD_ERROR_KEY, equalTo(expectedErrorMessage)));
 
   }
 
@@ -260,7 +254,12 @@ public class OidcAccountLinkingTests {
           .getRequest()
           .getSession();
 
-    session = (MockHttpSession) mvc.perform(get("/iam/account-linking/OIDC/done").session(session))
+
+    String expectedErrorMessage =
+        String.format("OpenID connect account '[%s] %s' is already linked to user '%s'",
+            OidcTestConfig.TEST_OIDC_ISSUER, "test-user", "test");
+
+    mvc.perform(get("/iam/account-linking/OIDC/done").session(session))
       .andExpect(status().isFound())
       .andExpect(redirectedUrl("/dashboard"))
       .andExpect(
@@ -268,18 +267,8 @@ public class OidcAccountLinkingTests {
       .andExpect(
           request().sessionAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION, nullValue()))
       .andExpect(request().sessionAttribute(ACCOUNT_LINKING_SESSION_KEY, nullValue()))
-      .andExpect(request().sessionAttribute(ACCOUNT_LINKING_ERROR_KEY, notNullValue()))
-      .andReturn()
-      .getRequest()
-      .getSession();
-
-    String expectedErrorMessage =
-        String.format("OpenID connect account '[%s] %s' is already linked to user '%s'",
-            OidcTestConfig.TEST_OIDC_ISSUER, "test-user", "test");
-
-    AccountAlreadyLinkedError e =
-        (AccountAlreadyLinkedError) session.getAttribute(ACCOUNT_LINKING_ERROR_KEY);
-    assertThat(expectedErrorMessage, equalTo(e.getMessage()));
+      .andExpect(
+          flash().attribute(ACCOUNT_LINKING_DASHBOARD_ERROR_KEY, equalTo(expectedErrorMessage)));
 
   }
 

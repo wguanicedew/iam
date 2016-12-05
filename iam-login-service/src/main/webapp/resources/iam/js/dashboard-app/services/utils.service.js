@@ -14,7 +14,8 @@ function Utils() {
 			isRegistrationEnabled: isRegistrationEnabled,
 			buildErrorOperationResult: buildErrorOperationResult,
 			buildSuccessOperationResult: buildSuccessOperationResult,
-			buildErrorResult: buildErrorResult
+			buildErrorResult: buildErrorResult,
+			userIsVoAdmin: userIsVoAdmin
 		};
 
 	return service;
@@ -31,6 +32,15 @@ function Utils() {
 	function isMe(id) {
 		
 		return (id == getUserInfo().sub);
+	}
+
+	function userIsVoAdmin(user){
+		if (user.authorities) {
+        if (user.authorities.indexOf('ROLE_ADMIN') > -1) {
+          return true;
+        }
+      }
+      return false;
 	}
 	
 	function isAdmin() {

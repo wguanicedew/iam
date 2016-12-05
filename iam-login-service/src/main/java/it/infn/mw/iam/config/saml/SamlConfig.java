@@ -88,7 +88,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
@@ -98,6 +97,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import it.infn.mw.iam.authn.ExternalAuthenticationFailureHandler;
 import it.infn.mw.iam.authn.ExternalAuthenticationSuccessHandler;
 import it.infn.mw.iam.authn.InactiveAccountAuthenticationHander;
+import it.infn.mw.iam.authn.RootIsDashboardSuccessHandler;
 import it.infn.mw.iam.authn.TimestamperSuccessHandler;
 import it.infn.mw.iam.authn.saml.DefaultSAMLUserDetailsService;
 import it.infn.mw.iam.authn.saml.IamSamlAuthenticationProvider;
@@ -369,8 +369,11 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
   @Bean
   public ExtendedMetadata extendedMetadata() {
 
+    // String discoveryUrl = String.format("%s/saml/selectIdp", iamProperties.getBaseUrl());
+
     ExtendedMetadata extendedMetadata = new ExtendedMetadata();
     extendedMetadata.setIdpDiscoveryEnabled(true);
+    // extendedMetadata.setIdpDiscoveryURL(discoveryUrl);
     extendedMetadata.setSignMetadata(false);
     return extendedMetadata;
   }
@@ -380,7 +383,7 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
   public SAMLDiscovery samlIDPDiscovery() {
 
     SAMLDiscovery idpDiscovery = new SAMLDiscovery();
-    idpDiscovery.setIdpSelectionPath("/saml/idpSelection");
+    idpDiscovery.setIdpSelectionPath("/saml/selectIdp");
     return idpDiscovery;
   }
 
@@ -443,12 +446,12 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
   @Bean
   public AuthenticationSuccessHandler successRedirectHandler() {
 
-    SavedRequestAwareAuthenticationSuccessHandler successRedirectHandler =
-        new SavedRequestAwareAuthenticationSuccessHandler();
-    successRedirectHandler.setDefaultTargetUrl("/");
 
-    ExternalAuthenticationSuccessHandler successHandler = new ExternalAuthenticationSuccessHandler(
-        new TimestamperSuccessHandler(successRedirectHandler), "/");
+    RootIsDashboardSuccessHandler sa =
+        new RootIsDashboardSuccessHandler(iamProperties.getBaseUrl());
+
+    ExternalAuthenticationSuccessHandler successHandler =
+        new ExternalAuthenticationSuccessHandler(new TimestamperSuccessHandler(sa), "/");
     return successHandler;
   }
 

@@ -131,6 +131,17 @@ public class AccountAuthorityEndpointTests {
       .andExpect(jsonPath("$.authorities", contains("ROLE_USER")));
   }
 
+
+  @Test
+  @WithMockUser(username = "admin", roles = {"ADMIN", "USER"})
+  public void getMeAuthoritiesWorks() throws Exception {
+    mvc.perform(get("/iam/me/authorities"))
+      .andDo(print())
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.authorities", not(empty())))
+      .andExpect(jsonPath("$.authorities", contains("ROLE_USER", "ROLE_ADMIN")));
+  }
+
   @Test
   @WithMockUser(username = "admin", roles = {"ADMIN", "USER"})
   public void AddInvalidAuthorityFails() throws Exception {

@@ -8,6 +8,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,7 +25,7 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 @RequestMapping(value = AccountAuthorityController.BASE_RESOURCE)
 public class AccountAuthorityController {
 
-  public static final String BASE_RESOURCE = "/iam/account";
+  public static final String BASE_RESOURCE = "/iam";
 
   final IamAccountRepository iamAccountRepository;
   final AccountAuthorityService authorityService;
@@ -45,8 +46,21 @@ public class AccountAuthorityController {
       .orElseThrow(() -> new AccountNotFoundError(format("No account found for id '%s'", id)));
   }
 
+  protected IamAccount findAccountByName(String name) {
+    return iamAccountRepository.findByUsername(name)
+      .orElseThrow(() -> new AccountNotFoundError(format("No account found for name '%s'", name)));
+  }
+
+  @PreAuthorize("hasRole('USER')")
+  @RequestMapping(value = "/me/authorities", method = RequestMethod.GET)
+  public AuthoritySetDTO getAuthoritiesForMe(Authentication authn) {
+    AuthoritySetDTO result = AuthoritySetDTO
+      .fromAuthorities(authorityService.getAccountAuthorities(findAccountByName(authn.getName())));
+    return result;
+  }
+
   @PreAuthorize("hasRole('ADMIN')")
-  @RequestMapping(value = "/{id}/authorities", method = RequestMethod.GET)
+  @RequestMapping(value = "/account/{id}/authorities", method = RequestMethod.GET)
   @ResponseBody
   public AuthoritySetDTO getAuthoritiesForAccount(@PathVariable("id") String id) {
     AuthoritySetDTO result = AuthoritySetDTO
@@ -55,7 +69,7 @@ public class AccountAuthorityController {
   }
 
   @PreAuthorize("hasRole('ADMIN')")
-  @RequestMapping(value = "/{id}/authorities", method = RequestMethod.POST)
+  @RequestMapping(value = "/account/{id}/authorities", method = RequestMethod.POST)
   public void addAuthorityToAccount(@PathVariable("id") String id, @Valid AuthorityDTO authority,
       BindingResult validationResult) {
 
@@ -68,7 +82,7 @@ public class AccountAuthorityController {
   }
 
   @PreAuthorize("hasRole('ADMIN')")
-  @RequestMapping(value = "/{id}/authorities", method = RequestMethod.DELETE)
+  @RequestMapping(value = "/account/{id}/authorities", method = RequestMethod.DELETE)
   public void removeAuthorityFromAccount(@PathVariable("id") String id,
       @Valid AuthorityDTO authority, BindingResult validationResult) {
 

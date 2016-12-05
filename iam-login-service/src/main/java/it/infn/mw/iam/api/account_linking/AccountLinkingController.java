@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import it.infn.mw.iam.authn.AbstractExternalAuthenticationToken;
 import it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport;
@@ -36,7 +37,8 @@ public class AccountLinkingController extends ExternalAuthenticationHandlerSuppo
 
   @PreAuthorize("hasRole('USER')")
   @RequestMapping(value = "/{type}", method = RequestMethod.POST)
-  public void linkAccount(@PathVariable ExternalAuthenticationType type, Authentication authn,
+  public void linkAccount(@PathVariable ExternalAuthenticationType type,
+      @RequestParam(value = "id", required = false) String externalIdpId, Authentication authn,
       HttpServletRequest request, HttpServletResponse response) throws IOException {
 
     HttpSession session = request.getSession();
@@ -45,14 +47,14 @@ public class AccountLinkingController extends ExternalAuthenticationHandlerSuppo
     setupAccountLinkingSessionKey(session, type);
     saveAuthenticationInSession(session, authn);
 
-    response.sendRedirect(mapExternalAuthenticationTypeToExternalAuthnURL(type));
+    response.sendRedirect(mapExternalAuthenticationTypeToExternalAuthnURL(type, externalIdpId));
   }
 
   @PreAuthorize("hasRole('USER')")
-  @RequestMapping(value = "/{type}/done", method = RequestMethod.GET)
+  @RequestMapping(value = "/{type}/done", method = {RequestMethod.GET, RequestMethod.POST})
   public String finalizeAccountLinking(@PathVariable ExternalAuthenticationType type,
-      Principal principal, HttpServletRequest request, HttpServletResponse response)
-          throws IOException {
+      Principal principal, final RedirectAttributes redirectAttributes, HttpServletRequest request,
+      HttpServletResponse response) throws IOException {
 
     HttpSession session = request.getSession();
 
@@ -70,11 +72,11 @@ public class AccountLinkingController extends ExternalAuthenticationHandlerSuppo
     try {
 
       linkingService.linkExternalAccount(principal, externalAuthenticationToken);
-      saveAccountLinkingSuccess(response);
+      saveAccountLinkingSuccess(externalAuthenticationToken, redirectAttributes);
 
     } catch (Exception ex) {
 
-      saveAccountLinkingError(session, ex, response);
+      saveAccountLinkingError(ex, redirectAttributes);
 
     } finally {
       clearAccountLinkingSessionAttributes(session);
@@ -86,12 +88,11 @@ public class AccountLinkingController extends ExternalAuthenticationHandlerSuppo
 
   @PreAuthorize("hasRole('USER')")
   @RequestMapping(value = "/{type}", method = RequestMethod.DELETE)
-  public String unlinkAccount(@PathVariable ExternalAuthenticationType type, Principal principal,
+  @ResponseStatus(value = HttpStatus.NO_CONTENT)
+  public void unlinkAccount(@PathVariable ExternalAuthenticationType type, Principal principal,
       @RequestParam("iss") String issuer, @RequestParam("sub") String subject) {
 
     linkingService.unlinkExternalAccount(principal, type, issuer, subject);
-
-    return "iam/dashboard";
   }
 
   @ResponseStatus(value = HttpStatus.BAD_REQUEST)

@@ -564,6 +564,8 @@ public class SecurityConfig {
         .sessionManagement()
         .sessionCreationPolicy(SessionCreationPolicy.NEVER)
         .and()
+        .csrf()
+        .disable()
         .authorizeRequests()
         .antMatchers("/iam/account-linking/**")
         .authenticated();
@@ -578,7 +580,9 @@ public class SecurityConfig {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-      http.antMatcher("/iam/account/**")
+      http.requestMatchers()
+        .antMatchers("/iam/account/**", "/iam/me/**")
+        .and()
         .exceptionHandling()
         .authenticationEntryPoint(authenticationEntryPoint)
         .and()
@@ -586,7 +590,7 @@ public class SecurityConfig {
         .sessionCreationPolicy(SessionCreationPolicy.NEVER)
         .and()
         .authorizeRequests()
-        .antMatchers("/iam/account/**")
+        .antMatchers("/iam/account/**", "/iam/me/**")
         .authenticated()
         .and()
         .csrf()

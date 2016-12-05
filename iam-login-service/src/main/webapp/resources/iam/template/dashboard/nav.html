@@ -1,6 +1,5 @@
 <!-- sidebar: style can be found in sidebar.less -->
 <section class="sidebar" ng-cloak>
-
   <div class="user-panel">
     <a class="pull-left image" ui-sref="home">
       <!-- if user picture is defined -->
@@ -17,7 +16,7 @@
   </div>
 
   <ul class="sidebar-menu" name="sidebar-menu">
-    <li class="header">MENU</li>
+    <li class="header">Organization Management</li>
     <li>
         <a ui-sref="home" ui-sref-opts="{reload: true}">
             <i class="fa fa-home"></i>
@@ -51,7 +50,7 @@
             </span>
         </a>
     </li>
-    <li class="header">MITREID-CONNECT</li>
+    <li class="header">Client management</li>
     <li>
         <a href="/">
             <i class="fa fa-dashboard"></i>
@@ -59,6 +58,10 @@
         </a>
     </li>
   </ul>
-
+  
+  <div class="version-info">
+      IAM {{$root.iamVersion}} ({{$root.iamCommitId}}) 
+  </div>
+  
 </section>
 <!-- /.sidebar -->

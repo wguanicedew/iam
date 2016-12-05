@@ -115,7 +115,7 @@ public class AccountUnlinkTests {
       .perform(delete(accountLinkingResourceOidc()).param("iss", UNLINKED_OIDC_ID.getIssuer())
         .param("sub", UNLINKED_OIDC_ID.getSubject())
         .with(csrf().asHeader()))
-      .andDo(print()).andExpect(status().isOk());
+      .andDo(print()).andExpect(status().isNoContent());
 
     user = iamAccountRepo.findByUsername("test")
       .orElseThrow(() -> new AssertionError("Expected user not found"));
@@ -140,7 +140,7 @@ public class AccountUnlinkTests {
       .perform(delete(accountLinkingResourceOidc()).param("iss", LINKED_OIDC_ID.getIssuer())
         .param("sub", LINKED_OIDC_ID.getSubject())
         .with(csrf().asHeader()))
-      .andDo(print()).andExpect(status().isOk());
+      .andDo(print()).andExpect(status().isNoContent());
 
     user = iamAccountRepo.findByUsername("test")
       .orElseThrow(() -> new AssertionError("Expected user not found"));
@@ -166,7 +166,7 @@ public class AccountUnlinkTests {
       .perform(delete(accountLinkingResourceSaml()).param("iss", UNLINKED_SAML_ID.getIdpId())
         .param("sub", UNLINKED_SAML_ID.getUserId())
         .with(csrf().asHeader()))
-      .andDo(print()).andExpect(status().isOk());
+      .andDo(print()).andExpect(status().isNoContent());
 
     assertThat(UNLINKED_SAML_ID, not(isIn(user.getSamlIds())));
     assertThat(lastUpdateTime, equalTo(user.getLastUpdateTime()));
@@ -187,7 +187,7 @@ public class AccountUnlinkTests {
       .perform(delete(accountLinkingResourceSaml()).param("iss", SAML_LINKED_ISSUER)
         .param("sub", SAML_LINKED_SUBJECT)
         .with(csrf().asHeader()))
-      .andDo(print()).andExpect(status().isOk());
+      .andDo(print()).andExpect(status().isNoContent());
 
     assertThat(LINKED_SAML_ID, not(isIn(user.getSamlIds())));
     assertThat(lastUpdateTime, not(equalTo(user.getLastUpdateTime())));

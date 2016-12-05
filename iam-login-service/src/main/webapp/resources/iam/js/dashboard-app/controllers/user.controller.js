@@ -3,112 +3,82 @@
 angular.module('dashboardApp').controller('UserController', UserController);
 
 UserController.$inject = [ '$scope', '$rootScope', '$state', '$uibModal', '$filter', '$q', 
-                           'filterFilter', 'Utils', 'scimFactory', 'ModalService', 'ResetPasswordService', 
-                           'RegistrationRequestService', 'Authorities'];
+                           'filterFilter', 'Utils', 'scimFactory', 'ModalService', 
+						   'ResetPasswordService', 'RegistrationRequestService', 'UserService'];
 
 function UserController($scope, $rootScope, $state, $uibModal, $filter, $q, filterFilter, 
-		Utils, scimFactory, ModalService, ResetPasswordService, RegistrationRequestService, Authorities) {
+		Utils, scimFactory, ModalService, ResetPasswordService, RegistrationRequestService,
+		UserService, user) {
 
-	var user = this;
+	var vm = this;
+	vm.id = $state.params.id;
 
-	console.log("User ID: ", $state.params.id);
-
-	user.id = $state.params.id;
-
-	user.loaded = false;
-	user.userInfo = {};
+	vm.user = user;
 	
 	// methods
-	user.loadUserInfo = loadUserInfo;
-	user.showSshKeyValue = showSshKeyValue;
-	user.showCertValue = showCertValue;
-	user.openAddGroupDialog = openAddGroupDialog;
-	user.openAddOIDCAccountDialog = openAddOIDCAccountDialog;
-	user.openAddSshKeyDialog = openAddSshKeyDialog;
-	user.openAddSamlAccountDialog = openAddSamlAccountDialog;
-	user.openAddX509CertificateDialog = openAddX509CertificateDialog;
-	user.openEditUserDialog = openEditUserDialog;
-	user.deleteGroup = deleteGroup;
-	user.deleteOidcAccount = deleteOidcAccount;
-	user.deleteSshKey = deleteSshKey;
-	user.deleteX509Certificate = deleteX509Certificate;
-	user.deleteSamlId = deleteSamlId;
-	user.setActive = setActive;
-	user.openLoadingModal = openLoadingModal;
-	user.closeLoadingModal = closeLoadingModal;
-	user.closeLoadingModalAndSetError = closeLoadingModalAndSetError;
+	vm.loadUserInfo = loadUserInfo;
+	vm.showSshKeyValue = showSshKeyValue;
+	vm.showCertValue = showCertValue;
+	vm.openAddGroupDialog = openAddGroupDialog;
+	vm.openAddOIDCAccountDialog = openAddOIDCAccountDialog;
+	vm.openAddSshKeyDialog = openAddSshKeyDialog;
+	vm.openAddSamlAccountDialog = openAddSamlAccountDialog;
+	vm.openAddX509CertificateDialog = openAddX509CertificateDialog;
+	vm.openEditUserDialog = openEditUserDialog;
+	vm.deleteGroup = deleteGroup;
+	vm.deleteOidcAccount = deleteOidcAccount;
+	vm.deleteSshKey = deleteSshKey;
+	vm.deleteX509Certificate = deleteX509Certificate;
+	vm.deleteSamlId = deleteSamlId;
+	vm.setActive = setActive;
+	vm.openLoadingModal = openLoadingModal;
+	vm.closeLoadingModal = closeLoadingModal;
+	vm.closeLoadingModalAndSetError = closeLoadingModalAndSetError;
 	
-	user.isVoAdmin = isVoAdmin;
-	user.openAssignVoAdminPrivilegesDialog = openAssignVoAdminPrivilegesDialog;
-	user.openRevokeVoAdminPrivilegesDialog = openRevokeVoAdminPrivilegesDialog;
-	user.isMe = isMe;
+	vm.isVoAdmin = isVoAdmin;
+	vm.openAssignVoAdminPrivilegesDialog = openAssignVoAdminPrivilegesDialog;
+	vm.openRevokeVoAdminPrivilegesDialog = openRevokeVoAdminPrivilegesDialog;
+	vm.isMe = isMe;
 
-	user.isEditUserDisabled = false;
-	user.isSendResetDisabled = false;
-	user.isEnableUserDisabled = false;
+	vm.isEditUserDisabled = false;
+	vm.isSendResetDisabled = false;
+	vm.isEnableUserDisabled = false;
 	
 	// password reset
-	user.doPasswordReset = doPasswordReset;
-	user.sendResetMail = sendResetMail;
-	
-	user.authorities = [];
+	vm.doPasswordReset = doPasswordReset;
 		
-	user.loadUserInfo();
-	
-	function loadUserInfo() {
-		user.loaded = false;
-		
-		var modalPromise = openLoadingModal();
-		var authPromise = Authorities.getAuthorities(user.id);
-		var scimPromise = scimFactory.getUser(user.id);
-		
-		var loadAuthoritiesSuccess = function(result){
-			user.authorities = result.data.authorities;
-			$scope.user.isAdmin = user.isVoAdmin();
-		}
-		
-		var loadScimUserSuccess = function(result){
-			$scope.user = result.data;
-			user.userInfo = result.data;
-		}
-		
-		$q.all([modalPromise,authPromise,scimPromise]).then(
-				function(data) {
-					scimPromise.then(loadScimUserSuccess);
-					authPromise.then(loadAuthoritiesSuccess);
-					
-					user.loaded = true;
-					closeLoadingModal();
-				}, function(error) {
-					console.error("Error loading user information:", error);
-					closeLoadingModalAndSetError(error.data);
-				});
+	function getUser() {
+		UserService.getUser(vm.id).then(function(user){
+			vm.user = user;
+		}).catch(function(error){
+			$scope.operationResult = Utils.buildErrorResult(error.message || error);
+		});
 	}
 	
 	function openLoadingModal() {
 		$rootScope.pageLoadingProgress = 0;
-		user.loadingModal = $uibModal.open({
+		vm.loadingModal = $uibModal.open({
 			animation: false,
 			templateUrl : '/resources/iam/template/dashboard/loading-modal.html'
 		});
 
-		return user.loadingModal.opened;
+		return vm.loadingModal.opened;
 	}
 	
 	function closeLoadingModal(){
 		$rootScope.pageLoadingProgress = 100;
-		user.loadingModal.dismiss("Cancel");
+		vm.loadingModal.dismiss("Cancel");
 	}
 	
 	function closeLoadingModalAndSetError(error){
 		$rootScope.pageLoadingProgress = 100;
-		user.loadingModal.dismiss("Error");
+		vm.loadingModal.dismiss("Error");
 		$scope.operationResult = Utils.buildErrorOperationResult(error);
 	}
 	
 	function doPasswordReset() {
 		
-		ResetPasswordService.forgotPassword($scope.user.emails[0].value).then(
+		ResetPasswordService.forgotPassword($scope.vm.emails[0].value).then(
 			function(response) {
 				ModalService.showModal({}, {
 					closeButtonText: null,
@@ -124,30 +94,30 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, $q, filt
 
 	function sendResetMail() {
 
-		user.isSendResetDisabled = true;
+		vm.isSendResetDisabled = true;
 		var modalOptions = {
 				closeButtonText: 'Cancel',
 				actionButtonText: 'Send password reset e-mail',
 				headerText: 'Send password reset e-mail',
-				bodyText: `Are you sure you want to send the password reset e-mail to ${$scope.user.name.formatted}?`	
+				bodyText: `Are you sure you want to send the password reset e-mail to ${$scope.vm.name.formatted}?`	
 			};
 				
 		ModalService.showModal({}, modalOptions).then(
 			function (){
-				user.doPasswordReset();
-				user.isSendResetDisabled = false;
+				vm.doPasswordReset();
+				vm.isSendResetDisabled = false;
 			}, function () {
-				user.isSendResetDisabled = false;
+				vm.isSendResetDisabled = false;
 			});
 	}
 
 	function openEditUserDialog() {
 
-		user.isEditUserDisabled = true;
+		vm.isEditUserDisabled = true;
 
 		var modalInstance = $uibModal
 				.open({
-					templateUrl : '/resources/iam/template/dashboard/user/edituser.html',
+					templateUrl : '/resources/iam/template/dashboard/user/editvm.html',
 					controller : 'EditUserController',
 					controllerAs : 'editUserCtrl',
 					resolve : {
@@ -160,10 +130,10 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, $q, filt
 		modalInstance.result.then(function() {
 			loadUserInfo();
 			$scope.operationResult = Utils.buildSuccessOperationResult("User's info updated successfully");
-			user.isEditUserDisabled = false;
+			vm.isEditUserDisabled = false;
 		}, function() {
 			console.log('Modal dismissed at: ', new Date());
-			user.isEditUserDisabled = false;
+			vm.isEditUserDisabled = false;
 		});
 	}
 	
@@ -423,7 +393,7 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, $q, filt
 
 	function setActive(status) {
 
-		user.isEnableUserDisabled = true;
+		vm.isEnableUserDisabled = true;
 		var modalOptions = {};
 		
 		if (status) {
@@ -456,13 +426,13 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, $q, filt
 						} else {
 							$scope.operationResult = Utils.buildSuccessOperationResult("User " + $scope.user.name.formatted + " disabled");
 						}
-						user.isEnableUserDisabled = false;
+						vm.isEnableUserDisabled = false;
 					}, function(error) {
 						$scope.operationResult = Utils.buildErrorOperationResult(error);
-						user.isEnableUserDisabled = false;
+						vm.isEnableUserDisabled = false;
 					});
 			}, function () {
-				user.isEnableUserDisabled = false;
+				vm.isEnableUserDisabled = false;
 			});
 	}
 	
@@ -510,14 +480,14 @@ function UserController($scope, $rootScope, $state, $uibModal, $filter, $q, filt
 	
 	function isMe(){
 		var authenticatedUserSub = getUserInfo().sub; 
-		return user.id == authenticatedUserSub;
+		return vm.id == authenticatedUserSub;
 	}
 	
 	
 	
 	function isVoAdmin() {
-		if (user.authorities){
-			if (user.authorities.indexOf("ROLE_ADMIN") > -1){
+		if (vm.authorities){
+			if (vm.authorities.indexOf("ROLE_ADMIN") > -1){
 				return true;
 			}
 		}

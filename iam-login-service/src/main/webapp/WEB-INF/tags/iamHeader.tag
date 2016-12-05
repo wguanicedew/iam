@@ -18,12 +18,7 @@
 <link
   rel="stylesheet"
   href="<c:url value='/webjars/angular-ui-select/select.min.css'/>"></link>
-
-<link
-  rel="stylesheet"
-  href="resources/iam/css/iam.css"></link>
-
-
+  
 <link
   rel="stylesheet"
   href="resources/iam/css/AdminLTE.css"></link>
@@ -45,9 +40,21 @@
   rel="stylesheet"
   href="resources/bootstrap-social/bootstrap-social.css">
 
+<link 
+  rel="stylesheet"
+  href="resources/iam/css/toaster.min.css" />
+
+<link
+  rel="stylesheet"
+  href="resources/iam/css/iam.css"></link>
+
 </head>
 
 <script>
+
+var _accountLinkingMessage = "${accountLinkingMessage}";
+var _accountLinkingError = "${accountLinkingError}";
+
 //get the info of the currently authenticated user, if available (null otherwise)
 function getUserInfo() {
   return ${userInfoJson};
@@ -72,13 +79,5 @@ function getRegistrationEnabled() {
 
 function getOrganisationName() {
  return '${iamProperties.organisationName}'; 
-}
-
-function getAccountLinkingError(){
- return '${account-linking.error}'; 
-}
-
-function getAccountLinkingMessage(){
-   return '${account-linking.message}'; 
 }
 </script>

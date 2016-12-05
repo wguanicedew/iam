@@ -1,102 +1,79 @@
 'use strict';
 
-angular.module('dashboardApp', [ 'ui.router', 'ui.bootstrap',
-		'ui.bootstrap.tpls', 'ui.select', 'ngCookies', 'ngSanitize',
-		'relativeDate', 'ngResource' ]);
+angular.module('dashboardApp', [
+  'ui.router', 'ui.bootstrap', 'ui.bootstrap.tpls', 'ui.select', 'ngCookies',
+  'ngSanitize', 'relativeDate', 'ngResource', 'toaster'
+]);
 
-angular.module('dashboardApp').run(
-		function($window, $rootScope, $state, $stateParams, $q, $uibModal, Utils,
-				scimFactory, RegistrationRequestService) {
-	
+angular.module('dashboardApp')
+    .run(function(
+        $window, $rootScope, $state, $stateParams, $q, $uibModal, $trace, Utils,
+        scimFactory, UserService, RegistrationRequestService,
+        LoadTemplatesService) {
 
-	// Offline dialog
-	$rootScope.closeOfflineDialog = function() {
+      $state.defaultErrorHandler(function(error) { console.error(error); });
 
-		console.log("into: closeOfflineDialog");
+      $rootScope.iamVersion = getIamVersion();
+      $rootScope.iamCommitId = getIamGitCommitId();
+      
+      LoadTemplatesService.loadTemplates();
 
-		if ($rootScope.offlineDialog) {
+      $trace.enable('TRANSITION');
 
-			console.log("Closing offline dialog");
-			$rootScope.offlineDialog.dismiss("Back online");
-			$rootScope.offlineDialog = undefined;
-		}
-	}
-	
-	$rootScope.openOfflineDialog = function() {
-		
-		if (!$rootScope.offlineDialog) {
-			
-			console.log("Opening offline dialog");
-			$rootScope.offlineDialog = $uibModal
-				.open({
-					animation : false,
-					backdrop  : 'static',
-					keyboard  : false,
-					templateUrl: "noConnectionTemplate.html"
-				});
-		}
-	}
+      // Offline dialog
+      $rootScope.closeOfflineDialog = function() {
 
-	// logged user
-	$rootScope.loggedUser = Utils.getLoggedUser();
-	$rootScope.isRegistrationEnabled = Utils.isRegistrationEnabled();
+        console.log('into: closeOfflineDialog');
 
-	var promises = [];
+        if ($rootScope.offlineDialog) {
+          console.log('Closing offline dialog');
+          $rootScope.offlineDialog.dismiss('Back online');
+          $rootScope.offlineDialog = undefined;
+        }
+      };
 
-	var getMePromise = scimFactory.getMe();
-	promises.push(getMePromise);
+      $rootScope.openOfflineDialog = function() {
 
-	var getUserCountPromise = scimFactory.getUsers(1,1);
-	promises.push(getUserCountPromise);
-	
-	var getGroupCountPromise = scimFactory.getGroups(1,1);
-	promises.push(getGroupCountPromise);
+        if (!$rootScope.offlineDialog) {
+          console.log('Opening offline dialog');
+          $rootScope.offlineDialog = $uibModal.open({
+            animation: false,
+            backdrop: 'static',
+            keyboard: false,
+            templateUrl: 'noConnectionTemplate.html'
+          });
+        }
+      };
 
-	if ($rootScope.isRegistrationEnabled){
-		var getPendingRequestsPromise = RegistrationRequestService.listPending();
-		promises.push(getPendingRequestsPromise);
-	}
+      $rootScope.reloadInfo = function() {
 
-	$q.all(promises).then(function(data){
-		getMePromise.then(function(response) {
-			console.log(response);
-			$rootScope.loggedUser.me = response.data;
-		});
+        var promises = [];
+        promises.push(UserService.updateLoggedUserInfo());
 
-		getUserCountPromise.then(function(response){
-			console.log(response.data);
-			$rootScope.loggedUser.totUsers = response.data.totalResults;
-		});
-		
-		getGroupCountPromise.then(function(response) {
-			console.log(response.data);
-			$rootScope.loggedUser.totGroups = response.data.totalResults;
-		});
+        if ($rootScope.isRegistrationEnabled && Utils.isAdmin()) {
+          promises.push(RegistrationRequestService.listPending().then(function(
+              r) { $rootScope.loggedUser.pendingRequests = r.data; }));
+        }
 
-		if ($rootScope.isRegistrationEnabled){
-			getPendingRequestsPromise.then(function(response) {
-				console.log(response.data);
-				$rootScope.loggedUser.pendingRequests = response.data;
-			});
-		}
+        return $q.all(promises).catch(function(error){
+          console.error("Error loading logged user info"+error);
+        });
+      };
 
-	}, function(err){
-		console.error(error);		
-	});
+      $rootScope.reloadInfo();
 
-	// ctrl+R refresh
-	$rootScope.reload = function() {
-		$window.location.reload();
-	}
+      // ctrl+R refresh
+      $rootScope.reload = function() { $window.location.reload(); };
 
-	// refresh last state loaded
-	$rootScope.refresh = function() {
+      // refresh last state loaded
+      $rootScope.refresh = function() {
 
-		$rootScope.closeOfflineDialog();
-		$state.transitionTo($state.current, $stateParams, {
-			reload : true,
-			inherit : false,
-			notify : true
-		});
-	}
-});
+        $rootScope.closeOfflineDialog();
+        $state.transitionTo(
+            $state.current, $stateParams,
+            {reload: true, inherit: false, notify: true});
+      };
+
+      $('#body').show();
+
+    });
