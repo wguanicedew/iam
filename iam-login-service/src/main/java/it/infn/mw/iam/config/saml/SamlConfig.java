@@ -41,7 +41,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.saml.SAMLAuthenticationProvider;
 import org.springframework.security.saml.SAMLBootstrap;
-import org.springframework.security.saml.SAMLDiscovery;
 import org.springframework.security.saml.SAMLEntryPoint;
 import org.springframework.security.saml.SAMLLogoutFilter;
 import org.springframework.security.saml.SAMLLogoutProcessingFilter;
@@ -378,15 +377,6 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
     return extendedMetadata;
   }
 
-  // IDP Discovery Service
-  @Bean
-  public SAMLDiscovery samlIDPDiscovery() {
-
-    SAMLDiscovery idpDiscovery = new SAMLDiscovery();
-    idpDiscovery.setIdpSelectionPath("/saml/selectIdp");
-    return idpDiscovery;
-  }
-
   @Bean
   @Qualifier("local")
   public ExtendedMetadataDelegate localIdpMetadataProvider()
@@ -598,8 +588,7 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
         samlWebSSOHoKProcessingFilter()));
     chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/SingleLogout/**"),
         samlLogoutProcessingFilter()));
-    chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/discovery/**"),
-        samlIDPDiscovery()));
+
     return new FilterChainProxy(chains);
   }
 
