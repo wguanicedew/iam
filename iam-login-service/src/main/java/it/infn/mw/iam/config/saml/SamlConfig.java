@@ -369,11 +369,11 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
   @Bean
   public ExtendedMetadata extendedMetadata() {
 
-    // String discoveryUrl = String.format("%s/saml/selectIdp", iamProperties.getBaseUrl());
+    final String discoveryUrl = String.format("%s/saml/discovery", iamProperties.getBaseUrl());
 
     ExtendedMetadata extendedMetadata = new ExtendedMetadata();
     extendedMetadata.setIdpDiscoveryEnabled(true);
-    // extendedMetadata.setIdpDiscoveryURL(discoveryUrl);
+    extendedMetadata.setIdpDiscoveryURL(discoveryUrl);
     extendedMetadata.setSignMetadata(false);
     return extendedMetadata;
   }
