@@ -323,14 +323,14 @@ public class IamDiscoveryEndpoint {
         Collections2.transform(encService.getAllEncryptionAlgsSupported(), toAlgorithmName));
     m.put("request_object_encryption_enc_values_supported",
         Collections2.transform(encService.getAllEncryptionEncsSupported(), toAlgorithmName));
+
     // @formatter:off
     m.put("token_endpoint_auth_methods_supported", Lists.newArrayList(
         "client_secret_post",
-        "client_secret_basic", 
-        "client_secret_jwt", 
-        "private_key_jwt", 
+        "client_secret_basic",  
         "none"));
     // @formatter:on
+
     m.put("token_endpoint_auth_signing_alg_values_supported",
         Collections2.transform(clientSymmetricAndAsymmetricSigningAlgs, toAlgorithmName));
 
