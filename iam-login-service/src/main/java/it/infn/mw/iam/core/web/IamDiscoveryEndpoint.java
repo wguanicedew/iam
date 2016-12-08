@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import org.mitre.discovery.util.WebfingerURLNormalizer;
 import org.mitre.jwt.encryption.service.JWTEncryptionAndDecryptionService;
@@ -67,7 +68,8 @@ public class IamDiscoveryEndpoint {
   private Function<Algorithm, String> toAlgorithmName = new Function<Algorithm, String>() {
     @Override
     public String apply(Algorithm alg) {
-      if (alg == null) {
+
+      if (Objects.isNull(alg)) {
         return null;
       } else {
         return alg.getName();
@@ -261,11 +263,6 @@ public class IamDiscoveryEndpoint {
      */
     // @formatter: on
     String baseUrl = config.getIssuer();
-
-    if (!baseUrl.endsWith("/")) {
-      logger.warn("Configured issuer doesn't end in /, adding for discovery: " + baseUrl);
-      baseUrl = baseUrl.concat("/");
-    }
 
     Collection<JWSAlgorithm> clientSymmetricAndAsymmetricSigningAlgs = Lists.newArrayList(
         JWSAlgorithm.HS256, JWSAlgorithm.HS384, JWSAlgorithm.HS512, JWSAlgorithm.RS256,
