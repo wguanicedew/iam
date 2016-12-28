@@ -11,6 +11,24 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ScimIndigoUser {
 
+  public enum INDIGO_USER_SCHEMA {
+
+    SSH_KEYS(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys"),
+    OIDC_IDS(ScimConstants.INDIGO_USER_SCHEMA + ".oidcIds"),
+    SAML_IDS(ScimConstants.INDIGO_USER_SCHEMA + ".samlIds");
+
+    private final String text;
+
+    private INDIGO_USER_SCHEMA(String text) {
+      this.text = text;
+    }
+
+    @Override
+    public String toString() {
+      return text;
+    }
+  };
+
   private final List<ScimSshKey> sshKeys;
   private final List<ScimOidcId> oidcIds;
   private final List<ScimSamlId> samlIds;
@@ -79,29 +97,6 @@ public class ScimIndigoUser {
     public Builder addSamlId(ScimSamlId samlId) {
 
       samlIds.add(samlId);
-      return this;
-    }
-
-    public Builder buildOidcId(String issuer, String subject) {
-
-      oidcIds.add(ScimOidcId.builder().subject(subject).issuer(issuer).build());
-      return this;
-    }
-
-    public Builder buildSshKey(String label, String key, String fingerprint, boolean isPrimary) {
-
-      sshKeys.add(ScimSshKey.builder()
-        .display(label)
-        .value(key)
-        .fingerprint(fingerprint)
-        .primary(isPrimary)
-        .build());
-      return this;
-    }
-
-    public Builder buildSamlId(String idpId, String userId) {
-
-      samlIds.add(ScimSamlId.builder().idpId(idpId).userId(userId).build());
       return this;
     }
 

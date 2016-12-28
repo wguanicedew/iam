@@ -13,7 +13,9 @@ function Utils() {
 			getLoggedUser: getLoggedUser,
 			isRegistrationEnabled: isRegistrationEnabled,
 			buildErrorOperationResult: buildErrorOperationResult,
-			buildSuccessOperationResult: buildSuccessOperationResult
+			buildSuccessOperationResult: buildSuccessOperationResult,
+			buildErrorResult: buildErrorResult,
+			userIsVoAdmin: userIsVoAdmin
 		};
 
 	return service;
@@ -29,7 +31,16 @@ function Utils() {
 	
 	function isMe(id) {
 		
-		return (id != getUserInfo().sub);
+		return (id == getUserInfo().sub);
+	}
+
+	function userIsVoAdmin(user){
+		if (user.authorities) {
+        if (user.authorities.indexOf('ROLE_ADMIN') > -1) {
+          return true;
+        }
+      }
+      return false;
 	}
 	
 	function isAdmin() {
@@ -52,17 +63,25 @@ function Utils() {
 		return getRegistrationEnabled();
 	}
 
+	function buildErrorResult(errorString) {
+
+		return { 
+			type: "error",
+			text: errorString
+		}
+	}
+	
 	function buildErrorOperationResult(error) {
 
 		return { 
 			type: "error",
-			text: error.data.error_description || error.data.detail
+			text: error.data.error_description || error.data.detail || error.data.message
 		}
 	}
 
 	function buildSuccessOperationResult(message) {
 
-		return { 
+		return {
 			type: "success",
 			text: message
 		}

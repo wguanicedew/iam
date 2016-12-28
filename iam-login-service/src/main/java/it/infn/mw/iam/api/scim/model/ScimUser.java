@@ -1,5 +1,7 @@
 package it.infn.mw.iam.api.scim.model;
 
+import static it.infn.mw.iam.api.scim.model.ScimConstants.INDIGO_USER_SCHEMA;
+
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -21,7 +23,10 @@ import com.google.common.base.Preconditions;
 public class ScimUser extends ScimResource {
 
   public interface NewUserValidation {
-  }
+  };
+
+  public interface UpdateUserValidation {
+  };
 
   public static final String USER_SCHEMA = "urn:ietf:params:scim:schemas:core:2.0:User";
   public static final String RESOURCE_TYPE = "User";
@@ -38,7 +43,6 @@ public class ScimUser extends ScimResource {
   private final String displayName;
   private final String nickName;
   private final String profileUrl;
-  private final String picture;
   private final String title;
   private final String userType;
   private final String preferredLanguage;
@@ -51,6 +55,7 @@ public class ScimUser extends ScimResource {
   private final List<ScimEmail> emails;
 
   private final List<ScimAddress> addresses;
+  private final List<ScimPhoto> photos;
   private final List<ScimX509Certificate> x509Certificates;
 
   private final Set<ScimGroupRef> groups;
@@ -69,9 +74,10 @@ public class ScimUser extends ScimResource {
       @JsonProperty("locale") String locale, @JsonProperty("timezone") String timezone,
       @JsonProperty("active") Boolean active, @JsonProperty("emails") List<ScimEmail> emails,
       @JsonProperty("addresses") List<ScimAddress> addresses,
+      @JsonProperty("photos") List<ScimPhoto> photos,
       @JsonProperty("groups") Set<ScimGroupRef> groups,
       @JsonProperty("x509Certificates") List<ScimX509Certificate> x509Certificates,
-      @JsonProperty("urn:indigo-dc:scim:schemas:IndigoUser") ScimIndigoUser indigoUser) {
+      @JsonProperty(INDIGO_USER_SCHEMA) ScimIndigoUser indigoUser) {
 
     super(id, externalId, meta, schemas);
 
@@ -81,7 +87,7 @@ public class ScimUser extends ScimResource {
     this.displayName = displayName;
     this.nickName = nickName;
     this.profileUrl = profileUrl;
-    this.picture = picture;
+    this.photos = photos;
     this.title = title;
     this.userType = userType;
     this.preferredLanguage = preferredLanguage;
@@ -103,7 +109,7 @@ public class ScimUser extends ScimResource {
     this.displayName = b.displayName;
     this.nickName = b.nickName;
     this.profileUrl = b.profileUrl;
-    this.picture = b.picture;
+    this.photos = b.photos;
     this.title = b.title;
     this.userType = b.userType;
     this.preferredLanguage = b.preferredLanguage;
@@ -147,9 +153,14 @@ public class ScimUser extends ScimResource {
     return profileUrl;
   }
 
-  public String getPicture() {
+  public boolean hasPhotos() {
 
-    return picture;
+    return photos != null && !photos.isEmpty();
+  }
+
+  public List<ScimPhoto> getPhotos() {
+
+    return photos;
   }
 
   public String getTitle() {
@@ -236,6 +247,16 @@ public class ScimUser extends ScimResource {
         && !indigoUser.getSamlIds().isEmpty();
   }
 
+  public boolean hasEmails() {
+
+    return emails != null && !emails.isEmpty();
+  }
+
+  public boolean hasName() {
+
+    return name != null;
+  }
+
   public static Builder builder(String username) {
 
     return new Builder(username);
@@ -254,7 +275,6 @@ public class ScimUser extends ScimResource {
     private String displayName;
     private String nickName;
     private String profileUrl;
-    private String picture;
     private String title;
     private String userType;
     private String preferredLanguage;
@@ -265,6 +285,7 @@ public class ScimUser extends ScimResource {
     private List<ScimEmail> emails = new ArrayList<ScimEmail>();
     private Set<ScimGroupRef> groups = new LinkedHashSet<ScimGroupRef>();
     private List<ScimAddress> addresses = new ArrayList<ScimAddress>();
+    private List<ScimPhoto> photos = new ArrayList<ScimPhoto>();
     private List<ScimX509Certificate> x509Certificates = new ArrayList<ScimX509Certificate>();
     private ScimIndigoUser indigoUser;
 
@@ -326,12 +347,6 @@ public class ScimUser extends ScimResource {
       return this;
     }
 
-    public Builder picture(String picture) {
-
-      this.picture = picture;
-      return this;
-    }
-
     public Builder title(String title) {
 
       this.title = title;
@@ -385,6 +400,20 @@ public class ScimUser extends ScimResource {
     public Builder buildName(String givenName, String familyName) {
 
       this.name = ScimName.builder().givenName(givenName).familyName(familyName).build();
+      return this;
+    }
+
+    public Builder buildPhoto(String value) {
+
+      photos.add(ScimPhoto.builder().value(value).build());
+      return this;
+    }
+
+    public Builder addPhoto(ScimPhoto scimPhoto) {
+
+      Preconditions.checkNotNull(scimPhoto, "Null photo");
+
+      photos.add(scimPhoto);
       return this;
     }
 

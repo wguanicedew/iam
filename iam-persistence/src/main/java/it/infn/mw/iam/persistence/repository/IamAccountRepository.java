@@ -38,11 +38,18 @@ public interface IamAccountRepository extends PagingAndSortingRepository<IamAcco
   Optional<IamAccount> findByEmail(@Param("emailAddress") String emailAddress);
 
   @Query("select a from IamAccount a where a.username = :username and a.uuid != :uuid")
-  Optional<IamAccount> findByUsernameWithDifferentId(@Param("username") String username,
+  Optional<IamAccount> findByUsernameWithDifferentUUID(@Param("username") String username,
+      @Param("uuid") String uuid);
+
+  @Query("select a from IamAccount a join a.userInfo ui where ui.email = :emailAddress and a.uuid != :uuid")
+  Optional<IamAccount> findByEmailWithDifferentUUID(@Param("emailAddress") String emailAddress,
       @Param("uuid") String uuid);
 
   @Query("select a from IamAccount a join a.x509Certificates c where c.certificateSubject = :subject")
   Optional<IamAccount> findByCertificateSubject(@Param("subject") String subject);
+
+  @Query("select a from IamAccount a join a.x509Certificates c where c.certificate = :certificate")
+  Optional<IamAccount> findByCertificate(@Param("certificate") String certificate);
 
   @Query("select a from IamAccount a join a.groups ag where ag.id = :groupId")
   List<IamAccount> findByGroupId(@Param("groupId") Long groupId);
@@ -50,4 +57,7 @@ public interface IamAccountRepository extends PagingAndSortingRepository<IamAcco
   Optional<IamAccount> findByConfirmationKey(@Param("confirmationKey") String confirmationKey);
 
   Optional<IamAccount> findByResetKey(@Param("resetKey") String resetKey);
+
+  @Query("select a from IamAccount a join a.authorities auth where auth.authority = :authority")
+  List<IamAccount> findByAuthority(@Param("authority") String authority);
 }

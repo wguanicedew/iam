@@ -23,6 +23,7 @@ public class RegistrationUtils {
     request.setEmail(email);
     request.setUsername(username);
     request.setNotes("Some short notes...");
+    request.setPassword("password");
 
     // @formatter:off
     RegistrationRequestDto reg = given()
@@ -94,12 +95,12 @@ public class RegistrationUtils {
     // @formatter:on
   }
 
-  public static void approveRequest(String uuid) {
-    makeDecision(uuid, IamRegistrationRequestStatus.APPROVED);
+  public static RegistrationRequestDto approveRequest(String uuid) {
+    return requestDecision(uuid, IamRegistrationRequestStatus.APPROVED);
   }
 
-  public static void rejectRequest(String uuid) {
-    makeDecision(uuid, IamRegistrationRequestStatus.REJECTED);
+  public static RegistrationRequestDto rejectRequest(String uuid) {
+    return requestDecision(uuid, IamRegistrationRequestStatus.REJECTED);
   }
 
   public static void changePassword(String resetKey, String newPassword) {
@@ -118,11 +119,13 @@ public class RegistrationUtils {
     // @formatter:on
   }
 
-  private static void makeDecision(String uuid, IamRegistrationRequestStatus decision) {
+  private static RegistrationRequestDto requestDecision(String uuid,
+      IamRegistrationRequestStatus decision) {
     String accessToken =
         TestUtils.getAccessToken("registration-client", "secret", "registration:write");
 
     // @formatter:off
+    RegistrationRequestDto req =
     given()
       .port(8080)
       .auth()
@@ -136,8 +139,10 @@ public class RegistrationUtils {
       .log()
         .body(true)
       .statusCode(HttpStatus.OK.value())
-    ;
+      .extract().as(RegistrationRequestDto.class);
     // @formatter:on
+
+    return req;
   }
 
 }

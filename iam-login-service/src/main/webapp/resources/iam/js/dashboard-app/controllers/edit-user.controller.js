@@ -1,78 +1,128 @@
-'use strict';
+(function() {
+  'use strict';
 
-angular.module('dashboardApp').controller('EditUserController',
-		EditUserController);
+  angular.module('dashboardApp')
+      .controller('EditUserController', EditUserController);
 
-EditUserController.$inject = [ '$scope', '$state', '$uibModalInstance',
-		'Utils', 'scimFactory', 'user' ];
+  EditUserController.$inject = [
+    '$scope', '$rootScope', '$state', '$uibModalInstance', 'Utils',
+    'scimFactory', 'user'
+  ];
 
-function EditUserController($scope, $state, $uibModalInstance, Utils,
-		scimFactory, user) {
+  function EditUserController(
+      $scope, $rootScope, $state, $uibModalInstance, Utils, scimFactory, user) {
+    var editUserCtrl = this;
 
-	var editUserCtrl = this;
-	
-	editUserCtrl.userToEdit = user;
+    editUserCtrl.oUser = user;
+    editUserCtrl.id = user.id;
 
-	editUserCtrl.submit = submit;
-	editUserCtrl.reset = reset;
-	editUserCtrl.dismiss = dismiss;
+    editUserCtrl.submit = submit;
+    editUserCtrl.reset = reset;
+    editUserCtrl.dismiss = dismiss;
+    editUserCtrl.isSubmitDisabled = isSubmitDisabled;
 
-	editUserCtrl.reset();
+    editUserCtrl.reset();
 
-	function submit() {
+    function submit() {
+      editUserCtrl.enabled = false;
 
-		editUserCtrl.enabled = false;
+      var operations = [];
 
-		var scimUser = {};
+      // remove picture if it's dirty and empty
+      if ($scope.userUpdateForm.picture.$dirty && !editUserCtrl.eUser.picture) {
+        operations.push(
+            {op: 'remove', value: {photos: editUserCtrl.oUser.photos}});
+      }
 
-		scimUser.id = user.id;
-		scimUser.schemas = [];
-		scimUser.schemas[0] = "urn:ietf:params:scim:schemas:core:2.0:User";
-		scimUser.displayName = editUserCtrl.user.givenName + " "
-				+ editUserCtrl.user.familyName;
-		scimUser.name = {
-			givenName : editUserCtrl.user.givenName,
-			familyName : editUserCtrl.user.familyName,
-			middleName : ""
-		};
-		scimUser.emails = [ {
-			type : "work",
-			value : editUserCtrl.user.email,
-			primary : true
-		} ];
-		scimUser.userName = editUserCtrl.user.userName;
-		scimUser.active = true;
-		scimUser.picture = editUserCtrl.user.picture;
+      if ($scope.userUpdateForm.name.$dirty ||
+          $scope.userUpdateForm.surname.$dirty) {
+        operations.push({
+          op: 'replace',
+          value: {
+            displayName:
+                editUserCtrl.eUser.name + ' ' + editUserCtrl.eUser.surname,
+            name: {
+              givenName: editUserCtrl.eUser.name,
+              familyName: editUserCtrl.eUser.surname,
+              middleName: ''
+            }
+          }
+        });
+      }
+      if ($scope.userUpdateForm.email.$dirty) {
+        operations.push({
+          op: 'replace',
+          value: {
+            emails: [{
+              type: 'work',
+              value: editUserCtrl.eUser.email,
+              primary: true
+            }]
+          }
+        });
+      }
+      if ($scope.userUpdateForm.username.$dirty) {
+        operations.push(
+            {op: 'replace', value: {userName: editUserCtrl.eUser.username}});
+      }
+      if ($scope.userUpdateForm.picture.$dirty) {
+        operations.push({
+          op: 'replace',
+          value:
+              {photos: [{type: 'photo', value: editUserCtrl.eUser.picture}]}
+        });
+      }
 
-		console.info("Adding user ... ", scimUser);
+      console.info('Operations ... ', operations);
 
-		scimFactory.updateUser(scimUser).then(
-			function(response) {
-				$uibModalInstance.close(response);
-				editUserCtrl.enabled = true;
-			},
-			function(error) {
-				$scope.operationResult = Utils.buildErrorOperationResult(error);
-				editUserCtrl.enabled = true;
-			});
-	}
+      var promise = null;
 
-	function reset() {
-		editUserCtrl.user = {
-				givenName : user.name.givenName,
-				familyName : user.name.familyName,
-				userName : user.userName,
-				email : user.emails[0].value,
-				picture : user.picture,
-				id: user.id
-			};
-		if ($scope.userUpdateForm) {
-			$scope.userUpdateForm.$setPristine();
-		}
-		editUserCtrl.enabled = true;
-	}
+      if (Utils.isMe(user.id)) {
+        promise = scimFactory.updateMe(operations);
+      } else {
+        promise = scimFactory.updateUser(user.id, operations);
+      }
 
-	function dismiss() {
-		$uibModalInstance.dismiss('Cancel');
-	}
-}
+      promise
+          .then(function(response) {
+            if (Utils.isMe(user.id)) {
+              $rootScope.reloadInfo();
+            }
+
+            $uibModalInstance.close(response);
+            editUserCtrl.enabled = true;
+
+          })
+          .catch(function(error) {
+            $scope.operationResult = Utils.buildErrorOperationResult(error);
+            editUserCtrl.enabled = true;
+          });
+    }
+
+    function reset() {
+      editUserCtrl.eUser = {
+        name: editUserCtrl.oUser.name.givenName,
+        surname: editUserCtrl.oUser.name.familyName,
+        picture:
+            editUserCtrl.oUser.photos ? editUserCtrl.oUser.photos[0].value : '',
+        email: editUserCtrl.oUser.emails[0].value,
+        username: editUserCtrl.oUser.userName
+      };
+      if ($scope.userUpdateForm) {
+        $scope.userUpdateForm.$setPristine();
+      }
+      editUserCtrl.enabled = true;
+    }
+
+    function dismiss() { $uibModalInstance.dismiss('Cancel'); }
+
+    function isSubmitDisabled() {
+      return !editUserCtrl.enabled || !$scope.userUpdateForm.$dirty ||
+          $scope.userUpdateForm.name.$invalid ||
+          $scope.userUpdateForm.surname.$invalid ||
+          $scope.userUpdateForm.email.$invalid ||
+          $scope.userUpdateForm.username.$invalid ||
+          $scope.userUpdateForm.picture.$invalid;
+    }
+  }
+})();

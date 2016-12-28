@@ -2,9 +2,9 @@ package it.infn.mw.iam.config;
 
 import org.mitre.oauth2.service.OAuth2TokenEntityService;
 import org.mitre.oauth2.web.CorsFilter;
-import org.mitre.openid.connect.web.AuthenticationTimeStamper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.embedded.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,14 +26,18 @@ import org.springframework.security.oauth2.provider.authentication.OAuth2Authent
 import org.springframework.security.oauth2.provider.client.ClientCredentialsTokenEndpointFilter;
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
 import org.springframework.security.oauth2.provider.expression.OAuth2WebSecurityExpressionHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.context.SecurityContextPersistenceFilter;
 import org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter;
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.filter.GenericFilterBean;
 
+import it.infn.mw.iam.authn.RootIsDashboardSuccessHandler;
+import it.infn.mw.iam.authn.TimestamperSuccessHandler;
 import it.infn.mw.iam.authn.oidc.OidcAccessDeniedHandler;
 import it.infn.mw.iam.authn.oidc.OidcAuthenticationProvider;
 import it.infn.mw.iam.authn.oidc.OidcClientFilter;
@@ -42,12 +46,14 @@ import it.infn.mw.iam.authn.oidc.OidcClientFilter;
 @EnableWebSecurity
 public class SecurityConfig {
 
+
+
   @Configuration
   @Order(100)
   public static class UserLoginConfig extends WebSecurityConfigurerAdapter {
 
-    @Autowired
-    private AuthenticationTimeStamper authenticationTimeStamper;
+    @Value("${iam.baseUrl}")
+    private String iamBaseUrl;
 
     @Autowired
     private OAuth2WebSecurityExpressionHandler oAuth2WebSecurityExpressionHandler;
@@ -84,20 +90,23 @@ public class SecurityConfig {
       // @formatter:off
 
       http.requestMatchers()
-        .antMatchers("/", "/login**", "/logout", "/authorize", "/manage/**", "/dashboard**")
+        .antMatchers("/", "/login**", "/logout", "/authorize", "/manage/**", "/dashboard**", "/register",
+            "/reset-session")
         .and()
         .sessionManagement()
           .enableSessionUrlRewriting(false)
         .and()
           .authorizeRequests()
             .antMatchers("/login**", "/webjars/**").permitAll()
-          .antMatchers("/authorize**").permitAll()
-          .antMatchers("/").authenticated()
+            .antMatchers("/register").permitAll()
+            .antMatchers("/authorize**").permitAll()
+            .antMatchers("/reset-session").permitAll()
+            .antMatchers("/").authenticated()
         .and()
           .formLogin()
             .loginPage("/login")
             .failureUrl("/login?error=failure")
-            .successHandler(authenticationTimeStamper)
+            .successHandler(successHandler())
         .and()
           .exceptionHandling()
             .accessDeniedHandler(new OidcAccessDeniedHandler())
@@ -117,10 +126,17 @@ public class SecurityConfig {
 
       return new OAuth2WebSecurityExpressionHandler();
     }
+
+    public AuthenticationSuccessHandler successHandler() {
+
+      return new TimestamperSuccessHandler(
+          new RootIsDashboardSuccessHandler(iamBaseUrl, new HttpSessionRequestCache()));
+    }
   }
 
   @Configuration
   @Order(105)
+  @Profile("google")
   public static class ExternalOidcLogin extends WebSecurityConfigurerAdapter {
 
     @Autowired
@@ -131,7 +147,7 @@ public class SecurityConfig {
     OidcAuthenticationProvider authProvider;
 
     @Autowired
-    @Qualifier("openIdConnectAuthenticationFilter")
+    @Qualifier("OIDCAuthenticationFilter")
     private OidcClientFilter oidcFilter;
 
     @Override
@@ -140,7 +156,7 @@ public class SecurityConfig {
       return oidcAuthManager;
     }
 
-    @Bean(name = "ExternalAuthenticationEntryPoint")
+    // @Bean(name = "ExternalAuthenticationEntryPoint")
     public LoginUrlAuthenticationEntryPoint authenticationEntryPoint() {
 
       return new LoginUrlAuthenticationEntryPoint("/openid_connect_login");
@@ -156,12 +172,19 @@ public class SecurityConfig {
     protected void configure(final HttpSecurity http) throws Exception {
 
       // @formatter:off
-      http.antMatcher("/openid_connect_login**").exceptionHandling()
+      http
+	.antMatcher("/openid_connect_login**")
+	.exceptionHandling()
           .authenticationEntryPoint(authenticationEntryPoint())
-          .accessDeniedHandler(new OidcAccessDeniedHandler()).and()
+	  .accessDeniedHandler(new OidcAccessDeniedHandler())
+	.and()
           .addFilterAfter(oidcFilter, SecurityContextPersistenceFilter.class).authorizeRequests()
-          .antMatchers("/openid_connect_login**").permitAll().and().sessionManagement()
-          .enableSessionUrlRewriting(false).sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
+	  .antMatchers("/openid_connect_login**")
+	    .permitAll()
+	.and()
+	  .sessionManagement()
+	    .enableSessionUrlRewriting(false)
+	    .sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
       // @formatter:on
     }
   }
@@ -499,6 +522,111 @@ public class SecurityConfig {
             .csrf()
               .disable();
       // @formatter:on
+    }
+  }
+
+  @Configuration
+  @Order(20)
+  public static class AuthnInfoEndpointConfig extends WebSecurityConfigurerAdapter {
+    @Autowired
+    private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+      http.antMatcher("/iam/authn-info/**")
+        .exceptionHandling()
+        .authenticationEntryPoint(authenticationEntryPoint)
+        .and()
+        .sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.NEVER)
+        .and()
+        .authorizeRequests()
+        .antMatchers("/iam/authn-info/**")
+        .authenticated();
+    }
+
+  }
+
+  @Configuration
+  @Order(21)
+  public static class AccountLinkingEndpointConfig extends WebSecurityConfigurerAdapter {
+    @Autowired
+    private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+      http.antMatcher("/iam/account-linking/**")
+        .exceptionHandling()
+        .authenticationEntryPoint(authenticationEntryPoint)
+        .and()
+        .sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.NEVER)
+        .and()
+        .csrf()
+        .disable()
+        .authorizeRequests()
+        .antMatchers("/iam/account-linking/**")
+        .authenticated();
+    }
+  }
+
+  @Configuration
+  @Order(22)
+  public static class AccountAuthorityEndpointConfig extends WebSecurityConfigurerAdapter {
+    @Autowired
+    private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+      http.requestMatchers()
+        .antMatchers("/iam/account/**", "/iam/me/**")
+        .and()
+        .exceptionHandling()
+        .authenticationEntryPoint(authenticationEntryPoint)
+        .and()
+        .sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.NEVER)
+        .and()
+        .authorizeRequests()
+        .antMatchers("/iam/account/**", "/iam/me/**")
+        .authenticated()
+        .and()
+        .csrf()
+        .disable();
+    }
+  }
+
+  @Configuration
+  @Order(23)
+  public static class PasswordUpdateApiEndpointConfig extends WebSecurityConfigurerAdapter {
+
+    @Autowired
+    private OAuth2AuthenticationProcessingFilter resourceFilter;
+
+    @Autowired
+    private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
+
+    @Autowired
+    private CorsFilter corsFilter;
+
+    @Override
+    protected void configure(final HttpSecurity http) throws Exception {
+
+      http.antMatcher("/iam/password-update")
+        .exceptionHandling()
+        .authenticationEntryPoint(authenticationEntryPoint)
+        .and()
+        .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
+        .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
+        .sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.NEVER)
+        .and()
+        .authorizeRequests()
+        .antMatchers("/iam/password-update")
+        .authenticated()
+        .and()
+        .csrf()
+        .disable();
     }
   }
 

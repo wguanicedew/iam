@@ -34,7 +34,7 @@ import it.infn.mw.iam.api.scim.model.ScimSshKey;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.test.ScimRestUtils;
 import it.infn.mw.iam.test.TestUtils;
-import it.infn.mw.iam.util.JacksonUtils;
+import it.infn.mw.iam.test.util.JacksonUtils;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = IamLoginService.class)
@@ -293,7 +293,7 @@ public class ScimUserProvisioningTests {
     restUtils
       .doPut(lennonCreationResult.getMeta().getLocation(), lennonWantsToBeMcCartney,
           HttpStatus.CONFLICT)
-      .body("detail", containsString("userName is already mapped to another user"));
+      .body("detail", containsString("username paul_mccartney already assigned to another user"));
 
     restUtils.doDelete(lennonCreationResult.getMeta().getLocation());
     restUtils.doDelete(mccartneyCreationResult.getMeta().getLocation());
@@ -353,7 +353,7 @@ public class ScimUserProvisioningTests {
       .build();
 
     restUtils.doPost("/scim/Users/", anotherUser, HttpStatus.CONFLICT).body("detail",
-        equalTo("OIDC id (urn:oidc:test:issuer,1234) is already mapped to another user"));
+        containsString("already bounded to another user"));
 
     restUtils.doDelete(creationResult.getMeta().getLocation());
 
@@ -447,8 +447,7 @@ public class ScimUserProvisioningTests {
       .build();
 
     restUtils.doPost("/scim/Users/", anotherUser, HttpStatus.CONFLICT).body("detail",
-        equalTo("ssh key " + TestUtils.sshKeys.get(0).fingerprintSHA256
-            + " is already mapped to another user"));
+        containsString("already bounded to another user"));
 
     restUtils.doDelete(creationResult.getMeta().getLocation());
 
@@ -614,7 +613,7 @@ public class ScimUserProvisioningTests {
       .build();
 
     restUtils.doPut(user0.getMeta().getLocation(), updatedUser0, HttpStatus.CONFLICT).body("detail",
-        containsString("email already assigned to an existing user"));
+        containsString("email user1@test.org already assigned to another user"));
 
     restUtils.deleteUsers(user0, user1);
   }
