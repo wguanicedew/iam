@@ -85,7 +85,7 @@ public class ScimMeController implements ApplicationEventPublisherAware {
   }
 
   @PreAuthorize("#oauth2.hasScope('scim:read') or hasRole('USER')")
-  @RequestMapping(method = RequestMethod.GET)
+  @RequestMapping(method = RequestMethod.GET, produces = ScimConstants.SCIM_CONTENT_TYPE)
   public ScimUser whoami() {
 
     IamAccount account = getCurrentUserAccount();
