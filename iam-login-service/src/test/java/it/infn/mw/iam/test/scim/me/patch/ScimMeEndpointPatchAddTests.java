@@ -1,5 +1,6 @@
 package it.infn.mw.iam.test.scim.me.patch;
 
+import static it.infn.mw.iam.test.SshKeyUtils.sshKeys;
 import static it.infn.mw.iam.test.TestUtils.passwordTokenGetter;
 
 import org.junit.After;
@@ -94,7 +95,8 @@ public class ScimMeEndpointPatchAddTests {
     return doPatch(patchRequest, HttpStatus.NO_CONTENT);
   }
 
-  private ValidatableResponse doPatch(ScimUserPatchRequest patchRequest, HttpStatus expectedHttpStatus) {
+  private ValidatableResponse doPatch(ScimUserPatchRequest patchRequest,
+      HttpStatus expectedHttpStatus) {
 
     return userRestUtils.doPatch("/scim/Me", patchRequest, expectedHttpStatus);
   }
@@ -245,8 +247,9 @@ public class ScimMeEndpointPatchAddTests {
     ScimOidcId NEW_TESTUSER_OIDCID =
         ScimOidcId.builder().issuer("new_test_issuer").subject("new_user_subject").build();
 
-    ScimUserPatchRequest patchRequest =
-        ScimUserPatchRequest.builder().add(ScimUser.builder().addOidcId(NEW_TESTUSER_OIDCID).build()).build();
+    ScimUserPatchRequest patchRequest = ScimUserPatchRequest.builder()
+      .add(ScimUser.builder().addOidcId(NEW_TESTUSER_OIDCID).build())
+      .build();
 
     doPatch(patchRequest, HttpStatus.BAD_REQUEST);
   }
@@ -254,11 +257,11 @@ public class ScimMeEndpointPatchAddTests {
   @Test
   public void testPatchAddSamlIdNotSupported() {
 
-    ScimSamlId TESTUSER_SAMLID =
-        ScimSamlId.builder().idpId("AA").userId("BB").build();
+    ScimSamlId TESTUSER_SAMLID = ScimSamlId.builder().idpId("AA").userId("BB").build();
 
-    ScimUserPatchRequest patchRequest =
-        ScimUserPatchRequest.builder().add(ScimUser.builder().addSamlId(TESTUSER_SAMLID).build()).build();
+    ScimUserPatchRequest patchRequest = ScimUserPatchRequest.builder()
+      .add(ScimUser.builder().addSamlId(TESTUSER_SAMLID).build())
+      .build();
 
     doPatch(patchRequest, HttpStatus.BAD_REQUEST);
   }
@@ -267,10 +270,11 @@ public class ScimMeEndpointPatchAddTests {
   public void testPatchAddSsHKeyNotSupported() {
 
     ScimSshKey NEW_SSH_KEY =
-        ScimSshKey.builder().display("ssh-key").value(TestUtils.sshKeys.get(0).key).build();
+        ScimSshKey.builder().display("ssh-key").value(sshKeys.get(0).key).build();
 
-    ScimUserPatchRequest patchRequest =
-        ScimUserPatchRequest.builder().add(ScimUser.builder().addSshKey(NEW_SSH_KEY).build()).build();
+    ScimUserPatchRequest patchRequest = ScimUserPatchRequest.builder()
+      .add(ScimUser.builder().addSshKey(NEW_SSH_KEY).build())
+      .build();
 
     doPatch(patchRequest, HttpStatus.BAD_REQUEST);
   }
@@ -279,12 +283,12 @@ public class ScimMeEndpointPatchAddTests {
   @Ignore
   public void testPatchAddX509CertificateNotSupported() {
 
-//    ScimX509Certificate NEW_X509_CERT =
-//        ScimX509Certificate.builder().display("x509-cert").value(TestUtils.x509Certs.get(0).certificate).build();
-//
-//    ScimUserPatchRequest patchRequest =
-//        ScimUserPatchRequest.builder().add(ScimUser.builder().addX509Certificate(NEW_X509_CERT).build()).build();
-//
-//    doPatch(patchRequest, HttpStatus.BAD_REQUEST);
+    // ScimX509Certificate NEW_X509_CERT =
+    // ScimX509Certificate.builder().display("x509-cert").value(TestUtils.x509Certs.get(0).certificate).build();
+    //
+    // ScimUserPatchRequest patchRequest =
+    // ScimUserPatchRequest.builder().add(ScimUser.builder().addX509Certificate(NEW_X509_CERT).build()).build();
+    //
+    // doPatch(patchRequest, HttpStatus.BAD_REQUEST);
   }
 }

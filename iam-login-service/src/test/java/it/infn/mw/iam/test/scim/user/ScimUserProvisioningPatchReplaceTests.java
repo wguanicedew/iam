@@ -1,5 +1,9 @@
 package it.infn.mw.iam.test.scim.user;
 
+import static it.infn.mw.iam.test.OidcIdUtils.oidcIds;
+import static it.infn.mw.iam.test.SamlIdUtils.samlIds;
+import static it.infn.mw.iam.test.SshKeyUtils.sshKeys;
+import static it.infn.mw.iam.test.TestUtils.getAccessToken;
 import static org.hamcrest.Matchers.containsString;
 
 import java.util.ArrayList;
@@ -24,7 +28,6 @@ import it.infn.mw.iam.api.scim.model.ScimSshKey;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.model.ScimUserPatchRequest;
 import it.infn.mw.iam.test.ScimRestUtils;
-import it.infn.mw.iam.test.TestUtils;
 import it.infn.mw.iam.test.util.JacksonUtils;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -45,37 +48,39 @@ public class ScimUserProvisioningPatchReplaceTests {
 
   private void initTestUsers() {
 
-    testUsers.add(restUtils
-      .doPost("/scim/Users/",
-          ScimUser.builder("john_lennon")
-            .buildEmail("lennon@email.test")
-            .buildName("John", "Lennon")
-            .addOidcId(ScimOidcId.builder()
-              .issuer(TestUtils.oidcIds.get(0).issuer)
-              .subject(TestUtils.oidcIds.get(0).subject)
-              .build())
-            .addSshKey(ScimSshKey.builder()
-              .value(TestUtils.sshKeys.get(0).key)
-              .fingerprint(TestUtils.sshKeys.get(0).fingerprintSHA256)
-              .primary(true)
-              .build())
-            .addSshKey(ScimSshKey.builder()
-              .value(TestUtils.sshKeys.get(1).key)
-              .fingerprint(TestUtils.sshKeys.get(1).fingerprintSHA256)
-              .primary(false)
-              .build())
-            .addSamlId(ScimSamlId.builder()
-              .idpId(TestUtils.samlIds.get(0).idpId)
-              .userId(TestUtils.samlIds.get(0).userId)
-              .build())
-            .build())
-      .extract().as(ScimUser.class));
+    testUsers.add(
+        restUtils
+          .doPost("/scim/Users/",
+              ScimUser.builder("john_lennon")
+                .buildEmail("lennon@email.test")
+                .buildName("John", "Lennon")
+                .addOidcId(ScimOidcId.builder()
+                  .issuer(oidcIds.get(0).issuer)
+                  .subject(oidcIds.get(0).subject)
+                  .build())
+                .addSshKey(ScimSshKey.builder()
+                  .value(sshKeys.get(0).key)
+                  .fingerprint(sshKeys.get(0).fingerprintSHA256)
+                  .primary(true)
+                  .build())
+                .addSshKey(ScimSshKey.builder()
+                  .value(sshKeys.get(1).key)
+                  .fingerprint(sshKeys.get(1).fingerprintSHA256)
+                  .primary(false)
+                  .build())
+                .addSamlId(ScimSamlId.builder()
+                  .idpId(samlIds.get(0).idpId)
+                  .userId(samlIds.get(0).userId)
+                  .build())
+                .build())
+          .extract()
+          .as(ScimUser.class));
   }
 
   @Before
   public void setupTest() {
 
-    accessToken = TestUtils.getAccessToken("scim-client-rw", "secret", "scim:read scim:write");
+    accessToken = getAccessToken("scim-client-rw", "secret", "scim:read scim:write");
     restUtils = ScimRestUtils.getInstance(accessToken);
 
     initTestUsers();

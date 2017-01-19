@@ -1,5 +1,8 @@
 package it.infn.mw.iam.test.scim.user;
 
+import static it.infn.mw.iam.test.OidcIdUtils.oidcIds;
+import static it.infn.mw.iam.test.SamlIdUtils.samlIds;
+import static it.infn.mw.iam.test.SshKeyUtils.sshKeys;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 
@@ -55,41 +58,51 @@ public class ScimUserProvisioningPatchRemoveTests {
 
   private void initTestUsers() {
 
-    testUsers.add(restUtils.doPost("/scim/Users/", ScimUser.builder("john_lennon")
-      .buildEmail("lennon@email.test")
-      .buildName("John", "Lennon")
-      .addOidcId(ScimOidcId.builder()
-        .issuer(TestUtils.oidcIds.get(0).issuer)
-        .subject(TestUtils.oidcIds.get(0).subject)
-        .build())
-      .addSshKey(ScimSshKey.builder()
-        .value(TestUtils.sshKeys.get(0).key)
-        .fingerprint(TestUtils.sshKeys.get(0).fingerprintSHA256)
-        .primary(true)
-        .build())
-      .addSamlId(ScimSamlId.builder()
-        .idpId(TestUtils.samlIds.get(0).idpId)
-        .userId(TestUtils.samlIds.get(0).userId)
-        .build())
-      .build()).extract().as(ScimUser.class));
+    testUsers.add(
+        restUtils
+          .doPost("/scim/Users/",
+              ScimUser.builder("john_lennon")
+                .buildEmail("lennon@email.test")
+                .buildName("John", "Lennon")
+                .addOidcId(ScimOidcId.builder()
+                  .issuer(oidcIds.get(0).issuer)
+                  .subject(oidcIds.get(0).subject)
+                  .build())
+                .addSshKey(ScimSshKey.builder()
+                  .value(sshKeys.get(0).key)
+                  .fingerprint(sshKeys.get(0).fingerprintSHA256)
+                  .primary(true)
+                  .build())
+                .addSamlId(ScimSamlId.builder()
+                  .idpId(samlIds.get(0).idpId)
+                  .userId(samlIds.get(0).userId)
+                  .build())
+                .build())
+          .extract()
+          .as(ScimUser.class));
 
-    testUsers.add(restUtils.doPost("/scim/Users/", ScimUser.builder("abraham_lincoln")
-      .buildEmail("lincoln@email.test")
-      .buildName("Abraham", "Lincoln")
-      .addOidcId(ScimOidcId.builder()
-        .issuer(TestUtils.oidcIds.get(1).issuer)
-        .subject(TestUtils.oidcIds.get(1).subject)
-        .build())
-      .addSshKey(ScimSshKey.builder()
-        .value(TestUtils.sshKeys.get(1).key)
-        .fingerprint(TestUtils.sshKeys.get(1).fingerprintSHA256)
-        .primary(true)
-        .build())
-      .addSamlId(ScimSamlId.builder()
-        .idpId(TestUtils.samlIds.get(1).idpId)
-        .userId(TestUtils.samlIds.get(1).userId)
-        .build())
-      .build()).extract().as(ScimUser.class));
+    testUsers.add(
+        restUtils
+          .doPost("/scim/Users/",
+              ScimUser.builder("abraham_lincoln")
+                .buildEmail("lincoln@email.test")
+                .buildName("Abraham", "Lincoln")
+                .addOidcId(ScimOidcId.builder()
+                  .issuer(oidcIds.get(1).issuer)
+                  .subject(oidcIds.get(1).subject)
+                  .build())
+                .addSshKey(ScimSshKey.builder()
+                  .value(sshKeys.get(1).key)
+                  .fingerprint(sshKeys.get(1).fingerprintSHA256)
+                  .primary(true)
+                  .build())
+                .addSamlId(ScimSamlId.builder()
+                  .idpId(samlIds.get(1).idpId)
+                  .userId(samlIds.get(1).userId)
+                  .build())
+                .build())
+          .extract()
+          .as(ScimUser.class));
   }
 
   @Before

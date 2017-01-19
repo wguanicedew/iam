@@ -1,7 +1,10 @@
 package it.infn.mw.iam.test.scim.core.provisioning.user;
 
-import org.hamcrest.Matchers;
-import org.junit.Assert;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +14,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import it.infn.mw.iam.IamLoginService;
-import it.infn.mw.iam.api.scim.converter.UserConverter;
 import it.infn.mw.iam.api.scim.model.ScimEmail;
 import it.infn.mw.iam.api.scim.model.ScimName;
 import it.infn.mw.iam.api.scim.model.ScimOidcId;
@@ -22,7 +24,7 @@ import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.provisioning.ScimUserProvisioning;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
-import it.infn.mw.iam.test.TestUtils;
+import it.infn.mw.iam.test.SshKeyUtils;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = IamLoginService.class)
@@ -31,12 +33,9 @@ public class ScimUserProvisioningTests {
 
   @Autowired
   private ScimUserProvisioning userService;
-  
+
   @Autowired
   private IamAccountRepository accountRepo;
-  
-  @Autowired
-  private UserConverter userConverter;
 
   @Autowired
   private PasswordEncoder passwordEncoder;
@@ -48,13 +47,11 @@ public class ScimUserProvisioningTests {
   final ScimPhoto TESTUSER_PHOTO = ScimPhoto.builder().value("http://site.org/user.png").build();
   final ScimOidcId TESTUSER_OIDCID =
       ScimOidcId.builder().issuer("urn:oidc:test:issuer").subject("1234").build();
-  final ScimSamlId TESTUSER_SAMLID = ScimSamlId.builder().idpId("idpID")
-      .userId("userId")
-      .build();
+  final ScimSamlId TESTUSER_SAMLID = ScimSamlId.builder().idpId("idpID").userId("userId").build();
   final ScimSshKey TESTUSER_SSHKEY = ScimSshKey.builder()
     .primary(true)
     .display("Personal Key")
-    .value(TestUtils.sshKeys.get(0).key)
+    .value(SshKeyUtils.sshKeys.get(0).key)
     .build();
 
   @Test
@@ -73,49 +70,37 @@ public class ScimUserProvisioningTests {
       .build();
 
     userService.create(scimUser);
-    
+
     IamAccount iamAccount = accountRepo.findByUsername(scimUser.getUserName())
-        .orElseThrow(() -> new AssertionError("Expected user not found by repo"));
+      .orElseThrow(() -> new AssertionError("Expected user not found by repo"));
 
-    Assert.assertNotNull(iamAccount);
+    assertNotNull(iamAccount);
 
-    Assert.assertTrue(iamAccount.isActive());
+    assertThat(iamAccount.isActive(), equalTo(true));
 
-    Assert.assertThat(iamAccount.getUsername(), Matchers.equalTo(TESTUSER_USERNAME));
+    assertThat(iamAccount.getUsername(), equalTo(TESTUSER_USERNAME));
 
-    Assert.assertTrue(passwordEncoder.matches(TESTUSER_PASSWORD, iamAccount.getPassword()));
+    assertTrue(passwordEncoder.matches(TESTUSER_PASSWORD, iamAccount.getPassword()));
 
-    Assert.assertThat(iamAccount.getUserInfo().getGivenName(),
-        Matchers.equalTo(TESTUSER_NAME.getGivenName()));
-    Assert.assertThat(iamAccount.getUserInfo().getMiddleName(),
-        Matchers.equalTo(TESTUSER_NAME.getMiddleName()));
-    Assert.assertThat(iamAccount.getUserInfo().getFamilyName(),
-        Matchers.equalTo(TESTUSER_NAME.getFamilyName()));
+    assertThat(iamAccount.getUserInfo().getGivenName(), equalTo(TESTUSER_NAME.getGivenName()));
+    assertThat(iamAccount.getUserInfo().getMiddleName(), equalTo(TESTUSER_NAME.getMiddleName()));
+    assertThat(iamAccount.getUserInfo().getFamilyName(), equalTo(TESTUSER_NAME.getFamilyName()));
 
-    Assert.assertThat(iamAccount.getUserInfo().getPicture(),
-        Matchers.equalTo(TESTUSER_PHOTO.getValue()));
+    assertThat(iamAccount.getUserInfo().getPicture(), equalTo(TESTUSER_PHOTO.getValue()));
 
-    Assert.assertThat(iamAccount.getUserInfo().getEmail(),
-        Matchers.equalTo(TESTUSER_EMAIL.getValue()));
+    assertThat(iamAccount.getUserInfo().getEmail(), equalTo(TESTUSER_EMAIL.getValue()));
 
-    Assert.assertThat(iamAccount.getOidcIds().get(0).getIssuer(),
-        Matchers.equalTo(TESTUSER_OIDCID.getIssuer()));
-    Assert.assertThat(iamAccount.getOidcIds().get(0).getSubject(),
-        Matchers.equalTo(TESTUSER_OIDCID.getSubject()));
+    assertThat(iamAccount.getOidcIds().get(0).getIssuer(), equalTo(TESTUSER_OIDCID.getIssuer()));
+    assertThat(iamAccount.getOidcIds().get(0).getSubject(), equalTo(TESTUSER_OIDCID.getSubject()));
 
-    Assert.assertThat(iamAccount.getSamlIds().get(0).getIdpId(),
-        Matchers.equalTo(TESTUSER_SAMLID.getIdpId()));
-    Assert.assertThat(iamAccount.getSamlIds().get(0).getUserId(),
-        Matchers.equalTo(TESTUSER_SAMLID.getUserId()));
+    assertThat(iamAccount.getSamlIds().get(0).getIdpId(), equalTo(TESTUSER_SAMLID.getIdpId()));
+    assertThat(iamAccount.getSamlIds().get(0).getUserId(), equalTo(TESTUSER_SAMLID.getUserId()));
 
-    Assert.assertThat(iamAccount.getSshKeys().get(0).getLabel(),
-        Matchers.equalTo(TESTUSER_SSHKEY.getDisplay()));
-    Assert.assertThat(iamAccount.getSshKeys().get(0).getFingerprint(),
-        Matchers.equalTo(TestUtils.sshKeys.get(0).fingerprintSHA256));
-    Assert.assertThat(iamAccount.getSshKeys().get(0).getValue(),
-        Matchers.equalTo(TESTUSER_SSHKEY.getValue()));
-    Assert.assertThat(iamAccount.getSshKeys().get(0).isPrimary(),
-        Matchers.equalTo(TESTUSER_SSHKEY.isPrimary()));
+    assertThat(iamAccount.getSshKeys().get(0).getLabel(), equalTo(TESTUSER_SSHKEY.getDisplay()));
+    assertThat(iamAccount.getSshKeys().get(0).getFingerprint(),
+        equalTo(SshKeyUtils.sshKeys.get(0).fingerprintSHA256));
+    assertThat(iamAccount.getSshKeys().get(0).getValue(), equalTo(TESTUSER_SSHKEY.getValue()));
+    assertThat(iamAccount.getSshKeys().get(0).isPrimary(), equalTo(TESTUSER_SSHKEY.isPrimary()));
 
     userService.delete(iamAccount.getUuid());
   }
