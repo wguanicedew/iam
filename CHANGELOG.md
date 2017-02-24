@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.6.0 (2017-2-27)
+
+This release provides improvements and bug fixes:
+
+- IAM now implements an audit log that keeps track of all interesting security
+  events (#79)
+- Password grant logins are now correctly logged (#98)
+- The MitreID logic for resolving user access and refresh token has been
+  replaced with a more efficient implementation (#94)
+- Audience restrictions can be enforced on tokens obtained through all
+  supported OAuth/OIDC flows (#92)
+- The tokens and site approval cleanup periods are now configurable (#96)
+
 ## 0.5.0 (2016-12-6)
 
 This release provides new functionality and bug fixes:
