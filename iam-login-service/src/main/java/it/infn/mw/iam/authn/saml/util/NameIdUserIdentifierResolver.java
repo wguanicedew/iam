@@ -7,7 +7,13 @@ import org.springframework.security.saml.SAMLCredential;
 
 import com.google.common.base.Verify;
 
-public class NameIdUserIdentifierResolver implements SamlUserIdentifierResolver {
+public class NameIdUserIdentifierResolver extends AbstractSamlUserIdentifierResolver{
+
+  public static final String NAMEID_RESOLVER = "nameID";
+  
+  public NameIdUserIdentifierResolver() {
+    super(NAMEID_RESOLVER);
+  }
 
   @Override
   public Optional<String> getUserIdentifier(SAMLCredential samlCredential) {

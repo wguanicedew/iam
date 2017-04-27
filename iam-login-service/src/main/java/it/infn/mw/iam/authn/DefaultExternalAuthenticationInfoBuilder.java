@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 import it.infn.mw.iam.authn.oidc.OidcExternalAuthenticationToken;
 import it.infn.mw.iam.authn.saml.SamlExternalAuthenticationToken;
-import it.infn.mw.iam.authn.saml.util.SamlIdResolvers;
+import it.infn.mw.iam.authn.saml.util.Saml2Attribute;
 
 @Component
 public class DefaultExternalAuthenticationInfoBuilder implements ExternalAuthenticationInfoBuilder {
@@ -40,16 +40,14 @@ public class DefaultExternalAuthenticationInfoBuilder implements ExternalAuthent
     result.put(TYPE_ATTR, SAML_TYPE);
 
     SAMLCredential cred = (SAMLCredential) token.getExternalAuthentication().getCredentials();
+    
     result.put("idpEntityId", cred.getRemoteEntityID());
 
-    // EPUID
-    if (cred.getAttributeAsString(SamlIdResolvers.EPUID_NAME) != null) {
-      result.put("epuid", cred.getAttributeAsString(SamlIdResolvers.EPUID_NAME));
-    }
-
-    // EPPN
-    if (cred.getAttributeAsString(SamlIdResolvers.EPPN_NAME) != null) {
-      result.put("eppn", cred.getAttributeAsString(SamlIdResolvers.EPPN_NAME));
+    for (Saml2Attribute attr: Saml2Attribute.values()){
+      String attrVal = cred.getAttributeAsString(attr.getAttributeName()); 
+      if ( attrVal != null) {
+        result.put(attr.name(), attrVal);
+      }
     }
 
     return result;
