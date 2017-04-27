@@ -8,6 +8,7 @@ import java.util.Date;
 
 import javax.persistence.EntityManager;
 
+import org.apache.commons.lang.time.DateUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mitre.oauth2.model.ClientDetailsEntity;
@@ -89,15 +90,20 @@ public class IamTokenRepositoryTests {
   public void testTokenResolutionCorrectlyEnforcesUsernameChecks() {
 
     buildAccessToken(loadTestClient(), TEST_347_USER);
+    Date currentTimestamp = new Date();
 
-    assertThat(accessTokenRepo.findValidAccessTokensForUser(TEST_346_USER), hasSize(0));
-    assertThat(refreshTokenRepo.findValidRefreshTokensForUser(TEST_346_USER), hasSize(0));
+    assertThat(accessTokenRepo.findValidAccessTokensForUser(TEST_346_USER, currentTimestamp),
+        hasSize(0));
+    assertThat(refreshTokenRepo.findValidRefreshTokensForUser(TEST_346_USER, currentTimestamp),
+        hasSize(0));
 
-    assertThat(accessTokenRepo.findValidAccessTokensForUser(TEST_347_USER), hasSize(2)); // access
-                                                                                         // token
+    assertThat(accessTokenRepo.findValidAccessTokensForUser(TEST_347_USER, currentTimestamp),
+        hasSize(2)); // access
+    // token
     // + ID token
 
-    assertThat(refreshTokenRepo.findValidRefreshTokensForUser(TEST_347_USER), hasSize(1));
+    assertThat(refreshTokenRepo.findValidRefreshTokensForUser(TEST_347_USER, currentTimestamp),
+        hasSize(1));
   }
 
   @Test
@@ -119,16 +125,38 @@ public class IamTokenRepositoryTests {
     tokenService.saveAccessToken(at.getIdToken());
     tokenService.saveRefreshToken(at.getRefreshToken());
 
-    assertThat(accessTokenRepo.findValidAccessTokensForUser(TEST_347_USER), hasSize(0));
-    assertThat(refreshTokenRepo.findValidRefreshTokensForUser(TEST_347_USER), hasSize(0));
+    Date currentTimestamp = new Date();
+
+    assertThat(accessTokenRepo.findValidAccessTokensForUser(TEST_347_USER, currentTimestamp),
+        hasSize(0));
+    assertThat(refreshTokenRepo.findValidRefreshTokensForUser(TEST_347_USER, currentTimestamp),
+        hasSize(0));
   }
 
   @Test
   public void testClientTokensNotBoundToUsersAreIgnored() {
     buildAccessToken(loadTestClient());
+    Date currentTimestamp = new Date();
 
-    assertThat(accessTokenRepo.findValidAccessTokensForUser(TEST_347_USER), hasSize(0));
-    assertThat(refreshTokenRepo.findValidRefreshTokensForUser(TEST_347_USER), hasSize(0));
+    assertThat(accessTokenRepo.findValidAccessTokensForUser(TEST_347_USER, currentTimestamp),
+        hasSize(0));
+    assertThat(refreshTokenRepo.findValidRefreshTokensForUser(TEST_347_USER, currentTimestamp),
+        hasSize(0));
+  }
+
+  @Test
+  public void testRepositoryDoesntRelyOnDbTime() {
+    OAuth2AccessTokenEntity at = buildAccessToken(loadTestClient(), TEST_347_USER);
+
+    Date now = DateUtils.addHours(new Date(), -2);
+    Date exp = DateUtils.addHours(now, +1);
+
+    at.setExpiration(exp);
+    at.getIdToken().setExpiration(exp);
+    at.getRefreshToken().setExpiration(exp);
+
+    assertThat(accessTokenRepo.findValidAccessTokensForUser(TEST_347_USER, now), hasSize(2));
+    assertThat(refreshTokenRepo.findValidRefreshTokensForUser(TEST_347_USER, now), hasSize(1));
   }
 
 }

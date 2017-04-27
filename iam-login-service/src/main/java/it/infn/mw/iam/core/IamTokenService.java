@@ -1,5 +1,6 @@
 package it.infn.mw.iam.core;
 
+import java.util.Date;
 import java.util.Set;
 
 import org.mitre.oauth2.model.OAuth2AccessTokenEntity;
@@ -33,7 +34,7 @@ public class IamTokenService extends DefaultOAuth2ProviderTokenService {
   public Set<OAuth2AccessTokenEntity> getAllAccessTokensForUser(String id) {
 
     Set<OAuth2AccessTokenEntity> results = Sets.newLinkedHashSet();
-    results.addAll(accessTokenRepo.findValidAccessTokensForUser(id));
+    results.addAll(accessTokenRepo.findValidAccessTokensForUser(id, new Date()));
     return results;
   }
 
@@ -41,7 +42,7 @@ public class IamTokenService extends DefaultOAuth2ProviderTokenService {
   @Override
   public Set<OAuth2RefreshTokenEntity> getAllRefreshTokensForUser(String id) {
     Set<OAuth2RefreshTokenEntity> results = Sets.newLinkedHashSet();
-    results.addAll(refreshTokenRepo.findValidRefreshTokensForUser(id));
+    results.addAll(refreshTokenRepo.findValidRefreshTokensForUser(id, new Date()));
     return results;
   }
 
