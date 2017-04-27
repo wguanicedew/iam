@@ -1,12 +1,11 @@
 package it.infn.mw.iam.config.saml;
 
-import static it.infn.mw.iam.authn.saml.util.SamlIdResolvers.eppn;
-import static it.infn.mw.iam.authn.saml.util.SamlIdResolvers.epuid;
+import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.eppn;
+import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.epuid;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +23,8 @@ import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.xml.parse.BasicParserPool;
 import org.opensaml.xml.parse.ParserPool;
 import org.opensaml.xml.parse.StaticBasicParserPool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -94,6 +95,8 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+import com.google.common.base.Strings;
+
 import it.infn.mw.iam.authn.ExternalAuthenticationFailureHandler;
 import it.infn.mw.iam.authn.ExternalAuthenticationSuccessHandler;
 import it.infn.mw.iam.authn.InactiveAccountAuthenticationHander;
@@ -103,6 +106,7 @@ import it.infn.mw.iam.authn.saml.DefaultSAMLUserDetailsService;
 import it.infn.mw.iam.authn.saml.IamSamlAuthenticationProvider;
 import it.infn.mw.iam.authn.saml.SamlExceptionMessageHelper;
 import it.infn.mw.iam.authn.saml.util.FirstApplicableChainedSamlIdResolver;
+import it.infn.mw.iam.authn.saml.util.SamlIdResolvers;
 import it.infn.mw.iam.authn.saml.util.SamlUserIdentifierResolver;
 import it.infn.mw.iam.config.saml.SamlConfig.IamProperties;
 import it.infn.mw.iam.config.saml.SamlConfig.ServerProperties;
@@ -115,6 +119,8 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
     ServerProperties.class})
 public class SamlConfig extends WebSecurityConfigurerAdapter {
 
+  public static final Logger LOG = LoggerFactory.getLogger(SamlConfig.class);
+  
   @Autowired
   ResourceLoader resourceLoader;
 
@@ -165,13 +171,45 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
   }
 
   @Configuration
+  @EnableConfigurationProperties({IamSamlProperties.class})
   public static class IamSamlConfig {
-
+    
+    public static final String[] DEFAULT_ID_RESOLVERS = {epuid.name(), eppn.name()};
+    
+    @Autowired
+    IamSamlProperties samlProperties;
+    
+    private String[] resolverNames(){
+      
+      if (Strings.isNullOrEmpty(samlProperties.getIdResolvers())){
+        return DEFAULT_ID_RESOLVERS;
+      }
+      
+      return samlProperties.getIdResolvers().split(",");
+    }
+    
     @Bean
     public SamlUserIdentifierResolver resolver() {
+      
+      List<SamlUserIdentifierResolver> resolvers = new ArrayList<>();
 
-      List<SamlUserIdentifierResolver> resolvers = Arrays.asList(epuid(), eppn());
-
+      SamlIdResolvers resolverFactory = new SamlIdResolvers();
+      
+      String[] resolverNames = resolverNames();
+      
+      for (String n: resolverNames){
+        SamlUserIdentifierResolver r = resolverFactory.byName(n);
+        if (r != null){
+          resolvers.add(r);
+        } else {
+          LOG.warn("Unsupported saml id resolver: {}", n);
+        }
+      }
+      
+      if (resolvers.isEmpty()){
+        throw new IllegalStateException("Could not configure SAML id resolvers");
+      }
+      
       return new FirstApplicableChainedSamlIdResolver(resolvers);
     }
 

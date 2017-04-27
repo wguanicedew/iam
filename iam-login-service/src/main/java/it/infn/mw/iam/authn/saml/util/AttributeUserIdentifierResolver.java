@@ -4,19 +4,19 @@ import java.util.Optional;
 
 import org.springframework.security.saml.SAMLCredential;
 
-public class AttributeUserIdentifierResolver implements SamlUserIdentifierResolver {
+public class AttributeUserIdentifierResolver extends AbstractSamlUserIdentifierResolver {
 
-  private final String attributeName;
+  Saml2Attribute attribute;
 
-  public AttributeUserIdentifierResolver(String attributeName) {
-    this.attributeName = attributeName;
+  public AttributeUserIdentifierResolver(Saml2Attribute attribute) {
+    super(attribute.name());
+    this.attribute = attribute;
   }
 
   @Override
   public Optional<String> getUserIdentifier(SAMLCredential samlCredential) {
-    
-    return Optional.ofNullable(samlCredential.getAttributeAsString(attributeName));
-    
+
+    return Optional.ofNullable(samlCredential.getAttributeAsString(attribute.getAttributeName()));
   }
 
 }

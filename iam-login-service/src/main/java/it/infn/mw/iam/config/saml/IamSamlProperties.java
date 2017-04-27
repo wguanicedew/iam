@@ -11,6 +11,7 @@ public class IamSamlProperties {
   private String keystorePassword;
   private String keyId;
   private String keyPassword;
+  private String idResolvers;
 
   private int maxAssertionTimeSec;
 
@@ -80,6 +81,14 @@ public class IamSamlProperties {
 
   public void setMaxAuthenticationAgeSec(int maxAuthenticationAgeSec) {
     this.maxAuthenticationAgeSec = maxAuthenticationAgeSec;
+  }
+
+  public String getIdResolvers() {
+    return idResolvers;
+  }
+
+  public void setIdResolvers(String idResolvers) {
+    this.idResolvers = idResolvers;
   }
 
 }

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.0 (xxxx-xx-xx)
+
+TBD
+
 ## 0.6.0 (2017-3-31)
 
 This release provides improvements and bug fixes:

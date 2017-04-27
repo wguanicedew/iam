@@ -9,6 +9,8 @@ import org.mockito.Mockito;
 import org.opensaml.saml2.core.NameID;
 import org.springframework.security.saml.SAMLCredential;
 
+import it.infn.mw.iam.authn.saml.util.NameIdUserIdentifierResolver;
+import it.infn.mw.iam.authn.saml.util.Saml2Attribute;
 import it.infn.mw.iam.authn.saml.util.SamlAttributeNames;
 import it.infn.mw.iam.authn.saml.util.SamlIdResolvers;
 import it.infn.mw.iam.authn.saml.util.SamlUserIdentifierResolver;
@@ -22,7 +24,7 @@ public class ResolverTests {
     SAMLCredential cred = Mockito.mock(SAMLCredential.class);
     Mockito.when(cred.getNameID()).thenReturn(null);
 
-    SamlUserIdentifierResolver resolver = SamlIdResolvers.nameid();
+    SamlUserIdentifierResolver resolver = new NameIdUserIdentifierResolver();
 
     Optional<String> resolvedId = resolver.getUserIdentifier(cred);
 
@@ -38,7 +40,7 @@ public class ResolverTests {
     SAMLCredential cred = Mockito.mock(SAMLCredential.class);
     Mockito.when(cred.getNameID()).thenReturn(nameId);
 
-    SamlUserIdentifierResolver resolver = SamlIdResolvers.nameid();
+    SamlUserIdentifierResolver resolver = new NameIdUserIdentifierResolver();
 
     Optional<String> resolvedId = resolver.getUserIdentifier(cred);
 
@@ -48,7 +50,10 @@ public class ResolverTests {
 
   @Test
   public void mailIdResolverTest() {
-    SamlUserIdentifierResolver resolver = SamlIdResolvers.mail();
+    SamlIdResolvers resolvers = new SamlIdResolvers();
+    
+    SamlUserIdentifierResolver resolver = resolvers.byAttribute(Saml2Attribute.mail);
+    
     SAMLCredential cred = Mockito.mock(SAMLCredential.class);
     Mockito.when(cred.getAttributeAsString(SamlAttributeNames.mail)).thenReturn("test@test.org");
 
