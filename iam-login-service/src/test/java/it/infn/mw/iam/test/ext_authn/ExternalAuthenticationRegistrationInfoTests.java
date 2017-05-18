@@ -17,6 +17,8 @@ import it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo;
 import it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo.ExternalAuthenticationType;
 import it.infn.mw.iam.authn.oidc.OidcExternalAuthenticationToken;
 import it.infn.mw.iam.authn.saml.SamlExternalAuthenticationToken;
+import it.infn.mw.iam.authn.saml.util.Saml2Attribute;
+import it.infn.mw.iam.persistence.model.IamSamlId;
 
 public class ExternalAuthenticationRegistrationInfoTests {
 
@@ -30,7 +32,7 @@ public class ExternalAuthenticationRegistrationInfoTests {
     OidcExternalAuthenticationToken extAuthToken =
 	new OidcExternalAuthenticationToken(token, "test-oidc-subject", null);
 
-    ExternalAuthenticationRegistrationInfo uri = extAuthToken.toExernalAuthenticationInfo();
+    ExternalAuthenticationRegistrationInfo uri = extAuthToken.toExernalAuthenticationRegistrationInfo();
 
     assertThat(uri.getType(), equalTo(ExternalAuthenticationType.OIDC));
     assertThat(uri.getGivenName(), Matchers.nullValue());
@@ -59,7 +61,7 @@ public class ExternalAuthenticationRegistrationInfoTests {
     OidcExternalAuthenticationToken extAuthToken =
 	new OidcExternalAuthenticationToken(token, "test-oidc-subject", null);
 
-    ExternalAuthenticationRegistrationInfo uri = extAuthToken.toExernalAuthenticationInfo();
+    ExternalAuthenticationRegistrationInfo uri = extAuthToken.toExernalAuthenticationRegistrationInfo();
 
     assertThat(uri.getType(), equalTo(ExternalAuthenticationType.OIDC));
     assertThat(uri.getSubject(), equalTo("test-oidc-subject"));
@@ -81,14 +83,19 @@ public class ExternalAuthenticationRegistrationInfoTests {
     when(token.getName()).thenReturn("test-saml-subject");
     when(cred.getRemoteEntityID()).thenReturn("test-saml-issuer");
 
+    IamSamlId samlId = new IamSamlId("test-saml-issuer", 
+        Saml2Attribute.epuid.getAttributeName(),
+        "test-saml-subject");
+    
     SamlExternalAuthenticationToken extAuthToken =
-	new SamlExternalAuthenticationToken(token, token.getTokenExpiration(), "test-saml-subject",
+	new SamlExternalAuthenticationToken(samlId, token, token.getTokenExpiration(), "test-saml-subject",
 	    token.getCredentials(), token.getAuthorities());
 
-    ExternalAuthenticationRegistrationInfo uri = extAuthToken.toExernalAuthenticationInfo();
+    ExternalAuthenticationRegistrationInfo uri = extAuthToken.toExernalAuthenticationRegistrationInfo();
     assertThat(uri.getType(), equalTo(ExternalAuthenticationType.SAML));
     assertThat(uri.getSubject(), equalTo("test-saml-subject"));
     assertThat(uri.getIssuer(), equalTo("test-saml-issuer"));
+    assertThat(uri.getSubjectAttribute(), equalTo(samlId.getAttributeId()));
     assertThat(uri.getGivenName(), Matchers.nullValue());
     assertThat(uri.getFamilyName(), Matchers.nullValue());
     assertThat(uri.getEmail(), Matchers.nullValue());
@@ -102,25 +109,29 @@ public class ExternalAuthenticationRegistrationInfoTests {
     SAMLCredential cred = mock(SAMLCredential.class);
     when(cred.getRemoteEntityID()).thenReturn("test-saml-issuer");
 
-    when(cred.getAttributeAsString(SamlExternalAuthenticationToken.OID_GIVEN_NAME))
+    when(cred.getAttributeAsString(Saml2Attribute.givenName.getAttributeName()))
       .thenReturn("Test Given Name");
-    when(cred.getAttributeAsString(SamlExternalAuthenticationToken.OID_SN))
+    when(cred.getAttributeAsString(Saml2Attribute.sn.getAttributeName()))
       .thenReturn("Test Family Name");
-    when(cred.getAttributeAsString(SamlExternalAuthenticationToken.OID_MAIL))
+    when(cred.getAttributeAsString(Saml2Attribute.mail.getAttributeName()))
       .thenReturn("test@test.org");
 
     when(token.getCredentials()).thenReturn(cred);
     when(token.getName()).thenReturn("test-saml-subject");
 
+    IamSamlId samlId = new IamSamlId("test-saml-issuer", 
+        Saml2Attribute.epuid.getAttributeName(),
+        "test-saml-subject");
 
     SamlExternalAuthenticationToken extAuthToken =
-	new SamlExternalAuthenticationToken(token, token.getTokenExpiration(), "test-saml-subject",
+	new SamlExternalAuthenticationToken(samlId,token, token.getTokenExpiration(), "test-saml-subject",
 	    token.getCredentials(), token.getAuthorities());
 
-    ExternalAuthenticationRegistrationInfo uri = extAuthToken.toExernalAuthenticationInfo();
+    ExternalAuthenticationRegistrationInfo uri = extAuthToken.toExernalAuthenticationRegistrationInfo();
     assertThat(uri.getType(), equalTo(ExternalAuthenticationType.SAML));
     assertThat(uri.getSubject(), equalTo("test-saml-subject"));
     assertThat(uri.getIssuer(), equalTo("test-saml-issuer"));
+    assertThat(uri.getSubjectAttribute(), equalTo(samlId.getAttributeId()));
     assertThat(uri.getGivenName(), equalTo("Test Given Name"));
     assertThat(uri.getFamilyName(), equalTo("Test Family Name"));
     assertThat(uri.getEmail(), equalTo("test@test.org"));

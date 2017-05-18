@@ -54,25 +54,27 @@ public class DefaultAccountLinkingService
     externalAuthenticationToken.linkToIamAccount(externalAccountLinker, userAccount);
 
     eventPublisher.publishEvent(new AccountLinkedEvent(this, userAccount,
-        externalAuthenticationToken.toExernalAuthenticationInfo(),
+        externalAuthenticationToken.toExernalAuthenticationRegistrationInfo(),
         String.format("User %s has linked a new account of type %s", userAccount.getUsername(),
-            externalAuthenticationToken.toExernalAuthenticationInfo().getType().toString())));
+            externalAuthenticationToken.toExernalAuthenticationRegistrationInfo().getType().toString())));
   }
 
 
   @Override
   public void unlinkExternalAccount(Principal authenticatedUser, ExternalAuthenticationType type,
-      String iss, String sub) {
+      String iss, String sub, String attributeId) {
 
     IamAccount userAccount = findAccount(authenticatedUser);
 
     boolean modified = false;
+    
     if (SAML.equals(type)) {
 
       IamSamlId id = new IamSamlId();
       id.setIdpId(iss);
       id.setUserId(sub);
-
+      id.setAttributeId(attributeId);
+      
       userAccount.getSamlIds()
         .stream()
         .filter(o -> o.equals(id))

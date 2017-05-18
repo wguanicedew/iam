@@ -37,19 +37,19 @@ public class DefaultExternalAccountLinker implements ExternalAccountLinker {
 
       if (found.equals(targetAccount)) {
 
-	String errorMsg =
-	    String.format("OpenID connect account '[%s] %s' is already linked to user '%s'",
-		oidcIssuer, oidcSubject, found.getUsername());
+        String errorMsg =
+            String.format("OpenID connect account '[%s] %s' is already linked to user '%s'",
+                oidcIssuer, oidcSubject, found.getUsername());
 
-	throw new AccountAlreadyLinkedError(errorMsg);
+        throw new AccountAlreadyLinkedError(errorMsg);
 
       } else {
 
-	String errorMsg =
-	    String.format("OpenID connect account '[%s] %s' is already linked to another user",
-		oidcIssuer, oidcSubject);
+        String errorMsg =
+            String.format("OpenID connect account '[%s] %s' is already linked to another user",
+                oidcIssuer, oidcSubject);
 
-	throw new AccountAlreadyLinkedError(errorMsg);
+        throw new AccountAlreadyLinkedError(errorMsg);
       }
     });
 
@@ -65,37 +65,34 @@ public class DefaultExternalAccountLinker implements ExternalAccountLinker {
   public void linkToIamAccount(IamAccount targetAccount, SamlExternalAuthenticationToken token) {
 
     final SAMLCredential credential =
-	(SAMLCredential) token.getExternalAuthentication().getCredentials();
+        (SAMLCredential) token.getExternalAuthentication().getCredentials();
 
-    final String samlSubject = samlUserIdResolver.getUserIdentifier(credential)
+    final IamSamlId iamSamlId = samlUserIdResolver.getSamlUserIdentifier(credential)
       .orElseThrow(() -> new UsernameNotFoundException(
-	  "Could not extract a user identifier from the SAML assertion"));
+          "Could not extract a user identifier from the SAML assertion"));
 
-    final String samlIssuer = credential.getRemoteEntityID();
-
-    repo.findBySamlId(samlIssuer, samlSubject).ifPresent(found -> {
+    repo.findBySamlId(iamSamlId).ifPresent(found -> {
 
       if (found.equals(targetAccount)) {
 
-	String errorMsg = String.format("SAML account '[%s] %s' is already linked to user '%s'",
-	    samlIssuer, samlSubject, found.getUsername());
+        String errorMsg = String.format(
+            "SAML account '[%s] (%s = %s)' is already linked to user '%s'", iamSamlId.getIdpId(),
+            iamSamlId.getAttributeId(), iamSamlId.getUserId(), found.getUsername());
 
-	throw new AccountAlreadyLinkedError(errorMsg);
+        throw new AccountAlreadyLinkedError(errorMsg);
       } else {
 
-	String errorMsg = String.format("SAML account '[%s] %s' is already linked to another user",
-	    samlIssuer, samlSubject);
+        String errorMsg =
+            String.format("SAML account '[%s] (%s = %s)' is already linked to another user",
+                iamSamlId.getIdpId(), iamSamlId.getAttributeId(), iamSamlId.getUserId());
 
-	throw new AccountAlreadyLinkedError(errorMsg);
+        throw new AccountAlreadyLinkedError(errorMsg);
       }
 
     });
 
-    IamSamlId samlId = new IamSamlId();
-    samlId.setIdpId(samlIssuer);
-    samlId.setUserId(samlSubject);
-    samlId.setAccount(targetAccount);
-    targetAccount.getSamlIds().add(samlId);
+    iamSamlId.setAccount(targetAccount);
+    targetAccount.getSamlIds().add(iamSamlId);
     repo.save(targetAccount);
 
   }

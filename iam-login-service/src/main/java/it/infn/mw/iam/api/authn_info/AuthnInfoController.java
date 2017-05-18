@@ -23,7 +23,7 @@ public class AuthnInfoController {
 	(AbstractExternalAuthenticationToken<?>) SecurityContextHolder.getContext()
 	  .getAuthentication();
 
-    return extAuthnToken.toExernalAuthenticationInfo();
+    return extAuthnToken.toExernalAuthenticationRegistrationInfo();
 
   }
 }

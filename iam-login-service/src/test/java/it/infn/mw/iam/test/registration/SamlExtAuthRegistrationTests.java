@@ -26,7 +26,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import it.infn.mw.iam.IamLoginService;
+import it.infn.mw.iam.authn.saml.util.Saml2Attribute;
 import it.infn.mw.iam.persistence.model.IamAccount;
+import it.infn.mw.iam.persistence.model.IamSamlId;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.registration.PersistentUUIDTokenGenerator;
 import it.infn.mw.iam.registration.RegistrationRequestDto;
@@ -129,7 +131,9 @@ public class SamlExtAuthRegistrationTests extends SamlExternalAuthenticationTest
     assertThat(err.getMessage(), startsWith(
         "Your registration request to indigo-dc was submitted and confirmed successfully"));
 
-    IamAccount account = iamAccountRepo.findBySamlId(DEFAULT_IDP_ID, T1_EPUID)
+    IamSamlId id = new IamSamlId(DEFAULT_IDP_ID, Saml2Attribute.epuid.getAttributeName(), T1_EPUID);
+
+    IamAccount account = iamAccountRepo.findBySamlId(id)
       .orElseThrow(() -> new AssertionError("Expected account not found"));
 
     iamAccountRepo.delete(account);

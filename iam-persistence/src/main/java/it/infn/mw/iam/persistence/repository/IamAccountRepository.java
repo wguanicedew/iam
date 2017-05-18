@@ -9,7 +9,8 @@ import org.springframework.data.repository.query.Param;
 
 import it.infn.mw.iam.persistence.model.IamAccount;
 
-public interface IamAccountRepository extends PagingAndSortingRepository<IamAccount, Long> {
+public interface IamAccountRepository extends PagingAndSortingRepository<IamAccount, Long>, 
+  IamAccountRepositoryCustom {
 
   @Query("select count(a) from IamAccount a")
   int countAllUsers();
@@ -18,8 +19,10 @@ public interface IamAccountRepository extends PagingAndSortingRepository<IamAcco
 
   Optional<IamAccount> findByUsername(@Param("username") String username);
 
-  @Query("select a from IamAccount a join a.samlIds si where si.idpId = :idpId and si.userId = :subject")
-  Optional<IamAccount> findBySamlId(@Param("idpId") String idpId, @Param("subject") String subject);
+  @Query("select a from IamAccount a join a.samlIds si where si.idpId = :idpId "
+      + "and si.attributeId = :attributeId and si.userId = :userId")
+  Optional<IamAccount> findBySamlId(@Param("idpId") String idpId,
+      @Param("attributeId") String attributeId, @Param("userId") String userId);
 
   @Query("select a from IamAccount a join a.oidcIds oi where oi.issuer = :issuer and oi.subject = :subject")
   Optional<IamAccount> findByOidcId(@Param("issuer") String issuer,

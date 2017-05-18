@@ -126,9 +126,9 @@ INSERT INTO iam_oidc_id(issuer, subject, account_id) VALUES
 ('https://accounts.google.com', '105440632287425289613', 2),
 ('urn:test-oidc-issuer', 'test-user', 2);
 
-INSERT INTO iam_saml_id(idpid, userid, account_id) VALUES
-('https://idptestbed/idp/shibboleth', 'andrea.ceccanti@example.org',2),
-('https://idptestbed/idp/shibboleth', '78901@idptestbed',2);
+INSERT INTO iam_saml_id(idpid, attribute_id, userid, account_id) VALUES
+('https://idptestbed/idp/shibboleth', 'urn:oid:0.9.2342.19200300.100.1.3', 'andrea.ceccanti@example.org',2),
+('https://idptestbed/idp/shibboleth', 'urn:oid:1.3.6.1.4.1.5923.1.1.1.13', '78901@idptestbed',2);
 
 INSERT INTO iam_group(id, name, uuid, description, creationtime, lastupdatetime) VALUES
 (1, 'Production', 'c617d586-54e6-411d-8e38-64967798fa8a', 'The production group', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP()),

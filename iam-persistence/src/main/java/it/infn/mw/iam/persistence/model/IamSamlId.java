@@ -24,11 +24,16 @@ public class IamSamlId implements IamAccountRef {
   @Column(nullable = false, length = 256)
   String idpId;
 
+  @Column(name = "attribute_id", length = 64)
+  String attributeId;
+
   @Column(nullable = false, length = 256)
   String userId;
 
-  public IamSamlId(String idpId, String userId) {
+
+  public IamSamlId(String idpId, String attributeId, String userId) {
     setIdpId(idpId);
+    setAttributeId(attributeId);
     setUserId(userId);
   }
 
@@ -76,11 +81,20 @@ public class IamSamlId implements IamAccountRef {
     this.userId = userId;
   }
 
+
+  public String getAttributeId() {
+    return attributeId;
+  }
+
+  public void setAttributeId(String attributeId) {
+    this.attributeId = attributeId;
+  }
+
   @Override
   public int hashCode() {
-
     final int prime = 31;
     int result = 1;
+    result = prime * result + ((attributeId == null) ? 0 : attributeId.hashCode());
     result = prime * result + ((idpId == null) ? 0 : idpId.hashCode());
     result = prime * result + ((userId == null) ? 0 : userId.hashCode());
     return result;
@@ -88,7 +102,6 @@ public class IamSamlId implements IamAccountRef {
 
   @Override
   public boolean equals(Object obj) {
-
     if (this == obj)
       return true;
     if (obj == null)
@@ -96,6 +109,11 @@ public class IamSamlId implements IamAccountRef {
     if (getClass() != obj.getClass())
       return false;
     IamSamlId other = (IamSamlId) obj;
+    if (attributeId == null) {
+      if (other.attributeId != null)
+        return false;
+    } else if (!attributeId.equals(other.attributeId))
+      return false;
     if (idpId == null) {
       if (other.idpId != null)
         return false;
@@ -111,8 +129,8 @@ public class IamSamlId implements IamAccountRef {
 
   @Override
   public String toString() {
-
-    return "IamSamlId [id=" + id + ", idpId=" + idpId + ", userId=" + userId + "]";
+    return "IamSamlId [idpId=" + idpId + ", attributeId=" + attributeId + ", userId=" + userId
+        + "]";
   }
 
 }

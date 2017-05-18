@@ -12,6 +12,7 @@ import com.google.common.base.Strings;
 
 import it.infn.mw.iam.authn.saml.SamlExternalAuthenticationToken;
 import it.infn.mw.iam.authn.saml.util.SamlAttributeNames;
+import it.infn.mw.iam.persistence.model.IamSamlId;
 import it.infn.mw.iam.test.ext_authn.saml.SamlExternalAuthenticationTestSupport;
 import it.infn.mw.iam.test.util.SecurityContextBuilderSupport;
 
@@ -60,7 +61,9 @@ public class SamlSecurityContextBuilder extends SecurityContextBuilderSupport {
     ExpiringUsernameAuthenticationToken samlToken = new ExpiringUsernameAuthenticationToken(
         expirationTime, subject, samlCredential, authorities);
 
-    SamlExternalAuthenticationToken token = new SamlExternalAuthenticationToken(samlToken,
+    IamSamlId samlId = new IamSamlId(issuer, subjectAttribute, subject);
+    
+    SamlExternalAuthenticationToken token = new SamlExternalAuthenticationToken(samlId, samlToken,
         samlToken.getTokenExpiration(), subject, samlToken.getCredentials(), authorities);
 
     context.setAuthentication(token);

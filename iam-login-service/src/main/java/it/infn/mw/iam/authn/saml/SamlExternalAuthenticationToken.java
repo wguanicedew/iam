@@ -1,5 +1,9 @@
 package it.infn.mw.iam.authn.saml;
 
+import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.givenName;
+import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.mail;
+import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.sn;
+
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
@@ -16,21 +20,20 @@ import it.infn.mw.iam.authn.ExternalAuthenticationInfoBuilder;
 import it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo;
 import it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo.ExternalAuthenticationType;
 import it.infn.mw.iam.persistence.model.IamAccount;
+import it.infn.mw.iam.persistence.model.IamSamlId;
 
 public class SamlExternalAuthenticationToken
     extends AbstractExternalAuthenticationToken<ExpiringUsernameAuthenticationToken> {
 
   private static final long serialVersionUID = -7854473523011856692L;
-
-  public static final String OID_GIVEN_NAME = "urn:oid:2.5.4.42";
-  public static final String OID_SN = "urn:oid:2.5.4.4";
-  public static final String OID_CN = "urn:oid:2.5.4.3";
-  public static final String OID_MAIL = "urn:oid:0.9.2342.19200300.100.1.3";
-
-  public SamlExternalAuthenticationToken(ExpiringUsernameAuthenticationToken authn,
+  
+  private final IamSamlId samlId;
+  
+  public SamlExternalAuthenticationToken(IamSamlId samlId, ExpiringUsernameAuthenticationToken authn,
       Date tokenExpiration, Object principal, Object credentials,
       Collection<? extends GrantedAuthority> authorities) {
     super(authn, tokenExpiration, principal, credentials, authorities);
+    this.samlId = samlId;
   }
 
   @Override
@@ -40,26 +43,27 @@ public class SamlExternalAuthenticationToken
   }
 
   @Override
-  public ExternalAuthenticationRegistrationInfo toExernalAuthenticationInfo() {
+  public ExternalAuthenticationRegistrationInfo toExernalAuthenticationRegistrationInfo() {
 
     ExternalAuthenticationRegistrationInfo ri =
 	new ExternalAuthenticationRegistrationInfo(ExternalAuthenticationType.SAML);
 
     SAMLCredential cred = (SAMLCredential) getExternalAuthentication().getCredentials();
 
-    ri.setIssuer(cred.getRemoteEntityID());
-    ri.setSubject(getName());
+    ri.setIssuer(samlId.getIdpId());
+    ri.setSubject(samlId.getUserId());
+    ri.setSubjectAttribute(samlId.getAttributeId());
 
-    if (!Strings.isNullOrEmpty(cred.getAttributeAsString(OID_GIVEN_NAME))) {
-      ri.setGivenName(cred.getAttributeAsString(OID_GIVEN_NAME));
+    if (!Strings.isNullOrEmpty(cred.getAttributeAsString(givenName.getAttributeName()))) {
+      ri.setGivenName(cred.getAttributeAsString(givenName.getAttributeName()));
     }
 
-    if (!Strings.isNullOrEmpty(cred.getAttributeAsString(OID_SN))) {
-      ri.setFamilyName(cred.getAttributeAsString(OID_SN));
+    if (!Strings.isNullOrEmpty(cred.getAttributeAsString(sn.getAttributeName()))) {
+      ri.setFamilyName(cred.getAttributeAsString(sn.getAttributeName()));
     }
 
-    if (!Strings.isNullOrEmpty(cred.getAttributeAsString(OID_MAIL))) {
-      ri.setEmail(cred.getAttributeAsString(OID_MAIL));
+    if (!Strings.isNullOrEmpty(cred.getAttributeAsString(mail.getAttributeName()))) {
+      ri.setEmail(cred.getAttributeAsString(mail.getAttributeName()));
     }
 
     return ri;
@@ -70,4 +74,7 @@ public class SamlExternalAuthenticationToken
     visitor.linkToIamAccount(account, this);
   }
 
+  public IamSamlId getSamlId() {
+    return samlId;
+  }
 }

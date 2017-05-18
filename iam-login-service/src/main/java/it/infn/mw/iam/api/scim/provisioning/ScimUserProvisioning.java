@@ -282,7 +282,8 @@ public class ScimUserProvisioning
     Preconditions.checkNotNull(samlId);
     Preconditions.checkNotNull(samlId.getIdpId());
     Preconditions.checkNotNull(samlId.getUserId());
-    accountRepository.findBySamlId(samlId.getIdpId(), samlId.getUserId()).ifPresent(account -> {
+    Preconditions.checkNotNull(samlId.getAttributeId());
+    accountRepository.findBySamlId(samlId).ifPresent(account -> {
       throw new ScimResourceExistsException(
           String.format("SAML id (%s,%s) already bounded to another user", samlId.getIdpId(),
               samlId.getUserId()));

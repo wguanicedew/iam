@@ -98,6 +98,7 @@ public class DefaultRegistrationRequestService
     } else if (ExternalAuthenticationType.SAML.equals(extAuthnInfo.getType())) {
       ScimSamlId samlId = new ScimSamlId.Builder().idpId(extAuthnInfo.getIssuer())
         .userId(extAuthnInfo.getSubject())
+        .attributeId(extAuthnInfo.getSubjectAttribute())
         .build();
       user.addSamlId(samlId);
     }

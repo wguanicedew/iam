@@ -41,6 +41,6 @@ public abstract class AbstractExternalAuthenticationToken<T>
 
   public abstract void linkToIamAccount(ExternalAccountLinker visitor, IamAccount account);
 
-  public abstract ExternalAuthenticationRegistrationInfo toExernalAuthenticationInfo();
+  public abstract ExternalAuthenticationRegistrationInfo toExernalAuthenticationRegistrationInfo();
 
 }
