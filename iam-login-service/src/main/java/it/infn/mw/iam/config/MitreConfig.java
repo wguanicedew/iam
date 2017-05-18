@@ -38,7 +38,13 @@ public class MitreConfig {
     }
 
     config.setIssuer(issuer);
-    config.setRegTokenLifeTime(tokenLifeTime);
+    
+    if (tokenLifeTime <= 0L){
+      config.setRegTokenLifeTime(null);
+    } else {
+      config.setRegTokenLifeTime(tokenLifeTime);
+    }
+    
     config.setForceHttps(false);
     config.setLocale(Locale.ENGLISH);
 

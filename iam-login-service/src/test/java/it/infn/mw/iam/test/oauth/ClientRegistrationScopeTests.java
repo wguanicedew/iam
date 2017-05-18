@@ -1,6 +1,8 @@
 package it.infn.mw.iam.test.oauth;
 
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
 import java.util.Set;
@@ -14,6 +16,7 @@ import org.mitre.oauth2.model.ClientDetailsEntity;
 import org.mitre.oauth2.model.RegisteredClientFields;
 import org.mitre.openid.connect.ClientDetailsEntityJsonProcessor;
 import org.mitre.util.JsonUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.WebIntegrationTest;
@@ -21,6 +24,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonObject;
@@ -39,6 +44,77 @@ public class ClientRegistrationScopeTests {
   @Value("${server.port}")
   private Integer iamPort;
 
+  @Autowired
+  private ObjectMapper mapper;
+  
+  @Test
+  public void testClientRegistrationAccessTokenWorks() throws JsonProcessingException, IOException {
+    String clientName = "test_test_test";
+    String jsonInString = buildClientJsonString(clientName, Sets.newHashSet("test"));
+    
+    // @formatter:off
+    Response response = RestAssured.given()
+      .port(iamPort)
+      .contentType(ContentType.JSON)
+      .body(jsonInString)
+      .log()
+        .all(true)
+      .when()
+        .post("/register")
+        .then()
+          .log().all(true)
+          .statusCode(HttpStatus.CREATED.value())
+          .contentType(ContentType.JSON)
+          .extract()
+            .response();
+      // @formatter:on
+    
+    String str = response.asString();
+    JsonNode jsonNode = mapper.readTree(str);
+    
+    String rat = jsonNode.get("registration_access_token").asText();
+    String registrationUri = jsonNode.get("registration_client_uri").asText();
+    
+    assertThat(rat, notNullValue());
+    assertThat(registrationUri, notNullValue());
+    
+    // @formatter:off
+    response = RestAssured.given()
+      .port(iamPort)
+      .auth()
+        .preemptive().oauth2(rat)
+      .contentType(ContentType.JSON)
+      .log()
+        .all(true)
+      .when()
+        .get(registrationUri)
+       .then()
+         .log().all(true)
+         .statusCode(HttpStatus.OK.value())
+         .contentType(ContentType.JSON)
+         .extract()
+            .response();
+      // @formatter:on
+    
+ // @formatter:off
+    response = RestAssured.given()
+      .port(iamPort)
+      .auth()
+        .preemptive().oauth2(rat)
+      .contentType(ContentType.JSON)
+      .log()
+        .all(true)
+      .when()
+        .get(registrationUri)
+       .then()
+         .log().all(true)
+         .statusCode(HttpStatus.OK.value())
+         .contentType(ContentType.JSON)
+         .extract()
+            .response();
+      // @formatter:on
+  }
+  
   @Test
   public void testCreateClientWithRegistrationReservedScopes()
       throws JsonProcessingException, IOException {
