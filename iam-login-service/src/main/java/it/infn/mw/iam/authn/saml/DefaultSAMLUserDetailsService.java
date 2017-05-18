@@ -18,6 +18,7 @@ import it.infn.mw.iam.authn.InactiveAccountAuthenticationHander;
 import it.infn.mw.iam.authn.saml.util.SamlUserIdentifierResolver;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamAuthority;
+import it.infn.mw.iam.persistence.model.IamSamlId;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
 public class DefaultSAMLUserDetailsService implements SAMLUserDetailsService {
@@ -50,21 +51,19 @@ public class DefaultSAMLUserDetailsService implements SAMLUserDetailsService {
     return new User(account.getUsername(), account.getPassword(), convertAuthorities(account));
   }
 
-  protected User buildUserFromSamlCredential(String userSamlId, SAMLCredential credential) {
-    return new User(userSamlId, "",
+  protected User buildUserFromSamlCredential(IamSamlId samlId, SAMLCredential credential) {
+    return new User(samlId.getUserId(), "",
         Arrays.asList(ExternalAuthenticationHandlerSupport.EXT_AUTHN_UNREGISTERED_USER_AUTH));
   }
 
   @Override
   public Object loadUserBySAML(SAMLCredential credential) throws UsernameNotFoundException {
-
-    String issuerId = credential.getRemoteEntityID();
-
-    String userSamlId =
-        resolver.getUserIdentifier(credential).orElseThrow(() -> new UsernameNotFoundException(
+    
+    IamSamlId userSamlId =
+        resolver.getSamlUserIdentifier(credential).orElseThrow(() -> new UsernameNotFoundException(
             "Could not extract a user identifier from the SAML assertion"));
 
-    Optional<IamAccount> account = repo.findBySamlId(issuerId, userSamlId);
+    Optional<IamAccount> account = repo.findBySamlId(userSamlId);
 
     if (account.isPresent()) {
       return buildUserFromIamAccount(account.get());

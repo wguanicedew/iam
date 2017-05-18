@@ -36,7 +36,7 @@ public class OidcExternalAuthenticationToken
   }
 
   @Override
-  public ExternalAuthenticationRegistrationInfo toExernalAuthenticationInfo() {
+  public ExternalAuthenticationRegistrationInfo toExernalAuthenticationRegistrationInfo() {
 
     ExternalAuthenticationRegistrationInfo ri =
 	new ExternalAuthenticationRegistrationInfo(ExternalAuthenticationType.OIDC);

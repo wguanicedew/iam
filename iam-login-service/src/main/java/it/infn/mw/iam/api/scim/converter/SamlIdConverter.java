@@ -14,6 +14,7 @@ public class SamlIdConverter implements Converter<ScimSamlId, IamSamlId> {
     IamSamlId samlId = new IamSamlId();
     samlId.setIdpId(scim.getIdpId());
     samlId.setUserId(scim.getUserId());
+    samlId.setAttributeId(scim.getAttributeId());
     samlId.setAccount(null);
 
     return samlId;

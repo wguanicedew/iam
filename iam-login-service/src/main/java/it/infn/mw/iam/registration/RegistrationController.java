@@ -43,7 +43,7 @@ public class RegistrationController {
     if (authn instanceof AbstractExternalAuthenticationToken<?>) {
 
       return Optional
-        .of(((AbstractExternalAuthenticationToken<?>) authn).toExernalAuthenticationInfo());
+        .of(((AbstractExternalAuthenticationToken<?>) authn).toExernalAuthenticationRegistrationInfo());
     }
 
     return Optional.empty();

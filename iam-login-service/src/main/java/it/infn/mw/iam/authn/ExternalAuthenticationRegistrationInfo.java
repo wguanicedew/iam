@@ -14,6 +14,7 @@ public class ExternalAuthenticationRegistrationInfo {
 
   private String issuer;
   private String subject;
+  private String subjectAttribute;
 
   private String email;
 
@@ -27,6 +28,7 @@ public class ExternalAuthenticationRegistrationInfo {
   @JsonCreator
   public ExternalAuthenticationRegistrationInfo(@JsonProperty("type") String type,
       @JsonProperty("issuer") String issuer, @JsonProperty("subject") String subject,
+      @JsonProperty("subject_attribute") String subjectAttribute,
       @JsonProperty("email") String email, @JsonProperty("given_name") String givenName,
       @JsonProperty("family_name") String familyName) {
 
@@ -36,6 +38,7 @@ public class ExternalAuthenticationRegistrationInfo {
     this.email = email;
     this.givenName = givenName;
     this.familyName = familyName;
+    this.subjectAttribute = subjectAttribute;
   }
 
   public ExternalAuthenticationType getType() {
@@ -82,5 +85,14 @@ public class ExternalAuthenticationRegistrationInfo {
 
   public void setFamilyName(String familyName) {
     this.familyName = familyName;
+  }
+
+  @JsonProperty("subject_attribute")
+  public String getSubjectAttribute() {
+    return subjectAttribute;
+  }
+
+  public void setSubjectAttribute(String subjectAttribute) {
+    this.subjectAttribute = subjectAttribute;
   }
 }

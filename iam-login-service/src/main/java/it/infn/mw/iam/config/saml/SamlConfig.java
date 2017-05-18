@@ -261,7 +261,7 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
   public SAMLAuthenticationProvider samlAuthenticationProvider(SamlUserIdentifierResolver resolver,
       IamAccountRepository accountRepo, InactiveAccountAuthenticationHander handler) {
 
-    IamSamlAuthenticationProvider samlAuthenticationProvider = new IamSamlAuthenticationProvider();
+    IamSamlAuthenticationProvider samlAuthenticationProvider = new IamSamlAuthenticationProvider(resolver);
     samlAuthenticationProvider
       .setUserDetails(samlUserDetailsService(resolver, accountRepo, handler));
     samlAuthenticationProvider.setForcePrincipalAsString(false);

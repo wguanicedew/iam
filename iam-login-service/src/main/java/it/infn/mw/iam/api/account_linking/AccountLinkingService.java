@@ -11,6 +11,6 @@ public interface AccountLinkingService {
       AbstractExternalAuthenticationToken<?> externalAuthenticationToken);
 
   void unlinkExternalAccount(Principal authenticatedUser, ExternalAuthenticationType type,
-      String iss, String sub);
+      String iss, String sub, String attributeId);
 
 }

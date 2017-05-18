@@ -4,6 +4,8 @@ import java.util.Optional;
 
 import org.springframework.security.saml.SAMLCredential;
 
+import it.infn.mw.iam.persistence.model.IamSamlId;
+
 public interface SamlUserIdentifierResolver {
-  public Optional<String> getUserIdentifier(SAMLCredential samlCredential);
+  public Optional<IamSamlId> getSamlUserIdentifier(SAMLCredential samlCredential);
 }

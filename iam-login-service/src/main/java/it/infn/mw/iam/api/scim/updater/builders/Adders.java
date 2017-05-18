@@ -138,7 +138,7 @@ public class Adders extends Replacers {
     super(repo, encoder, account);
 
     findByOidcId = id -> repo.findByOidcId(id.getIssuer(), id.getSubject());
-    findBySamlId = id -> repo.findBySamlId(id.getIdpId(), id.getUserId());
+    findBySamlId = id -> repo.findBySamlId(id);
     findBySshKey = key -> repo.findBySshKeyValue(key.getValue());
     findByX509Certificate = cert -> repo.findByCertificate(cert.getCertificate());
 

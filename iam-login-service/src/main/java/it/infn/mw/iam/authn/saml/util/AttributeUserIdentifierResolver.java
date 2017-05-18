@@ -4,6 +4,8 @@ import java.util.Optional;
 
 import org.springframework.security.saml.SAMLCredential;
 
+import it.infn.mw.iam.persistence.model.IamSamlId;
+
 public class AttributeUserIdentifierResolver extends AbstractSamlUserIdentifierResolver {
 
   Saml2Attribute attribute;
@@ -14,9 +16,21 @@ public class AttributeUserIdentifierResolver extends AbstractSamlUserIdentifierR
   }
 
   @Override
-  public Optional<String> getUserIdentifier(SAMLCredential samlCredential) {
+  public Optional<IamSamlId> getSamlUserIdentifier(SAMLCredential samlCredential) {
 
-    return Optional.ofNullable(samlCredential.getAttributeAsString(attribute.getAttributeName()));
+    String attributeValue = samlCredential.getAttributeAsString(attribute.getAttributeName());
+
+    if (attributeValue == null) {
+      return Optional.empty();
+    }
+
+    IamSamlId samlId = new IamSamlId();
+    samlId.setIdpId(samlCredential.getRemoteEntityID());
+    samlId.setAttributeId(attribute.getAttributeName());
+    samlId.setUserId(attributeValue);
+
+    return Optional.of(samlId);
+
   }
 
 }

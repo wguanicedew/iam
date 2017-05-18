@@ -7,6 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.saml.SAMLCredential;
 
+import it.infn.mw.iam.persistence.model.IamSamlId;
+
 public class FirstApplicableChainedSamlIdResolver implements SamlUserIdentifierResolver {
 
   public static final Logger LOG = LoggerFactory.getLogger(FirstApplicableChainedSamlIdResolver.class);
@@ -18,17 +20,17 @@ public class FirstApplicableChainedSamlIdResolver implements SamlUserIdentifierR
   }
 
   @Override
-  public Optional<String> getUserIdentifier(SAMLCredential samlCredential) {
+  public Optional<IamSamlId> getSamlUserIdentifier(SAMLCredential samlCredential) {
 
     for (SamlUserIdentifierResolver resolver : resolvers) {
       LOG.debug("Attempting SAML user id resolution with resolver {}",
           resolver.getClass().getName());
 
-      Optional<String> userId = resolver.getUserIdentifier(samlCredential);
+      Optional<IamSamlId> userId = resolver.getSamlUserIdentifier(samlCredential);
 
       if (userId.isPresent()) {
 
-        LOG.debug("Resolved user id: {}", userId);
+        LOG.debug("Resolved SAML user id: {}", userId);
         return userId;
       }
     }

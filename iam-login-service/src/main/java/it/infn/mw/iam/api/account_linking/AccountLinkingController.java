@@ -90,9 +90,10 @@ public class AccountLinkingController extends ExternalAuthenticationHandlerSuppo
   @RequestMapping(value = "/{type}", method = RequestMethod.DELETE)
   @ResponseStatus(value = HttpStatus.NO_CONTENT)
   public void unlinkAccount(@PathVariable ExternalAuthenticationType type, Principal principal,
-      @RequestParam("iss") String issuer, @RequestParam("sub") String subject) {
+      @RequestParam("iss") String issuer, @RequestParam("sub") String subject, 
+      @RequestParam(name="attr", required=false) String attributeId) {
 
-    linkingService.unlinkExternalAccount(principal, type, issuer, subject);
+    linkingService.unlinkExternalAccount(principal, type, issuer, subject, attributeId);
   }
 
   @ResponseStatus(value = HttpStatus.BAD_REQUEST)

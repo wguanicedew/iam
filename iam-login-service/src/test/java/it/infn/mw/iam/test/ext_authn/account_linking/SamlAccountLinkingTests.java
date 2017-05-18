@@ -5,6 +5,7 @@ import static it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport.ACCOUNT_
 import static it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport.ACCOUNT_LINKING_SESSION_KEY;
 import static it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport.ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION;
 import static it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport.EXT_AUTH_ERROR_KEY;
+import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.epuid;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
@@ -38,6 +39,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.persistence.model.IamAccount;
+import it.infn.mw.iam.persistence.model.IamSamlId;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.test.ext_authn.saml.SamlExternalAuthenticationTestSupport;
 import it.infn.mw.iam.test.ext_authn.saml.SamlTestConfig;
@@ -108,7 +110,10 @@ public class SamlAccountLinkingTests extends SamlExternalAuthenticationTestSuppo
           request().sessionAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION, nullValue()))
       .andExpect(request().sessionAttribute(ACCOUNT_LINKING_SESSION_KEY, nullValue()));
 
-    IamAccount account = iamAccountRepo.findBySamlId(DEFAULT_IDP_ID, T1_EPUID)
+    IamSamlId samlId  = new IamSamlId(DEFAULT_IDP_ID, epuid.getAttributeName(),
+        T1_EPUID);
+    
+    IamAccount account = iamAccountRepo.findBySamlId(samlId)
       .orElseThrow(() -> new AssertionError("User not found linked to expected SAML id"));
 
     Assert.assertThat(account.getUsername(), equalTo(TEST_100_USER));
@@ -164,7 +169,9 @@ public class SamlAccountLinkingTests extends SamlExternalAuthenticationTestSuppo
       .getSession();
 
     String expectedErrorMessage = String
-      .format("SAML account '[%s] %s' is already linked to another user", DEFAULT_IDP_ID, T2_EPUID);
+      .format("SAML account '[%s] (%s = %s)' is already linked to another user", DEFAULT_IDP_ID, 
+          epuid.getAttributeName(),
+          T2_EPUID);
 
     mvc.perform(get("/iam/account-linking/SAML/done").session(session))
       .andExpect(status().isFound())
@@ -226,7 +233,9 @@ public class SamlAccountLinkingTests extends SamlExternalAuthenticationTestSuppo
 
 
     String expectedErrorMessage = String
-      .format("SAML account '[%s] %s' is already linked to user 'test'", DEFAULT_IDP_ID, T2_EPUID);
+      .format("SAML account '[%s] (%s = %s)' is already linked to user 'test'", DEFAULT_IDP_ID, 
+          epuid.getAttributeName(),
+          T2_EPUID);
 
     mvc.perform(get("/iam/account-linking/SAML/done").session(session))
       .andExpect(status().isFound())

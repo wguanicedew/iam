@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 
 import java.util.Optional;
@@ -32,6 +33,7 @@ import it.infn.mw.iam.api.scim.updater.builders.Adders;
 import it.infn.mw.iam.api.scim.updater.builders.Removers;
 import it.infn.mw.iam.api.scim.updater.builders.Replacers;
 import it.infn.mw.iam.api.scim.updater.util.CollectionHelpers;
+import it.infn.mw.iam.authn.saml.util.Saml2Attribute;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.model.IamOidcId;
@@ -50,8 +52,11 @@ public class AccountUpdatersTests {
   public static final IamOidcId OLD_OIDC_ID = new IamOidcId(OLD, OLD);
   public static final IamOidcId NEW_OIDC_ID = new IamOidcId(NEW, NEW);
 
-  public static final IamSamlId OLD_SAML_ID = new IamSamlId(OLD, OLD);
-  public static final IamSamlId NEW_SAML_ID = new IamSamlId(NEW, NEW);
+  public static final IamSamlId OLD_SAML_ID =
+      new IamSamlId(OLD, Saml2Attribute.epuid.getAttributeName(), OLD);
+
+  public static final IamSamlId NEW_SAML_ID =
+      new IamSamlId(NEW, Saml2Attribute.epuid.getAttributeName(), NEW);
 
   public static final IamSshKey OLD_SSHKEY = new IamSshKey(OLD);
   public static final IamSshKey NEW_SSHKEY = new IamSshKey(NEW);
@@ -104,7 +109,7 @@ public class AccountUpdatersTests {
 
     Mockito.when(repo.findByOidcId(anyString(), anyString())).thenReturn(Optional.empty());
 
-    Mockito.when(repo.findBySamlId(anyString(), anyString())).thenReturn(Optional.empty());
+    Mockito.when(repo.findBySamlId(anyObject())).thenReturn(Optional.empty());
 
     Mockito.when(repo.findByEmail(anyString())).thenReturn(Optional.empty());
 
@@ -120,7 +125,7 @@ public class AccountUpdatersTests {
 
   private void repoBindSamlIdToAccount(IamSamlId id, IamAccount a) {
 
-    Mockito.when(repo.findBySamlId(id.getIdpId(), id.getUserId())).thenReturn(Optional.of(a));
+    Mockito.when(repo.findBySamlId(id)).thenReturn(Optional.of(a));
   }
 
   private void repoBindEmailToAccount(String email, IamAccount a) {

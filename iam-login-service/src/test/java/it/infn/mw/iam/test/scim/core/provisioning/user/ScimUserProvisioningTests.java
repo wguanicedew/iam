@@ -41,7 +41,9 @@ public class ScimUserProvisioningTests {
   final ScimPhoto TESTUSER_PHOTO = ScimPhoto.builder().value("http://site.org/user.png").build();
   final ScimOidcId TESTUSER_OIDCID =
       ScimOidcId.builder().issuer("urn:oidc:test:issuer").subject("1234").build();
-  final ScimSamlId TESTUSER_SAMLID = ScimSamlId.builder().idpId("idpID").userId("userId").build();
+  final ScimSamlId TESTUSER_SAMLID = ScimSamlId.builder().idpId("idpID")
+      .userId("userId")
+      .build();
   final ScimSshKey TESTUSER_SSHKEY = ScimSshKey.builder()
     .primary(true)
     .display("Personal Key")
