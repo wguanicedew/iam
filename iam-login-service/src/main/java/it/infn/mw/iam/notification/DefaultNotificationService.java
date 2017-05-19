@@ -134,6 +134,7 @@ public class DefaultNotificationService implements NotificationService {
     model.put(RECIPIENT_FIELD, recipient);
     model.put("resetPasswordUrl", resetPasswordUrl);
     model.put("organisationName", organisationName);
+    model.put("username", account.getUsername());
 
     return createMessage("resetPassword.vm", model, IamNotificationType.RESETPASSWD,
         properties.getSubject().get("resetPassword"), account.getUserInfo().getEmail());
