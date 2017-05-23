@@ -2,6 +2,9 @@ package it.infn.mw.iam.test.notification;
 
 import static it.infn.mw.iam.test.RegistrationUtils.createRegistrationRequest;
 import static it.infn.mw.iam.test.RegistrationUtils.deleteUser;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -14,7 +17,6 @@ import java.util.concurrent.Future;
 
 import org.apache.commons.lang.time.DateUtils;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -106,7 +108,7 @@ public class NotificationConcurrentTests {
     }
 
     int count = wiserSmtpServer.getMessages().size();
-    Assert.assertEquals(1, count);
+    assertThat(count, equalTo(1));
 
   }
 
@@ -114,7 +116,7 @@ public class NotificationConcurrentTests {
   public void testConcurrentCleanUp() throws Exception {
 
     notificationService.sendPendingNotifications();
-    Assert.assertEquals(1, wiserSmtpServer.getMessages().size());
+    assertThat(wiserSmtpServer.getMessages(), hasSize(1));
 
     Date fakeDate = DateUtils.addDays(new Date(), (notificationCleanUpAge + 1));
     timeProvider.setTime(fakeDate.getTime());
@@ -136,7 +138,7 @@ public class NotificationConcurrentTests {
     }
 
     int count = notificationRepository.countAllMessages();
-    Assert.assertEquals(0, count);
+    assertThat(count, equalTo(0));
   }
 
   public class WorkerSend implements Callable<Integer> {
