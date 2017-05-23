@@ -1,9 +1,36 @@
 package it.infn.mw.iam.config.saml;
 
+import static java.lang.Boolean.FALSE;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "saml")
 public class IamSamlProperties {
+
+  @ConfigurationProperties(prefix = "saml.jit-user-provisioning")
+  public static class IamSamlJITUserProvisioningProperties {
+
+    private Boolean enabled = FALSE;
+    private String trustedIdps = "all";
+
+    public IamSamlJITUserProvisioningProperties() {}
+
+    public Boolean getEnabled() {
+      return enabled;
+    }
+
+    public void setEnabled(Boolean enabled) {
+      this.enabled = enabled;
+    }
+
+    public String getTrustedIdps() {
+      return trustedIdps;
+    }
+
+    public void setTrustedIdps(String trustedIdps) {
+      this.trustedIdps = trustedIdps;
+    }
+  }
 
   private String entityId;
   private String idpMetadata;
@@ -90,5 +117,5 @@ public class IamSamlProperties {
   public void setIdResolvers(String idResolvers) {
     this.idResolvers = idResolvers;
   }
-
+  
 }

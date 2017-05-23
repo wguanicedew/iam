@@ -8,3 +8,7 @@ saml:
   max-assertion-time-sec: ${IAM_SAML_MAX_ASSERTION_TIME:3000}
   max-authentication-age-sec: ${IAM_SAML_MAX_AUTHENTICATION_AGE:86400}
   id-resolvers: ${IAM_SAML_ID_RESOLVERS:epuid,eppn}
+  
+  jit-user-provisioning:
+    enabled: ${IAM_SAML_JIT_USER_PROVISIONING_ENABLED:false}
+    trusted-idps: ${IAM_SAML_JIT_USER_PROVISIONING_TRUSTED_IDPS:all}
