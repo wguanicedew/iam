@@ -40,7 +40,7 @@ public class IamX509Certificate implements IamAccountRef {
 
   public IamX509Certificate(String certificate) {
 
-    this.setCertificate(certificate);
+    this.certificate = certificate;
   }
 
   @Override

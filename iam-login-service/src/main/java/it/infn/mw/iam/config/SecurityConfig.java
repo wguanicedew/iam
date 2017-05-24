@@ -42,6 +42,7 @@ import it.infn.mw.iam.authn.TimestamperSuccessHandler;
 import it.infn.mw.iam.authn.oidc.OidcAccessDeniedHandler;
 import it.infn.mw.iam.authn.oidc.OidcAuthenticationProvider;
 import it.infn.mw.iam.authn.oidc.OidcClientFilter;
+import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
 @Configuration
 @EnableWebSecurity
@@ -69,6 +70,9 @@ public class SecurityConfig {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private IamAccountRepository accountRepo;
 
     @Autowired
     public void configureGlobal(final AuthenticationManagerBuilder auth) throws Exception {
@@ -131,7 +135,8 @@ public class SecurityConfig {
     public AuthenticationSuccessHandler successHandler() {
 
       return new TimestamperSuccessHandler(
-          new RootIsDashboardSuccessHandler(iamBaseUrl, new HttpSessionRequestCache()));
+          new RootIsDashboardSuccessHandler(iamBaseUrl, new HttpSessionRequestCache()),
+          accountRepo);
     }
   }
 

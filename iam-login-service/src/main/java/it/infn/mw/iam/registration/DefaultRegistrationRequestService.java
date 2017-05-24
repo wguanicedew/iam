@@ -23,12 +23,12 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 
+import it.infn.mw.iam.api.scim.converter.UserConverter;
 import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
 import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
 import it.infn.mw.iam.api.scim.model.ScimOidcId;
 import it.infn.mw.iam.api.scim.model.ScimSamlId;
 import it.infn.mw.iam.api.scim.model.ScimUser;
-import it.infn.mw.iam.api.scim.provisioning.ScimUserProvisioning;
 import it.infn.mw.iam.audit.events.registration.RegistrationApproveEvent;
 import it.infn.mw.iam.audit.events.registration.RegistrationConfirmEvent;
 import it.infn.mw.iam.audit.events.registration.RegistrationRejectEvent;
@@ -36,6 +36,7 @@ import it.infn.mw.iam.audit.events.registration.RegistrationRequestEvent;
 import it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo;
 import it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo.ExternalAuthenticationType;
 import it.infn.mw.iam.core.IamRegistrationRequestStatus;
+import it.infn.mw.iam.core.user.IamAccountService;
 import it.infn.mw.iam.notification.NotificationService;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamRegistrationRequest;
@@ -50,7 +51,10 @@ public class DefaultRegistrationRequestService
   private IamRegistrationRequestRepository requestRepository;
 
   @Autowired
-  private ScimUserProvisioning userService;
+  private IamAccountService accountService;
+  
+  @Autowired
+  private UserConverter userConverter;
 
   @Autowired
   @Qualifier("defaultNotificationService")
@@ -116,7 +120,7 @@ public class DefaultRegistrationRequestService
 
     extAuthnInfo.ifPresent(i -> addExternalAuthnInfo(userBuilder, i));
 
-    IamAccount newAccount = userService.createAccount(userBuilder.build());
+    IamAccount newAccount = accountService.createAccount(userConverter.fromScim(userBuilder.build()));
     newAccount.setConfirmationKey(tokenGenerator.generateToken());
     newAccount.setActive(false);
 
@@ -276,7 +280,7 @@ public class DefaultRegistrationRequestService
     notificationService.createRequestRejectedMessage(request);
     RegistrationRequestDto retval = converter.fromEntity(request);
 
-    userService.delete(request.getAccount().getUuid());
+    accountService.deleteAccount(request.getAccount());
 
     eventPublisher.publishEvent(new RegistrationRejectEvent(this, request,
         "Reject registration request for user " + request.getAccount().getUsername()));

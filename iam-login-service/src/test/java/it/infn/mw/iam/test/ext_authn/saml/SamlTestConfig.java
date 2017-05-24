@@ -8,6 +8,4 @@ public class SamlTestConfig {
   @Autowired
   ResourceLoader resourceLoader;
 
-
-
 }

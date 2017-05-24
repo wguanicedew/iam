@@ -32,15 +32,24 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 
+import it.infn.mw.iam.authn.saml.util.Saml2Attribute;
+import it.infn.mw.iam.persistence.model.IamSamlId;
 import it.infn.mw.iam.test.util.saml.SamlAssertionBuilder;
 import it.infn.mw.iam.test.util.saml.SamlResponseBuilder;
 
-public class SamlExternalAuthenticationTestSupport {
+public class SamlAuthenticationTestSupport {
 
   public static final String DEFAULT_IDP_ID = "https://idptestbed/idp/shibboleth";
 
   public static final String KEY_ALIAS = "iam-test";
   public static final String KS_PASSWORD = "iam-test";
+
+  public static final String JIT1_NAMEID = "jit1";
+  public static final String JIT1_EPPN = "jit1.eppn@idptestbed";
+  public static final String JIT1_EPUID = "jit1.epuid@idptestbed";
+  public static final String JIT1_GIVEN_NAME = "JustInTime1";
+  public static final String JIT1_FAMILY_NAME = "Saml User";
+  public static final String JIT1_MAIL = "jit1@example.org";
 
   public static final String T1_NAMEID = "1234";
   public static final String T1_EPPN = "test-user@idptestbed";
@@ -58,6 +67,9 @@ public class SamlExternalAuthenticationTestSupport {
 
   public static final String EXT_AUTHN_URL = "/iam/authn-info";
 
+  public static final IamSamlId T1_SAML_ID =
+      new IamSamlId(DEFAULT_IDP_ID, Saml2Attribute.epuid.getAttributeName(), T1_EPUID);
+  
   @Autowired
   protected MetadataGenerator metadataGenerator;
 
@@ -238,6 +250,37 @@ public class SamlExternalAuthenticationTestSupport {
     return r;
   }
 
+
+  public Response buildJitTest1Response(AuthnRequest authnRequest)
+      throws NoSuchAlgorithmException, CertificateException, KeyStoreException, IOException,
+      SecurityException, SignatureException, MarshallingException {
+
+    SamlAssertionBuilder sab = samlAssertionBuilder();
+
+    DateTime issueTime = DateTime.now().minusSeconds(30);
+
+    Assertion a = sab.issuer(DEFAULT_IDP_ID)
+      .nameId(JIT1_NAMEID)
+      .eppn(JIT1_EPPN)
+      .epuid(JIT1_EPUID)
+      .givenName(JIT1_GIVEN_NAME)
+      .sn(JIT1_FAMILY_NAME)
+      .mail(JIT1_MAIL)
+      .recipient(authnRequest.getAssertionConsumerServiceURL())
+      .requestId(authnRequest.getID())
+      .audience(metadataGenerator.getEntityId())
+      .issueInstant(issueTime)
+      .build();
+
+    SamlResponseBuilder srb = samlResponseBuilder();
+    Response r = srb.assertion(a)
+      .recipient(authnRequest.getAssertionConsumerServiceURL())
+      .requestId(authnRequest.getID())
+      .issueInstant(DateTime.now())
+      .build();
+
+    return r;
+  }
 
   @SuppressWarnings("rawtypes")
   public AuthnRequest getAuthnRequestFromSession(MockHttpSession session) {

@@ -60,6 +60,9 @@ public class GoogleClient {
   @Autowired
   private GoogleClientProperties googleClientProperties;
 
+  @Autowired
+  private IamAccountRepository accountRepo;
+
   @Bean
   public FilterRegistrationBean disabledAutomaticOidcFilterRegistration(OidcClientFilter f) {
 
@@ -111,7 +114,8 @@ public class GoogleClient {
 
     RootIsDashboardSuccessHandler sa =
         new RootIsDashboardSuccessHandler(iamBaseUrl, new HttpSessionRequestCache());
-    AuthenticationSuccessHandler successHandler = new TimestamperSuccessHandler(sa);
+
+    AuthenticationSuccessHandler successHandler = new TimestamperSuccessHandler(sa, accountRepo);
 
     return new ExternalAuthenticationSuccessHandler(successHandler, "/");
 

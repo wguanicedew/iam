@@ -1,0 +1,736 @@
+package it.infn.mw.iam.test.service;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Optional;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import it.infn.mw.iam.core.user.DefaultIamAccountService;
+import it.infn.mw.iam.core.user.exception.CredentialAlreadyBoundException;
+import it.infn.mw.iam.core.user.exception.InvalidCredentialException;
+import it.infn.mw.iam.core.user.exception.UserAlreadyExistsException;
+import it.infn.mw.iam.persistence.model.IamAccount;
+import it.infn.mw.iam.persistence.model.IamOidcId;
+import it.infn.mw.iam.persistence.model.IamSamlId;
+import it.infn.mw.iam.persistence.model.IamSshKey;
+import it.infn.mw.iam.persistence.model.IamX509Certificate;
+import it.infn.mw.iam.persistence.repository.IamAccountRepository;
+import it.infn.mw.iam.persistence.repository.IamAuthoritiesRepository;
+
+@RunWith(MockitoJUnitRunner.class)
+public class IamAccountServiceTests extends IamAccountServiceTestSupport {
+
+  @Mock
+  private IamAccountRepository accountRepo;
+
+  @Mock
+  private IamAuthoritiesRepository authoritiesRepo;
+
+  @Mock
+  private PasswordEncoder passwordEncoder;
+
+  @Mock
+  private ApplicationEventPublisher eventPublisher;
+
+
+  @InjectMocks
+  private DefaultIamAccountService accountService;
+
+
+  @Before
+  public void setup() {
+
+    when(accountRepo.findProvisionedAccountsWithLastLoginTimeBeforeTimestamp(anyObject()))
+      .thenReturn(emptyList());
+    when(accountRepo.findByCertificate(anyString())).thenReturn(Optional.empty());
+    when(accountRepo.findBySshKeyValue(anyString())).thenReturn(Optional.empty());
+    when(accountRepo.findBySamlId(anyObject())).thenReturn(Optional.empty());
+    when(accountRepo.findByOidcId(anyString(), anyString())).thenReturn(Optional.empty());
+    when(accountRepo.findByUsername(anyString())).thenReturn(Optional.empty());
+    when(accountRepo.findByEmail(anyString())).thenReturn(Optional.empty());
+    when(accountRepo.findByUsername(TEST_USERNAME)).thenReturn(Optional.of(TEST_ACCOUNT));
+    when(accountRepo.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(TEST_ACCOUNT));
+    when(authoritiesRepo.findByAuthority(anyString())).thenReturn(Optional.empty());
+    when(authoritiesRepo.findByAuthority("ROLE_USER")).thenReturn(Optional.of(ROLE_USER_AUTHORITY));
+    when(passwordEncoder.encode(anyObject())).thenReturn(PASSWORD);
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void testCreateNullAccountFails() {
+    try {
+      accountService.createAccount(null);
+    } catch (NullPointerException e) {
+      assertThat(e.getMessage(), equalTo("Cannot create a null account"));
+      throw e;
+    }
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testNullUsernameFails() {
+    IamAccount account = IamAccount.newAccount();
+    try {
+      accountService.createAccount(account);
+    } catch (IllegalArgumentException e) {
+      assertThat(e.getMessage(), equalTo("Null or empty username"));
+      throw e;
+    }
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testEmptyUsernameFails() {
+    IamAccount account = IamAccount.newAccount();
+    account.setUsername("");
+    try {
+      accountService.createAccount(account);
+    } catch (IllegalArgumentException e) {
+      assertThat(e.getMessage(), equalTo("Null or empty username"));
+      throw e;
+    }
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void testNullUserinfoFails() {
+    IamAccount account = new IamAccount();
+    account.setUsername("test");
+    try {
+      accountService.createAccount(account);
+    } catch (NullPointerException e) {
+      assertThat(e.getMessage(), equalTo("Null userinfo object"));
+      throw e;
+    }
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testNullEmailFails() {
+    IamAccount account = IamAccount.newAccount();
+    account.setUsername("test");
+
+    try {
+      accountService.createAccount(account);
+    } catch (IllegalArgumentException e) {
+      assertThat(e.getMessage(), equalTo("Null or empty email"));
+      throw e;
+    }
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testEmptyEmailFails() {
+    IamAccount account = IamAccount.newAccount();
+    account.setUsername("test");
+    account.getUserInfo().setEmail("");
+
+    try {
+      accountService.createAccount(account);
+    } catch (IllegalArgumentException e) {
+      assertThat(e.getMessage(), equalTo("Null or empty email"));
+      throw e;
+    }
+  }
+
+
+  @Test(expected = UserAlreadyExistsException.class)
+  public void testBoundUsernameChecksWorks() {
+    IamAccount account = IamAccount.newAccount();
+    account.setUsername(TEST_USERNAME);
+    account.getUserInfo().setEmail("cicciopaglia@test.org");
+
+    try {
+      accountService.createAccount(account);
+    } catch (UserAlreadyExistsException e) {
+      assertThat(e.getMessage(),
+          equalTo(String.format("A user with username '%s' already exists", TEST_USERNAME)));
+      throw e;
+    }
+
+  }
+
+  @Test(expected = UserAlreadyExistsException.class)
+  public void testBoundEmailCheckWorks() {
+    IamAccount account = IamAccount.newAccount();
+    account.setUsername("ciccio");
+    account.getUserInfo().setEmail(TEST_EMAIL);
+
+    try {
+      accountService.createAccount(account);
+    } catch (UserAlreadyExistsException e) {
+      assertThat(e.getMessage(),
+          equalTo(String.format("A user linked with email '%s' already exists", TEST_EMAIL)));
+      throw e;
+    }
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void testCreationFailsIfRoleUserAuthorityIsNotDefined() {
+
+    when(authoritiesRepo.findByAuthority("ROLE_USER")).thenReturn(Optional.empty());
+
+    try {
+      accountService.createAccount(CICCIO_ACCOUNT);
+    } catch (IllegalStateException e) {
+      assertThat(e.getMessage(), equalTo("ROLE_USER not found in database. This is a bug"));
+      throw e;
+    }
+  }
+
+
+  @Test
+  public void testUuidIfProvidedIsPreserved() {
+    IamAccount account = cloneAccount(CICCIO_ACCOUNT);
+
+    accountService.createAccount(account);
+    verify(accountRepo, Mockito.times(1)).save(account);
+    assertThat(account.getUuid(), equalTo(CICCIO_UUID));
+
+  }
+
+  @Test
+  public void testUuidIfNotProvidedIsGenerated() {
+    IamAccount account = cloneAccount(CICCIO_ACCOUNT);
+
+    account.setUuid(null);
+
+    accountService.createAccount(account);
+    verify(accountRepo, Mockito.times(1)).save(account);
+    assertNotNull(account.getUuid());
+  }
+
+  @Test
+  public void testCreationTimeIfProvidedIsPreserved() {
+    IamAccount account = cloneAccount(CICCIO_ACCOUNT);
+
+    Calendar cal = Calendar.getInstance();
+    cal.add(Calendar.DAY_OF_MONTH, -1);
+
+    Date yesterday = cal.getTime();
+
+    account.setCreationTime(yesterday);
+    accountService.createAccount(account);
+    verify(accountRepo, times(1)).save(account);
+    assertThat(account.getCreationTime(), equalTo(yesterday));
+  }
+
+  @Test
+  public void testPasswordIfProvidedIsPreservedAndEncoded() {
+    IamAccount account = cloneAccount(CICCIO_ACCOUNT);
+
+    account.setPassword(PASSWORD);
+
+    accountService.createAccount(account);
+    verify(accountRepo, Mockito.times(1)).save(account);
+    verify(passwordEncoder, Mockito.times(1)).encode(PASSWORD);
+
+    assertThat(account.getPassword(), equalTo(PASSWORD));
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void testNullSamlIdIsNotAccepted() {
+    IamAccount account = cloneAccount(CICCIO_ACCOUNT);
+    account.getSamlIds().add(null);
+    try {
+      accountService.createAccount(account);
+    } catch (NullPointerException e) {
+      assertThat(e.getMessage(), equalTo("null saml id"));
+      throw e;
+    }
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testNullSamlIdpIdIsNotAccepted() {
+    IamAccount account = cloneAccount(CICCIO_ACCOUNT);
+    IamSamlId samlId = new IamSamlId();
+    account.linkSamlIds(asList(samlId));
+    try {
+      accountService.createAccount(account);
+    } catch (IllegalArgumentException e) {
+      assertThat(e.getMessage(), equalTo("null or empty idpId"));
+      throw e;
+    }
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testEmptySamlIdpIdIsNotAccepted() {
+    IamAccount account = cloneAccount(CICCIO_ACCOUNT);
+    IamSamlId samlId = new IamSamlId();
+    samlId.setIdpId("");
+    account.linkSamlIds(asList(samlId));
+    try {
+      accountService.createAccount(account);
+    } catch (IllegalArgumentException e) {
+      assertThat(e.getMessage(), equalTo("null or empty idpId"));
+      throw e;
+    }
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testNullSamlUserIdIsNotAccepted() {
+    IamAccount account = cloneAccount(CICCIO_ACCOUNT);
+    IamSamlId samlId = new IamSamlId();
+    samlId.setIdpId(TEST_SAML_ID_IDP_ID);
+
+    account.linkSamlIds(asList(samlId));
+    try {
+      accountService.createAccount(account);
+    } catch (IllegalArgumentException e) {
+      assertThat(e.getMessage(), equalTo("null or empty userId"));
+      throw e;
+    }
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testEmptySamlUserIdIsNotAccepted() {
+    IamAccount account = cloneAccount(CICCIO_ACCOUNT);
+    IamSamlId samlId = new IamSamlId();
+    samlId.setIdpId(TEST_SAML_ID_IDP_ID);
+    samlId.setUserId("");
+
+    account.linkSamlIds(asList(samlId));
+    try {
+      accountService.createAccount(account);
+    } catch (IllegalArgumentException e) {
+      assertThat(e.getMessage(), equalTo("null or empty userId"));
+      throw e;
+    }
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testNullSamlAttributeIdIsNotAccepted() {
+    IamAccount account = cloneAccount(CICCIO_ACCOUNT);
+    IamSamlId samlId = new IamSamlId();
+    samlId.setIdpId(TEST_SAML_ID_IDP_ID);
+    samlId.setUserId(TEST_SAML_ID_USER_ID);
+
+    account.linkSamlIds(asList(samlId));
+    try {
+      accountService.createAccount(account);
+    } catch (IllegalArgumentException e) {
+      assertThat(e.getMessage(), equalTo("null or empty attributeId"));
+      throw e;
+    }
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testEmptySamlAttributeIdIsNotAccepted() {
+    IamAccount account = cloneAccount(CICCIO_ACCOUNT);
+    IamSamlId samlId = new IamSamlId();
+    samlId.setIdpId(TEST_SAML_ID_IDP_ID);
+    samlId.setUserId(TEST_SAML_ID_USER_ID);
+    samlId.setAttributeId("");
+
+    account.linkSamlIds(asList(samlId));
+    try {
+      accountService.createAccount(account);
+    } catch (IllegalArgumentException e) {
+      assertThat(e.getMessage(), equalTo("null or empty attributeId"));
+      throw e;
+    }
+  }
+
+
+  @Test(expected = CredentialAlreadyBoundException.class)
+  public void testBoundSamlIdIsNotAccepted() {
+    IamAccount account = cloneAccount(CICCIO_ACCOUNT);
+    when(accountRepo.findBySamlId(TEST_SAML_ID)).thenReturn(Optional.of(TEST_ACCOUNT));
+    account.linkSamlIds(asList(TEST_SAML_ID));
+    accountService.createAccount(account);
+  }
+
+  @Test
+  public void testValidSamlIdLinkedPassesSanityChecks() {
+    IamAccount account = cloneAccount(CICCIO_ACCOUNT);
+
+    account.linkSamlIds(asList(TEST_SAML_ID));
+    accountService.createAccount(account);
+
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void testNullOidcIdIsNotAccepted() {
+    IamAccount account = cloneAccount(CICCIO_ACCOUNT);
+    account.getOidcIds().add(null);
+    try {
+      accountService.createAccount(account);
+    } catch (NullPointerException e) {
+      assertThat(e.getMessage(), equalTo("null oidc id"));
+      throw e;
+    }
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testNullOidcIdIssuerIsNotAccepted() {
+    IamAccount account = cloneAccount(CICCIO_ACCOUNT);
+    IamOidcId oidcId = new IamOidcId();
+    account.linkOidcIds(asList(oidcId));
+    try {
+      accountService.createAccount(account);
+    } catch (IllegalArgumentException e) {
+      assertThat(e.getMessage(), equalTo("null or empty oidc id issuer"));
+      throw e;
+    }
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testEmptyOidcIdIssuerIsNotAccepted() {
+    IamAccount account = cloneAccount(CICCIO_ACCOUNT);
+    IamOidcId oidcId = new IamOidcId();
+    oidcId.setIssuer("");
+    account.linkOidcIds(asList(oidcId));
+    try {
+      accountService.createAccount(account);
+    } catch (IllegalArgumentException e) {
+      assertThat(e.getMessage(), equalTo("null or empty oidc id issuer"));
+      throw e;
+    }
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testNullOidcIdSubjectIsNotAccepted() {
+    IamAccount account = cloneAccount(CICCIO_ACCOUNT);
+    IamOidcId oidcId = new IamOidcId();
+    oidcId.setIssuer(TEST_OIDC_ID_ISSUER);
+    account.linkOidcIds(asList(oidcId));
+    try {
+      accountService.createAccount(account);
+    } catch (IllegalArgumentException e) {
+      assertThat(e.getMessage(), equalTo("null or empty oidc id subject"));
+      throw e;
+    }
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testEmptyOidcIdSubjectIsNotAccepted() {
+    IamAccount account = cloneAccount(CICCIO_ACCOUNT);
+    IamOidcId oidcId = new IamOidcId();
+    oidcId.setIssuer(TEST_OIDC_ID_ISSUER);
+    oidcId.setSubject("");
+    account.linkOidcIds(asList(oidcId));
+    try {
+      accountService.createAccount(account);
+    } catch (IllegalArgumentException e) {
+      assertThat(e.getMessage(), equalTo("null or empty oidc id subject"));
+      throw e;
+    }
+  }
+
+  @Test(expected = CredentialAlreadyBoundException.class)
+  public void testBoundOidcIdIsNotAccepted() {
+    IamAccount account = cloneAccount(CICCIO_ACCOUNT);
+    when(accountRepo.findByOidcId(TEST_OIDC_ID_ISSUER, TEST_OIDC_ID_SUBJECT))
+      .thenReturn(Optional.of(TEST_ACCOUNT));
+
+    account.linkOidcIds(asList(TEST_OIDC_ID));
+    accountService.createAccount(account);
+  }
+
+
+  @Test
+  public void testValidOidcIdPassesSanityChecks() {
+    IamAccount account = cloneAccount(CICCIO_ACCOUNT);
+    account.linkOidcIds(asList(TEST_OIDC_ID));
+    accountService.createAccount(account);
+
+  }
+
+
+  @Test(expected = NullPointerException.class)
+  public void testNullSshKeyIsNotAccepted() {
+    IamAccount account = cloneAccount(CICCIO_ACCOUNT);
+    account.getSshKeys().add(null);
+    try {
+      accountService.createAccount(account);
+    } catch (NullPointerException e) {
+      assertThat(e.getMessage(), equalTo("null ssh key"));
+      throw e;
+    }
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testNoValueSshKeyIsNotAccepted() {
+    IamAccount account = cloneAccount(CICCIO_ACCOUNT);
+    IamSshKey key = new IamSshKey();
+    account.linkSshKeys(asList(key));
+    try {
+      accountService.createAccount(account);
+    } catch (IllegalArgumentException e) {
+      assertThat(e.getMessage(), equalTo("null or empty ssh key value"));
+      throw e;
+    }
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testEmptyValueSshKeyIsNotAccepted() {
+    IamAccount account = cloneAccount(CICCIO_ACCOUNT);
+    IamSshKey key = new IamSshKey();
+    key.setValue("");
+    account.linkSshKeys(asList(key));
+    try {
+      accountService.createAccount(account);
+    } catch (IllegalArgumentException e) {
+      assertThat(e.getMessage(), equalTo("null or empty ssh key value"));
+      throw e;
+    }
+  }
+
+  @Test(expected = CredentialAlreadyBoundException.class)
+  public void testBoundSshKeyIsNotAccepted() {
+    IamAccount account = cloneAccount(CICCIO_ACCOUNT);
+    account.linkSshKeys(asList(TEST_SSH_KEY_1));
+    when(accountRepo.findBySshKeyValue(TEST_SSH_KEY_VALUE_1)).thenReturn(Optional.of(TEST_ACCOUNT));
+    accountService.createAccount(account);
+  }
+
+  @Test
+  public void testValidSshKeyPassesSanityChecks() {
+    IamAccount account = cloneAccount(CICCIO_ACCOUNT);
+    account.linkSshKeys(asList(TEST_SSH_KEY_1));
+    accountService.createAccount(account);
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void testNullX509CertificateIsNotAccepted() {
+    IamAccount account = cloneAccount(CICCIO_ACCOUNT);
+    account.getX509Certificates().add(null);
+    try {
+      accountService.createAccount(account);
+    } catch (NullPointerException e) {
+      assertThat(e.getMessage(), equalTo("null X.509 certificate"));
+      throw e;
+    }
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testNullX509CertificateValueIsNotAccepted() {
+    IamAccount account = cloneAccount(CICCIO_ACCOUNT);
+    IamX509Certificate cert = new IamX509Certificate(null);
+    account.linkX509Certificates(asList(cert));
+    try {
+      accountService.createAccount(account);
+    } catch (IllegalArgumentException e) {
+      assertThat(e.getMessage(), equalTo("null or empty X.509 certificate value"));
+      throw e;
+    }
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testEmptyX509CertificateValueIsNotAccepted() {
+    IamAccount account = cloneAccount(CICCIO_ACCOUNT);
+    IamX509Certificate cert = new IamX509Certificate("");
+    account.linkX509Certificates(asList(cert));
+    try {
+      accountService.createAccount(account);
+    } catch (IllegalArgumentException e) {
+      assertThat(e.getMessage(), equalTo("null or empty X.509 certificate value"));
+      throw e;
+    }
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testNullX509CertificateSubjectIsNotAccepted() {
+    IamAccount account = cloneAccount(CICCIO_ACCOUNT);
+    IamX509Certificate cert = new IamX509Certificate(TEST_X509_CERTIFICATE_VALUE_1);
+    account.linkX509Certificates(asList(cert));
+    try {
+      accountService.createAccount(account);
+    } catch (IllegalArgumentException e) {
+      assertThat(e.getMessage(), equalTo("null or empty X.509 certificate subject"));
+      throw e;
+    }
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testEmptyX509CertificateSubjectIsNotAccepted() {
+    IamAccount account = cloneAccount(CICCIO_ACCOUNT);
+    IamX509Certificate cert = new IamX509Certificate(TEST_X509_CERTIFICATE_VALUE_1);
+    cert.setCertificateSubject("");
+    account.linkX509Certificates(asList(cert));
+    try {
+      accountService.createAccount(account);
+    } catch (IllegalArgumentException e) {
+      assertThat(e.getMessage(), equalTo("null or empty X.509 certificate subject"));
+      throw e;
+    }
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testNullX509CertificateLabelIsNotAccepted() {
+    IamAccount account = cloneAccount(CICCIO_ACCOUNT);
+    IamX509Certificate cert = new IamX509Certificate(TEST_X509_CERTIFICATE_VALUE_1);
+    cert.setCertificateSubject(TEST_X509_CERTIFICATE_SUBJECT_1);
+    account.linkX509Certificates(asList(cert));
+    try {
+      accountService.createAccount(account);
+    } catch (IllegalArgumentException e) {
+      assertThat(e.getMessage(), equalTo("null or empty X.509 certificate label"));
+      throw e;
+    }
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testEmptyX509CertificateLabelIsNotAccepted() {
+    IamAccount account = cloneAccount(CICCIO_ACCOUNT);
+    IamX509Certificate cert = new IamX509Certificate(TEST_X509_CERTIFICATE_VALUE_1);
+    cert.setCertificateSubject(TEST_X509_CERTIFICATE_SUBJECT_1);
+    cert.setLabel("");
+    account.linkX509Certificates(asList(cert));
+    try {
+      accountService.createAccount(account);
+    } catch (IllegalArgumentException e) {
+      assertThat(e.getMessage(), equalTo("null or empty X.509 certificate label"));
+      throw e;
+    }
+  }
+
+  @Test(expected = CredentialAlreadyBoundException.class)
+  public void testBoundX509CertificateIsNotAccepted() {
+    IamAccount account = cloneAccount(CICCIO_ACCOUNT);
+    account.linkX509Certificates(asList(TEST_X509_CERTIFICATE_1));
+
+    when(accountRepo.findByCertificate(TEST_X509_CERTIFICATE_VALUE_1))
+      .thenReturn(Optional.of(TEST_ACCOUNT));
+
+    accountService.createAccount(account);
+
+
+  }
+
+  @Test
+  public void testValidX509CertificatePassesSanityChecks() {
+    IamAccount account = cloneAccount(CICCIO_ACCOUNT);
+    account.linkX509Certificates(asList(TEST_X509_CERTIFICATE_2));
+    accountService.createAccount(account);
+  }
+
+  @Test
+  public void testX509PrimaryIsBoundIfNotProvided() {
+    IamAccount account = cloneAccount(CICCIO_ACCOUNT);
+    account.linkX509Certificates(asList(TEST_X509_CERTIFICATE_1, TEST_X509_CERTIFICATE_2));
+    accountService.createAccount(account);
+
+    assertTrue(account.getX509Certificates().get(0).isPrimary());
+    assertFalse(account.getX509Certificates().get(1).isPrimary());
+
+  }
+
+  @Test
+  public void testX509PrimaryIsRespected() {
+    IamAccount account = cloneAccount(CICCIO_ACCOUNT);
+    TEST_X509_CERTIFICATE_2.setPrimary(true);
+    account.linkX509Certificates(asList(TEST_X509_CERTIFICATE_1, TEST_X509_CERTIFICATE_2));
+    accountService.createAccount(account);
+
+    assertFalse(account.getX509Certificates().get(0).isPrimary());
+    assertTrue(account.getX509Certificates().get(1).isPrimary());
+
+  }
+
+  @Test(expected = InvalidCredentialException.class)
+  public void testX509MultiplePrimaryIsNotAccepted() {
+    IamAccount account = cloneAccount(CICCIO_ACCOUNT);
+    TEST_X509_CERTIFICATE_1.setPrimary(true);
+    TEST_X509_CERTIFICATE_2.setPrimary(true);
+    account.linkX509Certificates(asList(TEST_X509_CERTIFICATE_1, TEST_X509_CERTIFICATE_2));
+    try {
+      accountService.createAccount(account);
+    } catch (InvalidCredentialException e) {
+      assertThat(e.getMessage(), equalTo("Only one X.509 certificate can be marked as primary"));
+      throw e;
+    }
+  }
+
+  @Test
+  public void testSshKeyPrimaryIsBoundIfNotProvided() {
+    IamAccount account = cloneAccount(CICCIO_ACCOUNT);
+    account.linkSshKeys(asList(TEST_SSH_KEY_1, TEST_SSH_KEY_2));
+    accountService.createAccount(account);
+
+    assertTrue(account.getSshKeys().get(0).isPrimary());
+    assertFalse(account.getSshKeys().get(1).isPrimary());
+  }
+
+  @Test
+  public void testSshKeyPrimaryIsRespected() {
+    IamAccount account = cloneAccount(CICCIO_ACCOUNT);
+    TEST_SSH_KEY_2.setPrimary(true);
+    account.linkSshKeys(asList(TEST_SSH_KEY_1, TEST_SSH_KEY_2));
+    accountService.createAccount(account);
+
+    assertFalse(account.getSshKeys().get(0).isPrimary());
+    assertTrue(account.getSshKeys().get(1).isPrimary());
+  }
+
+  @Test(expected = InvalidCredentialException.class)
+  public void testMultiplePrimarySshKeysIsNotAccepted() {
+    IamAccount account = cloneAccount(CICCIO_ACCOUNT);
+    TEST_SSH_KEY_1.setPrimary(true);
+    TEST_SSH_KEY_2.setPrimary(true);
+    account.linkSshKeys(asList(TEST_SSH_KEY_1, TEST_SSH_KEY_2));
+    try {
+      accountService.createAccount(account);
+    } catch (InvalidCredentialException e) {
+      assertThat(e.getMessage(), equalTo("Only one SSH key can be marked as primary"));
+      throw e;
+    }
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void testNullDeleteAccountFails() {
+    try {
+      accountService.deleteAccount(null);
+    } catch (NullPointerException e) {
+      assertThat(e.getMessage(), equalTo("cannot delete a null account"));
+      throw e;
+    }
+  }
+
+  @Test
+  public void testAccountDeletion() {
+    accountService.deleteAccount(CICCIO_ACCOUNT);
+    verify(accountRepo, times(1)).delete(CICCIO_ACCOUNT);
+    verify(eventPublisher, times(1)).publishEvent(anyObject());
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void testDeleteInactiveProvisionedAccountFailsWithNullTimestamp() {
+    try {
+      accountService.deleteInactiveProvisionedUsersSinceTime(null);
+    } catch (NullPointerException e) {
+      assertThat(e.getMessage(), equalTo("null timestamp"));
+      throw e;
+    }
+  }
+
+  @Test
+  public void testDeleteInactiveProvisionedAccountWorks() {
+
+    when(accountRepo.findProvisionedAccountsWithLastLoginTimeBeforeTimestamp(anyObject()))
+      .thenReturn(Arrays.asList(CICCIO_ACCOUNT, TEST_ACCOUNT));
+    
+    accountService.deleteInactiveProvisionedUsersSinceTime(new Date());
+    
+    verify(accountRepo, times(1)).delete(CICCIO_ACCOUNT);
+    verify(accountRepo, times(1)).delete(TEST_ACCOUNT);
+    verify(eventPublisher, times(2)).publishEvent(anyObject());
+  }
+}

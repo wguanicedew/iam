@@ -1,10 +1,12 @@
 package it.infn.mw.iam.authn.saml;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.givenName;
 import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.mail;
 
 import java.util.EnumSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -24,18 +26,32 @@ public class JustInTimeProvisioningSAMLUserDetailsService extends SAMLUserDetail
 
   private final IamAccountRepository repo;
   private final IamAccountService accountService;
+  private final Optional<Set<String>> trustedIdpEntityIds; 
 
   private static final EnumSet<Saml2Attribute> REQUIRED_SAML_ATTRIBUTES =
       EnumSet.of(Saml2Attribute.mail, Saml2Attribute.givenName, Saml2Attribute.sn);
 
   public JustInTimeProvisioningSAMLUserDetailsService(SamlUserIdentifierResolver resolver,
       IamAccountService accountService, InactiveAccountAuthenticationHander inactiveAccountHandler,
-      IamAccountRepository repo) {
+      IamAccountRepository repo,
+      Optional<Set<String>> trustedIdpEntityIds) {
     super(inactiveAccountHandler, resolver);
     this.accountService = accountService;
     this.repo = repo;
+    this.trustedIdpEntityIds = trustedIdpEntityIds;
   }
 
+  
+  protected void samlCredentialEntityIdChecks(SAMLCredential credential){
+    trustedIdpEntityIds.ifPresent(l -> {
+      if (!l.contains(credential.getRemoteEntityID())){
+        throw new UsernameNotFoundException(
+            String.format("Error provisioning user! SAML credential issuer '%s' is not trusted"
+                + " for just-in-time account provisioning.", credential.getRemoteEntityID()));
+      }
+    });
+  }
+  
   protected void samlCredentialSanityChecks(SAMLCredential credential) {
 
     for (Saml2Attribute a : REQUIRED_SAML_ATTRIBUTES) {
@@ -45,11 +61,14 @@ public class JustInTimeProvisioningSAMLUserDetailsService extends SAMLUserDetail
             a.getAlias(), a.getAttributeName()));
       }
     }
+    
+    
   }
 
 
   @Override
   public Object loadUserBySAML(SAMLCredential credential) throws UsernameNotFoundException {
+    checkNotNull(credential, "null saml credential");
 
     IamSamlId samlId = resolverSamlId(credential);
 
@@ -59,14 +78,18 @@ public class JustInTimeProvisioningSAMLUserDetailsService extends SAMLUserDetail
       return buildUserFromIamAccount(account.get());
     }
 
+    samlCredentialEntityIdChecks(credential);
     samlCredentialSanityChecks(credential);
     
     final String randomUuid = UUID.randomUUID().toString();
 
     // Create account from SAMLCredential
-    IamAccount newAccount = new IamAccount();
+    IamAccount newAccount = IamAccount.newAccount();
 
+    newAccount.setProvisioned(true);
     newAccount.getSamlIds().add(samlId);
+    samlId.setAccount(newAccount);
+    
     newAccount.setActive(true);
 
     if (samlId.getUserId().length() < 128) {
@@ -83,7 +106,7 @@ public class JustInTimeProvisioningSAMLUserDetailsService extends SAMLUserDetail
     
     newAccount.getUserInfo().setEmail(credential.getAttributeAsString(mail.getAttributeName()));
     
-    newAccount = accountService.createAccount(newAccount);
+    accountService.createAccount(newAccount);
     
     return buildUserFromIamAccount(newAccount);
   }

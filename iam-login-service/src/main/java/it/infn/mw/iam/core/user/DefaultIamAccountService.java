@@ -1,9 +1,14 @@
 package it.infn.mw.iam.core.user;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Strings.isNullOrEmpty;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
+
+import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -11,10 +16,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import it.infn.mw.iam.audit.events.account.AccountCreatedEvent;
+import it.infn.mw.iam.audit.events.account.AccountRemovedEvent;
 import it.infn.mw.iam.core.user.exception.CredentialAlreadyBoundException;
 import it.infn.mw.iam.core.user.exception.InvalidCredentialException;
 import it.infn.mw.iam.core.user.exception.UserAlreadyExistsException;
 import it.infn.mw.iam.persistence.model.IamAccount;
+import it.infn.mw.iam.persistence.model.IamAuthority;
 import it.infn.mw.iam.persistence.model.IamOidcId;
 import it.infn.mw.iam.persistence.model.IamSamlId;
 import it.infn.mw.iam.persistence.model.IamSshKey;
@@ -23,6 +30,7 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamAuthoritiesRepository;
 
 @Service
+@Transactional
 public class DefaultIamAccountService implements IamAccountService {
 
   private final IamAccountRepository accountRepo;
@@ -43,21 +51,21 @@ public class DefaultIamAccountService implements IamAccountService {
 
   @Override
   public IamAccount createAccount(IamAccount account) {
-    checkNotNull(account);
+    checkNotNull(account, "Cannot create a null account");
 
     final Date now = new Date();
     final String randomUuid = UUID.randomUUID().toString();
-    
+
     newAccountSanityChecks(account);
 
-    if (account.getCreationTime() == null){
+    if (account.getCreationTime() == null) {
       account.setCreationTime(now);
     }
-    
+
     if (account.getUuid() == null) {
       account.setUuid(randomUuid);
     }
-    
+
     account.setLastUpdateTime(now);
 
     account.getUserInfo().setEmailVerified(true);
@@ -68,11 +76,10 @@ public class DefaultIamAccountService implements IamAccountService {
 
     account.setPassword(passwordEncoder.encode(account.getPassword()));
 
-    authoritiesRepo.findByAuthority("ROLE_USER")
-      .map(a -> account.getAuthorities().add(a))
-      .orElseThrow(
-          () -> new IllegalStateException("ROLE_USER not found in database. This is a bug"));
+    IamAuthority roleUserAuthority = authoritiesRepo.findByAuthority("ROLE_USER").orElseThrow(
+        () -> new IllegalStateException("ROLE_USER not found in database. This is a bug"));
 
+    account.getAuthorities().add(roleUserAuthority);
 
     // Credentials sanity checks
     newAccountX509CertificatesSanityChecks(account);
@@ -90,7 +97,13 @@ public class DefaultIamAccountService implements IamAccountService {
 
   @Override
   public IamAccount deleteAccount(IamAccount account) {
-    return null;
+    checkNotNull(account, "cannot delete a null account");
+    accountRepo.delete(account);
+
+    eventPublisher.publishEvent(new AccountRemovedEvent(this, account,
+        "Removed account for user " + account.getUsername()));
+
+    return account;
   }
 
   private void newAccountOidcIdsSanityChecks(IamAccount account) {
@@ -103,9 +116,9 @@ public class DefaultIamAccountService implements IamAccountService {
   }
 
   private void newAccountSanityChecks(IamAccount account) {
-    checkNotNull(account.getUsername());
-    checkNotNull(account.getUserInfo());
-    checkNotNull(account.getUserInfo().getEmail());
+    checkArgument(!isNullOrEmpty(account.getUsername()), "Null or empty username");
+    checkNotNull(account.getUserInfo(), "Null userinfo object");
+    checkArgument(!isNullOrEmpty(account.getUserInfo().getEmail()), "Null or empty email");
 
     accountRepo.findByUsername(account.getUsername()).ifPresent(a -> {
       throw new UserAlreadyExistsException(
@@ -144,7 +157,7 @@ public class DefaultIamAccountService implements IamAccountService {
       account.getX509Certificates().forEach(this::x509CertificateSanityCheck);
 
       // FIXME: remove duplicate certificates, currently we don't have such a check
-      
+
       final long count =
           account.getX509Certificates().stream().filter(cert -> cert.isPrimary()).count();
 
@@ -160,9 +173,10 @@ public class DefaultIamAccountService implements IamAccountService {
   }
 
   private void oidcIdSanityChecks(IamOidcId oidcId) {
-    checkNotNull(oidcId);
-    checkNotNull(oidcId.getIssuer());
-    checkNotNull(oidcId.getSubject());
+    checkNotNull(oidcId, "null oidc id");
+    checkArgument(!isNullOrEmpty(oidcId.getIssuer()), "null or empty oidc id issuer");
+    checkArgument(!isNullOrEmpty(oidcId.getSubject()), "null or empty oidc id subject");
+
     accountRepo.findByOidcId(oidcId.getIssuer(), oidcId.getSubject()).ifPresent(account -> {
 
       throw new CredentialAlreadyBoundException(String.format(
@@ -172,10 +186,12 @@ public class DefaultIamAccountService implements IamAccountService {
 
   private void samlIdSanityChecks(IamSamlId samlId) {
 
-    checkNotNull(samlId);
-    checkNotNull(samlId.getIdpId());
-    checkNotNull(samlId.getUserId());
-    checkNotNull(samlId.getAttributeId());
+    checkNotNull(samlId, "null saml id");
+
+    checkArgument(!isNullOrEmpty(samlId.getIdpId()), "null or empty idpId");
+    checkArgument(!isNullOrEmpty(samlId.getUserId()), "null or empty userId");
+    checkArgument(!isNullOrEmpty(samlId.getAttributeId()), "null or empty attributeId");
+
     accountRepo.findBySamlId(samlId).ifPresent(account -> {
       throw new CredentialAlreadyBoundException(
           String.format("SAML id '%s,%s,%s' already bound to a user", samlId.getIdpId(),
@@ -185,8 +201,8 @@ public class DefaultIamAccountService implements IamAccountService {
 
   private void sshKeySanityChecks(IamSshKey sshKey) {
 
-    checkNotNull(sshKey);
-    checkNotNull(sshKey.getValue());
+    checkNotNull(sshKey, "null ssh key");
+    checkArgument(!isNullOrEmpty(sshKey.getValue()), "null or empty ssh key value");
 
     accountRepo.findBySshKeyValue(sshKey.getValue()).ifPresent(account -> {
       throw new CredentialAlreadyBoundException(
@@ -195,14 +211,27 @@ public class DefaultIamAccountService implements IamAccountService {
   }
 
   private void x509CertificateSanityCheck(IamX509Certificate cert) {
-    checkNotNull(cert.getCertificate());
-    checkNotNull(cert.getCertificateSubject());
+    checkNotNull(cert, "null X.509 certificate");
+    checkArgument(!isNullOrEmpty(cert.getCertificate()), "null or empty X.509 certificate value");
+    checkArgument(!isNullOrEmpty(cert.getCertificateSubject()),
+        "null or empty X.509 certificate subject");
+    checkArgument(!isNullOrEmpty(cert.getLabel()), "null or empty X.509 certificate label");
 
     accountRepo.findByCertificate(cert.getCertificate()).ifPresent(c -> {
       throw new CredentialAlreadyBoundException(String
         .format("X509 certificate '%s' already bound to a user", cert.getCertificateSubject()));
     });
-
   }
 
+  @Override
+  public List<IamAccount> deleteInactiveProvisionedUsersSinceTime(Date timestamp) {
+    checkNotNull(timestamp, "null timestamp");
+
+    List<IamAccount> accounts =
+        accountRepo.findProvisionedAccountsWithLastLoginTimeBeforeTimestamp(timestamp);
+
+    accounts.forEach(a -> deleteAccount(a));
+
+    return accounts;
+  }
 }
