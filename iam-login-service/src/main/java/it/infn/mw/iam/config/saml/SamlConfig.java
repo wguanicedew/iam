@@ -130,8 +130,6 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 public class SamlConfig extends WebSecurityConfigurerAdapter implements SchedulingConfigurer {
 
   public static final Logger LOG = LoggerFactory.getLogger(SamlConfig.class);
-
-  public static final Logger LOG = LoggerFactory.getLogger(SamlConfig.class);
   
   @Autowired
   ResourceLoader resourceLoader;
