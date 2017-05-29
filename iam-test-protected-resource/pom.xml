@@ -7,7 +7,7 @@
   <parent>
     <groupId>it.infn.mw</groupId>
     <artifactId>iam-parent</artifactId>
-    <version>0.6.1.rc0</version>
+    <version>1.0.0.rc0-SNAPSHOT</version>
   </parent>
 
   <artifactId>iam-test-protected-resource</artifactId>
