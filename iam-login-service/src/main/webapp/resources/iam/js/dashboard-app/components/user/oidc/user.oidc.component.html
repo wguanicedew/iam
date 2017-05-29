@@ -24,7 +24,7 @@
                                 <button class="btn btn-xs btn-danger" ng-click="$ctrl.openRemoveOidcAccountDialog(oidcId)" ng-if="$ctrl.isVoAdmin() && !$ctrl.isMe()">
                                     <i class="fa fa-times"></i> Remove
                                 </button>
-                                <button class="btn btn-xs btn-danger" ng-click="$ctrl.openUnlinkOidcAccountDialog(oidcId)" ng-if="$ctrl.isMe()">
+                                <button class="btn btn-xs btn-danger" ng-click="$ctrl.openUnlinkOidcAccountDialog(oidcId)" ng-if="$ctrl.isMe() && $ctrl.accountLinkingEnabled">
                                     <i class="fa fa-times"></i> Unlink
                                 </button>
                             </div>
@@ -39,7 +39,7 @@
             <i class="fa fa-plus"></i> Add OpenID-Connect account
         </button>
 
-        <button class="btn btn-success btn-sm" name="btn-link-oidc" ng-click="$ctrl.openLinkOidcAccountDialog()" ng-if="$ctrl.isMe()">
+        <button class="btn btn-success btn-sm" name="btn-link-oidc" ng-click="$ctrl.openLinkOidcAccountDialog()" ng-if="$ctrl.isMe() && $ctrl.accountLinkingEnabled">
             <i class="fa fa-google"></i> Link Google account
         </button>
     </div>

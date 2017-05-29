@@ -92,3 +92,6 @@ task:
 endpoints:
   healthMail:
     path: /health/mail
+
+accountLinking:
+  disable: ${IAM_ACCOUNT_LINKING_DISABLE:false}

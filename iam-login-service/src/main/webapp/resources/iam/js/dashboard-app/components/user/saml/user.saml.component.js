@@ -10,6 +10,8 @@
     self.type = 'SAML';
     self.account = account;
 
+    self.accountLinkingEnabled = getAccountLinkingEnabled();
+
     self.doLink = function() {
       self.enabled = false;
       document.getElementById("link-account-form").submit();

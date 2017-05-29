@@ -15,10 +15,11 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.google.common.base.Strings;
 
+import it.infn.mw.iam.api.account_linking.AccountLinkingConstants;
 import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
 import it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo.ExternalAuthenticationType;
 
-public class ExternalAuthenticationHandlerSupport {
+public class ExternalAuthenticationHandlerSupport implements AccountLinkingConstants{
 
   public static final String ACCCOUNT_LINKING_BASE_RESOURCE = "/iam/account-linking";
 

@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -27,12 +28,21 @@ import it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo.ExternalAuthe
 
 @Controller
 @RequestMapping(AccountLinkingController.ACCCOUNT_LINKING_BASE_RESOURCE)
-public class AccountLinkingController extends ExternalAuthenticationHandlerSupport {
+public class AccountLinkingController extends ExternalAuthenticationHandlerSupport{
   final AccountLinkingService linkingService;
+
+  @Value(ACCOUNT_LINKING_DISABLE_PROPERTY)
+  private Boolean accountLinkingDisabled;
 
   @Autowired
   public AccountLinkingController(AccountLinkingService s) {
     linkingService = s;
+  }
+
+  private void checkAccountLinkingEnabled() {
+    if (accountLinkingDisabled) {
+      throw new AccountLinkingDisabledException();
+    }
   }
 
   @PreAuthorize("hasRole('USER')")
@@ -40,6 +50,8 @@ public class AccountLinkingController extends ExternalAuthenticationHandlerSuppo
   public void linkAccount(@PathVariable ExternalAuthenticationType type,
       @RequestParam(value = "id", required = false) String externalIdpId, Authentication authn,
       HttpServletRequest request, HttpServletResponse response) throws IOException {
+
+    checkAccountLinkingEnabled();
 
     HttpSession session = request.getSession();
 
@@ -56,6 +68,7 @@ public class AccountLinkingController extends ExternalAuthenticationHandlerSuppo
       Principal principal, final RedirectAttributes redirectAttributes, HttpServletRequest request,
       HttpServletResponse response) throws IOException {
 
+    checkAccountLinkingEnabled();
     HttpSession session = request.getSession();
 
     if (!hasAccountLinkingDoneKey(session)) {
@@ -90,15 +103,22 @@ public class AccountLinkingController extends ExternalAuthenticationHandlerSuppo
   @RequestMapping(value = "/{type}", method = RequestMethod.DELETE)
   @ResponseStatus(value = HttpStatus.NO_CONTENT)
   public void unlinkAccount(@PathVariable ExternalAuthenticationType type, Principal principal,
-      @RequestParam("iss") String issuer, @RequestParam("sub") String subject, 
-      @RequestParam(name="attr", required=false) String attributeId) {
+      @RequestParam("iss") String issuer, @RequestParam("sub") String subject,
+      @RequestParam(name = "attr", required = false) String attributeId) {
 
+    checkAccountLinkingEnabled();
     linkingService.unlinkExternalAccount(principal, type, issuer, subject, attributeId);
   }
 
   @ResponseStatus(value = HttpStatus.BAD_REQUEST)
   @ExceptionHandler(IllegalArgumentException.class)
   public String handleIllegalArgumentException(HttpServletRequest request, Exception ex) {
+    return "iam/dashboard";
+  }
+
+  @ResponseStatus(value = HttpStatus.FORBIDDEN)
+  @ExceptionHandler(AccountLinkingDisabledException.class)
+  public String handleAccountLinkingDisabledException(HttpServletRequest request, Exception ex) {
     return "iam/dashboard";
   }
 }

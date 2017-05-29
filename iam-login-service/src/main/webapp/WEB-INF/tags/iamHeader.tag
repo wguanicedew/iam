@@ -77,6 +77,10 @@ function getRegistrationEnabled() {
   return ${loginPageConfiguration.registrationEnabled};
 }
 
+function getAccountLinkingEnabled() {
+    return ${loginPageConfiguration.accountLinkingEnabled};
+}
+
 function getOrganisationName() {
  return '${iamProperties.organisationName}'; 
 }
