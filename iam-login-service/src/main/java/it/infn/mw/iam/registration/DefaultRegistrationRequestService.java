@@ -112,6 +112,8 @@ public class DefaultRegistrationRequestService
   public RegistrationRequestDto createRequest(RegistrationRequestDto request,
       Optional<ExternalAuthenticationRegistrationInfo> extAuthnInfo) {
 
+    notesSanityChecks(request.getNotes());
+
     ScimUser.Builder userBuilder = ScimUser.builder()
       .buildName(request.getGivenname(), request.getFamilyname())
       .buildEmail(request.getEmail())
@@ -286,6 +288,17 @@ public class DefaultRegistrationRequestService
         "Reject registration request for user " + request.getAccount().getUsername()));
 
     return retval;
+  }
+
+  private void notesSanityChecks(final String notes) {
+
+    if (notes == null) {
+      throw new IllegalArgumentException("Notes field cannot be null");
+    }
+
+    if (notes.trim().isEmpty()) {
+      throw new IllegalArgumentException("Notes field cannot be the empty string");
+    }
   }
 
 }

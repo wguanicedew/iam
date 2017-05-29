@@ -1,5 +1,6 @@
 package it.infn.mw.iam.persistence.repository;
 
+
 import java.util.Date;
 import java.util.Optional;
 
@@ -21,6 +22,7 @@ public class IamAccountRepositoryImpl implements IamAccountRepositoryCustom {
         samlId.getUserId());
   }
 
+
   @Override
   public void touchLastLoginTimeForUserWithUsername(String username) {
     repo.findByUsername(username).ifPresent( a -> {
@@ -28,4 +30,5 @@ public class IamAccountRepositoryImpl implements IamAccountRepositoryCustom {
       repo.save(a);
     });
   }
+
 }

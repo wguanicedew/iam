@@ -79,8 +79,10 @@ This username is already linked to another user
     </div>
     <div class="form-group">
       <label class="control-label" for="notes">Notes</label>
-      <textarea class="form-control" id="notes" name="notes" rows="5" placeholder="Notes for admins (not required)" ng-model=request.notes>
-</textarea>
+      <textarea class="form-control" id="notes" name="notes" rows="5" placeholder="Registration reason (mandatory)" ng-model=request.notes required></textarea>
+      <span class="help-block" ng-show="registrationForm.notes.$dirty && registrationForm.notes.$error.required"> 
+        Please writes a reason for your registration
+      </span>
     </div>
     <div ng-show="extAuthInfo != null">
       <div class="form-group">

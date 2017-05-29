@@ -1,5 +1,6 @@
 package it.infn.mw.iam.test.actuator;
 
+import static it.infn.mw.iam.test.TestUtils.waitIfPortIsUsed;
 import static java.lang.String.format;
 import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -53,12 +54,16 @@ public class MailHealthEndpointsTests {
   private MockMvc mvc;
   private Wiser wiser;
 
+  private int timeoutInSecs = 30;
+
   @Before
-  public void setup() {
+  public void setup() throws InterruptedException {
     mvc = MockMvcBuilders.webAppContextSetup(context)
       .apply(springSecurity())
       .alwaysDo(print())
       .build();
+
+    waitIfPortIsUsed(mailHost, mailPort, timeoutInSecs);
 
     wiser = new Wiser();
     wiser.setHostname(mailHost);
@@ -67,7 +72,7 @@ public class MailHealthEndpointsTests {
   }
 
   @After
-  public void teardown() throws InterruptedException {
+  public void teardown() {
     wiser.stop();
   }
 

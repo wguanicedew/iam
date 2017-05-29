@@ -131,6 +131,8 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
 
   public static final Logger LOG = LoggerFactory.getLogger(SamlConfig.class);
 
+  public static final Logger LOG = LoggerFactory.getLogger(SamlConfig.class);
+  
   @Autowired
   ResourceLoader resourceLoader;
 
@@ -189,6 +191,7 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
   @Configuration
   @EnableConfigurationProperties({IamSamlProperties.class})
   public static class IamSamlConfig {
+
 
     public static final String[] DEFAULT_ID_RESOLVERS = {epuid.name(), eppn.name()};
 
@@ -285,6 +288,7 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
 
     IamSamlAuthenticationProvider samlAuthenticationProvider =
         new IamSamlAuthenticationProvider(resolver);
+
     samlAuthenticationProvider
       .setUserDetails(samlUserDetailsService(resolver, accountRepo, handler));
     samlAuthenticationProvider.setForcePrincipalAsString(false);

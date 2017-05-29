@@ -44,7 +44,7 @@ public class IamRegistrationRequest {
   @Column(nullable = true)
   private Date lastUpdateTime;
 
-  @Column(nullable = true)
+  @Column(nullable = false)
   private String notes;
 
   public IamRegistrationRequest() {}

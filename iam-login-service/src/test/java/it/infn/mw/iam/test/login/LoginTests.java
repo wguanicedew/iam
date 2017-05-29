@@ -1,12 +1,15 @@
 package it.infn.mw.iam.test.login;
 
+
 import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 
 import java.time.Instant;
 
@@ -21,11 +24,13 @@ import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import it.infn.mw.iam.IamLoginService;
+
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
@@ -39,6 +44,7 @@ public class LoginTests {
   public static final String ADMIN_USERNAME = "admin";
   public static final String ADMIN_PASSWORD = "password";
 
+
   @Autowired
   private WebApplicationContext context;
 
@@ -51,8 +57,6 @@ public class LoginTests {
   public void setup() {
     mvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
   }
-
-
 
   @Test
   public void loginForAdminUserWorks() throws Exception {
@@ -100,6 +104,5 @@ public class LoginTests {
         .param("submit", "Login"))
       .andExpect(status().is3xxRedirection())
       .andExpect(MockMvcResultMatchers.redirectedUrl("/login?error=failure"));
-
   }
 }

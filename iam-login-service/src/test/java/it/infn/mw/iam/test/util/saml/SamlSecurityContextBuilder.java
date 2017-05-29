@@ -13,6 +13,7 @@ import com.google.common.base.Strings;
 import it.infn.mw.iam.authn.saml.SamlExternalAuthenticationToken;
 import it.infn.mw.iam.authn.saml.util.SamlAttributeNames;
 import it.infn.mw.iam.persistence.model.IamSamlId;
+
 import it.infn.mw.iam.test.ext_authn.saml.SamlAuthenticationTestSupport;
 import it.infn.mw.iam.test.util.SecurityContextBuilderSupport;
 

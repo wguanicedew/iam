@@ -1,9 +1,16 @@
 package it.infn.mw.iam.test;
 
 import static com.jayway.restassured.RestAssured.given;
+import static java.lang.String.format;
+import static java.lang.System.out;
+import static java.lang.Thread.sleep;
+import static org.junit.Assert.fail;
 
+import java.io.IOException;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.http.HttpStatus;
 
@@ -199,6 +206,28 @@ public class TestUtils {
 
   public static AccessTokenGetter passwordTokenGetter(String clientId, String clientSecret) {
     return new AccessTokenGetter(clientId, clientSecret).grantType("password");
+  }
+
+  public static void waitIfPortIsUsed(String host, int port, int timeoutInSecs)
+      throws InterruptedException {
+    boolean result = true;
+    int sleeped = 0;
+
+    do {
+      try {
+        (new Socket(host, port)).close();
+        out.println(format("Port %s already used", port));
+        sleep(TimeUnit.SECONDS.toMillis(1));
+        sleeped++;
+        result = true;
+      } catch (IOException e) {
+        result = false;
+      }
+    } while (result && sleeped < timeoutInSecs);
+
+    if (sleeped >= timeoutInSecs) {
+      fail("Timeout waiting for port available");
+    }
   }
 
   public static class AccessTokenGetter {

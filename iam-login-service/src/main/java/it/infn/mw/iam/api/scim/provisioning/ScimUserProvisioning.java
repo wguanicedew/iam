@@ -140,6 +140,41 @@ public class ScimUserProvisioning
     }
   }
 
+  private void checkOidcIdNotAlreadyBounded(IamOidcId oidcId) {
+
+    Preconditions.checkNotNull(oidcId);
+    Preconditions.checkNotNull(oidcId.getIssuer());
+    Preconditions.checkNotNull(oidcId.getSubject());
+    accountRepository.findByOidcId(oidcId.getIssuer(), oidcId.getSubject()).ifPresent(account -> {
+      throw new ScimResourceExistsException(
+          String.format("OIDC id (%s,%s) already bounded to another user", oidcId.getIssuer(),
+              oidcId.getSubject()));
+    });
+  }
+
+  private void checkSshKeyNotExists(IamSshKey sshKey) {
+
+    Preconditions.checkNotNull(sshKey);
+    Preconditions.checkNotNull(sshKey.getValue());
+    accountRepository.findBySshKeyValue(sshKey.getValue()).ifPresent(account -> {
+      throw new ScimResourceExistsException(
+          String.format("Ssh key (%s) already bounded to another user", sshKey.getValue()));
+    });
+  }
+
+  private void checkSamlIdNotAlreadyBounded(IamSamlId samlId) {
+
+    Preconditions.checkNotNull(samlId);
+    Preconditions.checkNotNull(samlId.getIdpId());
+    Preconditions.checkNotNull(samlId.getUserId());
+    Preconditions.checkNotNull(samlId.getAttributeId());
+    accountRepository.findBySamlId(samlId).ifPresent(account -> {
+      throw new ScimResourceExistsException(
+          String.format("SAML id (%s,%s) already bounded to another user", samlId.getIdpId(),
+              samlId.getUserId()));
+    });
+  }
+
   @Override
   public ScimListResponse<ScimUser> list(final ScimPageRequest params) {
 
