@@ -2,6 +2,9 @@ package it.infn.mw.iam.test.notification;
 
 import static it.infn.mw.iam.test.RegistrationUtils.createRegistrationRequest;
 import static it.infn.mw.iam.test.RegistrationUtils.deleteUser;
+
+import static it.infn.mw.iam.test.TestUtils.waitIfPortIsUsed;
+
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
@@ -72,7 +75,9 @@ public class NotificationConcurrentTests {
   }
 
   @Before
-  public void setUp() {
+  public void setUp() throws InterruptedException {
+    waitIfPortIsUsed(mailHost, mailPort, 30);
+
     wiserSmtpServer = new Wiser();
     wiserSmtpServer.setHostname(mailHost);
     wiserSmtpServer.setPort(mailPort);

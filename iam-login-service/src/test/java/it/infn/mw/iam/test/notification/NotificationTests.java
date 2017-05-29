@@ -4,6 +4,9 @@ import static it.infn.mw.iam.test.RegistrationUtils.approveRequest;
 import static it.infn.mw.iam.test.RegistrationUtils.confirmRegistrationRequest;
 import static it.infn.mw.iam.test.RegistrationUtils.createRegistrationRequest;
 import static it.infn.mw.iam.test.RegistrationUtils.deleteUser;
+
+import static it.infn.mw.iam.test.TestUtils.waitIfPortIsUsed;
+
 import static it.infn.mw.iam.test.RegistrationUtils.rejectRequest;
 import static java.lang.String.format;
 import static org.hamcrest.Matchers.containsString;
@@ -14,6 +17,7 @@ import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -96,7 +100,9 @@ public class NotificationTests {
   }
 
   @Before
-  public void setUp() {
+  public void setUp() throws InterruptedException {
+    waitIfPortIsUsed(mailHost, mailPort, 30);
+
     wiser = new Wiser();
     wiser.setHostname(mailHost);
     wiser.setPort(mailPort);
@@ -106,7 +112,6 @@ public class NotificationTests {
   @After
   public void tearDown() throws InterruptedException {
     wiser.stop();
-    Thread.sleep(1000L);
 
     notificationRepository.deleteAll();
   }
