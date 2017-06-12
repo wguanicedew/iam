@@ -25,6 +25,9 @@ import org.opensaml.saml2.metadata.provider.FileBackedHTTPMetadataProvider;
 import org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider;
 import org.opensaml.saml2.metadata.provider.MetadataProvider;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
+import org.opensaml.saml2.metadata.provider.ResourceBackedMetadataProvider;
+import org.opensaml.util.resource.ClasspathResource;
+import org.opensaml.util.resource.ResourceException;
 import org.opensaml.xml.parse.BasicParserPool;
 import org.opensaml.xml.parse.ParserPool;
 import org.opensaml.xml.parse.StaticBasicParserPool;
@@ -163,13 +166,13 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
 
   @Autowired
   InactiveAccountAuthenticationHander inactiveAccountHandler;
-  
+
   @Autowired
   MetadataLookupService metadataLookupService;
-  
+
 
   Timer metadataFetchTimer = new Timer();
-  
+
   BasicParserPool basicParserPool = new BasicParserPool();
 
   @ConfigurationProperties(prefix = "iam")
@@ -449,7 +452,8 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
     return extendedMetadataDelegate;
   }
 
-  private List<MetadataProvider> metadataProviders() throws MetadataProviderException, IOException {
+  private List<MetadataProvider> metadataProviders()
+      throws MetadataProviderException, IOException, ResourceException {
 
     List<MetadataProvider> providers = new ArrayList<>();
 
@@ -460,10 +464,24 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
 
 
     for (String m : metadataIterable) {
-      if (m.startsWith("classpath:") || m.startsWith("file:")) {
+      if (m.startsWith("classpath:")) {
+        LOG.info("Adding classpath based metadata provider for URL: {}", m);
+        
+        ClasspathResource cpMetadataResources =
+            new ClasspathResource(m.replaceFirst("classpath:",""));
+        
+        ResourceBackedMetadataProvider metadataProvider =
+            new ResourceBackedMetadataProvider(metadataFetchTimer, cpMetadataResources);
+
+        metadataProvider.setParserPool(basicParserPool);
+        metadataProvider.initialize();
+        providers.add(metadataDelegate(metadataProvider));
+
+      } else if (m.startsWith("file:")) {
 
         LOG.info("Adding File based metadata provider for URL: {}", m);
         Resource metadataResource = resourceLoader.getResource(m);
+
 
         FilesystemMetadataProvider metadataProvider =
             new FilesystemMetadataProvider(metadataResource.getFile());
@@ -491,22 +509,22 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
     }
 
     if (providers.isEmpty()) {
-      final String message = "Empty SAML metadata providers after initialization"; 
+      final String message = "Empty SAML metadata providers after initialization";
       LOG.error(message);
       throw new IllegalStateException(message);
     }
-    
+
     return providers;
   }
-  
+
 
   @Bean
   @Qualifier("metadata")
   public CachingMetadataManager metadata()
-      throws MetadataProviderException, URISyntaxException, IOException {
-    
+      throws MetadataProviderException, URISyntaxException, IOException, ResourceException {
+
     CachingMetadataManager metadataManager = new CachingMetadataManager(metadataProviders());
-    
+
     return metadataManager;
   }
 
