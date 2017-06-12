@@ -1,5 +1,6 @@
 package it.infn.mw.iam.test.ext_authn.saml.jit_account_provisioning;
 
+import static it.infn.mw.iam.authn.saml.util.SamlUserIdentifierResolutionResult.resolutionSuccess;
 import static it.infn.mw.iam.test.ext_authn.saml.SamlAuthenticationTestSupport.DEFAULT_IDP_ID;
 import static it.infn.mw.iam.test.ext_authn.saml.SamlAuthenticationTestSupport.T1_EPUID;
 import static it.infn.mw.iam.test.ext_authn.saml.SamlAuthenticationTestSupport.T1_GIVEN_NAME;
@@ -30,6 +31,7 @@ import com.google.common.collect.Sets;
 import it.infn.mw.iam.authn.InactiveAccountAuthenticationHander;
 import it.infn.mw.iam.authn.saml.JustInTimeProvisioningSAMLUserDetailsService;
 import it.infn.mw.iam.authn.saml.util.Saml2Attribute;
+import it.infn.mw.iam.authn.saml.util.SamlUserIdentifierResolutionResult;
 import it.infn.mw.iam.authn.saml.util.SamlUserIdentifierResolver;
 import it.infn.mw.iam.core.user.IamAccountService;
 import it.infn.mw.iam.persistence.model.IamAccount;
@@ -68,7 +70,8 @@ public class JitUserDetailServiceTests extends JitUserDetailsServiceTestsSupport
       return account;
     });
 
-    when(resolver.getSamlUserIdentifier(anyObject())).thenReturn(Optional.empty());
+    when(resolver.resolveSamlUserIdentifier(anyObject()))
+      .thenReturn(SamlUserIdentifierResolutionResult.resolutionFailure("No suitable user id found"));
 
     userDetailsService = new JustInTimeProvisioningSAMLUserDetailsService(resolver, accountService,
         inactiveAccountHander, accountRepo, Optional.empty());
@@ -98,7 +101,7 @@ public class JitUserDetailServiceTests extends JitUserDetailsServiceTestsSupport
 
   @Test(expected = UsernameNotFoundException.class)
   public void testMissingEmailSamlCredentialSanityCheck() {
-    when(resolver.getSamlUserIdentifier(cred)).thenReturn(Optional.of(T1_SAML_ID));
+    when(resolver.resolveSamlUserIdentifier(cred)).thenReturn(resolutionSuccess(T1_SAML_ID));
     try {
       userDetailsService.loadUserBySAML(cred);
     } catch (UsernameNotFoundException e) {
@@ -111,7 +114,7 @@ public class JitUserDetailServiceTests extends JitUserDetailsServiceTestsSupport
 
   @Test(expected = UsernameNotFoundException.class)
   public void testMissingGivenNameSamlCredentialSanityCheck() {
-    when(resolver.getSamlUserIdentifier(cred)).thenReturn(Optional.of(T1_SAML_ID));
+    when(resolver.resolveSamlUserIdentifier(cred)).thenReturn(resolutionSuccess(T1_SAML_ID));
     when(cred.getAttributeAsString(Saml2Attribute.mail.getAttributeName())).thenReturn(T1_MAIL);
 
     try {
@@ -126,7 +129,7 @@ public class JitUserDetailServiceTests extends JitUserDetailsServiceTestsSupport
 
   @Test(expected = UsernameNotFoundException.class)
   public void testMissingFamilyNameSamlCredentialSanityCheck() {
-    when(resolver.getSamlUserIdentifier(cred)).thenReturn(Optional.of(T1_SAML_ID));
+    when(resolver.resolveSamlUserIdentifier(cred)).thenReturn(resolutionSuccess(T1_SAML_ID));
     when(cred.getAttributeAsString(Saml2Attribute.mail.getAttributeName())).thenReturn(T1_MAIL);
     when(cred.getAttributeAsString(Saml2Attribute.givenName.getAttributeName()))
       .thenReturn(T1_GIVEN_NAME);
@@ -143,7 +146,7 @@ public class JitUserDetailServiceTests extends JitUserDetailsServiceTestsSupport
 
   @Test
   public void testSamlIdIsUsedForUsername() {
-    when(resolver.getSamlUserIdentifier(cred)).thenReturn(Optional.of(T1_SAML_ID));
+    when(resolver.resolveSamlUserIdentifier(cred)).thenReturn(resolutionSuccess(T1_SAML_ID));
     when(cred.getAttributeAsString(Saml2Attribute.mail.getAttributeName())).thenReturn(T1_MAIL);
     when(cred.getAttributeAsString(Saml2Attribute.givenName.getAttributeName()))
       .thenReturn(T1_GIVEN_NAME);
@@ -156,7 +159,7 @@ public class JitUserDetailServiceTests extends JitUserDetailsServiceTestsSupport
 
   @Test
   public void uuidIsUsedForAccountUsernameIfResolvedIdLongerThan128Chars() {
-    when(resolver.getSamlUserIdentifier(cred)).thenReturn(Optional.of(LONG_SAML_ID));
+    when(resolver.resolveSamlUserIdentifier(cred)).thenReturn(resolutionSuccess(LONG_SAML_ID));
     when(cred.getAttributeAsString(Saml2Attribute.mail.getAttributeName())).thenReturn(T1_MAIL);
     when(cred.getAttributeAsString(Saml2Attribute.givenName.getAttributeName()))
       .thenReturn(T1_GIVEN_NAME);
@@ -172,14 +175,14 @@ public class JitUserDetailServiceTests extends JitUserDetailsServiceTestsSupport
     userDetailsService = new JustInTimeProvisioningSAMLUserDetailsService(resolver, accountService,
         inactiveAccountHander, accountRepo, Optional.of(trustedIdps));
 
-    when(resolver.getSamlUserIdentifier(cred)).thenReturn(Optional.of(T1_SAML_ID));
+    when(resolver.resolveSamlUserIdentifier(cred)).thenReturn(resolutionSuccess(T1_SAML_ID));
     when(cred.getRemoteEntityID()).thenReturn(SamlAuthenticationTestSupport.DEFAULT_IDP_ID);
     when(cred.getAttributeAsString(Saml2Attribute.mail.getAttributeName())).thenReturn(T1_MAIL);
     when(cred.getAttributeAsString(Saml2Attribute.givenName.getAttributeName()))
       .thenReturn(T1_GIVEN_NAME);
     when(cred.getAttributeAsString(Saml2Attribute.sn.getAttributeName())).thenReturn(T1_SN);
     try {
-      User user = (User) userDetailsService.loadUserBySAML(cred);
+      userDetailsService.loadUserBySAML(cred);
     } catch (UsernameNotFoundException e) {
       assertThat(e.getMessage(),
           containsString(String.format("SAML credential issuer '%s' is not trusted",
@@ -187,23 +190,23 @@ public class JitUserDetailServiceTests extends JitUserDetailsServiceTestsSupport
       throw e;
     }
   }
-  
+
   @Test
   public void testEntityIdSanityChecksWorkForTrustedIdp() {
     Set<String> trustedIdps = Sets.newHashSet("http://trusted.idp.example", DEFAULT_IDP_ID);
     userDetailsService = new JustInTimeProvisioningSAMLUserDetailsService(resolver, accountService,
         inactiveAccountHander, accountRepo, Optional.of(trustedIdps));
 
-    when(resolver.getSamlUserIdentifier(cred)).thenReturn(Optional.of(T1_SAML_ID));
+    when(resolver.resolveSamlUserIdentifier(cred)).thenReturn(resolutionSuccess(T1_SAML_ID));
     when(cred.getRemoteEntityID()).thenReturn(SamlAuthenticationTestSupport.DEFAULT_IDP_ID);
     when(cred.getAttributeAsString(Saml2Attribute.mail.getAttributeName())).thenReturn(T1_MAIL);
     when(cred.getAttributeAsString(Saml2Attribute.givenName.getAttributeName()))
       .thenReturn(T1_GIVEN_NAME);
     when(cred.getAttributeAsString(Saml2Attribute.sn.getAttributeName())).thenReturn(T1_SN);
-    
+
     User user = (User) userDetailsService.loadUserBySAML(cred);
     assertThat(user.getUsername(), equalTo(T1_EPUID));
-    
+
   }
 
 }

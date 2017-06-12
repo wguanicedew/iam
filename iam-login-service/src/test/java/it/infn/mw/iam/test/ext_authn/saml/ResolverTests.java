@@ -26,7 +26,7 @@ public class ResolverTests {
 
     SamlUserIdentifierResolver resolver = new NameIdUserIdentifierResolver();
 
-    Optional<IamSamlId> resolvedId = resolver.getSamlUserIdentifier(cred);
+    Optional<IamSamlId> resolvedId = resolver.resolveSamlUserIdentifier(cred).getResolvedId();
 
     Assert.assertFalse(resolvedId.isPresent());
 
@@ -45,7 +45,7 @@ public class ResolverTests {
 
     SamlUserIdentifierResolver resolver = new NameIdUserIdentifierResolver();
 
-    IamSamlId resolvedId = resolver.getSamlUserIdentifier(cred)
+    IamSamlId resolvedId = resolver.resolveSamlUserIdentifier(cred).getResolvedId()
       .orElseThrow(() -> new AssertionError("Could not resolve nameid SAML ID"));
 
     Assert.assertThat(resolvedId.getUserId(), Matchers.equalTo("nameid"));
@@ -64,7 +64,7 @@ public class ResolverTests {
       .thenReturn("test@test.org");
     Mockito.when(cred.getRemoteEntityID()).thenReturn("entityId");
 
-    IamSamlId resolvedId = resolver.getSamlUserIdentifier(cred)
+    IamSamlId resolvedId = resolver.resolveSamlUserIdentifier(cred).getResolvedId()
       .orElseThrow(() -> new AssertionError("Could not resolve email address SAML ID"));
 
     Assert.assertThat(resolvedId.getUserId(), Matchers.equalTo("test@test.org"));

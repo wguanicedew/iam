@@ -67,7 +67,8 @@ public class DefaultExternalAccountLinker implements ExternalAccountLinker {
     final SAMLCredential credential =
         (SAMLCredential) token.getExternalAuthentication().getCredentials();
 
-    final IamSamlId iamSamlId = samlUserIdResolver.getSamlUserIdentifier(credential)
+    final IamSamlId iamSamlId = samlUserIdResolver.resolveSamlUserIdentifier(credential)
+      .getResolvedId()
       .orElseThrow(() -> new UsernameNotFoundException(
           "Could not extract a user identifier from the SAML assertion"));
 

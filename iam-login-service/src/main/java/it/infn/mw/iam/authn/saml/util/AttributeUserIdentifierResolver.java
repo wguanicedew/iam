@@ -1,7 +1,5 @@
 package it.infn.mw.iam.authn.saml.util;
 
-import java.util.Optional;
-
 import org.springframework.security.saml.SAMLCredential;
 
 import it.infn.mw.iam.persistence.model.IamSamlId;
@@ -16,12 +14,15 @@ public class AttributeUserIdentifierResolver extends AbstractSamlUserIdentifierR
   }
 
   @Override
-  public Optional<IamSamlId> getSamlUserIdentifier(SAMLCredential samlCredential) {
+  public SamlUserIdentifierResolutionResult resolveSamlUserIdentifier(
+      SAMLCredential samlCredential) {
 
     String attributeValue = samlCredential.getAttributeAsString(attribute.getAttributeName());
 
     if (attributeValue == null) {
-      return Optional.empty();
+      return SamlUserIdentifierResolutionResult
+        .resolutionFailure(String.format("Attribute '%s:%s' not found in assertion", attribute.getAlias(),
+            attribute.getAttributeName()));
     }
 
     IamSamlId samlId = new IamSamlId();
@@ -29,7 +30,7 @@ public class AttributeUserIdentifierResolver extends AbstractSamlUserIdentifierR
     samlId.setAttributeId(attribute.getAttributeName());
     samlId.setUserId(attributeValue);
 
-    return Optional.of(samlId);
+    return SamlUserIdentifierResolutionResult.resolutionSuccess(samlId);
 
   }
 

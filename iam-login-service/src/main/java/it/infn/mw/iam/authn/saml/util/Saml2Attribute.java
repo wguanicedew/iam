@@ -3,6 +3,7 @@ package it.infn.mw.iam.authn.saml.util;
 public enum Saml2Attribute {
 
   epuid("eduPersonUniqueId", "urn:oid:1.3.6.1.4.1.5923.1.1.1.13"),
+  eptid("eduPersonTargetedId", "urn:oid:1.3.6.1.4.1.5923.1.1.1.10"),
   eppn("eduPersonPrincipalName", "urn:oid:1.3.6.1.4.1.5923.1.1.1.6"),
   eduPersonOrcid("eduPersonOrcid", "urn:oid:1.3.6.1.4.1.5923.1.1.1.16"),
   mail("mail", "urn:oid:0.9.2342.19200300.100.1.3"),
