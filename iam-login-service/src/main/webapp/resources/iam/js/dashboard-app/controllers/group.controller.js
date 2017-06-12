@@ -2,13 +2,14 @@
 
 angular.module('dashboardApp').controller('GroupController', GroupController);
 
-GroupController.$inject = [ '$rootScope', '$state', '$filter', 'scimFactory', '$uibModal', 'ModalService', 'Utils' ];
+GroupController.$inject = [ '$scope', '$rootScope', '$state', '$filter', 'scimFactory', '$uibModal', 'ModalService', 'Utils' ];
 
-function GroupController($rootScope, $state, $filter, scimFactory, $uibModal, ModalService, Utils) {
+function GroupController($scope, $rootScope, $state, $filter, scimFactory, $uibModal, ModalService, Utils) {
 
 	var group = this;
 
 	group.loadGroup = loadGroup;
+	group.clickToOpen = clickToOpen;
 
 	group.id = $state.params.id;
 	group.data = [];
@@ -45,34 +46,49 @@ function GroupController($rootScope, $state, $filter, scimFactory, $uibModal, Mo
 
 	group.removeMemberFromList = removeMemberFromList;
 
-	function removeMemberFromList(user) {
+	function removeMemberFromList(member) {
 
-		var i = group.data.members.indexOf(user);
+		var i = group.data.members.indexOf(member);
 		group.data.members.splice(i, 1);
 	}
 
 	group.deleteMember = deleteMember;
 
-	function deleteMember(user) {
+	function deleteMember(member) {
 
 		var modalOptions = {
 				closeButtonText: 'Cancel',
 				actionButtonText: 'Remove membership',
-				headerText: 'Remove «' + user.display + "» from «" + group.data.displayName + "»",
-				bodyText: `Are you sure you want to remove '${user.display}' from '${group.data.displayName}'?`	
+				headerText: 'Remove «' + member.display + "» from «" + group.data.displayName + "»",
+				bodyText: `Are you sure you want to remove '${member.display}' from '${group.data.displayName}'?`	
 			};
 				
 			ModalService.showModal({}, modalOptions).then(
 				function (){
-					scimFactory.removeUserFromGroup(group.id, user.value, user.$ref,
-							user.display)
+					scimFactory.removeMemberFromGroup(group.id, member.value, member.$ref,
+							member.display)
 						.then(function(response) {
-							console.log("Deleted: ", user.display);
-							group.removeMemberFromList(user);
-							$scope.operationResult = Utils.buildSuccessOperationResult("User " + user.display + " membership has been removed successfully");
+							console.log("Deleted: ", member.display);
+							group.removeMemberFromList(member);
+							$scope.operationResult = Utils.buildSuccessOperationResult("Member " + member.display + " has been removed successfully");
 						}, function(error) {
 							$scope.operationResult = Utils.buildErrorOperationResult(error);
 						});
 				});
+	}
+	
+	function clickToOpen() {
+		var modalInstance = $uibModal.open({
+			templateUrl: '/resources/iam/template/dashboard/group/addsubgroup.html',
+			controller: 'AddSubGroupController',
+			controllerAs: 'addSubGroupCtrl',
+			resolve: {group: function() { return group.data; }}
+		});
+		modalInstance.result.then(function(createdGroup) {
+			console.info(createdGroup);
+			group.loadGroup();
+		}, function() {
+			console.info('Modal dismissed at: ', new Date());
+		});
 	}
 }

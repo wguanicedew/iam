@@ -7,6 +7,12 @@
         <label>Name</label>
         <input id="name" class="form-control" type="text" placeholder="Insert group name ..." ng-model="addGroupCtrl.group.displayName">
     </div>
+    
+    <div class="form-group">
+        <label>Parent Group (optional)</label>
+        <select id="parent" class="form-control" ng-options="group as group.displayName for group in addGroupCtrl.parents track by group.id" ng-model="addGroupCtrl.parentSelected">
+        </select>
+    </div>
 
 	<div class="row">
 		<div class="col-xs-12">

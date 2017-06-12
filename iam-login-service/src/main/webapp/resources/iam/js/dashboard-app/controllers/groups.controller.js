@@ -12,6 +12,8 @@ function GroupsController($scope, $rootScope, $uibModal, $state, $filter,
 
 	// group data
 	gc.groups = [];
+	gc.visitedList = [];
+	gc.groupMap = [];
 
 	// filtered groups to show
 	gc.filtered = [];
@@ -36,16 +38,81 @@ function GroupsController($scope, $rootScope, $uibModal, $state, $filter,
 	gc.removeGroupFromList = removeGroupFromList;
 
 	gc.loadGroupList = loadGroupList;
+	gc.visitGroupList = visitGroupList;
 
 	// Controller actions:
-	gc.resetFilters()
+	gc.resetFilters();
 	gc.loadGroupList(); // eval gc.groups
 
-
+	function buildMap(){
+		gc.groups.forEach(function(item){
+			gc.groupMap[item.id] = item;
+			gc.groupMap[item.id].visited = false;
+		});
+	}
+	
+	function visit(groupId) {
+		var toVisit = []
+		toVisit.push(groupId);
+		gc.groupMap[groupId].visited = true;
+		
+		while(toVisit.length > 0){
+			var nextNodeId = toVisit.shift();
+			var group = gc.groupMap[nextNodeId];
+			var name = group.displayName;
+			if(!isRootGroup(group)){
+				var parentId = group["urn:indigo-dc:scim:schemas:IndigoGroup"].parentGroup.value;
+				var parentName = gc.visitedList.find(item => item.id === parentId).hierarchicName;
+				name = parentName + "/" + group.displayName;
+			}
+			group.hierarchicName = name;
+			gc.visitedList.push(group);
+			var childs = getChilds(gc.groupMap[nextNodeId]);
+			
+			childs.forEach(function(member){
+				if(!gc.groupMap[member.value].visited){
+					gc.groupMap[member.value].visited = true;
+					toVisit.push(member.value);
+				}
+			});
+		}
+	}
+	
+	function getChilds(item){
+		if(!item.members){
+			return [];
+		}
+		return item.members.filter(memberIsAGroup);
+	}
+	
+	function memberIsAGroup(member){
+		return (member.$ref.indexOf('scim/Groups')!=-1);
+	}
+	
+	function isRootGroup(group){
+		if(group["urn:indigo-dc:scim:schemas:IndigoGroup"]){
+			return false;
+		}
+		return true;
+	}
+	
+	function visitGroupList(){
+		gc.visitedList = [];
+		gc.groupMap = [];
+		buildMap();
+		gc.groups.forEach(function(group){
+			if(isRootGroup(group)){
+				visit(group.id);
+			}
+		});
+		gc.groups = gc.visitedList 
+		rebuildFilteredList();
+	}
+	
 	function rebuildFilteredList() {
 		
-		gc.filtered = filterFilter(gc.groups, {'displayName': gc.searchText});
-		gc.filtered = $filter('orderBy')(gc.filtered, "displayName", false);
+		gc.filtered = filterFilter(gc.groups, {'hierarchicName': gc.searchText});
+		gc.filtered = $filter('orderBy')(gc.filtered, "hierarchicName", false);
 	}
 
 	function resetFilters() {
@@ -94,7 +161,10 @@ function GroupsController($scope, $rootScope, $uibModal, $state, $filter,
 							} else {
 								$rootScope.pageLoadingProgress = 100;
 								gc.loadingModal.dismiss("Cancel");
+								$rootScope.groups = gc.groups;
+								gc.visitGroupList();
 							}
+							
 						}, function(error) {
 							console.log("getGroups error", error);
 							gc.loadingModal.dismiss("Error");
@@ -111,13 +181,13 @@ function GroupsController($scope, $rootScope, $uibModal, $state, $filter,
 		modalInstance.result.then(function(createdGroup) {
 			console.info(createdGroup);
 			gc.groups.push(createdGroup);
-			gc.rebuildFilteredList();
+			gc.loadGroupList()
+			gc.visitGroupList()
 			$scope.operationResult = Utils.buildSuccessOperationResult("Group " + createdGroup.displayName + " CREATED successfully");
 		}, function() {
 			console.info('Modal dismissed at: ', new Date());
 		});
 	}
-	;
 
 	function removeGroupFromList(group) {
 

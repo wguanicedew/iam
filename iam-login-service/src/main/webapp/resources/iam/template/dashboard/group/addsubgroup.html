@@ -1,0 +1,24 @@
+<div class="modal-header">
+    <h3 class="modal-title">Add new subgroup to <strong>{{addSubGroupCtrl.parent.displayName}}</strong></h3>
+</div>
+<div class="modal-body">
+
+    <div class="form-group">
+        <label>Name</label>
+        <input id="name" class="form-control" type="text" placeholder="Insert group name ..." ng-model="addSubGroupCtrl.subgroup.displayName">
+    </div>
+    
+	<div class="row">
+		<div class="col-xs-12">
+			<operationresult />
+		</div>
+	</div>
+
+</div>
+<div class="modal-footer">
+    <button class="btn btn-primary" type="button" id="modal-btn-confirm"
+       ng-disabled="!addSubGroupCtrl.subgroup.displayName || !addSubGroupCtrl.enabled"
+       ng-click="addSubGroupCtrl.addSubGroup()">Create SubGroup</button>
+    <button class="btn btn-warning" type="button" id="modal-btn-cancel"
+        ng-click="addSubGroupCtrl.cancel()">Cancel</button>
+</div>

@@ -37,15 +37,17 @@
                 <tr>
                   <th>#</th>
                   <th>Member</th>
+                  <th>Type</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                <tr ng-repeat="user in group.data.members | orderBy:'display'">
+                <tr ng-repeat="member in group.data.members | orderBy:'display'">
                   <td>{{$index + 1}}</td>
-                  <td><a ui-sref="user({id: user.value})">{{user.display}}</a></td>
+                  <td><a ui-sref="{{ member.$ref.indexOf('scim/Users')!=-1 ? 'user' : 'group'}}({id: member.value})">{{member.display}}</a></td>
+                  <td><span class="text-capitalize">{{member.$ref.indexOf('scim/Groups')!=-1 ? "Group" : "User"}}</span></td>
                   <td>
-                    <button class="btn btn-danger btn-xs" ng-click="group.deleteMember(user)">
+                    <button class="btn btn-danger btn-xs" ng-click="group.deleteMember(member)" ng-hide="member.$ref.indexOf('scim/Groups')!=-1">
                       <i class="fa fa-times"></i> Remove
                     </button>
                   </td>
@@ -55,12 +57,15 @@
                 <tr>
                   <th>#</th>
                   <th>Member</th>
+                  <th>Type</th>
                   <th>Actions</th>
                 </tr>
               </tfoot>
             </table>
-
           </div>
+			<div class="box-footer">
+				<button class="btn btn-success" ng-click="group.clickToOpen()">Add Subgroup</button>
+			</div>
         </div>
       </div>
     </div>
