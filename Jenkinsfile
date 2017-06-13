@@ -10,17 +10,15 @@ pipeline {
 
     stage('build') {
       steps {
-        dir('/iam') {
-          git(url: 'https://github.com/indigo-iam/iam.git', branch: env.BRANCH_NAME)
+        git(url: 'https://github.com/indigo-iam/iam.git', branch: env.BRANCH_NAME)
 
-          sh 'mvn -B -U clean package'
+        sh 'mvn -B -U clean package'
 
-          junit '**/target/surefire-reports/TEST-*.xml'
+        junit '**/target/surefire-reports/TEST-*.xml'
 
-          archive 'iam-login-service/target/iam-login-service.war'
-          archive 'iam-login-service/target/classes/iam.version.properties'
-          archive 'iam-test-client/target/iam-test-client.jar'
-        }
+        archive 'iam-login-service/target/iam-login-service.war'
+        archive 'iam-login-service/target/classes/iam.version.properties'
+        archive 'iam-test-client/target/iam-test-client.jar'
       }
     }
   }
