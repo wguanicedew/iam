@@ -27,6 +27,12 @@ pipeline {
         unstash 'code'
         sh 'mvn -B clean test'
       }
+
+      post {
+        always {
+          junit '**/target/surefire-reports/TEST-*.xml'
+        }
+      }
     }
 
 
@@ -61,9 +67,6 @@ pipeline {
   }
 
   post {
-    always {
-      junit '**/target/surefire-reports/TEST-*.xml'
-    }
 
     success {
       slackSend channel: "#iam", color: 'good', message: "${env.JOB_NAME} - #${env.BUILD_NUMBER} Success (<${env.BUILD_URL}|Open>)" 
