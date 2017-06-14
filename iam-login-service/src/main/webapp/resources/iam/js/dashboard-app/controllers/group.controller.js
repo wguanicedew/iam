@@ -13,6 +13,11 @@ function GroupController($scope, $rootScope, $state, $filter, scimFactory, $uibM
 
 	group.id = $state.params.id;
 	group.data = [];
+	group.subgroups = [];
+	
+	group.removeMemberFromList = removeMemberFromList;
+	group.deleteMember = deleteMember;
+	group.deleteGroup = deleteGroup;
 
 	group.loadGroup();
 
@@ -33,6 +38,7 @@ function GroupController($scope, $rootScope, $state, $filter, scimFactory, $uibM
 						group.data.members = $filter('orderBy')(group.data.members, "display", false);
 						$rootScope.pageLoadingProgress = 100;
 						group.loadingModal.dismiss("Dismiss");
+						separateSubGroups();
 
 					}, function(error) {
 
@@ -44,15 +50,17 @@ function GroupController($scope, $rootScope, $state, $filter, scimFactory, $uibM
 		});
 	}
 
-	group.removeMemberFromList = removeMemberFromList;
-
 	function removeMemberFromList(member) {
 
 		var i = group.data.members.indexOf(member);
 		group.data.members.splice(i, 1);
 	}
+	
+	function removeSubgroupFromList(member) {
 
-	group.deleteMember = deleteMember;
+		var i = group.subgroups.indexOf(member);
+		group.subgroups.splice(i, 1);
+	}
 
 	function deleteMember(member) {
 
@@ -77,6 +85,21 @@ function GroupController($scope, $rootScope, $state, $filter, scimFactory, $uibM
 				});
 	}
 	
+	function separateSubGroups(){
+		if(group.data.members){
+			group.subgroups = group.data.members.filter(memberIsAGroup);
+			group.subgroups.forEach(function(member){
+				removeMemberFromList(member);
+			});
+		}else{
+			group.subgroups = [];
+		}
+	}
+	
+	function memberIsAGroup(member){
+		return (member.$ref.indexOf('scim/Groups')!=-1);
+	}
+	
 	function clickToOpen() {
 		var modalInstance = $uibModal.open({
 			templateUrl: '/resources/iam/template/dashboard/group/addsubgroup.html',
@@ -90,5 +113,27 @@ function GroupController($scope, $rootScope, $state, $filter, scimFactory, $uibM
 		}, function() {
 			console.info('Modal dismissed at: ', new Date());
 		});
+	}
+	
+	function deleteGroup(member) {
+		
+		var modalOptions = {
+			closeButtonText: 'Cancel',
+			actionButtonText: 'Delete Group',
+			headerText: "Delete Group «" + member.display + "»",
+			bodyText: `Are you sure you want to delete group '${member.display}'?`
+		};
+		
+		ModalService.showModal({}, modalOptions).then(
+			function (){
+				scimFactory.deleteGroup(member.value)
+					.then(function(response) {
+						removeSubgroupFromList(member);
+						$rootScope.loggedUser.totGroups = $rootScope.loggedUser.totGroups -1;
+						$scope.operationResult = Utils.buildSuccessOperationResult("Group " + member.display + " DELETED successfully");
+					}, function(error) {
+						$scope.operationResult = Utils.buildErrorOperationResult(error);
+					});
+			});
 	}
 }
