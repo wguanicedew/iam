@@ -1,4 +1,5 @@
 pipeline {
+
   agent { label 'maven' }
 
   options {
@@ -7,7 +8,6 @@ pipeline {
   }
 
   stages {
-
     stage('checkout') {
       steps {
         git(url: 'https://github.com/indigo-iam/iam.git', branch: env.BRANCH_NAME)
@@ -56,24 +56,6 @@ pipeline {
         /bin/bash iam-test-client/docker/build-prod-image.sh
         /bin/bash iam-test-client/docker/push-prod-image.sh
         '''
-      }
-    }
-
-    stage('coverage') {
-      agent { label 'maven' }
-
-      steps {
-        unstash 'code'
-        sh 'mvn -B clean cobertura:cobertura'
-
-        publishHTML(target: [
-          reportName           : 'Cobertura Report',
-          reportDir            : 'iam-login-service/target/site/cobertura/',
-          reportFiles          : 'index.html',
-          keepAll              : true,
-          alwaysLinkToLastBuild: true,
-          allowMissing         : false
-        ])
       }
     }
   }
