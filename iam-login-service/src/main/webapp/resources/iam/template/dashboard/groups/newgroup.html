@@ -2,24 +2,34 @@
     <h3 class="modal-title">Add new group</h3>
 </div>
 <div class="modal-body">
-
-    <div class="form-group">
-        <label>Name</label>
-        <input id="name" class="form-control" type="text" placeholder="Insert group name ..." ng-model="addGroupCtrl.group.displayName">
-    </div>
-    
-    <div class="form-group">
-        <label>Parent Group (optional)</label>
-        <select id="parent" class="form-control" ng-options="group as group.displayName for group in addGroupCtrl.parents track by group.id" ng-model="addGroupCtrl.parentSelected">
-        </select>
-    </div>
-
-	<div class="row">
-		<div class="col-xs-12">
-			<operationresult />
+	<form name="newGroupForm">
+	    <div class="form-group">
+	        <label class="control-label">Name</label>
+	        <div ng-class="{'has-error': newGroupForm.name.$dirty && newGroupForm.name.$invalid, 'has-success': newGroupForm.name.$dirty && newGroupForm.name.$valid}">
+	        	<div>
+	        		<input id="name" name="name" class="form-control" type="text" required ng-maxlength="50" placeholder="Insert group name ..." ng-model="addGroupCtrl.group.displayName">
+	        		<span class="glyphicon form-control-feedback" ng-class="{'glyphicon-remove': newGroupForm.name.$dirty && newGroupForm.name.$invalid, 'glyphicon-ok': newGroupForm.name.$dirty && newGroupForm.name.$valid}" style="right: 15px; top: 40px"></span>
+	        		<span class="help-block" ng-show="newGroupForm.name.$dirty && newGroupForm.name.$error.maxlength"> Max 50 characters</span>
+	        	</div>
+	        </div>
+	    </div>
+	    
+	    <div class="form-group">
+	        <label class="control-label">Parent Group (optional)</label>
+	        <div>
+	        	<div>
+	        		<select id="parent" class="form-control" ng-options="group as group.displayName for group in addGroupCtrl.parents track by group.id" ng-model="addGroupCtrl.parentSelected">
+	        		</select>
+	        	</div>
+	        </div>
+	    </div>
+	
+		<div class="row">
+			<div class="col-xs-12">
+				<operationresult />
+			</div>
 		</div>
-	</div>
-
+	</form>
 </div>
 <div class="modal-footer">
     <button class="btn btn-primary" type="button" id="modal-btn-confirm"

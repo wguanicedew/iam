@@ -2,9 +2,9 @@
 
 angular.module('dashboardApp').controller('GroupController', GroupController);
 
-GroupController.$inject = [ '$scope', '$rootScope', '$state', '$filter', 'scimFactory', '$uibModal', 'ModalService', 'Utils' ];
+GroupController.$inject = [ '$scope', '$rootScope', '$state', '$filter', 'scimFactory', '$uibModal', 'ModalService', 'Utils', 'toaster' ];
 
-function GroupController($scope, $rootScope, $state, $filter, scimFactory, $uibModal, ModalService, Utils) {
+function GroupController($scope, $rootScope, $state, $filter, scimFactory, $uibModal, ModalService, Utils, toaster) {
 
 	var group = this;
 
@@ -78,9 +78,17 @@ function GroupController($scope, $rootScope, $state, $filter, scimFactory, $uibM
 						.then(function(response) {
 							console.log("Deleted: ", member.display);
 							group.removeMemberFromList(member);
-							$scope.operationResult = Utils.buildSuccessOperationResult("Member " + member.display + " has been removed successfully");
+							toaster.pop({
+						          type: 'success',
+						          body:
+						              `Member ${member.display} has been removed successfully`
+						        });
 						}, function(error) {
-							$scope.operationResult = Utils.buildErrorOperationResult(error);
+							toaster.pop({
+						          type: 'error',
+						          body:
+						              `${error.data.detail}`
+						        });
 						});
 				});
 	}
@@ -110,6 +118,11 @@ function GroupController($scope, $rootScope, $state, $filter, scimFactory, $uibM
 		modalInstance.result.then(function(createdGroup) {
 			console.info(createdGroup);
 			group.loadGroup();
+			toaster.pop({
+		          type: 'success',
+		          body:
+		              `Group '${createdGroup.displayName}' CREATED successfully`
+		        });
 		}, function() {
 			console.info('Modal dismissed at: ', new Date());
 		});
@@ -130,9 +143,17 @@ function GroupController($scope, $rootScope, $state, $filter, scimFactory, $uibM
 					.then(function(response) {
 						removeSubgroupFromList(member);
 						$rootScope.loggedUser.totGroups = $rootScope.loggedUser.totGroups -1;
-						$scope.operationResult = Utils.buildSuccessOperationResult("Group " + member.display + " DELETED successfully");
+						toaster.pop({
+					          type: 'success',
+					          body:
+					              `Group '${member.display}' DELETED successfully`
+					        });
 					}, function(error) {
-						$scope.operationResult = Utils.buildErrorOperationResult(error);
+						toaster.pop({
+					          type: 'error',
+					          body:
+					              `${error.data.detail}`
+					        });
 					});
 			});
 	}

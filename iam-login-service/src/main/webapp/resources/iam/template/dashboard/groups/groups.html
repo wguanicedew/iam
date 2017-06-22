@@ -48,7 +48,7 @@
 							<tr
 								ng-repeat="group in gc.filtered | startFrom:(gc.currentPage-1)*gc.entryLimit | limitTo:gc.entryLimit">
 								<td class="col-md-1 uuid" id="{{group.id}}">{{$index + (gc.currentPage-1)*gc.entryLimit + 1}}</td>
-								<td class="col-md-8"><a ui-sref="group({id: group.id})">{{group.hierarchicName}}</a>
+								<td class="col-md-8"><a ui-sref="group({id: group.id})">{{group.displayName}}</a>
 								</td>
 								<td class="col-md-3 text-right">
 									<button id="delete_group_{{group.id}}" class="btn btn-danger btn-xs" ng-click="gc.deleteGroup(group)">
@@ -72,8 +72,7 @@
 					</div>
 				</div>
 				<div class="box-footer">
-					<button class="btn btn-success" ng-click="gc.clickToOpen()">Add
-						Group</button>
+					<button class="btn btn-success" ng-click="gc.clickToOpen()"><i class="fa fa-plus"></i> Add Group</button>
 				</div>
 			</div>
 		</div>
