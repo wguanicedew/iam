@@ -1,12 +1,19 @@
 package it.infn.mw.iam.authn.util;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.mitre.oauth2.model.SavedUserAuthentication;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 
 import com.google.common.collect.ImmutableSet;
 
 import it.infn.mw.iam.authn.oidc.OidcExternalAuthenticationToken;
 import it.infn.mw.iam.authn.saml.SamlExternalAuthenticationToken;
+import it.infn.mw.iam.persistence.model.IamAccount;
 
 public class AuthenticationUtils {
 
@@ -25,6 +32,17 @@ public class AuthenticationUtils {
 
     }
     return false;
+  }
+
+  public static List<GrantedAuthority> convertIamAccountAuthorities(IamAccount account) {
+    return account.getAuthorities()
+      .stream()
+      .map(a -> new SimpleGrantedAuthority(a.getAuthority()))
+      .collect(Collectors.toList());
+  }
+  
+  public static User userFromIamAccount(IamAccount account){
+    return new User(account.getUsername(), account.getPassword(), convertIamAccountAuthorities(account));
   }
 
   private AuthenticationUtils() {}
