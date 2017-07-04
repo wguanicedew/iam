@@ -9,7 +9,7 @@ function GroupController($scope, $rootScope, $state, $filter, scimFactory, $uibM
 	var group = this;
 
 	group.loadGroup = loadGroup;
-	group.clickToOpen = clickToOpen;
+	group.openAddSubgroupDialog = openAddSubgroupDialog;
 
 	group.id = $state.params.id;
 	group.data = [];
@@ -108,7 +108,7 @@ function GroupController($scope, $rootScope, $state, $filter, scimFactory, $uibM
 		return (member.$ref.indexOf('scim/Groups')!=-1);
 	}
 	
-	function clickToOpen() {
+	function openAddSubgroupDialog() {
 		var modalInstance = $uibModal.open({
 			templateUrl: '/resources/iam/template/dashboard/group/addsubgroup.html',
 			controller: 'AddSubGroupController',

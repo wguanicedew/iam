@@ -135,8 +135,6 @@ public class ScimGroupProvisioning
     groupRepository.save(iamGroup);
     if (iamParentGroup != null) {
       groupRepository.save(iamParentGroup);
-      eventPublisher.publishEvent(new GroupCreatedEvent(this, iamGroup,
-          "Group created with name " + iamParentGroup.getName()));
     }
 
     eventPublisher.publishEvent(
@@ -179,9 +177,10 @@ public class ScimGroupProvisioning
 
     /* displayname is required */
     String displayName = scimItemToBeReplaced.getDisplayName();
+    displayNameSanityChecks(displayName);
 
     if (!isGroupNameAvailable(displayName, id)) {
-      throw new ScimResourceExistsException(displayName + " is already mappped to another group");
+      throw new ScimResourceExistsException(displayName + " is already mapped to another group");
     }
 
     IamGroup updatedGroup = converter.fromScim(scimItemToBeReplaced);
