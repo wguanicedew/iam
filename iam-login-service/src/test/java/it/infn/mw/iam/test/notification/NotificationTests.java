@@ -4,10 +4,8 @@ import static it.infn.mw.iam.test.RegistrationUtils.approveRequest;
 import static it.infn.mw.iam.test.RegistrationUtils.confirmRegistrationRequest;
 import static it.infn.mw.iam.test.RegistrationUtils.createRegistrationRequest;
 import static it.infn.mw.iam.test.RegistrationUtils.deleteUser;
-
-import static it.infn.mw.iam.test.TestUtils.waitIfPortIsUsed;
-
 import static it.infn.mw.iam.test.RegistrationUtils.rejectRequest;
+import static it.infn.mw.iam.test.TestUtils.waitIfPortIsUsed;
 import static java.lang.String.format;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
@@ -18,7 +16,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -28,6 +25,7 @@ import javax.mail.MessagingException;
 
 import org.apache.commons.lang.time.DateUtils;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -112,8 +110,10 @@ public class NotificationTests {
   @After
   public void tearDown() throws InterruptedException {
     wiser.stop();
-
     notificationRepository.deleteAll();
+    if (wiser.getServer().isRunning()) {
+      Assert.fail("Fake mail server is still running after stop!!");
+    }
   }
 
   @Test

@@ -45,11 +45,20 @@ public class ActuatorEndpointsTests {
   private static final Set<String> SENSITIVE_ENDPOINTS = Sets.newHashSet("/metrics", "/configprops",
       "/env", "/mappings", "/flyway", "/autoconfig", "/beans", "/dump", "/trace");
 
+  @Value("${endpoints.healthMail.path}")
+  private String mailHealthEndpoint;
+
+  @Value("${endpoints.externalService.path}")
+  private String externalHealthEndpoint;
+
   @Value("${spring.mail.host}")
   private String mailHost;
 
   @Value("${spring.mail.port}")
   private Integer mailPort;
+
+  @Value("${health.googleEndpoint}")
+  private String googleEndpoint;
 
   @Autowired
   private WebApplicationContext context;
@@ -170,7 +179,7 @@ public class ActuatorEndpointsTests {
   @Test
   public void testMailHealthEndpointWithoutSmtp() throws Exception {
     // @formatter:off
-    mvc.perform(get("/health/mail"))
+    mvc.perform(get(mailHealthEndpoint))
       .andExpect(status().isServiceUnavailable())
       .andExpect(jsonPath("$.status", equalTo(STATUS_DOWN)))
       .andExpect(jsonPath("$.mail").doesNotExist());
@@ -181,7 +190,7 @@ public class ActuatorEndpointsTests {
   @WithMockUser(username = USER_USERNAME, roles = {USER_ROLE})
   public void testMailHealthEndpointWithoutSmtpAsUser() throws Exception {
     // @formatter:off
-    mvc.perform(get("/health/mail"))
+    mvc.perform(get(mailHealthEndpoint))
       .andExpect(status().isServiceUnavailable())
       .andExpect(jsonPath("$.status", equalTo(STATUS_DOWN)))
       .andExpect(jsonPath("$.mail").doesNotExist());
@@ -192,12 +201,46 @@ public class ActuatorEndpointsTests {
   @WithMockUser(username = ADMIN_USERNAME, roles = {ADMIN_ROLE})
   public void testMailHealthEndpointWithoutSmtpAsAdmin() throws Exception {
     // @formatter:off
-    mvc.perform(get("/health/mail"))
+    mvc.perform(get(mailHealthEndpoint))
       .andExpect(status().isServiceUnavailable())
       .andExpect(jsonPath("$.status", equalTo(STATUS_DOWN)))
       .andExpect(jsonPath("$.mail.status", equalTo(STATUS_DOWN)))
       .andExpect(jsonPath("$.mail.location", equalTo(format("%s:%d", mailHost, mailPort))))
       .andExpect(jsonPath("$.mail.error").exists());
+    // @formatter:on
+  }
+
+  @Test
+  public void testExternalServicesHealthEndpoint() throws Exception {
+    // @formatter:off
+    mvc.perform(get(externalHealthEndpoint))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.status", equalTo(STATUS_UP)))
+      .andExpect(jsonPath("$.google").doesNotExist());
+    // @formatter:on
+  }
+
+  @Test
+  @WithMockUser(username = USER_USERNAME, roles = {USER_ROLE})
+  public void testExternalServicesHealthEndpointAsUser() throws Exception {
+    // @formatter:off
+    mvc.perform(get(externalHealthEndpoint))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.status", equalTo(STATUS_UP)))
+      .andExpect(jsonPath("$.google").doesNotExist());
+    // @formatter:on
+  }
+
+  @Test
+  @WithMockUser(username = ADMIN_USERNAME, roles = {ADMIN_ROLE})
+  public void testExternalServicesHealthEndpointAsAdmin() throws Exception {
+    // @formatter:off
+    mvc.perform(get(externalHealthEndpoint))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.status", equalTo(STATUS_UP)))
+      .andExpect(jsonPath("$.google.status", equalTo(STATUS_UP)))
+      .andExpect(jsonPath("$.google.location", equalTo(googleEndpoint)))
+      .andExpect(jsonPath("$.google.error").doesNotExist());
     // @formatter:on
   }
 }

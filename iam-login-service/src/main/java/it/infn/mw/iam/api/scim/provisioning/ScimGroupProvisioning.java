@@ -1,5 +1,7 @@
 package it.infn.mw.iam.api.scim.provisioning;
 
+import static java.lang.String.format;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -13,6 +15,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+
+import com.google.common.base.Strings;
 
 import it.infn.mw.iam.api.scim.converter.GroupConverter;
 import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
@@ -31,7 +35,6 @@ import it.infn.mw.iam.api.scim.updater.factory.DefaultGroupMembershipUpdaterFact
 import it.infn.mw.iam.audit.events.group.GroupCreatedEvent;
 import it.infn.mw.iam.audit.events.group.GroupRemovedEvent;
 import it.infn.mw.iam.audit.events.group.GroupReplacedEvent;
-import it.infn.mw.iam.audit.events.group.GroupUpdatedEvent;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
@@ -40,6 +43,9 @@ import it.infn.mw.iam.persistence.repository.IamGroupRepository;
 @Service
 public class ScimGroupProvisioning
     implements ScimProvisioning<ScimGroup, List<ScimMemberRef>>, ApplicationEventPublisherAware {
+
+  private static final int GROUP_NAME_MAX_LENGTH = 50;
+  private static final int GROUP_FULLNAME_MAX_LENGTH = 512;
 
   private final IamGroupRepository groupRepository;
 
@@ -91,6 +97,8 @@ public class ScimGroupProvisioning
   @Override
   public ScimGroup create(ScimGroup group) {
 
+    displayNameSanityChecks(group.getDisplayName());
+
     IamGroup iamGroup = new IamGroup();
 
     Date creationTime = new Date();
@@ -100,35 +108,35 @@ public class ScimGroupProvisioning
     iamGroup.setName(group.getDisplayName());
     iamGroup.setCreationTime(creationTime);
     iamGroup.setLastUpdateTime(creationTime);
-    iamGroup.setAccounts(new HashSet<IamAccount>());
+    iamGroup.setAccounts(new HashSet<>());
     iamGroup.setChildrenGroups(new HashSet<>());
-
-    if (groupRepository.findByName(group.getDisplayName()).isPresent()) {
-      throw new ScimResourceExistsException("Duplicated group '" + group.getDisplayName() + "'");
-    }
 
     IamGroup iamParentGroup = null;
 
     if (group.getIndigoGroup().getParentGroup() != null) {
       String parentGroupUuid = group.getIndigoGroup().getParentGroup().getValue();
+      String parentGroupName = group.getIndigoGroup().getParentGroup().getDisplay();
 
       iamParentGroup = groupRepository.findByUuid(parentGroupUuid)
         .orElseThrow(() -> new ScimResourceNotFoundException(
             String.format("Parent group '%s' not found", parentGroupUuid)));
 
+      String fullName = String.format("%s/%s", parentGroupName, group.getDisplayName());
+      fullNameSanityChecks(fullName);
+
       iamGroup.setParentGroup(iamParentGroup);
+      iamGroup.setName(fullName);
 
       Set<IamGroup> children = iamParentGroup.getChildrenGroups();
       children.add(iamGroup);
     }
 
     groupRepository.save(iamGroup);
+    
     if (iamParentGroup != null) {
       groupRepository.save(iamParentGroup);
-      eventPublisher.publishEvent(
-          new GroupCreatedEvent(this, iamGroup, "Group created with name " + iamParentGroup.getName()));
     }
-
+    
     eventPublisher.publishEvent(
         new GroupCreatedEvent(this, iamGroup, "Group created with name " + iamGroup.getName()));
 
@@ -235,6 +243,7 @@ public class ScimGroupProvisioning
     checkUnsupportedPath(op);
 
     List<AccountUpdater> updaters = groupUpdaterFactory.getUpdatersForPatchOperation(group, op);
+    List<AccountUpdater> updatesToPublish = new ArrayList<>();
 
     boolean hasChanged = false;
 
@@ -244,9 +253,7 @@ public class ScimGroupProvisioning
         a.touch();
         accountRepository.save(a);
         hasChanged = true;
-
-        eventPublisher.publishEvent(new GroupUpdatedEvent(this, group, u.getType(),
-            String.format("Updated information for group %s", group.getName())));
+        updatesToPublish.add(u);
       }
     }
 
@@ -254,7 +261,9 @@ public class ScimGroupProvisioning
 
       group.touch();
       groupRepository.save(group);
-
+      for (AccountUpdater u : updatesToPublish) {
+        u.publishUpdateEvent(this, eventPublisher);
+      }
     }
   }
 
@@ -268,6 +277,33 @@ public class ScimGroupProvisioning
     }
     throw new ScimPatchOperationNotSupported(
         "path value " + op.getPath() + " is not currently supported");
+  }
+
+  private void displayNameSanityChecks(String displayName) {
+    if (Strings.isNullOrEmpty(displayName)) {
+      throw new IllegalArgumentException("Group displayName cannot be empty");
+    }
+
+    if (displayName.contains("/")) {
+      throw new IllegalArgumentException("Group displayName cannot contain a slash character");
+    }
+
+    if (displayName.length() > GROUP_NAME_MAX_LENGTH) {
+      throw new IllegalArgumentException(
+          format("Group name length cannot be higher than %d characters", GROUP_NAME_MAX_LENGTH));
+    }
+  }
+
+  private void fullNameSanityChecks(String displayName) {
+    if (displayName.length() > GROUP_FULLNAME_MAX_LENGTH) {
+      throw new IllegalArgumentException(
+          format("Group displayName length cannot be higher than %d characters",
+              GROUP_FULLNAME_MAX_LENGTH));
+    }
+
+    if (groupRepository.findByName(displayName).isPresent()) {
+      throw new ScimResourceExistsException(format("Duplicated group '%s'", displayName));
+    }
   }
 
 }

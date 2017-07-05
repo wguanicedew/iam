@@ -29,7 +29,7 @@ public class IamGroup {
   @Column(nullable = false, length = 36, unique = true)
   private String uuid;
 
-  @Column(nullable = false, length = 255, unique = true)
+  @Column(nullable = false, length = 512, unique = true)
   private String name;
 
   @Column(nullable = true, length = 512)
