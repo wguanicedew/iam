@@ -26,7 +26,7 @@
 	
 	<div class="wrapper">
 		<toaster-container
-				toaster-options="{'close-button': true, 'time-out':{ 'toast-error': 0, 'toast-success': 5000, 'toast-warning': 5000 }, 'position-class': 'toast-top-center'}">
+				toaster-options="{'close-button': true, 'time-out':{ 'toast-error': 5000, 'toast-success': 5000, 'toast-warning': 5000 }, 'position-class': 'toast-top-center'}">
 		</toaster-container>
 		
 		<header class="main-header" ng-cloak></header>
@@ -97,6 +97,7 @@
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/groups.controller.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/registration.controller.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/add-group.controller.js"></script>
+	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/add-subgroup.controller.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/add-user.controller.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/account-privileges.controller.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/edit-user.controller.js"></script>

@@ -1,5 +1,6 @@
 package it.infn.mw.iam.test.account;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -13,6 +14,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
+import it.infn.mw.iam.persistence.repository.IamEmailNotificationRepository;
 import it.infn.mw.iam.registration.PersistentUUIDTokenGenerator;
 import it.infn.mw.iam.registration.RegistrationRequestDto;
 import it.infn.mw.iam.test.RegistrationUtils;
@@ -32,11 +34,19 @@ public class PasswordEncodingTests {
   @Autowired
   private IamAccountRepository iamAccountRepository;
 
+  @Autowired
+  private IamEmailNotificationRepository notificationRepository;
+
   private RegistrationRequestDto reg;
 
   @BeforeClass
   public static void init() {
     TestUtils.initRestAssured();
+  }
+
+  @After
+  public void tearDown() {
+    notificationRepository.deleteAll();
   }
 
   @Test

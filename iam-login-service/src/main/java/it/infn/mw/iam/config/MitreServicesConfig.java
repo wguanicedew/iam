@@ -42,6 +42,7 @@ import org.mitre.openid.connect.web.AuthenticationTimeStamper;
 import org.mitre.openid.connect.web.ServerConfigInterceptor;
 import org.mitre.openid.connect.web.UserInfoInterceptor;
 import org.mitre.uma.service.ResourceSetService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.embedded.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -80,12 +81,13 @@ public class MitreServicesConfig {
 
   @Bean
   OAuth2RequestFactory requestFactory() {
-    
-    return new IamOAuth2RequestFactory(clientDetailsService());
+
+    return new IamOAuth2RequestFactory(clientDetailsEntityService());
   }
 
   @Bean
-  ClientDetailsEntityService clientDetailsService() {
+  @Qualifier("iamClientDetailsEntityService")
+  ClientDetailsEntityService clientDetailsEntityService() {
 
     return new DefaultOAuth2ClientDetailsEntityService();
   }

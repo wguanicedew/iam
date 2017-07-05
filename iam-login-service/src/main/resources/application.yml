@@ -92,3 +92,10 @@ task:
 endpoints:
   healthMail:
     path: /health/mail
+  externalService:
+    path: /health/external
+    
+health:
+  timeout: 5000
+  googleEndpoint: http://www.google.it
+    

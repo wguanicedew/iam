@@ -5,6 +5,7 @@ import static it.infn.mw.iam.api.scim.model.ScimConstants.SCIM_CONTENT_TYPE;
 import static java.lang.String.format;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -167,11 +168,106 @@ public class ScimGroupTests {
     // @formatter:on
   }
 
+  @Test
+  @WithMockOAuthUser(clientId = "scim-client-rw", scopes = {"scim:read", "scim:write"})
+  public void testCreateGroupWithASlashIntoDisplayName() throws Exception {
+    ScimGroup group = ScimGroup.builder("te/st").build();
+
+    // @formatter:off
+    mvc.perform(post("/scim/Groups").contentType(SCIM_CONTENT_TYPE)
+        .content(objectMapper.writeValueAsString(group)))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.detail", equalTo("Group displayName cannot contain a slash character")));
+    // @formatter:on
+  }
+
+  @Test
+  @WithMockOAuthUser(clientId = "scim-client-rw", scopes = {"scim:read", "scim:write"})
+  public void testCreateTwoGroupsWithSameNameButDifferentParent() throws Exception {
+    ScimGroup cms = createGroup("cms");
+    ScimGroup alice = createGroup("alice");
+
+    ScimGroup cmsTest = createGroup("test", cms);
+    assertNotNull(cmsTest);
+    assertThat(cmsTest.getDisplayName(), equalTo("cms/test"));
+
+    ScimGroup aliceTest = createGroup("test", alice);
+    assertNotNull(aliceTest);
+    assertThat(aliceTest.getDisplayName(), equalTo("alice/test"));
+  }
+
+  @Test
+  @WithMockOAuthUser(clientId = "scim-client-rw", scopes = {"scim:read", "scim:write"})
+  public void testCreateTwoGroupsWithSameNameAndSameParent() throws Exception {
+    ScimGroup cms = createGroup("cms");
+
+    ScimGroup cmsTest = createGroup("test", cms);
+    assertNotNull(cmsTest);
+    assertThat(cmsTest.getDisplayName(), equalTo("cms/test"));
+
+    // @formatter:off
+    mvc.perform(post("/scim/Groups").contentType(SCIM_CONTENT_TYPE)
+        .content(objectMapper.writeValueAsString(buildGroupObject("test", cms))))
+      .andExpect(status().isConflict())
+      .andExpect(jsonPath("$.detail", equalTo("Duplicated group 'cms/test'")));
+    // @formatter:on
+  }
+
+  @Test
+  @WithMockOAuthUser(clientId = "scim-client-rw", scopes = {"scim:read", "scim:write"})
+  public void testCreateGroupWithFullNameTooLong() throws Exception {
+    String name = "group_with_fifty_characters_name_has_a_long_name_";
+    ScimGroup group = createGroup(name);
+
+    for (int i = 0; i < 9; i++) {
+      group = createGroup(name + i, group);
+    }
+
+    group = buildGroupObject(name, group);
+
+    // @formatter:off
+    mvc.perform(post("/scim/Groups").contentType(SCIM_CONTENT_TYPE)
+        .content(objectMapper.writeValueAsString(group)))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.detail", equalTo("Group displayName length cannot be higher than 512 characters")));
+    // @formatter:on
+  }
+
+  @Test
+  @WithMockOAuthUser(clientId = "scim-client-rw", scopes = {"scim:read", "scim:write"})
+  public void testCreateGroupWithNameTooLong() throws Exception {
+    ScimGroup group =
+        buildGroupObject("group_with_name_longer_than_fifty_characters_is_not_allowed", null);
+
+    assertNotNull(group);
+
+    // @formatter:off
+    mvc.perform(post("/scim/Groups").contentType(SCIM_CONTENT_TYPE)
+        .content(objectMapper.writeValueAsString(group)))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.detail", equalTo("Group name length cannot be higher than 50 characters")));
+    // @formatter:on
+  }
+
   private ScimGroup createGroup(String name) throws Exception {
     return createGroup(name, null);
   }
 
   private ScimGroup createGroup(String name, ScimGroup parent) throws Exception {
+    ScimGroup group = buildGroupObject(name, parent);
+
+    String response = mvc
+      .perform(post("/scim/Groups").contentType(SCIM_CONTENT_TYPE)
+        .content(objectMapper.writeValueAsString(group)))
+      .andExpect(status().isCreated())
+      .andReturn()
+      .getResponse()
+      .getContentAsString();
+
+    return objectMapper.readValue(response, ScimGroup.class);
+  }
+
+  private ScimGroup buildGroupObject(String name, ScimGroup parent) {
     ScimGroup group = ScimGroup.builder(name).build();
     if (parent != null) {
       ScimGroupRef parentGroupRef = ScimGroupRef.builder()
@@ -185,16 +281,7 @@ public class ScimGroupTests {
 
       group = ScimGroup.builder(name).indigoGroup(parentIndigoGroup).build();
     }
-
-    String response = mvc
-      .perform(post("/scim/Groups").contentType(SCIM_CONTENT_TYPE)
-        .content(objectMapper.writeValueAsString(group)))
-      .andExpect(status().isCreated())
-      .andReturn()
-      .getResponse()
-      .getContentAsString();
-
-    return objectMapper.readValue(response, ScimGroup.class);
+    return group;
   }
 
 }

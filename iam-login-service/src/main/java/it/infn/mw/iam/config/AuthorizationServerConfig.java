@@ -53,6 +53,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
   private OAuth2TokenEntityService tokenServices;
 
   @Autowired
+  @Qualifier("iamClientDetailsEntityService")
   private ClientDetailsEntityService clientDetailsService;
 
   @Autowired
@@ -72,7 +73,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 
   @Autowired
   private SystemScopeService systemScopeService;
-  
+
 
   @Bean
   WebResponseExceptionTranslator webResponseExceptionTranslator() {
@@ -81,10 +82,10 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
   }
 
   @Bean(name = "iamAuthenticationEventPublisher")
-  AuthenticationEventPublisher iamAuthenticationEventPublisher(){
+  AuthenticationEventPublisher iamAuthenticationEventPublisher() {
     return new IamAuthenticationEventPublisher();
   }
-  
+
   @Bean(name = "authenticationManager")
   AuthenticationManager authenticationManager() {
 
