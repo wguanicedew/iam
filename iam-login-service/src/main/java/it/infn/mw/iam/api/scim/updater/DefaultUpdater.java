@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import it.infn.mw.iam.api.scim.updater.util.NullSafeNotEqualsMatcher;
 
-public class DefaultUpdater<T> implements Updater {
+public abstract class DefaultUpdater<T> implements Updater {
 
   public static final Logger LOG = LoggerFactory.getLogger(DefaultUpdater.class);
 

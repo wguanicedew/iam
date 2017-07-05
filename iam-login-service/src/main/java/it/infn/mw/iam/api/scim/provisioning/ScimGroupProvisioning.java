@@ -31,7 +31,6 @@ import it.infn.mw.iam.api.scim.updater.factory.DefaultGroupMembershipUpdaterFact
 import it.infn.mw.iam.audit.events.group.GroupCreatedEvent;
 import it.infn.mw.iam.audit.events.group.GroupRemovedEvent;
 import it.infn.mw.iam.audit.events.group.GroupReplacedEvent;
-import it.infn.mw.iam.audit.events.group.GroupUpdatedEvent;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
@@ -100,7 +99,7 @@ public class ScimGroupProvisioning
     iamGroup.setName(group.getDisplayName());
     iamGroup.setCreationTime(creationTime);
     iamGroup.setLastUpdateTime(creationTime);
-    iamGroup.setAccounts(new HashSet<IamAccount>());
+    iamGroup.setAccounts(new HashSet<>());
     iamGroup.setChildrenGroups(new HashSet<>());
 
     if (groupRepository.findByName(group.getDisplayName()).isPresent()) {
@@ -125,8 +124,8 @@ public class ScimGroupProvisioning
     groupRepository.save(iamGroup);
     if (iamParentGroup != null) {
       groupRepository.save(iamParentGroup);
-      eventPublisher.publishEvent(
-          new GroupCreatedEvent(this, iamGroup, "Group created with name " + iamParentGroup.getName()));
+      eventPublisher.publishEvent(new GroupCreatedEvent(this, iamParentGroup,
+          "Group created with name " + iamParentGroup.getName()));
     }
 
     eventPublisher.publishEvent(
@@ -235,6 +234,7 @@ public class ScimGroupProvisioning
     checkUnsupportedPath(op);
 
     List<AccountUpdater> updaters = groupUpdaterFactory.getUpdatersForPatchOperation(group, op);
+    List<AccountUpdater> updatesToPublish = new ArrayList<>();
 
     boolean hasChanged = false;
 
@@ -244,9 +244,7 @@ public class ScimGroupProvisioning
         a.touch();
         accountRepository.save(a);
         hasChanged = true;
-
-        eventPublisher.publishEvent(new GroupUpdatedEvent(this, group, u.getType(),
-            String.format("Updated information for group %s", group.getName())));
+        updatesToPublish.add(u);
       }
     }
 
@@ -254,7 +252,9 @@ public class ScimGroupProvisioning
 
       group.touch();
       groupRepository.save(group);
-
+      for (AccountUpdater u : updatesToPublish) {
+        u.publishUpdateEvent(this, eventPublisher);
+      }
     }
   }
 

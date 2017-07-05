@@ -32,8 +32,8 @@ public class IamX509Certificate implements IamAccountRef {
   @Column(name = "is_primary")
   private boolean primary;
 
-  @ManyToOne(fetch=FetchType.EAGER)
-  @JoinColumn(name="account_id")
+  @ManyToOne(fetch = FetchType.EAGER)
+  @JoinColumn(name = "account_id")
   private IamAccount account;
 
   public IamX509Certificate() {}
@@ -46,29 +46,28 @@ public class IamX509Certificate implements IamAccountRef {
   @Override
   public int hashCode() {
 
-	final int prime = 31;
-	int result = 1;
-	result = prime * result
-	  + ((certificate == null) ? 0 : certificate.hashCode());
-	return result;
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((certificate == null) ? 0 : certificate.hashCode());
+    return result;
   }
 
   @Override
   public boolean equals(Object obj) {
 
-	if (this == obj)
-	  return true;
-	if (obj == null)
-	  return false;
-	if (getClass() != obj.getClass())
-	  return false;
-	IamX509Certificate other = (IamX509Certificate) obj;
-	if (certificate == null) {
-	  if (other.certificate != null)
-		return false;
-	} else if (!certificate.equals(other.certificate))
-	  return false;
-	return true;
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    IamX509Certificate other = (IamX509Certificate) obj;
+    if (certificate == null) {
+      if (other.certificate != null)
+        return false;
+    } else if (!certificate.equals(other.certificate))
+      return false;
+    return true;
   }
 
   @Override
@@ -131,6 +130,13 @@ public class IamX509Certificate implements IamAccountRef {
   public void setPrimary(boolean primary) {
 
     this.primary = primary;
+  }
+
+  @Override
+  public String toString() {
+    return String.format(
+        "IamX509Certificate [label=%s, certificateSubject=%s, primary=%s, certificate=%s", label,
+        certificateSubject, primary, certificate);
   }
 
 }
