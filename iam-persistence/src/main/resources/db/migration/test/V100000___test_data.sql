@@ -130,6 +130,32 @@ INSERT INTO iam_saml_id(idpid, attribute_id, userid, account_id) VALUES
 ('https://idptestbed/idp/shibboleth', 'urn:oid:0.9.2342.19200300.100.1.3', 'andrea.ceccanti@example.org',2),
 ('https://idptestbed/idp/shibboleth', 'urn:oid:1.3.6.1.4.1.5923.1.1.1.13', '78901@idptestbed',2);
 
+INSERT INTO iam_x509_cert(label,subject_dn,issuer_dn, is_primary,certificate,creation_time, last_update_time,account_id) VALUES
+('test2 cert', 'CN=test2,O=IGI,C=IT', 'CN=Test CA,O=IGI,C=IT',true, 
+'-----BEGIN CERTIFICATE-----
+MIIDnjCCAoagAwIBAgIBCzANBgkqhkiG9w0BAQUFADAtMQswCQYDVQQGEwJJVDEM
+MAoGA1UECgwDSUdJMRAwDgYDVQQDDAdUZXN0IENBMB4XDTEyMDkyNjE1MzkzOFoX
+DTIyMDkyNDE1MzkzOFowKzELMAkGA1UEBhMCSVQxDDAKBgNVBAoTA0lHSTEOMAwG
+A1UEAxMFdGVzdDIwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDEYYwo
+eq5ucXGsIZqI5V30OmEZTLzz3TCtFSp+DWbFHAeiiZNNktK44udHV+kwTjSxHTUJ
+P9RIvCAIMggtvibesXrTp1UHAF6p1d2GaUmU+mc/y7zRESxuSXx+SqWCwBOVxOzj
+Dhm9oWlg3TSNctV2qv0HR2t8hsnfsQShULwaUJmQZ1fBfDN6HL5ITe77ptXB84Hz
+MAmNv0ckoQmVGtlVhoasppTgMhoWvBSguT1FGw7A/a8ZzQZV8rC1BP/1LZtRitHm
+stErUyULBjQekpu3VhGFJLCFD3fcyjoBKsIxCm62NhzHLOF8RE+kW05MRGrUu007
+CuV3yCDZOixIAxKVAgMBAAGjgcowgccwDAYDVR0TAQH/BAIwADAdBgNVHQ4EFgQU
+XNkN/hv+aBr6hqNqYm1VaiEAvpcwDgYDVR0PAQH/BAQDAgXgMD4GA1UdJQQ3MDUG
+CCsGAQUFBwMBBggrBgEFBQcDAgYKKwYBBAGCNwoDAwYJYIZIAYb4QgQBBggrBgEF
+BQcDBDAfBgNVHSMEGDAWgBSRdzZ7LrRp8yfqt/YIi0ojohFJxjAnBgNVHREEIDAe
+gRxhbmRyZWEuY2VjY2FudGlAY25hZi5pbmZuLml0MA0GCSqGSIb3DQEBBQUAA4IB
+AQBOavmIRcBqWnGFmcEp8zJ+cR3k02UcM0Xg7/vAnxJ7JziniMJLyBrxAaW1j2f6
+qJrap9rK+aukhovInTSrdWKM6y5ceY0w7u4nsu8Y3lRf3g9e766iuY3NfflDZE2N
+s3JuHZljwx7NGEOrr/Wi5Q1g9JVJcK+A+aB3vPLoS/Uc95ibdqJKHVG0rcKLnqR6
+AVvzyPxJtpwk4yy4V+juBZib2SImBWJ7C5VHuHLMAOxtNV84CIXpdvLKfA1Bjf3W
+UMrcvhN03L72j9IR0WEZlFMfYbxv1gbNbo+fhVo3itHI3lTl0K0BD5bOP0LqtARL
+gZ9zFVlxWHcKUqQ41ZQXNg7U
+-----END CERTIFICATE-----', 
+CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(),1);
+
 INSERT INTO iam_group(id, name, uuid, description, creationtime, lastupdatetime) VALUES
 (1, 'Production', 'c617d586-54e6-411d-8e38-64967798fa8a', 'The production group', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP()),
 (2, 'Analysis', '6a384bcd-d4b3-4b7f-a2fe-7d897ada0dd1', 'The analysis group', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP());

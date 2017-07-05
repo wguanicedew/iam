@@ -132,8 +132,8 @@ public class ScimUserProvisioning
 
     accountRepository.delete(account);
 
-    eventPublisher.publishEvent(
-        new AccountRemovedEvent(this, account, "Removed account for user " + account.getUsername()));
+    eventPublisher.publishEvent(new AccountRemovedEvent(this, account,
+        "Removed account for user " + account.getUsername()));
   }
 
   private void checkForDuplicates(ScimUser user) throws ScimResourceExistsException {
@@ -188,7 +188,11 @@ public class ScimUserProvisioning
 
     if (account.hasX509Certificates()) {
 
-      account.getX509Certificates().forEach(cert -> checkX509CertificateNotExists(cert));
+      account.getX509Certificates().forEach(cert -> {
+        checkX509CertificateNotExists(cert);
+        cert.setCreationTime(creationTime);
+        cert.setLastUpdateTime(creationTime);
+      });
 
       long count = account.getX509Certificates().stream().filter(cert -> cert.isPrimary()).count();
 
@@ -232,8 +236,8 @@ public class ScimUserProvisioning
 
     accountRepository.save(account);
 
-    eventPublisher.publishEvent(
-        new AccountCreatedEvent(this, account, "Account created for user " + account.getUsername()));
+    eventPublisher.publishEvent(new AccountCreatedEvent(this, account,
+        "Account created for user " + account.getUsername()));
 
     return account;
   }
@@ -248,10 +252,9 @@ public class ScimUserProvisioning
 
   private void checkX509CertificateNotExists(IamX509Certificate cert) {
 
-    if (accountRepository.findByCertificate(cert.getCertificate()).isPresent()) {
-
-      throw new ScimResourceExistsException(
-          String.format("X509 Certificate %s is already mapped to a user", cert.getCertificate()));
+    if (accountRepository.findByCertificateSubject(cert.getSubjectDn()).isPresent()) {
+      throw new ScimResourceExistsException(String.format(
+          "X509 certificate with subject '%s' is already bound to another user", cert.getSubjectDn()));
     }
   }
 

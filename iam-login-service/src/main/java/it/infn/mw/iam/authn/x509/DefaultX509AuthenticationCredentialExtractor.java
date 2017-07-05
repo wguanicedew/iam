@@ -5,7 +5,6 @@ import static it.infn.mw.iam.authn.x509.DefaultX509AuthenticationCredentialExtra
 import static it.infn.mw.iam.authn.x509.DefaultX509AuthenticationCredentialExtractor.Headers.SUBJECT;
 import static it.infn.mw.iam.authn.x509.DefaultX509AuthenticationCredentialExtractor.Headers.VERIFY;
 
-import java.security.cert.X509Certificate;
 import java.util.EnumSet;
 import java.util.Optional;
 
@@ -105,17 +104,20 @@ public class DefaultX509AuthenticationCredentialExtractor
 
     headerNamesSanityChecks(request);
 
-    X509Certificate[] chain =
-        certChainParser.parseChainFromString(clientCertHeaderContent);
-
+    String pemCertificateString = clientCertHeaderContent.replace('\t', '\n');
+    
+    X509CertificateChainParsingResult chain =
+        certChainParser.parseChainFromString(pemCertificateString);
+    
     IamX509AuthenticationCredential.Builder credBuilder =
         new IamX509AuthenticationCredential.Builder();
 
     // FIXME: populate all the fields we get from NGINX
-    credBuilder.certificateChain(chain)
+    credBuilder.certificateChain(chain.getChain())
+      .certificateChainPemString(chain.getPemString())
       .subject(getHeader(request, SUBJECT))
       .issuer(getHeader(request, ISSUER))
-      .verificationStatus(parseVerifyHeader(request));
+      .verificationResult(parseVerifyHeader(request));
 
     final IamX509AuthenticationCredential cred = credBuilder.build();
     LOG.debug("Extracted X.509 credential: {}", cred);

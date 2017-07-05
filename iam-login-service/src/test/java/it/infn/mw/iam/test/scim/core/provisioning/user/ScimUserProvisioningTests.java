@@ -18,7 +18,6 @@ import it.infn.mw.iam.api.scim.model.ScimPhoto;
 import it.infn.mw.iam.api.scim.model.ScimSamlId;
 import it.infn.mw.iam.api.scim.model.ScimSshKey;
 import it.infn.mw.iam.api.scim.model.ScimUser;
-import it.infn.mw.iam.api.scim.model.ScimX509Certificate;
 import it.infn.mw.iam.api.scim.provisioning.ScimUserProvisioning;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.test.TestUtils;
@@ -49,11 +48,6 @@ public class ScimUserProvisioningTests {
     .display("Personal Key")
     .value(TestUtils.sshKeys.get(0).key)
     .build();
-  final ScimX509Certificate TESTUSER_X509CERT = ScimX509Certificate.builder()
-    .display("Personal X509 Certificate")
-    .value(TestUtils.x509Certs.get(0).certificate)
-    .primary(true)
-    .build();
 
   @Test
   public void createUserTest() {
@@ -68,7 +62,6 @@ public class ScimUserProvisioningTests {
       .addOidcId(TESTUSER_OIDCID)
       .addSamlId(TESTUSER_SAMLID)
       .addSshKey(TESTUSER_SSHKEY)
-      .addX509Certificate(TESTUSER_X509CERT)
       .build();
 
     IamAccount iamAccount = userService.createAccount(scimUser);
@@ -112,13 +105,6 @@ public class ScimUserProvisioningTests {
         Matchers.equalTo(TESTUSER_SSHKEY.getValue()));
     Assert.assertThat(iamAccount.getSshKeys().get(0).isPrimary(),
         Matchers.equalTo(TESTUSER_SSHKEY.isPrimary()));
-
-    Assert.assertThat(iamAccount.getX509Certificates().get(0).getLabel(),
-        Matchers.equalTo(TESTUSER_X509CERT.getDisplay()));
-    Assert.assertThat(iamAccount.getX509Certificates().get(0).getCertificate(),
-        Matchers.equalTo(TESTUSER_X509CERT.getValue()));
-    Assert.assertThat(iamAccount.getX509Certificates().get(0).isPrimary(),
-        Matchers.equalTo(TESTUSER_X509CERT.isPrimary()));
 
     userService.delete(iamAccount.getUuid());
   }

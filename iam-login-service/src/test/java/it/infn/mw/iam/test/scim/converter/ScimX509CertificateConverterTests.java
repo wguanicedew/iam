@@ -1,59 +1,59 @@
 package it.infn.mw.iam.test.scim.converter;
 
-import javax.transaction.Transactional;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
-import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.boot.test.WebIntegrationTest;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.scim.converter.X509CertificateConverter;
 import it.infn.mw.iam.api.scim.model.ScimX509Certificate;
+import it.infn.mw.iam.authn.x509.PEMX509CertificateChainParser;
 import it.infn.mw.iam.persistence.model.IamX509Certificate;
-import it.infn.mw.iam.test.TestUtils;
+import it.infn.mw.iam.test.ext_authn.x509.X509TestSupport;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = IamLoginService.class)
-@Transactional
-@WebIntegrationTest
-public class ScimX509CertificateConverterTests {
 
-  @Autowired
-  X509CertificateConverter converter;
+public class ScimX509CertificateConverterTests extends X509TestSupport {
+
+  X509CertificateConverter converter =
+      new X509CertificateConverter(new PEMX509CertificateChainParser());
 
   @Test
-  public void testConversionFromScimToIamWithCertificate() {
-
-    ScimX509Certificate scimCert =
-        ScimX509Certificate.builder().value(TestUtils.x509Certs.get(0).certificate).build();
-
-    IamX509Certificate iamCert = converter.fromScim(scimCert);
-
-    Assert.assertNull(iamCert.getLabel());
-    Assert.assertFalse(iamCert.isPrimary());
-    Assert.assertNotNull(iamCert.getCertificate());
-    Assert.assertNotNull(iamCert.getCertificateSubject());
-    Assert.assertNull(iamCert.getAccount());
-  }
-
-  @Test
-  public void testConversionFromScimToIamWithCertificateAndLabel() {
+  public void testScimToEntityConversion() {
 
     ScimX509Certificate scimCert = ScimX509Certificate.builder()
-      .value(TestUtils.x509Certs.get(0).certificate)
-      .display("This is the label")
+      .display("A label")
+      .primary(true)
+      .subjectDn(TEST_0_SUBJECT)
+      .pemEncodedCertificate(TEST_0_CERT_STRING)
       .build();
 
     IamX509Certificate iamCert = converter.fromScim(scimCert);
 
-    Assert.assertEquals(iamCert.getLabel(), "This is the label");
-    Assert.assertFalse(iamCert.isPrimary());
-    Assert.assertNotNull(iamCert.getCertificate());
-    Assert.assertNotNull(iamCert.getCertificateSubject());
-    Assert.assertNull(iamCert.getAccount());
+    assertThat(iamCert.getLabel(), equalTo("A label"));
+    assertTrue(iamCert.isPrimary());
+    assertThat(iamCert.getSubjectDn(), equalTo(TEST_0_SUBJECT));
+    assertThat(iamCert.getCertificate(), equalTo(TEST_0_CERT_STRING));
+    assertThat(iamCert.getAccount(), nullValue());
+  }
+
+  @Test
+  public void testEntityToScimConversion() {
+
+    IamX509Certificate cert = new IamX509Certificate();
+    cert.setSubjectDn(TEST_0_SUBJECT);
+    cert.setCertificate(TEST_0_CERT_STRING);
+    cert.setLabel("A label");
+    cert.setPrimary(false);
+
+    ScimX509Certificate scimCert = converter.toScim(cert);
+
+    assertThat(scimCert.getDisplay(), equalTo("A label"));
+    assertFalse(scimCert.getPrimary());
+    assertThat(scimCert.getSubjectDn(), equalTo(TEST_0_SUBJECT));
+    assertThat(scimCert.getPemEncodedCertificate(), equalTo(TEST_0_CERT_STRING));
+
   }
 }

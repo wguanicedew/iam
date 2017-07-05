@@ -33,6 +33,10 @@ public class X509CertificateVerificationResult {
     return new X509CertificateVerificationResult(Status.FAILED, reason);
   }
 
+  public boolean failedVerification(){
+    return verificationStatus == Status.FAILED;
+  }
+  
   @Override
   public String toString() {
     return "X509CertificateVerificationResult [verificationStatus=" + verificationStatus

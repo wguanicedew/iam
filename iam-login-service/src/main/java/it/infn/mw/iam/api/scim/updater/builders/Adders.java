@@ -41,7 +41,7 @@ public class Adders extends Replacers {
   final AccountFinder<IamOidcId> findByOidcId;
   final AccountFinder<IamSamlId> findBySamlId;
   final AccountFinder<IamSshKey> findBySshKey;
-  final AccountFinder<IamX509Certificate> findByX509Certificate;
+  final AccountFinder<IamX509Certificate> findByX509CertificateSubject;
 
   private Predicate<Collection<IamOidcId>> buildOidcIdsAddChecks() {
 
@@ -66,27 +66,26 @@ public class Adders extends Replacers {
   }
 
   private Predicate<Collection<IamSamlId>> buildSamlIdsAddChecks() {
-    
-    Predicate<Collection<IamSamlId>> samlIdWellFormed =
-        c -> {
-          c.removeIf(Objects::isNull);
-          c.stream().forEach(id -> {
-            if (Strings.isNullOrEmpty(id.getIdpId())){
-              throw new IllegalArgumentException("idpId cannot be null or empty!");
-            }
-            
-            if (Strings.isNullOrEmpty(id.getAttributeId())){
-              throw new IllegalArgumentException("attributeId cannot be null or empty!");
-            }
-            
-            if (Strings.isNullOrEmpty(id.getUserId())){
-              throw new IllegalArgumentException("userId cannot be null or empty!");
-            }
-          });
-          
-          return true;
-        };
-    
+
+    Predicate<Collection<IamSamlId>> samlIdWellFormed = c -> {
+      c.removeIf(Objects::isNull);
+      c.stream().forEach(id -> {
+        if (Strings.isNullOrEmpty(id.getIdpId())) {
+          throw new IllegalArgumentException("idpId cannot be null or empty!");
+        }
+
+        if (Strings.isNullOrEmpty(id.getAttributeId())) {
+          throw new IllegalArgumentException("attributeId cannot be null or empty!");
+        }
+
+        if (Strings.isNullOrEmpty(id.getUserId())) {
+          throw new IllegalArgumentException("userId cannot be null or empty!");
+        }
+      });
+
+      return true;
+    };
+
     Predicate<IamSamlId> samlIdNotBound =
         new IdNotBoundChecker<IamSamlId>(findBySamlId, account, (id, a) -> {
           throw new ScimResourceExistsException(
@@ -129,10 +128,11 @@ public class Adders extends Replacers {
 
   private Predicate<Collection<IamX509Certificate>> buildX509CertificateAddChecks() {
     Predicate<IamX509Certificate> x509CertificateNotBound =
-        new IdNotBoundChecker<IamX509Certificate>(findByX509Certificate, account, (cert, a) -> {
-          throw new ScimResourceExistsException(
-              "X509 Certificate " + cert.getCertificate() + "' already bound to another user");
-        });
+        new IdNotBoundChecker<IamX509Certificate>(findByX509CertificateSubject, account,
+            (cert, a) -> {
+              throw new ScimResourceExistsException("X509 certificate with subject '"
+                  + cert.getSubjectDn() + "' is already bound to another user");
+            });
 
     Predicate<Collection<IamX509Certificate>> x509CertificatesNotBound = c -> {
       c.removeIf(Objects::isNull);
@@ -163,7 +163,7 @@ public class Adders extends Replacers {
     findByOidcId = id -> repo.findByOidcId(id.getIssuer(), id.getSubject());
     findBySamlId = id -> repo.findBySamlId(id);
     findBySshKey = key -> repo.findBySshKeyValue(key.getValue());
-    findByX509Certificate = cert -> repo.findByCertificate(cert.getCertificate());
+    findByX509CertificateSubject = cert -> repo.findByCertificateSubject(cert.getSubjectDn());
 
     oidcIdAddChecks = buildOidcIdsAddChecks();
     samlIdAddChecks = buildSamlIdsAddChecks();
@@ -192,8 +192,9 @@ public class Adders extends Replacers {
 
   public AccountUpdater x509Certificate(Collection<IamX509Certificate> newX509Certificates) {
 
-    return new DefaultAccountUpdater<Collection<IamX509Certificate>>(account, ACCOUNT_ADD_X509_CERTIFICATE,
-        account::linkX509Certificates, newX509Certificates, x509CertificateAddChecks);
+    return new DefaultAccountUpdater<Collection<IamX509Certificate>>(account,
+        ACCOUNT_ADD_X509_CERTIFICATE, account::linkX509Certificates, newX509Certificates,
+        x509CertificateAddChecks);
   }
 
   public AccountUpdater group(Collection<IamGroup> groups) {

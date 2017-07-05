@@ -23,7 +23,6 @@ import it.infn.mw.iam.api.scim.model.ScimSamlId;
 import it.infn.mw.iam.api.scim.model.ScimSshKey;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.model.ScimUserPatchRequest;
-import it.infn.mw.iam.api.scim.model.ScimX509Certificate;
 import it.infn.mw.iam.test.ScimRestUtils;
 import it.infn.mw.iam.test.TestUtils;
 import it.infn.mw.iam.test.util.JacksonUtils;
@@ -69,16 +68,6 @@ public class ScimUserProvisioningPatchReplaceTests {
               .idpId(TestUtils.samlIds.get(0).idpId)
               .userId(TestUtils.samlIds.get(0).userId)
               .build())
-            .addX509Certificate(ScimX509Certificate.builder()
-              .display(TestUtils.x509Certs.get(0).display)
-              .value(TestUtils.x509Certs.get(0).certificate)
-              .primary(true)
-              .build())
-            .addX509Certificate(ScimX509Certificate.builder()
-              .display(TestUtils.x509Certs.get(1).display)
-              .value(TestUtils.x509Certs.get(1).certificate)
-              .primary(false)
-              .build())
             .build())
       .extract().as(ScimUser.class));
   }
@@ -111,92 +100,6 @@ public class ScimUserProvisioningPatchReplaceTests {
   private ScimUserPatchRequest getPatchRemoveRequest(ScimUser updates) {
 
     return ScimUserPatchRequest.builder().remove(updates).build();
-  }
-
-  @Test
-  @Ignore
-  public void testPatchReplaceX509CertificateDisplay() {
-
-    ScimUser user = testUsers.get(0);
-
-    ScimUserPatchRequest req = getPatchReplaceRequest(ScimUser.builder()
-      .buildX509Certificate(user.getX509Certificates().get(0).getDisplay() + "_updated",
-          user.getX509Certificates().get(0).getValue(), null)
-      .build());
-
-    restUtils.doPatch(user.getMeta().getLocation(), req);
-
-    ScimUser updated_user =
-        restUtils.doGet(user.getMeta().getLocation()).extract().as(ScimUser.class);
-
-    Assert
-      .assertTrue(updated_user.getX509Certificates()
-        .stream()
-        .filter(cert -> cert.getValue().equals(user.getX509Certificates().get(0).getValue()) && cert
-          .getDisplay().equals(user.getX509Certificates().get(0).getDisplay() + "_updated"))
-        .findFirst()
-        .isPresent());
-  }
-
-  @Test
-  @Ignore
-  public void testPatchReplaceX509CertificatePrimary() {
-
-    ScimUser user = testUsers.get(0);
-
-    ScimX509Certificate certToReplace = user.getX509Certificates().get(0);
-    ScimUserPatchRequest req = getPatchReplaceRequest(
-        ScimUser.builder().buildX509Certificate(null, certToReplace.getValue(), false).build());
-
-    restUtils.doPatch(user.getMeta().getLocation(), req);
-
-    ScimUser updated_user =
-        restUtils.doGet(user.getMeta().getLocation()).extract().as(ScimUser.class);
-    Assert.assertTrue(
-        updated_user.getX509Certificates().stream().filter(cert -> cert.isPrimary()).count() == 1);
-  }
-
-  @Test
-  @Ignore
-  public void testPatchReplaceX509CertificatePrimarySwitch() {
-
-    ScimUser user = testUsers.get(0);
-
-    ScimUserPatchRequest req = getPatchReplaceRequest(ScimUser.builder()
-      .buildX509Certificate(null, user.getX509Certificates().get(0).getValue(), false)
-      .buildX509Certificate(null, user.getX509Certificates().get(1).getValue(), true)
-      .build());
-
-    restUtils.doPatch(user.getMeta().getLocation(), req);
-
-    ScimUser updated_user =
-        restUtils.doGet(user.getMeta().getLocation()).extract().as(ScimUser.class);
-
-    Assert.assertTrue(updated_user.getX509Certificates()
-      .stream()
-      .filter(cert -> cert.getValue().equals(user.getX509Certificates().get(0).getValue())
-          && !cert.isPrimary())
-      .findFirst()
-      .isPresent());
-
-    Assert.assertTrue(updated_user.getX509Certificates()
-      .stream()
-      .filter(cert -> cert.getValue().equals(user.getX509Certificates().get(1).getValue())
-          && cert.isPrimary())
-      .findFirst()
-      .isPresent());
-  }
-
-  @Test
-  @Ignore
-  public void testPatchReplaceX509CertificateNotFound() {
-
-    ScimUser user = testUsers.get(0);
-
-    ScimUserPatchRequest req = getPatchReplaceRequest(
-        ScimUser.builder().buildX509Certificate("fake_display", "fake_value", true).build());
-
-    restUtils.doPatch(user.getMeta().getLocation(), req, HttpStatus.NOT_FOUND);
   }
 
   @Test
@@ -259,23 +162,6 @@ public class ScimUserProvisioningPatchReplaceTests {
     ScimUserPatchRequest req = getPatchReplaceRequest(ScimUser.builder()
       .addSshKey(ScimSshKey.builder().value(keyValue).display("NEW LABEL").build())
       .build());
-
-    restUtils.doPatch(location, req, HttpStatus.BAD_REQUEST);
-  }
-
-  @Test
-  @Ignore
-  public void testPatchReplaceX509CertificateNotSupported() {
-
-    String location = testUsers.get(0).getMeta().getLocation();
-    String certValue = testUsers.get(0).getX509Certificates().get(0).getValue();
-
-    ScimUserPatchRequest req =
-        getPatchReplaceRequest(
-            ScimUser.builder()
-              .addX509Certificate(
-                  ScimX509Certificate.builder().value(certValue).display("NEW LABEL").build())
-              .build());
 
     restUtils.doPatch(location, req, HttpStatus.BAD_REQUEST);
   }

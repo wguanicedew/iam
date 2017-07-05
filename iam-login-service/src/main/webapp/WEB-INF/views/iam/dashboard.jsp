@@ -117,7 +117,8 @@
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/components/user/groups/user.groups.component.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/components/user/oidc/user.oidc.component.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/components/user/saml/user.saml.component.js"></script>
-	
+	<script type="text/javascript" src="/resources/iam/js/dashboard-app/components/user/x509/user.x509.component.js"></script>
+
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/components/user/user.component.js"></script>
 
 </body>

@@ -99,13 +99,13 @@ public class AccountUnlinkTests {
       .perform(delete(accountLinkingResourceOidc()).param("iss", LINKED_OIDC_ID.getIssuer())
         .param("sub", LINKED_OIDC_ID.getSubject()))
       .andDo(print())
-      .andExpect(status().is4xxClientError());
+      .andExpect(status().isUnauthorized());
 
     mvc
       .perform(delete(accountLinkingResourceSaml()).param("iss", LINKED_SAML_ID.getIdpId())
         .param("sub", LINKED_SAML_ID.getUserId()))
       .andDo(print())
-      .andExpect(status().is4xxClientError());
+      .andExpect(status().isUnauthorized());
   }
 
   @Test
@@ -205,5 +205,7 @@ public class AccountUnlinkTests {
     iamAccountRepo.save(user);
 
   }
+  
+  
 
 }

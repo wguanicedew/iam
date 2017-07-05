@@ -4,6 +4,7 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import javax.transaction.Transactional;
 
@@ -61,7 +62,7 @@ public class LoginTests {
     
      MvcResult result = mvc.perform(get("/dashboard").session(session))
         .andExpect(status().isOk())
-        .andExpect(MockMvcResultMatchers.view().name("iam/dashboard"))
+        .andExpect(view().name("iam/dashboard"))
         .andReturn();
   }
   

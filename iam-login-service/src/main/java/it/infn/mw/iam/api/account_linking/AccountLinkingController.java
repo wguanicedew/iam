@@ -1,6 +1,8 @@
 package it.infn.mw.iam.api.account_linking;
 
 
+import static java.lang.String.format;
+
 import java.io.IOException;
 import java.security.Principal;
 
@@ -24,6 +26,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import it.infn.mw.iam.authn.AbstractExternalAuthenticationToken;
 import it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport;
 import it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo.ExternalAuthenticationType;
+import it.infn.mw.iam.authn.x509.IamX509AuthenticationCredential;
 
 @Controller
 @RequestMapping(AccountLinkingController.ACCCOUNT_LINKING_BASE_RESOURCE)
@@ -34,6 +37,39 @@ public class AccountLinkingController extends ExternalAuthenticationHandlerSuppo
   public AccountLinkingController(AccountLinkingService s) {
     linkingService = s;
   }
+
+
+  @PreAuthorize("hasRole('USER')")
+  @RequestMapping(value = "/X509", method = RequestMethod.DELETE)
+  @ResponseStatus(value = HttpStatus.NO_CONTENT)
+  public void unlinkX509Certificate(Principal principal, @RequestParam String certificateSubject) {
+
+    linkingService.unlinkX509Certificate(principal, certificateSubject);
+  }
+
+
+  @PreAuthorize("hasRole('USER')")
+  @RequestMapping(value = "/X509", method = RequestMethod.POST)
+  public String linkX509Certificate(HttpSession session, Principal principal,
+      RedirectAttributes attributes) {
+
+    clearAccountLinkingSessionAttributes(session);
+    
+    try {
+      IamX509AuthenticationCredential cred = getSavedX509AuthenticationCredential(session)
+          .orElseThrow(() -> new IllegalArgumentException(
+              format("No X.509 credential found in session for user '%s'", principal.getName())));
+      
+      linkingService.linkX509Certificate(principal, cred);
+      saveX509LinkingSuccess(cred, attributes);
+
+    } catch (Exception ex) {
+      saveAccountLinkingError(ex, attributes);
+    }
+
+    return "redirect:/dashboard";
+  }
+
 
   @PreAuthorize("hasRole('USER')")
   @RequestMapping(value = "/{type}", method = RequestMethod.POST)
@@ -90,8 +126,8 @@ public class AccountLinkingController extends ExternalAuthenticationHandlerSuppo
   @RequestMapping(value = "/{type}", method = RequestMethod.DELETE)
   @ResponseStatus(value = HttpStatus.NO_CONTENT)
   public void unlinkAccount(@PathVariable ExternalAuthenticationType type, Principal principal,
-      @RequestParam("iss") String issuer, @RequestParam("sub") String subject, 
-      @RequestParam(name="attr", required=false) String attributeId) {
+      @RequestParam("iss") String issuer, @RequestParam("sub") String subject,
+      @RequestParam(name = "attr", required = false) String attributeId) {
 
     linkingService.unlinkExternalAccount(principal, type, issuer, subject, attributeId);
   }

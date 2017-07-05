@@ -81,10 +81,11 @@ public class DefaultAccountUpdaterFactory implements AccountUpdaterFactory<IamAc
   private ScimCollectionConverter<IamX509Certificate, ScimX509Certificate> x509CertificateConverter(
       ScimUser user) {
     return new ScimCollectionConverter<IamX509Certificate, ScimX509Certificate>(
-        user::getX509Certificates, x509CertificateConverter::fromScim);
+        user.getIndigoUser()::getCertificates, x509CertificateConverter::fromScim);
   }
 
-  private static <T> AccountUpdater buildUpdater(AccountUpdaterBuilder<T> factory, Supplier<T> valueSupplier) {
+  private static <T> AccountUpdater buildUpdater(AccountUpdaterBuilder<T> factory,
+      Supplier<T> valueSupplier) {
     return factory.build(valueSupplier.get());
   }
 

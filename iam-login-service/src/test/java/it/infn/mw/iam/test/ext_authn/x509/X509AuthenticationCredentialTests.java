@@ -23,16 +23,16 @@ public class X509AuthenticationCredentialTests {
     IamX509AuthenticationCredential.Builder builder = new IamX509AuthenticationCredential.Builder();
     IamX509AuthenticationCredential cred = builder.subject(TEST_SUBJECT)
       .issuer(TEST_ISSUER)
-      .verificationStatus(X509CertificateVerificationResult.failed(VERIFICATION_ERROR))
+      .verificationResult(X509CertificateVerificationResult.failed(VERIFICATION_ERROR))
       .certificateChain(new X509Certificate[] {})
       .build();
 
     assertThat(cred.getSubject(), equalTo(TEST_SUBJECT));
     assertThat(cred.getIssuer(), equalTo(TEST_ISSUER));
-    assertThat(cred.getVerificationStatus().status(),
+    assertThat(cred.getVerificationResult().status(),
         is(X509CertificateVerificationResult.Status.FAILED));
 
-    assertThat(cred.getVerificationStatus().error().get(),
+    assertThat(cred.getVerificationResult().error().get(),
         equalTo(VERIFICATION_ERROR));
     
     assertThat(cred.getCertificateChain(), emptyArray());

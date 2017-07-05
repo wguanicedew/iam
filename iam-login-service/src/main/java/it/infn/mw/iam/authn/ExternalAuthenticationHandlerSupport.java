@@ -1,5 +1,7 @@
 package it.infn.mw.iam.authn;
 
+import static it.infn.mw.iam.authn.x509.IamX509PreauthenticationProcessingFilter.X509_CREDENTIAL_SESSION_KEY;
+
 import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
@@ -17,6 +19,7 @@ import com.google.common.base.Strings;
 
 import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
 import it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo.ExternalAuthenticationType;
+import it.infn.mw.iam.authn.x509.IamX509AuthenticationCredential;
 
 public class ExternalAuthenticationHandlerSupport {
 
@@ -77,8 +80,21 @@ public class ExternalAuthenticationHandlerSupport {
     return (request.getSession().getAttribute(ACCOUNT_LINKING_SESSION_KEY) != null);
   }
 
+  protected Optional<IamX509AuthenticationCredential> getSavedX509AuthenticationCredential(
+      HttpSession session) {
+    return Optional.ofNullable(
+        (IamX509AuthenticationCredential) session.getAttribute(X509_CREDENTIAL_SESSION_KEY));
+  }
+
+
   protected Authentication getAccountLinkingSavedAuthentication(HttpSession session) {
     return (Authentication) session.getAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION);
+  }
+
+  protected void saveX509LinkingSuccess(IamX509AuthenticationCredential cred,
+      RedirectAttributes attributes) {
+    attributes.addFlashAttribute(ACCOUNT_LINKING_DASHBOARD_MESSAGE_KEY,
+        String.format("Certificate '%s' linked succesfully", cred.getSubject()));
   }
 
   protected void saveAccountLinkingSuccess(

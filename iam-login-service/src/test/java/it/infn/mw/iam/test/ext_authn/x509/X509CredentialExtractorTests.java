@@ -17,9 +17,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import it.infn.mw.iam.authn.x509.CanlX509CertificateChainParser;
 import it.infn.mw.iam.authn.x509.DefaultX509AuthenticationCredentialExtractor;
 import it.infn.mw.iam.authn.x509.IamX509AuthenticationCredential;
+import it.infn.mw.iam.authn.x509.PEMX509CertificateChainParser;
 import it.infn.mw.iam.authn.x509.X509CertificateVerificationResult.Status;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -30,7 +30,7 @@ public class X509CredentialExtractorTests extends X509TestSupport {
   HttpServletRequest request;
 
   DefaultX509AuthenticationCredentialExtractor extractor =
-      new DefaultX509AuthenticationCredentialExtractor(new CanlX509CertificateChainParser());
+      new DefaultX509AuthenticationCredentialExtractor(new PEMX509CertificateChainParser());
 
   @Test
   public void testEmptyHeaders() {
@@ -65,7 +65,7 @@ public class X509CredentialExtractorTests extends X509TestSupport {
     assertThat(cred.getSubject(), equalTo(TEST_0_SUBJECT));
     assertThat(cred.getIssuer(), equalTo(TEST_0_ISSUER));
     assertThat(cred.getCertificateChain(), arrayWithSize(1));
-    assertThat(cred.getVerificationStatus().status(), is(Status.SUCCESS));
+    assertThat(cred.getVerificationResult().status(), is(Status.SUCCESS));
   }
   
   @Test(expected=IllegalArgumentException.class)
@@ -93,7 +93,7 @@ public class X509CredentialExtractorTests extends X509TestSupport {
     assertThat(cred.getIssuer(), equalTo(TEST_0_ISSUER));
     assertThat(cred.getCertificateChain(), arrayWithSize(1));
     
-    assertThat(cred.getVerificationStatus().status(), is(Status.FAILED));
-    assertThat(cred.getVerificationStatus().error().get(), equalTo("invalid whatever"));
+    assertThat(cred.getVerificationResult().status(), is(Status.FAILED));
+    assertThat(cred.getVerificationResult().error().get(), equalTo("invalid whatever"));
   }
 }

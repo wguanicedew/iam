@@ -13,7 +13,7 @@ server:
 
 spring:
   profiles:
-    active: h2-test,registration
+    active: h2-test,google,saml,registration
 
   application:
     name: INDIGO IAM

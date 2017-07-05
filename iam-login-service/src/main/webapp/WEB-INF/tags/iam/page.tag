@@ -46,7 +46,7 @@
 
 <link
   rel="stylesheet"
-  href="<c:url value='/webjars/font-awesome/css/font-awesome.css'/>"></link>
+  href="/webjars/font-awesome/css/font-awesome.css"></link>
 
 <link
   rel="stylesheet"

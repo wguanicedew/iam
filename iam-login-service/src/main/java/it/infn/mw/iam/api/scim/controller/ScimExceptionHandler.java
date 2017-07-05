@@ -17,6 +17,7 @@ import it.infn.mw.iam.api.scim.exception.ScimResourceExistsException;
 import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
 import it.infn.mw.iam.api.scim.exception.ScimValidationException;
 import it.infn.mw.iam.api.scim.model.ScimErrorResponse;
+import it.infn.mw.iam.authn.x509.CertificateParsingError;
 import it.infn.mw.iam.util.ssh.InvalidSshKeyException;
 
 @ControllerAdvice
@@ -36,6 +37,14 @@ public class ScimExceptionHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(ScimValidationException.class)
   @ResponseBody
   public ScimErrorResponse handleScimValidationException(ScimValidationException e) {
+
+    return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
+  }
+
+  @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(CertificateParsingError.class)
+  @ResponseBody
+  public ScimErrorResponse handleCertificateParsingError(CertificateParsingError e) {
 
     return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
   }

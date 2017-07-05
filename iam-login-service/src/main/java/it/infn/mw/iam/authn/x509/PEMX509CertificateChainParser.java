@@ -16,27 +16,24 @@ import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 
 @Component
-public class CanlX509CertificateChainParser implements X509CertificateChainParser {
+public class PEMX509CertificateChainParser implements X509CertificateChainParser {
 
-  public static final Logger LOG = LoggerFactory.getLogger(CanlX509CertificateChainParser.class);
-
-  public CanlX509CertificateChainParser() {
+  public static final Logger LOG = LoggerFactory.getLogger(PEMX509CertificateChainParser.class);
+  
+  public PEMX509CertificateChainParser() {
     configureSecProvider();
   }
 
   @Override
-  public X509Certificate[] parseChainFromString(String certChain) {
-
-    // Replace tabs with newlines (NGINX sends the cert chain PEM over a single line)
-    String processedCertChain = certChain.replace('\t', '\n');
+  public X509CertificateChainParsingResult parseChainFromString(String pemString) {
     
-    InputStream stream = new ByteArrayInputStream(processedCertChain
+    InputStream stream = new ByteArrayInputStream(pemString
         .getBytes(StandardCharsets.US_ASCII));
 
     try {
 
       X509Certificate[] chain = CertificateUtils.loadCertificateChain(stream, Encoding.PEM);
-      return chain;
+      return X509CertificateChainParsingResult.from(pemString, chain);
 
     } catch (IOException e) {
       final String errorMessage = String.format("Error parsing certificate chain: %s", 
@@ -44,9 +41,7 @@ public class CanlX509CertificateChainParser implements X509CertificateChainParse
       
       LOG.error(errorMessage, e);
       
-      // FIXME: RuntimeException is probably too generic? 
-      // Should we have an X509CertficateParsingError instead?
-      throw new RuntimeException(errorMessage, e);
+      throw new CertificateParsingError(errorMessage, e);
     }
   }
 
