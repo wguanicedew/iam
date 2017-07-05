@@ -14,10 +14,11 @@ public class IamGroupSerializer extends JsonSerializer<IamGroup> {
   @Override
   public void serialize(IamGroup value, JsonGenerator gen, SerializerProvider serializers)
       throws IOException, JsonProcessingException {
-      gen.writeStartObject();
-      gen.writeStringField("uuid", value.getUuid());
-      gen.writeStringField("name", value.getName());
-      gen.writeEndObject();
+
+    gen.writeStartObject();
+    gen.writeStringField("uuid", value.getUuid());
+    gen.writeStringField("name", value.getName());
+    gen.writeEndObject();
   }
 
 }
