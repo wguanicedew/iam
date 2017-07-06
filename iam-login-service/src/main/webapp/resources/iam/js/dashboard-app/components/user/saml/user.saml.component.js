@@ -73,7 +73,9 @@
     self.account = account;
     self.error = undefined;
 
-    self.doLink = function () {
+    self.accountLinkingEnabled = getAccountLinkingEnabled();
+
+    self.doLink = function() {
       self.enabled = false;
       document.getElementById("link-account-form").submit();
     };

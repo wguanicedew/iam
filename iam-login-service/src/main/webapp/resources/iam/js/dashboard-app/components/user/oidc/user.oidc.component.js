@@ -10,6 +10,9 @@
     self.account = account;
     self.enabled = true;
 
+    // FIXME: it would be nicer if this is injected
+    self.accountLinkingEnabled = getAccontLinkingEnabled();
+
     self.doLink = function() {
       self.enabled = false;
       document.getElementById("link-account-form").submit();

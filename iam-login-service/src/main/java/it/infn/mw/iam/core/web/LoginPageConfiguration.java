@@ -9,4 +9,6 @@ public interface LoginPageConfiguration {
   boolean isSamlEnabled();
 
   boolean isRegistrationEnabled();
+  
+  boolean isAccountLinkingEnabled();
 }

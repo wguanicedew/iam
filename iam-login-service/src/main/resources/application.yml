@@ -99,3 +99,5 @@ health:
   timeout: 5000
   googleEndpoint: http://www.google.it
     
+accountLinking:
+  disable: ${IAM_ACCOUNT_LINKING_DISABLE:false}
