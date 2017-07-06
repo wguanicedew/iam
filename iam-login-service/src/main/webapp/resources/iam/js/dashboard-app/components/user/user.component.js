@@ -12,9 +12,25 @@
       $timeout(self.showAccountLinkingFeedback, 0);
     };
 
+    self.accountLinkingEnabled = getAccountLinkingEnabled();
+
     self.isVoAdmin = function() { return Utils.isAdmin(); };
 
     self.userIsVoAdmin = function() { return Utils.userIsVoAdmin(self.user); };
+
+    self.isMe = function() { return Utils.isMe(self.user.id); };
+
+    self.canManageLinkedAccounts = function() {
+      if (!self.accountLinkingEnabled){
+        return self.isVoAdmin();
+      }
+
+      return self.isVoAdmin() && !self.isMe();
+    };
+
+    self.canLinkAccounts = function() {
+      return self.accountLinkingEnabled && self.isMe();
+    };
 
     self.showAccountLinkingFeedback = function() {
       if (_accountLinkingError){
@@ -27,8 +43,6 @@
         _accountLinkingMessage = '';
       }
     };
-
-    self.isMe = function() { return Utils.isMe(self.user.id); };
 
     self.handleError = function(error) {
       console.error(error);

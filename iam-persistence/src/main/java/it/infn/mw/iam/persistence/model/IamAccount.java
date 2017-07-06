@@ -330,14 +330,16 @@ public class IamAccount {
   public void linkX509Certificates(Collection<IamX509Certificate> ids) {
 
     checkNotNull(ids);
-    
+
     for (IamX509Certificate id : ids) {
-      Date addedTimestamp = new Date();
-      id.setAccount(this);
-      id.setCreationTime(addedTimestamp);
-      id.setLastUpdateTime(addedTimestamp);
-      
-      getX509Certificates().add(id);  
+      if (!getX509Certificates().contains(id)) {
+        Date addedTimestamp = new Date();
+        id.setAccount(this);
+        id.setCreationTime(addedTimestamp);
+        id.setLastUpdateTime(addedTimestamp);
+
+        getX509Certificates().add(id);
+      }
     }
   }
 

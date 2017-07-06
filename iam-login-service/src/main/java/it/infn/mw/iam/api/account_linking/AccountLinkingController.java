@@ -46,8 +46,10 @@ public class AccountLinkingController extends ExternalAuthenticationHandlerSuppo
   @PreAuthorize("hasRole('USER')")
   @RequestMapping(value = "/X509", method = RequestMethod.DELETE)
   @ResponseStatus(value = HttpStatus.NO_CONTENT)
-  public void unlinkX509Certificate(Principal principal, @RequestParam String certificateSubject) {
-
+  public void unlinkX509Certificate(Principal principal, @RequestParam String certificateSubject,
+      RedirectAttributes attributes) {
+    
+    checkAccountLinkingEnabled(attributes);
     linkingService.unlinkX509Certificate(principal, certificateSubject);
   }
 
@@ -58,6 +60,7 @@ public class AccountLinkingController extends ExternalAuthenticationHandlerSuppo
       RedirectAttributes attributes) {
 
     clearAccountLinkingSessionAttributes(session);
+    checkAccountLinkingEnabled(attributes);
     
     try {
       IamX509AuthenticationCredential cred = getSavedX509AuthenticationCredential(session)

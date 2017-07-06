@@ -93,6 +93,8 @@
     function UserX509Controller(toaster, $uibModal, ModalService, scimFactory) {
         var self = this;
 
+        self.accountLinkingEnabled = getAccountLinkingEnabled();
+
         self.indigoUser = function () {
             return self.user['urn:indigo-dc:scim:schemas:IndigoUser'];
         };
@@ -100,14 +102,6 @@
         self.$onInit = function () {
             console.log('UserX509Controller onInit');
             self.enabled = true;
-        };
-
-        self.isVoAdmin = function () {
-            return self.userCtrl.isVoAdmin();
-        };
-
-        self.isMe = function () {
-            return self.userCtrl.isMe();
         };
 
         self.getCertificates = function () {

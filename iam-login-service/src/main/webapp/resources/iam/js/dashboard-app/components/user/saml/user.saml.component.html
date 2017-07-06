@@ -28,10 +28,10 @@
                         <td>{{ samlId.userId }}</td>
                         <td class="text-right">
                             <div class="btn-group">
-                                <button class="btn btn-xs btn-danger" ng-click="$ctrl.openRemoveSamlAccountDialog(samlId)" ng-if="$ctrl.isVoAdmin() && !$ctrl.isMe()">
+                                <button class="btn btn-xs btn-danger" ng-click="$ctrl.openRemoveSamlAccountDialog(samlId)" ng-if="$ctrl.userCtrl.canManageLinkedAccounts()">
                                     <i class="fa fa-times"></i> Remove
                                 </button>
-                                <button class="btn btn-xs btn-danger" ng-click="$ctrl.openUnlinkSamlAccountDialog(samlId)" ng-if="$ctrl.isMe() && $ctrl.accountLinkingEnabled">
+                                <button class="btn btn-xs btn-danger" ng-click="$ctrl.openUnlinkSamlAccountDialog(samlId)" ng-if="$ctrl.userCtrl.canLinkAccounts()">
                                     <i class="fa fa-times"></i> Unlink
                                 </button>
                             </div>
@@ -43,10 +43,10 @@
         
     </div>
     <div class="box-footer">
-        <button class="btn btn-success btn-sm" name="btn-add-samlid" ng-click="$ctrl.openAddSamlAccountDialog()" ng-if="$ctrl.isVoAdmin() && !$ctrl.isMe()">
+        <button class="btn btn-success btn-sm" name="btn-add-samlid" ng-click="$ctrl.openAddSamlAccountDialog()" ng-if="$ctrl.userCtrl.canManageLinkedAccounts()">
             <i class="fa fa-plus"></i> Add Saml account
         </button>
-        <button class="btn btn-success btn-sm" name="btn-link-samlid" ng-click="$ctrl.openLinkSamlAccountDialog()" ng-if="$ctrl.isMe() && $ctrl.accountLinkingEnabled">
+        <button class="btn btn-success btn-sm" name="btn-link-samlid" ng-click="$ctrl.openLinkSamlAccountDialog()" ng-if="$ctrl.userCtrl.canLinkAccounts()">
             <i class="fa fa-plus"></i> Link Saml account
         </button>
     </div>

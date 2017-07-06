@@ -28,24 +28,24 @@
 
                         <td class="text-right">
                             <div class="btn-group">
-                                    <button class="btn btn-xs btn-danger" ng-click="$ctrl.openRemoveCertificateDialog(cert)" ng-if="$ctrl.isVoAdmin() && !$ctrl.isMe()">
+                                <button class="btn btn-xs btn-danger" ng-click="$ctrl.openRemoveCertificateDialog(cert)" ng-if="$ctrl.userCtrl.canManageLinkedAccounts()">
                                         <i class="fa fa-times"></i> Remove
                                     </button>
-                                    <button class="btn btn-xs btn-danger" ng-click="$ctrl.openUnlinkCertificateDialog(cert)" ng-if="$ctrl.isMe()">
+                                <button class="btn btn-xs btn-danger" ng-click="$ctrl.openUnlinkCertificateDialog(cert)" ng-if="$ctrl.userCtrl.canLinkAccounts()">
                                         <i class="fa fa-times"></i> Unlink
                                     </button>
                         </td>
                     </tr>
                 </tbody>
             </table>
+            </div>
         </div>
-    </div>
-    <div class="box-footer">
-        <button class="btn btn-success btn-sm" name="btn-add-cert" ng-click="$ctrl.openAddCertificateDialog()" ng-if="$ctrl.isVoAdmin() && !$ctrl.isMe()">
+        <div class="box-footer">
+            <button class="btn btn-success btn-sm" name="btn-add-cert" ng-click="$ctrl.openAddCertificateDialog()" ng-if="$ctrl.userCtrl.canManageLinkedAccounts()">
             <i class="fa fa-plus"></i> Add certificate
         </button>
-        <button class="btn btn-success btn-sm" name="btn-link-cert" ng-click="$ctrl.openLinkCertificateDialog()" ng-if="$ctrl.isMe() && $ctrl.getUserCertSubject()">
+            <button class="btn btn-success btn-sm" name="btn-link-cert" ng-click="$ctrl.openLinkCertificateDialog()" ng-if="$ctrl.userCtrl.canLinkAccounts() && $ctrl.getUserCertSubject()">
             <i class="fa fa-plus"></i> Link certificate
         </button>
+        </div>
     </div>
-</div>

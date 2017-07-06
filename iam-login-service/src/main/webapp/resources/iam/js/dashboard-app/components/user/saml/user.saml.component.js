@@ -73,8 +73,6 @@
     self.account = account;
     self.error = undefined;
 
-    self.accountLinkingEnabled = getAccountLinkingEnabled();
-
     self.doLink = function() {
       self.enabled = false;
       document.getElementById("link-account-form").submit();
@@ -182,14 +180,6 @@
     self.$onInit = function () {
       console.log('UserSamlController onInit');
       self.enabled = true;
-    };
-
-    self.isVoAdmin = function () {
-      return self.userCtrl.isVoAdmin();
-    };
-
-    self.isMe = function () {
-      return self.userCtrl.isMe();
     };
 
     self.handleSuccess = function (msg) {

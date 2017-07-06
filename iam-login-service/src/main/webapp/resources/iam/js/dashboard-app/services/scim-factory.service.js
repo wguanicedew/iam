@@ -203,15 +203,16 @@ angular.module('dashboardApp').factory("scimFactory", ['$http', '$httpParamSeria
 		return $http.patch(url, data, config);
 	};
 
-	function addOpenIDAccount(userId, issuer, subject) {
+	function addOpenIDAccount(userId, account) {
 
-		console.info("Patch user-id, add oidc account ", userId, issuer, subject);
-
+		var url = urlUsers + '/' + userId;
+		
 		var config = {
 			headers: {
 				'Content-Type': 'application/scim+json'
 			}
 		};
+
 		var data = {
 
 			schemas: ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
@@ -219,28 +220,26 @@ angular.module('dashboardApp').factory("scimFactory", ['$http', '$httpParamSeria
 				op: "add",
 				value: {
 					"urn:indigo-dc:scim:schemas:IndigoUser": {
-						oidcIds: [{
-							"issuer": issuer,
-							"subject": subject
-						}]
+						oidcIds: [account]
 					}
 				}
 			}]
 		};
-		var url = urlUsers + '/' + userId;
+
 
 		return $http.patch(url, data, config);
-	};
+	}
 
-	function removeOpenIDAccount(userId, issuer, subject) {
+	function removeOpenIDAccount(userId, account) {
 
-		console.info("Patch user-id, remove oidc account ", userId, issuer, subject);
-
+		var url = urlUsers + '/' + userId;
+	
 		var config = {
 			headers: {
 				'Content-Type': 'application/scim+json'
 			}
 		};
+
 		var data = {
 
 			schemas: ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
@@ -248,18 +247,14 @@ angular.module('dashboardApp').factory("scimFactory", ['$http', '$httpParamSeria
 				op: "remove",
 				value: {
 					"urn:indigo-dc:scim:schemas:IndigoUser": {
-						oidcIds: [{
-							"issuer": issuer,
-							"subject": subject
-						}]
+						oidcIds: [account]
 					}
 				}
 			}]
 		};
-		var url = urlUsers + '/' + userId;
-
+		
 		return $http.patch(url, data, config);
-	};
+	}
 
 	function addSshKey(userId, label, isPrimary, value) {
 
