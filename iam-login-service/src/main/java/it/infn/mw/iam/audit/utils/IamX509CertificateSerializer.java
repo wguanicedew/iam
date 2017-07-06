@@ -20,7 +20,9 @@ public class IamX509CertificateSerializer extends JsonSerializer<Collection<IamX
     for (IamX509Certificate elem : value) {
       gen.writeStartObject();
       gen.writeStringField("label", elem.getLabel());
-      gen.writeStringField("certificateSubject", elem.getCertificateSubject());
+      gen.writeStringField("subjectDn", elem.getSubjectDn());
+      gen.writeStringField("issuerDn", elem.getIssuerDn());
+      gen.writeStringField("certificate", elem.getCertificate());
       gen.writeEndObject();
     }
     gen.writeEndArray();

@@ -46,12 +46,13 @@ import it.infn.mw.iam.audit.events.account.x509.X509CertificateRemovedEvent;
 import it.infn.mw.iam.authn.saml.util.SamlAttributeNames;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.test.TestUtils;
+import it.infn.mw.iam.test.ext_authn.x509.X509TestSupport;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {IamLoginService.class})
 @WebAppConfiguration
 @Transactional
-public class EventTests {
+public class EventTests extends X509TestSupport {
 
   private static final String USERNAME = "event_user";
   private static final String GIVENNAME = "Event";
@@ -64,8 +65,6 @@ public class EventTests {
   private static final String SSH_LABEL = "test_label";
   private static final String SSH_KEY = TestUtils.sshKeys.get(0).key;
   private static final String SSH_FINGERPRINT = TestUtils.sshKeys.get(0).fingerprintSHA256;
-  private static final String X509_LABEL = "test_label";
-  private static final String X509_CERT = TestUtils.x509Certs.get(0).certificate;
   private static final String GROUPNAME = "event_group";
 
   private static final String USERNAME_MESSAGE_CHECK = String.format("username: '%s'", USERNAME);
@@ -90,6 +89,11 @@ public class EventTests {
   public void setup() {
 
     group = groupProvisioning.create(ScimGroup.builder(GROUPNAME).build());
+    
+    ScimX509Certificate test1Cert = ScimX509Certificate.builder()
+        .pemEncodedCertificate(TEST_1_CERT_STRING)
+        .display(TEST_1_CERT_LABEL)
+        .build();
 
     ScimUser user = ScimUser.builder(USERNAME)
       .buildName(GIVENNAME, FAMILYNAME)
@@ -97,7 +101,7 @@ public class EventTests {
       .buildSamlId(SAML_IDP, SAML_USER_ID)
       .buildOidcId(OIDC_ISSUER, OIDC_SUBJECT)
       .buildSshKey(SSH_LABEL, SSH_KEY, SSH_FINGERPRINT, true)
-      .buildX509Certificate(X509_LABEL, X509_CERT, true)
+      .addX509Certificate(test1Cert)
       .build();
 
     account = userProvisioning.createAccount(user);
@@ -251,12 +255,14 @@ public class EventTests {
 
   @Test
   public void testAddX509CertificateEvent() {
+    
+    ScimX509Certificate cert = ScimX509Certificate.builder()
+        .pemEncodedCertificate(TEST_0_CERT_STRING)
+        .display(TEST_0_CERT_LABEL)
+        .build();
 
     ScimUser update = ScimUser.builder()
-      .addX509Certificate(ScimX509Certificate.builder()
-        .display(TestUtils.x509Certs.get(1).display)
-        .value(TestUtils.x509Certs.get(1).certificate)
-        .build())
+      .addX509Certificate(cert)
       .build();
 
     ScimUserPatchRequest req = ScimUserPatchRequest.builder().add(update).build();
@@ -267,17 +273,25 @@ public class EventTests {
     assertNotNull(event.getMessage());
     assertThat(event.getMessage(), containsString("Add x509 certificate to user"));
     assertThat(event.getMessage(), containsString(USERNAME_MESSAGE_CHECK));
-    assertThat(event.getMessage(), containsString("label=" + TestUtils.x509Certs.get(1).display));
+    assertThat(event.getMessage(), containsString("label=" + TEST_0_CERT_LABEL));
     assertThat(event.getMessage(),
-        containsString("certificate=" + TestUtils.x509Certs.get(1).certificate));
+        containsString("subjectDn=" + TEST_0_SUBJECT));
+    assertThat(event.getMessage(),
+        containsString("issuerDn=" + TEST_0_ISSUER));
+    assertThat(event.getMessage(),
+        containsString("certificate=" + TEST_0_CERT_STRING));
   }
 
   @Test
-  public void testRemoveX509CertificateEvent() {
+  public void testRemoveX509CertificateEvent() {    
+    
+    ScimX509Certificate cert = ScimX509Certificate.builder()
+        .pemEncodedCertificate(TEST_1_CERT_STRING)
+        .display(TEST_1_CERT_LABEL)
+        .build();
 
     ScimUser update = ScimUser.builder()
-      .addX509Certificate(
-          ScimX509Certificate.builder().display(X509_LABEL).value(X509_CERT).build())
+      .addX509Certificate(cert)
       .build();
 
     ScimUserPatchRequest req = ScimUserPatchRequest.builder().remove(update).build();
@@ -288,8 +302,13 @@ public class EventTests {
     assertNotNull(event.getMessage());
     assertThat(event.getMessage(), containsString("Remove x509 certificate from user"));
     assertThat(event.getMessage(), containsString(USERNAME_MESSAGE_CHECK));
-    assertThat(event.getMessage(), containsString("label=" + X509_LABEL));
-    assertThat(event.getMessage(), containsString("certificate=" + X509_CERT));
+    assertThat(event.getMessage(), containsString("label=" + TEST_1_CERT_LABEL));
+    assertThat(event.getMessage(),
+        containsString("subjectDn=" + TEST_1_SUBJECT));
+    assertThat(event.getMessage(),
+        containsString("issuerDn=" + TEST_1_ISSUER));
+    assertThat(event.getMessage(),
+        containsString("certificate=" + TEST_1_CERT_STRING));
   }
 
   @Test

@@ -98,4 +98,8 @@ public class IamX509AuthenticationCredential {
   public String verificationError(){
     return verificationResult.error().orElse("X.509 credential is valid");
   }
+  
+  public static Builder builder(){
+    return new Builder();
+  }
 }

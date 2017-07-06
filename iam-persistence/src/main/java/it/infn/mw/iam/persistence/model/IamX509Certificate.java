@@ -168,4 +168,11 @@ public class IamX509Certificate implements IamAccountRef {
   public void setLastUpdateTime(Date lastUpdateTime) {
     this.lastUpdateTime = lastUpdateTime;
   }
+
+  @Override
+  public String toString() {
+    return "IamX509Certificate [label=" + label + ", subjectDn=" + subjectDn + ", issuerDn="
+        + issuerDn + ", certificate=" + certificate + ", primary=" + primary + ", creationTime="
+        + creationTime + ", lastUpdateTime=" + lastUpdateTime + "]";
+  }
 }

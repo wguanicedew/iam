@@ -5,9 +5,10 @@
         <i class="fa fa-cloud pull-right"></i>
     </div>
 
-    
+
     <div class="box-body">
         <div ng-if="!$ctrl.hasSamlIds()">No SAML account found</div>
+
 
         <div class="table-responsive" ng-if="$ctrl.hasSamlIds()">
             <table class="table no-margin" id="saml_account_list">
@@ -39,6 +40,7 @@
                 </tbody>
             </table>
         </div>
+        
     </div>
     <div class="box-footer">
         <button class="btn btn-success btn-sm" name="btn-add-samlid" ng-click="$ctrl.openAddSamlAccountDialog()" ng-if="$ctrl.isVoAdmin() && !$ctrl.isMe()">

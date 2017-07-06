@@ -20,12 +20,12 @@
 
     function unlinkOidcAccount(account) {
       return $http.delete(
-          OIDC_RESOURCE, {params: {iss: account.iss, sub: account.sub}});
+          OIDC_RESOURCE, {params: account});
     }
 
     function unlinkSamlAccount(account) {
       return $http.delete(
-          SAML_RESOURCE, {params: {iss: account.iss, sub: account.sub}});
+          SAML_RESOURCE, {params: account});
     }
 
     function unlinkX509Certificate(cert) {

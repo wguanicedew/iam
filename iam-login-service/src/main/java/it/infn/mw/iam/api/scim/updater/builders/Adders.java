@@ -226,9 +226,9 @@ public class Adders extends Replacers {
 
   public AccountUpdater x509Certificate(Collection<IamX509Certificate> newX509Certificates) {
 
-    return new DefaultAccountUpdater<Collection<IamX509Certificate>>(account,
-        ACCOUNT_ADD_X509_CERTIFICATE, account::linkX509Certificates, newX509Certificates,
-        x509CertificateAddChecks);
+    return new DefaultAccountUpdater<Collection<IamX509Certificate>, X509CertificateAddedEvent>(
+        account, ACCOUNT_ADD_X509_CERTIFICATE, account::linkX509Certificates, newX509Certificates,
+        x509CertificateAddChecks, buildX509CertificateAddedEvent);
   }
 
   public AccountUpdater group(Collection<IamGroup> groups) {

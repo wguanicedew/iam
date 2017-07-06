@@ -18,7 +18,7 @@
     self.doUnlink = function() {
       self.enabled = false;
       AccountLinkingService.unlinkOidcAccount(self.account).then(function(response){
-        $uibModalInstance.close(response);
+        $uibModalInstance.close("Google account unlinked");
       }).catch(function(error){
         console.error(error);
       });
@@ -43,13 +43,13 @@
       self.enabled = true;
     };
 
-    self.handleSuccess = function(user) {
+    self.handleSuccess = function(msg) {
       self.enabled = true;
-      self.userCtrl.loadUser().then(function(user) {
+      self.userCtrl.loadUser().then(function() {
         toaster.pop({
           type: 'success',
           body:
-              `User '${user.name.formatted}' OpenID-Connect accounts updated succesfully`
+              msg
         });
       });
     };

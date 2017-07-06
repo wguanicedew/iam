@@ -18,11 +18,12 @@
             scimFactory.addX509Certificate(self.user.id, self.certVal).then(
                 function (response) {
                     $uibModalInstance.close(response.data);
-                    self.successHandler(`Certificate ${self.certVal.label} added succesfully`);
+                    self.successHandler(`Certificate added`);
                     self.enabled = true;
                 }).catch(function (error) {
                     console.error(error);
                     self.error = error;
+                    self.enabled = true;
             });
         };
 
@@ -32,10 +33,11 @@
             scimFactory.removeX509Certificate(self.user.id, self.cert)
                 .then(function (response) {
                     $uibModalInstance.close(response.data);
-                    self.successHandler(`Certificate ${self.cert.subjectDn} removed succesfully`);
+                    self.successHandler(`Certificate ${self.cert.subjectDn} removed`);
                     self.enabled = true;
                 }).catch(function (error) {
                     console.error(error);
+                    self.enabled = true;
                     self.error = error;
                 });
         };
@@ -75,9 +77,11 @@
         self.doUnlink = function () {
             self.enabled = false;
             AccountLinkingService.unlinkX509Certificate(self.cert).then(function (response) {
-                $uibModalInstance.close(response);
+                $uibModalInstance.close(`Certificate '${self.cert.subjectDn}' unlinked succesfully`);
             }).catch(function (error) {
                 console.error(error);
+                self.error = error;
+                self.enabled = true;
             });
         };
 

@@ -366,10 +366,10 @@ angular.module('dashboardApp').factory("scimFactory", ['$http', '$httpParamSeria
 		return $http.patch(url, data, config);
 	};
 
-	function addSamlId(userId, samlIdpId, samlAttributeId, samlUserId) {
+	function addSamlId(userId, samlId) {
 
-		console.info("Patch user-id, add saml-account ", userId, samlIdpId, samlAttributeId, samlUserId);
-
+		var url = urlUsers + '/' + userId;
+		
 		var config = {
 			headers: {
 				'Content-Type': 'application/scim+json'
@@ -381,19 +381,14 @@ angular.module('dashboardApp').factory("scimFactory", ['$http', '$httpParamSeria
 				op: "add",
 				value: {
 					"urn:indigo-dc:scim:schemas:IndigoUser": {
-						samlIds: [{
-							"idpId": samlIdpId,
-							"attributeId": samlAttributeId,
-							"userId": samlUserId
-						}]
+						samlIds: [samlId]
 					}
 				}
 			}]
 		};
-		var url = urlUsers + '/' + userId;
-
+		
 		return $http.patch(url, data, config);
-	};
+	}
 
 	function removeSamlId(userId, samlId) {
 

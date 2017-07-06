@@ -12,7 +12,6 @@
             <table class="table no-margin" id="x509_cert_list">
                 <thead>
                     <tr>
-                        <th>Label</th>
                         <th>Subject &amp; Issuer</th>
                         <th>Last modified</th>
                         <th class="text-right"></th>
@@ -21,9 +20,6 @@
                 <tbody>
 
                     <tr ng-repeat="cert in $ctrl.getCertificates()">
-                        <td>
-                            {{cert.display}}
-                        </td>
                         <td>
                             <div class="subjectDn">{{ cert.subjectDn }}</div>
                             <div class="issuerDn">{{ cert.issuerDn }}</div>

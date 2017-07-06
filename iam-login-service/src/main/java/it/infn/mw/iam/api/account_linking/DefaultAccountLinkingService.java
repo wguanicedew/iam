@@ -139,14 +139,14 @@ public class DefaultAccountLinkingService
       .findAny();
 
     if (linkedCert.isPresent()) {
-      
+
       linkedCert.ifPresent(c -> {
         c.setSubjectDn(x509Credential.getSubject());
         c.setIssuerDn(x509Credential.getIssuer());
         c.setCertificate(x509Credential.getCertificateChainPemString());
         c.setLastUpdateTime(new Date());
       });
-      
+
       userAccount.touch();
       iamAccountRepository.save(userAccount);
 
@@ -159,16 +159,16 @@ public class DefaultAccountLinkingService
 
       Date now = new Date();
       IamX509Certificate newCert = x509Credential.asIamX509Certificate();
-      newCert.setLabel("");
-      
+      newCert.setLabel(String.format("cert-%d", userAccount.getX509Certificates().size()));
+
       newCert.setCreationTime(now);
       newCert.setLastUpdateTime(now);
-      
+
       newCert.setPrimary(true);
       newCert.setAccount(userAccount);
       userAccount.getX509Certificates().add(newCert);
       userAccount.touch();
-      
+
       iamAccountRepository.save(userAccount);
 
       eventPublisher.publishEvent(new X509CertificateLinkedEvent(this, userAccount,
@@ -189,7 +189,7 @@ public class DefaultAccountLinkingService
     if (removed) {
       userAccount.touch();
       iamAccountRepository.save(userAccount);
-      
+
       eventPublisher.publishEvent(new X509CertificateUnlinkedEvent(this, userAccount,
           String.format("User '%s' unlinked certificate with subject '%s' from his/her membership",
               userAccount.getUsername(), certificateSubject),

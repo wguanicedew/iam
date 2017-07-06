@@ -7,6 +7,11 @@
     </h3>
 </div>
 <div class="modal-body">
+    <div ng-if="$ctrl.error">
+        <p class="text-justify text-wrapped text-alert">
+            {{ $ctrl.error.data.detail }}
+        </p>
+    </div>
     <div ng-show="$ctrl.action == 'link'">
         <p class="text-justify text-wrapped">
             The following trusted X.509 certificate was presented when
@@ -20,10 +25,7 @@
 
         <p class="text-justify text-wrapped">
             Do you want to link this certificate to your account?
-            This will allow you to log into the IAM with such certificate.
         </p>
-        
-
     </div>
     <div ng-show="$ctrl.action == 'unlink'">
         <p class="text-justify text-wrapped">
@@ -34,7 +36,7 @@
             <div class="issuerDn">{{$ctrl.cert.issuerDn}}</div>
         </p>
         <p class="text-justify text-wrapped">
-                You will not <strong>NOT</strong> able to login into the IAM with such certificate if you proceed.
+                Login with the above certificate will <strong>NOT</strong> be allowed if you proceed.
             </p>
         </p>
     </div>
