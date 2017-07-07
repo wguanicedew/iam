@@ -49,7 +49,7 @@ public class SAMLUserDetailsServiceSupport {
   }
 
   protected IamSamlId resolverSamlId(SAMLCredential credential) {
-    return resolver.getSamlUserIdentifier(credential)
+    return resolver.resolveSamlUserIdentifier(credential).getResolvedId()
       .orElseThrow(() -> new UsernameNotFoundException(
           "Could not extract a user identifier from the SAML assertion"));
   }

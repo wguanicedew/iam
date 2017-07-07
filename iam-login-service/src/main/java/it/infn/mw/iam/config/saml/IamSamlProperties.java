@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.validation.constraints.Min;
 
+import org.hibernate.validator.constraints.NotBlank;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import com.google.common.base.Splitter;
@@ -80,10 +81,10 @@ public class IamSamlProperties {
       Set<String> trustedIdpIds =
           Sets.newHashSet(Splitter.on(",").trimResults().omitEmptyStrings().split(trustedIdps));
 
-      if (trustedIdpIds.isEmpty()){
+      if (trustedIdpIds.isEmpty()) {
         return Optional.empty();
       }
-      
+
       return Optional.of(trustedIdpIds);
     }
   }
@@ -100,6 +101,8 @@ public class IamSamlProperties {
 
   private int maxAuthenticationAgeSec;
 
+  private int metadataLookupServiceRefreshPeriodSec = (int) TimeUnit.MINUTES.toSeconds(5);
+
   public IamSamlProperties() {}
 
   public String getEntityId() {
@@ -110,6 +113,7 @@ public class IamSamlProperties {
     this.entityId = entityId;
   }
 
+  @NotBlank
   public String getIdpMetadata() {
     return idpMetadata;
   }
@@ -172,6 +176,14 @@ public class IamSamlProperties {
 
   public void setIdResolvers(String idResolvers) {
     this.idResolvers = idResolvers;
+  }
+
+  public int getMetadataLookupServiceRefreshPeriodSec() {
+    return metadataLookupServiceRefreshPeriodSec;
+  }
+
+  public void setMetadataLookupServiceRefreshPeriodSec(int metadataLookupServiceRefreshPeriodSec) {
+    this.metadataLookupServiceRefreshPeriodSec = metadataLookupServiceRefreshPeriodSec;
   }
 
 }

@@ -3,13 +3,16 @@ package it.infn.mw.iam.config.saml;
 import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.eppn;
 import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.epuid;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.httpclient.HttpClient;
@@ -18,9 +21,13 @@ import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.velocity.app.VelocityEngine;
 import org.opensaml.saml2.core.NameIDType;
+import org.opensaml.saml2.metadata.provider.FileBackedHTTPMetadataProvider;
 import org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider;
 import org.opensaml.saml2.metadata.provider.MetadataProvider;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
+import org.opensaml.saml2.metadata.provider.ResourceBackedMetadataProvider;
+import org.opensaml.util.resource.ClasspathResource;
+import org.opensaml.util.resource.ResourceException;
 import org.opensaml.xml.parse.BasicParserPool;
 import org.opensaml.xml.parse.ParserPool;
 import org.opensaml.xml.parse.StaticBasicParserPool;
@@ -99,6 +106,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 
 import it.infn.mw.iam.authn.ExternalAuthenticationFailureHandler;
@@ -110,6 +118,7 @@ import it.infn.mw.iam.authn.saml.CleanInactiveProvisionedAccounts;
 import it.infn.mw.iam.authn.saml.DefaultSAMLUserDetailsService;
 import it.infn.mw.iam.authn.saml.IamSamlAuthenticationProvider;
 import it.infn.mw.iam.authn.saml.JustInTimeProvisioningSAMLUserDetailsService;
+import it.infn.mw.iam.authn.saml.MetadataLookupService;
 import it.infn.mw.iam.authn.saml.SamlExceptionMessageHelper;
 import it.infn.mw.iam.authn.saml.util.FirstApplicableChainedSamlIdResolver;
 import it.infn.mw.iam.authn.saml.util.SamlIdResolvers;
@@ -130,7 +139,7 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 public class SamlConfig extends WebSecurityConfigurerAdapter implements SchedulingConfigurer {
 
   public static final Logger LOG = LoggerFactory.getLogger(SamlConfig.class);
-  
+
   @Autowired
   ResourceLoader resourceLoader;
 
@@ -157,6 +166,14 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
 
   @Autowired
   InactiveAccountAuthenticationHander inactiveAccountHandler;
+
+  @Autowired
+  MetadataLookupService metadataLookupService;
+
+
+  Timer metadataFetchTimer = new Timer();
+
+  BasicParserPool basicParserPool = new BasicParserPool();
 
   @ConfigurationProperties(prefix = "iam")
   public static class IamProperties {
@@ -278,8 +295,6 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
     return new HttpClient(multiThreadedHttpConnectionManager());
   }
 
-  // SAML Authentication Provider responsible for validating of received SAML
-  // messages
   @Bean
   public SAMLAuthenticationProvider samlAuthenticationProvider(SamlUserIdentifierResolver resolver,
       IamAccountRepository accountRepo, InactiveAccountAuthenticationHander handler) {
@@ -429,35 +444,88 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
     return extendedMetadata;
   }
 
-  @Bean
-  @Qualifier("local")
-  public ExtendedMetadataDelegate localIdpMetadataProvider()
-      throws MetadataProviderException, URISyntaxException, IOException {
-
-    Resource metadataResource = resourceLoader.getResource(samlProperties.getIdpMetadata());
-
-    FilesystemMetadataProvider localIdpMetadataProvider =
-        new FilesystemMetadataProvider(metadataResource.getFile());
-
-    localIdpMetadataProvider.setParserPool(new BasicParserPool());
-    localIdpMetadataProvider.initialize();
-
+  private ExtendedMetadataDelegate metadataDelegate(MetadataProvider p) {
     ExtendedMetadataDelegate extendedMetadataDelegate =
-        new ExtendedMetadataDelegate(localIdpMetadataProvider, extendedMetadata());
+        new ExtendedMetadataDelegate(p, extendedMetadata());
     extendedMetadataDelegate.setMetadataTrustCheck(true);
     extendedMetadataDelegate.setMetadataRequireSignature(false);
     return extendedMetadataDelegate;
-
   }
+
+  private List<MetadataProvider> metadataProviders()
+      throws MetadataProviderException, IOException, ResourceException {
+
+    List<MetadataProvider> providers = new ArrayList<>();
+
+    String metadata = samlProperties.getIdpMetadata();
+
+    Iterable<String> metadataIterable =
+        Splitter.on(",").trimResults().omitEmptyStrings().split(metadata);
+
+
+    for (String m : metadataIterable) {
+      if (m.startsWith("classpath:")) {
+        LOG.info("Adding classpath based metadata provider for URL: {}", m);
+        
+        ClasspathResource cpMetadataResources =
+            new ClasspathResource(m.replaceFirst("classpath:",""));
+        
+        ResourceBackedMetadataProvider metadataProvider =
+            new ResourceBackedMetadataProvider(metadataFetchTimer, cpMetadataResources);
+
+        metadataProvider.setParserPool(basicParserPool);
+        metadataProvider.initialize();
+        providers.add(metadataDelegate(metadataProvider));
+
+      } else if (m.startsWith("file:")) {
+
+        LOG.info("Adding File based metadata provider for URL: {}", m);
+        Resource metadataResource = resourceLoader.getResource(m);
+
+
+        FilesystemMetadataProvider metadataProvider =
+            new FilesystemMetadataProvider(metadataResource.getFile());
+
+        metadataProvider.setParserPool(basicParserPool);
+        metadataProvider.initialize();
+        providers.add(metadataDelegate(metadataProvider));
+
+      } else if (m.startsWith("http")) {
+
+        LOG.info("Adding HTTP metadata provider for URL: {}", m);
+
+        File metadataBackupFile = Files.createTempFile("metadata", "xml").toFile();
+        metadataBackupFile.deleteOnExit();
+
+        FileBackedHTTPMetadataProvider metadataProvider = new FileBackedHTTPMetadataProvider(
+            metadataFetchTimer, httpClient(), m, metadataBackupFile.getAbsolutePath());
+
+        metadataProvider.setParserPool(basicParserPool);
+        metadataProvider.initialize();
+        providers.add(metadataDelegate(metadataProvider));
+      } else {
+        LOG.error("Skipping invalid saml.idp-metatadata value: {}", m);
+      }
+    }
+
+    if (providers.isEmpty()) {
+      final String message = "Empty SAML metadata providers after initialization";
+      LOG.error(message);
+      throw new IllegalStateException(message);
+    }
+
+    return providers;
+  }
+
 
   @Bean
   @Qualifier("metadata")
   public CachingMetadataManager metadata()
-      throws MetadataProviderException, URISyntaxException, IOException {
+      throws MetadataProviderException, URISyntaxException, IOException, ResourceException {
 
-    List<MetadataProvider> providers = new ArrayList<MetadataProvider>();
-    providers.add(localIdpMetadataProvider());
-    return new CachingMetadataManager(providers);
+    CachingMetadataManager metadataManager = new CachingMetadataManager(metadataProviders());
+
+    return metadataManager;
   }
 
   @Bean
@@ -661,6 +729,13 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
     auth.authenticationProvider(samlAuthenticationProvider(resolver, repo, inactiveAccountHandler));
   }
 
+  private void scheduleMetadataLookupServiceRefresh(ScheduledTaskRegistrar taskRegistrar) {
+    LOG.info("Scheduling metadata lookup service refresh task to run every {} seconds.",
+        samlProperties.getMetadataLookupServiceRefreshPeriodSec());
+    taskRegistrar.addFixedRateTask(() -> {
+      metadataLookupService.refreshMetadata();
+    }, TimeUnit.SECONDS.toMillis(samlProperties.getMetadataLookupServiceRefreshPeriodSec()));
+  }
 
   private void scheduleProvisionedAccountsCleanup(final ScheduledTaskRegistrar taskRegistrar) {
 
@@ -689,6 +764,7 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
   @Override
   public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
     scheduleProvisionedAccountsCleanup(taskRegistrar);
+    scheduleMetadataLookupServiceRefresh(taskRegistrar);
   }
 
 }

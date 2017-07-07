@@ -145,7 +145,7 @@ public class NotificationConcurrentTests {
     for (Future<Integer> elem : futuresList) {
       elem.get();
     }
-
+    
     executorService.shutdown();
 
     int count = notificationRepository.countAllMessages();
@@ -192,7 +192,7 @@ public class NotificationConcurrentTests {
       try {
         barrier.await();
       } catch (Exception ex) {
-        ex.printStackTrace();
+        throw new RuntimeException(ex);
       }
 
       this.notificationService.clearExpiredNotifications();

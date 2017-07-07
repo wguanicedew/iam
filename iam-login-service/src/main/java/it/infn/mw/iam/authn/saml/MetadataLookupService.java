@@ -9,4 +9,6 @@ public interface MetadataLookupService {
   List<IdpDescription> lookupIdp(String text);
 
   List<IdpDescription> listIdps();
+  
+  void refreshMetadata();
 }
