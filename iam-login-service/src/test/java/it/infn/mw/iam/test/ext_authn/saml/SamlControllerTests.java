@@ -17,7 +17,7 @@ import it.infn.mw.iam.IamLoginService;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {IamLoginService.class, SamlTestConfig.class})
 @WebAppConfiguration
-public class SamlControllerTests extends SamlExternalAuthenticationTestSupport {
+public class SamlControllerTests extends SamlAuthenticationTestSupport {
 
   @Test
   public void testListIdpsMatch() throws Exception {

@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
@@ -37,6 +38,9 @@ import org.springframework.core.annotation.Order;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.SchedulingConfigurer;
+import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -102,22 +106,28 @@ import it.infn.mw.iam.authn.ExternalAuthenticationSuccessHandler;
 import it.infn.mw.iam.authn.InactiveAccountAuthenticationHander;
 import it.infn.mw.iam.authn.RootIsDashboardSuccessHandler;
 import it.infn.mw.iam.authn.TimestamperSuccessHandler;
+import it.infn.mw.iam.authn.saml.CleanInactiveProvisionedAccounts;
 import it.infn.mw.iam.authn.saml.DefaultSAMLUserDetailsService;
 import it.infn.mw.iam.authn.saml.IamSamlAuthenticationProvider;
+import it.infn.mw.iam.authn.saml.JustInTimeProvisioningSAMLUserDetailsService;
 import it.infn.mw.iam.authn.saml.SamlExceptionMessageHelper;
 import it.infn.mw.iam.authn.saml.util.FirstApplicableChainedSamlIdResolver;
 import it.infn.mw.iam.authn.saml.util.SamlIdResolvers;
 import it.infn.mw.iam.authn.saml.util.SamlUserIdentifierResolver;
+import it.infn.mw.iam.config.saml.IamSamlProperties.IamSamlJITAccountProvisioningProperties;
 import it.infn.mw.iam.config.saml.SamlConfig.IamProperties;
 import it.infn.mw.iam.config.saml.SamlConfig.ServerProperties;
+import it.infn.mw.iam.core.time.SystemTimeProvider;
+import it.infn.mw.iam.core.user.IamAccountService;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
 @Configuration
 @Order(value = Ordered.LOWEST_PRECEDENCE)
 @Profile("saml")
-@EnableConfigurationProperties({IamSamlProperties.class, IamProperties.class,
-    ServerProperties.class})
-public class SamlConfig extends WebSecurityConfigurerAdapter {
+@EnableConfigurationProperties({IamSamlProperties.class,
+    IamSamlJITAccountProvisioningProperties.class, IamProperties.class, ServerProperties.class})
+@EnableScheduling
+public class SamlConfig extends WebSecurityConfigurerAdapter implements SchedulingConfigurer {
 
   public static final Logger LOG = LoggerFactory.getLogger(SamlConfig.class);
   
@@ -131,10 +141,16 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
   IamAccountRepository repo;
 
   @Autowired
+  IamAccountService accountService;
+
+  @Autowired
   IamProperties iamProperties;
 
   @Autowired
   IamSamlProperties samlProperties;
+
+  @Autowired
+  IamSamlJITAccountProvisioningProperties jitProperties;
 
   @Autowired
   ServerProperties serverProperties;
@@ -173,43 +189,44 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
   @Configuration
   @EnableConfigurationProperties({IamSamlProperties.class})
   public static class IamSamlConfig {
-    
+
+
     public static final String[] DEFAULT_ID_RESOLVERS = {epuid.name(), eppn.name()};
-    
+
     @Autowired
     IamSamlProperties samlProperties;
-    
-    private String[] resolverNames(){
-      
-      if (Strings.isNullOrEmpty(samlProperties.getIdResolvers())){
+
+    private String[] resolverNames() {
+
+      if (Strings.isNullOrEmpty(samlProperties.getIdResolvers())) {
         return DEFAULT_ID_RESOLVERS;
       }
-      
+
       return samlProperties.getIdResolvers().split(",");
     }
-    
+
     @Bean
     public SamlUserIdentifierResolver resolver() {
-      
+
       List<SamlUserIdentifierResolver> resolvers = new ArrayList<>();
 
       SamlIdResolvers resolverFactory = new SamlIdResolvers();
-      
+
       String[] resolverNames = resolverNames();
-      
-      for (String n: resolverNames){
+
+      for (String n : resolverNames) {
         SamlUserIdentifierResolver r = resolverFactory.byName(n);
-        if (r != null){
+        if (r != null) {
           resolvers.add(r);
         } else {
           LOG.warn("Unsupported saml id resolver: {}", n);
         }
       }
-      
-      if (resolvers.isEmpty()){
+
+      if (resolvers.isEmpty()) {
         throw new IllegalStateException("Could not configure SAML id resolvers");
       }
-      
+
       return new FirstApplicableChainedSamlIdResolver(resolvers);
     }
 
@@ -218,6 +235,12 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
   @Bean
   public SAMLUserDetailsService samlUserDetailsService(SamlUserIdentifierResolver resolver,
       IamAccountRepository accountRepo, InactiveAccountAuthenticationHander handler) {
+
+    if (jitProperties.getEnabled()) {
+
+      return new JustInTimeProvisioningSAMLUserDetailsService(resolver, accountService, handler,
+          accountRepo, jitProperties.getTrustedIdpsAsOptionalSet());
+    }
 
     return new DefaultSAMLUserDetailsService(resolver, accountRepo, handler);
 
@@ -261,7 +284,9 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
   public SAMLAuthenticationProvider samlAuthenticationProvider(SamlUserIdentifierResolver resolver,
       IamAccountRepository accountRepo, InactiveAccountAuthenticationHander handler) {
 
-    IamSamlAuthenticationProvider samlAuthenticationProvider = new IamSamlAuthenticationProvider(resolver);
+    IamSamlAuthenticationProvider samlAuthenticationProvider =
+        new IamSamlAuthenticationProvider(resolver);
+
     samlAuthenticationProvider
       .setUserDetails(samlUserDetailsService(resolver, accountRepo, handler));
     samlAuthenticationProvider.setForcePrincipalAsString(false);
@@ -370,17 +395,6 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
     return new Protocol("https", socketFactory(), 443);
   }
 
-  //
-  // @Bean
-  // public MethodInvokingFactoryBean socketFactoryInitialization() {
-  //
-  // MethodInvokingFactoryBean methodInvokingFactoryBean = new MethodInvokingFactoryBean();
-  // methodInvokingFactoryBean.setTargetClass(Protocol.class);
-  // methodInvokingFactoryBean.setTargetMethod("registerProtocol");
-  // Object[] args = {"https", socketFactoryProtocol()};
-  // methodInvokingFactoryBean.setArguments(args);
-  // return methodInvokingFactoryBean;
-  // }
 
   @Bean
   public WebSSOProfileOptions defaultWebSSOProfileOptions() {
@@ -403,7 +417,6 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
     return samlEntryPoint;
   }
 
-  // Setup advanced info about metadata
   @Bean
   public ExtendedMetadata extendedMetadata() {
 
@@ -437,8 +450,6 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
 
   }
 
-  // IDP Metadata configuration - paths to metadata of IDPs in circle of trust
-  // is here
   @Bean
   @Qualifier("metadata")
   public CachingMetadataManager metadata()
@@ -449,7 +460,6 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
     return new CachingMetadataManager(providers);
   }
 
-  // Filter automatically generates default SP metadata
   @Bean
   public MetadataGenerator metadataGenerator() {
 
@@ -473,14 +483,14 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
 
 
   @Bean
-  public AuthenticationSuccessHandler successRedirectHandler() {
+  public AuthenticationSuccessHandler samlAuthenticationSuccessHandler() {
 
 
     RootIsDashboardSuccessHandler sa = new RootIsDashboardSuccessHandler(iamProperties.getBaseUrl(),
         new HttpSessionRequestCache());
 
     ExternalAuthenticationSuccessHandler successHandler =
-        new ExternalAuthenticationSuccessHandler(new TimestamperSuccessHandler(sa), "/");
+        new ExternalAuthenticationSuccessHandler(new TimestamperSuccessHandler(sa, repo), "/");
     return successHandler;
   }
 
@@ -495,7 +505,8 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
 
     SAMLWebSSOHoKProcessingFilter samlWebSSOHoKProcessingFilter =
         new SAMLWebSSOHoKProcessingFilter();
-    samlWebSSOHoKProcessingFilter.setAuthenticationSuccessHandler(successRedirectHandler());
+    samlWebSSOHoKProcessingFilter
+      .setAuthenticationSuccessHandler(samlAuthenticationSuccessHandler());
     samlWebSSOHoKProcessingFilter.setAuthenticationManager(authenticationManager());
     samlWebSSOHoKProcessingFilter.setAuthenticationFailureHandler(authenticationFailureHandler());
     return samlWebSSOHoKProcessingFilter;
@@ -507,7 +518,7 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
 
     SAMLProcessingFilter samlWebSSOProcessingFilter = new SAMLProcessingFilter();
     samlWebSSOProcessingFilter.setAuthenticationManager(authenticationManager());
-    samlWebSSOProcessingFilter.setAuthenticationSuccessHandler(successRedirectHandler());
+    samlWebSSOProcessingFilter.setAuthenticationSuccessHandler(samlAuthenticationSuccessHandler());
     samlWebSSOProcessingFilter.setAuthenticationFailureHandler(authenticationFailureHandler());
     return samlWebSSOProcessingFilter;
   }
@@ -649,4 +660,35 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
 
     auth.authenticationProvider(samlAuthenticationProvider(resolver, repo, inactiveAccountHandler));
   }
+
+
+  private void scheduleProvisionedAccountsCleanup(final ScheduledTaskRegistrar taskRegistrar) {
+
+    if (!jitProperties.getEnabled()) {
+      LOG.info("Just-in-time account provisioning for SAML is DISABLED.");
+      return;
+    }
+
+    if (!jitProperties.getCleanupTaskEnabled()) {
+      LOG.info("Cleanup for SAML JIT account provisioning is DISABLED.");
+      return;
+    }
+
+    LOG.info(
+        "Scheduling Just-in-time provisioned account cleanup task to run every {} seconds. Accounts inactive for {} "
+            + "days will be deleted",
+        jitProperties.getCleanupTaskPeriodSec(), jitProperties.getInactiveAccountLifetimeDays());
+
+    taskRegistrar.addFixedRateTask(
+        new CleanInactiveProvisionedAccounts(new SystemTimeProvider(), accountService,
+            jitProperties.getInactiveAccountLifetimeDays()),
+        TimeUnit.SECONDS.toMillis(jitProperties.getCleanupTaskPeriodSec()));
+
+  }
+
+  @Override
+  public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
+    scheduleProvisionedAccountsCleanup(taskRegistrar);
+  }
+
 }

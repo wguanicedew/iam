@@ -41,7 +41,7 @@ import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamSamlId;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
-import it.infn.mw.iam.test.ext_authn.saml.SamlExternalAuthenticationTestSupport;
+import it.infn.mw.iam.test.ext_authn.saml.SamlAuthenticationTestSupport;
 import it.infn.mw.iam.test.ext_authn.saml.SamlTestConfig;
 import it.infn.mw.iam.test.util.saml.SamlUtils;
 
@@ -49,7 +49,7 @@ import it.infn.mw.iam.test.util.saml.SamlUtils;
 @SpringApplicationConfiguration(classes = {IamLoginService.class, SamlTestConfig.class})
 @WebAppConfiguration
 @Transactional
-public class SamlAccountLinkingTests extends SamlExternalAuthenticationTestSupport {
+public class SamlAccountLinkingTests extends SamlAuthenticationTestSupport {
 
   private static final String TEST_100_USER = "test_100";
 

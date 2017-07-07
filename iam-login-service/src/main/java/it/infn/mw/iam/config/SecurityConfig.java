@@ -46,12 +46,11 @@ import it.infn.mw.iam.authn.x509.IamX509AuthenticationProvider;
 import it.infn.mw.iam.authn.x509.IamX509AuthenticationUserDetailService;
 import it.infn.mw.iam.authn.x509.IamX509PreauthenticationProcessingFilter;
 import it.infn.mw.iam.authn.x509.X509AuthenticationCredentialExtractor;
+import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-
-
 
   @Configuration
   @Order(100)
@@ -79,6 +78,9 @@ public class SecurityConfig {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private IamAccountRepository accountRepo;
 
     @Autowired
     public void configureGlobal(final AuthenticationManagerBuilder auth) throws Exception {
@@ -157,7 +159,8 @@ public class SecurityConfig {
     public AuthenticationSuccessHandler successHandler() {
 
       return new TimestamperSuccessHandler(
-          new RootIsDashboardSuccessHandler(iamBaseUrl, new HttpSessionRequestCache()));
+          new RootIsDashboardSuccessHandler(iamBaseUrl, new HttpSessionRequestCache()),
+          accountRepo);
     }
   }
 

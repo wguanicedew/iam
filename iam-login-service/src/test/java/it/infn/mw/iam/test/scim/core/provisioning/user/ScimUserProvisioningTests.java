@@ -11,6 +11,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import it.infn.mw.iam.IamLoginService;
+import it.infn.mw.iam.api.scim.converter.UserConverter;
 import it.infn.mw.iam.api.scim.model.ScimEmail;
 import it.infn.mw.iam.api.scim.model.ScimName;
 import it.infn.mw.iam.api.scim.model.ScimOidcId;
@@ -20,6 +21,7 @@ import it.infn.mw.iam.api.scim.model.ScimSshKey;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.provisioning.ScimUserProvisioning;
 import it.infn.mw.iam.persistence.model.IamAccount;
+import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.test.TestUtils;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -29,6 +31,12 @@ public class ScimUserProvisioningTests {
 
   @Autowired
   private ScimUserProvisioning userService;
+  
+  @Autowired
+  private IamAccountRepository accountRepo;
+  
+  @Autowired
+  private UserConverter userConverter;
 
   @Autowired
   private PasswordEncoder passwordEncoder;
@@ -64,7 +72,10 @@ public class ScimUserProvisioningTests {
       .addSshKey(TESTUSER_SSHKEY)
       .build();
 
-    IamAccount iamAccount = userService.createAccount(scimUser);
+    userService.create(scimUser);
+    
+    IamAccount iamAccount = accountRepo.findByUsername(scimUser.getUserName())
+        .orElseThrow(() -> new AssertionError("Expected user not found by repo"));
 
     Assert.assertNotNull(iamAccount);
 

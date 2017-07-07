@@ -33,7 +33,7 @@ import it.infn.mw.iam.test.util.saml.SamlUtils;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {IamLoginService.class, SamlTestConfig.class})
 @WebAppConfiguration
-public class SamlExternalAuthenticationTests extends SamlExternalAuthenticationTestSupport {
+public class SamlExternalAuthenticationTests extends SamlAuthenticationTestSupport {
 
   @Test
   public void testSuccessfulExternalUnregisteredUserAuthentication() throws Throwable {

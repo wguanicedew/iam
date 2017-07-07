@@ -52,11 +52,6 @@ public class IamX509Certificate implements IamAccountRef {
   private IamAccount account;
 
   public IamX509Certificate() {}
-
-  public IamX509Certificate(String certificate) {
-
-    this.setCertificate(certificate);
-  }
   
   
   @Override

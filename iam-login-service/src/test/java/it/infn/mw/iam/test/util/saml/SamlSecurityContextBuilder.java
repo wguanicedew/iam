@@ -13,7 +13,8 @@ import com.google.common.base.Strings;
 import it.infn.mw.iam.authn.saml.SamlExternalAuthenticationToken;
 import it.infn.mw.iam.authn.saml.util.SamlAttributeNames;
 import it.infn.mw.iam.persistence.model.IamSamlId;
-import it.infn.mw.iam.test.ext_authn.saml.SamlExternalAuthenticationTestSupport;
+
+import it.infn.mw.iam.test.ext_authn.saml.SamlAuthenticationTestSupport;
 import it.infn.mw.iam.test.util.SecurityContextBuilderSupport;
 
 public class SamlSecurityContextBuilder extends SecurityContextBuilderSupport {
@@ -24,7 +25,7 @@ public class SamlSecurityContextBuilder extends SecurityContextBuilderSupport {
 
   public SamlSecurityContextBuilder() {
     samlCredential = Mockito.mock(SAMLCredential.class);
-    issuer = SamlExternalAuthenticationTestSupport.DEFAULT_IDP_ID;
+    issuer = SamlAuthenticationTestSupport.DEFAULT_IDP_ID;
     subject = "test-saml-user";
   }
 

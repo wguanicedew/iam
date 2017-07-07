@@ -19,10 +19,8 @@ import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REPLACE_USERNA
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -39,7 +37,6 @@ import it.infn.mw.iam.api.scim.converter.SshKeyConverter;
 import it.infn.mw.iam.api.scim.converter.UserConverter;
 import it.infn.mw.iam.api.scim.converter.X509CertificateConverter;
 import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
-import it.infn.mw.iam.api.scim.exception.ScimException;
 import it.infn.mw.iam.api.scim.exception.ScimPatchOperationNotSupported;
 import it.infn.mw.iam.api.scim.exception.ScimResourceExistsException;
 import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
@@ -51,16 +48,16 @@ import it.infn.mw.iam.api.scim.provisioning.paging.ScimPageRequest;
 import it.infn.mw.iam.api.scim.updater.AccountUpdater;
 import it.infn.mw.iam.api.scim.updater.UpdaterType;
 import it.infn.mw.iam.api.scim.updater.factory.DefaultAccountUpdaterFactory;
-import it.infn.mw.iam.audit.events.account.AccountCreatedEvent;
-import it.infn.mw.iam.audit.events.account.AccountRemovedEvent;
 import it.infn.mw.iam.audit.events.account.AccountReplacedEvent;
+import it.infn.mw.iam.audit.events.account.AccountUpdatedEvent;
+import it.infn.mw.iam.core.user.IamAccountService;
+import it.infn.mw.iam.core.user.exception.CredentialAlreadyBoundException;
+import it.infn.mw.iam.core.user.exception.UserAlreadyExistsException;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamOidcId;
 import it.infn.mw.iam.persistence.model.IamSamlId;
 import it.infn.mw.iam.persistence.model.IamSshKey;
-import it.infn.mw.iam.persistence.model.IamX509Certificate;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
-import it.infn.mw.iam.persistence.repository.IamAuthoritiesRepository;
 
 @Service
 public class ScimUserProvisioning
@@ -73,22 +70,22 @@ public class ScimUserProvisioning
       ACCOUNT_REPLACE_GIVEN_NAME, ACCOUNT_REPLACE_PASSWORD, ACCOUNT_REPLACE_PICTURE,
       ACCOUNT_REPLACE_USERNAME, ACCOUNT_REMOVE_PICTURE);
 
+  private final IamAccountService accountService;
   private final IamAccountRepository accountRepository;
-  private final IamAuthoritiesRepository authorityRepository;
+
   private final DefaultAccountUpdaterFactory updatersFactory;
-  private final PasswordEncoder passwordEncoder;
+
   private final UserConverter userConverter;
   private ApplicationEventPublisher eventPublisher;
 
   @Autowired
-  public ScimUserProvisioning(IamAccountRepository accountRepository,
-      IamAuthoritiesRepository authorityRepository, PasswordEncoder passwordEncoder,
+  public ScimUserProvisioning(IamAccountService accountService,
+      IamAccountRepository accountRepository, PasswordEncoder passwordEncoder,
       UserConverter userConverter, OidcIdConverter oidcIdConverter, SamlIdConverter samlIdConverter,
       SshKeyConverter sshKeyConverter, X509CertificateConverter x509CertificateConverter) {
 
+    this.accountService = accountService;
     this.accountRepository = accountRepository;
-    this.authorityRepository = authorityRepository;
-    this.passwordEncoder = passwordEncoder;
     this.userConverter = userConverter;
     this.updatersFactory = new DefaultAccountUpdaterFactory(passwordEncoder, accountRepository,
         oidcIdConverter, samlIdConverter, sshKeyConverter, x509CertificateConverter);
@@ -129,131 +126,21 @@ public class ScimUserProvisioning
     IamAccount account = accountRepository.findByUuid(id)
       .orElseThrow(() -> new ScimResourceNotFoundException("No user mapped to id '" + id + "'"));
 
-    accountRepository.delete(account);
-
-    eventPublisher.publishEvent(new AccountRemovedEvent(this, account,
-        "Removed account for user " + account.getUsername()));
+    accountService.deleteAccount(account);
+    
   }
 
-  private void checkForDuplicates(ScimUser user) throws ScimResourceExistsException {
-
-    Preconditions.checkNotNull(user.getEmails());
-    Preconditions.checkNotNull(user.getEmails().get(0));
-    Preconditions.checkNotNull(user.getEmails().get(0).getValue());
-
-    accountRepository.findByUsername(user.getUserName()).ifPresent(a -> {
-      throw new ScimResourceExistsException("userName is already taken: " + a.getUsername());
-    });
-
-    accountRepository.findByEmail(user.getEmails().get(0).getValue()).ifPresent(a -> {
-      throw new ScimResourceExistsException(
-          "email already assigned to an existing user: " + a.getUserInfo().getEmail());
-    });
-  }
-
-  public IamAccount createAccount(final ScimUser user) {
-
-    checkForDuplicates(user);
-
-    final Date creationTime = new Date();
-    final String uuid = UUID.randomUUID().toString();
-
-    IamAccount account = userConverter.fromScim(user);
-    account.setUuid(uuid);
-    account.setCreationTime(creationTime);
-    account.setLastUpdateTime(creationTime);
-    account.setUsername(user.getUserName());
-
-    if (user.getActive() != null) {
-      account.setActive(user.getActive());
-    } else {
-      /* if no active status is specified, disable user */
-      account.setActive(false);
-    }
-
-    /* users created via SCIM are set with email-verified as true */
-    account.getUserInfo().setEmailVerified(true);
-
-    if (account.getPassword() == null) {
-      account.setPassword(UUID.randomUUID().toString());
-    }
-
-    account.setPassword(passwordEncoder.encode(account.getPassword()));
-
-    authorityRepository.findByAuthority("ROLE_USER")
-      .map(a -> account.getAuthorities().add(a))
-      .orElseThrow(
-          () -> new IllegalStateException("ROLE_USER not found in database. This is a bug"));
-
-    if (account.hasX509Certificates()) {
-
-      account.getX509Certificates().forEach(cert -> {
-        checkX509CertificateNotExists(cert);
-        cert.setCreationTime(creationTime);
-        cert.setLastUpdateTime(creationTime);
-      });
-
-      long count = account.getX509Certificates().stream().filter(cert -> cert.isPrimary()).count();
-
-      if (count > 1) {
-
-        throw new ScimException("Too many primary x509 certificates provided!");
-      }
-
-      if (count == 0) {
-
-        account.getX509Certificates().stream().findFirst().get().setPrimary(true);
-      }
-    }
-
-    if (account.hasOidcIds()) {
-
-      account.getOidcIds().forEach(oidcId -> checkOidcIdNotAlreadyBounded(oidcId));
-    }
-
-    if (account.hasSshKeys()) {
-
-      account.getSshKeys().forEach(sshKey -> checkSshKeyNotExists(sshKey));
-
-      long count = account.getSshKeys().stream().filter(sshKey -> sshKey.isPrimary()).count();
-
-      if (count > 1) {
-
-        throw new ScimException("Too many primary ssh keys provided!");
-      }
-
-      if (count == 0) {
-
-        account.getSshKeys().stream().findFirst().get().setPrimary(true);
-      }
-    }
-
-    if (account.hasSamlIds()) {
-
-      account.getSamlIds().forEach(samlId -> checkSamlIdNotAlreadyBounded(samlId));
-    }
-
-    accountRepository.save(account);
-
-    eventPublisher.publishEvent(new AccountCreatedEvent(this, account,
-        "Account created for user " + account.getUsername()));
-
-    return account;
-  }
 
   @Override
   public ScimUser create(final ScimUser user) {
 
-    IamAccount account = createAccount(user);
+    IamAccount newAccount = userConverter.fromScim(user);
 
-    return userConverter.toScim(account);
-  }
-
-  private void checkX509CertificateNotExists(IamX509Certificate cert) {
-
-    if (accountRepository.findByCertificateSubject(cert.getSubjectDn()).isPresent()) {
-      throw new ScimResourceExistsException(String.format(
-          "X509 certificate with subject '%s' is already bound to another user", cert.getSubjectDn()));
+    try {
+      IamAccount account = accountService.createAccount(newAccount);
+      return userConverter.toScim(account);
+    } catch (CredentialAlreadyBoundException | UserAlreadyExistsException e) {
+      throw new ScimResourceExistsException(e.getMessage());
     }
   }
 

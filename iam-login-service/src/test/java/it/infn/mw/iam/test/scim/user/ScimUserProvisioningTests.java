@@ -353,7 +353,7 @@ public class ScimUserProvisioningTests {
       .build();
 
     restUtils.doPost("/scim/Users/", anotherUser, HttpStatus.CONFLICT).body("detail",
-        containsString("already bounded to another user"));
+        containsString("already bound to a user"));
 
     restUtils.doDelete(creationResult.getMeta().getLocation());
 
@@ -447,7 +447,7 @@ public class ScimUserProvisioningTests {
       .build();
 
     restUtils.doPost("/scim/Users/", anotherUser, HttpStatus.CONFLICT).body("detail",
-        containsString("already bounded to another user"));
+        containsString("already bound to a user"));
 
     restUtils.doDelete(creationResult.getMeta().getLocation());
 
@@ -510,7 +510,7 @@ public class ScimUserProvisioningTests {
     user0 = restUtils.doPost("/scim/Users/", user0).extract().as(ScimUser.class);
 
     restUtils.doPost("/scim/Users/", user1, HttpStatus.CONFLICT).body("detail",
-        containsString("email already assigned to an existing user"));
+        equalTo("A user linked with email 'same_email@test.org' already exists"));
 
     restUtils.deleteUsers(user0);
 

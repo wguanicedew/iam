@@ -20,6 +20,7 @@ import com.google.common.collect.Lists;
 
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.scim.converter.ScimResourceLocationProvider;
+import it.infn.mw.iam.api.scim.converter.UserConverter;
 import it.infn.mw.iam.api.scim.model.ScimGroup;
 import it.infn.mw.iam.api.scim.model.ScimGroupPatchRequest;
 import it.infn.mw.iam.api.scim.model.ScimMemberRef;
@@ -44,6 +45,7 @@ import it.infn.mw.iam.audit.events.account.ssh.SshKeyRemovedEvent;
 import it.infn.mw.iam.audit.events.account.x509.X509CertificateAddedEvent;
 import it.infn.mw.iam.audit.events.account.x509.X509CertificateRemovedEvent;
 import it.infn.mw.iam.authn.saml.util.SamlAttributeNames;
+import it.infn.mw.iam.core.user.IamAccountService;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.test.TestUtils;
 import it.infn.mw.iam.test.ext_authn.x509.X509TestSupport;
@@ -72,6 +74,12 @@ public class EventTests extends X509TestSupport {
   @Autowired
   private IamAuditEventLogger logger;
 
+  @Autowired
+  private IamAccountService accountService;
+  
+  @Autowired
+  private UserConverter userConverter;
+  
   @Autowired
   private ScimUserProvisioning userProvisioning;
 
@@ -104,7 +112,9 @@ public class EventTests extends X509TestSupport {
       .addX509Certificate(test1Cert)
       .build();
 
-    account = userProvisioning.createAccount(user);
+    
+    account = accountService.createAccount(userConverter.fromScim(user));
+    
     assertNotNull(account);
 
     accountRef = ScimMemberRef.builder()

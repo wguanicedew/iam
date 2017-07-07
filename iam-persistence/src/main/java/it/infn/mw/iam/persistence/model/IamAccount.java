@@ -56,15 +56,22 @@ public class IamAccount {
 
   @Temporal(TemporalType.TIMESTAMP)
   @Column(nullable = false)
-  Date creationTime;
+  private Date creationTime;
 
   @Temporal(TemporalType.TIMESTAMP)
   @Column(nullable = false)
-  Date lastUpdateTime;
+  private Date lastUpdateTime;
+
+  @Column(name = "provisioned", nullable = false)
+  private boolean provisioned = false;
 
   @OneToOne(cascade = CascadeType.ALL)
   @JoinColumn(name = "user_info_id")
   private IamUserInfo userInfo;
+  
+  @Temporal(TemporalType.TIMESTAMP)
+  @Column(name="last_login_time", nullable = true)
+  private Date lastLoginTime;
 
   @ManyToMany
   @JoinTable(name = "iam_account_authority",
@@ -463,15 +470,38 @@ public class IamAccount {
     return true;
   }
 
+  public boolean isProvisioned() {
+    return provisioned;
+  }
+
+  public void setProvisioned(boolean provisioned) {
+    this.provisioned = provisioned;
+  }
+  
+  public Date getLastLoginTime() {
+    return lastLoginTime;
+  }
+
+  public void setLastLoginTime(Date lastLoginTime) {
+    this.lastLoginTime = lastLoginTime;
+  }
+
   @Override
   public String toString() {
-
     return "IamAccount [id=" + id + ", uuid=" + uuid + ", username=" + username + ", password="
         + password + ", active=" + active + ", creationTime=" + creationTime + ", lastUpdateTime="
-        + lastUpdateTime + ", userInfo=" + userInfo + ", authorities=" + authorities + ", groups="
-        + groups + ", samlIds=" + samlIds + ", oidcIds=" + oidcIds + ", sshKeys=" + sshKeys
+        + lastUpdateTime + ", provisioned=" + provisioned + ", userInfo=" + userInfo
+        + ", lastLoginTime=" + lastLoginTime + ", authorities=" + authorities + ", groups=" + groups
+        + ", samlIds=" + samlIds + ", oidcIds=" + oidcIds + ", sshKeys=" + sshKeys
         + ", x509Certificates=" + x509Certificates + ", confirmationKey=" + confirmationKey
         + ", resetKey=" + resetKey + ", registrationRequest=" + registrationRequest + "]";
   }
 
+  public static IamAccount newAccount() {
+    IamAccount newAccount = new IamAccount();
+    IamUserInfo userInfo = new IamUserInfo();
+    userInfo.setIamAccount(newAccount);
+    newAccount.setUserInfo(userInfo);
+    return newAccount;
+  }
 }
