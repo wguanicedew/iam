@@ -177,9 +177,10 @@ public class ScimGroupProvisioning
 
     /* displayname is required */
     String displayName = scimItemToBeReplaced.getDisplayName();
+    displayNameSanityChecks(displayName);
 
     if (!isGroupNameAvailable(displayName, id)) {
-      throw new ScimResourceExistsException(displayName + " is already mappped to another group");
+      throw new ScimResourceExistsException(displayName + " is already mapped to another group");
     }
 
     IamGroup updatedGroup = converter.fromScim(scimItemToBeReplaced);

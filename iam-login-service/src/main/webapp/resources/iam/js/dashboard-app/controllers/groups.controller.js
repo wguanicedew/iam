@@ -29,7 +29,7 @@ function GroupsController($scope, $rootScope, $uibModal, $state, $filter,
 	gc.rebuildFilteredList = rebuildFilteredList;
 
 	// add group
-	gc.clickToOpen = clickToOpen;
+	gc.openAddGroupDialog = openAddGroupDialog;
 
 	// delete group
 	gc.deleteGroup = deleteGroup;
@@ -103,7 +103,7 @@ function GroupsController($scope, $rootScope, $uibModal, $state, $filter,
 						});
 	}
 
-	function clickToOpen() {
+	function openAddGroupDialog() {
 		var modalInstance = $uibModal.open({
 			templateUrl : '/resources/iam/template/dashboard/groups/newgroup.html',
 			controller : 'AddGroupController',

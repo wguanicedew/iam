@@ -148,6 +148,8 @@ public class NotificationConcurrentTests {
     
     executorService.shutdown();
 
+    executorService.shutdown();
+
     int count = notificationRepository.countAllMessages();
     assertThat(count, equalTo(0));
   }

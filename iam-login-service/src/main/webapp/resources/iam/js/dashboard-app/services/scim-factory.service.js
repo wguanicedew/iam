@@ -202,6 +202,30 @@ angular.module('dashboardApp').factory("scimFactory", ['$http', '$httpParamSeria
 
 		return $http.patch(url, data, config);
 	};
+	
+	function removeMemberFromGroup(groupId, memberId, memberLocation, memberDisplayName) {
+		
+		console.info("Patch groupId, remove member", groupId, memberId, memberLocation);
+		
+		var config = {
+				headers: { 'Content-Type': 'application/scim+json' }
+			};
+		var data = {
+				schemas: ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
+				operations: [{
+					op: "remove",
+					path: "members",
+					value: [{
+						display: memberDisplayName,
+						value: memberId,
+						$ref: memberLocation
+					}]
+				}]
+		};
+		var url = urlGroups + '/' + groupId;
+
+		return $http.patch(url, data, config);
+	};
 
 	function addOpenIDAccount(userId, account) {
 
