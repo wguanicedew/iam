@@ -49,28 +49,36 @@ public class AccountLinkingDisabledTests {
   @Test
   @WithMockUser(username = "test")
   public void accountLinkingDisabledWorkAsExpected() throws Throwable {
-    
+
+    mvc.perform(post("/iam/account-linking/X509").with(csrf().asHeader()))
+      .andExpect(status().isForbidden());
+
+    mvc.perform(delete("/iam/account-linking/X509")
+      .param("certificateSubject", "certificateSubject").with(csrf().asHeader()))
+      .andExpect(status().isForbidden());
+
     mvc.perform(post("/iam/account-linking/OIDC").with(csrf().asHeader()))
       .andExpect(status().isForbidden());
-    
+
     mvc.perform(get("/iam/account-linking/OIDC/done").with(csrf().asHeader()))
-    .andExpect(status().isForbidden());
-
-    mvc.perform(delete("/iam/account-linking/OIDC")
-        .param("sub",  "sub").param("iss", "iss").with(csrf().asHeader()))
       .andExpect(status().isForbidden());
-    
-    mvc.perform(post("/iam/account-linking/SAML").with(csrf().asHeader()))
-    .andExpect(status().isForbidden());
-  
-  mvc.perform(get("/iam/account-linking/SAML/done").with(csrf().asHeader()))
-  .andExpect(status().isForbidden());
 
-  mvc.perform(delete("/iam/account-linking/SAML")
-      .param("sub",  "sub").param("iss", "iss")
-      .param("attr",  "attr")
-      .with(csrf().asHeader()))
-    .andExpect(status().isForbidden());
+    mvc.perform(delete("/iam/account-linking/OIDC").param("sub", "sub")
+      .param("iss", "iss")
+      .with(csrf().asHeader())).andExpect(status().isForbidden());
+
+    mvc.perform(post("/iam/account-linking/SAML").with(csrf().asHeader()))
+      .andExpect(status().isForbidden());
+
+    mvc.perform(get("/iam/account-linking/SAML/done").with(csrf().asHeader()))
+      .andExpect(status().isForbidden());
+
+    mvc
+      .perform(delete("/iam/account-linking/SAML").param("sub", "sub")
+        .param("iss", "iss")
+        .param("attr", "attr")
+        .with(csrf().asHeader()))
+      .andExpect(status().isForbidden());
 
   }
 
