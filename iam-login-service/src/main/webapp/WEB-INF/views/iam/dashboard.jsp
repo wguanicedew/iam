@@ -26,7 +26,7 @@
 	
 	<div class="wrapper">
 		<toaster-container
-				toaster-options="{'close-button': true, 'time-out':{ 'toast-error': 0, 'toast-success': 5000, 'toast-warning': 5000 }, 'position-class': 'toast-top-center'}">
+				toaster-options="{'close-button': true, 'time-out':{ 'toast-error': 5000, 'toast-success': 5000, 'toast-warning': 5000 }, 'position-class': 'toast-top-center'}">
 		</toaster-container>
 		
 		<header class="main-header" ng-cloak></header>

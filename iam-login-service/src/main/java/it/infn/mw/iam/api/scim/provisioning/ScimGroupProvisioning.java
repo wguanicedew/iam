@@ -132,10 +132,11 @@ public class ScimGroupProvisioning
     }
 
     groupRepository.save(iamGroup);
+    
     if (iamParentGroup != null) {
       groupRepository.save(iamParentGroup);
     }
-
+    
     eventPublisher.publishEvent(
         new GroupCreatedEvent(this, iamGroup, "Group created with name " + iamGroup.getName()));
 

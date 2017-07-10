@@ -649,7 +649,7 @@ public class SecurityConfig {
         .requestMatchers()
           .antMatchers("/metrics", "/configprops", "/env", "/mappings", 
               "/flyway", "/autoconfig", "/beans", "/dump", "/trace", 
-              "/info", "/health", "/health/mail")
+              "/info", "/health", "/health/mail", "/health/external")
         .and()
           .httpBasic()
           .authenticationEntryPoint(authenticationEntryPoint)
@@ -662,7 +662,7 @@ public class SecurityConfig {
           .sessionCreationPolicy(SessionCreationPolicy.NEVER)
         .and()
           .authorizeRequests()
-            .antMatchers(HttpMethod.GET, "/info", "/health", "/health/mail").permitAll()
+            .antMatchers(HttpMethod.GET, "/info", "/health", "/health/mail", "/health/external").permitAll()
             .antMatchers("/metrics", "/configprops", "/env", "/mappings", "/flyway",
                 "/autoconfig", "/beans", "/dump", "/trace").hasRole("ADMIN");
       // @formatter:on
