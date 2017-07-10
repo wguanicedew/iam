@@ -9,7 +9,7 @@
 <div class="modal-body" ng-disabled="addGroupCtrl.loadingGroupsProgress < 100">
 
 
-	<ui-select multiple ng-model="addGroupCtrl.groupsSelected" theme="bootstrap" sortable="true" close-on-select="false" style="width: 100%;">
+	<ui-select multiple ng-model="addGroupCtrl.groupsSelected" theme="bootstrap" sortable="true" close-on-select="false" input-id="add-group-input" style="width: 100%;">
 		<ui-select-match placeholder="Select group...">{{$item.displayName}}</ui-select-match>
 		<ui-select-choices repeat="group in addGroupCtrl.oGroups | filter: {displayName: $select.search}">
 			<div ng-bind-html="group.displayName | highlight: $select.search"></div>

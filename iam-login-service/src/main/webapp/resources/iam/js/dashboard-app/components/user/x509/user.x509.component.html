@@ -31,7 +31,7 @@
                                 <button class="btn btn-xs btn-danger" ng-click="$ctrl.openRemoveCertificateDialog(cert)" ng-if="$ctrl.userCtrl.canManageLinkedAccounts()">
                                         <i class="fa fa-times"></i> Remove
                                     </button>
-                                <button class="btn btn-xs btn-danger" ng-click="$ctrl.openUnlinkCertificateDialog(cert)" ng-if="$ctrl.userCtrl.canLinkAccounts()">
+                                <button id="unlink-{{cert.display}}" class="btn btn-xs btn-danger" ng-click="$ctrl.openUnlinkCertificateDialog(cert)" ng-if="$ctrl.userCtrl.canLinkAccounts()">
                                         <i class="fa fa-times"></i> Unlink
                                     </button>
                         </td>

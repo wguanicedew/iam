@@ -18,7 +18,7 @@
       self.enabled = false;
       self.error = undefined;
       scimFactory.removeSamlId(self.user.id, self.samlId).then(function (response) {
-        $uibModalInstance.close(`Saml account removed`);
+        $uibModalInstance.close(`SAML account removed`);
         self.enabled = true;
       }).catch(function (error) {
         console.error(error);
@@ -53,7 +53,7 @@
       self.error = undefined;
       self.enabled = false;
       scimFactory.addSamlId(self.user.id, self.samlId).then(function (response) {
-        $uibModalInstance.close(`Saml account added`);
+        $uibModalInstance.close(`SAML account added`);
         self.enabled = true;
       }).catch(function (error) {
         console.error(error);

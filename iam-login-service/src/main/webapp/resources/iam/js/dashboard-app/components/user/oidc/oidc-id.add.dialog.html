@@ -1,12 +1,12 @@
 <div class="modal-header">
-    <h3 class="modal-title">Add OpenID Connect Account to <strong>{{$ctrl.user.name.formatted}}</strong></h3>
+    <h3 class="modal-title">Add OpenID Connect account to <strong>{{$ctrl.user.name.formatted}}</strong></h3>
 </div>
 <div class="modal-body">
     <form name="addOidcId">
         <div class="form-group" ng-class="{'has-error': 
         (addOidcId.issuer.$dirty && !addOidcId.issuer.$valid) || $ctrl.error }">
             <label>OpenID provider Issuer </label>
-            <input name="issuer" class="form-control" type="text" placeholder="OpenID Provider issuer..." ng-model="$ctrl.account.issuer"
+            <input id="add-oidc-issuer" name="issuer" class="form-control" type="text" placeholder="OpenID Provider issuer..." ng-model="$ctrl.account.issuer"
                 required="true" ng-maxlength="256">
 
              <span class="help-block" ng-if="addOidcId.issuer.$dirty && addOidcId.issuer.$error.required">
@@ -20,7 +20,7 @@
         <div class="form-group"  ng-class="{'has-error': 
         (addOidcId.subject.$dirty && !addOidcId.subject.$valid) || $ctrl.error }">
             <label>OpenID provider subject</label>
-            <input name="subject" class="form-control" type="text" placeholder="OpenID provider subject..." ng-model="$ctrl.account.subject"
+            <input id="add-oidc-subject" name="subject" class="form-control" type="text" placeholder="OpenID provider subject..." ng-model="$ctrl.account.subject"
                 required="true" maxlength="256">
             <span class="help-block" ng-if="addOidcId.subject.$dirty && addOidcId.subject.$error.required">
                 Please set the OpenID provider subject

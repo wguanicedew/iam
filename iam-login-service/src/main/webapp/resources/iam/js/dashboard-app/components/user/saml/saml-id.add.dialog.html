@@ -1,12 +1,12 @@
 <div class="modal-header">
-    <h3 class="modal-title">Add SAML Account to <strong>{{$ctrl.user.name.formatted}}</strong></h3>
+    <h3 class="modal-title">Add SAML account to <strong>{{$ctrl.user.name.formatted}}</strong></h3>
 </div>
 <div class="modal-body">
     <form name="addSamlId">
         <div class="form-group" ng-class="{'has-error': 
         addSamlId.idpId.$dirty && !addSamlId.idpId.$valid }">
             <label>Idp Entity Id</label>
-            <input name="idpId" class="form-control" type="text" placeholder="Identity Provider entity ID..." ng-model="$ctrl.samlId.idpId"
+            <input id="add-saml-idp-id" name="idpId" class="form-control" type="text" placeholder="Identity Provider entity ID..." ng-model="$ctrl.samlId.idpId"
                 required="true" ng-maxlength="256">
 
              <span class="help-block" ng-if="addSamlId.idpId.$dirty && addSamlId.idpId.$error.required">
@@ -19,7 +19,7 @@
 
         <div class="form-group">
             <label>Attribute Id</label>
-            <select name="attributeId" class="form-control" ng-model="$ctrl.samlId.attributeId">
+            <select id="add-saml-attribute-id" name="attributeId" class="form-control" ng-model="$ctrl.samlId.attributeId">
             <option value="urn:oid:1.3.6.1.4.1.5923.1.1.1.13">eduPersonUniqueId</option>
             <option value="urn:oid:1.3.6.1.4.1.5923.1.1.1.10">eduPersonTargetedId</option>
             <option value="urn:oid:1.3.6.1.4.1.5923.1.1.1.6">eduPersonPrincipalName</option>
@@ -32,7 +32,7 @@
         <div class="form-group"  ng-class="{'has-error': 
         addSamlId.userId.$dirty && !addSamlId.userId.$valid }">
             <label>Attribute Value</label>
-            <input name="userId" class="form-control" type="text" placeholder="Saml attribute value ..." ng-model="$ctrl.samlId.userId"
+            <input id="add-saml-user-id" name="userId" class="form-control" type="text" placeholder="Saml attribute value ..." ng-model="$ctrl.samlId.userId"
                 required="true" maxlength="256">
             <span class="help-block" ng-if="addSamlId.userId.$dirty && addSamlId.userId.$error.required">
                 Please set an attribute value
