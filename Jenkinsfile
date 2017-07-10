@@ -23,7 +23,9 @@ pipeline {
 
     stage('test') {
       steps {
-        sh 'mvn -B clean test'
+        sh '''
+        env | sort
+        mvn -B clean test'''
       }
 
       post {

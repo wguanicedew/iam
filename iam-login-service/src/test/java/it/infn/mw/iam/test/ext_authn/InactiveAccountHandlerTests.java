@@ -17,10 +17,9 @@ import it.infn.mw.iam.persistence.model.IamRegistrationRequest;
 
 
 public class InactiveAccountHandlerTests {
-
+  
   @Test
   public void inactiveAccountHandlerSilentlyIgnoresActiveAccount() {
-    IamProperties.INSTANCE.setOrganisationName("test");
 
     IamAccount account = Mockito.mock(IamAccount.class);
 
@@ -35,7 +34,6 @@ public class InactiveAccountHandlerTests {
 
   @Test
   public void inactiveAccountHandlerRaiseErrorForDisabledUser() {
-    IamProperties.INSTANCE.setOrganisationName("test");
 
     IamAccount account = Mockito.mock(IamAccount.class);
 
@@ -56,7 +54,6 @@ public class InactiveAccountHandlerTests {
 
   @Test
   public void inactiveAccountHandlerInformsOfRegistrationRequestWaitingConfirmation() {
-    IamProperties.INSTANCE.setOrganisationName("test");
     IamRegistrationRequest req = Mockito.mock(IamRegistrationRequest.class);
     IamAccount account = Mockito.mock(IamAccount.class);
 
@@ -80,7 +77,6 @@ public class InactiveAccountHandlerTests {
 
   @Test
   public void inactiveAccountHandlerInformsOfRegistrationRequestWaitingForApproval() {
-    IamProperties.INSTANCE.setOrganisationName("test");
     IamRegistrationRequest req = Mockito.mock(IamRegistrationRequest.class);
     IamAccount account = Mockito.mock(IamAccount.class);
 
@@ -104,7 +100,6 @@ public class InactiveAccountHandlerTests {
 
   @Test
   public void inactiveAccountHandlerIgnoresApprovedRegistrationRequest() {
-    IamProperties.INSTANCE.setOrganisationName("test");
     IamRegistrationRequest req = Mockito.mock(IamRegistrationRequest.class);
     IamAccount account = Mockito.mock(IamAccount.class);
 

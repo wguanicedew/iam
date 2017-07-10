@@ -64,6 +64,8 @@ public class IamIntrospectionResultAssembler extends DefaultIntrospectionResultA
 
         result.put(PREFERRED_USERNAME, iamUserInfo.getPreferredUsername());
 
+        LOGGER.debug("Organisation name: {}", IamProperties.INSTANCE.getOrganisationName());
+        
         result.put(ORGANISATION_NAME, IamProperties.INSTANCE.getOrganisationName());
       }
 
