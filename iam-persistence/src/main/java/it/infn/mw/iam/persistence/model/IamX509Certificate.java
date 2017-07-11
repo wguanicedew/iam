@@ -1,5 +1,6 @@
 package it.infn.mw.iam.persistence.model;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -17,7 +18,12 @@ import javax.persistence.TemporalType;
 
 @Entity
 @Table(name = "iam_x509_cert")
-public class IamX509Certificate implements IamAccountRef {
+public class IamX509Certificate implements IamAccountRef, Serializable {
+
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

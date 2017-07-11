@@ -24,7 +24,7 @@ public class X509Utils {
     } catch (IllegalArgumentException iae) {
 
       throw new ScimValidationException(
-          "Error in conversion from String to x509 certificate: Not valid Base64 scheme");
+          "Error in conversion from String to x509 certificate: Not valid Base64 scheme", iae);
     }
 
     X509Certificate cert = null;
@@ -37,7 +37,7 @@ public class X509Utils {
     } catch (CertificateException ce) {
 
       throw new ScimValidationException(
-          "Error in conversion from String to x509 certificate: the base64 encoded string is not a valid certificate");
+          "Error in conversion from String to x509 certificate: the base64 encoded string is not a valid certificate", ce);
     }
 
     return cert;

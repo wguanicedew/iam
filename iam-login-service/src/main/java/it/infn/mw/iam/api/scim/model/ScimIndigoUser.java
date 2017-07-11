@@ -30,7 +30,7 @@ public class ScimIndigoUser {
     public String toString() {
       return text;
     }
-  };
+  }
 
   private final List<ScimSshKey> sshKeys;
   private final List<ScimOidcId> oidcIds;

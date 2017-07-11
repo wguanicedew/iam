@@ -11,4 +11,8 @@ public class ScimValidationException extends IllegalArgumentException {
     super(message);
   }
 
+  public ScimValidationException(String message, Throwable cause) {
+    super(message, cause);
+  }
+  
 }

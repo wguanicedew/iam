@@ -1,12 +1,18 @@
 package it.infn.mw.iam.authn.x509;
 
+import java.io.Serializable;
 import java.security.cert.X509Certificate;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import it.infn.mw.iam.persistence.model.IamX509Certificate;
 
-public class IamX509AuthenticationCredential {
+public class IamX509AuthenticationCredential implements Serializable{
+  
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   
   private final String subject;
   private final String issuer;

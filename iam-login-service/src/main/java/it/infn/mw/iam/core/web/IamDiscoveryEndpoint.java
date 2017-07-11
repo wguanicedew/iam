@@ -81,8 +81,8 @@ public class IamDiscoveryEndpoint {
   public String webfinger(@RequestParam("resource") String resource,
       @RequestParam(value = "rel", required = false) String rel, Model model) {
 
-    if (!Strings.isNullOrEmpty(rel) && !rel.equals("http://openid.net/specs/connect/1.0/issuer")) {
-      logger.warn("Responding to webfinger request for non-OIDC relation: " + rel);
+    if (!Strings.isNullOrEmpty(rel) && !"http://openid.net/specs/connect/1.0/issuer".equals(rel)) {
+      logger.warn("Responding to webfinger request for non-OIDC relation: {}", rel);
     }
 
     if (!resource.equals(config.getIssuer())) {
@@ -118,7 +118,7 @@ public class IamDiscoveryEndpoint {
 
             // if the user's still null, punt and say we didn't find them
 
-            logger.info("User not found: " + resource);
+            logger.info("User not found: {}", resource);
             model.addAttribute(HttpCodeView.CODE, HttpStatus.NOT_FOUND);
             return HttpCodeView.VIEWNAME;
           }
@@ -126,7 +126,7 @@ public class IamDiscoveryEndpoint {
         }
 
       } else {
-        logger.info("Unknown URI format: " + resource);
+        logger.info("Unknown URI format: {}", resource);
         model.addAttribute(HttpCodeView.CODE, HttpStatus.NOT_FOUND);
         return HttpCodeView.VIEWNAME;
       }

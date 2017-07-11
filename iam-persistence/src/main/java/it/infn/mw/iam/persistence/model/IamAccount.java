@@ -2,6 +2,7 @@ package it.infn.mw.iam.persistence.model;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -35,7 +36,12 @@ import com.google.common.base.Preconditions;
  */
 @Entity
 @Table(name = "iam_account")
-public class IamAccount {
+public class IamAccount implements Serializable{
+
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

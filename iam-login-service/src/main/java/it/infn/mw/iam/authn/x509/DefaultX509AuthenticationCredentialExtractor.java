@@ -53,7 +53,7 @@ public class DefaultX509AuthenticationCredentialExtractor
     }
   }
 
-  public static final EnumSet<Headers> HEADERS_REQUIRED =
+  protected static final EnumSet<Headers> HEADERS_REQUIRED =
       EnumSet.complementOf(EnumSet.of(Headers.SERVER_NAME));
   
   private String getHeader(HttpServletRequest request, Headers header){

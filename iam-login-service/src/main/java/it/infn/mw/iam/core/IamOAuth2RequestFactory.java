@@ -9,7 +9,7 @@ import org.springframework.security.oauth2.provider.TokenRequest;
 
 public class IamOAuth2RequestFactory extends ConnectOAuth2RequestFactory {
 
-  public static final String[] AUDIENCE_KEYS = {"aud", "audience"};
+  protected static final String[] AUDIENCE_KEYS = {"aud", "audience"};
   public static final String AUD = "aud";
   public static final String PASSWORD_GRANT = "password";
 

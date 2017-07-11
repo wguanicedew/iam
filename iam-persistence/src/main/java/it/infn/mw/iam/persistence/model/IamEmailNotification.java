@@ -1,5 +1,6 @@
 package it.infn.mw.iam.persistence.model;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
@@ -21,7 +22,12 @@ import it.infn.mw.iam.core.IamNotificationType;
 
 @Entity
 @Table(name = "iam_email_notification")
-public class IamEmailNotification {
+public class IamEmailNotification implements Serializable{
+
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

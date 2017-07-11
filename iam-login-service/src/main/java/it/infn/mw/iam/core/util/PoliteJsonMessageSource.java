@@ -148,7 +148,7 @@ public class PoliteJsonMessageSource extends AbstractMessageSource {
 
           Resource r = getBaseDirectory().createRelative(filename);
 
-          logger.info("No locale loaded, trying to load from " + r);
+          logger.info("No locale loaded, trying to load from {}" , r);
 
           JsonParser parser = new JsonParser();
           JsonObject obj =
@@ -158,7 +158,7 @@ public class PoliteJsonMessageSource extends AbstractMessageSource {
         }
         languageMaps.put(locale, set);
       } catch (JsonIOException | JsonSyntaxException | IOException e) {
-        logger.debug("Unable to load locale: {}", e.getMessage());
+        logger.debug("Unable to load locale: {}", e.getMessage(),e);
       }
     }
 

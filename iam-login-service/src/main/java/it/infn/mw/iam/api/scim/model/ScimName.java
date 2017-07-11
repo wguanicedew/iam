@@ -13,10 +13,10 @@ import it.infn.mw.iam.core.NameUtils;
 public class ScimName {
 
   interface NewUserValidation {
-  };
+  }
 
   interface UpdateUserValidation {
-  };
+  }
 
   private final String formatted;
 

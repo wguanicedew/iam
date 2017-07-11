@@ -23,10 +23,10 @@ import com.google.common.base.Preconditions;
 public class ScimUser extends ScimResource {
 
   public interface NewUserValidation {
-  };
+  }
 
   public interface UpdateUserValidation {
-  };
+  }
 
   public static final String USER_SCHEMA = "urn:ietf:params:scim:schemas:core:2.0:User";
   public static final String RESOURCE_TYPE = "User";

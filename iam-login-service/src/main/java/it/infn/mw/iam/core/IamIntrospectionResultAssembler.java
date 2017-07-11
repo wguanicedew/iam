@@ -39,7 +39,7 @@ public class IamIntrospectionResultAssembler extends DefaultIntrospectionResultA
 
       List<String> audience = accessToken.getJwt().getJWTClaimsSet().getAudience();
 
-      if (audience != null && audience.size() > 0) {
+      if (audience != null && !audience.isEmpty()) {
         result.put("aud", Joiner.on(' ').join(audience));
       }
 

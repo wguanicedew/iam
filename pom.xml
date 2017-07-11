@@ -11,7 +11,7 @@
   <artifactId>iam-parent</artifactId>
   <version>1.0.0.rc0-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>IAM Parent POM</name>
+  <name>INDIGO Identity and Access Manager (IAM)</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

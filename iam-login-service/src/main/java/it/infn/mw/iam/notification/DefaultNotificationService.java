@@ -170,7 +170,7 @@ public class DefaultNotificationService implements NotificationService {
       } catch (MailException me) {
         elem.setDeliveryStatus(IamDeliveryStatus.DELIVERY_ERROR);
         logger.error("Message delivery fail. message_id:{} reason:{}", elem.getUuid(),
-            me.getMessage());
+            me.getMessage(), me);
       }
 
       elem.setLastUpdate(new Date());

@@ -90,11 +90,8 @@ public class DefaultMetadataLookupService implements MetadataLookupService {
             }
 
             if (!uiInfo.getLogos().isEmpty()) {
-
-              Logo minLogo =
-                  uiInfo.getLogos().stream().min(Comparator.comparing(Logo::getHeight)).get();
-
-              result.setImageUrl(minLogo.getURL());
+              uiInfo.getLogos().stream().min(Comparator.comparing(Logo::getHeight)).ifPresent(
+                  l -> result.setImageUrl(l.getURL()));
             }
           }
         }
@@ -177,7 +174,7 @@ public class DefaultMetadataLookupService implements MetadataLookupService {
     try {
       initializeMetadataSet();
     } catch (MetadataProviderException e) {
-      throw new RuntimeException(e);
+      throw new SamlMetadataError(e);
     }
   }
 

@@ -30,7 +30,7 @@ public class FirstApplicableChainedSamlIdResolver implements SamlUserIdentifierR
           .resolveSamlUserIdentifier(samlCredential);
       
       if (result.getResolvedId().isPresent()){
-        LOG.debug("Resolved SAML user id: {}", result.resolvedId.get());
+        LOG.debug("Resolved SAML user id: {}", result.getResolvedId().get());
         return result;
       }
       

@@ -87,7 +87,7 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
           try {
             iamSshKey.setFingerprint(RSAPublicKeyUtils.getSHA256Fingerprint(iamSshKey.getValue()));
           } catch (InvalidSshKeyException e) {
-            throw new ScimException(e.getMessage());
+            throw new ScimException(e.getMessage(),e);
           }
         }
 

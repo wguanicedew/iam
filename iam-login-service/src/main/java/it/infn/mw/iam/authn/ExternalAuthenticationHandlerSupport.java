@@ -63,7 +63,7 @@ public class ExternalAuthenticationHandlerSupport implements AccountLinkingConst
   }
 
   protected void setAccountLinkingDone(HttpSession session) {
-    session.setAttribute(ACCOUNT_LINKING_DONE_KEY, "DONE");;
+    session.setAttribute(ACCOUNT_LINKING_DONE_KEY, "DONE");
   }
 
   protected boolean isExternalUnregisteredUser(Authentication authentication) {

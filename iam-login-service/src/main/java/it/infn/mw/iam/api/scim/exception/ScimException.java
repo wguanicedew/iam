@@ -7,4 +7,14 @@ public class ScimException extends RuntimeException {
   public ScimException(String message) {
     super(message);
   }
+
+  public ScimException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
+  public ScimException(Throwable cause) {
+    super(cause);
+  }
+  
+  
 }

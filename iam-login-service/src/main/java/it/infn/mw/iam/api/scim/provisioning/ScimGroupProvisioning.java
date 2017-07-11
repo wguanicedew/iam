@@ -273,7 +273,7 @@ public class ScimGroupProvisioning
     if (op.getPath() == null || op.getPath().isEmpty()) {
       throw new ScimPatchOperationNotSupported("empty path value is not currently supported");
     }
-    if (op.getPath().equals("members")) {
+    if ("members".equals(op.getPath())) {
       return;
     }
     throw new ScimPatchOperationNotSupported(

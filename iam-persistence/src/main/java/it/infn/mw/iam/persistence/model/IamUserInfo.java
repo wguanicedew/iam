@@ -2,6 +2,7 @@ package it.infn.mw.iam.persistence.model;
 
 import static it.infn.mw.iam.core.NameUtils.getFormatted;
 
+import java.io.Serializable;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -23,7 +24,7 @@ import it.infn.mw.iam.core.IamProperties;
 
 @Entity
 @Table(name = "iam_user_info")
-public class IamUserInfo implements UserInfo {
+public class IamUserInfo implements UserInfo, Serializable{
 
   /**
    * 

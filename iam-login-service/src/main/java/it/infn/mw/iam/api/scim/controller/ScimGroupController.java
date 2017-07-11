@@ -34,22 +34,21 @@ import it.infn.mw.iam.api.scim.model.ScimGroup;
 import it.infn.mw.iam.api.scim.model.ScimGroupPatchRequest;
 import it.infn.mw.iam.api.scim.model.ScimListResponse;
 import it.infn.mw.iam.api.scim.provisioning.ScimGroupProvisioning;
-import it.infn.mw.iam.api.scim.provisioning.paging.DefaultScimPageRequest;
 import it.infn.mw.iam.api.scim.provisioning.paging.ScimPageRequest;
 
 @RestController
 @RequestMapping("/scim/Groups")
 @Transactional
-public class ScimGroupController {
-
-  private static final int SCIM_MAX_PAGE_SIZE = 10;
-
+public class ScimGroupController extends ScimControllerSupport{
+  
   private Set<String> parseAttributes(final String attributesParameter) {
 
     Set<String> result = new HashSet<>();
     if (!Strings.isNullOrEmpty(attributesParameter)) {
-      result = Sets.newHashSet(Splitter.on(CharMatcher.anyOf(".,")).trimResults().omitEmptyStrings()
-          .split(attributesParameter));
+      result = Sets.newHashSet(Splitter.on(CharMatcher.anyOf(".,"))
+        .trimResults()
+        .omitEmptyStrings()
+        .split(attributesParameter));
     }
     result.add("schemas");
     result.add("id");
@@ -58,27 +57,6 @@ public class ScimGroupController {
 
   @Autowired
   ScimGroupProvisioning groupProvisioningService;
-
-  private ScimPageRequest buildPageRequest(Integer count, Integer startIndex) {
-
-    if (count == null || count > SCIM_MAX_PAGE_SIZE) {
-      count = SCIM_MAX_PAGE_SIZE;
-    }
-
-    if (count < 0) {
-      count = 0;
-    }
-
-    // SCIM pages index is 1-based
-    if (startIndex == null || startIndex < 1) {
-      startIndex = 1;
-    }
-
-    ScimPageRequest pr =
-        new DefaultScimPageRequest.Builder().count(count).startIndex(startIndex - 1).build();
-
-    return pr;
-  }
 
   @PreAuthorize("#oauth2.hasScope('scim:read') or hasRole('ADMIN')")
   @RequestMapping(value = "/{id}", method = RequestMethod.GET,
@@ -94,7 +72,7 @@ public class ScimGroupController {
       @RequestParam(required = false) final Integer startIndex,
       @RequestParam(required = false) final String attributes) {
 
-    ScimPageRequest pr = buildPageRequest(count, startIndex);
+    ScimPageRequest pr = buildGroupPageRequest(count, startIndex);
     ScimListResponse<ScimGroup> result = groupProvisioningService.list(pr);
 
     MappingJacksonValue wrapper = new MappingJacksonValue(result);
@@ -141,7 +119,8 @@ public class ScimGroupController {
       consumes = ScimConstants.SCIM_CONTENT_TYPE)
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void updateGroup(@PathVariable final String id,
-      @RequestBody @Validated final ScimGroupPatchRequest groupPatchRequest, final BindingResult validationResult) {
+      @RequestBody @Validated final ScimGroupPatchRequest groupPatchRequest,
+      final BindingResult validationResult) {
 
     handleValidationError("Invalid Scim Group", validationResult);
 

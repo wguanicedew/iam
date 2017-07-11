@@ -52,7 +52,7 @@ public class DefaultRegistrationRequestService
 
   @Autowired
   private IamAccountService accountService;
-  
+
   @Autowired
   private UserConverter userConverter;
 
@@ -122,7 +122,8 @@ public class DefaultRegistrationRequestService
 
     extAuthnInfo.ifPresent(i -> addExternalAuthnInfo(userBuilder, i));
 
-    IamAccount newAccount = accountService.createAccount(userConverter.fromScim(userBuilder.build()));
+    IamAccount newAccount =
+        accountService.createAccount(userConverter.fromScim(userBuilder.build()));
     newAccount.setConfirmationKey(tokenGenerator.generateToken());
     newAccount.setActive(false);
 
@@ -152,7 +153,9 @@ public class DefaultRegistrationRequestService
     List<IamRegistrationRequest> result = new ArrayList<>();
 
     if (status != null) {
-      result = requestRepository.findByStatus(status).get();
+      result = requestRepository.findByStatus(status).orElseThrow(
+          () -> new IllegalStateException("No request found with status: " + status.name()));
+      
     } else {
       Sort srt = new Sort(Sort.Direction.ASC, "creationTime");
       Iterable<IamRegistrationRequest> iter = requestRepository.findAll(srt);
@@ -174,7 +177,7 @@ public class DefaultRegistrationRequestService
   @Override
   public List<RegistrationRequestDto> listPendingRequests() {
 
-    List<IamRegistrationRequest> result = requestRepository.findPendingRequests().get();
+    List<IamRegistrationRequest> result = requestRepository.findPendingRequests();
 
     List<RegistrationRequestDto> requests = new ArrayList<>();
 

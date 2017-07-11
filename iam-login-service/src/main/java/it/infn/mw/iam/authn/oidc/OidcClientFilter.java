@@ -51,7 +51,7 @@ public class OidcClientFilter extends OIDCAuthenticationFilter {
 
     ServerConfiguration serverConfig;
     RegisteredClient clientConfig;
-  };
+  }
 
   public static final Logger LOG = LoggerFactory.getLogger(OidcClientFilter.class);
 
