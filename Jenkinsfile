@@ -23,9 +23,7 @@ pipeline {
 
     stage('test') {
       steps {
-        sh '''
-        env | sort
-        mvn -B clean test'''
+        sh 'mvn -B clean test'
       }
 
       post {
@@ -49,6 +47,7 @@ pipeline {
     stage('docker-images') {
       agent { label 'docker' }
       steps {
+        deleteDir()
         unstash 'code'
         unstash 'iam-artifacts'
         sh '''
