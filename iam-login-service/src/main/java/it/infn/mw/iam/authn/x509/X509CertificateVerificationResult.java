@@ -1,8 +1,14 @@
 package it.infn.mw.iam.authn.x509;
 
+import java.io.Serializable;
 import java.util.Optional;
 
-public class X509CertificateVerificationResult {
+public class X509CertificateVerificationResult implements Serializable{
+
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
 
   public static enum Status {
     SUCCESS,

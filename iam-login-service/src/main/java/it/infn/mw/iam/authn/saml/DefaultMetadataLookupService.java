@@ -116,7 +116,7 @@ public class DefaultMetadataLookupService implements MetadataLookupService {
       }
 
     } catch (MetadataProviderException e) {
-      throw new RuntimeException(e);
+      throw new SamlMetadataError(e.getMessage(), e);
     }
 
     return Optional.empty();

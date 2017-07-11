@@ -1,5 +1,6 @@
 package it.infn.mw.iam.authn;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
@@ -9,7 +10,7 @@ import org.springframework.security.providers.ExpiringUsernameAuthenticationToke
 
 import it.infn.mw.iam.persistence.model.IamAccount;
 
-public abstract class AbstractExternalAuthenticationToken<T>
+public abstract class AbstractExternalAuthenticationToken<T extends Serializable>
     extends ExpiringUsernameAuthenticationToken {
 
 
