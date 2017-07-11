@@ -208,7 +208,7 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
   public static class IamSamlConfig {
 
 
-    public static final String[] DEFAULT_ID_RESOLVERS = {epuid.name(), eppn.name()};
+    protected static final String[] DEFAULT_ID_RESOLVERS = {epuid.name(), eppn.name()};
 
     @Autowired
     IamSamlProperties samlProperties;
@@ -466,10 +466,10 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
     for (String m : metadataIterable) {
       if (m.startsWith("classpath:")) {
         LOG.info("Adding classpath based metadata provider for URL: {}", m);
-        
+
         ClasspathResource cpMetadataResources =
-            new ClasspathResource(m.replaceFirst("classpath:",""));
-        
+            new ClasspathResource(m.replaceFirst("classpath:", ""));
+
         ResourceBackedMetadataProvider metadataProvider =
             new ResourceBackedMetadataProvider(metadataFetchTimer, cpMetadataResources);
 

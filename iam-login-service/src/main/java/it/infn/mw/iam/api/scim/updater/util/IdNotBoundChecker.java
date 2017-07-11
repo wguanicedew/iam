@@ -31,7 +31,6 @@ public class IdNotBoundChecker<T> implements Predicate<T> {
     Optional<IamAccount> a = finder.find(id);
     
     a.ifPresent(otherAccount -> {
-      System.out.println();
       if (!otherAccount.equals(account)) {
         action.accept(id, account);
       }

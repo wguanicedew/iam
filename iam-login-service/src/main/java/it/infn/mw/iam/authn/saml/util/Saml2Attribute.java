@@ -13,14 +13,14 @@ public enum Saml2Attribute {
   employeeNumber("employeeNumber", "urn:oid:2.16.840.1.113730.3.1.3"),
   spidCode("spidCode", "spidCode");
 
+  private String alias;
+  private String attributeName;
+  
   private Saml2Attribute(String alias, String attributeName) {
     this.alias = alias;
     this.attributeName = attributeName;
   }
-
-  private String alias;
-  private String attributeName;
-
+  
   public String getAlias() {
     return alias;
   }

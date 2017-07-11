@@ -23,9 +23,9 @@ public class MockSmtpServerUtils {
 
         // If we reach this far there's someone listening,
         // i.e. the port is busy
-        LOG.warn("Port {} already used", port);
+        LOG.warn("Port {} is in use", port);
 
-        // So sleep some time
+        // So sleep 1 sec
         Thread.sleep(TimeUnit.SECONDS.toMillis(1));
         sleepTimeInSecs++;
         portBusy = true;
