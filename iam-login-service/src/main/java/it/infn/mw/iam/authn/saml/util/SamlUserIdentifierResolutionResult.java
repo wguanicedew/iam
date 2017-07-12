@@ -19,9 +19,9 @@ public class SamlUserIdentifierResolutionResult {
   
   private SamlUserIdentifierResolutionResult(String errorMessage){
     this.resolvedId = Optional.empty();
-    List<String> errorMessages = new ArrayList<>();
-    errorMessages.add(errorMessage);
-    this.errorMessages = Optional.of(errorMessages);
+    List<String> errors = new ArrayList<>();
+    errors.add(errorMessage);
+    this.errorMessages = Optional.of(errors);
   }
   
   private SamlUserIdentifierResolutionResult(List<String> errorMessages){

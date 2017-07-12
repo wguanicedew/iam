@@ -44,11 +44,9 @@ public class ScimControllerSupport {
       }
     }
 
-    ScimPageRequest pr = new DefaultScimPageRequest.Builder().count(validCount)
+    return new DefaultScimPageRequest.Builder().count(validCount)
       .startIndex(validStartIndex - 1)
       .build();
-
-    return pr;
   }
 
 }

@@ -21,6 +21,8 @@ import it.infn.mw.iam.persistence.repository.IamAuthoritiesRepository;
 public class DefaultAccountAuthorityService
     implements AccountAuthorityService, ApplicationEventPublisherAware {
 
+  public static final String ACCOUNT_NOT_NULL_MSG = "account must not be null";
+
   final IamAuthoritiesRepository authRepo;
   final IamAccountRepository accountRepo;
   private ApplicationEventPublisher eventPublisher;
@@ -45,7 +47,7 @@ public class DefaultAccountAuthorityService
 
   @Override
   public void addAuthorityToAccount(IamAccount account, String authority) {
-    checkNotNull(account, "account must not be null");
+    checkNotNull(account, ACCOUNT_NOT_NULL_MSG);
 
     IamAuthority iamAuthority = findAuthorityFromString(authority);
 
@@ -58,30 +60,33 @@ public class DefaultAccountAuthorityService
     account.getAuthorities().add(iamAuthority);
     accountRepo.save(account);
 
-    final String message = String.format("Authority %s was added to user %s.", 
-        authority, account.getUsername()); 
-    
+    final String message =
+        String.format("Authority %s was added to user %s.", authority, account.getUsername());
+
     eventPublisher.publishEvent(new AuthorityAddedEvent(this, account, message, authority));
   }
 
   @Override
   public void removeAuthorityFromAccount(IamAccount account, String authority) {
-    checkNotNull(account, "account must not be null");
+    checkNotNull(account, ACCOUNT_NOT_NULL_MSG);
     IamAuthority iamAuthority = findAuthorityFromString(authority);
     account.getAuthorities().remove(iamAuthority);
     accountRepo.save(account);
 
-    final String message = 
+    final String message =
         String.format("Authority %s was removed from user %s.", authority, account.getUsername());
-    
+
     eventPublisher.publishEvent(new AuthorityRemovedEvent(this, account, message, authority));
   }
 
   @Override
   public Set<String> getAccountAuthorities(IamAccount account) {
-    checkNotNull(account, "account must not be null");
+    checkNotNull(account, ACCOUNT_NOT_NULL_MSG);
 
-    return account.getAuthorities().stream().map(i -> i.getAuthority()).collect(Collectors.toSet());
+    return account.getAuthorities()
+      .stream()
+      .map(IamAuthority::getAuthority)
+      .collect(Collectors.toSet());
   }
 
 }

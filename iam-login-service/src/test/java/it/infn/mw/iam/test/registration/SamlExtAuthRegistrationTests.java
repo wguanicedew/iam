@@ -131,7 +131,7 @@ public class SamlExtAuthRegistrationTests extends SamlAuthenticationTestSupport 
     assertThat(err.getMessage(), startsWith(
         "Your registration request to indigo-dc was submitted and confirmed successfully"));
 
-    IamSamlId id = new IamSamlId(DEFAULT_IDP_ID, Saml2Attribute.epuid.getAttributeName(), T1_EPUID);
+    IamSamlId id = new IamSamlId(DEFAULT_IDP_ID, Saml2Attribute.EPUID.getAttributeName(), T1_EPUID);
 
     IamAccount account = iamAccountRepo.findBySamlId(id)
       .orElseThrow(() -> new AssertionError("Expected account not found"));

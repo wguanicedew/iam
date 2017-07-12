@@ -1,7 +1,8 @@
 package it.infn.mw.iam.config.saml;
 
-import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.eppn;
-import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.epuid;
+import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.EPPN;
+import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.EPTID;
+import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.EPUID;
 
 import java.io.File;
 import java.io.IOException;
@@ -208,7 +209,8 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
   public static class IamSamlConfig {
 
 
-    protected static final String[] DEFAULT_ID_RESOLVERS = {epuid.name(), eppn.name()};
+    protected static final String[] DEFAULT_ID_RESOLVERS =
+        {EPUID.getAlias(), EPTID.getAlias(), EPPN.getAlias()};
 
     @Autowired
     IamSamlProperties samlProperties;
@@ -380,7 +382,7 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
   @Bean
   public KeyManager keyManager() {
 
-    Map<String, String> passwords = new HashMap<String, String>();
+    Map<String, String> passwords = new HashMap<>();
     passwords.put(samlProperties.getKeyId(), samlProperties.getKeyPassword());
 
     DefaultResourceLoader loader = new DefaultResourceLoader();
@@ -523,9 +525,7 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
   public CachingMetadataManager metadata()
       throws MetadataProviderException, URISyntaxException, IOException, ResourceException {
 
-    CachingMetadataManager metadataManager = new CachingMetadataManager(metadataProviders());
-
-    return metadataManager;
+    return new CachingMetadataManager(metadataProviders());
   }
 
   @Bean
@@ -553,13 +553,10 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
   @Bean
   public AuthenticationSuccessHandler samlAuthenticationSuccessHandler() {
 
-
     RootIsDashboardSuccessHandler sa = new RootIsDashboardSuccessHandler(iamProperties.getBaseUrl(),
         new HttpSessionRequestCache());
 
-    ExternalAuthenticationSuccessHandler successHandler =
-        new ExternalAuthenticationSuccessHandler(new TimestamperSuccessHandler(sa, repo), "/");
-    return successHandler;
+    return new ExternalAuthenticationSuccessHandler(new TimestamperSuccessHandler(sa, repo), "/");
   }
 
 
@@ -675,7 +672,7 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
   @Bean
   public SAMLProcessor processor() {
 
-    Collection<SAMLBinding> bindings = new ArrayList<SAMLBinding>();
+    Collection<SAMLBinding> bindings = new ArrayList<>();
     bindings.add(httpRedirectDeflateBinding());
     bindings.add(httpPostBinding());
     bindings.add(artifactBinding(parserPool(), velocityEngine()));
@@ -693,7 +690,7 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
   @Bean
   public FilterChainProxy samlFilter() throws Exception {
 
-    List<SecurityFilterChain> chains = new ArrayList<SecurityFilterChain>();
+    List<SecurityFilterChain> chains = new ArrayList<>();
     chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/login/**"),
         samlEntryPoint()));
     chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/logout/**"),
@@ -732,9 +729,8 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
   private void scheduleMetadataLookupServiceRefresh(ScheduledTaskRegistrar taskRegistrar) {
     LOG.info("Scheduling metadata lookup service refresh task to run every {} seconds.",
         samlProperties.getMetadataLookupServiceRefreshPeriodSec());
-    taskRegistrar.addFixedRateTask(() -> {
-      metadataLookupService.refreshMetadata();
-    }, TimeUnit.SECONDS.toMillis(samlProperties.getMetadataLookupServiceRefreshPeriodSec()));
+    taskRegistrar.addFixedRateTask(() -> metadataLookupService.refreshMetadata(),
+        TimeUnit.SECONDS.toMillis(samlProperties.getMetadataLookupServiceRefreshPeriodSec()));
   }
 
   private void scheduleProvisionedAccountsCleanup(final ScheduledTaskRegistrar taskRegistrar) {

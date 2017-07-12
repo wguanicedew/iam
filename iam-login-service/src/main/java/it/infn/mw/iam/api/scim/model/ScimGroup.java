@@ -78,7 +78,7 @@ public final class ScimGroup extends ScimResource {
   public static class Builder extends ScimResource.Builder<ScimGroup> {
 
     private String displayName;
-    private Set<ScimMemberRef> members = new HashSet<ScimMemberRef>();
+    private Set<ScimMemberRef> members = new HashSet<>();
     private ScimIndigoGroup indigoGroup = null;
 
     public Builder(String displayName) {

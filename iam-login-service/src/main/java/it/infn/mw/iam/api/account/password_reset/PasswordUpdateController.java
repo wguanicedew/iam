@@ -29,9 +29,9 @@ import it.infn.mw.iam.api.scim.controller.utils.ValidationErrorMessageHelper;
 @Transactional
 public class PasswordUpdateController {
 
-  public final static String BASE_URL = "/iam/password-update";
-  public final static String CURRENT_PASSWORD = "currentPassword";
-  public final static String UPDATED_PASSWORD = "updatedPassword";
+  public static final String BASE_URL = "/iam/password-update";
+  public static final String CURRENT_PASSWORD = "currentPassword";
+  public static final String UPDATED_PASSWORD = "updatedPassword";
 
   @Autowired
   private PasswordResetService service;

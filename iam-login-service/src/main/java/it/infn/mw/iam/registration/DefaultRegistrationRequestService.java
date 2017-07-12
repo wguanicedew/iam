@@ -71,10 +71,6 @@ public class DefaultRegistrationRequestService
 
   private ApplicationEventPublisher eventPublisher;
 
-  public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
-    this.eventPublisher = publisher;
-  }
-
   private static final Table<IamRegistrationRequestStatus, IamRegistrationRequestStatus, Boolean> allowedStateTransitions =
       new ImmutableTable.Builder<IamRegistrationRequestStatus, IamRegistrationRequestStatus, Boolean>()
         .put(NEW, CONFIRMED, true)
@@ -155,7 +151,7 @@ public class DefaultRegistrationRequestService
     if (status != null) {
       result = requestRepository.findByStatus(status).orElseThrow(
           () -> new IllegalStateException("No request found with status: " + status.name()));
-      
+
     } else {
       Sort srt = new Sort(Sort.Direction.ASC, "creationTime");
       Iterable<IamRegistrationRequest> iter = requestRepository.findAll(srt);
@@ -302,6 +298,10 @@ public class DefaultRegistrationRequestService
     if (notes.trim().isEmpty()) {
       throw new IllegalArgumentException("Notes field cannot be the empty string");
     }
+  }
+
+  public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
+    this.eventPublisher = publisher;
   }
 
 }

@@ -94,7 +94,7 @@ public class SamlJitAccountProvisioningTests extends SamlAuthenticationTestSuppo
       .andExpect(view().name("iam/dashboard"));
 
     IamAccount provisionedAccount = accountRepo
-      .findBySamlId(DEFAULT_IDP_ID, Saml2Attribute.epuid.getAttributeName(), JIT1_EPUID)
+      .findBySamlId(DEFAULT_IDP_ID, Saml2Attribute.EPUID.getAttributeName(), JIT1_EPUID)
       .orElseThrow(() -> new AssertionError(
           String.format("Expected provisioned account not found for EPUID '%s'", JIT1_EPUID)));
 
@@ -129,7 +129,7 @@ public class SamlJitAccountProvisioningTests extends SamlAuthenticationTestSuppo
       .getSession();
 
     IamAccount newProvisionedAccount = accountRepo
-      .findBySamlId(DEFAULT_IDP_ID, Saml2Attribute.epuid.getAttributeName(), JIT1_EPUID)
+      .findBySamlId(DEFAULT_IDP_ID, Saml2Attribute.EPUID.getAttributeName(), JIT1_EPUID)
       .orElseThrow(() -> new AssertionError(
           String.format("Expected provisioned account not found for EPUID '%s'", JIT1_EPUID)));
 

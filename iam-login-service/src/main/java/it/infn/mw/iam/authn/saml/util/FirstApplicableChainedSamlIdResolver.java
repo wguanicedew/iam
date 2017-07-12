@@ -34,7 +34,7 @@ public class FirstApplicableChainedSamlIdResolver implements SamlUserIdentifierR
         return result;
       }
       
-      result.getErrorMessages().ifPresent(m -> errorMessages.addAll(m));
+      result.getErrorMessages().ifPresent(errorMessages::addAll);
     }
 
     LOG.debug(

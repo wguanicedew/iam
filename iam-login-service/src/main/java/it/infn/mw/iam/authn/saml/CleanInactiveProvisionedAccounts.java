@@ -51,12 +51,10 @@ public class CleanInactiveProvisionedAccounts implements Runnable {
     List<IamAccount> removedAccounts =
         accountService.deleteInactiveProvisionedUsersSinceTime(expirationTimestamp);
 
-    if (removedAccounts.isEmpty()){
+    if (removedAccounts.isEmpty()) {
       LOG.info("No accounts removed");
     } else {
-      removedAccounts.forEach(a -> {
-        LOG.info("Removed inactive provisioned account: {}", a);
-      });
+      removedAccounts.forEach(a -> LOG.info("Removed inactive provisioned account: {}", a));
     }
   }
 

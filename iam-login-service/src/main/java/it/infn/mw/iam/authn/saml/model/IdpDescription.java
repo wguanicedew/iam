@@ -4,13 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(Include.NON_EMPTY)
-public class IdpDescription {
-
-  @Override
-  public String toString() {
-    return "IdpDescription [entityId=" + entityId + ", organizationName=" + organizationName
-        + ", imageUrl=" + imageUrl + "]";
-  }
+public class IdpDescription { 
 
   private String entityId;
   private String organizationName;
@@ -40,5 +34,9 @@ public class IdpDescription {
     this.imageUrl = imageUrl;
   }
 
-
+  @Override
+  public String toString() {
+    return "IdpDescription [entityId=" + entityId + ", organizationName=" + organizationName
+        + ", imageUrl=" + imageUrl + "]";
+  }
 }

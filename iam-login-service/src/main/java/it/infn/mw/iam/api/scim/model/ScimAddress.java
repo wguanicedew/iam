@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ScimAddress {
 
-  public static enum ScimAddressType {
+  public enum ScimAddressType {
     work, home, other;
   }
 
@@ -171,10 +171,6 @@ public class ScimAddress {
     private String postalCode;
     private String country;
     private boolean primary = true;
-
-    public Builder() {
-
-    }
 
     public Builder formatted(String formatted) {
 

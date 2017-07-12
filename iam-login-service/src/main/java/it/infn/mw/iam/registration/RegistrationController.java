@@ -67,8 +67,7 @@ public class RegistrationController {
 
   @RequestMapping(value = "/registration/email-available/{email:.+}", method = RequestMethod.GET)
   public Boolean emailAvailable(@PathVariable("email") String email) {
-    Boolean emailAvaiable = service.emailAvailable(email);
-    return emailAvaiable;
+    return service.emailAvailable(email);
   }
 
   @PreAuthorize("#oauth2.hasScope('registration:read') or hasRole('ADMIN')")

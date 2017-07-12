@@ -35,9 +35,9 @@ import com.nimbusds.jwt.PlainJWT;
 import com.nimbusds.jwt.SignedJWT;
 
 /**
- * A slightly modified version of mitreid client filter that allows to provide a custom {@link
- * ClientHttpRequestFactory} object. This is needed to accomodate SSL connections to providers that
- * use EUGridPMA certificates.
+ * A slightly modified version of mitreid client filter that allows to provide a custom
+ * {@link ClientHttpRequestFactory} object. This is needed to accomodate SSL connections to
+ * providers that use EUGridPMA certificates.
  *
  */
 public class OidcClientFilter extends OIDCAuthenticationFilter {
@@ -82,18 +82,18 @@ public class OidcClientFilter extends OIDCAuthenticationFilter {
       throw new AuthenticationServiceException("Issuser not found in session.");
     }
     ServerConfiguration serverConfig =
-	getServerConfigurationService().getServerConfiguration(issuer);
+        getServerConfigurationService().getServerConfiguration(issuer);
 
     if (serverConfig == null) {
       throw new AuthenticationServiceException("Unknow OpenID provider :" + issuer);
     }
 
     RegisteredClient clientConfig =
-	getClientConfigurationService().getClientConfiguration(serverConfig);
+        getClientConfigurationService().getClientConfiguration(serverConfig);
 
     if (clientConfig == null) {
       throw new AuthenticationServiceException(
-	  "Client configuration not found for OpenID provider :" + issuer);
+          "Client configuration not found for OpenID provider :" + issuer);
     }
 
     return new OidcProviderConfiguration(serverConfig, clientConfig);
@@ -145,11 +145,9 @@ public class OidcClientFilter extends OIDCAuthenticationFilter {
   protected void handleError(HttpServletRequest request, HttpServletResponse response)
       throws IOException {
 
-    OidcClientError error =
-	new OidcClientError("External authentication error", request.getParameter("error"),
-            request.getParameter("error_description"), request.getParameter("error_uri"));
+    throw new OidcClientError("External authentication error", request.getParameter("error"),
+        request.getParameter("error_description"), request.getParameter("error_uri"));
 
-    throw error;
   }
 
   @Override
@@ -164,11 +162,11 @@ public class OidcClientFilter extends OIDCAuthenticationFilter {
     try {
 
       tokenResponseString =
-	  tokenRequestor.requestTokens(config, initTokenRequestParameters(request, config));
+          tokenRequestor.requestTokens(config, initTokenRequestParameters(request, config));
 
     } catch (OidcClientError e) {
       LOG.error("Error executing token request against endpoint {}: {}",
-	  config.serverConfig.getTokenEndpointUri(), e.getMessage(), e);
+          config.serverConfig.getTokenEndpointUri(), e.getMessage(), e);
       throw e;
     }
 
@@ -184,7 +182,7 @@ public class OidcClientFilter extends OIDCAuthenticationFilter {
       accessTokenValue = tokenResponse.get("access_token").getAsString();
     } else {
       throw new AuthenticationServiceException(
-	  "Token Endpoint did not return an access_token. Response: " + tokenResponseString);
+          "Token Endpoint did not return an access_token. Response: " + tokenResponseString);
     }
 
     if (tokenResponse.has("id_token")) {
@@ -230,11 +228,9 @@ public class OidcClientFilter extends OIDCAuthenticationFilter {
 
     JWTSigningAndValidationService jwtValidator = null;
 
-    if (clientAlg != null) {
-      if (!clientAlg.equals(tokenAlg)) {
-        throw new AuthenticationServiceException(
-            "Token algorithm " + tokenAlg + " does not match expected algorithm " + clientAlg);
-      }
+    if (clientAlg != null && !clientAlg.equals(tokenAlg)) {
+      throw new AuthenticationServiceException(
+          "Token algorithm " + tokenAlg + " does not match expected algorithm " + clientAlg);
     }
 
     if (idToken instanceof PlainJWT) {
@@ -370,11 +366,13 @@ public class OidcClientFilter extends OIDCAuthenticationFilter {
     }
   }
 
+  @Override
   public int getTimeSkewAllowance() {
 
     return timeSkewAllowance;
   }
 
+  @Override
   public void setTimeSkewAllowance(int timeSkewAllowance) {
 
     this.timeSkewAllowance = timeSkewAllowance;

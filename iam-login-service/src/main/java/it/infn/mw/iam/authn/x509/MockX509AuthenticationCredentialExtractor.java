@@ -17,7 +17,7 @@ public class MockX509AuthenticationCredentialExtractor
 
   public static final String TEST_0_SUBJECT = "CN=test0,O=IGI,C=IT";
   public static final String TEST_0_ISSUER = "CN=Test CA,O=IGI,C=IT";
-  private final String TEST_0_CERT = "-----BEGIN CERTIFICATE-----\n"
+  private static final String TEST_0_CERT = "-----BEGIN CERTIFICATE-----\n"
       + "MIIDnjCCAoagAwIBAgIBCTANBgkqhkiG9w0BAQUFADAtMQswCQYDVQQGEwJJVDEM\n"
       + "MAoGA1UECgwDSUdJMRAwDgYDVQQDDAdUZXN0IENBMB4XDTEyMDkyNjE1MzkzNFoX\n"
       + "DTIyMDkyNDE1MzkzNFowKzELMAkGA1UEBhMCSVQxDDAKBgNVBAoTA0lHSTEOMAwG\n"

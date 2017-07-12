@@ -13,7 +13,7 @@ public class SamlIdResolvers {
         ImmutableMap.<String, SamlUserIdentifierResolver>builder();
 
     for (Saml2Attribute a : Saml2Attribute.values()) {
-      builder.put(a.name(), new AttributeUserIdentifierResolver(a));
+      builder.put(a.getAlias(), new AttributeUserIdentifierResolver(a));
     }
 
     builder.put(NAME_ID_NAME, new NameIdUserIdentifierResolver());
@@ -22,7 +22,7 @@ public class SamlIdResolvers {
   }
 
   public SamlUserIdentifierResolver byAttribute(Saml2Attribute attribute) {
-    return registeredResolvers.get(attribute.name());
+    return registeredResolvers.get(attribute.getAlias());
   }
   
   public SamlUserIdentifierResolver byName(String name) {

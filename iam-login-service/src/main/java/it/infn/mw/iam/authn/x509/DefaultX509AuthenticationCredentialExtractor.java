@@ -20,18 +20,8 @@ import com.google.common.base.Strings;
 @Component
 public class DefaultX509AuthenticationCredentialExtractor
     implements X509AuthenticationCredentialExtractor {
-
-  public static final Logger LOG =
-      LoggerFactory.getLogger(DefaultX509AuthenticationCredentialExtractor.class);
-
-  private final X509CertificateChainParser certChainParser;
-
-  @Autowired
-  public DefaultX509AuthenticationCredentialExtractor(X509CertificateChainParser chainParser) {
-    this.certChainParser = chainParser;
-  }
-
-  public static enum Headers {
+  
+  public enum Headers {
     CLIENT_CERT("X-SSL-Client-Cert"),
     SUBJECT("X-SSL-Client-S-Dn"),
     ISSUER("X-SSL-Client-I-Dn"),
@@ -53,8 +43,18 @@ public class DefaultX509AuthenticationCredentialExtractor
     }
   }
 
+  public static final Logger LOG =
+      LoggerFactory.getLogger(DefaultX509AuthenticationCredentialExtractor.class);
+
+  private final X509CertificateChainParser certChainParser;
+
   protected static final EnumSet<Headers> HEADERS_REQUIRED =
       EnumSet.complementOf(EnumSet.of(Headers.SERVER_NAME));
+
+  @Autowired
+  public DefaultX509AuthenticationCredentialExtractor(X509CertificateChainParser chainParser) {
+    this.certChainParser = chainParser;
+  }
   
   private String getHeader(HttpServletRequest request, Headers header){
     return request.getHeader(header.header);

@@ -27,8 +27,6 @@ public class IamIntrospectionResultAssembler extends DefaultIntrospectionResultA
   public static final String GROUPS = "groups";
   public static final String ORGANISATION_NAME = "organisation_name";
 
-  public IamIntrospectionResultAssembler() {}
-
   @Override
   public Map<String, Object> assembleFrom(OAuth2AccessTokenEntity accessToken, UserInfo userInfo,
       Set<String> authScopes) {

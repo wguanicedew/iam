@@ -275,10 +275,10 @@ public class ScimUser extends ScimResource {
     private String timezone;
     private Boolean active;
 
-    private List<ScimEmail> emails = new ArrayList<ScimEmail>();
-    private Set<ScimGroupRef> groups = new LinkedHashSet<ScimGroupRef>();
-    private List<ScimAddress> addresses = new ArrayList<ScimAddress>();
-    private List<ScimPhoto> photos = new ArrayList<ScimPhoto>();
+    private List<ScimEmail> emails = new ArrayList<>();
+    private Set<ScimGroupRef> groups = new LinkedHashSet<>();
+    private List<ScimAddress> addresses = new ArrayList<>();
+    private List<ScimPhoto> photos = new ArrayList<>();
     private ScimIndigoUser indigoUser;
 
     public Builder() {

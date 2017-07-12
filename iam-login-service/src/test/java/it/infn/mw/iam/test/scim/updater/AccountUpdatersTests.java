@@ -54,10 +54,10 @@ public class AccountUpdatersTests extends X509TestSupport {
   public static final IamOidcId NEW_OIDC_ID = new IamOidcId(NEW, NEW);
 
   public static final IamSamlId OLD_SAML_ID =
-      new IamSamlId(OLD, Saml2Attribute.epuid.getAttributeName(), OLD);
+      new IamSamlId(OLD, Saml2Attribute.EPUID.getAttributeName(), OLD);
 
   public static final IamSamlId NEW_SAML_ID =
-      new IamSamlId(NEW, Saml2Attribute.epuid.getAttributeName(), NEW);
+      new IamSamlId(NEW, Saml2Attribute.EPUID.getAttributeName(), NEW);
 
   public static final IamSshKey OLD_SSHKEY = new IamSshKey(OLD);
   public static final IamSshKey NEW_SSHKEY = new IamSshKey(NEW);
@@ -144,15 +144,8 @@ public class AccountUpdatersTests extends X509TestSupport {
   @Test
   public void testCollectionHelperNotNullOrEmpty() {
 
-    new CollectionHelpers();
     assertThat(CollectionHelpers.notNullOrEmpty(Lists.newArrayList()), equalTo(false));
     assertThat(CollectionHelpers.notNullOrEmpty(null), equalTo(false));
-  }
-
-  @Test
-  public void testUpdatersClass() {
-
-    new AccountUpdaters();
   }
 
   @Test

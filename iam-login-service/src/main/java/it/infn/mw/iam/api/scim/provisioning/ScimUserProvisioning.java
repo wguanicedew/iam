@@ -29,8 +29,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.google.common.base.Preconditions;
-
 import it.infn.mw.iam.api.scim.converter.OidcIdConverter;
 import it.infn.mw.iam.api.scim.converter.SamlIdConverter;
 import it.infn.mw.iam.api.scim.converter.SshKeyConverter;
@@ -53,9 +51,6 @@ import it.infn.mw.iam.core.user.IamAccountService;
 import it.infn.mw.iam.core.user.exception.CredentialAlreadyBoundException;
 import it.infn.mw.iam.core.user.exception.UserAlreadyExistsException;
 import it.infn.mw.iam.persistence.model.IamAccount;
-import it.infn.mw.iam.persistence.model.IamOidcId;
-import it.infn.mw.iam.persistence.model.IamSamlId;
-import it.infn.mw.iam.persistence.model.IamSshKey;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
 @Service
@@ -139,43 +134,8 @@ public class ScimUserProvisioning
       IamAccount account = accountService.createAccount(newAccount);
       return userConverter.toScim(account);
     } catch (CredentialAlreadyBoundException | UserAlreadyExistsException e) {
-      throw new ScimResourceExistsException(e.getMessage());
+      throw new ScimResourceExistsException(e.getMessage(),e);
     }
-  }
-
-  private void checkOidcIdNotAlreadyBounded(IamOidcId oidcId) {
-
-    Preconditions.checkNotNull(oidcId);
-    Preconditions.checkNotNull(oidcId.getIssuer());
-    Preconditions.checkNotNull(oidcId.getSubject());
-    accountRepository.findByOidcId(oidcId.getIssuer(), oidcId.getSubject()).ifPresent(account -> {
-      throw new ScimResourceExistsException(
-          String.format("OIDC id (%s,%s) already bounded to another user", oidcId.getIssuer(),
-              oidcId.getSubject()));
-    });
-  }
-
-  private void checkSshKeyNotExists(IamSshKey sshKey) {
-
-    Preconditions.checkNotNull(sshKey);
-    Preconditions.checkNotNull(sshKey.getValue());
-    accountRepository.findBySshKeyValue(sshKey.getValue()).ifPresent(account -> {
-      throw new ScimResourceExistsException(
-          String.format("Ssh key (%s) already bounded to another user", sshKey.getValue()));
-    });
-  }
-
-  private void checkSamlIdNotAlreadyBounded(IamSamlId samlId) {
-
-    Preconditions.checkNotNull(samlId);
-    Preconditions.checkNotNull(samlId.getIdpId());
-    Preconditions.checkNotNull(samlId.getUserId());
-    Preconditions.checkNotNull(samlId.getAttributeId());
-    accountRepository.findBySamlId(samlId).ifPresent(account -> {
-      throw new ScimResourceExistsException(
-          String.format("SAML id (%s,%s) already bounded to another user", samlId.getIdpId(),
-              samlId.getUserId()));
-    });
   }
 
   @Override
@@ -229,10 +189,6 @@ public class ScimUserProvisioning
     // use the value that was formerly set in the database
     if (scimItemToBeUpdated.getActive() == null) {
       updatedAccount.setActive(existingAccount.isActive());
-    }
-
-    if (scimItemToBeUpdated.getPassword() != null) {
-
     }
 
     updatedAccount.touch();

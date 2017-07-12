@@ -10,13 +10,13 @@ public class X509CertificateVerificationResult implements Serializable{
    */
   private static final long serialVersionUID = 1L;
 
-  public static enum Status {
+  public enum Status {
     SUCCESS,
     FAILED
-  };
+  }
   
   final Status verificationStatus;
-  final Optional<String> verificationError;
+  final transient Optional<String> verificationError;
   
   private X509CertificateVerificationResult(Status s, String verificationError) {
     this.verificationStatus = s;

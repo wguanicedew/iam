@@ -17,15 +17,14 @@ public class X509CertificateConverter
     implements Converter<ScimX509Certificate, IamX509Certificate> {
 
   private final X509CertificateChainParser parser;
-
+  
+  
   @Autowired
   public X509CertificateConverter(X509CertificateChainParser parser) {
     this.parser = parser;
   }
 
-  X509Certificate cert;
-
-  private String principalAsRfc2253String(Principal principal) {
+    private String principalAsRfc2253String(Principal principal) {
     return X500NameUtils.getPortableRFC2253Form(principal.getName());
   }
 

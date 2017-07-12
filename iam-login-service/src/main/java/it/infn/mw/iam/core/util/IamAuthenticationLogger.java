@@ -9,12 +9,12 @@ public enum IamAuthenticationLogger implements AuthenticationLogger {
 
   INSTANCE;
 
-  private final Logger LOG = LoggerFactory.getLogger(IamAuthenticationLogger.class);
+  private final Logger log = LoggerFactory.getLogger(IamAuthenticationLogger.class);
 
   @Override
   public void logAuthenticationSuccess(Authentication auth) {
     if (!(auth instanceof OAuth2Authentication)) {
-      LOG.info("{} was authenticated succesfully", auth.getName());
+      log.info("{} was authenticated succesfully", auth.getName());
       return;
     }
 
@@ -23,9 +23,9 @@ public enum IamAuthenticationLogger implements AuthenticationLogger {
 
     if (oauth.getUserAuthentication() != null) {
       final String userName = oauth.getUserAuthentication().getName();
-      LOG.info("{} acting for {} was authenticated succesfully", clientName, userName);
+      log.info("{} acting for {} was authenticated succesfully", clientName, userName);
     } else {
-      LOG.info("Client {} was authenticated succesfully", clientName);
+      log.info("Client {} was authenticated succesfully", clientName);
     }
   }
 

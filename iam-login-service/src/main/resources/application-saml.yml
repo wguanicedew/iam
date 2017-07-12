@@ -7,7 +7,7 @@ saml:
   idp-metadata: ${IAM_SAML_IDP_METADATA:classpath:/saml/idp-metadata.xml}
   max-assertion-time-sec: ${IAM_SAML_MAX_ASSERTION_TIME:3000}
   max-authentication-age-sec: ${IAM_SAML_MAX_AUTHENTICATION_AGE:86400}
-  id-resolvers: ${IAM_SAML_ID_RESOLVERS:epuid,eppn}
+  id-resolvers: ${IAM_SAML_ID_RESOLVERS:eduPersonUniqueId,eduPersonTargetedId,eduPersonPrincipalName}
   metadata-lookup-service-refresh-period-sec: ${IAM_SAML_METADATA_LOOKUP_SERVICE_REFRESH_PERIOD_SEC:600}
   
   jit-account-provisioning:

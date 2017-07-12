@@ -54,18 +54,16 @@ public class AccountAuthorityController {
   @PreAuthorize("hasRole('USER')")
   @RequestMapping(value = "/me/authorities", method = RequestMethod.GET)
   public AuthoritySetDTO getAuthoritiesForMe(Authentication authn) {
-    AuthoritySetDTO result = AuthoritySetDTO
+    return AuthoritySetDTO
       .fromAuthorities(authorityService.getAccountAuthorities(findAccountByName(authn.getName())));
-    return result;
   }
 
   @PreAuthorize("hasRole('ADMIN')")
   @RequestMapping(value = "/account/{id}/authorities", method = RequestMethod.GET)
   @ResponseBody
   public AuthoritySetDTO getAuthoritiesForAccount(@PathVariable("id") String id) {
-    AuthoritySetDTO result = AuthoritySetDTO
+    return AuthoritySetDTO
       .fromAuthorities(authorityService.getAccountAuthorities(findAccountById(id)));
-    return result;
   }
 
   @PreAuthorize("hasRole('ADMIN')")

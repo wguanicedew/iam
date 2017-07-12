@@ -144,7 +144,7 @@ public class DefaultIamAccountService implements IamAccountService {
 
       account.getSshKeys().forEach(this::sshKeySanityChecks);
 
-      final long count = account.getSshKeys().stream().filter(sshKey -> sshKey.isPrimary()).count();
+      final long count = account.getSshKeys().stream().filter(IamSshKey::isPrimary).count();
 
       if (count > 1) {
         throw new InvalidCredentialException("Only one SSH key can be marked as primary");
@@ -163,7 +163,7 @@ public class DefaultIamAccountService implements IamAccountService {
       account.getX509Certificates().forEach(this::x509CertificateSanityCheck);
 
       final long count =
-          account.getX509Certificates().stream().filter(cert -> cert.isPrimary()).count();
+          account.getX509Certificates().stream().filter(IamX509Certificate::isPrimary).count();
 
       if (count > 1) {
         throw new InvalidCredentialException("Only one X.509 certificate can be marked as primary");
@@ -234,7 +234,7 @@ public class DefaultIamAccountService implements IamAccountService {
     List<IamAccount> accounts =
         accountRepo.findProvisionedAccountsWithLastLoginTimeBeforeTimestamp(timestamp);
 
-    accounts.forEach(a -> deleteAccount(a));
+    accounts.forEach(this::deleteAccount);
 
     return accounts;
   }

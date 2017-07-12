@@ -12,10 +12,10 @@ import it.infn.mw.iam.persistence.model.IamSamlId;
 public class JitUserDetailsServiceTestsSupport {
   
   public static final IamSamlId T1_SAML_ID =
-      new IamSamlId(DEFAULT_IDP_ID, Saml2Attribute.epuid.getAttributeName(), T1_EPUID);
+      new IamSamlId(DEFAULT_IDP_ID, Saml2Attribute.EPUID.getAttributeName(), T1_EPUID);
 
   public static final IamSamlId LONG_SAML_ID = 
-      new IamSamlId(DEFAULT_IDP_ID, Saml2Attribute.epuid.getAttributeName(), generateRandomString(130));
+      new IamSamlId(DEFAULT_IDP_ID, Saml2Attribute.EPUID.getAttributeName(), generateRandomString(130));
   
  
   

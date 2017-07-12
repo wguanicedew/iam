@@ -155,7 +155,7 @@ public class GoogleClient {
   @Bean
   public ClientConfigurationService staticClientConfiguration() {
 
-    Map<String, RegisteredClient> clients = new LinkedHashMap<String, RegisteredClient>();
+    Map<String, RegisteredClient> clients = new LinkedHashMap<>();
 
     clients.put(googleClientProperties.getIssuer(), googleClientProperties);
 

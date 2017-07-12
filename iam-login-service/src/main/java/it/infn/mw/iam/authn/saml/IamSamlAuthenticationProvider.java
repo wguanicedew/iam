@@ -29,13 +29,10 @@ public class IamSamlAuthenticationProvider extends SAMLAuthenticationProvider {
 
   private Supplier<AuthenticationServiceException> handleResolutionFailure(
       SamlUserIdentifierResolutionResult result) {
-    
-    List<String> errorMessages = result.getErrorMessages()
-      .orElse(Collections.emptyList());
 
-    return () -> {
-      return new AuthenticationServiceException(joiner.join(errorMessages));
-    };
+    List<String> errorMessages = result.getErrorMessages().orElse(Collections.emptyList());
+
+    return () -> new AuthenticationServiceException(joiner.join(errorMessages));
   }
 
   @Override
@@ -57,11 +54,9 @@ public class IamSamlAuthenticationProvider extends SAMLAuthenticationProvider {
 
     IamSamlId samlId = result.getResolvedId().orElseThrow(handleResolutionFailure(result));
 
-    SamlExternalAuthenticationToken extAuthnToken =
-        new SamlExternalAuthenticationToken(samlId, token, token.getTokenExpiration(),
-            user.getUsername(), token.getCredentials(), token.getAuthorities());
+    return new SamlExternalAuthenticationToken(samlId, token, token.getTokenExpiration(),
+        user.getUsername(), token.getCredentials(), token.getAuthorities());
 
-    return extAuthnToken;
   }
 
 }

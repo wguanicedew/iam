@@ -107,7 +107,7 @@ public class JitUserDetailServiceTests extends JitUserDetailsServiceTestsSupport
     } catch (UsernameNotFoundException e) {
 
       assertThat(e.getMessage(), containsString(String.format("missing required attribute: %s (%s)",
-          Saml2Attribute.mail.getAlias(), Saml2Attribute.mail.getAttributeName())));
+          Saml2Attribute.MAIL.getAlias(), Saml2Attribute.MAIL.getAttributeName())));
       throw e;
     }
   }
@@ -115,14 +115,14 @@ public class JitUserDetailServiceTests extends JitUserDetailsServiceTestsSupport
   @Test(expected = UsernameNotFoundException.class)
   public void testMissingGivenNameSamlCredentialSanityCheck() {
     when(resolver.resolveSamlUserIdentifier(cred)).thenReturn(resolutionSuccess(T1_SAML_ID));
-    when(cred.getAttributeAsString(Saml2Attribute.mail.getAttributeName())).thenReturn(T1_MAIL);
+    when(cred.getAttributeAsString(Saml2Attribute.MAIL.getAttributeName())).thenReturn(T1_MAIL);
 
     try {
       userDetailsService.loadUserBySAML(cred);
     } catch (UsernameNotFoundException e) {
 
       assertThat(e.getMessage(), containsString(String.format("missing required attribute: %s (%s)",
-          Saml2Attribute.givenName.getAlias(), Saml2Attribute.givenName.getAttributeName())));
+          Saml2Attribute.GIVEN_NAME.getAlias(), Saml2Attribute.GIVEN_NAME.getAttributeName())));
       throw e;
     }
   }
@@ -130,8 +130,8 @@ public class JitUserDetailServiceTests extends JitUserDetailsServiceTestsSupport
   @Test(expected = UsernameNotFoundException.class)
   public void testMissingFamilyNameSamlCredentialSanityCheck() {
     when(resolver.resolveSamlUserIdentifier(cred)).thenReturn(resolutionSuccess(T1_SAML_ID));
-    when(cred.getAttributeAsString(Saml2Attribute.mail.getAttributeName())).thenReturn(T1_MAIL);
-    when(cred.getAttributeAsString(Saml2Attribute.givenName.getAttributeName()))
+    when(cred.getAttributeAsString(Saml2Attribute.MAIL.getAttributeName())).thenReturn(T1_MAIL);
+    when(cred.getAttributeAsString(Saml2Attribute.GIVEN_NAME.getAttributeName()))
       .thenReturn(T1_GIVEN_NAME);
 
     try {
@@ -139,7 +139,7 @@ public class JitUserDetailServiceTests extends JitUserDetailsServiceTestsSupport
     } catch (UsernameNotFoundException e) {
 
       assertThat(e.getMessage(), containsString(String.format("missing required attribute: %s (%s)",
-          Saml2Attribute.sn.getAlias(), Saml2Attribute.sn.getAttributeName())));
+          Saml2Attribute.SN.getAlias(), Saml2Attribute.SN.getAttributeName())));
       throw e;
     }
   }
@@ -147,10 +147,10 @@ public class JitUserDetailServiceTests extends JitUserDetailsServiceTestsSupport
   @Test
   public void testSamlIdIsUsedForUsername() {
     when(resolver.resolveSamlUserIdentifier(cred)).thenReturn(resolutionSuccess(T1_SAML_ID));
-    when(cred.getAttributeAsString(Saml2Attribute.mail.getAttributeName())).thenReturn(T1_MAIL);
-    when(cred.getAttributeAsString(Saml2Attribute.givenName.getAttributeName()))
+    when(cred.getAttributeAsString(Saml2Attribute.MAIL.getAttributeName())).thenReturn(T1_MAIL);
+    when(cred.getAttributeAsString(Saml2Attribute.GIVEN_NAME.getAttributeName()))
       .thenReturn(T1_GIVEN_NAME);
-    when(cred.getAttributeAsString(Saml2Attribute.sn.getAttributeName())).thenReturn(T1_SN);
+    when(cred.getAttributeAsString(Saml2Attribute.SN.getAttributeName())).thenReturn(T1_SN);
 
     User user = (User) userDetailsService.loadUserBySAML(cred);
     assertThat(user.getUsername(), equalTo(T1_EPUID));
@@ -160,10 +160,10 @@ public class JitUserDetailServiceTests extends JitUserDetailsServiceTestsSupport
   @Test
   public void uuidIsUsedForAccountUsernameIfResolvedIdLongerThan128Chars() {
     when(resolver.resolveSamlUserIdentifier(cred)).thenReturn(resolutionSuccess(LONG_SAML_ID));
-    when(cred.getAttributeAsString(Saml2Attribute.mail.getAttributeName())).thenReturn(T1_MAIL);
-    when(cred.getAttributeAsString(Saml2Attribute.givenName.getAttributeName()))
+    when(cred.getAttributeAsString(Saml2Attribute.MAIL.getAttributeName())).thenReturn(T1_MAIL);
+    when(cred.getAttributeAsString(Saml2Attribute.GIVEN_NAME.getAttributeName()))
       .thenReturn(T1_GIVEN_NAME);
-    when(cred.getAttributeAsString(Saml2Attribute.sn.getAttributeName())).thenReturn(T1_SN);
+    when(cred.getAttributeAsString(Saml2Attribute.SN.getAttributeName())).thenReturn(T1_SN);
 
     User user = (User) userDetailsService.loadUserBySAML(cred);
     assertThat(user.getUsername().length(), equalTo(36));
@@ -177,10 +177,10 @@ public class JitUserDetailServiceTests extends JitUserDetailsServiceTestsSupport
 
     when(resolver.resolveSamlUserIdentifier(cred)).thenReturn(resolutionSuccess(T1_SAML_ID));
     when(cred.getRemoteEntityID()).thenReturn(SamlAuthenticationTestSupport.DEFAULT_IDP_ID);
-    when(cred.getAttributeAsString(Saml2Attribute.mail.getAttributeName())).thenReturn(T1_MAIL);
-    when(cred.getAttributeAsString(Saml2Attribute.givenName.getAttributeName()))
+    when(cred.getAttributeAsString(Saml2Attribute.MAIL.getAttributeName())).thenReturn(T1_MAIL);
+    when(cred.getAttributeAsString(Saml2Attribute.GIVEN_NAME.getAttributeName()))
       .thenReturn(T1_GIVEN_NAME);
-    when(cred.getAttributeAsString(Saml2Attribute.sn.getAttributeName())).thenReturn(T1_SN);
+    when(cred.getAttributeAsString(Saml2Attribute.SN.getAttributeName())).thenReturn(T1_SN);
     try {
       userDetailsService.loadUserBySAML(cred);
     } catch (UsernameNotFoundException e) {
@@ -199,10 +199,10 @@ public class JitUserDetailServiceTests extends JitUserDetailsServiceTestsSupport
 
     when(resolver.resolveSamlUserIdentifier(cred)).thenReturn(resolutionSuccess(T1_SAML_ID));
     when(cred.getRemoteEntityID()).thenReturn(SamlAuthenticationTestSupport.DEFAULT_IDP_ID);
-    when(cred.getAttributeAsString(Saml2Attribute.mail.getAttributeName())).thenReturn(T1_MAIL);
-    when(cred.getAttributeAsString(Saml2Attribute.givenName.getAttributeName()))
+    when(cred.getAttributeAsString(Saml2Attribute.MAIL.getAttributeName())).thenReturn(T1_MAIL);
+    when(cred.getAttributeAsString(Saml2Attribute.GIVEN_NAME.getAttributeName()))
       .thenReturn(T1_GIVEN_NAME);
-    when(cred.getAttributeAsString(Saml2Attribute.sn.getAttributeName())).thenReturn(T1_SN);
+    when(cred.getAttributeAsString(Saml2Attribute.SN.getAttributeName())).thenReturn(T1_SN);
 
     User user = (User) userDetailsService.loadUserBySAML(cred);
     assertThat(user.getUsername(), equalTo(T1_EPUID));

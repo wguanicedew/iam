@@ -1,8 +1,8 @@
 package it.infn.mw.iam.authn.saml;
 
-import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.givenName;
-import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.mail;
-import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.sn;
+import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.GIVEN_NAME;
+import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.MAIL;
+import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.SN;
 
 import java.util.Collection;
 import java.util.Date;
@@ -54,16 +54,16 @@ public class SamlExternalAuthenticationToken
     ri.setSubject(samlId.getUserId());
     ri.setSubjectAttribute(samlId.getAttributeId());
 
-    if (!Strings.isNullOrEmpty(cred.getAttributeAsString(givenName.getAttributeName()))) {
-      ri.setGivenName(cred.getAttributeAsString(givenName.getAttributeName()));
+    if (!Strings.isNullOrEmpty(cred.getAttributeAsString(GIVEN_NAME.getAttributeName()))) {
+      ri.setGivenName(cred.getAttributeAsString(GIVEN_NAME.getAttributeName()));
     }
 
-    if (!Strings.isNullOrEmpty(cred.getAttributeAsString(sn.getAttributeName()))) {
-      ri.setFamilyName(cred.getAttributeAsString(sn.getAttributeName()));
+    if (!Strings.isNullOrEmpty(cred.getAttributeAsString(SN.getAttributeName()))) {
+      ri.setFamilyName(cred.getAttributeAsString(SN.getAttributeName()));
     }
 
-    if (!Strings.isNullOrEmpty(cred.getAttributeAsString(mail.getAttributeName()))) {
-      ri.setEmail(cred.getAttributeAsString(mail.getAttributeName()));
+    if (!Strings.isNullOrEmpty(cred.getAttributeAsString(MAIL.getAttributeName()))) {
+      ri.setEmail(cred.getAttributeAsString(MAIL.getAttributeName()));
     }
 
     return ri;

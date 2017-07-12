@@ -22,7 +22,7 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 public class IamAccountRepositoryTests {
 
   static final IamSamlId TEST_USER_ID = new IamSamlId("https://idptestbed/idp/shibboleth",
-      Saml2Attribute.epuid.getAttributeName(), "78901@idptestbed");
+      Saml2Attribute.EPUID.getAttributeName(), "78901@idptestbed");
 
   @Autowired
   IamAccountRepository repo;

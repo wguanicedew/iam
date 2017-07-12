@@ -6,6 +6,4 @@ import org.springframework.security.web.authentication.preauth.PreAuthenticatedA
 public class IamX509AuthenticationProvider extends PreAuthenticatedAuthenticationProvider
     implements AuthenticationManager {
 
-  public IamX509AuthenticationProvider() {}
-
 }

@@ -21,6 +21,8 @@ public class AuthenticationUtils {
       ImmutableSet.of(SamlExternalAuthenticationToken.class.getName(),
           OidcExternalAuthenticationToken.class.getName());
 
+  private AuthenticationUtils() {}
+  
   public static boolean isSupportedExternalAuthenticationToken(Authentication authn) {
 
     if (authn instanceof SavedUserAuthentication) {
@@ -45,6 +47,6 @@ public class AuthenticationUtils {
     return new User(account.getUsername(), account.getPassword(), convertIamAccountAuthorities(account));
   }
 
-  private AuthenticationUtils() {}
+  
 
 }

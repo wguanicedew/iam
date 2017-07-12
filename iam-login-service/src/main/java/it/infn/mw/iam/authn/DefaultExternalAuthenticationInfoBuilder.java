@@ -19,7 +19,9 @@ public class DefaultExternalAuthenticationInfoBuilder implements ExternalAuthent
   public static final String OIDC_TYPE = "oidc";
   public static final String SAML_TYPE = "saml";
 
-  public DefaultExternalAuthenticationInfoBuilder() {}
+  public DefaultExternalAuthenticationInfoBuilder() { 
+    // Empty constructor required by Spring
+  }
 
   public Map<String, String> buildInfoMap(OidcExternalAuthenticationToken token) {
     checkNotNull(token, "token cannot be null");

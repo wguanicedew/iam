@@ -5,7 +5,7 @@ import static it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport.ACCOUNT_
 import static it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport.ACCOUNT_LINKING_SESSION_KEY;
 import static it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport.ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION;
 import static it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport.EXT_AUTH_ERROR_KEY;
-import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.epuid;
+import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.EPUID;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
@@ -110,7 +110,7 @@ public class SamlAccountLinkingTests extends SamlAuthenticationTestSupport {
           request().sessionAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION, nullValue()))
       .andExpect(request().sessionAttribute(ACCOUNT_LINKING_SESSION_KEY, nullValue()));
 
-    IamSamlId samlId  = new IamSamlId(DEFAULT_IDP_ID, epuid.getAttributeName(),
+    IamSamlId samlId  = new IamSamlId(DEFAULT_IDP_ID, EPUID.getAttributeName(),
         T1_EPUID);
     
     IamAccount account = iamAccountRepo.findBySamlId(samlId)
@@ -170,7 +170,7 @@ public class SamlAccountLinkingTests extends SamlAuthenticationTestSupport {
 
     String expectedErrorMessage = String
       .format("SAML account '[%s] (%s = %s)' is already linked to another user", DEFAULT_IDP_ID, 
-          epuid.getAttributeName(),
+          EPUID.getAttributeName(),
           T2_EPUID);
 
     mvc.perform(get("/iam/account-linking/SAML/done").session(session))
@@ -234,7 +234,7 @@ public class SamlAccountLinkingTests extends SamlAuthenticationTestSupport {
 
     String expectedErrorMessage = String
       .format("SAML account '[%s] (%s = %s)' is already linked to user 'test'", DEFAULT_IDP_ID, 
-          epuid.getAttributeName(),
+          EPUID.getAttributeName(),
           T2_EPUID);
 
     mvc.perform(get("/iam/account-linking/SAML/done").session(session))

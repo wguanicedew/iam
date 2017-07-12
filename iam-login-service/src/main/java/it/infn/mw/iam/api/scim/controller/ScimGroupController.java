@@ -97,8 +97,7 @@ public class ScimGroupController extends ScimControllerSupport{
       final BindingResult validationResult) {
 
     handleValidationError("Invalid Scim Group", validationResult);
-    ScimGroup result = groupProvisioningService.create(group);
-    return result;
+    return groupProvisioningService.create(group);
   }
 
   @PreAuthorize("#oauth2.hasScope('scim:write') or hasRole('ADMIN')")

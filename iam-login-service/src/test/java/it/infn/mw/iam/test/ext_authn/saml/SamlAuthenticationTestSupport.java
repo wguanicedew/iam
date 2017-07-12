@@ -68,7 +68,7 @@ public class SamlAuthenticationTestSupport {
   public static final String EXT_AUTHN_URL = "/iam/authn-info";
 
   public static final IamSamlId T1_SAML_ID =
-      new IamSamlId(DEFAULT_IDP_ID, Saml2Attribute.epuid.getAttributeName(), T1_EPUID);
+      new IamSamlId(DEFAULT_IDP_ID, Saml2Attribute.EPUID.getAttributeName(), T1_EPUID);
   
   @Autowired
   protected MetadataGenerator metadataGenerator;

@@ -1,8 +1,8 @@
 package it.infn.mw.iam.authn.saml;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.givenName;
-import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.mail;
+import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.GIVEN_NAME;
+import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.MAIL;
 
 import java.util.EnumSet;
 import java.util.Optional;
@@ -29,7 +29,7 @@ public class JustInTimeProvisioningSAMLUserDetailsService extends SAMLUserDetail
   private final Optional<Set<String>> trustedIdpEntityIds; 
 
   private static final EnumSet<Saml2Attribute> REQUIRED_SAML_ATTRIBUTES =
-      EnumSet.of(Saml2Attribute.mail, Saml2Attribute.givenName, Saml2Attribute.sn);
+      EnumSet.of(Saml2Attribute.MAIL, Saml2Attribute.GIVEN_NAME, Saml2Attribute.SN);
 
   public JustInTimeProvisioningSAMLUserDetailsService(SamlUserIdentifierResolver resolver,
       IamAccountService accountService, InactiveAccountAuthenticationHander inactiveAccountHandler,
@@ -99,12 +99,12 @@ public class JustInTimeProvisioningSAMLUserDetailsService extends SAMLUserDetail
     }
 
     newAccount.getUserInfo()
-      .setGivenName(credential.getAttributeAsString(givenName.getAttributeName()));
+      .setGivenName(credential.getAttributeAsString(GIVEN_NAME.getAttributeName()));
     
     newAccount.getUserInfo()
-      .setFamilyName(credential.getAttributeAsString(Saml2Attribute.sn.getAttributeName()));
+      .setFamilyName(credential.getAttributeAsString(Saml2Attribute.SN.getAttributeName()));
     
-    newAccount.getUserInfo().setEmail(credential.getAttributeAsString(mail.getAttributeName()));
+    newAccount.getUserInfo().setEmail(credential.getAttributeAsString(MAIL.getAttributeName()));
     
     accountService.createAccount(newAccount);
     

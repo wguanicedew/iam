@@ -100,7 +100,7 @@ public class IamX509PreauthenticationProcessingFilter
     if (successHandler != null) {
       try {
         successHandler.onAuthenticationSuccess(request, response, authentication);
-      } catch (Throwable e) {
+      } catch (Exception e) {
         throw new RuntimeException(e.getMessage(), e);
       }
     }
@@ -115,7 +115,7 @@ public class IamX509PreauthenticationProcessingFilter
     if (failureHandler != null) {
       try {
         failureHandler.onAuthenticationFailure(request, response, failed);
-      } catch (Throwable e) {
+      } catch (Exception e) {
         throw new RuntimeException(e.getMessage(), e);
       }
     }

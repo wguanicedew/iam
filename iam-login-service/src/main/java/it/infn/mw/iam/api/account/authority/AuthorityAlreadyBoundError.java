@@ -6,7 +6,6 @@ public class AuthorityAlreadyBoundError extends RuntimeException {
 
   public AuthorityAlreadyBoundError(String message) {
     super(message);
-    // TODO Auto-generated constructor stub
   }
 
 }

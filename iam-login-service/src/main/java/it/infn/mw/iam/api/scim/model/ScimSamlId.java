@@ -64,7 +64,7 @@ public class ScimSamlId {
 
     private String idpId;
     private String userId;
-    private String attributeId = Saml2Attribute.epuid.getAttributeName();
+    private String attributeId = Saml2Attribute.EPUID.getAttributeName();
 
     public Builder idpId(String idpId) {
 

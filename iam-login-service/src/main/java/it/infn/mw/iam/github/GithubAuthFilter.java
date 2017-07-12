@@ -8,22 +8,21 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.client.filter.OAuth2ClientAuthenticationProcessingFilter;
 import org.springframework.security.web.savedrequest.DefaultSavedRequest;
 
 public class GithubAuthFilter extends OAuth2ClientAuthenticationProcessingFilter {
 
-  protected final static String REDIRECT_URI_SESSION_VARIABLE = "redirect_uri";
-  protected final static String STATE_SESSION_VARIABLE = "state";
-  protected final static String NONCE_SESSION_VARIABLE = "nonce";
-  protected final static String ISSUER_SESSION_VARIABLE = "issuer";
+  protected static final String REDIRECT_URI_SESSION_VARIABLE = "redirect_uri";
+  protected static final String STATE_SESSION_VARIABLE = "state";
+  protected static final String NONCE_SESSION_VARIABLE = "nonce";
+  protected static final String ISSUER_SESSION_VARIABLE = "issuer";
   protected static final String TARGET_SESSION_VARIABLE = "target";
-  protected final static int HTTP_SOCKET_TIMEOUT = 30000;
+  protected static final int HTTP_SOCKET_TIMEOUT = 30000;
 
-  protected final static String ORIGIN_AUTH_REQUEST_SESSION_VARIABLE = "origin_auth_request";
+  protected static final String ORIGIN_AUTH_REQUEST_SESSION_VARIABLE = "origin_auth_request";
 
-  public final static String FILTER_PROCESSES_URL = "/login/github";
+  public static final String FILTER_PROCESSES_URL = "/login/github";
 
   public GithubAuthFilter() {
     super(FILTER_PROCESSES_URL);
@@ -36,7 +35,7 @@ public class GithubAuthFilter extends OAuth2ClientAuthenticationProcessingFilter
   @Override
   public Authentication attemptAuthentication(final HttpServletRequest request,
       final HttpServletResponse response)
-          throws AuthenticationException, IOException, ServletException {
+          throws IOException, ServletException {
 
     HttpSession session = request.getSession();
 

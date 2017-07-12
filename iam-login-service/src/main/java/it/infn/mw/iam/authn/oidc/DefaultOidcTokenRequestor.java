@@ -92,10 +92,9 @@ public class DefaultOidcTokenRequestor implements OidcTokenRequestor {
             "Unsupported token endpoint authentication method");
     }
 
-    HttpEntity<MultiValueMap<String, String>> tokenRequest =
+    return
         new HttpEntity<>(tokenRequestParams, headers);
 
-    return tokenRequest;
   }
 
   Optional<TokenEndpointErrorResponse> parseErrorResponse(HttpClientErrorException e) {

@@ -28,7 +28,7 @@ public class ScimCollectionConverter<EntityType, ScimType>
     return supplier.get()
       .stream()
       .filter(Objects::nonNull)
-      .map(i -> converter.fromScim(i))
+      .map(converter::fromScim)
       .collect(Collectors.toList());
   }
 

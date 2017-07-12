@@ -76,23 +76,20 @@ public class DefaultMetadataLookupService implements MetadataLookupService {
     result.setEntityId(descriptor.getEntityID());
 
     IDPSSODescriptor idpDesc = descriptor.getIDPSSODescriptor(SAMLConstants.SAML20P_NS);
-    if (idpDesc != null) {
-      if (idpDesc.getExtensions() != null) {
+    if (idpDesc != null && idpDesc.getExtensions() != null) {
 
-        for (final XMLObject object : idpDesc.getExtensions()
-          .getUnknownXMLObjects(UIInfo.DEFAULT_ELEMENT_NAME)) {
-          if (object instanceof UIInfo) {
-            UIInfo uiInfo = (UIInfo) object;
+      for (final XMLObject object : idpDesc.getExtensions()
+        .getUnknownXMLObjects(UIInfo.DEFAULT_ELEMENT_NAME)) {
+        if (object instanceof UIInfo) {
+          UIInfo uiInfo = (UIInfo) object;
 
-            if (!uiInfo.getDisplayNames().isEmpty()) {
-              result
-                .setOrganizationName(uiInfo.getDisplayNames().get(0).getName().getLocalString());
-            }
+          if (!uiInfo.getDisplayNames().isEmpty()) {
+            result.setOrganizationName(uiInfo.getDisplayNames().get(0).getName().getLocalString());
+          }
 
-            if (!uiInfo.getLogos().isEmpty()) {
-              uiInfo.getLogos().stream().min(Comparator.comparing(Logo::getHeight)).ifPresent(
-                  l -> result.setImageUrl(l.getURL()));
-            }
+          if (!uiInfo.getLogos().isEmpty()) {
+            uiInfo.getLogos().stream().min(Comparator.comparing(Logo::getHeight)).ifPresent(
+                l -> result.setImageUrl(l.getURL()));
           }
         }
       }
@@ -127,7 +124,7 @@ public class DefaultMetadataLookupService implements MetadataLookupService {
 
     List<IdpDescription> result = new ArrayList<>();
 
-    lookupByEntityId(text).ifPresent(c -> result.addAll(c));
+    lookupByEntityId(text).ifPresent(result::addAll);
 
     if (!result.isEmpty()) {
       return result;

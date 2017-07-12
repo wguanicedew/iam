@@ -1,6 +1,6 @@
 package it.infn.mw.iam.test.ext_authn.account_linking;
 
-import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.epuid;
+import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.EPUID;
 
 import static it.infn.mw.iam.test.ext_authn.saml.SamlAuthenticationTestSupport.DEFAULT_IDP_ID;
 import static it.infn.mw.iam.test.ext_authn.saml.SamlAuthenticationTestSupport.T2_EPUID;
@@ -53,7 +53,7 @@ public class AccountUnlinkTests {
 
   private MockMvc mvc;
   
-  public static final String SAML_ATTRIBUTE_ID = epuid.getAttributeName();
+  public static final String SAML_ATTRIBUTE_ID = EPUID.getAttributeName();
 
   public static final String UNLINKED_ISSUER = UUID.randomUUID().toString();
   public static final String UNLINKED_SUBJECT = UUID.randomUUID().toString();

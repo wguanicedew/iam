@@ -8,6 +8,8 @@ import org.apache.commons.codec.digest.MessageDigestAlgorithms;
 
 public class RSAPublicKeyUtils {
 
+  private RSAPublicKeyUtils() {}
+  
   public static String getMD5Fingerprint(String key) {
 
     return buildMD5Fingerprint(key);

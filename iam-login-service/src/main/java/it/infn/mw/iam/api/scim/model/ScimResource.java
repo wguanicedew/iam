@@ -77,7 +77,7 @@ public abstract class ScimResource {
     return true;
   }
 
-  public static abstract class Builder<T extends ScimResource> {
+  public abstract static class Builder<T extends ScimResource> {
 
     protected String externalid;
     protected String id;

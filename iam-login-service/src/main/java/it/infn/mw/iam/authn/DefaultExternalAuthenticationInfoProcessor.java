@@ -11,7 +11,9 @@ import org.springframework.stereotype.Component;
 public class DefaultExternalAuthenticationInfoProcessor
     implements ExternalAuthenticationInfoProcessor {
 
-  public DefaultExternalAuthenticationInfoProcessor() {}
+  public DefaultExternalAuthenticationInfoProcessor() {
+    // Empty constructor required by Spring?
+  }
 
   @Override
   public Map<String, String> process(OAuth2Authentication authentication) {

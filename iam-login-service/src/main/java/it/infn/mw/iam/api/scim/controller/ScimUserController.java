@@ -103,9 +103,7 @@ public class ScimUserController extends ScimControllerSupport{
     handleValidationError("Invalid Scim User", validationResult);
     ScimUser result = userProvisioningService.create(user);
 
-    MappingJacksonValue wrapper = new MappingJacksonValue(result);
-
-    return wrapper;
+    return new MappingJacksonValue(result);
   }
 
   @PreAuthorize("#oauth2.hasScope('scim:write') or hasRole('ADMIN')")

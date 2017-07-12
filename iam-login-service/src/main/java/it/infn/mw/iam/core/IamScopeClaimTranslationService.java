@@ -16,36 +16,42 @@ public class IamScopeClaimTranslationService implements ScopeClaimTranslationSer
 
   private SetMultimap<String, String> scopesToClaims = HashMultimap.create();
 
+  public static final String OPENID_SCOPE = "openid";
+  public static final String PROFILE_SCOPE = "profile";
+  public static final String EMAIL_SCOPE = "email";
+  public static final String PHONE_SCOPE = "phone";
+  public static final String ADDRESS_SCOPE = "address";
+  
   public IamScopeClaimTranslationService() {
     // Mitreid scope mappings
-    scopesToClaims.put("openid", "sub");
+    scopesToClaims.put(OPENID_SCOPE, "sub");
 
-    scopesToClaims.put("profile", "name");
-    scopesToClaims.put("profile", "preferred_username");
-    scopesToClaims.put("profile", "given_name");
-    scopesToClaims.put("profile", "family_name");
-    scopesToClaims.put("profile", "middle_name");
-    scopesToClaims.put("profile", "nickname");
-    scopesToClaims.put("profile", "profile");
-    scopesToClaims.put("profile", "picture");
-    scopesToClaims.put("profile", "website");
-    scopesToClaims.put("profile", "gender");
-    scopesToClaims.put("profile", "zoneinfo");
-    scopesToClaims.put("profile", "locale");
-    scopesToClaims.put("profile", "updated_at");
-    scopesToClaims.put("profile", "birthdate");
+    scopesToClaims.put(PROFILE_SCOPE, "name");
+    scopesToClaims.put(PROFILE_SCOPE, "preferred_username");
+    scopesToClaims.put(PROFILE_SCOPE, "given_name");
+    scopesToClaims.put(PROFILE_SCOPE, "family_name");
+    scopesToClaims.put(PROFILE_SCOPE, "middle_name");
+    scopesToClaims.put(PROFILE_SCOPE, "nickname");
+    scopesToClaims.put(PROFILE_SCOPE, "profile");
+    scopesToClaims.put(PROFILE_SCOPE, "picture");
+    scopesToClaims.put(PROFILE_SCOPE, "website");
+    scopesToClaims.put(PROFILE_SCOPE, "gender");
+    scopesToClaims.put(PROFILE_SCOPE, "zoneinfo");
+    scopesToClaims.put(PROFILE_SCOPE, "locale");
+    scopesToClaims.put(PROFILE_SCOPE, "updated_at");
+    scopesToClaims.put(PROFILE_SCOPE, "birthdate");
 
-    scopesToClaims.put("email", "email");
-    scopesToClaims.put("email", "email_verified");
+    scopesToClaims.put(EMAIL_SCOPE, "email");
+    scopesToClaims.put(EMAIL_SCOPE, "email_verified");
 
-    scopesToClaims.put("phone", "phone_number");
-    scopesToClaims.put("phone", "phone_number_verified");
+    scopesToClaims.put(PHONE_SCOPE, "phone_number");
+    scopesToClaims.put(PHONE_SCOPE, "phone_number_verified");
 
-    scopesToClaims.put("address", "address");
+    scopesToClaims.put(ADDRESS_SCOPE, "address");
 
     // Iam scope mappings
-    scopesToClaims.put("profile", "organisation_name");
-    scopesToClaims.put("profile", "groups");
+    scopesToClaims.put(PROFILE_SCOPE, "organisation_name");
+    scopesToClaims.put(PROFILE_SCOPE, "groups");
 
   }
 

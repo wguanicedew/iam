@@ -9,7 +9,7 @@ public class AccountUnlinkedEvent extends AccountEvent {
 
   private static final long serialVersionUID = -1605221918249294636L;
 
-  @JsonIgnoreProperties({"email", "givenName", "familyName", "issuer", "subject"})
+  @JsonIgnoreProperties({"email", "GIVEN_NAME", "familyName", "issuer", "subject"})
   private final ExternalAuthenticationType externalAuthenticationType;
   
   private final String issuer;

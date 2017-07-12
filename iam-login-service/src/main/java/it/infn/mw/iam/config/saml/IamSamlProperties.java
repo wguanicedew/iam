@@ -30,8 +30,6 @@ public class IamSamlProperties {
     @Min(1)
     private Integer inactiveAccountLifetimeDays = 15;
 
-    public IamSamlJITAccountProvisioningProperties() {}
-
     public Boolean getEnabled() {
       return enabled;
     }
@@ -102,8 +100,6 @@ public class IamSamlProperties {
   private int maxAuthenticationAgeSec;
 
   private int metadataLookupServiceRefreshPeriodSec = (int) TimeUnit.MINUTES.toSeconds(5);
-
-  public IamSamlProperties() {}
 
   public String getEntityId() {
     return entityId;
