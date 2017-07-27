@@ -1,124 +1,93 @@
 package it.infn.mw.iam.test.scim.user;
 
-import static com.jayway.restassured.RestAssured.given;
-import static it.infn.mw.iam.api.scim.model.ScimConstants.SCIM_CONTENT_TYPE;
+import static it.infn.mw.iam.api.scim.model.ScimConstants.INDIGO_USER_SCHEMA;
+import static it.infn.mw.iam.api.scim.model.ScimListResponse.SCHEMA;
 import static it.infn.mw.iam.test.TestUtils.TOTAL_USERS_COUNT;
+import static it.infn.mw.iam.test.scim.ScimUtils.SCIM_CLIENT_ID;
+import static it.infn.mw.iam.test.scim.ScimUtils.SCIM_READ_SCOPE;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-import javax.transaction.Transactional;
-
-import org.hamcrest.Matchers;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.boot.test.WebIntegrationTest;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
 
 import it.infn.mw.iam.IamLoginService;
-import it.infn.mw.iam.api.scim.model.ScimConstants;
-import it.infn.mw.iam.api.scim.model.ScimListResponse;
-import it.infn.mw.iam.test.TestUtils;
+import it.infn.mw.iam.test.core.CoreControllerTestSupport;
+import it.infn.mw.iam.test.scim.ScimRestUtilsMvc;
+import it.infn.mw.iam.test.scim.ScimUtils.ParamsBuilder;
+import it.infn.mw.iam.test.util.WithMockOAuthUser;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = IamLoginService.class)
-@WebIntegrationTest
-@Transactional
+@SpringApplicationConfiguration(
+    classes = {IamLoginService.class, CoreControllerTestSupport.class, ScimRestUtilsMvc.class})
+@WebAppConfiguration
+@WithMockOAuthUser(clientId = SCIM_CLIENT_ID, scopes = {SCIM_READ_SCOPE})
 public class ScimUserProvisioningAttributeFilterTests {
 
-  String accessToken;
-
-  @Before
-  public void initAccessToken() {
-
-    accessToken = TestUtils.getAccessToken("scim-client-rw", "secret", "scim:read");
-  }
+  @Autowired
+  private ScimRestUtilsMvc scimUtils;
 
   @Test
-  public void testReuturnOnlyUsernameRequest() {
+  public void testReuturnOnlyUsernameRequest() throws Exception {
 
-    given().port(8080)
-      .auth()
-      .preemptive()
-      .oauth2(accessToken)
-      .accept(SCIM_CONTENT_TYPE)
-      .log()
-      .all(true)
-      .param("count", 1)
-      .param("attributes", "userName")
-      .when()
-      .get("/scim/Users")
-      .then()
-      .log()
-      .all(true)
-      .statusCode(HttpStatus.OK.value())
-      .body("totalResults", equalTo(TOTAL_USERS_COUNT))
-      .body("itemsPerPage", equalTo(1))
-      .body("startIndex", equalTo(1))
-      .body("schemas", contains(ScimListResponse.SCHEMA))
-      .body("Resources", hasSize(equalTo(1)))
-      .body("Resources[0].id", is(Matchers.not(nullValue())))
-      .body("Resources[0].schemas", is(Matchers.not(nullValue())))
-      .body("Resources[0].userName", is(Matchers.not(nullValue())))
-      .body("Resources[0].emails", is(nullValue()))
-      .body("Resources[0].displayName", is(nullValue()))
-      .body("Resources[0].nickName", is(nullValue()))
-      .body("Resources[0].profileUrl", is(nullValue()))
-      .body("Resources[0].locale", is(nullValue()))
-      .body("Resources[0].timezone", is(nullValue()))
-      .body("Resources[0].active", is(nullValue()))
-      .body("Resources[0].title", is(nullValue()))
-      .body("Resources[0].addresses", is(nullValue()))
-      .body("Resources[0].certificates", is(nullValue()))
-      .body("Resources[0].groups", is(nullValue()))
-      .body("Resources[0].urn:indigo-dc:scim:schemas:IndigoUser", is(nullValue()));
+    scimUtils.getUsers(ParamsBuilder.builder().count(1).attributes("userName").build())
+      .andExpect(jsonPath("$.totalResults", equalTo(TOTAL_USERS_COUNT)))
+      .andExpect(jsonPath("$.itemsPerPage", equalTo(1)))
+      .andExpect(jsonPath("$.startIndex", equalTo(1)))
+      .andExpect(jsonPath("$.schemas", contains(SCHEMA)))
+      .andExpect(jsonPath("$.Resources", hasSize(equalTo(1))))
+      .andExpect(jsonPath("$.Resources[0].id").exists())
+      .andExpect(jsonPath("$.Resources[0].schemas").exists())
+      .andExpect(jsonPath("$.Resources[0].userName").exists())
+      .andExpect(jsonPath("$.Resources[0].emails").doesNotExist())
+      .andExpect(jsonPath("$.Resources[0].displayName").doesNotExist())
+      .andExpect(jsonPath("$.Resources[0].nickName").doesNotExist())
+      .andExpect(jsonPath("$.Resources[0].profileUrl").doesNotExist())
+      .andExpect(jsonPath("$.Resources[0].locale").doesNotExist())
+      .andExpect(jsonPath("$.Resources[0].timezone").doesNotExist())
+      .andExpect(jsonPath("$.Resources[0].active").doesNotExist())
+      .andExpect(jsonPath("$.Resources[0].title").doesNotExist())
+      .andExpect(jsonPath("$.Resources[0].addresses").doesNotExist())
+      .andExpect(jsonPath("$.Resources[0].certificates").doesNotExist())
+      .andExpect(jsonPath("$.Resources[0].groups").doesNotExist())
+      .andExpect(jsonPath("$.Resources[0].urn:indigo-dc:scim:schemas:IndigoUser").doesNotExist());
 
   }
 
   @Test
-  public void testMultipleAttrsRequest() {
+  public void testMultipleAttrsRequest() throws Exception {
 
-    given().port(8080)
-      .auth()
-      .preemptive()
-      .oauth2(accessToken)
-      .accept(SCIM_CONTENT_TYPE)
-      .log()
-      .all(true)
-      .param("count", 2)
-      .param("attributes", "userName,emails," + ScimConstants.INDIGO_USER_SCHEMA)
-      .when()
-      .get("/scim/Users")
-      .then()
-      .log()
-      .all(true)
-      .statusCode(HttpStatus.OK.value())
-      .body("totalResults", equalTo(TOTAL_USERS_COUNT))
-      .body("itemsPerPage", equalTo(2))
-      .body("startIndex", equalTo(1))
-      .body("schemas", contains(ScimListResponse.SCHEMA))
-      .body("Resources", hasSize(equalTo(2)))
-      .body("Resources[0].id", is(Matchers.not(nullValue())))
-      .body("Resources[0].schemas", is(not(nullValue())))
-      .body("Resources[0].userName", is(not(nullValue())))
-      .body("Resources[0].emails", is(not(nullValue())))
-      .body("Resources[0].displayName", is(nullValue()))
-      .body("Resources[0].nickName", is(nullValue()))
-      .body("Resources[0].profileUrl", is(nullValue()))
-      .body("Resources[0].locale", is(nullValue()))
-      .body("Resources[0].timezone", is(nullValue()))
-      .body("Resources[0].active", is(nullValue()))
-      .body("Resources[0].title", is(nullValue()))
-      .body("Resources[0].addresses", is(nullValue()))
-      .body("Resources[0].certificates", is(nullValue()))
-      .body("Resources[0].groups", is(nullValue()))
-      .body("Resources[0].urn:indigo-dc:scim:schemas:IndigoUser", is(not(nullValue())));
+    scimUtils
+      .getUsers(ParamsBuilder.builder()
+        .count(2)
+        .attributes("userName,emails," + INDIGO_USER_SCHEMA)
+        .build())
+      .andExpect(jsonPath("$.totalResults", equalTo(TOTAL_USERS_COUNT)))
+      .andExpect(jsonPath("$.itemsPerPage", equalTo(2)))
+      .andExpect(jsonPath("$.startIndex", equalTo(1)))
+      .andExpect(jsonPath("$.schemas", contains(SCHEMA)))
+      .andExpect(jsonPath("$.Resources", hasSize(equalTo(2))))
+      .andExpect(jsonPath("$.Resources[0].id").exists())
+      .andExpect(jsonPath("$.Resources[0].schemas").exists())
+      .andExpect(jsonPath("$.Resources[0].userName").exists())
+      .andExpect(jsonPath("$.Resources[0].emails").exists())
+      .andExpect(jsonPath("$.Resources[0].displayName").doesNotExist())
+      .andExpect(jsonPath("$.Resources[0].nickName").doesNotExist())
+      .andExpect(jsonPath("$.Resources[0].profileUrl").doesNotExist())
+      .andExpect(jsonPath("$.Resources[0].locale").doesNotExist())
+      .andExpect(jsonPath("$.Resources[0].timezone").doesNotExist())
+      .andExpect(jsonPath("$.Resources[0].active").doesNotExist())
+      .andExpect(jsonPath("$.Resources[0].title").doesNotExist())
+      .andExpect(jsonPath("$.Resources[0].addresses").doesNotExist())
+      .andExpect(jsonPath("$.Resources[0].certificates").doesNotExist())
+      .andExpect(jsonPath("$.Resources[0].groups").doesNotExist())
+      .andExpect(jsonPath("$.Resources[0].urn:indigo-dc:scim:schemas:IndigoUser").exists());
 
   }
 

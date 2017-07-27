@@ -1,256 +1,134 @@
 package it.infn.mw.iam.test.scim.user;
 
-import static com.jayway.restassured.RestAssured.given;
-import static it.infn.mw.iam.api.scim.model.ScimConstants.SCIM_CONTENT_TYPE;
+import static it.infn.mw.iam.api.scim.model.ScimListResponse.SCHEMA;
 import static it.infn.mw.iam.test.TestUtils.TOTAL_USERS_COUNT;
+import static it.infn.mw.iam.test.scim.ScimUtils.SCIM_CLIENT_ID;
+import static it.infn.mw.iam.test.scim.ScimUtils.SCIM_READ_SCOPE;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-import javax.transaction.Transactional;
-
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.boot.test.WebIntegrationTest;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
 
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.scim.model.ScimListResponse;
-import it.infn.mw.iam.test.TestUtils;
+import it.infn.mw.iam.test.core.CoreControllerTestSupport;
+import it.infn.mw.iam.test.scim.ScimRestUtilsMvc;
+import it.infn.mw.iam.test.scim.ScimUtils.ParamsBuilder;
+import it.infn.mw.iam.test.util.WithMockOAuthUser;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = IamLoginService.class)
-@WebIntegrationTest
-@Transactional
+@SpringApplicationConfiguration(
+    classes = {IamLoginService.class, CoreControllerTestSupport.class, ScimRestUtilsMvc.class})
+@WebAppConfiguration
+@WithMockOAuthUser(clientId = SCIM_CLIENT_ID, scopes = {SCIM_READ_SCOPE})
 public class ScimUserProvisioningListTests {
 
-  String accessToken;
-
-  @Before
-  public void initAccessToken() {
-
-    accessToken = TestUtils.getAccessToken("scim-client-rw", "secret", "scim:read");
-  }
-
+  @Autowired
+  private ScimRestUtilsMvc scimUtils;
 
   @Test
-  public void testNoParameterListRequest() {
+  public void testNoParameterListRequest() throws Exception {
 
-    given().port(8080)
-      .auth()
-      .preemptive()
-      .oauth2(accessToken)
-      .accept(SCIM_CONTENT_TYPE)
-      .log()
-      .all(true)
-      .when()
-      .get("/scim/Users")
-      .then()
-      .log()
-      .all(true)
-      .statusCode(HttpStatus.OK.value())
-      .body("totalResults", equalTo(TOTAL_USERS_COUNT))
-      .body("itemsPerPage", equalTo(100))
-      .body("startIndex", equalTo(1))
-      .body("schemas", contains(ScimListResponse.SCHEMA))
-      .body("Resources", hasSize(equalTo(100)));
+    scimUtils.getUsers()
+      .andExpect(jsonPath("$.totalResults", equalTo(TOTAL_USERS_COUNT)))
+      .andExpect(jsonPath("$.itemsPerPage", equalTo(100)))
+      .andExpect(jsonPath("$.startIndex", equalTo(1)))
+      .andExpect(jsonPath("$.schemas", contains(ScimListResponse.SCHEMA)))
+      .andExpect(jsonPath("$.Resources", hasSize(equalTo(100))));
   }
 
   @Test
-  public void testCountAs10Returns10Items() {
+  public void testCountAs10Returns10Items() throws Exception {
 
-    given().port(8080)
-      .auth()
-      .preemptive()
-      .oauth2(accessToken)
-      .accept(SCIM_CONTENT_TYPE)
-      .log()
-      .all(true)
-      .param("count", 10)
-      .when()
-      .get("/scim/Users")
-      .then()
-      .log()
-      .all(true)
-      .statusCode(HttpStatus.OK.value())
-      .body("totalResults", equalTo(TOTAL_USERS_COUNT))
-      .body("itemsPerPage", equalTo(10))
-      .body("startIndex", equalTo(1))
-      .body("schemas", contains(ScimListResponse.SCHEMA))
-      .body("Resources", hasSize(equalTo(10)));
+    scimUtils.getUsers(ParamsBuilder.builder().count(10).build())
+      .andExpect(jsonPath("$.totalResults", equalTo(TOTAL_USERS_COUNT)))
+      .andExpect(jsonPath("$.itemsPerPage", equalTo(10)))
+      .andExpect(jsonPath("$.startIndex", equalTo(1)))
+      .andExpect(jsonPath("$.schemas", contains(ScimListResponse.SCHEMA)))
+      .andExpect(jsonPath("$.Resources", hasSize(equalTo(10))));
   }
 
   @Test
-  public void testCount1Returns1Item() {
+  public void testCount1Returns1Item() throws Exception {
 
-    given().port(8080)
-      .auth()
-      .preemptive()
-      .oauth2(accessToken)
-      .accept(SCIM_CONTENT_TYPE)
-      .log()
-      .all(true)
-      .param("count", 1)
-      .when()
-      .get("/scim/Users")
-      .then()
-      .log()
-      .all(true)
-      .statusCode(HttpStatus.OK.value())
-      .body("totalResults", equalTo(TOTAL_USERS_COUNT))
-      .body("itemsPerPage", equalTo(1))
-      .body("startIndex", equalTo(1))
-      .body("schemas", contains(ScimListResponse.SCHEMA))
-      .body("Resources", hasSize(equalTo(1)));
+    scimUtils.getUsers(ParamsBuilder.builder().count(1).build())
+      .andExpect(jsonPath("$.totalResults", equalTo(TOTAL_USERS_COUNT)))
+      .andExpect(jsonPath("$.itemsPerPage", equalTo(1)))
+      .andExpect(jsonPath("$.startIndex", equalTo(1)))
+      .andExpect(jsonPath("$.schemas", contains(ScimListResponse.SCHEMA)))
+      .andExpect(jsonPath("$.Resources", hasSize(equalTo(1))));
   }
 
   @Test
-  public void testCountShouldBeLimitedToOneHundred() {
+  public void testCountShouldBeLimitedToOneHundred() throws Exception {
 
-    given().port(8080)
-      .auth()
-      .preemptive()
-      .oauth2(accessToken)
-      .accept(SCIM_CONTENT_TYPE)
-      .log()
-      .all(true)
-      .param("count", 1000)
-      .when()
-      .get("/scim/Users")
-      .then()
-      .log()
-      .all(true)
-      .statusCode(HttpStatus.OK.value())
-      .body("totalResults", equalTo(TOTAL_USERS_COUNT))
-      .body("itemsPerPage", equalTo(100))
-      .body("startIndex", equalTo(1))
-      .body("schemas", contains(ScimListResponse.SCHEMA))
-      .body("Resources", hasSize(equalTo(100)));
+    scimUtils.getUsers(ParamsBuilder.builder().count(1000).build())
+      .andExpect(jsonPath("$.totalResults", equalTo(TOTAL_USERS_COUNT)))
+      .andExpect(jsonPath("$.itemsPerPage", equalTo(100)))
+      .andExpect(jsonPath("$.startIndex", equalTo(1)))
+      .andExpect(jsonPath("$.schemas", contains(ScimListResponse.SCHEMA)))
+      .andExpect(jsonPath("$.Resources", hasSize(equalTo(100))));
   }
 
   @Test
-  public void testNegativeCountBecomesZero() {
+  public void testNegativeCountBecomesZero() throws Exception {
 
-    given().port(8080)
-      .auth()
-      .preemptive()
-      .oauth2(accessToken)
-      .accept(SCIM_CONTENT_TYPE)
-      .log()
-      .all(true)
-      .param("count", -10)
-      .when()
-      .get("/scim/Users")
-      .then()
-      .log()
-      .all(true)
-      .statusCode(HttpStatus.OK.value())
-      .body("totalResults", equalTo(TOTAL_USERS_COUNT))
-      .body("itemsPerPage", equalTo(0))
-      .body("startIndex", equalTo(1))
-      .body("schemas", contains(ScimListResponse.SCHEMA))
-      .body("Resources", hasSize(equalTo(0)));
+    scimUtils.getUsers(ParamsBuilder.builder().count(-10).build())
+      .andExpect(jsonPath("$.totalResults", equalTo(TOTAL_USERS_COUNT)))
+      .andExpect(jsonPath("$.itemsPerPage", equalTo(0)))
+      .andExpect(jsonPath("$.startIndex", equalTo(1)))
+      .andExpect(jsonPath("$.schemas", contains(ScimListResponse.SCHEMA)))
+      .andExpect(jsonPath("$.Resources", hasSize(equalTo(0))));
   }
 
   @Test
-  public void testInvalidStartIndex() {
+  public void testInvalidStartIndex() throws Exception {
 
-    given().port(8080)
-      .auth()
-      .preemptive()
-      .oauth2(accessToken)
-      .accept(SCIM_CONTENT_TYPE)
-      .log()
-      .all(true)
-      .param("startIndex", TOTAL_USERS_COUNT + 1)
-      .when()
-      .get("/scim/Users")
-      .then()
-      .log()
-      .all(true)
-      .statusCode(HttpStatus.OK.value())
-      .body("totalResults", equalTo(TOTAL_USERS_COUNT))
-      .body("itemsPerPage", equalTo(0))
-      .body("startIndex", equalTo(TOTAL_USERS_COUNT + 1))
-      .body("schemas", contains(ScimListResponse.SCHEMA))
-      .body("Resources", hasSize(equalTo(0)));
+    scimUtils.getUsers(ParamsBuilder.builder().startIndex(TOTAL_USERS_COUNT + 1).build())
+      .andExpect(jsonPath("$.totalResults", equalTo(TOTAL_USERS_COUNT)))
+      .andExpect(jsonPath("$.itemsPerPage", equalTo(0)))
+      .andExpect(jsonPath("$.startIndex", equalTo(TOTAL_USERS_COUNT + 1)))
+      .andExpect(jsonPath("$.schemas", contains(SCHEMA)))
+      .andExpect(jsonPath("$.Resources", hasSize(equalTo(0))));
   }
 
   @Test
-  public void testRightEndPagination() {
+  public void testRightEndPagination() throws Exception {
 
-    given().port(8080)
-      .auth()
-      .preemptive()
-      .oauth2(accessToken)
-      .accept(SCIM_CONTENT_TYPE)
-      .log()
-      .all(true)
-      .param("startIndex", TOTAL_USERS_COUNT - 5)
-      .param("count", 10)
-      .when()
-      .get("/scim/Users")
-      .then()
-      .log()
-      .all(true)
-      .statusCode(HttpStatus.OK.value())
-      .body("totalResults", equalTo(TOTAL_USERS_COUNT))
-      .body("itemsPerPage", equalTo(6))
-      .body("startIndex", equalTo(TOTAL_USERS_COUNT - 5))
-      .body("schemas", contains(ScimListResponse.SCHEMA))
-      .body("Resources", hasSize(equalTo(6)));
+    scimUtils.getUsers(ParamsBuilder.builder().startIndex(TOTAL_USERS_COUNT - 5).count(10).build())
+      .andExpect(jsonPath("$.totalResults", equalTo(TOTAL_USERS_COUNT)))
+      .andExpect(jsonPath("$.itemsPerPage", equalTo(6)))
+      .andExpect(jsonPath("$.startIndex", equalTo(TOTAL_USERS_COUNT - 5)))
+      .andExpect(jsonPath("$.schemas", contains(SCHEMA)))
+      .andExpect(jsonPath("$.Resources", hasSize(equalTo(6))));
   }
 
   @Test
-  public void testLastElementPagination() {
+  public void testLastElementPagination() throws Exception {
 
-    given().port(8080)
-      .auth()
-      .preemptive()
-      .oauth2(accessToken)
-      .accept(SCIM_CONTENT_TYPE)
-      .log()
-      .all(true)
-      .param("startIndex", TOTAL_USERS_COUNT)
-      .param("count", 2)
-      .when()
-      .get("/scim/Users")
-      .then()
-      .log()
-      .all(true)
-      .statusCode(HttpStatus.OK.value())
-      .body("totalResults", equalTo(TOTAL_USERS_COUNT))
-      .body("itemsPerPage", equalTo(1))
-      .body("startIndex", equalTo(TOTAL_USERS_COUNT))
-      .body("schemas", contains(ScimListResponse.SCHEMA))
-      .body("Resources", hasSize(equalTo(1)));
+    scimUtils.getUsers(ParamsBuilder.builder().startIndex(TOTAL_USERS_COUNT).count(2).build())
+      .andExpect(jsonPath("$.totalResults", equalTo(TOTAL_USERS_COUNT)))
+      .andExpect(jsonPath("$.itemsPerPage", equalTo(1)))
+      .andExpect(jsonPath("$.startIndex", equalTo(TOTAL_USERS_COUNT)))
+      .andExpect(jsonPath("$.schemas", contains(SCHEMA)))
+      .andExpect(jsonPath("$.Resources", hasSize(equalTo(1))));
   }
 
   @Test
-  public void testFirstElementPagination() {
+  public void testFirstElementPagination() throws Exception {
 
-    given().port(8080)
-      .auth()
-      .preemptive()
-      .oauth2(accessToken)
-      .accept(SCIM_CONTENT_TYPE)
-      .log()
-      .all(true)
-      .param("startIndex", 1)
-      .param("count", 5)
-      .when()
-      .get("/scim/Users")
-      .then()
-      .log()
-      .all(true)
-      .statusCode(HttpStatus.OK.value())
-      .body("totalResults", equalTo(TOTAL_USERS_COUNT))
-      .body("itemsPerPage", equalTo(5))
-      .body("startIndex", equalTo(1))
-      .body("schemas", contains(ScimListResponse.SCHEMA))
-      .body("Resources", hasSize(equalTo(5)));
+    scimUtils.getUsers(ParamsBuilder.builder().startIndex(1).count(5).build())
+      .andExpect(jsonPath("$.totalResults", equalTo(TOTAL_USERS_COUNT)))
+      .andExpect(jsonPath("$.itemsPerPage", equalTo(5)))
+      .andExpect(jsonPath("$.startIndex", equalTo(1)))
+      .andExpect(jsonPath("$.schemas", contains(SCHEMA)))
+      .andExpect(jsonPath("$.Resources", hasSize(equalTo(5))));
   }
 }

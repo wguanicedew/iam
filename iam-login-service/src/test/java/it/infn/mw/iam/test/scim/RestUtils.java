@@ -31,7 +31,10 @@ public class RestUtils {
   @Autowired
   public RestUtils(WebApplicationContext context, ObjectMapper mapper) {
 
-    mvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
+    mvc = MockMvcBuilders.webAppContextSetup(context)
+      .apply(springSecurity())
+      .alwaysDo(print())
+      .build();
     this.mapper = mapper;
   }
 
@@ -41,7 +44,6 @@ public class RestUtils {
     String contentJson = mapper.writeValueAsString(contentObj);
 
     return mvc.perform(post(location).contentType(contentType).content(contentJson))
-      .andDo(print())
       .andExpect(status().is(expectedStatus.value()))
       .andExpect(content().contentType(contentType));
   }
@@ -51,7 +53,6 @@ public class RestUtils {
       HttpStatus expectedStatus) throws Exception {
 
     return mvc.perform(post(location).contentType(APPLICATION_FORM_URLENCODED).params(formParams))
-      .andDo(print())
       .andExpect(status().is(expectedStatus.value()))
       .andExpect(content().contentType(expectedContentType));
   }
@@ -59,22 +60,18 @@ public class RestUtils {
   public ResultActions doGet(String location, String expectedContentType, HttpStatus expectedStatus)
       throws Exception {
 
-    return mvc.perform(get(location)).andDo(print()).andExpect(status().is(expectedStatus.value()));
+    return mvc.perform(get(location)).andExpect(status().is(expectedStatus.value()));
   }
 
   public ResultActions doGet(String location, MultiValueMap<String, String> params,
       String expectedContentType, HttpStatus expectedStatus) throws Exception {
 
-    return mvc.perform(get(location).params(params))
-      .andDo(print())
-      .andExpect(status().is(expectedStatus.value()));
+    return mvc.perform(get(location).params(params)).andExpect(status().is(expectedStatus.value()));
   }
 
   public ResultActions doDelete(String location, HttpStatus expectedStatus) throws Exception {
 
-    return mvc.perform(delete(location))
-      .andDo(print())
-      .andExpect(status().is(expectedStatus.value()));
+    return mvc.perform(delete(location)).andExpect(status().is(expectedStatus.value()));
   }
 
   public <B> ResultActions doPut(String location, B contentObj, String expectedContentType,
@@ -83,7 +80,6 @@ public class RestUtils {
     String contentJson = mapper.writeValueAsString(contentObj);
 
     return mvc.perform(put(location).contentType(expectedContentType).content(contentJson))
-      .andDo(print())
       .andExpect(status().is(expectedStatus.value()))
       .andExpect(content().contentType(expectedContentType));
   }
@@ -94,7 +90,6 @@ public class RestUtils {
     String contentJson = mapper.writeValueAsString(contentObj);
 
     return mvc.perform(patch(location).contentType(expectedContentType).content(contentJson))
-      .andDo(print())
       .andExpect(status().is(expectedStatus.value()));
   }
 

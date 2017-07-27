@@ -1,23 +1,28 @@
 package it.infn.mw.iam.test.scim.group.patch;
 
+import static it.infn.mw.iam.api.scim.model.ScimConstants.SCIM_CONTENT_TYPE;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.boot.test.WebIntegrationTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import com.google.common.collect.Lists;
 
@@ -25,39 +30,29 @@ import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.scim.model.ScimGroup;
 import it.infn.mw.iam.api.scim.model.ScimGroupPatchRequest;
 import it.infn.mw.iam.api.scim.model.ScimUser;
-import it.infn.mw.iam.test.ScimRestUtils;
-import it.infn.mw.iam.test.TestUtils;
-import it.infn.mw.iam.test.util.JacksonUtils;
+import it.infn.mw.iam.test.core.CoreControllerTestSupport;
+import it.infn.mw.iam.test.util.WithMockOAuthUser;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = IamLoginService.class)
-@WebIntegrationTest
-public class ScimGroupProvisioningPatchRemoveTests {
+@SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class})
+@WebAppConfiguration
+@WithMockOAuthUser(clientId = "scim-client-rw", scopes = {"scim:read", "scim:write"})
+public class ScimGroupProvisioningPatchRemoveTests extends ScimGroupPatchUtils {
 
-  private final DateTimeFormatter dateTimeFormatter = ISODateTimeFormat.dateTime();
-  public static final String SCIM_CONTENT_TYPE = "application/scim+json";
-
-  private String accessToken;
-  private ScimRestUtils restUtils;
+  @Autowired
+  private WebApplicationContext context;
 
   private ScimGroup engineers;
-  private ScimUser lennon;
-  private ScimUser lincoln;
-  private ScimUser kennedy;
+  private ScimUser lennon, lincoln, kennedy;
 
   List<ScimUser> members;
 
-  @BeforeClass
-  public static void init() {
-
-    JacksonUtils.initRestAssured();
-  }
-
   @Before
-  public void initTests() {
-
-    accessToken = TestUtils.getAccessToken("scim-client-rw", "secret", "scim:read scim:write");
-    restUtils = ScimRestUtils.getInstance(accessToken);
+  public void initTests() throws Exception {
+    mvc = MockMvcBuilders.webAppContextSetup(context)
+      .apply(springSecurity())
+      .alwaysDo(print())
+      .build();
 
     engineers = addTestGroup("engineers");
     lennon = addTestUser("john_lennon", "lennon@email.test", "John", "Lennon");
@@ -73,57 +68,18 @@ public class ScimGroupProvisioningPatchRemoveTests {
   }
 
   @After
-  public void teardownTests() {
-
-    restUtils.doDelete(lennon.getMeta().getLocation());
-    restUtils.doDelete(lincoln.getMeta().getLocation());
-    restUtils.doDelete(kennedy.getMeta().getLocation());
-    restUtils.doDelete(engineers.getMeta().getLocation());
-  }
-
-  private ScimGroup addTestGroup(String displayName) {
-
-    ScimGroup group = ScimGroup.builder(displayName).build();
-
-    return restUtils.doPost("/scim/Groups/", group).extract().as(ScimGroup.class);
-  }
-
-  private ScimUser addTestUser(String userName, String email, String firstName, String LastName) {
-
-    ScimUser lennon =
-        ScimUser.builder(userName).buildEmail(email).buildName(firstName, LastName).build();
-
-    return restUtils.doPost("/scim/Users/", lennon).extract().as(ScimUser.class);
-  }
-
-  private void addMembers(ScimGroup group, List<ScimUser> members) {
-
-    ScimGroupPatchRequest patchAddReq = ScimGroupPatchUtils.getPatchAddUsersRequest(members);
-
-    restUtils.doPatch(group.getMeta().getLocation(), patchAddReq);
-
-    ScimGroup g = getGroup(group.getMeta().getLocation());
-
-    Assert.assertTrue(g.getMembers().contains(TestUtils.getMemberRef(members.get(0))));
-    Assert.assertTrue(g.getMembers().contains(TestUtils.getMemberRef(members.get(1))));
-    Assert.assertTrue(g.getMembers().contains(TestUtils.getMemberRef(members.get(2))));
-  }
-
-  private void assertMembership(ScimUser user, ScimGroup group, boolean isMember) {
-
-    assertThat(group.getMembers().stream().anyMatch(m -> m.getValue().equals(user.getId())),
-        equalTo(isMember));
-  }
-
-  private ScimGroup getGroup(String location) {
-    return restUtils.doGet(location).extract().as(ScimGroup.class);
+  public void teardownTests() throws Exception {
+    deleteScimResource(lennon);
+    deleteScimResource(lincoln);
+    deleteScimResource(kennedy);
+    deleteScimResource(engineers);
   }
 
   @Test
-  public void testGroupPatchRemoveMember() {
+  public void testGroupPatchRemoveMember() throws Exception {
 
     ScimGroupPatchRequest patchRemoveRequest =
-        ScimGroupPatchUtils.getPatchRemoveUsersRequest(Lists.newArrayList(lennon));
+        getPatchRemoveUsersRequest(Lists.newArrayList(lennon));
 
     ScimGroup engineersBeforeUpdate = getGroup(engineers.getMeta().getLocation());
 
@@ -137,7 +93,12 @@ public class ScimGroupProvisioningPatchRemoveTests {
     } catch (InterruptedException e) {
     }
 
-    restUtils.doPatch(engineers.getMeta().getLocation(), patchRemoveRequest);
+    //@formatter:off
+    mvc.perform(patch(engineers.getMeta().getLocation())
+        .contentType(SCIM_CONTENT_TYPE)
+        .content(objectMapper.writeValueAsString(patchRemoveRequest)))
+      .andExpect(status().isNoContent());
+    //@formatter:on
 
     ScimGroup engineersAfterUpdate = getGroup(engineers.getMeta().getLocation());
 
@@ -149,21 +110,24 @@ public class ScimGroupProvisioningPatchRemoveTests {
     final long dateBeforeUpdate = engineersBeforeUpdate.getMeta().getLastModified().getTime();
     final long dateAfterUpdate = engineersAfterUpdate.getMeta().getLastModified().getTime();
 
-    assertTrue(dateBeforeUpdate < dateAfterUpdate);
-
+    assertThat(dateBeforeUpdate, lessThan(dateAfterUpdate));
   }
 
   @Test
-  public void testGroupPatchRemoveMultipleMembers() {
+  public void testGroupPatchRemoveMultipleMembers() throws Exception {
 
     List<ScimUser> membersToRemove = new ArrayList<ScimUser>();
     membersToRemove.add(lennon);
     membersToRemove.add(lincoln);
 
-    ScimGroupPatchRequest patchReq =
-        ScimGroupPatchUtils.getPatchRemoveUsersRequest(membersToRemove);
+    ScimGroupPatchRequest patchReq = getPatchRemoveUsersRequest(membersToRemove);
 
-    restUtils.doPatch(engineers.getMeta().getLocation(), patchReq);
+    //@formatter:off
+    mvc.perform(patch(engineers.getMeta().getLocation())
+        .contentType(SCIM_CONTENT_TYPE)
+        .content(objectMapper.writeValueAsString(patchReq)))
+      .andExpect(status().isNoContent());
+    //@formatter:on
 
     ScimGroup updatedGroup = getGroup(engineers.getMeta().getLocation());
 
@@ -173,17 +137,21 @@ public class ScimGroupProvisioningPatchRemoveTests {
   }
 
   @Test
-  public void testGroupPatchRemoveAllListOfMembers() {
+  public void testGroupPatchRemoveAllListOfMembers() throws Exception {
 
     List<ScimUser> membersToRemove = new ArrayList<ScimUser>();
     membersToRemove.add(lennon);
     membersToRemove.add(lincoln);
     membersToRemove.add(kennedy);
 
-    ScimGroupPatchRequest patchReq =
-        ScimGroupPatchUtils.getPatchRemoveUsersRequest(membersToRemove);
+    ScimGroupPatchRequest patchReq = getPatchRemoveUsersRequest(membersToRemove);
 
-    restUtils.doPatch(engineers.getMeta().getLocation(), patchReq);
+    //@formatter:off
+    mvc.perform(patch(engineers.getMeta().getLocation())
+        .contentType(SCIM_CONTENT_TYPE)
+        .content(objectMapper.writeValueAsString(patchReq)))
+      .andExpect(status().isNoContent());
+    //@formatter:on
 
     ScimGroup updatedGroup = getGroup(engineers.getMeta().getLocation());
 
@@ -191,30 +159,43 @@ public class ScimGroupProvisioningPatchRemoveTests {
   }
 
   @Test
-  public void testGroupPatchRemoveAllMembers() {
+  public void testGroupPatchRemoveAllMembers() throws Exception {
 
     List<ScimUser> emptyMembers = new ArrayList<ScimUser>();
+    ScimGroupPatchRequest patchReq = getPatchRemoveUsersRequest(emptyMembers);
 
-    ScimGroupPatchRequest patchReq = ScimGroupPatchUtils.getPatchRemoveUsersRequest(emptyMembers);
-
-    restUtils.doPatch(engineers.getMeta().getLocation(), patchReq);
+    //@formatter:off
+    mvc.perform(patch(engineers.getMeta().getLocation())
+        .contentType(SCIM_CONTENT_TYPE)
+        .content(objectMapper.writeValueAsString(patchReq)))
+      .andExpect(status().isNoContent());
+    //@formatter:on
 
     ScimGroup updatedGroup = getGroup(engineers.getMeta().getLocation());
-
-    Assert.assertTrue(updatedGroup.getMembers().isEmpty());
+    assertThat(updatedGroup.getMembers(), empty());
   }
 
   @Test
-  public void testGroupPatchRemoveMemberTwice() {
+  public void testGroupPatchRemoveMemberTwice() throws Exception {
 
     ScimGroupPatchRequest patchRemoveRequest =
-        ScimGroupPatchUtils.getPatchRemoveUsersRequest(Lists.newArrayList(lennon));
+        getPatchRemoveUsersRequest(Lists.newArrayList(lennon));
 
-    restUtils.doPatch(engineers.getMeta().getLocation(), patchRemoveRequest);
+    //@formatter:off
+    mvc.perform(patch(engineers.getMeta().getLocation())
+        .contentType(SCIM_CONTENT_TYPE)
+        .content(objectMapper.writeValueAsString(patchRemoveRequest)))
+      .andExpect(status().isNoContent());
+    //@formatter:on
 
     ScimGroup engineersBeforeUpdate = getGroup(engineers.getMeta().getLocation());
 
-    restUtils.doPatch(engineers.getMeta().getLocation(), patchRemoveRequest);
+    //@formatter:off
+    mvc.perform(patch(engineers.getMeta().getLocation())
+        .contentType(SCIM_CONTENT_TYPE)
+        .content(objectMapper.writeValueAsString(patchRemoveRequest)))
+      .andExpect(status().isNoContent());
+    //@formatter:on
 
     ScimGroup engineersAfterUpdate = getGroup(engineers.getMeta().getLocation());
 
@@ -223,5 +204,4 @@ public class ScimGroupProvisioningPatchRemoveTests {
     assertThat(engineersBeforeUpdate.getMeta().getLastModified(),
         equalTo(engineersAfterUpdate.getMeta().getLastModified()));
   }
-
 }

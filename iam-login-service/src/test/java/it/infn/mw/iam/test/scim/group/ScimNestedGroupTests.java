@@ -4,6 +4,7 @@ import static it.infn.mw.iam.api.scim.model.ScimConstants.INDIGO_GROUP_SCHEMA;
 import static it.infn.mw.iam.api.scim.model.ScimConstants.SCIM_CONTENT_TYPE;
 import static java.lang.String.format;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -18,7 +19,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import javax.transaction.Transactional;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,23 +38,24 @@ import it.infn.mw.iam.api.scim.model.ScimGroup;
 import it.infn.mw.iam.api.scim.model.ScimGroupRef;
 import it.infn.mw.iam.api.scim.model.ScimIndigoGroup;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
-import it.infn.mw.iam.test.util.JacksonUtils;
 import it.infn.mw.iam.test.util.WithMockOAuthUser;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class})
 @WebAppConfiguration
 @Transactional
-public class ScimGroupTests {
+public class ScimNestedGroupTests {
 
   @Autowired
   private WebApplicationContext context;
 
   @Autowired
+  private ObjectMapper objectMapper;
+
+  @Autowired
   private ScimResourceLocationProvider scimResourceLocationProvider;
 
   private MockMvc mvc;
-  private ObjectMapper objectMapper;
 
   @Before
   public void setup() {
@@ -62,7 +63,6 @@ public class ScimGroupTests {
       .apply(springSecurity())
       .alwaysDo(print())
       .build();
-    objectMapper = JacksonUtils.createJacksonObjectMapper();
   }
 
   @Test
@@ -75,7 +75,7 @@ public class ScimGroupTests {
     ScimGroup mammals = createGroup("mammals", animals);
     assertNotNull(mammals);
 
-    Assert.assertEquals(animals.getId(), mammals.getIndigoGroup().getParentGroup().getValue());
+    assertEquals(animals.getId(), mammals.getIndigoGroup().getParentGroup().getValue());
   }
 
   @Test
