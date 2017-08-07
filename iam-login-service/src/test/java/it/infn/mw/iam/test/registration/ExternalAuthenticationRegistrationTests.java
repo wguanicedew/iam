@@ -1,6 +1,6 @@
 package it.infn.mw.iam.test.registration;
 
-import static it.infn.mw.iam.test.ext_authn.saml.SamlExternalAuthenticationTestSupport.DEFAULT_IDP_ID;
+import static it.infn.mw.iam.test.ext_authn.saml.SamlAuthenticationTestSupport.DEFAULT_IDP_ID;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;

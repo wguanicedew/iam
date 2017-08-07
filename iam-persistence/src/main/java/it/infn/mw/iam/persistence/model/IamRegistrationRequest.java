@@ -1,5 +1,6 @@
 package it.infn.mw.iam.persistence.model;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -19,7 +20,12 @@ import it.infn.mw.iam.core.IamRegistrationRequestStatus;
 
 @Entity
 @Table(name = "iam_reg_request")
-public class IamRegistrationRequest {
+public class IamRegistrationRequest implements Serializable{
+
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

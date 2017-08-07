@@ -64,27 +64,28 @@ public class DefaultAccountUpdaterFactory implements AccountUpdaterFactory<IamAc
 
   private ScimCollectionConverter<IamSshKey, ScimSshKey> sshKeyConverter(ScimUser user) {
 
-    return new ScimCollectionConverter<IamSshKey, ScimSshKey>(user.getIndigoUser()::getSshKeys,
+    return new ScimCollectionConverter<>(user.getIndigoUser()::getSshKeys,
         sshKeyConverter::fromScim);
   }
 
   private ScimCollectionConverter<IamOidcId, ScimOidcId> oidcIdConverter(ScimUser user) {
-    return new ScimCollectionConverter<IamOidcId, ScimOidcId>(user.getIndigoUser()::getOidcIds,
+    return new ScimCollectionConverter<>(user.getIndigoUser()::getOidcIds,
         oidcIdConverter::fromScim);
   }
 
   private ScimCollectionConverter<IamSamlId, ScimSamlId> samlIdConverter(ScimUser user) {
-    return new ScimCollectionConverter<IamSamlId, ScimSamlId>(user.getIndigoUser()::getSamlIds,
+    return new ScimCollectionConverter<>(user.getIndigoUser()::getSamlIds,
         samlIdConverter::fromScim);
   }
 
   private ScimCollectionConverter<IamX509Certificate, ScimX509Certificate> x509CertificateConverter(
       ScimUser user) {
-    return new ScimCollectionConverter<IamX509Certificate, ScimX509Certificate>(
-        user::getX509Certificates, x509CertificateConverter::fromScim);
+    return new ScimCollectionConverter<>(
+        user.getIndigoUser()::getCertificates, x509CertificateConverter::fromScim);
   }
 
-  private static <T> AccountUpdater buildUpdater(AccountUpdaterBuilder<T> factory, Supplier<T> valueSupplier) {
+  private static <T> AccountUpdater buildUpdater(AccountUpdaterBuilder<T> factory,
+      Supplier<T> valueSupplier) {
     return factory.build(valueSupplier.get());
   }
 

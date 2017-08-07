@@ -11,12 +11,12 @@
 
     self.isVoAdmin = function() { return self.userCtrl.isVoAdmin(); };
 
-    self.handleSuccess = function() {
+    self.handleSuccess = function(msg) {
       self.enabled = true;
-      self.userCtrl.loadUser().then(function(user) {
+      self.userCtrl.loadUser().then(function() {
         toaster.pop({
           type: 'success',
-          body: `User '${user.name.formatted}' groups updated succesfully`
+          body: msg
         });
       });
     };
@@ -48,7 +48,9 @@
             .removeUserFromGroup(
                 group.value, self.user.id, self.user.meta.location,
                 self.user.name.formatted)
-            .then(self.handleSuccess)
+            .then(function(){
+             self.handleSuccess(`User removed from group '${group.display}'`);  
+            })
             .catch(self.userCtrl.handleError);
       });
 

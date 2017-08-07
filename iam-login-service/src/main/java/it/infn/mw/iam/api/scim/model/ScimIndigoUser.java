@@ -17,7 +17,8 @@ public class ScimIndigoUser {
 
     SSH_KEYS(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys"),
     OIDC_IDS(ScimConstants.INDIGO_USER_SCHEMA + ".oidcIds"),
-    SAML_IDS(ScimConstants.INDIGO_USER_SCHEMA + ".samlIds");
+    SAML_IDS(ScimConstants.INDIGO_USER_SCHEMA + ".samlIds"),
+    X509_CERTS(ScimConstants.INDIGO_USER_SCHEMA + ".x509Certificates");
 
     private final String text;
 
@@ -29,7 +30,7 @@ public class ScimIndigoUser {
     public String toString() {
       return text;
     }
-  };
+  }
 
   private final List<ScimSshKey> sshKeys;
   private final List<ScimOidcId> oidcIds;
@@ -37,14 +38,19 @@ public class ScimIndigoUser {
   @Valid
   private final List<ScimSamlId> samlIds;
 
+  @Valid
+  private final List<ScimX509Certificate> certificates;
+  
   @JsonCreator
   private ScimIndigoUser(@JsonProperty("oidcIds") List<ScimOidcId> oidcIds,
       @JsonProperty("sshKeys") List<ScimSshKey> sshKeys,
-      @JsonProperty("samlIds") List<ScimSamlId> samlIds) {
+      @JsonProperty("samlIds") List<ScimSamlId> samlIds,
+      @JsonProperty("x509Certificates") List<ScimX509Certificate> certs ) {
 
-    this.oidcIds = oidcIds != null ? oidcIds : new LinkedList<ScimOidcId>();
-    this.sshKeys = sshKeys != null ? sshKeys : new LinkedList<ScimSshKey>();
-    this.samlIds = samlIds != null ? samlIds : new LinkedList<ScimSamlId>();
+    this.oidcIds = oidcIds != null ? oidcIds : new LinkedList<>();
+    this.sshKeys = sshKeys != null ? sshKeys : new LinkedList<>();
+    this.samlIds = samlIds != null ? samlIds : new LinkedList<>();
+    this.certificates = certs != null ? certs: new LinkedList<>();
 
   }
 
@@ -52,12 +58,13 @@ public class ScimIndigoUser {
     this.sshKeys = b.sshKeys;
     this.oidcIds = b.oidcIds;
     this.samlIds = b.samlIds;
+    this.certificates = b.certificates;
   }
 
   @JsonIgnore
   public boolean isEmpty() {
 
-    return sshKeys.isEmpty() && oidcIds.isEmpty() && samlIds.isEmpty();
+    return sshKeys.isEmpty() && oidcIds.isEmpty() && samlIds.isEmpty() && certificates.isEmpty();
   }
 
   public List<ScimSshKey> getSshKeys() {
@@ -75,6 +82,10 @@ public class ScimIndigoUser {
     return samlIds;
   }
 
+  public List<ScimX509Certificate> getCertificates() {
+    return certificates;
+  }
+
   public static Builder builder() {
 
     return new Builder();
@@ -82,9 +93,10 @@ public class ScimIndigoUser {
 
   public static class Builder {
 
-    private List<ScimSshKey> sshKeys = new LinkedList<ScimSshKey>();
-    private List<ScimOidcId> oidcIds = new LinkedList<ScimOidcId>();
-    private List<ScimSamlId> samlIds = new LinkedList<ScimSamlId>();
+    private List<ScimSshKey> sshKeys = new LinkedList<>();
+    private List<ScimOidcId> oidcIds = new LinkedList<>();
+    private List<ScimSamlId> samlIds = new LinkedList<>();
+    private List<ScimX509Certificate> certificates = new LinkedList<>();
 
     public Builder addSshKey(ScimSshKey sshKey) {
 
@@ -104,8 +116,12 @@ public class ScimIndigoUser {
       return this;
     }
 
+    public Builder addCertificate(ScimX509Certificate cert){
+      certificates.add(cert);
+      return this;
+    }
+    
     public ScimIndigoUser build() {
-
       return new ScimIndigoUser(this);
     }
   }

@@ -1,5 +1,6 @@
 package it.infn.mw.iam.authn;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
@@ -9,9 +10,8 @@ import org.springframework.security.providers.ExpiringUsernameAuthenticationToke
 
 import it.infn.mw.iam.persistence.model.IamAccount;
 
-public abstract class AbstractExternalAuthenticationToken<T>
+public abstract class AbstractExternalAuthenticationToken<T extends Serializable>
     extends ExpiringUsernameAuthenticationToken {
-
 
   /**
    * 
@@ -32,7 +32,6 @@ public abstract class AbstractExternalAuthenticationToken<T>
     this.wrappedAuthentication = authn;
   }
 
-
   public T getExternalAuthentication() {
     return wrappedAuthentication;
   }
@@ -43,4 +42,29 @@ public abstract class AbstractExternalAuthenticationToken<T>
 
   public abstract ExternalAuthenticationRegistrationInfo toExernalAuthenticationRegistrationInfo();
 
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = super.hashCode();
+    result =
+        prime * result + ((wrappedAuthentication == null) ? 0 : wrappedAuthentication.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (!super.equals(obj))
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    AbstractExternalAuthenticationToken other = (AbstractExternalAuthenticationToken) obj;
+    if (wrappedAuthentication == null) {
+      if (other.wrappedAuthentication != null)
+        return false;
+    } else if (!wrappedAuthentication.equals(other.wrappedAuthentication))
+      return false;
+    return true;
+  }
 }

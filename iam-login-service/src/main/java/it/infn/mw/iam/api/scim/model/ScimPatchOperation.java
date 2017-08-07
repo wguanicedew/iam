@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ScimPatchOperation<T> {
 
-  public static enum ScimPatchOperationType {
+  public enum ScimPatchOperationType {
     add, remove, replace
   }
 
@@ -59,8 +59,6 @@ public class ScimPatchOperation<T> {
     String path;
     T value;
 
-    public Builder() {}
-
     public Builder<T> path(String path) {
 
       this.path = path;
@@ -93,7 +91,7 @@ public class ScimPatchOperation<T> {
 
     public ScimPatchOperation<T> build() {
 
-      return new ScimPatchOperation<T>(this);
+      return new ScimPatchOperation<>(this);
     }
   }
 

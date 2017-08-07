@@ -1,5 +1,7 @@
 package it.infn.mw.iam.persistence.model;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -11,7 +13,12 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "iam_ssh_key")
-public class IamSshKey implements IamAccountRef {
+public class IamSshKey implements IamAccountRef, Serializable{
+
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

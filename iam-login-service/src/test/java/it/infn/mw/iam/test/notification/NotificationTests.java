@@ -5,7 +5,8 @@ import static it.infn.mw.iam.test.RegistrationUtils.confirmRegistrationRequest;
 import static it.infn.mw.iam.test.RegistrationUtils.createRegistrationRequest;
 import static it.infn.mw.iam.test.RegistrationUtils.deleteUser;
 import static it.infn.mw.iam.test.RegistrationUtils.rejectRequest;
-import static it.infn.mw.iam.test.TestUtils.waitIfPortIsUsed;
+import static it.infn.mw.iam.test.util.MockSmtpServerUtils.startMockSmtpServer;
+import static it.infn.mw.iam.test.util.MockSmtpServerUtils.stopMockSmtpServer;
 import static java.lang.String.format;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
@@ -99,17 +100,12 @@ public class NotificationTests {
 
   @Before
   public void setUp() throws InterruptedException {
-    waitIfPortIsUsed(mailHost, mailPort, 30);
-
-    wiser = new Wiser();
-    wiser.setHostname(mailHost);
-    wiser.setPort(mailPort);
-    wiser.start();
+    wiser = startMockSmtpServer(mailHost, mailPort);
   }
 
   @After
   public void tearDown() throws InterruptedException {
-    wiser.stop();
+    stopMockSmtpServer(wiser);
     notificationRepository.deleteAll();
     if (wiser.getServer().isRunning()) {
       Assert.fail("Fake mail server is still running after stop!!");

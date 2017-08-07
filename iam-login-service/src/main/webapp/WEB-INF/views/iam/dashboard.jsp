@@ -102,8 +102,7 @@
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/account-privileges.controller.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/edit-user.controller.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/add-user-group.controller.js"></script>
-	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/add-user-oidc-account.controller.js"></script>
-	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/add-user-saml-account.controller.js"></script>
+	
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/edit-password.controller.js"></script>
 
 	<!-- Components -->
@@ -118,7 +117,8 @@
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/components/user/groups/user.groups.component.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/components/user/oidc/user.oidc.component.js"></script>
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/components/user/saml/user.saml.component.js"></script>
-	
+	<script type="text/javascript" src="/resources/iam/js/dashboard-app/components/user/x509/user.x509.component.js"></script>
+
 	<script type="text/javascript" src="/resources/iam/js/dashboard-app/components/user/user.component.js"></script>
 
 </body>

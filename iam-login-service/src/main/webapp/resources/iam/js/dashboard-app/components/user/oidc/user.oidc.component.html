@@ -21,10 +21,10 @@
                         <td>{{ oidcId.subject }}</td>
                         <td class="text-right">
                             <div class="btn-group">
-                                <button class="btn btn-xs btn-danger" ng-click="$ctrl.openRemoveOidcAccountDialog(oidcId)" ng-if="$ctrl.isVoAdmin() && !$ctrl.isMe()">
+                                <button class="btn btn-xs btn-danger" ng-click="$ctrl.openRemoveOidcAccountDialog(oidcId)" ng-if="$ctrl.userCtrl.canManageLinkedAccounts()">
                                     <i class="fa fa-times"></i> Remove
                                 </button>
-                                <button class="btn btn-xs btn-danger" ng-click="$ctrl.openUnlinkOidcAccountDialog(oidcId)" ng-if="$ctrl.isMe()">
+                                <button class="btn btn-xs btn-danger" ng-click="$ctrl.openUnlinkOidcAccountDialog(oidcId)" ng-if="$ctrl.userCtrl.canLinkAccounts()">
                                     <i class="fa fa-times"></i> Unlink
                                 </button>
                             </div>
@@ -35,11 +35,11 @@
         </div>
     </div>
     <div class="box-footer">
-        <button class="btn btn-success btn-sm" name="btn-add-oidc" ng-click="$ctrl.openAddOidcAccountDialog()" ng-if="$ctrl.isVoAdmin() && !$ctrl.isMe()">
+        <button class="btn btn-success btn-sm" name="btn-add-oidc" ng-click="$ctrl.openAddOidcAccountDialog()" ng-if="$ctrl.userCtrl.canManageLinkedAccounts()">
             <i class="fa fa-plus"></i> Add OpenID-Connect account
         </button>
 
-        <button class="btn btn-success btn-sm" name="btn-link-oidc" ng-click="$ctrl.openLinkOidcAccountDialog()" ng-if="$ctrl.isMe()">
+        <button class="btn btn-success btn-sm" name="btn-link-oidc" ng-click="$ctrl.openLinkOidcAccountDialog()" ng-if="$ctrl.userCtrl.canLinkAccounts()">
             <i class="fa fa-google"></i> Link Google account
         </button>
     </div>

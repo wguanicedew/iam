@@ -36,7 +36,7 @@ public class JpaConfig extends JpaBaseConfiguration {
   @Override
   protected Map<String, Object> getVendorProperties() {
 
-    Map<String, Object> map = new HashMap<String, Object>();
+    Map<String, Object> map = new HashMap<>();
 
     map.put("eclipselink.weaving", "false");
     map.put("eclipselink.logging.level", "INFO");
@@ -56,13 +56,11 @@ public class JpaConfig extends JpaBaseConfiguration {
 
       final EntityManagerFactoryBuilder factoryBuilder) {
 
-    LocalContainerEntityManagerFactoryBean emf = factoryBuilder.dataSource(dataSource)
+    return factoryBuilder.dataSource(dataSource)
       .packages("org.mitre", "it.infn.mw.iam.persistence")
       .persistenceUnit("defaultPersistenceUnit")
       .properties(getVendorProperties())
       .build();
-
-    return emf;
 
   }
 

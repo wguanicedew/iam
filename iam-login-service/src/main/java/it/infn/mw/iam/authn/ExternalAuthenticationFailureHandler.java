@@ -33,7 +33,7 @@ public class ExternalAuthenticationFailureHandler extends ExternalAuthentication
     try {
       errorMessage = UriUtils.encode(errorMessage, StandardCharsets.UTF_8.toString());
     } catch (UnsupportedEncodingException uex) {
-      // Unlikely
+      LOG.error(uex.getMessage(), uex);
     }
 
     return UriComponentsBuilder.fromPath("/login")

@@ -28,22 +28,23 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
 
   private final AddressConverter addressConverter;
 
-  private final X509CertificateConverter x509CertificateConverter;
   private final OidcIdConverter oidcIdConverter;
   private final SshKeyConverter sshKeyConverter;
   private final SamlIdConverter samlIdConverter;
+  private final X509CertificateConverter x509CertificateIamConverter;
 
 
   @Autowired
-  public UserConverter(ScimResourceLocationProvider rlp, X509CertificateConverter x509cc,
-      AddressConverter ac, OidcIdConverter oidc, SshKeyConverter sshc, SamlIdConverter samlc) {
+  public UserConverter(ScimResourceLocationProvider rlp, AddressConverter ac, 
+      OidcIdConverter oidc, SshKeyConverter sshc, SamlIdConverter samlc,
+      X509CertificateConverter x509Iamcc) {
 
     this.resourceLocationProvider = rlp;
     this.addressConverter = ac;
-    this.x509CertificateConverter = x509cc;
     this.oidcIdConverter = oidc;
     this.sshKeyConverter = sshc;
     this.samlIdConverter = samlc;
+    this.x509CertificateIamConverter = x509Iamcc;
   }
 
   @Override
@@ -63,17 +64,7 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
 
       account.setPassword(scimUser.getPassword());
     }
-
-    if (scimUser.hasX509Certificates()) {
-
-      scimUser.getX509Certificates().forEach(scimCert -> {
-
-        IamX509Certificate iamCert = x509CertificateConverter.fromScim(scimCert);
-        iamCert.setAccount(account);
-        account.getX509Certificates().add(iamCert);
-      });
-    }
-
+    
     if (scimUser.hasOidcIds()) {
 
       scimUser.getIndigoUser().getOidcIds().forEach(oidcId -> {
@@ -96,7 +87,7 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
           try {
             iamSshKey.setFingerprint(RSAPublicKeyUtils.getSHA256Fingerprint(iamSshKey.getValue()));
           } catch (InvalidSshKeyException e) {
-            throw new ScimException(e.getMessage());
+            throw new ScimException(e.getMessage(),e);
           }
         }
 
@@ -119,6 +110,14 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
         iamSamlId.setAccount(account);
         account.getSamlIds().add(iamSamlId);
 
+      });
+    }
+    
+    if (scimUser.hasX509Certificates()) {
+      scimUser.getIndigoUser().getCertificates().forEach(c -> {
+        IamX509Certificate cert = x509CertificateIamConverter.fromScim(c);
+        cert.setAccount(account);
+        account.getX509Certificates().add(cert);
       });
     }
 
@@ -174,8 +173,6 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
     }
 
     entity.getGroups().forEach(group -> builder.addGroupRef(getScimGroupRef(group)));
-    entity.getX509Certificates()
-      .forEach(cert -> builder.addX509Certificate(x509CertificateConverter.toScim(cert)));
 
     return builder.build();
   }
@@ -210,6 +207,9 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
     entity.getSamlIds()
       .forEach(samlId -> indigoUserBuilder.addSamlId(samlIdConverter.toScim(samlId)));
 
+    entity.getX509Certificates()
+      .forEach(cert -> indigoUserBuilder.addCertificate(x509CertificateIamConverter.toScim(cert)));
+    
     ScimIndigoUser indigoUser = indigoUserBuilder.build();
 
     return indigoUser.isEmpty() ? null : indigoUser;

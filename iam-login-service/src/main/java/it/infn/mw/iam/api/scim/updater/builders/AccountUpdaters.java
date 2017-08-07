@@ -7,6 +7,9 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
 public class AccountUpdaters {
 
+  private AccountUpdaters() {
+  }
+  
   public static Adders adders(IamAccountRepository repo, PasswordEncoder encoder,
       IamAccount account) {
     return new Adders(repo, encoder, account);
@@ -20,5 +23,7 @@ public class AccountUpdaters {
       IamAccount account) {
     return new Replacers(repo, encoder, account);
   }
+  
+  
 
 }

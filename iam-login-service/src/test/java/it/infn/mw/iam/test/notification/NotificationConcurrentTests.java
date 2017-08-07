@@ -2,7 +2,8 @@ package it.infn.mw.iam.test.notification;
 
 import static it.infn.mw.iam.test.RegistrationUtils.createRegistrationRequest;
 import static it.infn.mw.iam.test.RegistrationUtils.deleteUser;
-import static it.infn.mw.iam.test.TestUtils.waitIfPortIsUsed;
+import static it.infn.mw.iam.test.util.MockSmtpServerUtils.startMockSmtpServer;
+import static it.infn.mw.iam.test.util.MockSmtpServerUtils.stopMockSmtpServer;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
@@ -76,22 +77,15 @@ public class NotificationConcurrentTests {
   @Before
   public void setUp() throws InterruptedException {
     notificationRepository.deleteAll();
-
-    waitIfPortIsUsed(mailHost, mailPort, 30);
-
-    wiserSmtpServer = new Wiser();
-    wiserSmtpServer.setHostname(mailHost);
-    wiserSmtpServer.setPort(mailPort);
-    wiserSmtpServer.start();
-
+    wiserSmtpServer = startMockSmtpServer(mailHost, mailPort);
     registrationRequest = createRegistrationRequest("test_user");
   }
 
   @After
   public void tearDown() {
-    wiserSmtpServer.stop();
-
+    stopMockSmtpServer(wiserSmtpServer);
     deleteUser(registrationRequest.getAccountId());
+    
     notificationRepository.deleteAll();
 
     if (wiserSmtpServer.getServer().isRunning()) {
@@ -145,6 +139,8 @@ public class NotificationConcurrentTests {
     for (Future<Integer> elem : futuresList) {
       elem.get();
     }
+    
+    executorService.shutdown();
 
     executorService.shutdown();
 
@@ -192,7 +188,7 @@ public class NotificationConcurrentTests {
       try {
         barrier.await();
       } catch (Exception ex) {
-        ex.printStackTrace();
+        throw new RuntimeException(ex);
       }
 
       this.notificationService.clearExpiredNotifications();

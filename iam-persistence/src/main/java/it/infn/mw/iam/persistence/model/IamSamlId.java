@@ -1,5 +1,7 @@
 package it.infn.mw.iam.persistence.model;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -13,7 +15,12 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "iam_saml_id", 
 indexes = {@Index(columnList="idpId,attribute_id,userId", name="IDX_IAM_SAML_ID_1")})
-public class IamSamlId implements IamAccountRef {
+public class IamSamlId implements IamAccountRef, Serializable {
+
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

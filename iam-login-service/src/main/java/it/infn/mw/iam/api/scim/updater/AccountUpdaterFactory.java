@@ -7,12 +7,13 @@ import it.infn.mw.iam.api.scim.model.ScimPatchOperation;
 /**
  * Builds a list of {@link AccountUpdater} objects linked to a patch operation
  */
-public interface AccountUpdaterFactory<EntityType, ScimType> {
+@FunctionalInterface
+public interface AccountUpdaterFactory<E, S> {
 
 
   /**
    * 
    * @param entity @param u @return
    */
-  List<AccountUpdater> getUpdatersForPatchOperation(EntityType entity, ScimPatchOperation<ScimType> u);
+  List<AccountUpdater> getUpdatersForPatchOperation(E entity, ScimPatchOperation<S> u);
 }

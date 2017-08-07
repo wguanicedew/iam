@@ -1,7 +1,5 @@
 package it.infn.mw.iam.authn.saml.util;
 
-import java.util.Optional;
-
 import org.opensaml.saml2.core.NameID;
 import org.springframework.security.saml.SAMLCredential;
 
@@ -18,23 +16,24 @@ public class NameIdUserIdentifierResolver extends AbstractSamlUserIdentifierReso
   }
 
   @Override
-  public Optional<IamSamlId> getSamlUserIdentifier(SAMLCredential samlCredential) {
-
+  public SamlUserIdentifierResolutionResult resolveSamlUserIdentifier(
+      SAMLCredential samlCredential) {
+   
     Verify.verifyNotNull(samlCredential);
-
+    
     if (samlCredential.getNameID() != null) {
       NameID nameId = samlCredential.getNameID();
-      
+
       IamSamlId samlId = new IamSamlId();
       samlId.setAttributeId(nameId.getFormat());
       samlId.setUserId(nameId.getValue());
       samlId.setIdpId(samlCredential.getRemoteEntityID());
-      
-      return Optional.of(samlId);
+
+      return SamlUserIdentifierResolutionResult.resolutionSuccess(samlId);
 
     }
     
-    return Optional.empty();
+    return SamlUserIdentifierResolutionResult.resolutionFailure("NameID resolution failure");
   }
 
 }

@@ -76,10 +76,6 @@ public class ScimSshKey {
     private Boolean primary;
     private String fingerprint;
 
-    public Builder() {
-
-    }
-
     public Builder display(String display) {
 
       this.display = display;

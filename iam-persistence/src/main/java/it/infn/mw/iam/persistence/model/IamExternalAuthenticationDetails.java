@@ -1,5 +1,6 @@
 package it.infn.mw.iam.persistence.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -17,7 +18,12 @@ import javax.persistence.TemporalType;
 
 @Entity
 @Table(name = "iam_ext_authn")
-public class IamExternalAuthenticationDetails {
+public class IamExternalAuthenticationDetails implements Serializable{
+
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

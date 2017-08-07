@@ -42,12 +42,15 @@ import it.infn.mw.iam.authn.TimestamperSuccessHandler;
 import it.infn.mw.iam.authn.oidc.OidcAccessDeniedHandler;
 import it.infn.mw.iam.authn.oidc.OidcAuthenticationProvider;
 import it.infn.mw.iam.authn.oidc.OidcClientFilter;
+import it.infn.mw.iam.authn.x509.IamX509AuthenticationProvider;
+import it.infn.mw.iam.authn.x509.IamX509AuthenticationUserDetailService;
+import it.infn.mw.iam.authn.x509.IamX509PreauthenticationProcessingFilter;
+import it.infn.mw.iam.authn.x509.X509AuthenticationCredentialExtractor;
+import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-
-
 
   @Configuration
   @Order(100)
@@ -68,7 +71,16 @@ public class SecurityConfig {
     private UserDetailsService iamUserDetailsService;
 
     @Autowired
+    private X509AuthenticationCredentialExtractor x509CredentialExtractor;
+
+    @Autowired
+    private IamX509AuthenticationUserDetailService x509UserDetailsService;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private IamAccountRepository accountRepo;
 
     @Autowired
     public void configureGlobal(final AuthenticationManagerBuilder auth) throws Exception {
@@ -83,6 +95,20 @@ public class SecurityConfig {
     public void configure(final WebSecurity web) throws Exception {
 
       web.expressionHandler(oAuth2WebSecurityExpressionHandler);
+    }
+
+
+    public IamX509AuthenticationProvider iamX509AuthenticationProvider() {
+
+      IamX509AuthenticationProvider provider = new IamX509AuthenticationProvider();
+      provider.setPreAuthenticatedUserDetailsService(x509UserDetailsService);
+      return provider;
+    }
+
+
+    public IamX509PreauthenticationProcessingFilter iamX509Filter() throws Exception {
+      return new IamX509PreauthenticationProcessingFilter(x509CredentialExtractor,
+          iamX509AuthenticationProvider());
     }
 
     @Override
@@ -118,7 +144,9 @@ public class SecurityConfig {
         .and().anonymous()
         .and()
           .csrf()
-            .requireCsrfProtectionMatcher(new AntPathRequestMatcher("/authorize")).disable();
+            .requireCsrfProtectionMatcher(new AntPathRequestMatcher("/authorize")).disable()
+        .addFilter(iamX509Filter());
+       
       // @formatter:on
     }
 
@@ -131,7 +159,8 @@ public class SecurityConfig {
     public AuthenticationSuccessHandler successHandler() {
 
       return new TimestamperSuccessHandler(
-          new RootIsDashboardSuccessHandler(iamBaseUrl, new HttpSessionRequestCache()));
+          new RootIsDashboardSuccessHandler(iamBaseUrl, new HttpSessionRequestCache()),
+          accountRepo);
     }
   }
 

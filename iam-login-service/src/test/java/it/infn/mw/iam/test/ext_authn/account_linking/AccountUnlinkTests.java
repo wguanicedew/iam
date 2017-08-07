@@ -1,8 +1,9 @@
 package it.infn.mw.iam.test.ext_authn.account_linking;
 
-import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.epuid;
-import static it.infn.mw.iam.test.ext_authn.saml.SamlExternalAuthenticationTestSupport.DEFAULT_IDP_ID;
-import static it.infn.mw.iam.test.ext_authn.saml.SamlExternalAuthenticationTestSupport.T2_EPUID;
+import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.EPUID;
+
+import static it.infn.mw.iam.test.ext_authn.saml.SamlAuthenticationTestSupport.DEFAULT_IDP_ID;
+import static it.infn.mw.iam.test.ext_authn.saml.SamlAuthenticationTestSupport.T2_EPUID;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.isIn;
@@ -52,7 +53,7 @@ public class AccountUnlinkTests {
 
   private MockMvc mvc;
   
-  public static final String SAML_ATTRIBUTE_ID = epuid.getAttributeName();
+  public static final String SAML_ATTRIBUTE_ID = EPUID.getAttributeName();
 
   public static final String UNLINKED_ISSUER = UUID.randomUUID().toString();
   public static final String UNLINKED_SUBJECT = UUID.randomUUID().toString();
@@ -99,13 +100,13 @@ public class AccountUnlinkTests {
       .perform(delete(accountLinkingResourceOidc()).param("iss", LINKED_OIDC_ID.getIssuer())
         .param("sub", LINKED_OIDC_ID.getSubject()))
       .andDo(print())
-      .andExpect(status().is4xxClientError());
+      .andExpect(status().isUnauthorized());
 
     mvc
       .perform(delete(accountLinkingResourceSaml()).param("iss", LINKED_SAML_ID.getIdpId())
         .param("sub", LINKED_SAML_ID.getUserId()))
       .andDo(print())
-      .andExpect(status().is4xxClientError());
+      .andExpect(status().isUnauthorized());
   }
 
   @Test
@@ -205,5 +206,7 @@ public class AccountUnlinkTests {
     iamAccountRepo.save(user);
 
   }
+  
+  
 
 }

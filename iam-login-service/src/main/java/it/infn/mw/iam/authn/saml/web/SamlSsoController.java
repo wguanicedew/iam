@@ -25,7 +25,7 @@ public class SamlSsoController {
 
   @Autowired
   MetadataLookupService lookupService;
-
+  
   @RequestMapping(value = "/idps", method = RequestMethod.GET)
   public @ResponseBody List<IdpDescription> idps(
       @RequestParam(value = "q", required = false) String text) {
@@ -43,4 +43,5 @@ public class SamlSsoController {
       @RequestParam("returnIDParam") String returnIDParam) {
     return "iam/samlDiscovery";
   }
+  
 }

@@ -48,7 +48,7 @@ public abstract class DefaultUpdater<T> implements Updater {
   }
 
   private static <T> NullSafeNotEqualsMatcher<T> nullSafeNotEqualsMatcher(Supplier<T> supp) {
-    return new NullSafeNotEqualsMatcher<T>(supp);
+    return new NullSafeNotEqualsMatcher<>(supp);
   }
 
   @Override

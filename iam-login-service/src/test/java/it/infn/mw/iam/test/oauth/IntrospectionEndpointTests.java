@@ -4,13 +4,17 @@ package it.infn.mw.iam.test.oauth;
 
 import static com.jayway.restassured.RestAssured.given;
 import static it.infn.mw.iam.test.TestUtils.passwordTokenGetter;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.nullValue;
 
 import javax.transaction.Transactional;
 
 import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.WebIntegrationTest;
 import org.springframework.http.HttpStatus;
@@ -24,6 +28,9 @@ import it.infn.mw.iam.IamLoginService;
 @Transactional
 public class IntrospectionEndpointTests {
 
+  @Value("${iam.organisation.name}")
+  String organisationName;
+  
   @Test
   public void testIntrospectionEndpointRetursBasicUserInformation() {
     String accessToken =
@@ -42,11 +49,11 @@ public class IntrospectionEndpointTests {
       .log().body(true)
       .statusCode(HttpStatus.OK.value())
       .body("active", equalTo(true))
-      .body("groups", Matchers.hasSize(Matchers.equalTo(2)))
-      .body("groups", Matchers.containsInAnyOrder("Production", "Analysis"))
-      .body("preferred_username", Matchers.equalTo("test"))
-      .body("organisation_name", Matchers.equalTo("indigo-dc"))
-      .body("email", Matchers.equalTo("test@iam.test"));
+      .body("groups", hasSize(Matchers.equalTo(2)))
+      .body("groups", containsInAnyOrder("Production", "Analysis"))
+      .body("preferred_username", equalTo("test"))
+      .body("organisation_name", equalTo(organisationName))
+      .body("email", equalTo("test@iam.test"));
     // @formatter:on
   }
 
@@ -70,10 +77,10 @@ public class IntrospectionEndpointTests {
       .log().body(true)
       .statusCode(HttpStatus.OK.value())
       .body("active", equalTo(true))
-      .body("groups", Matchers.nullValue())
-      .body("preferred_username", Matchers.nullValue())
-      .body("organisation_name", Matchers.nullValue())
-      .body("email", Matchers.nullValue());
+      .body("groups", nullValue())
+      .body("preferred_username", nullValue())
+      .body("organisation_name", nullValue())
+      .body("email", nullValue());
     // @formatter:on
   }
 
@@ -97,10 +104,10 @@ public class IntrospectionEndpointTests {
       .log().body(true)
       .statusCode(HttpStatus.OK.value())
       .body("active", equalTo(true))
-      .body("groups", Matchers.nullValue())
-      .body("preferred_username", Matchers.nullValue())
-      .body("organisation_name", Matchers.nullValue())
-      .body("email", Matchers.equalTo("test@iam.test"));
+      .body("groups", nullValue())
+      .body("preferred_username", nullValue())
+      .body("organisation_name", nullValue())
+      .body("email", equalTo("test@iam.test"));
     // @formatter:on
   }
 

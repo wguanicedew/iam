@@ -46,6 +46,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.embedded.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.OAuth2RequestValidator;
@@ -81,7 +82,6 @@ public class MitreServicesConfig {
 
   @Bean
   OAuth2RequestFactory requestFactory() {
-
     return new IamOAuth2RequestFactory(clientDetailsEntityService());
   }
 
@@ -145,6 +145,7 @@ public class MitreServicesConfig {
     return b;
   }
 
+  @Primary
   @Bean
   public CorsFilter corsFilter() {
 

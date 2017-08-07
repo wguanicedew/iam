@@ -1,6 +1,7 @@
 package it.infn.mw.iam.test.actuator;
 
-import static it.infn.mw.iam.test.TestUtils.waitIfPortIsUsed;
+import static it.infn.mw.iam.test.util.MockSmtpServerUtils.startMockSmtpServer;
+import static it.infn.mw.iam.test.util.MockSmtpServerUtils.stopMockSmtpServer;
 import static java.lang.String.format;
 import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -62,19 +63,15 @@ public class MailHealthEndpointsTests {
       .apply(springSecurity())
       .alwaysDo(print())
       .build();
-
-    waitIfPortIsUsed(mailHost, mailPort, 30);
-
-    wiser = new Wiser();
-    wiser.setHostname(mailHost);
-    wiser.setPort(mailPort);
-    wiser.start();
+    
+    wiser = startMockSmtpServer(mailHost, mailPort);
   }
 
   @After
   public synchronized void teardown() {
 
-    wiser.stop();
+    stopMockSmtpServer(wiser);
+    
     if (wiser.getServer().isRunning()) {
       Assert.fail("Fake mail server is still running after stop!!");
     }

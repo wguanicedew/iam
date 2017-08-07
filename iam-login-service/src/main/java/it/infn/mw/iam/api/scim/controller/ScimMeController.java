@@ -55,7 +55,7 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 @Transactional
 public class ScimMeController implements ApplicationEventPublisherAware {
 
-  public static final EnumSet<UpdaterType> SUPPORTED_UPDATER_TYPES =
+  protected static final EnumSet<UpdaterType> SUPPORTED_UPDATER_TYPES =
       EnumSet.of(ACCOUNT_REMOVE_OIDC_ID, ACCOUNT_REMOVE_SAML_ID, ACCOUNT_REPLACE_EMAIL,
           ACCOUNT_REPLACE_FAMILY_NAME, ACCOUNT_REPLACE_GIVEN_NAME, ACCOUNT_REPLACE_PICTURE,
           ACCOUNT_REMOVE_PICTURE);

@@ -30,7 +30,6 @@ public class AssertionConfig {
   @Bean
   @Qualifier("clientAssertionValidator")
   public AssertionValidator clientAssertionValidator() {
-    // TODO: verify whitelist
     Map<String, String> whitelist = new LinkedHashMap<>();
     whitelist.put("http://artemesia.local", "http://localhost:8080/jwk");
 

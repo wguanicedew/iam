@@ -2,6 +2,7 @@ package it.infn.mw.iam.persistence.model;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -35,7 +36,12 @@ import com.google.common.base.Preconditions;
  */
 @Entity
 @Table(name = "iam_account")
-public class IamAccount {
+public class IamAccount implements Serializable{
+
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -56,15 +62,22 @@ public class IamAccount {
 
   @Temporal(TemporalType.TIMESTAMP)
   @Column(nullable = false)
-  Date creationTime;
+  private Date creationTime;
 
   @Temporal(TemporalType.TIMESTAMP)
   @Column(nullable = false)
-  Date lastUpdateTime;
+  private Date lastUpdateTime;
+
+  @Column(name = "provisioned", nullable = false)
+  private boolean provisioned = false;
 
   @OneToOne(cascade = CascadeType.ALL)
   @JoinColumn(name = "user_info_id")
   private IamUserInfo userInfo;
+  
+  @Temporal(TemporalType.TIMESTAMP)
+  @Column(name="last_login_time", nullable = true)
+  private Date lastLoginTime;
 
   @ManyToMany
   @JoinTable(name = "iam_account_authority",
@@ -330,8 +343,16 @@ public class IamAccount {
   public void linkX509Certificates(Collection<IamX509Certificate> ids) {
 
     checkNotNull(ids);
+
     for (IamX509Certificate id : ids) {
-      link(x509Certificates, id, this);
+      if (!getX509Certificates().contains(id)) {
+        Date addedTimestamp = new Date();
+        id.setAccount(this);
+        id.setCreationTime(addedTimestamp);
+        id.setLastUpdateTime(addedTimestamp);
+
+        getX509Certificates().add(id);
+      }
     }
   }
 
@@ -455,15 +476,38 @@ public class IamAccount {
     return true;
   }
 
+  public boolean isProvisioned() {
+    return provisioned;
+  }
+
+  public void setProvisioned(boolean provisioned) {
+    this.provisioned = provisioned;
+  }
+  
+  public Date getLastLoginTime() {
+    return lastLoginTime;
+  }
+
+  public void setLastLoginTime(Date lastLoginTime) {
+    this.lastLoginTime = lastLoginTime;
+  }
+
   @Override
   public String toString() {
-
     return "IamAccount [id=" + id + ", uuid=" + uuid + ", username=" + username + ", password="
         + password + ", active=" + active + ", creationTime=" + creationTime + ", lastUpdateTime="
-        + lastUpdateTime + ", userInfo=" + userInfo + ", authorities=" + authorities + ", groups="
-        + groups + ", samlIds=" + samlIds + ", oidcIds=" + oidcIds + ", sshKeys=" + sshKeys
+        + lastUpdateTime + ", provisioned=" + provisioned + ", userInfo=" + userInfo
+        + ", lastLoginTime=" + lastLoginTime + ", authorities=" + authorities + ", groups=" + groups
+        + ", samlIds=" + samlIds + ", oidcIds=" + oidcIds + ", sshKeys=" + sshKeys
         + ", x509Certificates=" + x509Certificates + ", confirmationKey=" + confirmationKey
         + ", resetKey=" + resetKey + ", registrationRequest=" + registrationRequest + "]";
   }
 
+  public static IamAccount newAccount() {
+    IamAccount newAccount = new IamAccount();
+    IamUserInfo userInfo = new IamUserInfo();
+    userInfo.setIamAccount(newAccount);
+    newAccount.setUserInfo(userInfo);
+    return newAccount;
+  }
 }

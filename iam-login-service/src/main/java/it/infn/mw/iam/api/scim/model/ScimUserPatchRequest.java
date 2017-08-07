@@ -12,7 +12,6 @@ import org.hibernate.validator.constraints.NotEmpty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 
@@ -59,9 +58,9 @@ public class ScimUserPatchRequest {
 
   public static class Builder {
 
-    private Set<String> schemas = new HashSet<String>();
+    private Set<String> schemas = new HashSet<>();
     private List<ScimPatchOperation<ScimUser>> operations =
-        new ArrayList<ScimPatchOperation<ScimUser>>();
+        new ArrayList<>();
 
     public Builder() {
       schemas.add(PATCHOP_SCHEMA);

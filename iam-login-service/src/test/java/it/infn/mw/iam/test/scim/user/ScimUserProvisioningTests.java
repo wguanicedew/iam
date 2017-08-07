@@ -353,7 +353,7 @@ public class ScimUserProvisioningTests {
       .build();
 
     restUtils.doPost("/scim/Users/", anotherUser, HttpStatus.CONFLICT).body("detail",
-        containsString("already bounded to another user"));
+        containsString("already bound to a user"));
 
     restUtils.doDelete(creationResult.getMeta().getLocation());
 
@@ -447,7 +447,7 @@ public class ScimUserProvisioningTests {
       .build();
 
     restUtils.doPost("/scim/Users/", anotherUser, HttpStatus.CONFLICT).body("detail",
-        containsString("already bounded to another user"));
+        containsString("already bound to a user"));
 
     restUtils.doDelete(creationResult.getMeta().getLocation());
 
@@ -493,79 +493,6 @@ public class ScimUserProvisioningTests {
     restUtils.doDelete(creationResult.getMeta().getLocation());
   }
 
-
-  @Test
-  public void testUserCreationWithX509Certificate() {
-
-    ScimUser user = ScimUser.builder("user_with_x509")
-      .buildEmail("test_user@test.org")
-      .buildName("User", "With x509 Certificate")
-      .buildX509Certificate("Personal1", TestUtils.x509Certs.get(0).certificate, false)
-      .active(true)
-      .build();
-
-    ScimUser creationResult = restUtils.doPost("/scim/Users/", user)
-      .body("x509Certificates", hasSize(equalTo(1)))
-      .body("x509Certificates[0].display", equalTo("Personal1"))
-      .body("x509Certificates[0].value", equalTo(TestUtils.x509Certs.get(0).certificate))
-      .body("x509Certificates[0].primary", equalTo(true))
-      .extract()
-      .as(ScimUser.class);
-
-    restUtils.doDelete(creationResult.getMeta().getLocation());
-  }
-
-  @Test
-  public void testUserCreationWithMultipleX509Certificate() {
-
-    ScimUser user = ScimUser.builder("user_with_x509")
-      .buildEmail("test_user@test.org")
-      .buildName("User", "With x509 Certificate")
-      .buildX509Certificate("Personal1", TestUtils.x509Certs.get(0).certificate, false)
-      .buildX509Certificate("Personal2", TestUtils.x509Certs.get(1).certificate, true)
-      .active(true)
-      .build();
-
-    ScimUser creationResult = restUtils.doPost("/scim/Users/", user)
-      .body("x509Certificates", hasSize(equalTo(2)))
-      .body("x509Certificates[0].display", equalTo("Personal1"))
-      .body("x509Certificates[0].value", equalTo(TestUtils.x509Certs.get(0).certificate))
-      .body("x509Certificates[0].primary", equalTo(false))
-      .body("x509Certificates[1].display", equalTo("Personal2"))
-      .body("x509Certificates[1].value", equalTo(TestUtils.x509Certs.get(1).certificate))
-      .body("x509Certificates[1].primary", equalTo(true))
-      .extract()
-      .as(ScimUser.class);
-
-    restUtils.doDelete(creationResult.getMeta().getLocation());
-  }
-
-  @Test
-  public void testUserCreationWithMultipleX509CertificateAndNoPrimary() {
-
-    ScimUser user = ScimUser.builder("user_with_x509")
-      .buildEmail("test_user@test.org")
-      .buildName("User", "With x509 Certificate")
-      .buildX509Certificate("Personal1", TestUtils.x509Certs.get(0).certificate, false)
-      .buildX509Certificate("Personal2", TestUtils.x509Certs.get(1).certificate, false)
-      .active(true)
-      .build();
-
-    ScimUser creationResult = restUtils.doPost("/scim/Users/", user)
-      .body("x509Certificates", hasSize(equalTo(2)))
-      .body("x509Certificates[0].display", equalTo("Personal1"))
-      .body("x509Certificates[0].value", equalTo(TestUtils.x509Certs.get(0).certificate))
-      .body("x509Certificates[0].primary", equalTo(true))
-      .body("x509Certificates[1].display", equalTo("Personal2"))
-      .body("x509Certificates[1].value", equalTo(TestUtils.x509Certs.get(1).certificate))
-      .body("x509Certificates[1].primary", equalTo(false))
-      .extract()
-      .as(ScimUser.class);
-
-    restUtils.doDelete(creationResult.getMeta().getLocation());
-  }
-
-
   @Test
   public void testEmailIsNotAlreadyLinkedOnCreate() {
     ScimUser user0 = ScimUser.builder("test_same_email_0")
@@ -583,7 +510,7 @@ public class ScimUserProvisioningTests {
     user0 = restUtils.doPost("/scim/Users/", user0).extract().as(ScimUser.class);
 
     restUtils.doPost("/scim/Users/", user1, HttpStatus.CONFLICT).body("detail",
-        containsString("email already assigned to an existing user"));
+        equalTo("A user linked with email 'same_email@test.org' already exists"));
 
     restUtils.deleteUsers(user0);
 

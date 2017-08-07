@@ -116,7 +116,6 @@ pipeline {
   }
 
   post {
-
     success {
       slackSend channel: "#iam", color: 'good', message: "${env.JOB_NAME} - #${env.BUILD_NUMBER} Success (<${env.BUILD_URL}|Open>)"
     }

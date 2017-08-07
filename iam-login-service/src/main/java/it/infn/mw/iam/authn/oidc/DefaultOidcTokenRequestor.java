@@ -73,40 +73,39 @@ public class DefaultOidcTokenRequestor implements OidcTokenRequestor {
     switch (config.clientConfig.getTokenEndpointAuthMethod()) {
 
       case SECRET_BASIC:
-	basicAuthRequest(config.clientConfig, headers);
-	break;
+        basicAuthRequest(config.clientConfig, headers);
+        break;
       case SECRET_JWT:
-	jwtAuthRequest(config.clientConfig);
-	break;
+        jwtAuthRequest(config.clientConfig);
+        break;
       case PRIVATE_KEY:
-	jwtPrivateKeyAuthRequest(config.clientConfig);
-	break;
+        jwtPrivateKeyAuthRequest(config.clientConfig);
+        break;
       case SECRET_POST:
-	formAuthRequest(config.clientConfig, tokenRequestParams);
-	break;
+        formAuthRequest(config.clientConfig, tokenRequestParams);
+        break;
       case NONE:
-	break;
+        break;
 
       default:
-	throw new AuthenticationServiceException(
-	    "Unsupported token endpoint authentication method");
+        throw new AuthenticationServiceException(
+            "Unsupported token endpoint authentication method");
     }
 
-    HttpEntity<MultiValueMap<String, String>> tokenRequest =
-	new HttpEntity<>(tokenRequestParams, headers);
+    return
+        new HttpEntity<>(tokenRequestParams, headers);
 
-    return tokenRequest;
   }
 
   Optional<TokenEndpointErrorResponse> parseErrorResponse(HttpClientErrorException e) {
     try {
       TokenEndpointErrorResponse response = jacksonObjectMapper
-	.readValue(e.getResponseBodyAsByteArray(), TokenEndpointErrorResponse.class);
+        .readValue(e.getResponseBodyAsByteArray(), TokenEndpointErrorResponse.class);
 
       return Optional.of(response);
     } catch (Exception jsonParsingError) {
       LOG.error("Error parsing token endpoint response: {}. input: {}",
-	  jsonParsingError.getMessage(), e.getResponseBodyAsString());
+          jsonParsingError.getMessage(), e.getResponseBodyAsString(), jsonParsingError);
 
       return Optional.empty();
     }
@@ -122,28 +121,28 @@ public class DefaultOidcTokenRequestor implements OidcTokenRequestor {
     try {
 
       return restTemplate.postForObject(conf.serverConfig.getTokenEndpointUri(),
-	  prepareTokenRequest(conf, tokenRequestParams), String.class);
+          prepareTokenRequest(conf, tokenRequestParams), String.class);
 
     } catch (HttpClientErrorException e) {
 
       if (e.getStatusCode() != null && e.getStatusCode().equals(BAD_REQUEST)) {
-	parseErrorResponse(e).ifPresent(er -> {
+        parseErrorResponse(e).ifPresent(er -> {
 
 
-	  String errorMessage = String.format("Token request error: %s '%s'", er.getError(),
-	      er.getErrorDescription());
-	  LOG.error(errorMessage);
+          String errorMessage = String.format("Token request error: %s '%s'", er.getError(),
+              er.getErrorDescription());
+          LOG.error(errorMessage);
 
-	  throw new OidcClientError(e.getMessage(), er.getError(), er.getErrorDescription(),
-	      er.getErrorUri());
+          throw new OidcClientError(e.getMessage(), er.getError(), er.getErrorDescription(),
+              er.getErrorUri());
 
-	});
+        });
       }
 
       String errorMessage = String.format("Token request error: %s", e.getMessage());
       LOG.error(errorMessage, e);
       throw new OidcClientError(errorMessage, e);
-    } catch (Throwable e) {
+    } catch (Exception e) {
       String errorMessage = String.format("Token request error: %s", e.getMessage());
       LOG.error(errorMessage, e);
       throw new OidcClientError(errorMessage, e);

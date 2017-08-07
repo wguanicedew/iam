@@ -33,7 +33,7 @@ import com.google.gson.JsonSyntaxException;
 public class PoliteJsonMessageSource extends AbstractMessageSource {
 
   // Logger for this class
-  private static final Logger logger = LoggerFactory.getLogger(PoliteJsonMessageSource.class);
+  private static final Logger LOG = LoggerFactory.getLogger(PoliteJsonMessageSource.class);
 
   private Resource baseDirectory;
 
@@ -148,7 +148,7 @@ public class PoliteJsonMessageSource extends AbstractMessageSource {
 
           Resource r = getBaseDirectory().createRelative(filename);
 
-          logger.info("No locale loaded, trying to load from " + r);
+          LOG.info("No locale loaded, trying to load from {}" , r);
 
           JsonParser parser = new JsonParser();
           JsonObject obj =
@@ -158,7 +158,7 @@ public class PoliteJsonMessageSource extends AbstractMessageSource {
         }
         languageMaps.put(locale, set);
       } catch (JsonIOException | JsonSyntaxException | IOException e) {
-        logger.debug("Unable to load locale: {}", e.getMessage());
+        LOG.debug("Unable to load locale: {}", e.getMessage(),e);
       }
     }
 

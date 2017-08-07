@@ -4,6 +4,7 @@ package it.infn.mw.iam.core.time;
  * Time provider interface.
  *
  */
+@FunctionalInterface
 public interface TimeProvider {
 
   /**

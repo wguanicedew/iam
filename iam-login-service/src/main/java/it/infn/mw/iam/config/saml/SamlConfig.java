@@ -1,15 +1,20 @@
 package it.infn.mw.iam.config.saml;
 
-import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.eppn;
-import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.epuid;
+import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.EPPN;
+import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.EPTID;
+import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.EPUID;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
@@ -17,9 +22,13 @@ import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.velocity.app.VelocityEngine;
 import org.opensaml.saml2.core.NameIDType;
+import org.opensaml.saml2.metadata.provider.FileBackedHTTPMetadataProvider;
 import org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider;
 import org.opensaml.saml2.metadata.provider.MetadataProvider;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
+import org.opensaml.saml2.metadata.provider.ResourceBackedMetadataProvider;
+import org.opensaml.util.resource.ClasspathResource;
+import org.opensaml.util.resource.ResourceException;
 import org.opensaml.xml.parse.BasicParserPool;
 import org.opensaml.xml.parse.ParserPool;
 import org.opensaml.xml.parse.StaticBasicParserPool;
@@ -37,6 +46,9 @@ import org.springframework.core.annotation.Order;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.SchedulingConfigurer;
+import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -95,6 +107,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 
 import it.infn.mw.iam.authn.ExternalAuthenticationFailureHandler;
@@ -102,25 +115,32 @@ import it.infn.mw.iam.authn.ExternalAuthenticationSuccessHandler;
 import it.infn.mw.iam.authn.InactiveAccountAuthenticationHander;
 import it.infn.mw.iam.authn.RootIsDashboardSuccessHandler;
 import it.infn.mw.iam.authn.TimestamperSuccessHandler;
+import it.infn.mw.iam.authn.saml.CleanInactiveProvisionedAccounts;
 import it.infn.mw.iam.authn.saml.DefaultSAMLUserDetailsService;
 import it.infn.mw.iam.authn.saml.IamSamlAuthenticationProvider;
+import it.infn.mw.iam.authn.saml.JustInTimeProvisioningSAMLUserDetailsService;
+import it.infn.mw.iam.authn.saml.MetadataLookupService;
 import it.infn.mw.iam.authn.saml.SamlExceptionMessageHelper;
 import it.infn.mw.iam.authn.saml.util.FirstApplicableChainedSamlIdResolver;
 import it.infn.mw.iam.authn.saml.util.SamlIdResolvers;
 import it.infn.mw.iam.authn.saml.util.SamlUserIdentifierResolver;
+import it.infn.mw.iam.config.saml.IamSamlProperties.IamSamlJITAccountProvisioningProperties;
 import it.infn.mw.iam.config.saml.SamlConfig.IamProperties;
 import it.infn.mw.iam.config.saml.SamlConfig.ServerProperties;
+import it.infn.mw.iam.core.time.SystemTimeProvider;
+import it.infn.mw.iam.core.user.IamAccountService;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
 @Configuration
 @Order(value = Ordered.LOWEST_PRECEDENCE)
 @Profile("saml")
-@EnableConfigurationProperties({IamSamlProperties.class, IamProperties.class,
-    ServerProperties.class})
-public class SamlConfig extends WebSecurityConfigurerAdapter {
+@EnableConfigurationProperties({IamSamlProperties.class,
+    IamSamlJITAccountProvisioningProperties.class, IamProperties.class, ServerProperties.class})
+@EnableScheduling
+public class SamlConfig extends WebSecurityConfigurerAdapter implements SchedulingConfigurer {
 
   public static final Logger LOG = LoggerFactory.getLogger(SamlConfig.class);
-  
+
   @Autowired
   ResourceLoader resourceLoader;
 
@@ -131,16 +151,30 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
   IamAccountRepository repo;
 
   @Autowired
+  IamAccountService accountService;
+
+  @Autowired
   IamProperties iamProperties;
 
   @Autowired
   IamSamlProperties samlProperties;
 
   @Autowired
+  IamSamlJITAccountProvisioningProperties jitProperties;
+
+  @Autowired
   ServerProperties serverProperties;
 
   @Autowired
   InactiveAccountAuthenticationHander inactiveAccountHandler;
+
+  @Autowired
+  MetadataLookupService metadataLookupService;
+
+
+  Timer metadataFetchTimer = new Timer();
+
+  BasicParserPool basicParserPool = new BasicParserPool();
 
   @ConfigurationProperties(prefix = "iam")
   public static class IamProperties {
@@ -173,43 +207,45 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
   @Configuration
   @EnableConfigurationProperties({IamSamlProperties.class})
   public static class IamSamlConfig {
-    
-    public static final String[] DEFAULT_ID_RESOLVERS = {epuid.name(), eppn.name()};
-    
+
+
+    protected static final String[] DEFAULT_ID_RESOLVERS =
+        {EPUID.getAlias(), EPTID.getAlias(), EPPN.getAlias()};
+
     @Autowired
     IamSamlProperties samlProperties;
-    
-    private String[] resolverNames(){
-      
-      if (Strings.isNullOrEmpty(samlProperties.getIdResolvers())){
+
+    private String[] resolverNames() {
+
+      if (Strings.isNullOrEmpty(samlProperties.getIdResolvers())) {
         return DEFAULT_ID_RESOLVERS;
       }
-      
+
       return samlProperties.getIdResolvers().split(",");
     }
-    
+
     @Bean
     public SamlUserIdentifierResolver resolver() {
-      
+
       List<SamlUserIdentifierResolver> resolvers = new ArrayList<>();
 
       SamlIdResolvers resolverFactory = new SamlIdResolvers();
-      
+
       String[] resolverNames = resolverNames();
-      
-      for (String n: resolverNames){
+
+      for (String n : resolverNames) {
         SamlUserIdentifierResolver r = resolverFactory.byName(n);
-        if (r != null){
+        if (r != null) {
           resolvers.add(r);
         } else {
           LOG.warn("Unsupported saml id resolver: {}", n);
         }
       }
-      
-      if (resolvers.isEmpty()){
+
+      if (resolvers.isEmpty()) {
         throw new IllegalStateException("Could not configure SAML id resolvers");
       }
-      
+
       return new FirstApplicableChainedSamlIdResolver(resolvers);
     }
 
@@ -218,6 +254,12 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
   @Bean
   public SAMLUserDetailsService samlUserDetailsService(SamlUserIdentifierResolver resolver,
       IamAccountRepository accountRepo, InactiveAccountAuthenticationHander handler) {
+
+    if (jitProperties.getEnabled()) {
+
+      return new JustInTimeProvisioningSAMLUserDetailsService(resolver, accountService, handler,
+          accountRepo, jitProperties.getTrustedIdpsAsOptionalSet());
+    }
 
     return new DefaultSAMLUserDetailsService(resolver, accountRepo, handler);
 
@@ -255,13 +297,13 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
     return new HttpClient(multiThreadedHttpConnectionManager());
   }
 
-  // SAML Authentication Provider responsible for validating of received SAML
-  // messages
   @Bean
   public SAMLAuthenticationProvider samlAuthenticationProvider(SamlUserIdentifierResolver resolver,
       IamAccountRepository accountRepo, InactiveAccountAuthenticationHander handler) {
 
-    IamSamlAuthenticationProvider samlAuthenticationProvider = new IamSamlAuthenticationProvider(resolver);
+    IamSamlAuthenticationProvider samlAuthenticationProvider =
+        new IamSamlAuthenticationProvider(resolver);
+
     samlAuthenticationProvider
       .setUserDetails(samlUserDetailsService(resolver, accountRepo, handler));
     samlAuthenticationProvider.setForcePrincipalAsString(false);
@@ -340,7 +382,7 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
   @Bean
   public KeyManager keyManager() {
 
-    Map<String, String> passwords = new HashMap<String, String>();
+    Map<String, String> passwords = new HashMap<>();
     passwords.put(samlProperties.getKeyId(), samlProperties.getKeyPassword());
 
     DefaultResourceLoader loader = new DefaultResourceLoader();
@@ -370,17 +412,6 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
     return new Protocol("https", socketFactory(), 443);
   }
 
-  //
-  // @Bean
-  // public MethodInvokingFactoryBean socketFactoryInitialization() {
-  //
-  // MethodInvokingFactoryBean methodInvokingFactoryBean = new MethodInvokingFactoryBean();
-  // methodInvokingFactoryBean.setTargetClass(Protocol.class);
-  // methodInvokingFactoryBean.setTargetMethod("registerProtocol");
-  // Object[] args = {"https", socketFactoryProtocol()};
-  // methodInvokingFactoryBean.setArguments(args);
-  // return methodInvokingFactoryBean;
-  // }
 
   @Bean
   public WebSSOProfileOptions defaultWebSSOProfileOptions() {
@@ -403,7 +434,6 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
     return samlEntryPoint;
   }
 
-  // Setup advanced info about metadata
   @Bean
   public ExtendedMetadata extendedMetadata() {
 
@@ -416,40 +446,88 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
     return extendedMetadata;
   }
 
-  @Bean
-  @Qualifier("local")
-  public ExtendedMetadataDelegate localIdpMetadataProvider()
-      throws MetadataProviderException, URISyntaxException, IOException {
-
-    Resource metadataResource = resourceLoader.getResource(samlProperties.getIdpMetadata());
-
-    FilesystemMetadataProvider localIdpMetadataProvider =
-        new FilesystemMetadataProvider(metadataResource.getFile());
-
-    localIdpMetadataProvider.setParserPool(new BasicParserPool());
-    localIdpMetadataProvider.initialize();
-
+  private ExtendedMetadataDelegate metadataDelegate(MetadataProvider p) {
     ExtendedMetadataDelegate extendedMetadataDelegate =
-        new ExtendedMetadataDelegate(localIdpMetadataProvider, extendedMetadata());
+        new ExtendedMetadataDelegate(p, extendedMetadata());
     extendedMetadataDelegate.setMetadataTrustCheck(true);
     extendedMetadataDelegate.setMetadataRequireSignature(false);
     return extendedMetadataDelegate;
-
   }
 
-  // IDP Metadata configuration - paths to metadata of IDPs in circle of trust
-  // is here
+  private List<MetadataProvider> metadataProviders()
+      throws MetadataProviderException, IOException, ResourceException {
+
+    List<MetadataProvider> providers = new ArrayList<>();
+
+    String metadata = samlProperties.getIdpMetadata();
+
+    Iterable<String> metadataIterable =
+        Splitter.on(",").trimResults().omitEmptyStrings().split(metadata);
+
+
+    for (String m : metadataIterable) {
+      if (m.startsWith("classpath:")) {
+        LOG.info("Adding classpath based metadata provider for URL: {}", m);
+
+        ClasspathResource cpMetadataResources =
+            new ClasspathResource(m.replaceFirst("classpath:", ""));
+
+        ResourceBackedMetadataProvider metadataProvider =
+            new ResourceBackedMetadataProvider(metadataFetchTimer, cpMetadataResources);
+
+        metadataProvider.setParserPool(basicParserPool);
+        metadataProvider.initialize();
+        providers.add(metadataDelegate(metadataProvider));
+
+      } else if (m.startsWith("file:")) {
+
+        LOG.info("Adding File based metadata provider for URL: {}", m);
+        Resource metadataResource = resourceLoader.getResource(m);
+
+
+        FilesystemMetadataProvider metadataProvider =
+            new FilesystemMetadataProvider(metadataResource.getFile());
+
+        metadataProvider.setParserPool(basicParserPool);
+        metadataProvider.initialize();
+        providers.add(metadataDelegate(metadataProvider));
+
+      } else if (m.startsWith("http")) {
+
+        LOG.info("Adding HTTP metadata provider for URL: {}", m);
+
+        File metadataBackupFile = Files.createTempFile("metadata", "xml").toFile();
+        metadataBackupFile.deleteOnExit();
+
+        FileBackedHTTPMetadataProvider metadataProvider = new FileBackedHTTPMetadataProvider(
+            metadataFetchTimer, httpClient(), m, metadataBackupFile.getAbsolutePath());
+
+        metadataProvider.setParserPool(basicParserPool);
+        metadataProvider.initialize();
+        providers.add(metadataDelegate(metadataProvider));
+      } else {
+        LOG.error("Skipping invalid saml.idp-metatadata value: {}", m);
+      }
+    }
+
+    if (providers.isEmpty()) {
+      final String message = "Empty SAML metadata providers after initialization";
+      LOG.error(message);
+      throw new IllegalStateException(message);
+    }
+
+    return providers;
+  }
+
+
   @Bean
   @Qualifier("metadata")
   public CachingMetadataManager metadata()
-      throws MetadataProviderException, URISyntaxException, IOException {
+      throws MetadataProviderException, URISyntaxException, IOException, ResourceException {
 
-    List<MetadataProvider> providers = new ArrayList<MetadataProvider>();
-    providers.add(localIdpMetadataProvider());
-    return new CachingMetadataManager(providers);
+    return new CachingMetadataManager(metadataProviders());
   }
 
-  // Filter automatically generates default SP metadata
   @Bean
   public MetadataGenerator metadataGenerator() {
 
@@ -473,15 +551,12 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
 
 
   @Bean
-  public AuthenticationSuccessHandler successRedirectHandler() {
-
+  public AuthenticationSuccessHandler samlAuthenticationSuccessHandler() {
 
     RootIsDashboardSuccessHandler sa = new RootIsDashboardSuccessHandler(iamProperties.getBaseUrl(),
         new HttpSessionRequestCache());
 
-    ExternalAuthenticationSuccessHandler successHandler =
-        new ExternalAuthenticationSuccessHandler(new TimestamperSuccessHandler(sa), "/");
-    return successHandler;
+    return new ExternalAuthenticationSuccessHandler(new TimestamperSuccessHandler(sa, repo), "/");
   }
 
 
@@ -495,7 +570,8 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
 
     SAMLWebSSOHoKProcessingFilter samlWebSSOHoKProcessingFilter =
         new SAMLWebSSOHoKProcessingFilter();
-    samlWebSSOHoKProcessingFilter.setAuthenticationSuccessHandler(successRedirectHandler());
+    samlWebSSOHoKProcessingFilter
+      .setAuthenticationSuccessHandler(samlAuthenticationSuccessHandler());
     samlWebSSOHoKProcessingFilter.setAuthenticationManager(authenticationManager());
     samlWebSSOHoKProcessingFilter.setAuthenticationFailureHandler(authenticationFailureHandler());
     return samlWebSSOHoKProcessingFilter;
@@ -507,7 +583,7 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
 
     SAMLProcessingFilter samlWebSSOProcessingFilter = new SAMLProcessingFilter();
     samlWebSSOProcessingFilter.setAuthenticationManager(authenticationManager());
-    samlWebSSOProcessingFilter.setAuthenticationSuccessHandler(successRedirectHandler());
+    samlWebSSOProcessingFilter.setAuthenticationSuccessHandler(samlAuthenticationSuccessHandler());
     samlWebSSOProcessingFilter.setAuthenticationFailureHandler(authenticationFailureHandler());
     return samlWebSSOProcessingFilter;
   }
@@ -596,7 +672,7 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
   @Bean
   public SAMLProcessor processor() {
 
-    Collection<SAMLBinding> bindings = new ArrayList<SAMLBinding>();
+    Collection<SAMLBinding> bindings = new ArrayList<>();
     bindings.add(httpRedirectDeflateBinding());
     bindings.add(httpPostBinding());
     bindings.add(artifactBinding(parserPool(), velocityEngine()));
@@ -614,7 +690,7 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
   @Bean
   public FilterChainProxy samlFilter() throws Exception {
 
-    List<SecurityFilterChain> chains = new ArrayList<SecurityFilterChain>();
+    List<SecurityFilterChain> chains = new ArrayList<>();
     chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/login/**"),
         samlEntryPoint()));
     chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/logout/**"),
@@ -649,4 +725,42 @@ public class SamlConfig extends WebSecurityConfigurerAdapter {
 
     auth.authenticationProvider(samlAuthenticationProvider(resolver, repo, inactiveAccountHandler));
   }
+
+  private void scheduleMetadataLookupServiceRefresh(ScheduledTaskRegistrar taskRegistrar) {
+    LOG.info("Scheduling metadata lookup service refresh task to run every {} seconds.",
+        samlProperties.getMetadataLookupServiceRefreshPeriodSec());
+    taskRegistrar.addFixedRateTask(() -> metadataLookupService.refreshMetadata(),
+        TimeUnit.SECONDS.toMillis(samlProperties.getMetadataLookupServiceRefreshPeriodSec()));
+  }
+
+  private void scheduleProvisionedAccountsCleanup(final ScheduledTaskRegistrar taskRegistrar) {
+
+    if (!jitProperties.getEnabled()) {
+      LOG.info("Just-in-time account provisioning for SAML is DISABLED.");
+      return;
+    }
+
+    if (!jitProperties.getCleanupTaskEnabled()) {
+      LOG.info("Cleanup for SAML JIT account provisioning is DISABLED.");
+      return;
+    }
+
+    LOG.info(
+        "Scheduling Just-in-time provisioned account cleanup task to run every {} seconds. Accounts inactive for {} "
+            + "days will be deleted",
+        jitProperties.getCleanupTaskPeriodSec(), jitProperties.getInactiveAccountLifetimeDays());
+
+    taskRegistrar.addFixedRateTask(
+        new CleanInactiveProvisionedAccounts(new SystemTimeProvider(), accountService,
+            jitProperties.getInactiveAccountLifetimeDays()),
+        TimeUnit.SECONDS.toMillis(jitProperties.getCleanupTaskPeriodSec()));
+
+  }
+
+  @Override
+  public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
+    scheduleProvisionedAccountsCleanup(taskRegistrar);
+    scheduleMetadataLookupServiceRefresh(taskRegistrar);
+  }
+
 }

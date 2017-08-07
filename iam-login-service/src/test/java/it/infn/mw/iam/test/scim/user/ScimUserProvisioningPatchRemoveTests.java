@@ -27,7 +27,6 @@ import it.infn.mw.iam.api.scim.model.ScimSamlId;
 import it.infn.mw.iam.api.scim.model.ScimSshKey;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.model.ScimUserPatchRequest;
-import it.infn.mw.iam.api.scim.model.ScimX509Certificate;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.test.ScimRestUtils;
 import it.infn.mw.iam.test.TestUtils;
@@ -72,11 +71,6 @@ public class ScimUserProvisioningPatchRemoveTests {
         .idpId(TestUtils.samlIds.get(0).idpId)
         .userId(TestUtils.samlIds.get(0).userId)
         .build())
-      .addX509Certificate(ScimX509Certificate.builder()
-        .display(TestUtils.x509Certs.get(0).display)
-        .value(TestUtils.x509Certs.get(0).certificate)
-        .primary(true)
-        .build())
       .build()).extract().as(ScimUser.class));
 
     testUsers.add(restUtils.doPost("/scim/Users/", ScimUser.builder("abraham_lincoln")
@@ -94,11 +88,6 @@ public class ScimUserProvisioningPatchRemoveTests {
       .addSamlId(ScimSamlId.builder()
         .idpId(TestUtils.samlIds.get(1).idpId)
         .userId(TestUtils.samlIds.get(1).userId)
-        .build())
-      .addX509Certificate(ScimX509Certificate.builder()
-        .display(TestUtils.x509Certs.get(1).display)
-        .value(TestUtils.x509Certs.get(1).certificate)
-        .primary(true)
         .build())
       .build()).extract().as(ScimUser.class));
   }
@@ -173,53 +162,6 @@ public class ScimUserProvisioningPatchRemoveTests {
         ScimConstants.INDIGO_USER_SCHEMA + ".oidcIds", hasSize(equalTo(1)));
   }
 
-  @Test
-  public void testPatchRemoveX509Certificate() {
-
-    ScimUser user = testUsers.get(0);
-
-    ScimUserPatchRequest req = getPatchRemoveRequest(
-        ScimUser.builder().addX509Certificate(user.getX509Certificates().get(0)).build());
-
-    restUtils.doPatch(user.getMeta().getLocation(), req);
-
-    restUtils.doGet(user.getMeta().getLocation())
-      .body("id", equalTo(user.getId()))
-      .body("x509certificates", equalTo(null));
-  }
-
-  @Test
-  @Ignore
-  @Deprecated
-  public void testPatchRemoveAnotherUserX509Certificate() {
-
-    ScimUser user1 = testUsers.get(0);
-    ScimUser user2 = testUsers.get(1);
-
-    ScimUserPatchRequest req = getPatchRemoveRequest(
-        ScimUser.builder().addX509Certificate(user2.getX509Certificates().get(0)).build());
-
-    restUtils.doPatch(user1.getMeta().getLocation(), req, HttpStatus.NOT_FOUND);
-
-    restUtils.doGet(user1.getMeta().getLocation())
-      .body("id", equalTo(user1.getId()))
-      .body("x509certificates", equalTo(null));
-  }
-
-
-  @Test
-  @Ignore
-  @Deprecated
-  public void testPatchRemoveNotFoundX509Certificate() {
-
-    ScimUser user1 = testUsers.get(0);
-
-    ScimUserPatchRequest req = getPatchRemoveRequest(
-        ScimUser.builder().addX509Certificate(user1.getX509Certificates().get(0)).build());
-
-    restUtils.doPatch(user1.getMeta().getLocation(), req);
-    restUtils.doPatch(user1.getMeta().getLocation(), req, HttpStatus.NOT_FOUND);
-  }
 
   @Test
   public void testPatchRemoveSshKey() {

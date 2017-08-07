@@ -15,6 +15,7 @@ angular.module('dashboardApp')
 
       $rootScope.iamVersion = getIamVersion();
       $rootScope.iamCommitId = getIamGitCommitId();
+      $rootScope.accountLinkingEnabled = getAccountLinkingEnabled();
       
       LoadTemplatesService.loadTemplates();
 

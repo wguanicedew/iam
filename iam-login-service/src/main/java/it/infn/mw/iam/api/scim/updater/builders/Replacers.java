@@ -14,7 +14,6 @@ import java.util.function.Predicate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import it.infn.mw.iam.api.scim.exception.ScimResourceExistsException;
-import it.infn.mw.iam.api.scim.updater.AccountEventBuilder;
 import it.infn.mw.iam.api.scim.updater.AccountUpdater;
 import it.infn.mw.iam.api.scim.updater.DefaultAccountUpdater;
 import it.infn.mw.iam.api.scim.updater.util.AccountFinder;
@@ -41,47 +40,11 @@ public class Replacers extends AccountBuilderSupport {
   final AccountFinder<String> findByEmail;
   final AccountFinder<String> findByUsername;
 
-  final AccountEventBuilder<String, GivenNameReplacedEvent> buildGivenNameReplacedEvent =
-      (source, a, v) -> {
-        return new GivenNameReplacedEvent(source, a, v);
-      };
-
-  final AccountEventBuilder<String, FamilyNameReplacedEvent> buildFamilyNameReplacedEvent =
-      (source, a, v) -> {
-        return new FamilyNameReplacedEvent(source, a, v);
-      };
-
-  final AccountEventBuilder<String, PictureReplacedEvent> buildPictureReplacedEvent =
-      (source, a, v) -> {
-        return new PictureReplacedEvent(source, a, v);
-      };
-
-  final AccountEventBuilder<String, EmailReplacedEvent> buildEmailReplacedEvent =
-      (source, a, v) -> {
-        return new EmailReplacedEvent(source, a, v);
-      };
-
-  final AccountEventBuilder<String, PasswordReplacedEvent> buildPasswordReplacedEvent =
-      (source, a, v) -> {
-        return new PasswordReplacedEvent(source, a, v);
-      };
-
-  final AccountEventBuilder<String, UsernameReplacedEvent> buildUsernameReplacedEvent =
-      (source, a, v) -> {
-        return new UsernameReplacedEvent(source, a, v);
-      };
-
-  final AccountEventBuilder<Boolean, ActiveReplacedEvent> buildActiveReplacedEvent =
-      (source, a, v) -> {
-        return new ActiveReplacedEvent(source, a, v);
-      };
-
-
   public Replacers(IamAccountRepository repo, PasswordEncoder encoder, IamAccount account) {
 
     super(repo, encoder, account);
-    findByEmail = e -> repo.findByEmail(e);
-    findByUsername = u -> repo.findByUsername(u);
+    findByEmail = repo::findByEmail;
+    findByUsername = repo::findByUsername;
     encodedPasswordSetter = t -> account.setPassword(encoder.encode(t));
     encodedPasswordChecker = t -> !encoder.matches(t, account.getPassword());
     emailAddChecks = buildEmailAddChecks();
@@ -91,7 +54,7 @@ public class Replacers extends AccountBuilderSupport {
 
   private Predicate<String> buildEmailAddChecks() {
     Predicate<String> emailNotBound =
-        new IdNotBoundChecker<String>(findByEmail, account, (e, a) -> {
+        new IdNotBoundChecker<>(findByEmail, account, (e, a) -> {
           throw new ScimResourceExistsException("Email " + e + " already bound to another user");
         });
 
@@ -102,7 +65,7 @@ public class Replacers extends AccountBuilderSupport {
 
   private Predicate<String> buildUsernameAddChecks() {
     Predicate<String> usernameNotBound =
-        new IdNotBoundChecker<String>(findByUsername, account, (e, a) -> {
+        new IdNotBoundChecker<>(findByUsername, account, (e, a) -> {
           throw new ScimResourceExistsException("Username " + e + " already bound to another user");
         });
 
@@ -116,21 +79,21 @@ public class Replacers extends AccountBuilderSupport {
     IamUserInfo ui = account.getUserInfo();
     return new DefaultAccountUpdater<String, GivenNameReplacedEvent>(account,
         ACCOUNT_REPLACE_GIVEN_NAME, ui::getGivenName, ui::setGivenName, givenName,
-        buildGivenNameReplacedEvent);
+        GivenNameReplacedEvent::new);
   }
 
   public AccountUpdater familyName(String familyName) {
     final IamUserInfo ui = account.getUserInfo();
     return new DefaultAccountUpdater<String, FamilyNameReplacedEvent>(account,
         ACCOUNT_REPLACE_FAMILY_NAME, ui::getFamilyName, ui::setFamilyName, familyName,
-        buildFamilyNameReplacedEvent);
+        FamilyNameReplacedEvent::new);
   }
 
   public AccountUpdater picture(String newPicture) {
 
     final IamUserInfo ui = account.getUserInfo();
     return new DefaultAccountUpdater<String, PictureReplacedEvent>(account, ACCOUNT_REPLACE_PICTURE,
-        ui::getPicture, ui::setPicture, newPicture, buildPictureReplacedEvent);
+        ui::getPicture, ui::setPicture, newPicture, PictureReplacedEvent::new);
 
   }
 
@@ -138,27 +101,27 @@ public class Replacers extends AccountBuilderSupport {
     final IamUserInfo ui = account.getUserInfo();
 
     return new DefaultAccountUpdater<String, EmailReplacedEvent>(account, ACCOUNT_REPLACE_EMAIL,
-        ui::setEmail, email, emailAddChecks, buildEmailReplacedEvent);
+        ui::setEmail, email, emailAddChecks, EmailReplacedEvent::new);
   }
 
   public AccountUpdater password(String newPassword) {
 
     return new DefaultAccountUpdater<String, PasswordReplacedEvent>(account,
         ACCOUNT_REPLACE_PASSWORD, encodedPasswordSetter, newPassword, encodedPasswordChecker,
-        buildPasswordReplacedEvent);
+        PasswordReplacedEvent::new);
   }
 
   public AccountUpdater username(String newUsername) {
 
     return new DefaultAccountUpdater<String, UsernameReplacedEvent>(account,
         ACCOUNT_REPLACE_USERNAME, account::setUsername, newUsername, usernameAddChecks,
-        buildUsernameReplacedEvent);
+        UsernameReplacedEvent::new);
   }
 
   public AccountUpdater active(boolean isActive) {
 
     return new DefaultAccountUpdater<Boolean, ActiveReplacedEvent>(account, ACCOUNT_REPLACE_ACTIVE,
-        account::isActive, account::setActive, isActive, buildActiveReplacedEvent);
+        account::isActive, account::setActive, isActive, ActiveReplacedEvent::new);
   }
 
 }

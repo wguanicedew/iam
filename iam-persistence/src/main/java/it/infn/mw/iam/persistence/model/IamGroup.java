@@ -1,5 +1,6 @@
 package it.infn.mw.iam.persistence.model;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -20,8 +21,13 @@ import javax.persistence.TemporalType;
 
 @Entity
 @Table(name = "iam_group")
-public class IamGroup {
+public class IamGroup implements Serializable {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+  
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;

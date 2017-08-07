@@ -6,8 +6,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.startsWith;
 
-import java.util.Base64;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -229,65 +227,6 @@ public class ScimUserProvisioningPatchTests {
   }
 
   @Test
-  public void testAddInvalidBase64X509Certificate() {
-
-    ScimUser lennon_update = ScimUser.builder()
-      .buildX509Certificate("Personal Certificate", "This is not a certificate", true)
-      .build();
-
-    ScimUserPatchRequest req = getPatchAddRequest(lennon_update);
-
-    restUtils.doPatch(lennon.getMeta().getLocation(), req, HttpStatus.BAD_REQUEST);
-
-  }
-
-  @Test
-  public void testAddInvalidX509Certificate() {
-
-    String certificate = Base64.getEncoder().encodeToString("this is not a certificate".getBytes());
-
-    ScimUser lennon_update =
-        ScimUser.builder().buildX509Certificate("Personal Certificate", certificate, true).build();
-
-    ScimUserPatchRequest req = getPatchAddRequest(lennon_update);
-
-    restUtils.doPatch(lennon.getMeta().getLocation(), req, HttpStatus.BAD_REQUEST);
-
-  }
-
-  @Test
-  public void testAddAndRemoveX509Certificate() {
-
-    ScimUser lennon_update = ScimUser.builder()
-      .buildX509Certificate("Personal Certificate", TestUtils.x509Certs.get(0).certificate, true)
-      .build();
-
-    ScimUserPatchRequest req = getPatchAddRequest(lennon_update);
-
-    restUtils.doPatch(lennon.getMeta().getLocation(), req);
-
-    restUtils.doGet(lennon.getMeta().getLocation())
-      .body("id", equalTo(lennon.getId()))
-      .body("userName", equalTo(lennon.getUserName()))
-      .body("x509Certificates", hasSize(equalTo(1)))
-      .body("x509Certificates[0].value", equalTo(TestUtils.x509Certs.get(0).certificate));
-
-    ScimUser lennon_remove = ScimUser.builder()
-      .buildX509Certificate(null, TestUtils.x509Certs.get(0).certificate, null)
-      .build();
-
-    req = getPatchRemoveRequest(lennon_remove);
-
-    restUtils.doPatch(lennon.getMeta().getLocation(), req, HttpStatus.NO_CONTENT);
-
-    restUtils.doGet(lennon.getMeta().getLocation())
-      .body("id", equalTo(lennon.getId()))
-      .body("userName", equalTo(lennon.getUserName()))
-      .body("x509Certificates", equalTo(null));
-
-  }
-
-  @Test
   public void testPatchUserPassword() {
 
     ScimUser patchedPasswordUser = ScimUser.builder().password("new_password").build();
@@ -494,20 +433,6 @@ public class ScimUserProvisioningPatchTests {
   }
 
   @Test
-  public void testAddX509DuplicateInASingleRequest() {
-
-    ScimUser lennon_update = ScimUser.builder()
-      .buildX509Certificate("Personal Certificate", TestUtils.x509Certs.get(0).certificate, true)
-      .buildX509Certificate("Personal Certificate", TestUtils.x509Certs.get(0).certificate, true)
-      .build();
-
-    ScimUserPatchRequest req = getPatchAddRequest(lennon_update);
-
-    restUtils.doPatch(lennon.getMeta().getLocation(), req);
-
-  }
-
-  @Test
   public void testPatchAddOidIdAndSshKeyAndSamlId() {
 
     ScimOidcId oidcId = ScimOidcId.builder().issuer("test_issuer").subject("test_subject").build();
@@ -565,65 +490,6 @@ public class ScimUserProvisioningPatchTests {
 
   }
 
-  @Test
-  @Ignore
-  public void testAddMultipleX509CertificateAndNoPrimary() {
-
-    ScimUserPatchRequest req = getPatchAddRequest(ScimUser.builder()
-      .buildX509Certificate("Personal1", TestUtils.x509Certs.get(0).certificate, false)
-      .buildX509Certificate("Personal2", TestUtils.x509Certs.get(1).certificate, false)
-      .build());
-
-    restUtils.doPatch(lennon.getMeta().getLocation(), req);
-
-    restUtils.doGet(lennon.getMeta().getLocation())
-      .body("x509Certificates", hasSize(equalTo(2)))
-      .body("x509Certificates[0].display", equalTo("Personal1"))
-      .body("x509Certificates[0].value", equalTo(TestUtils.x509Certs.get(0).certificate))
-      .body("x509Certificates[0].primary", equalTo(true))
-      .body("x509Certificates[1].display", equalTo("Personal2"))
-      .body("x509Certificates[1].value", equalTo(TestUtils.x509Certs.get(1).certificate))
-      .body("x509Certificates[1].primary", equalTo(false));
-
-  }
-
-  @Test
-  @Ignore
-  public void testReplacePrimaryWithMultipleX509Certificate() {
-
-    ScimUserPatchRequest req = getPatchAddRequest(ScimUser.builder()
-      .buildX509Certificate("Personal1", TestUtils.x509Certs.get(0).certificate, false)
-      .buildX509Certificate("Personal2", TestUtils.x509Certs.get(1).certificate, false)
-      .build());
-
-    restUtils.doPatch(lennon.getMeta().getLocation(), req);
-
-    restUtils.doGet(lennon.getMeta().getLocation())
-      .body("x509Certificates", hasSize(equalTo(2)))
-      .body("x509Certificates[0].display", equalTo("Personal1"))
-      .body("x509Certificates[0].value", equalTo(TestUtils.x509Certs.get(0).certificate))
-      .body("x509Certificates[0].primary", equalTo(true))
-      .body("x509Certificates[1].display", equalTo("Personal2"))
-      .body("x509Certificates[1].value", equalTo(TestUtils.x509Certs.get(1).certificate))
-      .body("x509Certificates[1].primary", equalTo(false));
-
-    req = getPatchReplaceRequest(ScimUser.builder()
-      .buildX509Certificate("Personal1", TestUtils.x509Certs.get(0).certificate, false)
-      .buildX509Certificate("Personal2", TestUtils.x509Certs.get(1).certificate, true)
-      .build());
-
-    restUtils.doPatch(lennon.getMeta().getLocation(), req);
-
-    restUtils.doGet(lennon.getMeta().getLocation())
-      .body("x509Certificates", hasSize(equalTo(2)))
-      .body("x509Certificates[0].display", equalTo("Personal1"))
-      .body("x509Certificates[0].value", equalTo(TestUtils.x509Certs.get(0).certificate))
-      .body("x509Certificates[0].primary", equalTo(false))
-      .body("x509Certificates[1].display", equalTo("Personal2"))
-      .body("x509Certificates[1].value", equalTo(TestUtils.x509Certs.get(1).certificate))
-      .body("x509Certificates[1].primary", equalTo(true));
-
-  }
 
   @Test
   public void testEmailIsNotAlreadyLinkedOnPatch() {

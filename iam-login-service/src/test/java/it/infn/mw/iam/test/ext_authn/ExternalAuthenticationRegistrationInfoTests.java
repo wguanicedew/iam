@@ -84,7 +84,7 @@ public class ExternalAuthenticationRegistrationInfoTests {
     when(cred.getRemoteEntityID()).thenReturn("test-saml-issuer");
 
     IamSamlId samlId = new IamSamlId("test-saml-issuer", 
-        Saml2Attribute.epuid.getAttributeName(),
+        Saml2Attribute.EPUID.getAttributeName(),
         "test-saml-subject");
     
     SamlExternalAuthenticationToken extAuthToken =
@@ -109,18 +109,18 @@ public class ExternalAuthenticationRegistrationInfoTests {
     SAMLCredential cred = mock(SAMLCredential.class);
     when(cred.getRemoteEntityID()).thenReturn("test-saml-issuer");
 
-    when(cred.getAttributeAsString(Saml2Attribute.givenName.getAttributeName()))
+    when(cred.getAttributeAsString(Saml2Attribute.GIVEN_NAME.getAttributeName()))
       .thenReturn("Test Given Name");
-    when(cred.getAttributeAsString(Saml2Attribute.sn.getAttributeName()))
+    when(cred.getAttributeAsString(Saml2Attribute.SN.getAttributeName()))
       .thenReturn("Test Family Name");
-    when(cred.getAttributeAsString(Saml2Attribute.mail.getAttributeName()))
+    when(cred.getAttributeAsString(Saml2Attribute.MAIL.getAttributeName()))
       .thenReturn("test@test.org");
 
     when(token.getCredentials()).thenReturn(cred);
     when(token.getName()).thenReturn("test-saml-subject");
 
     IamSamlId samlId = new IamSamlId("test-saml-issuer", 
-        Saml2Attribute.epuid.getAttributeName(),
+        Saml2Attribute.EPUID.getAttributeName(),
         "test-saml-subject");
 
     SamlExternalAuthenticationToken extAuthToken =

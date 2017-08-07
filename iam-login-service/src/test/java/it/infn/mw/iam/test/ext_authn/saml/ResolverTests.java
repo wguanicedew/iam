@@ -1,5 +1,11 @@
 package it.infn.mw.iam.test.ext_authn.saml;
 
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertThat;
+
 import java.util.Optional;
 
 import org.hamcrest.Matchers;
@@ -19,6 +25,16 @@ public class ResolverTests {
 
 
   @Test
+  public void testSamlIdResolverAttributeResolution(){
+    SamlIdResolvers resolvers = new SamlIdResolvers();
+    
+    for (Saml2Attribute a: Saml2Attribute.values()){
+      Assert.assertNotNull(resolvers.byName(a.getAlias()));
+    }
+    
+  }
+  
+  @Test
   public void emptyNameIdResolverTest() {
 
     SAMLCredential cred = Mockito.mock(SAMLCredential.class);
@@ -26,7 +42,7 @@ public class ResolverTests {
 
     SamlUserIdentifierResolver resolver = new NameIdUserIdentifierResolver();
 
-    Optional<IamSamlId> resolvedId = resolver.getSamlUserIdentifier(cred);
+    Optional<IamSamlId> resolvedId = resolver.resolveSamlUserIdentifier(cred).getResolvedId();
 
     Assert.assertFalse(resolvedId.isPresent());
 
@@ -45,7 +61,7 @@ public class ResolverTests {
 
     SamlUserIdentifierResolver resolver = new NameIdUserIdentifierResolver();
 
-    IamSamlId resolvedId = resolver.getSamlUserIdentifier(cred)
+    IamSamlId resolvedId = resolver.resolveSamlUserIdentifier(cred).getResolvedId()
       .orElseThrow(() -> new AssertionError("Could not resolve nameid SAML ID"));
 
     Assert.assertThat(resolvedId.getUserId(), Matchers.equalTo("nameid"));
@@ -57,21 +73,23 @@ public class ResolverTests {
   public void mailIdResolverTest() {
     SamlIdResolvers resolvers = new SamlIdResolvers();
 
-    SamlUserIdentifierResolver resolver = resolvers.byAttribute(Saml2Attribute.mail);
+    SamlUserIdentifierResolver resolver = resolvers.byAttribute(Saml2Attribute.MAIL);
 
+    assertThat(resolver, is(not(nullValue())));
+    
     SAMLCredential cred = Mockito.mock(SAMLCredential.class);
-    Mockito.when(cred.getAttributeAsString(Saml2Attribute.mail.getAttributeName()))
+    Mockito.when(cred.getAttributeAsString(Saml2Attribute.MAIL.getAttributeName()))
       .thenReturn("test@test.org");
     Mockito.when(cred.getRemoteEntityID()).thenReturn("entityId");
 
-    IamSamlId resolvedId = resolver.getSamlUserIdentifier(cred)
+    IamSamlId resolvedId = resolver.resolveSamlUserIdentifier(cred).getResolvedId()
       .orElseThrow(() -> new AssertionError("Could not resolve email address SAML ID"));
 
-    Assert.assertThat(resolvedId.getUserId(), Matchers.equalTo("test@test.org"));
-    Assert.assertThat(resolvedId.getAttributeId(),
-        Matchers.equalTo(Saml2Attribute.mail.getAttributeName()));
+    assertThat(resolvedId.getUserId(), equalTo("test@test.org"));
+    assertThat(resolvedId.getAttributeId(),
+        equalTo(Saml2Attribute.MAIL.getAttributeName()));
 
-    Assert.assertThat(resolvedId.getIdpId(), Matchers.equalTo("entityId"));
+    Assert.assertThat(resolvedId.getIdpId(), equalTo("entityId"));
 
   }
 }

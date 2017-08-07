@@ -76,7 +76,7 @@ public class OidcAccountLinkingTests {
 
     mvc.perform(get("/iam/account-linking/OIDC")).andExpect(status().isUnauthorized());
     mvc.perform(get("/iam/account-linking/SAML")).andExpect(status().isUnauthorized());
-
+    
   }
 
   @Test
@@ -99,7 +99,7 @@ public class OidcAccountLinkingTests {
       .andExpect(
           request().sessionAttribute(ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION, notNullValue()))
       .andExpect(request().sessionAttribute(ACCOUNT_LINKING_SESSION_KEY,
-          Matchers.equalTo("/iam/account-linking/OIDC")))
+          equalTo("/iam/account-linking/OIDC")))
       .andReturn()
       .getRequest()
       .getSession();

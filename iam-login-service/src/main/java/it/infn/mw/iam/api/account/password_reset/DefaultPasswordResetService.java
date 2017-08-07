@@ -1,6 +1,6 @@
 package it.infn.mw.iam.api.account.password_reset;
 
-import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,8 +65,11 @@ public class DefaultPasswordResetService
   public void resetPassword(String resetToken, String password) {
 
     validateResetToken(resetToken);
-
-    IamAccount account = accountRepository.findByResetKey(resetToken).get();
+    // FIXME: we perform the lookup twice. if validateResetToken 
+    // was modified to return the IamAccount we save one call to the DB
+    IamAccount account = accountRepository.findByResetKey(resetToken)
+      .orElseThrow(() -> new InvalidPasswordResetTokenError(
+          String.format("No account found for reset_key [%s]", resetToken)));
 
     eventPublisher.publishEvent(new PasswordResetEvent(this, account,
         String.format("User %s reset its password", account.getUsername())));
@@ -80,19 +83,20 @@ public class DefaultPasswordResetService
 
   @Override
   public void createPasswordResetToken(String email) {
-    try {
-      IamAccount account = accountRepository.findByEmail(email).get();
-
-      if (accountActiveAndEmailVerified(account)) {
-        String resetKey = tokenGenerator.generateToken();
-        account.setResetKey(resetKey);
-        accountRepository.save(account);
-
-        notificationService.createResetPasswordMessage(account);
+      Optional<IamAccount> accountByMail = accountRepository.findByEmail(email);
+      
+      accountByMail.ifPresent(a -> {
+        if (accountActiveAndEmailVerified(a)) {
+          String resetKey = tokenGenerator.generateToken();
+          a.setResetKey(resetKey);
+          accountRepository.save(a);
+          notificationService.createResetPasswordMessage(a);
+        } 
+      });
+      
+      if (!accountByMail.isPresent()){
+        logger.warn("No account found linked to email: {}", email);
       }
-    } catch (NoSuchElementException nse) {
-      logger.warn("No account found for the email {}. Message: {}", email, nse.getMessage());
-    }
   }
 
 

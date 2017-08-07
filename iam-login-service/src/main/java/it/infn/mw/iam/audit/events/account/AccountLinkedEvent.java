@@ -9,7 +9,7 @@ public class AccountLinkedEvent extends AccountEvent {
 
   private static final long serialVersionUID = -1605221918249294636L;
 
-  @JsonIgnoreProperties({"email", "givenName", "familyName"})
+  @JsonIgnoreProperties({"email", "GIVEN_NAME", "familyName"})
   private final ExternalAuthenticationRegistrationInfo externalAccountInfo;
 
   public AccountLinkedEvent(Object source, IamAccount account,

@@ -37,6 +37,7 @@ import it.infn.mw.iam.api.scim.model.ScimPatchOperation;
 import it.infn.mw.iam.api.scim.updater.AccountUpdater;
 import it.infn.mw.iam.api.scim.updater.UpdaterType;
 import it.infn.mw.iam.api.scim.updater.factory.DefaultGroupMembershipUpdaterFactory;
+import it.infn.mw.iam.authn.x509.PEMX509CertificateChainParser;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.model.IamUserInfo;
@@ -86,7 +87,8 @@ public class DefaultGroupMembershipUpdaterFactoryTests {
   OidcIdConverter oidcConverter = new OidcIdConverter();
   SamlIdConverter samlConverter = new SamlIdConverter();
   SshKeyConverter sshKeyConverter = new SshKeyConverter();
-  X509CertificateConverter x509Converter = new X509CertificateConverter();
+  X509CertificateConverter x509Converter =
+      new X509CertificateConverter(new PEMX509CertificateChainParser());
 
   DefaultGroupMembershipUpdaterFactory factory;
 
@@ -150,7 +152,8 @@ public class DefaultGroupMembershipUpdaterFactoryTests {
     assertThat(updaters.size(), equalTo(1));
 
     assertThat(updaters.get(0).getType(), equalTo(ACCOUNT_ADD_GROUP_MEMBERSHIP));
-    assertThat(updaters.get(0).update(), equalTo(false));  }
+    assertThat(updaters.get(0).update(), equalTo(false));
+  }
 
   @Test
   public void testAddMultipleMembershipPatchOpParsing() {
@@ -218,9 +221,8 @@ public class DefaultGroupMembershipUpdaterFactoryTests {
   @Test(expected = ScimResourceNotFoundException.class)
   public void testRemoveMembershipUserNotExistsPatchOpParsing() {
 
-    ScimGroupPatchRequest req = ScimGroupPatchRequest.builder()
-      .remove(Lists.newArrayList(ACCOUNT1_GROUP_REF))
-      .build();
+    ScimGroupPatchRequest req =
+        ScimGroupPatchRequest.builder().remove(Lists.newArrayList(ACCOUNT1_GROUP_REF)).build();
 
     ScimPatchOperation<List<ScimMemberRef>> op = req.getOperations().get(0);
 

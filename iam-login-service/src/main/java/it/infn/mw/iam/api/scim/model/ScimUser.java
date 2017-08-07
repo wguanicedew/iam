@@ -23,10 +23,10 @@ import com.google.common.base.Preconditions;
 public class ScimUser extends ScimResource {
 
   public interface NewUserValidation {
-  };
+  }
 
   public interface UpdateUserValidation {
-  };
+  }
 
   public static final String USER_SCHEMA = "urn:ietf:params:scim:schemas:core:2.0:User";
   public static final String RESOURCE_TYPE = "User";
@@ -56,7 +56,6 @@ public class ScimUser extends ScimResource {
 
   private final List<ScimAddress> addresses;
   private final List<ScimPhoto> photos;
-  private final List<ScimX509Certificate> x509Certificates;
 
   private final Set<ScimGroupRef> groups;
 
@@ -99,8 +98,6 @@ public class ScimUser extends ScimResource {
     this.groups = groups;
     this.addresses = addresses;
     this.indigoUser = indigoUser;
-    this.x509Certificates = x509Certificates;
-
   }
 
   private ScimUser(Builder b) {
@@ -119,7 +116,6 @@ public class ScimUser extends ScimResource {
     this.active = b.active;
     this.emails = b.emails;
     this.addresses = b.addresses;
-    this.x509Certificates = b.x509Certificates;
     this.indigoUser = b.indigoUser;
     this.groups = b.groups;
     this.password = b.password;
@@ -209,11 +205,6 @@ public class ScimUser extends ScimResource {
     return addresses;
   }
 
-  public List<ScimX509Certificate> getX509Certificates() {
-
-    return x509Certificates;
-  }
-
   @JsonProperty(value = ScimConstants.INDIGO_USER_SCHEMA)
   public ScimIndigoUser getIndigoUser() {
 
@@ -227,7 +218,8 @@ public class ScimUser extends ScimResource {
 
   public boolean hasX509Certificates() {
 
-    return x509Certificates != null && !x509Certificates.isEmpty();
+    return indigoUser != null && indigoUser.getCertificates() != null
+        && !indigoUser.getCertificates().isEmpty();
   }
 
   public boolean hasOidcIds() {
@@ -283,11 +275,10 @@ public class ScimUser extends ScimResource {
     private String timezone;
     private Boolean active;
 
-    private List<ScimEmail> emails = new ArrayList<ScimEmail>();
-    private Set<ScimGroupRef> groups = new LinkedHashSet<ScimGroupRef>();
-    private List<ScimAddress> addresses = new ArrayList<ScimAddress>();
-    private List<ScimPhoto> photos = new ArrayList<ScimPhoto>();
-    private List<ScimX509Certificate> x509Certificates = new ArrayList<ScimX509Certificate>();
+    private List<ScimEmail> emails = new ArrayList<>();
+    private Set<ScimGroupRef> groups = new LinkedHashSet<>();
+    private List<ScimAddress> addresses = new ArrayList<>();
+    private List<ScimPhoto> photos = new ArrayList<>();
     private ScimIndigoUser indigoUser;
 
     public Builder() {
@@ -442,14 +433,12 @@ public class ScimUser extends ScimResource {
 
       Preconditions.checkNotNull(scimX509Certificate, "Null x509 certificate");
 
-      x509Certificates.add(scimX509Certificate);
-      return this;
-    }
+      if (indigoUser == null) {
+        indigoUser = ScimIndigoUser.builder().addCertificate(scimX509Certificate).build();
+      } else {
+        indigoUser.getCertificates().add(scimX509Certificate);
+      }
 
-    public Builder buildX509Certificate(String display, String value, Boolean isPrimary) {
-
-      addX509Certificate(
-          ScimX509Certificate.builder().display(display).value(value).primary(isPrimary).build());
       return this;
     }
 

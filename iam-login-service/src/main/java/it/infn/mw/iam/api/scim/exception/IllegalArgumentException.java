@@ -10,4 +10,9 @@ public class IllegalArgumentException extends ScimException {
   public IllegalArgumentException(String message) {
     super(message);
   }
+
+  public IllegalArgumentException(String message, Throwable cause) {
+    super(message, cause);
+  }
+  
 }

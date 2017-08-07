@@ -177,9 +177,10 @@ public class ScimGroupProvisioning
 
     /* displayname is required */
     String displayName = scimItemToBeReplaced.getDisplayName();
+    displayNameSanityChecks(displayName);
 
     if (!isGroupNameAvailable(displayName, id)) {
-      throw new ScimResourceExistsException(displayName + " is already mappped to another group");
+      throw new ScimResourceExistsException(displayName + " is already mapped to another group");
     }
 
     IamGroup updatedGroup = converter.fromScim(scimItemToBeReplaced);
@@ -272,7 +273,7 @@ public class ScimGroupProvisioning
     if (op.getPath() == null || op.getPath().isEmpty()) {
       throw new ScimPatchOperationNotSupported("empty path value is not currently supported");
     }
-    if (op.getPath().equals("members")) {
+    if ("members".equals(op.getPath())) {
       return;
     }
     throw new ScimPatchOperationNotSupported(

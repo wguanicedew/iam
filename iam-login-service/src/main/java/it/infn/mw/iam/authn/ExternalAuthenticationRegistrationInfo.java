@@ -1,9 +1,16 @@
 package it.infn.mw.iam.authn;
 
+import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class ExternalAuthenticationRegistrationInfo {
+public class ExternalAuthenticationRegistrationInfo implements Serializable {
+
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
 
   public enum ExternalAuthenticationType {
     OIDC, SAML

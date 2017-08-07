@@ -1,5 +1,8 @@
 package it.infn.mw.iam.persistence.model;
 
+import java.io.Serializable;
+import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -10,10 +13,17 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 @Entity
 @Table(name = "iam_x509_cert")
-public class IamX509Certificate implements IamAccountRef {
+public class IamX509Certificate implements IamAccountRef, Serializable {
+
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,39 +32,44 @@ public class IamX509Certificate implements IamAccountRef {
   @Column(nullable = false, length = 36)
   private String label;
 
-  @Column(nullable = false, length = 128, unique = true)
-  private String certificateSubject;
+  @Column(name = "subject_dn", nullable = false, length = 128, unique = true)
+  private String subjectDn;
+
+  @Column(name = "issuer_dn", nullable = false, length = 128)
+  private String issuerDn;
 
   @Lob
-  @Column(nullable = false, unique = true)
+  @Column(nullable=true, unique = true)
   private String certificate;
 
   @Column(name = "is_primary")
   private boolean primary;
 
+  @Temporal(TemporalType.TIMESTAMP)
+  @Column(name="creation_time", nullable = false)
+  Date creationTime;
+  
+  @Temporal(TemporalType.TIMESTAMP)
+  @Column(name="last_update_time", nullable = false)
+  Date lastUpdateTime;
+  
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "account_id")
   private IamAccount account;
 
   public IamX509Certificate() {}
-
-  public IamX509Certificate(String certificate) {
-
-    this.setCertificate(certificate);
-  }
-
+  
+  
   @Override
   public int hashCode() {
-
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((certificate == null) ? 0 : certificate.hashCode());
+    result = prime * result + ((subjectDn == null) ? 0 : subjectDn.hashCode());
     return result;
   }
 
   @Override
   public boolean equals(Object obj) {
-
     if (this == obj)
       return true;
     if (obj == null)
@@ -62,10 +77,10 @@ public class IamX509Certificate implements IamAccountRef {
     if (getClass() != obj.getClass())
       return false;
     IamX509Certificate other = (IamX509Certificate) obj;
-    if (certificate == null) {
-      if (other.certificate != null)
+    if (subjectDn == null) {
+      if (other.subjectDn != null)
         return false;
-    } else if (!certificate.equals(other.certificate))
+    } else if (!subjectDn.equals(other.subjectDn))
       return false;
     return true;
   }
@@ -76,9 +91,9 @@ public class IamX509Certificate implements IamAccountRef {
     return account;
   }
 
-  public String getCertificateSubject() {
+  public String getSubjectDn() {
 
-    return certificateSubject;
+    return subjectDn;
   }
 
   public String getCertificate() {
@@ -107,9 +122,9 @@ public class IamX509Certificate implements IamAccountRef {
     this.account = account;
   }
 
-  public void setCertificateSubject(String certificateSubject) {
+  public void setSubjectDn(String certificateSubject) {
 
-    this.certificateSubject = certificateSubject;
+    this.subjectDn = certificateSubject;
   }
 
   public void setCertificate(String certificate) {
@@ -132,11 +147,34 @@ public class IamX509Certificate implements IamAccountRef {
     this.primary = primary;
   }
 
-  @Override
-  public String toString() {
-    return String.format(
-        "IamX509Certificate [label=%s, certificateSubject=%s, primary=%s, certificate=%s", label,
-        certificateSubject, primary, certificate);
+  public String getIssuerDn() {
+    return issuerDn;
   }
 
+  public void setIssuerDn(String issuerDn) {
+    this.issuerDn = issuerDn;
+  }
+
+  public Date getCreationTime() {
+    return creationTime;
+  }
+
+  public void setCreationTime(Date creationTime) {
+    this.creationTime = creationTime;
+  }
+
+  public Date getLastUpdateTime() {
+    return lastUpdateTime;
+  }
+
+  public void setLastUpdateTime(Date lastUpdateTime) {
+    this.lastUpdateTime = lastUpdateTime;
+  }
+
+  @Override
+  public String toString() {
+    return "IamX509Certificate [label=" + label + ", subjectDn=" + subjectDn + ", issuerDn="
+        + issuerDn + ", certificate=" + certificate + ", primary=" + primary + ", creationTime="
+        + creationTime + ", lastUpdateTime=" + lastUpdateTime + "]";
+  }
 }
