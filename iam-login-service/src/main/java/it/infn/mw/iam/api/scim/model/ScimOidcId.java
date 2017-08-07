@@ -67,7 +67,7 @@ public class ScimOidcId {
 
   @Override
   public int hashCode() {
-    final int prime = 31;
+    int prime = 31;
     int result = 1;
     result = prime * result + ((issuer == null) ? 0 : issuer.hashCode());
     result = prime * result + ((subject == null) ? 0 : subject.hashCode());

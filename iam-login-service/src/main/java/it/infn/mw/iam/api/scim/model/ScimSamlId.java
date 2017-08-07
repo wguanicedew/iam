@@ -20,7 +20,7 @@ public class ScimSamlId {
   @NotBlank
   @Length(max = 256)
   private final String userId;
-  
+
   @NotBlank
   @Length(max = 256)
   private final String attributeId;
@@ -34,6 +34,13 @@ public class ScimSamlId {
     this.attributeId = attributeId;
   }
 
+  private ScimSamlId(Builder b) {
+
+    this.idpId = b.idpId;
+    this.userId = b.userId;
+    this.attributeId = b.attributeId;
+  }
+
   public String getUserId() {
 
     return userId;
@@ -43,16 +50,9 @@ public class ScimSamlId {
 
     return idpId;
   }
-  
+
   public String getAttributeId() {
     return attributeId;
-  }
-
-  private ScimSamlId(Builder b) {
-
-    this.idpId = b.idpId;
-    this.userId = b.userId;
-    this.attributeId = b.attributeId;
   }
 
   public static Builder builder() {
@@ -62,7 +62,7 @@ public class ScimSamlId {
 
   @Override
   public int hashCode() {
-    final int prime = 31;
+    int prime = 31;
     int result = 1;
     result = prime * result + ((idpId == null) ? 0 : idpId.hashCode());
     result = prime * result + ((userId == null) ? 0 : userId.hashCode());
@@ -109,11 +109,11 @@ public class ScimSamlId {
       return this;
     }
 
-    public Builder attributeId(String attributeId){
+    public Builder attributeId(String attributeId) {
       this.attributeId = attributeId;
       return this;
     }
-    
+
     public ScimSamlId build() {
 
       return new ScimSamlId(this);
