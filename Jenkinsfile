@@ -6,13 +6,13 @@ pipeline {
 
   options {
     timeout(time: 1, unit: 'HOURS')
-    buildDiscarder(logRotator(numToKeepStr: '5')) 
+    buildDiscarder(logRotator(numToKeepStr: '5'))
   }
-  
+
   parameters {
     choice(name: 'RUN_SONAR', choices: 'yes\nno', description: 'Run Sonar static analysis')
   }
-
+  
   stages {
     stage('checkout') {
       steps {
@@ -39,7 +39,7 @@ pipeline {
         }
       }
     }
-    
+
     stage('PR analysis'){
       when{
         not {
@@ -68,7 +68,7 @@ pipeline {
         }
       }
     }
-    
+
     stage('analysis'){
       when{
         expression {
