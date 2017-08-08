@@ -44,7 +44,7 @@ public abstract class AbstractExternalAuthenticationToken<T extends Serializable
 
   @Override
   public int hashCode() {
-    final int prime = 31;
+    int prime = 31;
     int result = super.hashCode();
     result =
         prime * result + ((wrappedAuthentication == null) ? 0 : wrappedAuthentication.hashCode());

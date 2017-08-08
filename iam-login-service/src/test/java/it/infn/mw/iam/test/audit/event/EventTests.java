@@ -47,7 +47,7 @@ import it.infn.mw.iam.audit.events.account.x509.X509CertificateRemovedEvent;
 import it.infn.mw.iam.authn.saml.util.SamlAttributeNames;
 import it.infn.mw.iam.core.user.IamAccountService;
 import it.infn.mw.iam.persistence.model.IamAccount;
-import it.infn.mw.iam.test.TestUtils;
+import it.infn.mw.iam.test.SshKeyUtils;
 import it.infn.mw.iam.test.ext_authn.x509.X509TestSupport;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -65,8 +65,8 @@ public class EventTests extends X509TestSupport {
   private static final String OIDC_ISSUER = "test_issuer";
   private static final String OIDC_SUBJECT = "test_subject";
   private static final String SSH_LABEL = "test_label";
-  private static final String SSH_KEY = TestUtils.sshKeys.get(0).key;
-  private static final String SSH_FINGERPRINT = TestUtils.sshKeys.get(0).fingerprintSHA256;
+  private static final String SSH_KEY = SshKeyUtils.sshKeys.get(0).key;
+  private static final String SSH_FINGERPRINT = SshKeyUtils.sshKeys.get(0).fingerprintSHA256;
   private static final String GROUPNAME = "event_group";
 
   private static final String USERNAME_MESSAGE_CHECK = String.format("username: '%s'", USERNAME);
@@ -76,10 +76,10 @@ public class EventTests extends X509TestSupport {
 
   @Autowired
   private IamAccountService accountService;
-  
+
   @Autowired
   private UserConverter userConverter;
-  
+
   @Autowired
   private ScimUserProvisioning userProvisioning;
 
@@ -97,11 +97,11 @@ public class EventTests extends X509TestSupport {
   public void setup() {
 
     group = groupProvisioning.create(ScimGroup.builder(GROUPNAME).build());
-    
+
     ScimX509Certificate test1Cert = ScimX509Certificate.builder()
-        .pemEncodedCertificate(TEST_1_CERT_STRING)
-        .display(TEST_1_CERT_LABEL)
-        .build();
+      .pemEncodedCertificate(TEST_1_CERT_STRING)
+      .display(TEST_1_CERT_LABEL)
+      .build();
 
     ScimUser user = ScimUser.builder(USERNAME)
       .buildName(GIVENNAME, FAMILYNAME)
@@ -112,9 +112,9 @@ public class EventTests extends X509TestSupport {
       .addX509Certificate(test1Cert)
       .build();
 
-    
+
     account = accountService.createAccount(userConverter.fromScim(user));
-    
+
     assertNotNull(account);
 
     accountRef = ScimMemberRef.builder()
@@ -220,8 +220,8 @@ public class EventTests extends X509TestSupport {
     ScimUser update = ScimUser.builder()
       .addSshKey(ScimSshKey.builder()
         .display("foo")
-        .value(TestUtils.sshKeys.get(1).key)
-        .fingerprint(TestUtils.sshKeys.get(1).fingerprintSHA256)
+        .value(SshKeyUtils.sshKeys.get(1).key)
+        .fingerprint(SshKeyUtils.sshKeys.get(1).fingerprintSHA256)
         .build())
       .build();
 
@@ -235,8 +235,8 @@ public class EventTests extends X509TestSupport {
     assertThat(event.getMessage(), containsString(USERNAME_MESSAGE_CHECK));
     assertThat(event.getMessage(), containsString("label=foo"));
     assertThat(event.getMessage(),
-        containsString("fingerprint=" + TestUtils.sshKeys.get(1).fingerprintSHA256));
-    assertThat(event.getMessage(), containsString("value=" + TestUtils.sshKeys.get(1).key));
+        containsString("fingerprint=" + SshKeyUtils.sshKeys.get(1).fingerprintSHA256));
+    assertThat(event.getMessage(), containsString("value=" + SshKeyUtils.sshKeys.get(1).key));
   }
 
   @Test
@@ -265,15 +265,13 @@ public class EventTests extends X509TestSupport {
 
   @Test
   public void testAddX509CertificateEvent() {
-    
-    ScimX509Certificate cert = ScimX509Certificate.builder()
-        .pemEncodedCertificate(TEST_0_CERT_STRING)
-        .display(TEST_0_CERT_LABEL)
-        .build();
 
-    ScimUser update = ScimUser.builder()
-      .addX509Certificate(cert)
+    ScimX509Certificate cert = ScimX509Certificate.builder()
+      .pemEncodedCertificate(TEST_0_CERT_STRING)
+      .display(TEST_0_CERT_LABEL)
       .build();
+
+    ScimUser update = ScimUser.builder().addX509Certificate(cert).build();
 
     ScimUserPatchRequest req = ScimUserPatchRequest.builder().add(update).build();
     userProvisioning.update(account.getUuid(), req.getOperations());
@@ -284,25 +282,20 @@ public class EventTests extends X509TestSupport {
     assertThat(event.getMessage(), containsString("Add x509 certificate to user"));
     assertThat(event.getMessage(), containsString(USERNAME_MESSAGE_CHECK));
     assertThat(event.getMessage(), containsString("label=" + TEST_0_CERT_LABEL));
-    assertThat(event.getMessage(),
-        containsString("subjectDn=" + TEST_0_SUBJECT));
-    assertThat(event.getMessage(),
-        containsString("issuerDn=" + TEST_0_ISSUER));
-    assertThat(event.getMessage(),
-        containsString("certificate=" + TEST_0_CERT_STRING));
+    assertThat(event.getMessage(), containsString("subjectDn=" + TEST_0_SUBJECT));
+    assertThat(event.getMessage(), containsString("issuerDn=" + TEST_0_ISSUER));
+    assertThat(event.getMessage(), containsString("certificate=" + TEST_0_CERT_STRING));
   }
 
   @Test
-  public void testRemoveX509CertificateEvent() {    
-    
-    ScimX509Certificate cert = ScimX509Certificate.builder()
-        .pemEncodedCertificate(TEST_1_CERT_STRING)
-        .display(TEST_1_CERT_LABEL)
-        .build();
+  public void testRemoveX509CertificateEvent() {
 
-    ScimUser update = ScimUser.builder()
-      .addX509Certificate(cert)
+    ScimX509Certificate cert = ScimX509Certificate.builder()
+      .pemEncodedCertificate(TEST_1_CERT_STRING)
+      .display(TEST_1_CERT_LABEL)
       .build();
+
+    ScimUser update = ScimUser.builder().addX509Certificate(cert).build();
 
     ScimUserPatchRequest req = ScimUserPatchRequest.builder().remove(update).build();
     userProvisioning.update(account.getUuid(), req.getOperations());
@@ -313,12 +306,9 @@ public class EventTests extends X509TestSupport {
     assertThat(event.getMessage(), containsString("Remove x509 certificate from user"));
     assertThat(event.getMessage(), containsString(USERNAME_MESSAGE_CHECK));
     assertThat(event.getMessage(), containsString("label=" + TEST_1_CERT_LABEL));
-    assertThat(event.getMessage(),
-        containsString("subjectDn=" + TEST_1_SUBJECT));
-    assertThat(event.getMessage(),
-        containsString("issuerDn=" + TEST_1_ISSUER));
-    assertThat(event.getMessage(),
-        containsString("certificate=" + TEST_1_CERT_STRING));
+    assertThat(event.getMessage(), containsString("subjectDn=" + TEST_1_SUBJECT));
+    assertThat(event.getMessage(), containsString("issuerDn=" + TEST_1_ISSUER));
+    assertThat(event.getMessage(), containsString("certificate=" + TEST_1_CERT_STRING));
   }
 
   @Test

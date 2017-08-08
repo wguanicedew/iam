@@ -20,7 +20,7 @@ public class ScimSamlId {
   @NotBlank
   @Length(max = 256)
   private final String userId;
-  
+
   @NotBlank
   @Length(max = 256)
   private final String attributeId;
@@ -34,6 +34,13 @@ public class ScimSamlId {
     this.attributeId = attributeId;
   }
 
+  private ScimSamlId(Builder b) {
+
+    this.idpId = b.idpId;
+    this.userId = b.userId;
+    this.attributeId = b.attributeId;
+  }
+
   public String getUserId() {
 
     return userId;
@@ -43,21 +50,45 @@ public class ScimSamlId {
 
     return idpId;
   }
-  
+
   public String getAttributeId() {
     return attributeId;
-  }
-
-  private ScimSamlId(Builder b) {
-
-    this.idpId = b.idpId;
-    this.userId = b.userId;
-    this.attributeId = b.attributeId;
   }
 
   public static Builder builder() {
 
     return new Builder();
+  }
+
+  @Override
+  public int hashCode() {
+    int prime = 31;
+    int result = 1;
+    result = prime * result + ((idpId == null) ? 0 : idpId.hashCode());
+    result = prime * result + ((userId == null) ? 0 : userId.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    ScimSamlId other = (ScimSamlId) obj;
+    if (idpId == null) {
+      if (other.idpId != null)
+        return false;
+    } else if (!idpId.equals(other.idpId))
+      return false;
+    if (userId == null) {
+      if (other.userId != null)
+        return false;
+    } else if (!userId.equals(other.userId))
+      return false;
+    return true;
   }
 
   public static class Builder {
@@ -78,11 +109,11 @@ public class ScimSamlId {
       return this;
     }
 
-    public Builder attributeId(String attributeId){
+    public Builder attributeId(String attributeId) {
       this.attributeId = attributeId;
       return this;
     }
-    
+
     public ScimSamlId build() {
 
       return new ScimSamlId(this);

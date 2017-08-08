@@ -511,7 +511,7 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
     }
 
     if (providers.isEmpty()) {
-      final String message = "Empty SAML metadata providers after initialization";
+      String message = "Empty SAML metadata providers after initialization";
       LOG.error(message);
       throw new IllegalStateException(message);
     }
@@ -709,12 +709,13 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
 
   @Override
   protected void configure(HttpSecurity http) throws Exception {
+    String pattern = "/saml/**";
 
-    http.antMatcher("/saml/**");
+    http.antMatcher(pattern);
 
-    http.csrf().ignoringAntMatchers("/saml/**");
+    http.csrf().ignoringAntMatchers(pattern);
 
-    http.authorizeRequests().antMatchers("/saml/**").permitAll();
+    http.authorizeRequests().antMatchers(pattern).permitAll();
 
     http.addFilterBefore(metadataGeneratorFilter(), ChannelProcessingFilter.class)
       .addFilterAfter(samlFilter(), BasicAuthenticationFilter.class);

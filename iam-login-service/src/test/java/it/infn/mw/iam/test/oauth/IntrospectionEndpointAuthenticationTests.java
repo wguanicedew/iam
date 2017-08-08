@@ -1,88 +1,79 @@
 package it.infn.mw.iam.test.oauth;
 
-import static com.jayway.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import javax.transaction.Transactional;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.boot.test.WebIntegrationTest;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import it.infn.mw.iam.IamLoginService;
-import it.infn.mw.iam.test.TestUtils;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = IamLoginService.class)
-@WebIntegrationTest
+@SpringApplicationConfiguration(classes = {IamLoginService.class})
+@WebAppConfiguration
 @Transactional
-public class IntrospectionEndpointAuthenticationTests {
+public class IntrospectionEndpointAuthenticationTests extends EndpointsTestUtils {
+
+  private static final String ENDPOINT = "/introspect";
+
+  @Autowired
+  private WebApplicationContext context;
 
   private String accessToken;
 
   @Before
-  public void initAccessToken() {
+  public void setup() throws Exception {
+    mvc = MockMvcBuilders.webAppContextSetup(context)
+      .apply(springSecurity())
+      .alwaysDo(print())
+      .build();
 
-
-    accessToken = TestUtils.passwordTokenGetter()
-      .username("test")
-      .password("password")
-      .scope("openid profile offline_access")
-      .getAccessToken();
-
+    accessToken = getPasswordAccessToken("openid profile offline_access");
   }
 
+
   @Test
-  public void testTokenIntrospectionEndpointBasicAuthentication() {
+  public void testTokenIntrospectionEndpointBasicAuthentication() throws Exception {
     // @formatter:off
-    given()
-      .port(8080)
-      .auth()
-        .preemptive()
-          .basic("password-grant", "secret")
-      .formParam("token", accessToken)
-    .when()
-      .post("/introspect")
-    .then()
-      .log().body(true)
-      .statusCode(HttpStatus.OK.value())
-      .body("active", equalTo(true));
+    mvc.perform(post(ENDPOINT)
+        .with(httpBasic("password-grant", "secret"))
+        .param("token", accessToken))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.active", equalTo(true)));
     // @formatter:on
   }
 
   @Test
-  public void testTokenIntrospectionEndpointFormAuthentication() {
+  public void testTokenIntrospectionEndpointFormAuthentication() throws Exception {
     // @formatter:off
-    given()
-      .port(8080)
-      .formParam("token", accessToken)
-      .formParam("client_id", "client-cred")
-      .formParam("client_secret", "secret")
-      .log().all(true)
-    .when()
-      .post("/introspect")
-    .then()
-      .log().all(true)
-      .statusCode(HttpStatus.UNAUTHORIZED.value());
+    mvc.perform(post(ENDPOINT)
+        .param("token", accessToken)
+        .param("client_id", "client-cred")
+        .param("client_secret", "secret"))
+      .andExpect(status().isUnauthorized());
     // @formatter:on
   }
 
   @Test
-  public void testTokenIntrospectionEndpointNoAuthenticationFailure() {
+  public void testTokenIntrospectionEndpointNoAuthenticationFailure() throws Exception {
     // @formatter:off
-    given()
-      .port(8080)
-      .formParam("token", accessToken)
-    .when()
-      .post("/introspect")
-    .then()
-      .log().body(true)
-      .statusCode(HttpStatus.UNAUTHORIZED.value());
+    mvc.perform(post(ENDPOINT)
+        .param("token", accessToken))
+      .andExpect(status().isUnauthorized());
    // @formatter:on
-
   }
 }

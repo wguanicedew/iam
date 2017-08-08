@@ -1,147 +1,98 @@
 package it.infn.mw.iam.test.scim.me.patch;
 
-import static it.infn.mw.iam.test.TestUtils.passwordTokenGetter;
+import static it.infn.mw.iam.api.scim.model.ScimPatchOperation.ScimPatchOperationType.remove;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 
-import org.junit.After;
-import org.junit.Assert;
+import java.util.List;
+
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.boot.test.WebIntegrationTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.google.common.collect.Lists;
 
 import it.infn.mw.iam.IamLoginService;
-import it.infn.mw.iam.api.scim.model.ScimEmail;
-import it.infn.mw.iam.api.scim.model.ScimName;
 import it.infn.mw.iam.api.scim.model.ScimOidcId;
+import it.infn.mw.iam.api.scim.model.ScimPatchOperation;
 import it.infn.mw.iam.api.scim.model.ScimPhoto;
 import it.infn.mw.iam.api.scim.model.ScimSamlId;
 import it.infn.mw.iam.api.scim.model.ScimUser;
-import it.infn.mw.iam.api.scim.model.ScimUserPatchRequest;
-import it.infn.mw.iam.test.ScimRestUtils;
-import it.infn.mw.iam.test.TestUtils;
-import it.infn.mw.iam.test.util.JacksonUtils;
+import it.infn.mw.iam.api.scim.provisioning.ScimUserProvisioning;
+import it.infn.mw.iam.test.core.CoreControllerTestSupport;
+import it.infn.mw.iam.test.scim.ScimRestUtilsMvc;
+import it.infn.mw.iam.test.util.WithMockOAuthUser;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = IamLoginService.class)
-@WebIntegrationTest
+@SpringApplicationConfiguration(
+    classes = {IamLoginService.class, CoreControllerTestSupport.class, ScimRestUtilsMvc.class})
+@WebAppConfiguration
+@WithMockOAuthUser(user = "test_104", authorities = {"ROLE_USER"})
+@Transactional
 public class ScimMeEndpointPatchRemoveTests {
 
-  private ScimRestUtils userRestUtils;
-  private ScimRestUtils adminRestUtils;
-  private ScimUser testUser;
-
-  final String TESTUSER_USERNAME = "patchRemoveUser";
-  final String TESTUSER_PASSWORD = "password";
-  final ScimName TESTUSER_NAME = ScimName.builder().givenName("John").familyName("Lennon").build();
-  final ScimEmail TESTUSER_EMAIL = ScimEmail.builder().email("john.lennon@liverpool.uk").build();
-  final ScimPhoto TESTUSER_PHOTO = ScimPhoto.builder().value("http://site.org/user.png").build();
-  final ScimOidcId TESTUSER_OIDCID =
-      ScimOidcId.builder().issuer("OIDC_ID_ISSUER").subject("OIDC_ID_SUBJECT").build();
-  final ScimSamlId TESTUSER_SAMLID =
-      ScimSamlId.builder().idpId("SAML_ID_IDP").userId("SAML_ID_USER").build();
-
-  @BeforeClass
-  public static void init() {
-
-    JacksonUtils.initRestAssured();
-  }
+  @Autowired
+  private ScimRestUtilsMvc scimUtils;
+  @Autowired
+  private ScimUserProvisioning provider;
 
   @Before
-  public void testSetup() {
+  public void init() throws Exception {
 
-    adminRestUtils = ScimRestUtils
-      .getInstance(TestUtils.getAccessToken("scim-client-rw", "secret", "scim:read scim:write"));
+    String uuid = scimUtils.getMe().getId();
 
-    testUser = adminRestUtils
-      .doPost("/scim/Users/",
-          ScimUser.builder()
-            .active(true)
-            .userName(TESTUSER_USERNAME)
-            .password(TESTUSER_PASSWORD)
-            .addEmail(TESTUSER_EMAIL)
-            .name(TESTUSER_NAME)
-            .addOidcId(TESTUSER_OIDCID)
-            .addSamlId(TESTUSER_SAMLID)
-            .build())
-      .extract()
-      .as(ScimUser.class);
+    ScimUser updates = ScimUser.builder()
+      .buildPhoto("http://site.org/user.png")
+      .buildOidcId("ISS", "SUB")
+      .buildSamlId("IDP", "UID")
+      .build();
 
-    userRestUtils = ScimRestUtils.getInstance(passwordTokenGetter().username(TESTUSER_USERNAME)
-      .password(TESTUSER_PASSWORD)
-      .getAccessToken());
-  }
+    List<ScimPatchOperation<ScimUser>> operations = Lists.newArrayList();
 
-  @After
-  public void testTeardown() {
+    operations.add(new ScimPatchOperation.Builder<ScimUser>().add().value(updates).build());
 
-    adminRestUtils.doDelete(testUser.getMeta().getLocation());
-  }
-
-  private ScimUser doGet() {
-
-    return userRestUtils.doGet("/scim/Me").extract().as(ScimUser.class);
-  }
-
-  private void doPatch(ScimUserPatchRequest patchRequest) {
-
-    userRestUtils.doPatch("/scim/Me", patchRequest);
+    provider.update(uuid, operations);
   }
 
   @Test
-  public void testPatchRemovePicture() {
+  public void testPatchRemovePicture() throws Exception {
 
-    final ScimUserPatchRequest patchAddRequest = ScimUserPatchRequest.builder()
-      .add(ScimUser.builder().addPhoto(TESTUSER_PHOTO).build())
-      .build();
+    ScimPhoto currentPhoto = scimUtils.getMe().getPhotos().get(0);
 
-    doPatch(patchAddRequest);
+    ScimUser updates = ScimUser.builder().addPhoto(currentPhoto).build();
 
-    ScimPhoto updatedPhoto = doGet().getPhotos().get(0);
+    scimUtils.patchMe(remove, updates);
 
-    Assert.assertTrue(updatedPhoto.equals(TESTUSER_PHOTO));
-
-    ScimUserPatchRequest patchRemoveRequest = ScimUserPatchRequest.builder()
-      .remove(ScimUser.builder().addPhoto(TESTUSER_PHOTO).build())
-      .build();
-
-    doPatch(patchRemoveRequest);
-
-    ScimUser updatedUser = doGet();
-
-    Assert.assertFalse(updatedUser.hasPhotos());
+    assertThat(scimUtils.getMe().hasPhotos(), equalTo(false));
   }
 
   @Test
-  public void testPatchRemoveOidcId() {
+  public void testPatchRemoveOidcId() throws Exception {
 
-    final ScimUserPatchRequest patchRemoveRequest = ScimUserPatchRequest.builder()
-      .remove(ScimUser.builder().addOidcId(TESTUSER_OIDCID).build())
-      .build();
+    ScimOidcId currentOidcId = scimUtils.getMe().getIndigoUser().getOidcIds().get(0);
 
-    doPatch(patchRemoveRequest);
+    ScimUser updates = ScimUser.builder().addOidcId(currentOidcId).build();
 
-    ScimUser updatedUser = doGet();
+    scimUtils.patchMe(remove, updates);
 
-    assertThat(updatedUser.hasOidcIds(), equalTo(false));
+    assertThat(scimUtils.getMe().getIndigoUser().getOidcIds(), hasSize(equalTo(0)));
   }
 
   @Test
-  public void testPatchRemoveSamlId() {
+  public void testPatchRemoveSamlId() throws Exception {
 
-    final ScimUserPatchRequest patchRemoveRequest = ScimUserPatchRequest.builder()
-      .remove(ScimUser.builder().addSamlId(TESTUSER_SAMLID).build())
-      .build();
+    ScimSamlId currentSamlId = scimUtils.getMe().getIndigoUser().getSamlIds().get(0);
 
-    doPatch(patchRemoveRequest);
+    ScimUser updates = ScimUser.builder().addSamlId(currentSamlId).build();
 
-    ScimUser updatedUser = doGet();
+    scimUtils.patchMe(remove, updates);
 
-    assertThat(updatedUser.hasSamlIds(), equalTo(false));
+    assertThat(scimUtils.getMe().getIndigoUser().getSamlIds(), hasSize(equalTo(0)));
   }
-
 }

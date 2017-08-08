@@ -15,7 +15,7 @@ import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REPLACE_PASSWO
 import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REPLACE_PICTURE;
 import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REPLACE_USERNAME;
 import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.EPUID;
-import static it.infn.mw.iam.test.TestUtils.x509Certs;
+import static it.infn.mw.iam.test.X509Utils.x509Certs;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.isIn;
@@ -89,7 +89,8 @@ public class DefaultAccountUpdaterFactoryTests {
   OidcIdConverter oidcConverter = new OidcIdConverter();
   SamlIdConverter samlConverter = new SamlIdConverter();
   SshKeyConverter sshKeyConverter = new SshKeyConverter();
-  X509CertificateConverter x509Converter = new X509CertificateConverter(new PEMX509CertificateChainParser());
+  X509CertificateConverter x509Converter =
+      new X509CertificateConverter(new PEMX509CertificateChainParser());
 
   DefaultAccountUpdaterFactory factory;
 
@@ -193,11 +194,10 @@ public class DefaultAccountUpdaterFactoryTests {
   @Test
   public void testPatchAddOpMultipleParsing() {
 
-    List<UpdaterType> expectedUpdatersType =
-        Lists.newArrayList(ACCOUNT_REPLACE_GIVEN_NAME, ACCOUNT_REPLACE_FAMILY_NAME,
-            ACCOUNT_REPLACE_EMAIL, ACCOUNT_REPLACE_PASSWORD, ACCOUNT_REPLACE_USERNAME,
-            ACCOUNT_REPLACE_ACTIVE, ACCOUNT_REPLACE_PICTURE, ACCOUNT_ADD_OIDC_ID,
-            ACCOUNT_ADD_SAML_ID, ACCOUNT_ADD_SSH_KEY);
+    List<UpdaterType> expectedUpdatersType = Lists.newArrayList(ACCOUNT_REPLACE_GIVEN_NAME,
+        ACCOUNT_REPLACE_FAMILY_NAME, ACCOUNT_REPLACE_EMAIL, ACCOUNT_REPLACE_PASSWORD,
+        ACCOUNT_REPLACE_USERNAME, ACCOUNT_REPLACE_ACTIVE, ACCOUNT_REPLACE_PICTURE,
+        ACCOUNT_ADD_OIDC_ID, ACCOUNT_ADD_SAML_ID, ACCOUNT_ADD_SSH_KEY);
 
     IamAccount account = newAccount(OLD);
 
@@ -210,7 +210,7 @@ public class DefaultAccountUpdaterFactoryTests {
     account.getUserInfo().setEmail(OLD);
 
     IamSamlId newSamlId = new IamSamlId(NEW, Saml2Attribute.EPUID.getAttributeName(), NEW);
-    
+
     when(repo.findByUsername(NEW)).thenReturn(Optional.empty());
     when(repo.findByEmail(NEW)).thenReturn(Optional.empty());
     when(repo.findByOidcId(NEW, NEW)).thenReturn(Optional.empty());
@@ -227,8 +227,8 @@ public class DefaultAccountUpdaterFactoryTests {
       .buildEmail(NEW)
       .password(NEW)
       .addOidcId(ScimOidcId.builder().issuer(NEW).subject(NEW).build())
-      .addSamlId(ScimSamlId.builder().idpId(NEW).userId(NEW).attributeId(EPUID.getAttributeName())
-          .build())
+      .addSamlId(
+          ScimSamlId.builder().idpId(NEW).userId(NEW).attributeId(EPUID.getAttributeName()).build())
       .addSshKey(ScimSshKey.builder().value(NEW).build())
       .build();
 
@@ -253,7 +253,7 @@ public class DefaultAccountUpdaterFactoryTests {
     assertThat(encoder.matches(NEW, account.getPassword()), equalTo(true));
     assertThat(account.getOidcIds().get(0), equalTo(new IamOidcId(NEW, NEW)));
     assertThat(account.getSamlIds().get(0), equalTo(newSamlId));
-    
+
     assertThat(account.getSshKeys().get(0), equalTo(new IamSshKey(NEW)));
 
   }
@@ -311,8 +311,8 @@ public class DefaultAccountUpdaterFactoryTests {
   @Test
   public void testPatchRemoveOpMultipleParsing() {
 
-    List<UpdaterType> expectedUpdatersType = Lists.newArrayList(ACCOUNT_REMOVE_OIDC_ID,
-        ACCOUNT_REMOVE_SAML_ID, ACCOUNT_REMOVE_SSH_KEY );
+    List<UpdaterType> expectedUpdatersType =
+        Lists.newArrayList(ACCOUNT_REMOVE_OIDC_ID, ACCOUNT_REMOVE_SAML_ID, ACCOUNT_REMOVE_SSH_KEY);
 
     IamAccount account = newAccount(OLD);
     account.setOidcIds(Lists.newArrayList(new IamOidcId(OLD, OLD)));
@@ -321,7 +321,7 @@ public class DefaultAccountUpdaterFactoryTests {
     account.setSshKeys(Lists.newArrayList(new IamSshKey(OLD)));
 
     IamSamlId oldId = new IamSamlId(OLD, Saml2Attribute.EPUID.getAttributeName(), OLD);
-    
+
     when(repo.findByOidcId(OLD, OLD)).thenReturn(Optional.of(account));
     when(repo.findBySamlId(oldId)).thenReturn(Optional.of(account));
     when(repo.findBySshKeyValue(OLD)).thenReturn(Optional.of(account));
@@ -329,8 +329,8 @@ public class DefaultAccountUpdaterFactoryTests {
 
     ScimUser user = ScimUser.builder()
       .addOidcId(ScimOidcId.builder().issuer(OLD).subject(OLD).build())
-      .addSamlId(ScimSamlId.builder().idpId(OLD).userId(OLD).attributeId(EPUID.getAttributeName())
-          .build())
+      .addSamlId(
+          ScimSamlId.builder().idpId(OLD).userId(OLD).attributeId(EPUID.getAttributeName()).build())
       .addSshKey(ScimSshKey.builder().value(OLD).build())
       .build();
 
