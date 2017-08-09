@@ -117,7 +117,6 @@ public class RefreshTokenGetRevokeTests extends TokensUtils {
     String path = String.format("%s/%d", REFRESH_TOKENS_BASE_PATH, rt.getId());
 
     mvc.perform(delete(path).contentType(CONTENT_TYPE)).andExpect(status().isNoContent());
-    mvc.perform(get(path).contentType(CONTENT_TYPE)).andExpect(status().isNotFound());
 
     assertThat(tokenService.getRefreshTokenById(rt.getId()), equalTo(null));
   }

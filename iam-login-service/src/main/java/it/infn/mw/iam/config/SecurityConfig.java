@@ -1,5 +1,19 @@
 package it.infn.mw.iam.config;
 
+import static it.infn.mw.iam.api.tokens.Constants.ACCESS_TOKENS_ENDPOINT;
+import static it.infn.mw.iam.api.tokens.Constants.REFRESH_TOKENS_ENDPOINT;
+
+import it.infn.mw.iam.authn.RootIsDashboardSuccessHandler;
+import it.infn.mw.iam.authn.TimestamperSuccessHandler;
+import it.infn.mw.iam.authn.oidc.OidcAccessDeniedHandler;
+import it.infn.mw.iam.authn.oidc.OidcAuthenticationProvider;
+import it.infn.mw.iam.authn.oidc.OidcClientFilter;
+import it.infn.mw.iam.authn.x509.IamX509AuthenticationProvider;
+import it.infn.mw.iam.authn.x509.IamX509AuthenticationUserDetailService;
+import it.infn.mw.iam.authn.x509.IamX509PreauthenticationProcessingFilter;
+import it.infn.mw.iam.authn.x509.X509AuthenticationCredentialExtractor;
+import it.infn.mw.iam.persistence.repository.IamAccountRepository;
+
 import org.mitre.oauth2.service.OAuth2TokenEntityService;
 import org.mitre.oauth2.web.CorsFilter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,17 +50,6 @@ import org.springframework.security.web.context.request.async.WebAsyncManagerInt
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.filter.GenericFilterBean;
-
-import it.infn.mw.iam.authn.RootIsDashboardSuccessHandler;
-import it.infn.mw.iam.authn.TimestamperSuccessHandler;
-import it.infn.mw.iam.authn.oidc.OidcAccessDeniedHandler;
-import it.infn.mw.iam.authn.oidc.OidcAuthenticationProvider;
-import it.infn.mw.iam.authn.oidc.OidcClientFilter;
-import it.infn.mw.iam.authn.x509.IamX509AuthenticationProvider;
-import it.infn.mw.iam.authn.x509.IamX509AuthenticationUserDetailService;
-import it.infn.mw.iam.authn.x509.IamX509PreauthenticationProcessingFilter;
-import it.infn.mw.iam.authn.x509.X509AuthenticationCredentialExtractor;
-import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
 @Configuration
 @EnableWebSecurity
@@ -717,7 +720,7 @@ public class SecurityConfig {
       // @formatter:off
       http
         .requestMatchers()
-        .antMatchers("/access-tokens/**", "/refresh-tokens/**")
+        .antMatchers(ACCESS_TOKENS_ENDPOINT + "/**", REFRESH_TOKENS_ENDPOINT + "/**")
         .and()
         .exceptionHandling()
         .authenticationEntryPoint(authenticationEntryPoint)
@@ -728,7 +731,7 @@ public class SecurityConfig {
         .sessionCreationPolicy(SessionCreationPolicy.NEVER)
         .and()
         .authorizeRequests()
-        .antMatchers("/access-tokens/**", "/refresh-tokens/**")
+        .antMatchers(ACCESS_TOKENS_ENDPOINT + "/**", REFRESH_TOKENS_ENDPOINT + "/**")
         .authenticated()
         .and()
         .csrf()

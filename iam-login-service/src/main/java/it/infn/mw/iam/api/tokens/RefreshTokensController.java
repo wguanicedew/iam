@@ -1,5 +1,7 @@
 package it.infn.mw.iam.api.tokens;
 
+import static it.infn.mw.iam.api.tokens.Constants.REFRESH_TOKENS_ENDPOINT;
+
 import it.infn.mw.iam.api.account.authority.ErrorDTO;
 import it.infn.mw.iam.api.tokens.exception.TokenNotFoundException;
 import it.infn.mw.iam.api.tokens.model.RefreshToken;
@@ -31,7 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 @RestController
 @Transactional
 @PreAuthorize("hasRole('ADMIN')")
-@RequestMapping("/refresh-tokens")
+@RequestMapping(REFRESH_TOKENS_ENDPOINT)
 public class RefreshTokensController extends TokensControllerSupport {
 
   public static final Logger log = LoggerFactory.getLogger(RefreshTokensController.class);

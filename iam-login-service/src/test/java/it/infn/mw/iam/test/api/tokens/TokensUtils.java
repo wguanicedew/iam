@@ -3,6 +3,7 @@ package it.infn.mw.iam.test.api.tokens;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
+import it.infn.mw.iam.api.tokens.Constants;
 import it.infn.mw.iam.core.user.exception.IamAccountException;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
@@ -26,8 +27,8 @@ import org.springframework.web.context.WebApplicationContext;
 
 public class TokensUtils {
 
-  protected final String ACCESS_TOKENS_BASE_PATH = "/access-tokens";
-  protected final String REFRESH_TOKENS_BASE_PATH = "/refresh-tokens";
+  protected static final String REFRESH_TOKENS_BASE_PATH = Constants.REFRESH_TOKENS_ENDPOINT;
+  protected static final String ACCESS_TOKENS_BASE_PATH = Constants.ACCESS_TOKENS_ENDPOINT;
 
   @Autowired
   private IamOAuthAccessTokenRepository accessTokenRepository;
@@ -60,7 +61,8 @@ public class TokensUtils {
         .build();
   }
 
-  private OAuth2Authentication oauth2Authentication(ClientDetailsEntity client, String username, String[] scopes) {
+  private OAuth2Authentication oauth2Authentication(ClientDetailsEntity client, String username,
+      String[] scopes) {
 
     Authentication userAuth = null;
 
@@ -83,7 +85,8 @@ public class TokensUtils {
         .orElseThrow(() -> new IamAccountException("User not found"));
   }
 
-  public OAuth2AccessTokenEntity buildAccessToken(ClientDetailsEntity client, String username, String[] scopes) {
+  public OAuth2AccessTokenEntity buildAccessToken(ClientDetailsEntity client, String username,
+      String[] scopes) {
     OAuth2AccessTokenEntity token =
         tokenService.createAccessToken(oauth2Authentication(client, username, scopes));
     return token;

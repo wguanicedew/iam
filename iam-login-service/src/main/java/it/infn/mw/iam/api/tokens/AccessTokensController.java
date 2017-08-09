@@ -1,5 +1,7 @@
 package it.infn.mw.iam.api.tokens;
 
+import static it.infn.mw.iam.api.tokens.Constants.ACCESS_TOKENS_ENDPOINT;
+
 import it.infn.mw.iam.api.account.authority.ErrorDTO;
 import it.infn.mw.iam.api.tokens.exception.TokenNotFoundException;
 import it.infn.mw.iam.api.tokens.model.AccessToken;
@@ -31,7 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 @RestController
 @Transactional
 @PreAuthorize("hasRole('ADMIN')")
-@RequestMapping("/access-tokens")
+@RequestMapping(ACCESS_TOKENS_ENDPOINT)
 public class AccessTokensController extends TokensControllerSupport {
 
   public static final Logger log = LoggerFactory.getLogger(AccessTokensController.class);
