@@ -8,7 +8,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.validation.constraints.Min;
 
-import org.hibernate.validator.constraints.NotBlank;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import com.google.common.base.Splitter;
@@ -108,8 +107,7 @@ public class IamSamlProperties {
   public void setEntityId(String entityId) {
     this.entityId = entityId;
   }
-
-  @NotBlank
+  
   public String getIdpMetadata() {
     return idpMetadata;
   }
