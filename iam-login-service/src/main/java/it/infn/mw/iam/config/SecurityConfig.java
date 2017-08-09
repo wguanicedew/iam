@@ -699,6 +699,45 @@ public class SecurityConfig {
   }
 
   @Configuration
+  @Order(25)
+  public static class TokensApiEndpointConfig extends WebSecurityConfigurerAdapter {
+
+    @Autowired
+    private OAuth2AuthenticationProcessingFilter resourceFilter;
+
+    @Autowired
+    private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
+
+    @Autowired
+    private CorsFilter corsFilter;
+
+    @Override
+    protected void configure(final HttpSecurity http) throws Exception {
+
+      // @formatter:off
+      http
+        .requestMatchers()
+        .antMatchers("/access-tokens/**", "/refresh-tokens/**")
+        .and()
+        .exceptionHandling()
+        .authenticationEntryPoint(authenticationEntryPoint)
+        .and()
+        .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
+        .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
+        .sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.NEVER)
+        .and()
+        .authorizeRequests()
+        .antMatchers("/access-tokens/**", "/refresh-tokens/**")
+        .authenticated()
+        .and()
+        .csrf()
+        .disable();
+      // @formatter:on
+    }
+  }
+
+  @Configuration
   @Order(Ordered.HIGHEST_PRECEDENCE)
   @Profile("dev")
   public static class H2ConsoleEndpointAuthorizationConfig extends WebSecurityConfigurerAdapter {
