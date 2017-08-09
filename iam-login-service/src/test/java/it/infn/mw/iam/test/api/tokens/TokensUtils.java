@@ -15,8 +15,10 @@ import org.mitre.oauth2.model.OAuth2AccessTokenEntity;
 import org.mitre.oauth2.service.ClientDetailsEntityService;
 import org.mitre.oauth2.service.impl.DefaultOAuth2ProviderTokenService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -90,5 +92,10 @@ public class TokensUtils {
   public void clearAllTokens() {
     accessTokenRepository.deleteAll();
     refreshTokenRepository.deleteAll();
+  }
+
+  public Authentication anonymousAuthenticationToken() {
+    return new AnonymousAuthenticationToken("key", "anonymous",
+        AuthorityUtils.createAuthorityList("ROLE_ANONYMOUS"));
   }
 }
