@@ -105,6 +105,21 @@ public class AccessTokenGetRevokeTests extends TokensUtils {
     assertThat(remoteAt.getUser().getUserName(), equalTo(user.getUsername()));
     assertThat(remoteAt.getUser().getRef(),
         equalTo(scimResourceLocationProvider.userLocation(user.getUuid())));
+
+    String idPath = tokensResourceLocationProvider.accessTokenLocation(at.getIdToken().getId());
+    AccessToken remoteId = mapper.readValue(
+        mvc.perform(get(idPath).contentType(CONTENT_TYPE))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString(),
+        AccessToken.class);
+
+    assertThat(remoteId.getId(), equalTo(at.getIdToken().getId()));
+    assertThat(remoteId.getValue(), equalTo(at.getIdToken().getValue()));
+    assertThat(remoteId.getExpiration(), equalTo(at.getIdToken().getExpiration()));
+    assertThat(remoteId.getScopes().contains("id-token"), equalTo(true));
+    assertThat(remoteId.getScopes().size(), equalTo(1));
   }
 
   @Test
@@ -126,6 +141,7 @@ public class AccessTokenGetRevokeTests extends TokensUtils {
     mvc.perform(delete(path).contentType(CONTENT_TYPE)).andExpect(status().isNoContent());
 
     assertThat(tokenService.getAccessTokenById(at.getId()), equalTo(null));
+    assertThat(tokenService.getAccessTokenById(at.getIdToken().getId()), equalTo(null));
   }
 
   @Test
