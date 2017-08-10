@@ -87,10 +87,6 @@ public class RefreshTokenGetRevokeTests extends TokensUtils {
     assertThat(remoteRt.getValue(), equalTo(rt.getValue()));
     assertThat(remoteRt.getExpiration(), equalTo(rt.getExpiration()));
 
-    assertThat(remoteRt.getScopes().contains("openid"), equalTo(true));
-    assertThat(remoteRt.getScopes().contains("profile"), equalTo(true));
-    assertThat(remoteRt.getScopes().contains("offline_access"), equalTo(true));
-
     assertThat(remoteRt.getClient().getId(), equalTo(client.getId()));
     assertThat(remoteRt.getClient().getClientId(), equalTo(client.getClientId()));
 

@@ -62,7 +62,7 @@ public class TokensConverter {
             .build())
         .expiration(at.getExpiration())
         .idToken(idToken)
-        .scopes(ah.getScope())
+        .scopes(at.getScope())
         .user(UserRef.builder()
             .id(account.getUuid())
             .userName(account.getUsername())
@@ -72,30 +72,29 @@ public class TokensConverter {
         .build();
   }
 
-  public RefreshToken toRefreshToken(OAuth2RefreshTokenEntity at) {
+  public RefreshToken toRefreshToken(OAuth2RefreshTokenEntity rt) {
 
-    AuthenticationHolderEntity ah = at.getAuthenticationHolder();
+    AuthenticationHolderEntity ah = rt.getAuthenticationHolder();
     ClientDetailsEntity cd = clientDetailsService.loadClientByClientId(ah.getClientId());
     String username = ah.getAuthentication().getPrincipal().toString();
     IamAccount account = accountRepository.findByUsername(username)
         .orElseThrow(() -> new IamAccountException("Account not found"));
 
     return RefreshToken.builder()
-        .id(at.getId())
+        .id(rt.getId())
         .client(ClientRef.builder()
             .id(cd.getId())
             .clientId(cd.getClientId())
             .contacts(cd.getContacts())
             .ref(cd.getClientUri())
             .build())
-        .expiration(at.getExpiration())
-        .scopes(ah.getScope())
+        .expiration(rt.getExpiration())
         .user(UserRef.builder()
             .id(account.getUuid())
             .userName(account.getUsername())
             .ref(scimResourceLocationProvider.userLocation(account.getUuid()))
             .build())
-        .value(at.getValue())
+        .value(rt.getValue())
         .build();
   }
 }
