@@ -1,8 +1,42 @@
 # Changelog
 
-## 1.0.0 (xxxx-xx-xx)
+## 1.0.0 (2017-8-xx)
 
-TBD
+This release provides improvements, bug fixes and new features:
+
+- IAM now supports hierarchical groups. The SCIM group management API has been
+  extended to support nested group creation and listing, and the IAM dashboard
+  can now leverage these new API functions (#88)
+- IAM now supports native X.509 authentication (#119) and the ability to
+  link/unlink X.509 certificates to a user membership (#120)
+- IAM now supports configurable on-demand account provisioning for trusted SAML
+  IDPs; this means that the IAM can be configured to automatically on-board
+  users from a trusted IdP/federation after a succesfull external
+  authentication (i.e. no former registration or administration approval is
+  required to on-board users) (#130)
+- Account linking can be now be disabled via a configuration option (#142)
+- IAM dashboard now correctly displays valid active access tokens for a user
+  (#112) 
+- A problem that caused IAM registration access tokens to expire after the
+  first use has been fixed (#134)
+- IAM now provides an endpoint than can be used to monitor the service
+  connectivity to external service (ie. Google) (#150)
+- Improved SAML metadata handling (#146) and reloading (#115)
+- Account linking can now be disabled via a configuration option (#142)
+- The IAM audit log now provides fine-grained information for many events
+  (#137)
+- The IAM token introspection endpoint now correctly supports HTTP form
+  authentication (#149)
+- Notes in registration requests are now required (#114) to make life easier
+  for VO administrators that wants to understand the reason for a registration
+  request
+- Password reset emails now contain the username of the user that has requested
+  the password reset (#108)
+- A stronger SAML account linking logic is now in place (#116)
+- Starting from this release, we provide RPM and Deb packages (#110) and a
+  puppet module to configure the IAM service (#109)
+- The spring-boot dependency has been updated to version 1.3.8.RELEASE (#144)
+
 
 ## 0.6.0 (2017-3-31)
 
