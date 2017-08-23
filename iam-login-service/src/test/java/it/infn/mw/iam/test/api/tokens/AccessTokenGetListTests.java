@@ -362,4 +362,24 @@ public class AccessTokenGetListTests extends TokensUtils {
 
     assertThat(tokenRepository.countAllTokens(), equalTo(2));
   }
+
+
+  @Test
+  public void getAccessTokenListWithOneClientCredentialAccessToken() throws Exception {
+
+    buildAccessToken(loadTestClient(TEST_CLIENT_ID), TESTUSER_USERNAME, SCOPES);
+    buildAccessToken(loadTestClient(TEST_CLIENT_ID), SCOPES);
+
+    TokensListResponse<AccessToken> atl = mapper.readValue(
+        mvc.perform(get(ACCESS_TOKENS_BASE_PATH).contentType(CONTENT_TYPE))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString(),
+        new TypeReference<TokensListResponse<AccessToken>>() {});
+
+    assertThat(atl.getTotalResults(), equalTo(Long.valueOf(3)));
+    assertThat(atl.getStartIndex(), equalTo(Long.valueOf(1)));
+    assertThat(atl.getItemsPerPage(), equalTo(Long.valueOf(3)));
+  }
 }

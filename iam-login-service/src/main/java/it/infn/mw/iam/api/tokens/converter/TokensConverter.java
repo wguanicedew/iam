@@ -15,6 +15,7 @@ import org.mitre.oauth2.model.AuthenticationHolderEntity;
 import org.mitre.oauth2.model.ClientDetailsEntity;
 import org.mitre.oauth2.model.OAuth2AccessTokenEntity;
 import org.mitre.oauth2.model.OAuth2RefreshTokenEntity;
+import org.mitre.oauth2.model.SavedUserAuthentication;
 import org.mitre.oauth2.service.ClientDetailsEntityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -38,18 +39,17 @@ public class TokensConverter {
 
     AuthenticationHolderEntity ah = at.getAuthenticationHolder();
     ClientDetailsEntity cd = clientDetailsService.loadClientByClientId(ah.getClientId());
-    String username = ah.getAuthentication().getPrincipal().toString();
-    IamAccount account = accountRepository.findByUsername(username)
-        .orElseThrow(() -> new IamAccountException("Account for " + username + " not found"));
 
-    IdTokenRef idToken = null;
+    UserRef userRef = null;
 
-    if (at.getIdToken() != null) {
-      Long idTokenId = at.getIdToken().getId();
-      idToken = IdTokenRef.builder()
-          .id(idTokenId)
-          .ref(tokensResourceLocationProvider.accessTokenLocation(idTokenId))
-          .build();
+    if (hasUser(at)) {
+      userRef = buildUserRef(getUser(at));
+    }
+
+    IdTokenRef idTokenRef = null;
+
+    if (hasIdToken(at)) {
+      idTokenRef = buildIdTokenRef(getIdToken(at));
     }
 
     return AccessToken.builder()
@@ -61,13 +61,9 @@ public class TokensConverter {
             .ref(cd.getClientUri())
             .build())
         .expiration(at.getExpiration())
-        .idToken(idToken)
+        .idToken(idTokenRef)
         .scopes(at.getScope())
-        .user(UserRef.builder()
-            .id(account.getUuid())
-            .userName(account.getUsername())
-            .ref(scimResourceLocationProvider.userLocation(account.getUuid()))
-            .build())
+        .user(userRef)
         .value(at.getValue())
         .build();
   }
@@ -76,9 +72,12 @@ public class TokensConverter {
 
     AuthenticationHolderEntity ah = rt.getAuthenticationHolder();
     ClientDetailsEntity cd = clientDetailsService.loadClientByClientId(ah.getClientId());
-    String username = ah.getAuthentication().getPrincipal().toString();
-    IamAccount account = accountRepository.findByUsername(username)
-        .orElseThrow(() -> new IamAccountException("Account not found"));
+
+    UserRef userRef = null;
+
+    if (hasUser(rt)) {
+      userRef = buildUserRef(getUser(rt));
+    }
 
     return RefreshToken.builder()
         .id(rt.getId())
@@ -89,12 +88,60 @@ public class TokensConverter {
             .ref(cd.getClientUri())
             .build())
         .expiration(rt.getExpiration())
-        .user(UserRef.builder()
-            .id(account.getUuid())
-            .userName(account.getUsername())
-            .ref(scimResourceLocationProvider.userLocation(account.getUuid()))
-            .build())
+        .user(userRef)
         .value(rt.getValue())
         .build();
+  }
+
+  private boolean hasUser(OAuth2AccessTokenEntity at) {
+
+    return getUser(at) instanceof SavedUserAuthentication;
+  }
+
+  private SavedUserAuthentication getUser(OAuth2AccessTokenEntity at) {
+
+    return at.getAuthenticationHolder().getUserAuth();
+  }
+
+  private boolean hasUser(OAuth2RefreshTokenEntity rt) {
+
+    return getUser(rt) instanceof SavedUserAuthentication;
+  }
+
+  private SavedUserAuthentication getUser(OAuth2RefreshTokenEntity rt) {
+
+    return rt.getAuthenticationHolder().getUserAuth();
+  }
+
+  private boolean hasIdToken(OAuth2AccessTokenEntity at) {
+
+    return getIdToken(at) != null;
+  }
+
+  private OAuth2AccessTokenEntity getIdToken(OAuth2AccessTokenEntity at) {
+
+    return at.getIdToken();
+  }
+
+  private UserRef buildUserRef(SavedUserAuthentication userAuth) {
+
+    String username = userAuth.getPrincipal().toString();
+
+    IamAccount account = accountRepository.findByUsername(username)
+        .orElseThrow(() -> new IamAccountException("Account for " + username + " not found"));
+
+    return UserRef.builder()
+        .id(account.getUuid())
+        .userName(account.getUsername())
+        .ref(scimResourceLocationProvider.userLocation(account.getUuid()))
+        .build();
+  }
+
+  private IdTokenRef buildIdTokenRef(OAuth2AccessTokenEntity idToken) {
+
+    Long id = idToken.getId();
+    String ref = tokensResourceLocationProvider.accessTokenLocation(id);
+
+    return IdTokenRef.builder().id(id).ref(ref).build();
   }
 }

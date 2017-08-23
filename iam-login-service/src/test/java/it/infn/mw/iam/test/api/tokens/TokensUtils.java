@@ -92,6 +92,12 @@ public class TokensUtils {
     return token;
   }
 
+  public OAuth2AccessTokenEntity buildAccessToken(ClientDetailsEntity client, String[] scopes) {
+    OAuth2AccessTokenEntity token =
+        tokenService.createAccessToken(oauth2Authentication(client, null, scopes));
+    return token;
+  }
+
   public void clearAllTokens() {
     accessTokenRepository.deleteAll();
     refreshTokenRepository.deleteAll();
