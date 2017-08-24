@@ -19,7 +19,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class})
 @WebAppConfiguration
-public class RefreshTokenAuthenticatedTests extends TokensUtils {
+public class RefreshTokenAuthenticatedTests extends TestTokensUtils {
 
   private static final String TESTUSER_USERNAME = "test_102";
   private static final int FAKE_TOKEN_ID = 12345;
@@ -31,14 +31,14 @@ public class RefreshTokenAuthenticatedTests extends TokensUtils {
 
   @Test
   @WithMockOAuthUser(user = TESTUSER_USERNAME, authorities = {"ROLE_USER"})
-  public void getRefreshTokenListAsAuthenticatedUser() throws Exception {
+  public void forbiddenOnGettingListTest() throws Exception {
 
     mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(CONTENT_TYPE)).andExpect(status().isForbidden());
   }
 
   @Test
   @WithMockOAuthUser(user = TESTUSER_USERNAME, authorities = {"ROLE_USER"})
-  public void revokeRefreshTokenAsAuthenticatedUser() throws Exception {
+  public void forbiddenOnRevokingTest() throws Exception {
 
     String path = String.format("%s/%d", REFRESH_TOKENS_BASE_PATH, FAKE_TOKEN_ID);
     mvc.perform(delete(path).contentType(CONTENT_TYPE)).andExpect(status().isForbidden());

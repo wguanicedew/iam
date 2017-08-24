@@ -10,8 +10,6 @@ import it.infn.mw.iam.api.tokens.service.TokenService;
 import it.infn.mw.iam.api.tokens.service.paging.TokensPageRequest;
 import it.infn.mw.iam.core.user.exception.IamAccountException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.json.MappingJacksonValue;
@@ -35,8 +33,6 @@ import javax.servlet.http.HttpServletResponse;
 @PreAuthorize("hasRole('ADMIN')")
 @RequestMapping(REFRESH_TOKENS_ENDPOINT)
 public class RefreshTokensController extends TokensControllerSupport {
-
-  public static final Logger log = LoggerFactory.getLogger(RefreshTokensController.class);
 
   @Autowired
   private TokenService<RefreshToken> tokenService;
@@ -77,24 +73,15 @@ public class RefreshTokensController extends TokensControllerSupport {
   public RefreshToken getRefreshToken(@PathVariable("id") Long id, HttpServletRequest request,
       HttpServletResponse response) {
 
-    log.debug("GET {}", request.getRequestURI());
-
-    RefreshToken rt = tokenService.getTokenById(id);
-
-    log.info("GET {} {}", request.getRequestURI(), HttpStatus.OK);
-    return rt;
+    return tokenService.getTokenById(id);
   }
 
   @RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
   public void revokeRefreshToken(@PathVariable("id") Long id, HttpServletRequest request,
       HttpServletResponse response) {
 
-    log.debug("DELETE {}", request.getRequestURI());
-
     tokenService.revokeTokenById(id);
     response.setStatus(HttpStatus.NO_CONTENT.value());
-
-    log.info("DELETE {} {}", request.getRequestURI(), HttpStatus.NO_CONTENT);
   }
 
 
@@ -102,7 +89,6 @@ public class RefreshTokensController extends TokensControllerSupport {
   @ExceptionHandler(TokenNotFoundException.class)
   public ErrorDTO tokenNotFoundError(HttpServletRequest req, Exception ex) {
 
-    log.info("DELETE {} {}", req.getRequestURI(), HttpStatus.NOT_FOUND);
     return ErrorDTO.fromString(ex.getMessage());
   }
 

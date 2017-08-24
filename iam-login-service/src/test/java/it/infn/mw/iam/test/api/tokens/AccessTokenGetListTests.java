@@ -37,7 +37,7 @@ import java.util.List;
 @SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class})
 @WebAppConfiguration
 @WithMockOAuthUser(user = "admin", authorities = {"ROLE_ADMIN"})
-public class AccessTokenGetListTests extends TokensUtils {
+public class AccessTokenGetListTests extends TestTokensUtils {
 
   public static final String[] SCOPES = {"openid", "profile"};
 

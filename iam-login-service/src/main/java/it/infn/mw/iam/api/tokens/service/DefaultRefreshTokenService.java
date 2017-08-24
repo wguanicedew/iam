@@ -54,7 +54,7 @@ public class DefaultRefreshTokenService implements TokenService<RefreshToken> {
     return Optional.ofNullable(at);
   }
 
-  private TokensListResponse<RefreshToken> getCountZeroList() {
+  private TokensListResponse<RefreshToken> buildTokensCountResponse() {
 
     int tokenCount = tokenRepository.countAllTokens();
     return new TokensListResponse<>(Collections.emptyList(), tokenCount, 0, 1);
@@ -75,7 +75,7 @@ public class DefaultRefreshTokenService implements TokenService<RefreshToken> {
   public TokensListResponse<RefreshToken> getAllTokens(TokensPageRequest pageRequest) {
 
     if (pageRequest.getCount() == 0) {
-      return getCountZeroList();
+      return buildTokensCountResponse();
     }
 
     OffsetPageable op = new OffsetPageable(pageRequest.getStartIndex(), pageRequest.getCount());
@@ -87,7 +87,7 @@ public class DefaultRefreshTokenService implements TokenService<RefreshToken> {
       TokensPageRequest pageRequest) {
 
     if (pageRequest.getCount() == 0) {
-      return getCountZeroList();
+      return buildTokensCountResponse();
     }
 
     OffsetPageable op = new OffsetPageable(pageRequest.getStartIndex(), pageRequest.getCount());
@@ -100,7 +100,7 @@ public class DefaultRefreshTokenService implements TokenService<RefreshToken> {
       TokensPageRequest pageRequest) {
 
     if (pageRequest.getCount() == 0) {
-      return getCountZeroList();
+      return buildTokensCountResponse();
     }
 
     OffsetPageable op = new OffsetPageable(pageRequest.getStartIndex(), pageRequest.getCount());
@@ -113,7 +113,7 @@ public class DefaultRefreshTokenService implements TokenService<RefreshToken> {
       TokensPageRequest pageRequest) {
 
     if (pageRequest.getCount() == 0) {
-      return getCountZeroList();
+      return buildTokensCountResponse();
     }
 
     OffsetPageable op = new OffsetPageable(pageRequest.getStartIndex(), pageRequest.getCount());

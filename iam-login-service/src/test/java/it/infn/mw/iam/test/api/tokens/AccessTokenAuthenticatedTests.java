@@ -19,7 +19,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class})
 @WebAppConfiguration
-public class AccessTokenAuthenticatedTests extends TokensUtils {
+public class AccessTokenAuthenticatedTests extends TestTokensUtils {
 
   private static final String TESTUSER_USERNAME = "test_102";
   private static final int FAKE_TOKEN_ID = 12345;
@@ -31,14 +31,14 @@ public class AccessTokenAuthenticatedTests extends TokensUtils {
 
   @Test
   @WithMockOAuthUser(user = TESTUSER_USERNAME, authorities = {"ROLE_USER"})
-  public void getAccessTokenList() throws Exception {
+  public void forbiddenOnGettingListTest() throws Exception {
 
     mvc.perform(get(ACCESS_TOKENS_BASE_PATH).contentType(CONTENT_TYPE)).andExpect(status().isForbidden());
   }
 
   @Test
   @WithMockOAuthUser(user = TESTUSER_USERNAME, authorities = {"ROLE_USER"})
-  public void revokeAccessToken() throws Exception {
+  public void forbiddenOnRevokingTest() throws Exception {
 
     String path = String.format("%s/%d", ACCESS_TOKENS_BASE_PATH, FAKE_TOKEN_ID);
     mvc.perform(delete(path).contentType(CONTENT_TYPE)).andExpect(status().isForbidden());

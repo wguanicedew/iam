@@ -19,7 +19,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class})
 @WebAppConfiguration
-public class RefreshTokenAnonymousTests extends TokensUtils {
+public class RefreshTokenAnonymousTests extends TestTokensUtils {
 
   private static final int FAKE_TOKEN_ID = 12345;
 
@@ -30,13 +30,14 @@ public class RefreshTokenAnonymousTests extends TokensUtils {
   }
 
   @Test
-  public void getRefreshTokenList() throws Exception {
+  public void authenticationRequiredOnGettingListTest() throws Exception {
+
     mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(CONTENT_TYPE)
         .with(authentication(anonymousAuthenticationToken()))).andExpect(unauthenticated());
   }
 
   @Test
-  public void revokeRefreshToken() throws Exception {
+  public void authenticationRequiredOnRevokingTest() throws Exception {
 
     String path = String.format("%s/%d", REFRESH_TOKENS_BASE_PATH, FAKE_TOKEN_ID);
     mvc.perform(

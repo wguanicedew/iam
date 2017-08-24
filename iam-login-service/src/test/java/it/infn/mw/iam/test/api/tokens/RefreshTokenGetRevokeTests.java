@@ -35,7 +35,7 @@ import java.io.UnsupportedEncodingException;
 @SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class})
 @WebAppConfiguration
 @WithMockOAuthUser(user = "admin", authorities = {"ROLE_ADMIN"})
-public class RefreshTokenGetRevokeTests extends TokensUtils {
+public class RefreshTokenGetRevokeTests extends TestTokensUtils {
 
   public static final String[] SCOPES = {"openid", "profile", "offline_access"};
 

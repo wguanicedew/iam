@@ -6,6 +6,6 @@ public class Constants {
   public static final String REFRESH_TOKENS_ENDPOINT = "/iam/api/refresh-tokens";
 
   private Constants() {
-    throw new IllegalStateException("Utility class");
+    // utility class, it should not be instantiated
   }
 }
