@@ -1,12 +1,16 @@
 package it.infn.mw.iam.test.oauth;
 
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -20,30 +24,37 @@ public class EndpointsTestUtils {
 
 
   @Autowired
-  ObjectMapper mapper;
+  protected ObjectMapper mapper;
 
-  MockMvc mvc;
+  @Autowired
+  protected WebApplicationContext context;
 
-  protected String getPasswordAccessToken(String scope) throws Exception {
+  protected MockMvc mvc;
+
+  protected void buildMockMvc() {
+    mvc = MockMvcBuilders.webAppContextSetup(context)
+      .apply(springSecurity())
+      .alwaysDo(print())
+      .build();
+  }
+
+  public AccessTokenGetter buildAccessTokenGetter() {
     return new AccessTokenGetter().grantType("password")
       .clientId(DEFAULT_CLIENT_ID)
       .clientSecret(DEFAULT_CLIENT_SECRET)
-      .scope(scope)
       .username(DEFAULT_USERNAME)
-      .password(DEFAULT_PASSWORD)
-      .getAccessToken();
+      .password(DEFAULT_PASSWORD);
+  }
+
+  protected String getPasswordAccessToken(String scope) throws Exception {
+    
+    AccessTokenGetter tg = buildAccessTokenGetter().scope(scope);
+    return tg.getAccessTokenValue();
   }
 
   protected String getPasswordAccessToken() throws Exception {
-    return new AccessTokenGetter().grantType("password")
-      .clientId(DEFAULT_CLIENT_ID)
-      .clientSecret(DEFAULT_CLIENT_SECRET)
-      .scope(DEFAULT_SCOPE)
-      .username(DEFAULT_USERNAME)
-      .password(DEFAULT_PASSWORD)
-      .getAccessToken();
+    return getPasswordAccessToken(DEFAULT_SCOPE);
   }
-
 
   public class AccessTokenGetter {
     private String clientId;
@@ -89,7 +100,7 @@ public class EndpointsTestUtils {
       return this;
     }
 
-    public String getAccessToken() throws Exception {
+    public String performTokenRequest() throws Exception {
       MockHttpServletRequestBuilder req = post("/token").param("grant_type", grantType)
         .param("client_id", clientId)
         .param("client_secret", clientSecret)
@@ -104,18 +115,31 @@ public class EndpointsTestUtils {
       }
 
       //@formatter:off
-        String response = mvc.perform(req)
-          .andExpect(status().isOk())
-          .andReturn()
-          .getResponse()
-          .getContentAsString();
-        //@formatter:on
+          String response = mvc.perform(req)
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+          //@formatter:on
 
-      DefaultOAuth2AccessToken accessToken =
+      return response;
+    }
+
+    public DefaultOAuth2AccessToken getTokenResponseObject() throws Exception {
+
+      String response = performTokenRequest();
+
+      // This is incorrectly named in spring security OAuth, what they call OAuth2AccessToken
+      // is a TokenResponse object
+      DefaultOAuth2AccessToken tokenResponseObject =
           mapper.readValue(response, DefaultOAuth2AccessToken.class);
 
-      return accessToken.getValue();
+      return tokenResponseObject;
+    }
+
+    public String getAccessTokenValue() throws Exception {
+
+      return getTokenResponseObject().getValue();
     }
   }
-
 }
