@@ -85,7 +85,7 @@ public class TokenExchangeTests extends EndpointsTestUtils {
       .username(USERNAME)
       .password(PASSWORD)
       .scope("openid profile")
-      .getAccessToken();
+      .getAccessTokenValue();
 
     // @formatter:off
     String response = mvc.perform(post(TOKEN_ENDPOINT)
@@ -160,7 +160,7 @@ public class TokenExchangeTests extends EndpointsTestUtils {
       .username(USERNAME)
       .password(PASSWORD)
       .scope("openid profile")
-      .getAccessToken();
+      .getAccessTokenValue();
 
     // @formatter:off
     String response = mvc.perform(post(TOKEN_ENDPOINT)
@@ -232,7 +232,7 @@ public class TokenExchangeTests extends EndpointsTestUtils {
       .username(USERNAME)
       .password(PASSWORD)
       .scope("openid profile")
-      .getAccessToken();
+      .getAccessTokenValue();
 
     // @formatter:off
     mvc.perform(post(TOKEN_ENDPOINT)
@@ -265,7 +265,7 @@ public class TokenExchangeTests extends EndpointsTestUtils {
       .username(USERNAME)
       .password(PASSWORD)
       .scope("openid profile offline_access")
-      .getAccessToken();
+      .getAccessTokenValue();
 
     // @formatter:off
     String response = mvc.perform(post(TOKEN_ENDPOINT)
@@ -320,7 +320,7 @@ public class TokenExchangeTests extends EndpointsTestUtils {
       .username(USERNAME)
       .password(PASSWORD)
       .scope("openid")
-      .getAccessToken();
+      .getAccessTokenValue();
 
     // @formatter:off
     mvc.perform(post(TOKEN_ENDPOINT)
@@ -352,7 +352,7 @@ public class TokenExchangeTests extends EndpointsTestUtils {
       .username(USERNAME)
       .password(PASSWORD)
       .scope("openid")
-      .getAccessToken();
+      .getAccessTokenValue();
 
     String actorToken = new AccessTokenGetter().grantType("password")
       .clientId(clientId)
@@ -360,7 +360,7 @@ public class TokenExchangeTests extends EndpointsTestUtils {
       .username(USERNAME)
       .password(PASSWORD)
       .scope("openid")
-      .getAccessToken();
+      .getAccessTokenValue();
 
     // @formatter:off
     mvc.perform(post(TOKEN_ENDPOINT)
@@ -406,7 +406,7 @@ public class TokenExchangeTests extends EndpointsTestUtils {
       .clientId("client-cred")
       .clientSecret("secret")
       .scope("read-tasks write-tasks")
-      .getAccessToken();
+      .getAccessTokenValue();
 
     String actorClientId = "token-exchange-actor";
     String actorClientSecret = "secret";

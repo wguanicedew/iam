@@ -454,7 +454,9 @@ public class SecurityConfig {
       http.antMatcher("/revoke**").httpBasic().authenticationEntryPoint(authenticationEntryPoint)
           .and().addFilterBefore(corsFilter, SecurityContextPersistenceFilter.class)
           .addFilterBefore(clientCredentialsEndpointFilter(), BasicAuthenticationFilter.class)
-          .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint).and()
+          .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint)
+          .and()
+            .csrf().disable()
           .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
       // @formatter:on
     }
