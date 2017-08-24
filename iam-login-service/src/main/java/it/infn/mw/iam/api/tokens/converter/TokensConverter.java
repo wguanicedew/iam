@@ -38,28 +38,14 @@ public class TokensConverter {
   public AccessToken toAccessToken(OAuth2AccessTokenEntity at) {
 
     AuthenticationHolderEntity ah = at.getAuthenticationHolder();
-    ClientDetailsEntity cd = clientDetailsService.loadClientByClientId(ah.getClientId());
 
-    UserRef userRef = null;
-
-    if (hasUser(at)) {
-      userRef = buildUserRef(getUser(at));
-    }
-
-    IdTokenRef idTokenRef = null;
-
-    if (hasIdToken(at)) {
-      idTokenRef = buildIdTokenRef(getIdToken(at));
-    }
+    ClientRef clientRef = buildClientRef(ah.getClientId());
+    UserRef userRef = buildUserRef(ah.getUserAuth());
+    IdTokenRef idTokenRef = buildIdTokenRef(at.getIdToken());
 
     return AccessToken.builder()
         .id(at.getId())
-        .client(ClientRef.builder()
-            .id(cd.getId())
-            .clientId(cd.getClientId())
-            .contacts(cd.getContacts())
-            .ref(cd.getClientUri())
-            .build())
+        .client(clientRef)
         .expiration(at.getExpiration())
         .idToken(idTokenRef)
         .scopes(at.getScope())
@@ -71,59 +57,41 @@ public class TokensConverter {
   public RefreshToken toRefreshToken(OAuth2RefreshTokenEntity rt) {
 
     AuthenticationHolderEntity ah = rt.getAuthenticationHolder();
-    ClientDetailsEntity cd = clientDetailsService.loadClientByClientId(ah.getClientId());
 
-    UserRef userRef = null;
-
-    if (hasUser(rt)) {
-      userRef = buildUserRef(getUser(rt));
-    }
+    ClientRef clientRef = buildClientRef(ah.getClientId());
+    UserRef userRef = buildUserRef(ah.getUserAuth());
 
     return RefreshToken.builder()
         .id(rt.getId())
-        .client(ClientRef.builder()
-            .id(cd.getId())
-            .clientId(cd.getClientId())
-            .contacts(cd.getContacts())
-            .ref(cd.getClientUri())
-            .build())
+        .client(clientRef)
         .expiration(rt.getExpiration())
         .user(userRef)
         .value(rt.getValue())
         .build();
   }
 
-  private boolean hasUser(OAuth2AccessTokenEntity at) {
 
-    return getUser(at) instanceof SavedUserAuthentication;
-  }
+  private ClientRef buildClientRef(String clientId) {
 
-  private SavedUserAuthentication getUser(OAuth2AccessTokenEntity at) {
+    if (clientId == null) {
+      return null;
+    }
 
-    return at.getAuthenticationHolder().getUserAuth();
-  }
+    ClientDetailsEntity cd = clientDetailsService.loadClientByClientId(clientId);
 
-  private boolean hasUser(OAuth2RefreshTokenEntity rt) {
-
-    return getUser(rt) instanceof SavedUserAuthentication;
-  }
-
-  private SavedUserAuthentication getUser(OAuth2RefreshTokenEntity rt) {
-
-    return rt.getAuthenticationHolder().getUserAuth();
-  }
-
-  private boolean hasIdToken(OAuth2AccessTokenEntity at) {
-
-    return getIdToken(at) != null;
-  }
-
-  private OAuth2AccessTokenEntity getIdToken(OAuth2AccessTokenEntity at) {
-
-    return at.getIdToken();
+    return ClientRef.builder()
+        .id(cd.getId())
+        .clientId(cd.getClientId())
+        .contacts(cd.getContacts())
+        .ref(cd.getClientUri())
+        .build();
   }
 
   private UserRef buildUserRef(SavedUserAuthentication userAuth) {
+
+    if (userAuth == null) {
+      return null;
+    }
 
     String username = userAuth.getPrincipal().toString();
 
@@ -139,9 +107,13 @@ public class TokensConverter {
 
   private IdTokenRef buildIdTokenRef(OAuth2AccessTokenEntity idToken) {
 
-    Long id = idToken.getId();
-    String ref = tokensResourceLocationProvider.accessTokenLocation(id);
+    if (idToken == null) {
+      return null;
+    }
 
-    return IdTokenRef.builder().id(id).ref(ref).build();
+    return IdTokenRef.builder()
+        .id(idToken.getId())
+        .ref(tokensResourceLocationProvider.accessTokenLocation(idToken.getId()))
+        .build();
   }
 }
