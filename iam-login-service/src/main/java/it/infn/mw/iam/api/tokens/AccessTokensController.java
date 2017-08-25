@@ -25,8 +25,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Optional;
 
-import javax.servlet.http.HttpServletRequest;
-
 @RestController
 @Transactional
 @PreAuthorize("hasRole('ADMIN')")
@@ -41,7 +39,7 @@ public class AccessTokensController extends TokensControllerSupport {
       @RequestParam(required = false) Integer startIndex,
       @RequestParam(required = false) String userId,
       @RequestParam(required = false) String clientId,
-      @RequestParam(required = false) final String attributes, HttpServletRequest request) {
+      @RequestParam(required = false) final String attributes) {
 
     TokensPageRequest pr = buildTokensPageRequest(count, startIndex);
     TokensListResponse<AccessToken> results = getFilteredList(pr, userId, clientId);
