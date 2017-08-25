@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 @RestController
 @Transactional
@@ -38,13 +37,11 @@ public class RefreshTokensController extends TokensControllerSupport {
   private TokenService<RefreshToken> tokenService;
 
   @RequestMapping(method = RequestMethod.GET, produces = CONTENT_TYPE)
-  public MappingJacksonValue lisRefreshTokens(
-      @RequestParam(value = "count", required = false) Integer count,
-      @RequestParam(value = "startIndex", required = false) Integer startIndex,
-      @RequestParam(value = "userId", required = false) String userId,
-      @RequestParam(value = "clientId", required = false) String clientId,
-      @RequestParam(value = "attributes", required = false) final String attributes,
-      HttpServletRequest request) {
+  public MappingJacksonValue lisRefreshTokens(@RequestParam(required = false) Integer count,
+      @RequestParam(required = false) Integer startIndex,
+      @RequestParam(required = false) String userId,
+      @RequestParam(required = false) String clientId,
+      @RequestParam(required = false) final String attributes, HttpServletRequest request) {
 
     TokensPageRequest pr = buildTokensPageRequest(count, startIndex);
     TokensListResponse<RefreshToken> results = getFilteredList(pr, userId, clientId);
@@ -70,31 +67,29 @@ public class RefreshTokensController extends TokensControllerSupport {
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "/{id}", produces = CONTENT_TYPE)
-  public RefreshToken getRefreshToken(@PathVariable("id") Long id, HttpServletRequest request,
-      HttpServletResponse response) {
+  public RefreshToken getRefreshToken(@PathVariable("id") Long id) {
 
     return tokenService.getTokenById(id);
   }
 
   @RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
-  public void revokeRefreshToken(@PathVariable("id") Long id, HttpServletRequest request,
-      HttpServletResponse response) {
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void revokeRefreshToken(@PathVariable("id") Long id) {
 
     tokenService.revokeTokenById(id);
-    response.setStatus(HttpStatus.NO_CONTENT.value());
   }
 
 
   @ResponseStatus(value = HttpStatus.NOT_FOUND)
   @ExceptionHandler(TokenNotFoundException.class)
-  public ErrorDTO tokenNotFoundError(HttpServletRequest req, Exception ex) {
+  public ErrorDTO tokenNotFoundError(Exception ex) {
 
     return ErrorDTO.fromString(ex.getMessage());
   }
 
   @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
   @ExceptionHandler(IamAccountException.class)
-  public ErrorDTO accountNotFoundError(HttpServletRequest req, Exception ex) {
+  public ErrorDTO accountNotFoundError(Exception ex) {
 
     return ErrorDTO.fromString(ex.getMessage());
   }
