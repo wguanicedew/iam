@@ -13,9 +13,6 @@ import java.util.List;
 public interface IamOAuthRefreshTokenRepository
     extends PagingAndSortingRepository<OAuth2RefreshTokenEntity, Long> {
 
-  @Query("select count(t) from OAuth2RefreshTokenEntity t")
-  int countAllTokens();
-
   @Query("select t from OAuth2RefreshTokenEntity t where t.authenticationHolder.userAuth.name = :userId "
       + "and (t.expiration is NULL or t.expiration > :timestamp)")
   List<OAuth2RefreshTokenEntity> findValidRefreshTokensForUser(@Param("userId") String userId,

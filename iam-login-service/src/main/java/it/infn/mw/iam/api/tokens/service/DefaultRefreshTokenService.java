@@ -56,8 +56,7 @@ public class DefaultRefreshTokenService implements TokenService<RefreshToken> {
 
   private TokensListResponse<RefreshToken> buildTokensCountResponse() {
 
-    int tokenCount = tokenRepository.countAllTokens();
-    return new TokensListResponse<>(Collections.emptyList(), tokenCount, 0, 1);
+    return new TokensListResponse<>(Collections.emptyList(), tokenRepository.count(), 0, 1);
   }
 
   private TokensListResponse<RefreshToken> buildTokensListResponse(

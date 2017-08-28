@@ -13,9 +13,6 @@ import org.springframework.data.repository.query.Param;
 public interface IamOAuthAccessTokenRepository
     extends PagingAndSortingRepository<OAuth2AccessTokenEntity, Long> {
 
-  @Query("select count(t) from OAuth2AccessTokenEntity t")
-  int countAllTokens();
-
   @Query("select t from OAuth2AccessTokenEntity t where t.authenticationHolder.userAuth.name = :userId "
       + "and (t.expiration is NULL or t.expiration > :timestamp)")
   List<OAuth2AccessTokenEntity> findValidAccessTokensForUser(@Param("userId") String userId,
