@@ -1,4 +1,4 @@
-angular.module('dashboardApp').factory("scimFactory", ['$http', '$httpParamSerializer', function ($http, $httpParamSerializer) {
+angular.module('dashboardApp').factory("scimFactory", ['$q', '$http', '$httpParamSerializer', function ($q, $http, $httpParamSerializer) {
 
 	var urlBase = '/scim';
 	var urlUsers = urlBase + '/Users';
@@ -29,7 +29,8 @@ angular.module('dashboardApp').factory("scimFactory", ['$http', '$httpParamSeria
 		removeSamlId: removeSamlId,
 		setUserActiveStatus: setUserActiveStatus,
 		updateUser: updateUser,
-		updateMe: updateMe
+		updateMe: updateMe,
+		getAllUsers: getAllUsers
 	}
 
 	return service;
@@ -44,6 +45,46 @@ angular.module('dashboardApp').factory("scimFactory", ['$http', '$httpParamSeria
 		var url = urlUsers + '?' + qs;
 
 		return $http.get(url);
+	};
+
+	function getAllUsers() {
+
+	  console.info("Getting all users");
+
+	  var promises = [];
+	  var chunkRequestSize = 100;
+	  var users = [];
+	  var handleResponse = function(response){
+	    angular.forEach(response.data.Resources, function(user){
+	      users.push(user);
+	    });
+	  };
+	  var handleError = function(error) { return error; };
+
+	  var handleFirstResponse = function(response){
+	    var totalResults = response.data.totalResults;
+	    var lastLoaded = chunkRequestSize;
+
+	    while (lastLoaded < totalResults) {
+	      promises.push(getUsers(lastLoaded+1, chunkRequestSize));
+	      lastLoaded = lastLoaded + chunkRequestSize;
+	    }
+
+	    angular.forEach(response.data.Resources, function(user){
+	      users.push(user);
+	    });
+
+	    $q.all(promises).then(function(response){
+	      angular.forEach(promises, function(p){
+	        p.then(handleResponse);
+	      });
+	      return users;
+	    }, handleError);
+
+	    return users;
+	  };
+
+	  return getUsers(1, chunkRequestSize).then(handleFirstResponse, handleError);
 	};
 
 	function getGroups(startIndex, count) {
