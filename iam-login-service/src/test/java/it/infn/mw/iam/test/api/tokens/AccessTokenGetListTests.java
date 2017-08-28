@@ -344,7 +344,7 @@ public class AccessTokenGetListTests extends TestTokensUtils {
 
     buildAccessToken(client, TESTUSER_USERNAME, SCOPES);
 
-    assertThat(tokenRepository.countAllTokens(), equalTo(2));
+    assertThat(tokenRepository.count(), equalTo(Long.valueOf(2)));
 
     TokensListResponse<AccessToken> atl = mapper.readValue(
         mvc.perform(get(ACCESS_TOKENS_BASE_PATH).contentType(CONTENT_TYPE).param("userId",
@@ -360,7 +360,7 @@ public class AccessTokenGetListTests extends TestTokensUtils {
     assertThat(atl.getItemsPerPage(), equalTo(Long.valueOf(0)));
     assertThat(atl.getResources().size(), equalTo(0));
 
-    assertThat(tokenRepository.countAllTokens(), equalTo(2));
+    assertThat(tokenRepository.count(), equalTo(Long.valueOf(2)));
   }
 
 

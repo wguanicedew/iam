@@ -312,7 +312,7 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
 
     buildAccessToken(client, TESTUSER_USERNAME, SCOPES);
 
-    assertThat(tokenRepository.countAllTokens(), equalTo(1));
+    assertThat(tokenRepository.count(), equalTo(Long.valueOf(1)));
 
     TokensListResponse<RefreshToken> atl = mapper.readValue(
         mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(CONTENT_TYPE)
@@ -328,6 +328,6 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
     assertThat(atl.getItemsPerPage(), equalTo(Long.valueOf(0)));
     assertThat(atl.getResources().size(), equalTo(0));
 
-    assertThat(tokenRepository.countAllTokens(), equalTo(1));
+    assertThat(tokenRepository.count(), equalTo(Long.valueOf(1)));
   }
 }
