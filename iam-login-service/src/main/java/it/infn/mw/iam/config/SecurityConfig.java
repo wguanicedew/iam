@@ -1,5 +1,19 @@
 package it.infn.mw.iam.config;
 
+import static it.infn.mw.iam.api.tokens.Constants.ACCESS_TOKENS_ENDPOINT;
+import static it.infn.mw.iam.api.tokens.Constants.REFRESH_TOKENS_ENDPOINT;
+
+import it.infn.mw.iam.authn.RootIsDashboardSuccessHandler;
+import it.infn.mw.iam.authn.TimestamperSuccessHandler;
+import it.infn.mw.iam.authn.oidc.OidcAccessDeniedHandler;
+import it.infn.mw.iam.authn.oidc.OidcAuthenticationProvider;
+import it.infn.mw.iam.authn.oidc.OidcClientFilter;
+import it.infn.mw.iam.authn.x509.IamX509AuthenticationProvider;
+import it.infn.mw.iam.authn.x509.IamX509AuthenticationUserDetailService;
+import it.infn.mw.iam.authn.x509.IamX509PreauthenticationProcessingFilter;
+import it.infn.mw.iam.authn.x509.X509AuthenticationCredentialExtractor;
+import it.infn.mw.iam.persistence.repository.IamAccountRepository;
+
 import org.mitre.oauth2.service.OAuth2TokenEntityService;
 import org.mitre.oauth2.web.CorsFilter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,17 +50,6 @@ import org.springframework.security.web.context.request.async.WebAsyncManagerInt
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.filter.GenericFilterBean;
-
-import it.infn.mw.iam.authn.RootIsDashboardSuccessHandler;
-import it.infn.mw.iam.authn.TimestamperSuccessHandler;
-import it.infn.mw.iam.authn.oidc.OidcAccessDeniedHandler;
-import it.infn.mw.iam.authn.oidc.OidcAuthenticationProvider;
-import it.infn.mw.iam.authn.oidc.OidcClientFilter;
-import it.infn.mw.iam.authn.x509.IamX509AuthenticationProvider;
-import it.infn.mw.iam.authn.x509.IamX509AuthenticationUserDetailService;
-import it.infn.mw.iam.authn.x509.IamX509PreauthenticationProcessingFilter;
-import it.infn.mw.iam.authn.x509.X509AuthenticationCredentialExtractor;
-import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
 @Configuration
 @EnableWebSecurity
@@ -696,6 +699,45 @@ public class SecurityConfig {
             .antMatchers(HttpMethod.GET, "/info", "/health", "/health/mail", "/health/external").permitAll()
             .antMatchers("/metrics", "/configprops", "/env", "/mappings", "/flyway",
                 "/autoconfig", "/beans", "/dump", "/trace").hasRole("ADMIN");
+      // @formatter:on
+    }
+  }
+
+  @Configuration
+  @Order(25)
+  public static class TokensApiEndpointConfig extends WebSecurityConfigurerAdapter {
+
+    @Autowired
+    private OAuth2AuthenticationProcessingFilter resourceFilter;
+
+    @Autowired
+    private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
+
+    @Autowired
+    private CorsFilter corsFilter;
+
+    @Override
+    protected void configure(final HttpSecurity http) throws Exception {
+
+      // @formatter:off
+      http
+        .requestMatchers()
+        .antMatchers(ACCESS_TOKENS_ENDPOINT + "/**", REFRESH_TOKENS_ENDPOINT + "/**")
+        .and()
+        .exceptionHandling()
+        .authenticationEntryPoint(authenticationEntryPoint)
+        .and()
+        .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
+        .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
+        .sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.NEVER)
+        .and()
+        .authorizeRequests()
+        .antMatchers(ACCESS_TOKENS_ENDPOINT + "/**", REFRESH_TOKENS_ENDPOINT + "/**")
+        .authenticated()
+        .and()
+        .csrf()
+        .disable();
       // @formatter:on
     }
   }
