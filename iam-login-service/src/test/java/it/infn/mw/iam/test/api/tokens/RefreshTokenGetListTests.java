@@ -79,9 +79,9 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
             .getContentAsString(),
         new TypeReference<TokensListResponse<RefreshToken>>() {});
 
-    assertThat(atl.getTotalResults(), equalTo(Long.valueOf(0)));
-    assertThat(atl.getStartIndex(), equalTo(Long.valueOf(1)));
-    assertThat(atl.getItemsPerPage(), equalTo(Long.valueOf(0)));
+    assertThat(atl.getTotalResults(), equalTo(0L));
+    assertThat(atl.getStartIndex(), equalTo(1L));
+    assertThat(atl.getItemsPerPage(), equalTo(0L));
   }
 
   @Test
@@ -97,9 +97,9 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
             .getContentAsString(),
         new TypeReference<TokensListResponse<RefreshToken>>() {});
 
-    assertThat(atl.getTotalResults(), equalTo(Long.valueOf(1)));
-    assertThat(atl.getStartIndex(), equalTo(Long.valueOf(1)));
-    assertThat(atl.getItemsPerPage(), equalTo(Long.valueOf(0)));
+    assertThat(atl.getTotalResults(), equalTo(1L));
+    assertThat(atl.getStartIndex(), equalTo(1L));
+    assertThat(atl.getItemsPerPage(), equalTo(0L));
   }
 
   @Test
@@ -118,9 +118,9 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
             .getContentAsString(),
         new TypeReference<TokensListResponse<RefreshToken>>() {});
 
-    assertThat(atl.getTotalResults(), equalTo(Long.valueOf(1)));
-    assertThat(atl.getStartIndex(), equalTo(Long.valueOf(1)));
-    assertThat(atl.getItemsPerPage(), equalTo(Long.valueOf(1)));
+    assertThat(atl.getTotalResults(), equalTo(1L));
+    assertThat(atl.getStartIndex(), equalTo(1L));
+    assertThat(atl.getItemsPerPage(), equalTo(1L));
     assertThat(atl.getResources().size(), equalTo(1));
 
     RefreshToken remoteRt = atl.getResources().get(0);
@@ -156,9 +156,9 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
             .getContentAsString(),
         new TypeReference<TokensListResponse<RefreshToken>>() {});
 
-    assertThat(atl.getTotalResults(), equalTo(Long.valueOf(1)));
-    assertThat(atl.getStartIndex(), equalTo(Long.valueOf(1)));
-    assertThat(atl.getItemsPerPage(), equalTo(Long.valueOf(1)));
+    assertThat(atl.getTotalResults(), equalTo(1L));
+    assertThat(atl.getStartIndex(), equalTo(1L));
+    assertThat(atl.getItemsPerPage(), equalTo(1L));
     assertThat(atl.getResources().size(), equalTo(1));
 
     RefreshToken remoteRt = atl.getResources().get(0);
@@ -196,9 +196,9 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
             .getContentAsString(),
         new TypeReference<TokensListResponse<RefreshToken>>() {});
 
-    assertThat(atl.getTotalResults(), equalTo(Long.valueOf(1)));
-    assertThat(atl.getStartIndex(), equalTo(Long.valueOf(1)));
-    assertThat(atl.getItemsPerPage(), equalTo(Long.valueOf(1)));
+    assertThat(atl.getTotalResults(), equalTo(1L));
+    assertThat(atl.getStartIndex(), equalTo(1L));
+    assertThat(atl.getItemsPerPage(), equalTo(1L));
     assertThat(atl.getResources().size(), equalTo(1));
 
     RefreshToken remoteRt = atl.getResources().get(0);
@@ -240,9 +240,9 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
             .getContentAsString(),
         new TypeReference<TokensListResponse<RefreshToken>>() {});
 
-    assertThat(atl.getTotalResults(), equalTo(Long.valueOf(1)));
-    assertThat(atl.getStartIndex(), equalTo(Long.valueOf(1)));
-    assertThat(atl.getItemsPerPage(), equalTo(Long.valueOf(1)));
+    assertThat(atl.getTotalResults(), equalTo(1L));
+    assertThat(atl.getStartIndex(), equalTo(1L));
+    assertThat(atl.getItemsPerPage(), equalTo(1L));
     assertThat(atl.getResources().size(), equalTo(1));
 
     RefreshToken remoteRt = atl.getResources().get(0);
@@ -276,8 +276,8 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
             .getContentAsString(),
         new TypeReference<TokensListResponse<RefreshToken>>() {});
 
-    assertThat(atl.getTotalResults(), equalTo(Long.valueOf(2 * TOKENS_MAX_PAGE_SIZE)));
-    assertThat(atl.getStartIndex(), equalTo(Long.valueOf(1)));
+    assertThat(atl.getTotalResults(), equalTo(2L * TOKENS_MAX_PAGE_SIZE));
+    assertThat(atl.getStartIndex(), equalTo(1L));
     assertThat(atl.getItemsPerPage(), equalTo(Long.valueOf(TOKENS_MAX_PAGE_SIZE)));
     assertThat(atl.getResources().size(), equalTo(TOKENS_MAX_PAGE_SIZE));
   }
@@ -299,7 +299,7 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
             .getContentAsString(),
         new TypeReference<TokensListResponse<RefreshToken>>() {});
 
-    assertThat(atl.getTotalResults(), equalTo(Long.valueOf(2 * TOKENS_MAX_PAGE_SIZE)));
+    assertThat(atl.getTotalResults(), equalTo(2L * TOKENS_MAX_PAGE_SIZE));
     assertThat(atl.getStartIndex(), equalTo(Long.valueOf(TOKENS_MAX_PAGE_SIZE)));
     assertThat(atl.getItemsPerPage(), equalTo(Long.valueOf(TOKENS_MAX_PAGE_SIZE)));
     assertThat(atl.getResources().size(), equalTo(TOKENS_MAX_PAGE_SIZE));
@@ -312,7 +312,7 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
 
     buildAccessToken(client, TESTUSER_USERNAME, SCOPES);
 
-    assertThat(tokenRepository.count(), equalTo(Long.valueOf(1)));
+    assertThat(tokenRepository.count(), equalTo(1L));
 
     TokensListResponse<RefreshToken> atl = mapper.readValue(
         mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(CONTENT_TYPE)
@@ -323,11 +323,11 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
             .getContentAsString(),
         new TypeReference<TokensListResponse<RefreshToken>>() {});
 
-    assertThat(atl.getTotalResults(), equalTo(Long.valueOf(0)));
-    assertThat(atl.getStartIndex(), equalTo(Long.valueOf(1)));
-    assertThat(atl.getItemsPerPage(), equalTo(Long.valueOf(0)));
+    assertThat(atl.getTotalResults(), equalTo(0L));
+    assertThat(atl.getStartIndex(), equalTo(1L));
+    assertThat(atl.getItemsPerPage(), equalTo(0L));
     assertThat(atl.getResources().size(), equalTo(0));
 
-    assertThat(tokenRepository.count(), equalTo(Long.valueOf(1)));
+    assertThat(tokenRepository.count(), equalTo(1L));
   }
 }
