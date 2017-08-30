@@ -80,9 +80,9 @@ public class AccessTokenGetListTests extends TestTokensUtils {
             .getContentAsString(),
         new TypeReference<TokensListResponse<AccessToken>>() {});
 
-    assertThat(atl.getTotalResults(), equalTo(Long.valueOf(0)));
-    assertThat(atl.getStartIndex(), equalTo(Long.valueOf(1)));
-    assertThat(atl.getItemsPerPage(), equalTo(Long.valueOf(0)));
+    assertThat(atl.getTotalResults(), equalTo(0L));
+    assertThat(atl.getStartIndex(), equalTo(1L));
+    assertThat(atl.getItemsPerPage(), equalTo(0L));
   }
 
   @Test
@@ -98,9 +98,9 @@ public class AccessTokenGetListTests extends TestTokensUtils {
             .getContentAsString(),
         new TypeReference<TokensListResponse<AccessToken>>() {});
 
-    assertThat(atl.getTotalResults(), equalTo(Long.valueOf(2)));
-    assertThat(atl.getStartIndex(), equalTo(Long.valueOf(1)));
-    assertThat(atl.getItemsPerPage(), equalTo(Long.valueOf(0)));
+    assertThat(atl.getTotalResults(), equalTo(2L));
+    assertThat(atl.getStartIndex(), equalTo(1L));
+    assertThat(atl.getItemsPerPage(), equalTo(0L));
   }
 
   @Test
@@ -120,9 +120,9 @@ public class AccessTokenGetListTests extends TestTokensUtils {
             .getContentAsString(),
         new TypeReference<TokensListResponse<AccessToken>>() {});
 
-    assertThat(atl.getTotalResults(), equalTo(Long.valueOf(2)));
-    assertThat(atl.getStartIndex(), equalTo(Long.valueOf(1)));
-    assertThat(atl.getItemsPerPage(), equalTo(Long.valueOf(2)));
+    assertThat(atl.getTotalResults(), equalTo(2L));
+    assertThat(atl.getStartIndex(), equalTo(1L));
+    assertThat(atl.getItemsPerPage(), equalTo(2L));
     assertThat(atl.getResources().size(), equalTo(2));
 
     List<AccessToken> acl = atl.getResources();
@@ -160,9 +160,9 @@ public class AccessTokenGetListTests extends TestTokensUtils {
             .getContentAsString(),
         new TypeReference<TokensListResponse<AccessToken>>() {});
 
-    assertThat(atl.getTotalResults(), equalTo(Long.valueOf(2)));
-    assertThat(atl.getStartIndex(), equalTo(Long.valueOf(1)));
-    assertThat(atl.getItemsPerPage(), equalTo(Long.valueOf(2)));
+    assertThat(atl.getTotalResults(), equalTo(2L));
+    assertThat(atl.getStartIndex(), equalTo(1L));
+    assertThat(atl.getItemsPerPage(), equalTo(2L));
     assertThat(atl.getResources().size(), equalTo(2));
 
     List<AccessToken> acl = atl.getResources();
@@ -202,9 +202,9 @@ public class AccessTokenGetListTests extends TestTokensUtils {
             .getContentAsString(),
         new TypeReference<TokensListResponse<AccessToken>>() {});
 
-    assertThat(atl.getTotalResults(), equalTo(Long.valueOf(2)));
-    assertThat(atl.getStartIndex(), equalTo(Long.valueOf(1)));
-    assertThat(atl.getItemsPerPage(), equalTo(Long.valueOf(2)));
+    assertThat(atl.getTotalResults(), equalTo(2L));
+    assertThat(atl.getStartIndex(), equalTo(1L));
+    assertThat(atl.getItemsPerPage(), equalTo(2L));
     assertThat(atl.getResources().size(), equalTo(2));
 
     List<AccessToken> acl = atl.getResources();
@@ -248,9 +248,9 @@ public class AccessTokenGetListTests extends TestTokensUtils {
             .getContentAsString(),
         new TypeReference<TokensListResponse<AccessToken>>() {});
 
-    assertThat(atl.getTotalResults(), equalTo(Long.valueOf(2)));
-    assertThat(atl.getStartIndex(), equalTo(Long.valueOf(1)));
-    assertThat(atl.getItemsPerPage(), equalTo(Long.valueOf(2)));
+    assertThat(atl.getTotalResults(), equalTo(2L));
+    assertThat(atl.getStartIndex(), equalTo(1L));
+    assertThat(atl.getItemsPerPage(), equalTo(2L));
     assertThat(atl.getResources().size(), equalTo(2));
 
     List<AccessToken> acl = atl.getResources();
@@ -286,9 +286,9 @@ public class AccessTokenGetListTests extends TestTokensUtils {
             .getContentAsString(),
         new TypeReference<TokensListResponse<AccessToken>>() {});
 
-    assertThat(atl.getTotalResults(), equalTo(Long.valueOf(0)));
-    assertThat(atl.getStartIndex(), equalTo(Long.valueOf(1)));
-    assertThat(atl.getItemsPerPage(), equalTo(Long.valueOf(0)));
+    assertThat(atl.getTotalResults(), equalTo(0L));
+    assertThat(atl.getStartIndex(), equalTo(1L));
+    assertThat(atl.getItemsPerPage(), equalTo(0L));
     assertThat(atl.getResources().size(), equalTo(0));
   }
 
@@ -308,8 +308,8 @@ public class AccessTokenGetListTests extends TestTokensUtils {
             .getContentAsString(),
         new TypeReference<TokensListResponse<AccessToken>>() {});
 
-    assertThat(atl.getTotalResults(), equalTo(Long.valueOf(2 * TOKENS_MAX_PAGE_SIZE)));
-    assertThat(atl.getStartIndex(), equalTo(Long.valueOf(1)));
+    assertThat(atl.getTotalResults(), equalTo(2L * TOKENS_MAX_PAGE_SIZE));
+    assertThat(atl.getStartIndex(), equalTo(1L));
     assertThat(atl.getItemsPerPage(), equalTo(Long.valueOf(TOKENS_MAX_PAGE_SIZE)));
     assertThat(atl.getResources().size(), equalTo(TOKENS_MAX_PAGE_SIZE));
   }
@@ -331,7 +331,7 @@ public class AccessTokenGetListTests extends TestTokensUtils {
             .getContentAsString(),
         new TypeReference<TokensListResponse<AccessToken>>() {});
 
-    assertThat(atl.getTotalResults(), equalTo(Long.valueOf(2 * TOKENS_MAX_PAGE_SIZE)));
+    assertThat(atl.getTotalResults(), equalTo(2L * TOKENS_MAX_PAGE_SIZE));
     assertThat(atl.getStartIndex(), equalTo(Long.valueOf(TOKENS_MAX_PAGE_SIZE)));
     assertThat(atl.getItemsPerPage(), equalTo(Long.valueOf(TOKENS_MAX_PAGE_SIZE)));
     assertThat(atl.getResources().size(), equalTo(TOKENS_MAX_PAGE_SIZE));
@@ -344,7 +344,7 @@ public class AccessTokenGetListTests extends TestTokensUtils {
 
     buildAccessToken(client, TESTUSER_USERNAME, SCOPES);
 
-    assertThat(tokenRepository.count(), equalTo(Long.valueOf(2)));
+    assertThat(tokenRepository.count(), equalTo(2L));
 
     TokensListResponse<AccessToken> atl = mapper.readValue(
         mvc.perform(get(ACCESS_TOKENS_BASE_PATH).contentType(CONTENT_TYPE).param("userId",
@@ -355,12 +355,12 @@ public class AccessTokenGetListTests extends TestTokensUtils {
             .getContentAsString(),
         new TypeReference<TokensListResponse<AccessToken>>() {});
 
-    assertThat(atl.getTotalResults(), equalTo(Long.valueOf(0)));
-    assertThat(atl.getStartIndex(), equalTo(Long.valueOf(1)));
-    assertThat(atl.getItemsPerPage(), equalTo(Long.valueOf(0)));
+    assertThat(atl.getTotalResults(), equalTo(0L));
+    assertThat(atl.getStartIndex(), equalTo(1L));
+    assertThat(atl.getItemsPerPage(), equalTo(0L));
     assertThat(atl.getResources().size(), equalTo(0));
 
-    assertThat(tokenRepository.count(), equalTo(Long.valueOf(2)));
+    assertThat(tokenRepository.count(), equalTo(2L));
   }
 
 
@@ -378,8 +378,8 @@ public class AccessTokenGetListTests extends TestTokensUtils {
             .getContentAsString(),
         new TypeReference<TokensListResponse<AccessToken>>() {});
 
-    assertThat(atl.getTotalResults(), equalTo(Long.valueOf(3)));
-    assertThat(atl.getStartIndex(), equalTo(Long.valueOf(1)));
-    assertThat(atl.getItemsPerPage(), equalTo(Long.valueOf(3)));
+    assertThat(atl.getTotalResults(), equalTo(3L));
+    assertThat(atl.getStartIndex(), equalTo(1L));
+    assertThat(atl.getItemsPerPage(), equalTo(3L));
   }
 }
