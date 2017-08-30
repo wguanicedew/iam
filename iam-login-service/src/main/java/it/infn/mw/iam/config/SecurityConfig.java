@@ -699,6 +699,32 @@ public class SecurityConfig {
       // @formatter:on
     }
   }
+  
+  @Configuration
+  @Order(25)
+  public static class ScopePoliciesEndpointConfig extends WebSecurityConfigurerAdapter {
+    @Autowired
+    private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+      http.requestMatchers()
+        .antMatchers("/iam/scope_policies/**")
+        .and()
+        .exceptionHandling()
+        .authenticationEntryPoint(authenticationEntryPoint)
+        .and()
+        .sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.NEVER)
+        .and()
+        .authorizeRequests()
+        .antMatchers("/iam/scope_policies/**")
+        .authenticated()
+        .and()
+        .csrf()
+        .disable();
+    }
+  }
 
   @Configuration
   @Order(Ordered.HIGHEST_PRECEDENCE)

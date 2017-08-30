@@ -1,4 +1,4 @@
-package it.infn.mw.iam.api.account.authority;
+package it.infn.mw.iam.api.common;
 
 public class ErrorDTO {
 

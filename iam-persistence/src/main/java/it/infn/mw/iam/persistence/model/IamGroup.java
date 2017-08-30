@@ -58,6 +58,9 @@ public class IamGroup implements Serializable {
 
   @OneToMany(mappedBy = "parentGroup", cascade = CascadeType.PERSIST)
   private Set<IamGroup> childrenGroups = new HashSet<>();
+  
+  @OneToMany(mappedBy = "group", cascade = CascadeType.REMOVE)
+  private Set<IamScopePolicy> scopePolicies = new HashSet<>();
 
   public IamGroup() {
 
@@ -148,6 +151,14 @@ public class IamGroup implements Serializable {
   public void setChildrenGroups(Set<IamGroup> childrenGroups) {
     this.childrenGroups = childrenGroups;
   }
+  
+  public Set<IamScopePolicy> getScopePolicies() {
+    return scopePolicies;
+  }
+
+  public void setScopePolicies(Set<IamScopePolicy> scopePolicies) {
+    this.scopePolicies = scopePolicies;
+  }
 
   public void touch() {
 
@@ -189,4 +200,5 @@ public class IamGroup implements Serializable {
         + "]";
   }
 
+  
 }

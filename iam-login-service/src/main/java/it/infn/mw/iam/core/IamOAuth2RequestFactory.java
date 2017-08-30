@@ -7,29 +7,35 @@ import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.TokenRequest;
 
+import it.infn.mw.iam.core.oauth.scope.IamScopeFilter;
+
 public class IamOAuth2RequestFactory extends ConnectOAuth2RequestFactory {
 
   protected static final String[] AUDIENCE_KEYS = {"aud", "audience"};
   public static final String AUD = "aud";
   public static final String PASSWORD_GRANT = "password";
 
+  private final IamScopeFilter scopeFilter;
 
-  public IamOAuth2RequestFactory(ClientDetailsEntityService clientDetailsService) {
+  public IamOAuth2RequestFactory(ClientDetailsEntityService clientDetailsService,
+      IamScopeFilter scopeFilter) {
     super(clientDetailsService);
+    this.scopeFilter = scopeFilter;
   }
 
 
-  private void handlePasswordGrantAuthenticationTimestamp(OAuth2Request request){
-    if (PASSWORD_GRANT.equals(request.getGrantType())){
+  private void handlePasswordGrantAuthenticationTimestamp(OAuth2Request request) {
+    if (PASSWORD_GRANT.equals(request.getGrantType())) {
       String now = Long.toString(System.currentTimeMillis());
       request.getExtensions().put(AuthenticationTimeStamper.AUTH_TIMESTAMP, now);
     }
   }
+
   /**
    * This implementation extends what's already done by MitreID implementation with audience request
    * parameter handling (both "aud" and "audience" are accepted).
    *
-   *    
+   * 
    */
   @Override
   public OAuth2Request createOAuth2Request(ClientDetails client, TokenRequest tokenRequest) {

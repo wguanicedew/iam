@@ -41,6 +41,7 @@
     <json-path.version>2.2.0</json-path.version>
 
     <flyway-test.version>4.0</flyway-test.version>
+    <validator-collection.version>2.2.0</validator-collection.version>
 
     <resource.delimiter>@</resource.delimiter>
   </properties>
@@ -197,6 +198,12 @@
         <artifactId>flyway-spring-test</artifactId>
         <version>${flyway-test.version}</version>
         <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>cz.jirutka.validator</groupId>
+        <artifactId>validator-collection</artifactId>
+        <version>${validator-collection.version}</version>
       </dependency>
 
     </dependencies>

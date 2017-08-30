@@ -116,7 +116,12 @@ public class IamAccount implements Serializable{
   @OneToOne(cascade = CascadeType.REMOVE, mappedBy = "account")
   private IamRegistrationRequest registrationRequest;
 
-  public IamAccount() {}
+  @OneToMany(mappedBy="account", cascade = CascadeType.REMOVE)
+  private Set<IamScopePolicy> scopePolicies = new HashSet<>();
+  
+  public IamAccount() {
+    // empty constructor
+  }
 
   public Long getId() {
 
@@ -295,72 +300,72 @@ public class IamAccount implements Serializable{
   public void linkOidcIds(Collection<IamOidcId> ids) {
 
     checkNotNull(ids);
-    for (IamOidcId id : ids) {
-      link(oidcIds, id, this);
+    for (IamOidcId oidcId : ids) {
+      link(oidcIds, oidcId, this);
     }
   }
 
   public void unlinkOidcIds(Collection<IamOidcId> ids) {
 
     checkNotNull(ids);
-    for (IamOidcId id : ids) {
-      unlink(oidcIds.iterator(), id);
+    for (IamOidcId oidcId : ids) {
+      unlink(oidcIds.iterator(), oidcId);
     }
   }
 
   public void linkSamlIds(Collection<IamSamlId> ids) {
 
     checkNotNull(ids);
-    for (IamSamlId id : ids) {
-      link(samlIds, id, this);
+    for (IamSamlId samlId : ids) {
+      link(samlIds, samlId, this);
     }
   }
 
   public void unlinkSamlIds(Collection<IamSamlId> ids) {
 
     checkNotNull(ids);
-    for (IamSamlId id : ids) {
-      unlink(samlIds.iterator(), id);
+    for (IamSamlId samlId : ids) {
+      unlink(samlIds.iterator(), samlId);
     }
   }
 
-  public void linkSshKeys(Collection<IamSshKey> ids) {
+  public void linkSshKeys(Collection<IamSshKey> keys) {
 
-    checkNotNull(ids);
-    for (IamSshKey id : ids) {
-      link(sshKeys, id, this);
+    checkNotNull(keys);
+    for (IamSshKey key : keys) {
+      link(sshKeys, key, this);
     }
   }
 
-  public void unlinkSshKeys(Collection<IamSshKey> ids) {
+  public void unlinkSshKeys(Collection<IamSshKey> keys) {
 
-    checkNotNull(ids);
-    for (IamSshKey id : ids) {
-      unlink(sshKeys.iterator(), id);
+    checkNotNull(keys);
+    for (IamSshKey key : keys) {
+      unlink(sshKeys.iterator(), key);
     }
   }
 
-  public void linkX509Certificates(Collection<IamX509Certificate> ids) {
+  public void linkX509Certificates(Collection<IamX509Certificate> certs) {
 
-    checkNotNull(ids);
+    checkNotNull(certs);
 
-    for (IamX509Certificate id : ids) {
-      if (!getX509Certificates().contains(id)) {
+    for (IamX509Certificate c : certs) {
+      if (!getX509Certificates().contains(c)) {
         Date addedTimestamp = new Date();
-        id.setAccount(this);
-        id.setCreationTime(addedTimestamp);
-        id.setLastUpdateTime(addedTimestamp);
+        c.setAccount(this);
+        c.setCreationTime(addedTimestamp);
+        c.setLastUpdateTime(addedTimestamp);
 
-        getX509Certificates().add(id);
+        getX509Certificates().add(c);
       }
     }
   }
 
-  public void unlinkX509Certificates(Collection<IamX509Certificate> ids) {
+  public void unlinkX509Certificates(Collection<IamX509Certificate> certs) {
 
-    checkNotNull(ids);
-    for (IamX509Certificate id : ids) {
-      unlink(x509Certificates.iterator(), id);
+    checkNotNull(certs);
+    for (IamX509Certificate c: certs) {
+      unlink(x509Certificates.iterator(), c);
     }
   }
 
@@ -490,6 +495,14 @@ public class IamAccount implements Serializable{
 
   public void setLastLoginTime(Date lastLoginTime) {
     this.lastLoginTime = lastLoginTime;
+  }
+  
+  public Set<IamScopePolicy> getScopePolicies() {
+    return scopePolicies;
+  }
+
+  public void setScopePolicies(Set<IamScopePolicy> scopePolicies) {
+    this.scopePolicies = scopePolicies;
   }
 
   @Override
