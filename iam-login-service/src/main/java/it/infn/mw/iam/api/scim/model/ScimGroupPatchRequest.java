@@ -56,9 +56,9 @@ public class ScimGroupPatchRequest {
 
   public static class Builder {
 
-    private Set<String> schemas = new HashSet<String>();
+    private Set<String> schemas = new HashSet<>();
     private List<ScimPatchOperation<List<ScimMemberRef>>> operations =
-        new ArrayList<ScimPatchOperation<List<ScimMemberRef>>>();
+        new ArrayList<>();
 
     public Builder() {
       schemas.add(PATCHOP_SCHEMA);

@@ -1,5 +1,6 @@
 package it.infn.mw.iam.persistence.repository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -9,7 +10,9 @@ import org.springframework.data.repository.query.Param;
 
 import it.infn.mw.iam.persistence.model.IamAccount;
 
-public interface IamAccountRepository extends PagingAndSortingRepository<IamAccount, Long> {
+
+public interface IamAccountRepository
+    extends PagingAndSortingRepository<IamAccount, Long>, IamAccountRepositoryCustom {
 
   @Query("select count(a) from IamAccount a")
   int countAllUsers();
@@ -18,8 +21,10 @@ public interface IamAccountRepository extends PagingAndSortingRepository<IamAcco
 
   Optional<IamAccount> findByUsername(@Param("username") String username);
 
-  @Query("select a from IamAccount a join a.samlIds si where si.idpId = :idpId and si.userId = :subject")
-  Optional<IamAccount> findBySamlId(@Param("idpId") String idpId, @Param("subject") String subject);
+  @Query("select a from IamAccount a join a.samlIds si where si.idpId = :idpId "
+      + "and si.attributeId = :attributeId and si.userId = :userId")
+  Optional<IamAccount> findBySamlId(@Param("idpId") String idpId,
+      @Param("attributeId") String attributeId, @Param("userId") String userId);
 
   @Query("select a from IamAccount a join a.oidcIds oi where oi.issuer = :issuer and oi.subject = :subject")
   Optional<IamAccount> findByOidcId(@Param("issuer") String issuer,
@@ -45,7 +50,7 @@ public interface IamAccountRepository extends PagingAndSortingRepository<IamAcco
   Optional<IamAccount> findByEmailWithDifferentUUID(@Param("emailAddress") String emailAddress,
       @Param("uuid") String uuid);
 
-  @Query("select a from IamAccount a join a.x509Certificates c where c.certificateSubject = :subject")
+  @Query("select a from IamAccount a join a.x509Certificates c where c.subjectDn = :subject")
   Optional<IamAccount> findByCertificateSubject(@Param("subject") String subject);
 
   @Query("select a from IamAccount a join a.x509Certificates c where c.certificate = :certificate")
@@ -60,4 +65,9 @@ public interface IamAccountRepository extends PagingAndSortingRepository<IamAcco
 
   @Query("select a from IamAccount a join a.authorities auth where auth.authority = :authority")
   List<IamAccount> findByAuthority(@Param("authority") String authority);
+
+  @Query("select a from IamAccount a where a.provisioned = true and a.lastLoginTime < :timestamp")
+  List<IamAccount> findProvisionedAccountsWithLastLoginTimeBeforeTimestamp(
+      @Param("timestamp") Date timestamp);
+
 }

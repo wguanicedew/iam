@@ -19,7 +19,7 @@ public class ScimPhoto {
   @NotNull
   private final ScimPhotoType type;
 
-  public static enum ScimPhotoType {
+  public enum ScimPhotoType {
     thumbnail, photo;
   }
 

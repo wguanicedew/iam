@@ -4,7 +4,7 @@ import it.infn.mw.iam.api.scim.provisioning.paging.ScimPageRequest;
 
 public interface ScimQuery extends ScimPageRequest {
 
-  public static enum SortOrder {
+  public enum SortOrder {
     ascending, descending;
   }
 

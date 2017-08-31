@@ -24,6 +24,46 @@
 
       <div style="min-height: 650px;">
 
+		<div class="box">
+          <div class="box-header with-border">
+            <h3 class="box-title">Subgroups</h3>
+            <i class="fa fa-users pull-right"></i>
+          </div>
+          <div class="box-body">
+            <p ng-show="!group.subgroups.length">No subgroup found.</p>
+            <table id="subgroupslist" class="table table-striped" ng-show="group.subgroups.length > 0">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Name</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat="member in group.subgroups | orderBy:'display'">
+                  <td class="col-md-1">{{$index + 1}}</td>
+                  <td class="col-md-9"><a ui-sref="group({id: member.value})">{{member.display}}</a></td>
+                  <td class="col-md-2">
+                    <button class="btn btn-danger btn-xs" ng-click="group.deleteGroup(member)">
+                      <i class="fa fa-times"></i> Remove
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>#</th>
+                  <th>Name</th>
+                  <th>Actions</th>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          <div class="box-footer">
+				<button class="btn btn-success" ng-click="group.openAddSubgroupDialog()"><i class="fa fa-plus"></i> Add Subgroup</button>
+			</div>
+        </div>
+
         <div class="box">
           <div class="box-header with-border">
             <h3 class="box-title">Members</h3>
@@ -41,11 +81,11 @@
                 </tr>
               </thead>
               <tbody>
-                <tr ng-repeat="user in group.data.members | orderBy:'display'">
-                  <td>{{$index + 1}}</td>
-                  <td><a ui-sref="user({id: user.value})">{{user.display}}</a></td>
-                  <td>
-                    <button class="btn btn-danger btn-xs" ng-click="group.deleteMember(user)">
+                <tr ng-repeat="member in group.data.members | orderBy:'display'">
+                  <td class="col-md-1">{{$index + 1}}</td>
+                  <td class="col-md-9"><a ui-sref="user({id: member.value})">{{member.display}}</a></td>
+                  <td class="col-md-2">
+                    <button class="btn btn-danger btn-xs" ng-click="group.deleteMember(member)">
                       <i class="fa fa-times"></i> Remove
                     </button>
                   </td>
@@ -59,11 +99,9 @@
                 </tr>
               </tfoot>
             </table>
-
           </div>
         </div>
       </div>
     </div>
   </div>
-
 </section>

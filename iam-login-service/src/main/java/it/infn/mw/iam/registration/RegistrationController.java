@@ -1,8 +1,12 @@
 package it.infn.mw.iam.registration;
 
+import static java.lang.String.format;
+
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -30,6 +34,7 @@ import it.infn.mw.iam.core.IamRegistrationRequestStatus;
 @Profile("registration")
 public class RegistrationController {
 
+  public static final Logger LOG = LoggerFactory.getLogger(RegistrationController.class);
   private RegistrationRequestService service;
 
   private Optional<ExternalAuthenticationRegistrationInfo> getExternalAuthenticationInfo() {
@@ -43,7 +48,7 @@ public class RegistrationController {
     if (authn instanceof AbstractExternalAuthenticationToken<?>) {
 
       return Optional
-        .of(((AbstractExternalAuthenticationToken<?>) authn).toExernalAuthenticationInfo());
+        .of(((AbstractExternalAuthenticationToken<?>) authn).toExernalAuthenticationRegistrationInfo());
     }
 
     return Optional.empty();
@@ -62,8 +67,7 @@ public class RegistrationController {
 
   @RequestMapping(value = "/registration/email-available/{email:.+}", method = RequestMethod.GET)
   public Boolean emailAvailable(@PathVariable("email") String email) {
-    Boolean emailAvaiable = service.emailAvailable(email);
-    return emailAvaiable;
+    return service.emailAvailable(email);
   }
 
   @PreAuthorize("#oauth2.hasScope('registration:read') or hasRole('ADMIN')")
@@ -101,7 +105,7 @@ public class RegistrationController {
     try {
       status = IamRegistrationRequestStatus.valueOf(decision);
     } catch (Exception e) {
-      throw new IllegalArgumentException(String.format("Operation [%s] not found", decision));
+      throw new IllegalArgumentException(format("Operation [%s] not found", decision),e);
     }
 
     return service.updateStatus(uuid, status);
@@ -120,6 +124,7 @@ public class RegistrationController {
       model.addAttribute("verificationSuccess", true);
       SecurityContextHolder.clearContext();
     } catch (ScimResourceNotFoundException e) {
+      LOG.warn(e.getMessage(),e);
       String message = "Activation failed: " + e.getMessage();
       model.addAttribute("verificationMessage", message);
       model.addAttribute("verificationFailure", true);

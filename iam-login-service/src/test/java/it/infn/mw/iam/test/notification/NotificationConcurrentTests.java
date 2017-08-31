@@ -2,6 +2,11 @@ package it.infn.mw.iam.test.notification;
 
 import static it.infn.mw.iam.test.RegistrationUtils.createRegistrationRequest;
 import static it.infn.mw.iam.test.RegistrationUtils.deleteUser;
+import static it.infn.mw.iam.test.util.MockSmtpServerUtils.startMockSmtpServer;
+import static it.infn.mw.iam.test.util.MockSmtpServerUtils.stopMockSmtpServer;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -70,21 +75,22 @@ public class NotificationConcurrentTests {
   }
 
   @Before
-  public void setUp() {
-    wiserSmtpServer = new Wiser();
-    wiserSmtpServer.setHostname(mailHost);
-    wiserSmtpServer.setPort(mailPort);
-    wiserSmtpServer.start();
-
+  public void setUp() throws InterruptedException {
+    notificationRepository.deleteAll();
+    wiserSmtpServer = startMockSmtpServer(mailHost, mailPort);
     registrationRequest = createRegistrationRequest("test_user");
   }
 
   @After
   public void tearDown() {
-    wiserSmtpServer.stop();
-
+    stopMockSmtpServer(wiserSmtpServer);
     deleteUser(registrationRequest.getAccountId());
+    
     notificationRepository.deleteAll();
+
+    if (wiserSmtpServer.getServer().isRunning()) {
+      Assert.fail("Fake mail server is still running after stop!!");
+    }
   }
 
   @Test
@@ -106,7 +112,7 @@ public class NotificationConcurrentTests {
     }
 
     int count = wiserSmtpServer.getMessages().size();
-    Assert.assertEquals(1, count);
+    assertThat(count, equalTo(1));
 
   }
 
@@ -114,7 +120,7 @@ public class NotificationConcurrentTests {
   public void testConcurrentCleanUp() throws Exception {
 
     notificationService.sendPendingNotifications();
-    Assert.assertEquals(1, wiserSmtpServer.getMessages().size());
+    assertThat(wiserSmtpServer.getMessages(), hasSize(1));
 
     Date fakeDate = DateUtils.addDays(new Date(), (notificationCleanUpAge + 1));
     timeProvider.setTime(fakeDate.getTime());
@@ -129,14 +135,17 @@ public class NotificationConcurrentTests {
     }
 
     barrier.await();
-    executorService.shutdown();
 
     for (Future<Integer> elem : futuresList) {
       elem.get();
     }
+    
+    executorService.shutdown();
+
+    executorService.shutdown();
 
     int count = notificationRepository.countAllMessages();
-    Assert.assertEquals(0, count);
+    assertThat(count, equalTo(0));
   }
 
   public class WorkerSend implements Callable<Integer> {
@@ -179,7 +188,7 @@ public class NotificationConcurrentTests {
       try {
         barrier.await();
       } catch (Exception ex) {
-        ex.printStackTrace();
+        throw new RuntimeException(ex);
       }
 
       this.notificationService.clearExpiredNotifications();

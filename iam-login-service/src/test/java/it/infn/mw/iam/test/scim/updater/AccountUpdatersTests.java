@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 
 import java.util.Optional;
@@ -32,6 +33,7 @@ import it.infn.mw.iam.api.scim.updater.builders.Adders;
 import it.infn.mw.iam.api.scim.updater.builders.Removers;
 import it.infn.mw.iam.api.scim.updater.builders.Replacers;
 import it.infn.mw.iam.api.scim.updater.util.CollectionHelpers;
+import it.infn.mw.iam.authn.saml.util.Saml2Attribute;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.model.IamOidcId;
@@ -40,9 +42,10 @@ import it.infn.mw.iam.persistence.model.IamSshKey;
 import it.infn.mw.iam.persistence.model.IamUserInfo;
 import it.infn.mw.iam.persistence.model.IamX509Certificate;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
+import it.infn.mw.iam.test.ext_authn.x509.X509TestSupport;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AccountUpdatersTests {
+public class AccountUpdatersTests extends X509TestSupport {
 
   public static final String OLD = "old";
   public static final String NEW = "new";
@@ -50,14 +53,14 @@ public class AccountUpdatersTests {
   public static final IamOidcId OLD_OIDC_ID = new IamOidcId(OLD, OLD);
   public static final IamOidcId NEW_OIDC_ID = new IamOidcId(NEW, NEW);
 
-  public static final IamSamlId OLD_SAML_ID = new IamSamlId(OLD, OLD);
-  public static final IamSamlId NEW_SAML_ID = new IamSamlId(NEW, NEW);
+  public static final IamSamlId OLD_SAML_ID =
+      new IamSamlId(OLD, Saml2Attribute.EPUID.getAttributeName(), OLD);
+
+  public static final IamSamlId NEW_SAML_ID =
+      new IamSamlId(NEW, Saml2Attribute.EPUID.getAttributeName(), NEW);
 
   public static final IamSshKey OLD_SSHKEY = new IamSshKey(OLD);
   public static final IamSshKey NEW_SSHKEY = new IamSshKey(NEW);
-
-  public static final IamX509Certificate OLD_X509_CERT = new IamX509Certificate(OLD);
-  public static final IamX509Certificate NEW_X509_CERT = new IamX509Certificate(NEW);
 
   @Mock
   IamAccountRepository repo;
@@ -104,13 +107,13 @@ public class AccountUpdatersTests {
 
     Mockito.when(repo.findByOidcId(anyString(), anyString())).thenReturn(Optional.empty());
 
-    Mockito.when(repo.findBySamlId(anyString(), anyString())).thenReturn(Optional.empty());
+    Mockito.when(repo.findBySamlId(anyObject())).thenReturn(Optional.empty());
 
     Mockito.when(repo.findByEmail(anyString())).thenReturn(Optional.empty());
 
     Mockito.when(repo.findBySshKeyValue(anyString())).thenReturn(Optional.empty());
 
-    Mockito.when(repo.findByCertificate(anyString())).thenReturn(Optional.empty());
+    Mockito.when(repo.findByCertificateSubject(anyString())).thenReturn(Optional.empty());
   }
 
   private void repoBindOidcIdToAccount(IamOidcId id, IamAccount a) {
@@ -120,7 +123,7 @@ public class AccountUpdatersTests {
 
   private void repoBindSamlIdToAccount(IamSamlId id, IamAccount a) {
 
-    Mockito.when(repo.findBySamlId(id.getIdpId(), id.getUserId())).thenReturn(Optional.of(a));
+    Mockito.when(repo.findBySamlId(id)).thenReturn(Optional.of(a));
   }
 
   private void repoBindEmailToAccount(String email, IamAccount a) {
@@ -135,21 +138,14 @@ public class AccountUpdatersTests {
 
   private void repoBindX509CertificateToAccount(IamX509Certificate cert, IamAccount a) {
 
-    Mockito.when(repo.findByCertificate(cert.getCertificate())).thenReturn(Optional.of(a));
+    Mockito.when(repo.findByCertificateSubject(cert.getSubjectDn())).thenReturn(Optional.of(a));
   }
 
   @Test
   public void testCollectionHelperNotNullOrEmpty() {
 
-    new CollectionHelpers();
     assertThat(CollectionHelpers.notNullOrEmpty(Lists.newArrayList()), equalTo(false));
     assertThat(CollectionHelpers.notNullOrEmpty(null), equalTo(false));
-  }
-
-  @Test
-  public void testUpdatersClass() {
-
-    new AccountUpdaters();
   }
 
   @Test
@@ -660,23 +656,23 @@ public class AccountUpdatersTests {
   @Test
   public void testX509CertificateAdderWorks() {
 
-    Updater u = adder().x509Certificate(Lists.newArrayList(NEW_X509_CERT));
+    Updater u = adder().x509Certificate(Lists.newArrayList(TEST_0_IAM_X509_CERT));
 
     assertThat(u.update(), is(true));
     assertThat(u.update(), is(false));
 
     assertThat(account.getX509Certificates(), hasSize(1));
-    assertThat(account.getX509Certificates(), hasItems(NEW_X509_CERT));
+    assertThat(account.getX509Certificates(), hasItems(TEST_0_IAM_X509_CERT));
 
   }
 
   @Test
   public void testX509CertificateAdderWorksWithNoUpdate() {
 
-    account.getX509Certificates().add(NEW_X509_CERT);
-    repoBindX509CertificateToAccount(NEW_X509_CERT, account);
+    account.getX509Certificates().add(TEST_0_IAM_X509_CERT);
+    repoBindX509CertificateToAccount(TEST_0_IAM_X509_CERT, account);
 
-    Updater u = adder().x509Certificate(Lists.newArrayList(NEW_X509_CERT));
+    Updater u = adder().x509Certificate(Lists.newArrayList(TEST_0_IAM_X509_CERT));
 
     assertThat(u.update(), is(false));
 
@@ -685,84 +681,85 @@ public class AccountUpdatersTests {
   @Test(expected = ScimResourceExistsException.class)
   public void testX509CertificateAdderFailsWhenX509CertificateIsLinkedToAnotherAccount() {
 
-    repoBindX509CertificateToAccount(NEW_X509_CERT, other);
-    adder().x509Certificate(Lists.newArrayList(NEW_X509_CERT)).update();
+    repoBindX509CertificateToAccount(TEST_0_IAM_X509_CERT, other);
+    adder().x509Certificate(Lists.newArrayList(TEST_0_IAM_X509_CERT)).update();
 
   }
 
   @Test
   public void testX509CertificateAdderWorksWithUpdate() {
 
-    repoBindX509CertificateToAccount(NEW_X509_CERT, account);
+    repoBindX509CertificateToAccount(TEST_0_IAM_X509_CERT, account);
 
-    Updater u = adder().x509Certificate(newArrayList(NEW_X509_CERT, OLD_X509_CERT));
+    Updater u = adder().x509Certificate(newArrayList(TEST_0_IAM_X509_CERT, TEST_1_IAM_X509_CERT));
 
     assertThat(u.update(), is(true));
     assertThat(account.getX509Certificates(), hasSize(2));
-    assertThat(account.getX509Certificates(), hasItems(NEW_X509_CERT, OLD_X509_CERT));
+    assertThat(account.getX509Certificates(), hasItems(TEST_0_IAM_X509_CERT, TEST_1_IAM_X509_CERT));
 
-    repoBindX509CertificateToAccount(OLD_X509_CERT, account);
+    repoBindX509CertificateToAccount(TEST_1_IAM_X509_CERT, account);
 
     assertThat(u.update(), is(false));
     assertThat(account.getX509Certificates(), hasSize(2));
-    assertThat(account.getX509Certificates(), hasItems(NEW_X509_CERT, OLD_X509_CERT));
+    assertThat(account.getX509Certificates(), hasItems(TEST_0_IAM_X509_CERT, TEST_1_IAM_X509_CERT));
 
   }
 
   @Test
   public void testX509CertificateAdderWorksWithListContainingNull() {
 
-    account.getX509Certificates().add(NEW_X509_CERT);
-    repoBindX509CertificateToAccount(NEW_X509_CERT, account);
+    account.getX509Certificates().add(TEST_0_IAM_X509_CERT);
+    repoBindX509CertificateToAccount(TEST_0_IAM_X509_CERT, account);
 
-    Updater u = adder().x509Certificate(newArrayList(NEW_X509_CERT, null));
+    Updater u = adder().x509Certificate(newArrayList(TEST_0_IAM_X509_CERT, null));
 
     assertThat(u.update(), is(false));
     assertThat(account.getX509Certificates(), hasSize(1));
-    assertThat(account.getX509Certificates(), hasItems(NEW_X509_CERT));
+    assertThat(account.getX509Certificates(), hasItems(TEST_0_IAM_X509_CERT));
 
   }
 
   @Test
   public void testX509CertificateAdderWorksWithListContainingDuplicates() {
 
-    account.getX509Certificates().add(NEW_X509_CERT);
-    repoBindX509CertificateToAccount(NEW_X509_CERT, account);
+    account.getX509Certificates().add(TEST_0_IAM_X509_CERT);
+    repoBindX509CertificateToAccount(TEST_0_IAM_X509_CERT, account);
 
-    Updater u = adder().x509Certificate(newArrayList(NEW_X509_CERT, NEW_X509_CERT, OLD_X509_CERT));
+    Updater u = adder().x509Certificate(
+        newArrayList(TEST_0_IAM_X509_CERT, TEST_0_IAM_X509_CERT, TEST_1_IAM_X509_CERT));
 
     assertThat(u.update(), is(true));
     assertThat(account.getX509Certificates(), hasSize(2));
-    assertThat(account.getX509Certificates(), hasItems(NEW_X509_CERT, OLD_X509_CERT));
+    assertThat(account.getX509Certificates(), hasItems(TEST_0_IAM_X509_CERT, TEST_1_IAM_X509_CERT));
 
   }
 
   @Test
   public void testX509CertificateRemoverWorks() {
 
-    account.getX509Certificates().add(NEW_X509_CERT);
-    repoBindX509CertificateToAccount(NEW_X509_CERT, account);
+    account.getX509Certificates().add(TEST_0_IAM_X509_CERT);
+    repoBindX509CertificateToAccount(TEST_0_IAM_X509_CERT, account);
 
-    Updater u = removers().x509Certificate(newArrayList(NEW_X509_CERT));
+    Updater u = removers().x509Certificate(newArrayList(TEST_0_IAM_X509_CERT));
     assertThat(u.update(), is(true));
     assertThat(account.getX509Certificates(), hasSize(0));
   }
 
   @Test
   public void testX509CertificateRemoverWorksWithNoUpdate() {
-    account.getX509Certificates().add(NEW_X509_CERT);
-    repoBindX509CertificateToAccount(NEW_X509_CERT, account);
+    account.getX509Certificates().add(TEST_0_IAM_X509_CERT);
+    repoBindX509CertificateToAccount(TEST_0_IAM_X509_CERT, account);
 
-    Updater u = removers().x509Certificate(newArrayList(OLD_X509_CERT));
+    Updater u = removers().x509Certificate(newArrayList(TEST_1_IAM_X509_CERT));
     assertThat(u.update(), is(false));
     assertThat(account.getX509Certificates(), hasSize(1));
-    assertThat(account.getX509Certificates(), hasItems(NEW_X509_CERT));
+    assertThat(account.getX509Certificates(), hasItems(TEST_0_IAM_X509_CERT));
   }
 
   @Test
   public void testX509CertificateRemoverNoUpdateWithEmptyList() {
 
-    Updater u = removers().x509Certificate(newArrayList(OLD_X509_CERT));
+    Updater u = removers().x509Certificate(newArrayList(TEST_1_IAM_X509_CERT));
     assertThat(u.update(), is(false));
     assertThat(account.getX509Certificates(), hasSize(0));
 
@@ -779,10 +776,10 @@ public class AccountUpdatersTests {
 
   @Test
   public void testX509CertificateRemoverWorksWithMultipleValues() {
-    account.getX509Certificates().add(NEW_X509_CERT);
-    account.getX509Certificates().add(OLD_X509_CERT);
+    account.getX509Certificates().add(TEST_0_IAM_X509_CERT);
+    account.getX509Certificates().add(TEST_1_IAM_X509_CERT);
 
-    Updater u = removers().x509Certificate(newArrayList(NEW_X509_CERT, OLD_X509_CERT));
+    Updater u = removers().x509Certificate(newArrayList(TEST_0_IAM_X509_CERT, TEST_1_IAM_X509_CERT));
     assertThat(u.update(), is(true));
     assertThat(account.getX509Certificates(), hasSize(0));
 
@@ -790,10 +787,10 @@ public class AccountUpdatersTests {
 
   @Test
   public void testX509CertificateRemoverWorksWithNullAndDuplicatesValues() {
-    account.getX509Certificates().add(NEW_X509_CERT);
+    account.getX509Certificates().add(TEST_0_IAM_X509_CERT);
 
     Updater u =
-        removers().x509Certificate(newArrayList(NEW_X509_CERT, OLD_X509_CERT, null, OLD_X509_CERT));
+        removers().x509Certificate(newArrayList(TEST_0_IAM_X509_CERT, TEST_1_IAM_X509_CERT, null, TEST_1_IAM_X509_CERT));
     assertThat(u.update(), is(true));
     assertThat(account.getX509Certificates(), hasSize(0));
 

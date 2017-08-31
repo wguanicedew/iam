@@ -17,6 +17,7 @@ import it.infn.mw.iam.api.scim.converter.OidcIdConverter;
 import it.infn.mw.iam.api.scim.converter.SamlIdConverter;
 import it.infn.mw.iam.api.scim.converter.SshKeyConverter;
 import it.infn.mw.iam.api.scim.converter.X509CertificateConverter;
+import it.infn.mw.iam.api.scim.exception.ScimPatchOperationNotSupported;
 import it.infn.mw.iam.api.scim.model.ScimOidcId;
 import it.infn.mw.iam.api.scim.model.ScimPatchOperation;
 import it.infn.mw.iam.api.scim.model.ScimSamlId;
@@ -64,27 +65,28 @@ public class DefaultAccountUpdaterFactory implements AccountUpdaterFactory<IamAc
 
   private ScimCollectionConverter<IamSshKey, ScimSshKey> sshKeyConverter(ScimUser user) {
 
-    return new ScimCollectionConverter<IamSshKey, ScimSshKey>(user.getIndigoUser()::getSshKeys,
+    return new ScimCollectionConverter<>(user.getIndigoUser()::getSshKeys,
         sshKeyConverter::fromScim);
   }
 
   private ScimCollectionConverter<IamOidcId, ScimOidcId> oidcIdConverter(ScimUser user) {
-    return new ScimCollectionConverter<IamOidcId, ScimOidcId>(user.getIndigoUser()::getOidcIds,
+    return new ScimCollectionConverter<>(user.getIndigoUser()::getOidcIds,
         oidcIdConverter::fromScim);
   }
 
   private ScimCollectionConverter<IamSamlId, ScimSamlId> samlIdConverter(ScimUser user) {
-    return new ScimCollectionConverter<IamSamlId, ScimSamlId>(user.getIndigoUser()::getSamlIds,
+    return new ScimCollectionConverter<>(user.getIndigoUser()::getSamlIds,
         samlIdConverter::fromScim);
   }
 
   private ScimCollectionConverter<IamX509Certificate, ScimX509Certificate> x509CertificateConverter(
       ScimUser user) {
-    return new ScimCollectionConverter<IamX509Certificate, ScimX509Certificate>(
-        user::getX509Certificates, x509CertificateConverter::fromScim);
+    return new ScimCollectionConverter<>(
+        user.getIndigoUser()::getCertificates, x509CertificateConverter::fromScim);
   }
 
-  private static <T> AccountUpdater buildUpdater(AccountUpdaterBuilder<T> factory, Supplier<T> valueSupplier) {
+  private static <T> AccountUpdater buildUpdater(AccountUpdaterBuilder<T> factory,
+      Supplier<T> valueSupplier) {
     return factory.build(valueSupplier.get());
   }
 
@@ -188,7 +190,7 @@ public class DefaultAccountUpdaterFactory implements AccountUpdaterFactory<IamAc
 
   @Override
   public List<AccountUpdater> getUpdatersForPatchOperation(IamAccount account,
-      ScimPatchOperation<ScimUser> op) {
+      ScimPatchOperation<ScimUser> op) throws ScimPatchOperationNotSupported {
 
     final List<AccountUpdater> updaters = Lists.newArrayList();
 
@@ -208,6 +210,11 @@ public class DefaultAccountUpdaterFactory implements AccountUpdaterFactory<IamAc
 
       prepareReplacers(updaters, user, account);
     }
+
+    if (updaters.isEmpty()) {
+      throw new ScimPatchOperationNotSupported(op.getOp() + " operation not supported");
+    }
+
     return updaters;
   }
 

@@ -36,16 +36,16 @@ public class JpaConfig extends JpaBaseConfiguration {
   @Override
   protected Map<String, Object> getVendorProperties() {
 
-    Map<String, Object> map = new HashMap<String, Object>();
+    Map<String, Object> map = new HashMap<>();
 
     map.put("eclipselink.weaving", "false");
     map.put("eclipselink.logging.level", "INFO");
     map.put("eclipselink.logging.level.sql", "OFF");
     map.put("eclipselink.cache.shared.default", "false");
 
-    // map.put("eclipselink.ddl-generation.output-mode", "sql-script");
-    // map.put("eclipselink.ddl-generation", "create-tables");
-    // map.put("eclipselink.create-ddl-jdbc-file-name", "ddl.sql");
+//    map.put("eclipselink.ddl-generation.output-mode", "sql-script");
+//    map.put("eclipselink.ddl-generation", "create-tables");
+//    map.put("eclipselink.create-ddl-jdbc-file-name", "ddl.sql");
 
     return map;
 
@@ -56,13 +56,11 @@ public class JpaConfig extends JpaBaseConfiguration {
 
       final EntityManagerFactoryBuilder factoryBuilder) {
 
-    LocalContainerEntityManagerFactoryBean emf = factoryBuilder.dataSource(dataSource)
+    return factoryBuilder.dataSource(dataSource)
       .packages("org.mitre", "it.infn.mw.iam.persistence")
       .persistenceUnit("defaultPersistenceUnit")
       .properties(getVendorProperties())
       .build();
-
-    return emf;
 
   }
 

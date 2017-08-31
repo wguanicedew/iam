@@ -34,15 +34,12 @@ import it.infn.mw.iam.api.scim.model.ScimListResponse;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.model.ScimUserPatchRequest;
 import it.infn.mw.iam.api.scim.provisioning.ScimUserProvisioning;
-import it.infn.mw.iam.api.scim.provisioning.paging.DefaultScimPageRequest;
 import it.infn.mw.iam.api.scim.provisioning.paging.ScimPageRequest;
 
 @RestController
 @RequestMapping("/scim/Users")
 @Transactional
-public class ScimUserController {
-
-  private static final int SCIM_MAX_PAGE_SIZE = 100;
+public class ScimUserController extends ScimControllerSupport{
 
   @Autowired
   ScimUserProvisioning userProvisioningService;
@@ -54,34 +51,14 @@ public class ScimUserController {
 
     Set<String> result = new HashSet<>();
     if (!Strings.isNullOrEmpty(attributesParameter)) {
-      result = Sets.newHashSet(Splitter.on(CharMatcher.anyOf(".,")).trimResults().omitEmptyStrings()
-          .split(attributesParameter));
+      result = Sets.newHashSet(Splitter.on(CharMatcher.anyOf(".,"))
+        .trimResults()
+        .omitEmptyStrings()
+        .split(attributesParameter));
     }
     result.add("schemas");
     result.add("id");
     return result;
-  }
-
-
-  private ScimPageRequest buildPageRequest(Integer count, Integer startIndex) {
-
-    if (count == null || count > SCIM_MAX_PAGE_SIZE) {
-      count = SCIM_MAX_PAGE_SIZE;
-    }
-
-    if (count < 0) {
-      count = 0;
-    }
-
-    // SCIM pages index is 1-based
-    if (startIndex == null || startIndex < 1) {
-      startIndex = 1;
-    }
-
-    ScimPageRequest pr =
-        new DefaultScimPageRequest.Builder().count(count).startIndex(startIndex - 1).build();
-
-    return pr;
   }
 
   @PreAuthorize("#oauth2.hasScope('scim:read') or hasRole('ADMIN')")
@@ -90,7 +67,7 @@ public class ScimUserController {
       @RequestParam(required = false) final Integer startIndex,
       @RequestParam(required = false) final String attributes) {
 
-    ScimPageRequest pr = buildPageRequest(count, startIndex);
+    ScimPageRequest pr = buildUserPageRequest(count, startIndex);
     ScimListResponse<ScimUser> result = userProvisioningService.list(pr);
 
     MappingJacksonValue wrapper = new MappingJacksonValue(result);
@@ -126,9 +103,7 @@ public class ScimUserController {
     handleValidationError("Invalid Scim User", validationResult);
     ScimUser result = userProvisioningService.create(user);
 
-    MappingJacksonValue wrapper = new MappingJacksonValue(result);
-
-    return wrapper;
+    return new MappingJacksonValue(result);
   }
 
   @PreAuthorize("#oauth2.hasScope('scim:write') or hasRole('ADMIN')")

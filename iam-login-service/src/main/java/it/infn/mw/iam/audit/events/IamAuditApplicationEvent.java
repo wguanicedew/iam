@@ -17,7 +17,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 @JsonTypeInfo(use=Id.NAME, property="@type")
 public abstract class IamAuditApplicationEvent extends ApplicationEvent {
 
-  public static enum IamEventCategory {
+  public enum IamEventCategory {
     NONE,
     ACCOUNT,
     GROUP,

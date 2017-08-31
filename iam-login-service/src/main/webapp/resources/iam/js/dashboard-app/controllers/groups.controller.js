@@ -3,10 +3,10 @@
 angular.module('dashboardApp').controller('GroupsController', GroupsController);
 
 GroupsController.$inject = [ '$scope', '$rootScope', '$uibModal', '$state',
-		'$filter', 'filterFilter', 'scimFactory', 'ModalService', 'Utils' ];
+		'$filter', 'filterFilter', 'scimFactory', 'ModalService', 'Utils', 'toaster' ];
 
 function GroupsController($scope, $rootScope, $uibModal, $state, $filter,
-		filterFilter, scimFactory, ModalService, Utils) {
+		filterFilter, scimFactory, ModalService, Utils, toaster) {
 
 	var gc = this;
 
@@ -29,7 +29,7 @@ function GroupsController($scope, $rootScope, $uibModal, $state, $filter,
 	gc.rebuildFilteredList = rebuildFilteredList;
 
 	// add group
-	gc.clickToOpen = clickToOpen;
+	gc.openAddGroupDialog = openAddGroupDialog;
 
 	// delete group
 	gc.deleteGroup = deleteGroup;
@@ -38,9 +38,8 @@ function GroupsController($scope, $rootScope, $uibModal, $state, $filter,
 	gc.loadGroupList = loadGroupList;
 
 	// Controller actions:
-	gc.resetFilters()
+	gc.resetFilters();
 	gc.loadGroupList(); // eval gc.groups
-
 
 	function rebuildFilteredList() {
 		
@@ -94,7 +93,9 @@ function GroupsController($scope, $rootScope, $uibModal, $state, $filter,
 							} else {
 								$rootScope.pageLoadingProgress = 100;
 								gc.loadingModal.dismiss("Cancel");
+								$rootScope.groups = gc.groups;
 							}
+							
 						}, function(error) {
 							console.log("getGroups error", error);
 							gc.loadingModal.dismiss("Error");
@@ -102,7 +103,7 @@ function GroupsController($scope, $rootScope, $uibModal, $state, $filter,
 						});
 	}
 
-	function clickToOpen() {
+	function openAddGroupDialog() {
 		var modalInstance = $uibModal.open({
 			templateUrl : '/resources/iam/template/dashboard/groups/newgroup.html',
 			controller : 'AddGroupController',
@@ -111,13 +112,16 @@ function GroupsController($scope, $rootScope, $uibModal, $state, $filter,
 		modalInstance.result.then(function(createdGroup) {
 			console.info(createdGroup);
 			gc.groups.push(createdGroup);
-			gc.rebuildFilteredList();
-			$scope.operationResult = Utils.buildSuccessOperationResult("Group " + createdGroup.displayName + " CREATED successfully");
+			gc.loadGroupList()
+			toaster.pop({
+		          type: 'success',
+		          body:
+		              `Group '${createdGroup.displayName}' CREATED successfully`
+		        });
 		}, function() {
 			console.info('Modal dismissed at: ', new Date());
 		});
 	}
-	;
 
 	function removeGroupFromList(group) {
 
@@ -142,9 +146,17 @@ function GroupsController($scope, $rootScope, $uibModal, $state, $filter,
 					.then(function(response) {
 						gc.removeGroupFromList(group);
 						$rootScope.loggedUser.totGroups = $rootScope.loggedUser.totGroups -1;
-						$scope.operationResult = Utils.buildSuccessOperationResult("Group " + group.displayName + " DELETED successfully");
+						toaster.pop({
+					          type: 'success',
+					          body:
+					              `Group '${group.displayName}' DELETED successfully`
+					        });
 					}, function(error) {
-						$scope.operationResult = Utils.buildErrorOperationResult(error);
+						toaster.pop({
+					          type: 'error',
+					          body:
+					              `${error.data.detail}`
+					        });
 					});
 			});
 	}

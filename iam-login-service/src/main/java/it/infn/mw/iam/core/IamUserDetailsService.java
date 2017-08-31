@@ -43,8 +43,7 @@ public class IamUserDetailsService implements UserDetailsService {
 
       if (a.isActive()) {
 
-        User u = new User(a.getUsername(), a.getPassword(), convertAuthorities(a));
-        return u;
+        return new User(a.getUsername(), a.getPassword(), convertAuthorities(a));
 
       } else {
         throw new DisabledException("User '" + username + "' is not active.");

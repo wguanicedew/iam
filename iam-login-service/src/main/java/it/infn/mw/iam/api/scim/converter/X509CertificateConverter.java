@@ -1,40 +1,63 @@
 package it.infn.mw.iam.api.scim.converter;
 
+import java.security.Principal;
+import java.security.cert.X509Certificate;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import it.infn.mw.iam.api.scim.exception.ScimValidationException;
+import eu.emi.security.authn.x509.impl.X500NameUtils;
 import it.infn.mw.iam.api.scim.model.ScimX509Certificate;
+import it.infn.mw.iam.authn.x509.X509CertificateChainParser;
+import it.infn.mw.iam.authn.x509.X509CertificateChainParsingResult;
 import it.infn.mw.iam.persistence.model.IamX509Certificate;
-import it.infn.mw.iam.util.x509.X509Utils;
 
 @Service
 public class X509CertificateConverter
     implements Converter<ScimX509Certificate, IamX509Certificate> {
 
-  /**
-   * <ul>
-   * <li>scim.value => certificate</li>
-   * <li>scim.display => label</li>
-   * <li>scim.primary => primary</li>
-   * <li>scim.certificateSubject => must be extract from certificate</li>
-   * </ul>
-   */
+  private final X509CertificateChainParser parser;
+  
+  
+  @Autowired
+  public X509CertificateConverter(X509CertificateChainParser parser) {
+    this.parser = parser;
+  }
 
-  @Override
-  public IamX509Certificate fromScim(ScimX509Certificate scim) throws ScimValidationException {
+    private String principalAsRfc2253String(Principal principal) {
+    return X500NameUtils.getPortableRFC2253Form(principal.getName());
+  }
+
+
+  private IamX509Certificate parseCertificateFromString(String pemString) {
+    X509CertificateChainParsingResult result = parser.parseChainFromString(pemString);
 
     IamX509Certificate cert = new IamX509Certificate();
+    X509Certificate leafCert = result.getChain()[0];
 
-    cert.setCertificate(scim.getValue());
-    cert.setLabel(scim.getDisplay());
-
-    if (scim.isPrimary() != null) {
-      cert.setPrimary(scim.isPrimary());
-    } else {
-      cert.setPrimary(false);
-    }
+    cert.setSubjectDn(principalAsRfc2253String(leafCert.getSubjectX500Principal()));
+    cert.setIssuerDn(principalAsRfc2253String(leafCert.getIssuerX500Principal()));
     
-    cert.setCertificateSubject(X509Utils.getCertificateSubject(scim.getValue()));
+    cert.setCertificate(pemString);
+    return cert;
+  }
+
+  @Override
+  public IamX509Certificate fromScim(ScimX509Certificate scim) {
+
+    IamX509Certificate cert;
+
+    if (scim.getPemEncodedCertificate() != null) {
+      cert = parseCertificateFromString(scim.getPemEncodedCertificate());
+    } else {
+      cert = new IamX509Certificate();
+      cert.setCertificate(scim.getPemEncodedCertificate());
+      cert.setSubjectDn(scim.getSubjectDn());
+      cert.setIssuerDn(scim.getIssuerDn());
+    }
+
+    cert.setLabel(scim.getDisplay());
+    cert.setPrimary(scim.getPrimary() == null ? false : scim.getPrimary());
 
     return cert;
   }
@@ -43,9 +66,14 @@ public class X509CertificateConverter
   public ScimX509Certificate toScim(IamX509Certificate entity) {
 
     return ScimX509Certificate.builder()
-      .primary(entity.isPrimary())
+      .created(entity.getCreationTime())
+      .lastModified(entity.getLastUpdateTime())
       .display(entity.getLabel())
-      .value(entity.getCertificate())
+      .subjectDn(entity.getSubjectDn())
+      .issuerDn(entity.getIssuerDn())
+      .pemEncodedCertificate(entity.getCertificate())
+      .primary(entity.isPrimary())
       .build();
   }
+
 }

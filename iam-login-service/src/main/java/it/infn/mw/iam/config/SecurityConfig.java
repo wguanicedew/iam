@@ -1,5 +1,19 @@
 package it.infn.mw.iam.config;
 
+import static it.infn.mw.iam.api.tokens.Constants.ACCESS_TOKENS_ENDPOINT;
+import static it.infn.mw.iam.api.tokens.Constants.REFRESH_TOKENS_ENDPOINT;
+
+import it.infn.mw.iam.authn.RootIsDashboardSuccessHandler;
+import it.infn.mw.iam.authn.TimestamperSuccessHandler;
+import it.infn.mw.iam.authn.oidc.OidcAccessDeniedHandler;
+import it.infn.mw.iam.authn.oidc.OidcAuthenticationProvider;
+import it.infn.mw.iam.authn.oidc.OidcClientFilter;
+import it.infn.mw.iam.authn.x509.IamX509AuthenticationProvider;
+import it.infn.mw.iam.authn.x509.IamX509AuthenticationUserDetailService;
+import it.infn.mw.iam.authn.x509.IamX509PreauthenticationProcessingFilter;
+import it.infn.mw.iam.authn.x509.X509AuthenticationCredentialExtractor;
+import it.infn.mw.iam.persistence.repository.IamAccountRepository;
+
 import org.mitre.oauth2.service.OAuth2TokenEntityService;
 import org.mitre.oauth2.web.CorsFilter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,17 +51,9 @@ import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.filter.GenericFilterBean;
 
-import it.infn.mw.iam.authn.RootIsDashboardSuccessHandler;
-import it.infn.mw.iam.authn.TimestamperSuccessHandler;
-import it.infn.mw.iam.authn.oidc.OidcAccessDeniedHandler;
-import it.infn.mw.iam.authn.oidc.OidcAuthenticationProvider;
-import it.infn.mw.iam.authn.oidc.OidcClientFilter;
-
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-
-
 
   @Configuration
   @Order(100)
@@ -68,7 +74,16 @@ public class SecurityConfig {
     private UserDetailsService iamUserDetailsService;
 
     @Autowired
+    private X509AuthenticationCredentialExtractor x509CredentialExtractor;
+
+    @Autowired
+    private IamX509AuthenticationUserDetailService x509UserDetailsService;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private IamAccountRepository accountRepo;
 
     @Autowired
     public void configureGlobal(final AuthenticationManagerBuilder auth) throws Exception {
@@ -83,6 +98,20 @@ public class SecurityConfig {
     public void configure(final WebSecurity web) throws Exception {
 
       web.expressionHandler(oAuth2WebSecurityExpressionHandler);
+    }
+
+
+    public IamX509AuthenticationProvider iamX509AuthenticationProvider() {
+
+      IamX509AuthenticationProvider provider = new IamX509AuthenticationProvider();
+      provider.setPreAuthenticatedUserDetailsService(x509UserDetailsService);
+      return provider;
+    }
+
+
+    public IamX509PreauthenticationProcessingFilter iamX509Filter() throws Exception {
+      return new IamX509PreauthenticationProcessingFilter(x509CredentialExtractor,
+          iamX509AuthenticationProvider());
     }
 
     @Override
@@ -118,7 +147,9 @@ public class SecurityConfig {
         .and().anonymous()
         .and()
           .csrf()
-            .requireCsrfProtectionMatcher(new AntPathRequestMatcher("/authorize")).disable();
+            .requireCsrfProtectionMatcher(new AntPathRequestMatcher("/authorize")).disable()
+        .addFilter(iamX509Filter());
+       
       // @formatter:on
     }
 
@@ -131,7 +162,8 @@ public class SecurityConfig {
     public AuthenticationSuccessHandler successHandler() {
 
       return new TimestamperSuccessHandler(
-          new RootIsDashboardSuccessHandler(iamBaseUrl, new HttpSessionRequestCache()));
+          new RootIsDashboardSuccessHandler(iamBaseUrl, new HttpSessionRequestCache()),
+          accountRepo);
     }
   }
 
@@ -425,7 +457,9 @@ public class SecurityConfig {
       http.antMatcher("/revoke**").httpBasic().authenticationEntryPoint(authenticationEntryPoint)
           .and().addFilterBefore(corsFilter, SecurityContextPersistenceFilter.class)
           .addFilterBefore(clientCredentialsEndpointFilter(), BasicAuthenticationFilter.class)
-          .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint).and()
+          .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint)
+          .and()
+            .csrf().disable()
           .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
       // @formatter:on
     }
@@ -649,7 +683,7 @@ public class SecurityConfig {
         .requestMatchers()
           .antMatchers("/metrics", "/configprops", "/env", "/mappings", 
               "/flyway", "/autoconfig", "/beans", "/dump", "/trace", 
-              "/info", "/health", "/health/mail")
+              "/info", "/health", "/health/mail", "/health/external")
         .and()
           .httpBasic()
           .authenticationEntryPoint(authenticationEntryPoint)
@@ -662,9 +696,48 @@ public class SecurityConfig {
           .sessionCreationPolicy(SessionCreationPolicy.NEVER)
         .and()
           .authorizeRequests()
-            .antMatchers(HttpMethod.GET, "/info", "/health", "/health/mail").permitAll()
+            .antMatchers(HttpMethod.GET, "/info", "/health", "/health/mail", "/health/external").permitAll()
             .antMatchers("/metrics", "/configprops", "/env", "/mappings", "/flyway",
                 "/autoconfig", "/beans", "/dump", "/trace").hasRole("ADMIN");
+      // @formatter:on
+    }
+  }
+
+  @Configuration
+  @Order(25)
+  public static class TokensApiEndpointConfig extends WebSecurityConfigurerAdapter {
+
+    @Autowired
+    private OAuth2AuthenticationProcessingFilter resourceFilter;
+
+    @Autowired
+    private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
+
+    @Autowired
+    private CorsFilter corsFilter;
+
+    @Override
+    protected void configure(final HttpSecurity http) throws Exception {
+
+      // @formatter:off
+      http
+        .requestMatchers()
+        .antMatchers(ACCESS_TOKENS_ENDPOINT + "/**", REFRESH_TOKENS_ENDPOINT + "/**")
+        .and()
+        .exceptionHandling()
+        .authenticationEntryPoint(authenticationEntryPoint)
+        .and()
+        .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
+        .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
+        .sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.NEVER)
+        .and()
+        .authorizeRequests()
+        .antMatchers(ACCESS_TOKENS_ENDPOINT + "/**", REFRESH_TOKENS_ENDPOINT + "/**")
+        .authenticated()
+        .and()
+        .csrf()
+        .disable();
       // @formatter:on
     }
   }

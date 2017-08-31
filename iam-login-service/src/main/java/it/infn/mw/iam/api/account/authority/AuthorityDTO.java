@@ -10,10 +10,6 @@ public class AuthorityDTO {
   @Size(max = 128, message = "Invalid authority size")
   private String authority;
 
-  public AuthorityDTO() {
-
-  }
-
   public String getAuthority() {
     return authority;
   }

@@ -3,6 +3,8 @@ package it.infn.mw.iam.test.ext_authn;
 import static it.infn.mw.iam.authn.DefaultExternalAuthenticationInfoBuilder.OIDC_TYPE;
 import static it.infn.mw.iam.authn.DefaultExternalAuthenticationInfoBuilder.SAML_TYPE;
 import static it.infn.mw.iam.authn.DefaultExternalAuthenticationInfoBuilder.TYPE_ATTR;
+import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.EPPN;
+import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.EPUID;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -18,7 +20,6 @@ import org.springframework.security.saml.SAMLCredential;
 import it.infn.mw.iam.authn.DefaultExternalAuthenticationInfoBuilder;
 import it.infn.mw.iam.authn.oidc.OidcExternalAuthenticationToken;
 import it.infn.mw.iam.authn.saml.SamlExternalAuthenticationToken;
-import it.infn.mw.iam.authn.saml.util.SamlIdResolvers;
 
 public class ExternalAuthenticationBuilderTests {
 
@@ -53,13 +54,13 @@ public class ExternalAuthenticationBuilderTests {
     when(mockToken.getExternalAuthentication()).thenReturn(token);
     when(token.getCredentials()).thenReturn(cred);
     when(cred.getRemoteEntityID()).thenReturn("idpId");
-    when(cred.getAttributeAsString(SamlIdResolvers.EPUID_NAME)).thenReturn("epuid");
-    when(cred.getAttributeAsString(SamlIdResolvers.EPPN_NAME)).thenReturn("eppn");
+    when(cred.getAttributeAsString(EPUID.getAttributeName())).thenReturn("EPUID");
+    when(cred.getAttributeAsString(EPPN.getAttributeName())).thenReturn("EPPN");
 
     Map<String, String> infoMap = builder.buildInfoMap(mockToken);
     assertThat(infoMap.get(TYPE_ATTR), Matchers.equalTo(SAML_TYPE));
-    assertThat(infoMap.get("epuid"), Matchers.equalTo("epuid"));
-    assertThat(infoMap.get("eppn"), Matchers.equalTo("eppn"));
+    assertThat(infoMap.get("EPUID"), Matchers.equalTo("EPUID"));
+    assertThat(infoMap.get("EPPN"), Matchers.equalTo("EPPN"));
 
   }
 

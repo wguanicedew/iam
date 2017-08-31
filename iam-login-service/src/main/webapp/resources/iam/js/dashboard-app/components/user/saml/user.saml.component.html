@@ -5,29 +5,33 @@
         <i class="fa fa-cloud pull-right"></i>
     </div>
 
-    
+
     <div class="box-body">
         <div ng-if="!$ctrl.hasSamlIds()">No SAML account found</div>
+
 
         <div class="table-responsive" ng-if="$ctrl.hasSamlIds()">
             <table class="table no-margin" id="saml_account_list">
                 <thead>
                     <tr>
-                        <th>Identity Provider ID</th>
-                        <th>User ID</th>
+                        <th>IdP Entity ID</th>
+                        <th>Attribute</th>
+                        <th>Attribute Value</th>
+
                         <th class="text-right"></th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr ng-repeat="samlId in $ctrl.getSamlIds()">
                         <td>{{ samlId.idpId }}</td>
+                        <td>{{ samlId.attributeId }}</td>
                         <td>{{ samlId.userId }}</td>
                         <td class="text-right">
                             <div class="btn-group">
-                                <button class="btn btn-xs btn-danger" ng-click="$ctrl.openRemoveSamlAccountDialog(samlId)" ng-if="$ctrl.isVoAdmin() && !$ctrl.isMe()">
+                                <button class="btn btn-xs btn-danger" ng-click="$ctrl.openRemoveSamlAccountDialog(samlId)" ng-if="$ctrl.userCtrl.canManageLinkedAccounts()">
                                     <i class="fa fa-times"></i> Remove
                                 </button>
-                                <button class="btn btn-xs btn-danger" ng-click="$ctrl.openUnlinkSamlAccountDialog(samlId)" ng-if="$ctrl.isMe()">
+                                <button class="btn btn-xs btn-danger" ng-click="$ctrl.openUnlinkSamlAccountDialog(samlId)" ng-if="$ctrl.userCtrl.canLinkAccounts()">
                                     <i class="fa fa-times"></i> Unlink
                                 </button>
                             </div>
@@ -36,12 +40,13 @@
                 </tbody>
             </table>
         </div>
+        
     </div>
     <div class="box-footer">
-        <button class="btn btn-success btn-sm" name="btn-add-samlid" ng-click="$ctrl.openAddSamlAccountDialog()" ng-if="$ctrl.isVoAdmin() && !$ctrl.isMe()">
+        <button class="btn btn-success btn-sm" name="btn-add-samlid" ng-click="$ctrl.openAddSamlAccountDialog()" ng-if="$ctrl.userCtrl.canManageLinkedAccounts()">
             <i class="fa fa-plus"></i> Add Saml account
         </button>
-        <button class="btn btn-success btn-sm" name="btn-link-samlid" ng-click="$ctrl.openLinkSamlAccountDialog()" ng-if="$ctrl.isMe()">
+        <button class="btn btn-success btn-sm" name="btn-link-samlid" ng-click="$ctrl.openLinkSamlAccountDialog()" ng-if="$ctrl.userCtrl.canLinkAccounts()">
             <i class="fa fa-plus"></i> Link Saml account
         </button>
     </div>

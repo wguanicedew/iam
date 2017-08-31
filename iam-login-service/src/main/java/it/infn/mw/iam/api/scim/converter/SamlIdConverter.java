@@ -14,6 +14,7 @@ public class SamlIdConverter implements Converter<ScimSamlId, IamSamlId> {
     IamSamlId samlId = new IamSamlId();
     samlId.setIdpId(scim.getIdpId());
     samlId.setUserId(scim.getUserId());
+    samlId.setAttributeId(scim.getAttributeId());
     samlId.setAccount(null);
 
     return samlId;
@@ -22,6 +23,9 @@ public class SamlIdConverter implements Converter<ScimSamlId, IamSamlId> {
   @Override
   public ScimSamlId toScim(IamSamlId entity) {
 
-    return ScimSamlId.builder().idpId(entity.getIdpId()).userId(entity.getUserId()).build();
+    return ScimSamlId.builder().idpId(entity.getIdpId()).
+        userId(entity.getUserId())
+        .attributeId(entity.getAttributeId())
+        .build();
   }
 }

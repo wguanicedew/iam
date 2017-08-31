@@ -55,10 +55,8 @@ public class DefaultOidcUserDetailsService implements OidcUserDetailsService {
   protected User buildUserFromOIDCAuthentication(OIDCAuthenticationToken token) {
     String username = token.getSub();
 
-    if (token.getUserInfo() != null) {
-      if (!Strings.isNullOrEmpty(token.getUserInfo().getName())) {
-        username = token.getUserInfo().getName();
-      }
+    if (token.getUserInfo() != null && !Strings.isNullOrEmpty(token.getUserInfo().getName())) {
+      username = token.getUserInfo().getName();
     }
 
     return new User(username, "",

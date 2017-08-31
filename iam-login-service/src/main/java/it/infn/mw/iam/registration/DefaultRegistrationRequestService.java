@@ -23,12 +23,12 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 
+import it.infn.mw.iam.api.scim.converter.UserConverter;
 import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
 import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
 import it.infn.mw.iam.api.scim.model.ScimOidcId;
 import it.infn.mw.iam.api.scim.model.ScimSamlId;
 import it.infn.mw.iam.api.scim.model.ScimUser;
-import it.infn.mw.iam.api.scim.provisioning.ScimUserProvisioning;
 import it.infn.mw.iam.audit.events.registration.RegistrationApproveEvent;
 import it.infn.mw.iam.audit.events.registration.RegistrationConfirmEvent;
 import it.infn.mw.iam.audit.events.registration.RegistrationRejectEvent;
@@ -36,6 +36,7 @@ import it.infn.mw.iam.audit.events.registration.RegistrationRequestEvent;
 import it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo;
 import it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo.ExternalAuthenticationType;
 import it.infn.mw.iam.core.IamRegistrationRequestStatus;
+import it.infn.mw.iam.core.user.IamAccountService;
 import it.infn.mw.iam.notification.NotificationService;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamRegistrationRequest;
@@ -50,7 +51,10 @@ public class DefaultRegistrationRequestService
   private IamRegistrationRequestRepository requestRepository;
 
   @Autowired
-  private ScimUserProvisioning userService;
+  private IamAccountService accountService;
+
+  @Autowired
+  private UserConverter userConverter;
 
   @Autowired
   @Qualifier("defaultNotificationService")
@@ -66,10 +70,6 @@ public class DefaultRegistrationRequestService
   private IamAccountRepository iamAccountRepo;
 
   private ApplicationEventPublisher eventPublisher;
-
-  public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
-    this.eventPublisher = publisher;
-  }
 
   private static final Table<IamRegistrationRequestStatus, IamRegistrationRequestStatus, Boolean> allowedStateTransitions =
       new ImmutableTable.Builder<IamRegistrationRequestStatus, IamRegistrationRequestStatus, Boolean>()
@@ -98,6 +98,7 @@ public class DefaultRegistrationRequestService
     } else if (ExternalAuthenticationType.SAML.equals(extAuthnInfo.getType())) {
       ScimSamlId samlId = new ScimSamlId.Builder().idpId(extAuthnInfo.getIssuer())
         .userId(extAuthnInfo.getSubject())
+        .attributeId(extAuthnInfo.getSubjectAttribute())
         .build();
       user.addSamlId(samlId);
     }
@@ -107,6 +108,8 @@ public class DefaultRegistrationRequestService
   public RegistrationRequestDto createRequest(RegistrationRequestDto request,
       Optional<ExternalAuthenticationRegistrationInfo> extAuthnInfo) {
 
+    notesSanityChecks(request.getNotes());
+
     ScimUser.Builder userBuilder = ScimUser.builder()
       .buildName(request.getGivenname(), request.getFamilyname())
       .buildEmail(request.getEmail())
@@ -115,7 +118,8 @@ public class DefaultRegistrationRequestService
 
     extAuthnInfo.ifPresent(i -> addExternalAuthnInfo(userBuilder, i));
 
-    IamAccount newAccount = userService.createAccount(userBuilder.build());
+    IamAccount newAccount =
+        accountService.createAccount(userConverter.fromScim(userBuilder.build()));
     newAccount.setConfirmationKey(tokenGenerator.generateToken());
     newAccount.setActive(false);
 
@@ -145,7 +149,9 @@ public class DefaultRegistrationRequestService
     List<IamRegistrationRequest> result = new ArrayList<>();
 
     if (status != null) {
-      result = requestRepository.findByStatus(status).get();
+      result = requestRepository.findByStatus(status).orElseThrow(
+          () -> new IllegalStateException("No request found with status: " + status.name()));
+
     } else {
       Sort srt = new Sort(Sort.Direction.ASC, "creationTime");
       Iterable<IamRegistrationRequest> iter = requestRepository.findAll(srt);
@@ -167,7 +173,7 @@ public class DefaultRegistrationRequestService
   @Override
   public List<RegistrationRequestDto> listPendingRequests() {
 
-    List<IamRegistrationRequest> result = requestRepository.findPendingRequests().get();
+    List<IamRegistrationRequest> result = requestRepository.findPendingRequests();
 
     List<RegistrationRequestDto> requests = new ArrayList<>();
 
@@ -275,12 +281,27 @@ public class DefaultRegistrationRequestService
     notificationService.createRequestRejectedMessage(request);
     RegistrationRequestDto retval = converter.fromEntity(request);
 
-    userService.delete(request.getAccount().getUuid());
+    accountService.deleteAccount(request.getAccount());
 
     eventPublisher.publishEvent(new RegistrationRejectEvent(this, request,
         "Reject registration request for user " + request.getAccount().getUsername()));
 
     return retval;
+  }
+
+  private void notesSanityChecks(final String notes) {
+
+    if (notes == null) {
+      throw new IllegalArgumentException("Notes field cannot be null");
+    }
+
+    if (notes.trim().isEmpty()) {
+      throw new IllegalArgumentException("Notes field cannot be the empty string");
+    }
+  }
+
+  public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
+    this.eventPublisher = publisher;
   }
 
 }

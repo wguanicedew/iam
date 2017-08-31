@@ -1,5 +1,7 @@
 package it.infn.mw.iam.test.actuator;
 
+import static it.infn.mw.iam.test.util.MockSmtpServerUtils.startMockSmtpServer;
+import static it.infn.mw.iam.test.util.MockSmtpServerUtils.stopMockSmtpServer;
 import static java.lang.String.format;
 import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -9,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,25 +57,29 @@ public class MailHealthEndpointsTests {
   private Wiser wiser;
 
   @Before
-  public void setup() {
+  public synchronized void setup() throws InterruptedException {
+
     mvc = MockMvcBuilders.webAppContextSetup(context)
       .apply(springSecurity())
       .alwaysDo(print())
       .build();
-
-    wiser = new Wiser();
-    wiser.setHostname(mailHost);
-    wiser.setPort(mailPort);
-    wiser.start();
+    
+    wiser = startMockSmtpServer(mailHost, mailPort);
   }
 
   @After
-  public void teardown() throws InterruptedException {
-    wiser.stop();
+  public synchronized void teardown() {
+
+    stopMockSmtpServer(wiser);
+    
+    if (wiser.getServer().isRunning()) {
+      Assert.fail("Fake mail server is still running after stop!!");
+    }
   }
 
   @Test
   public void testMailHealthEndpointWithSmtp() throws Exception {
+
     // @formatter:off
     mvc.perform(get(mailEndpointPath))
       .andExpect(status().isOk())
@@ -84,6 +91,7 @@ public class MailHealthEndpointsTests {
   @Test
   @WithMockUser(username = USER_USERNAME, roles = {USER_ROLE})
   public void testMailHealthEndpointWithSmtpAsUser() throws Exception {
+
     // @formatter:off
     mvc.perform(get(mailEndpointPath))
       .andExpect(status().isOk())
@@ -96,6 +104,7 @@ public class MailHealthEndpointsTests {
   @Test
   @WithMockUser(username = ADMIN_USERNAME, roles = {ADMIN_ROLE})
   public void testMailHealthEndpointWithSmtpAsAdmin() throws Exception {
+
     // @formatter:off
     mvc.perform(get(mailEndpointPath))
       .andExpect(status().isOk())

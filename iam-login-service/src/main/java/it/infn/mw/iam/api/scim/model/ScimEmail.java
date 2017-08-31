@@ -14,7 +14,7 @@ import it.infn.mw.iam.api.scim.model.ScimUser.UpdateUserValidation;
 
 public class ScimEmail {
 
-  public static enum ScimEmailType {
+  public enum ScimEmailType {
     work, home, other;
   }
 

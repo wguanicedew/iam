@@ -1,5 +1,7 @@
 package it.infn.mw.iam.persistence.model;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -11,7 +13,12 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "iam_ssh_key")
-public class IamSshKey implements IamAccountRef {
+public class IamSshKey implements IamAccountRef, Serializable{
+
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,7 +46,7 @@ public class IamSshKey implements IamAccountRef {
 
   public IamSshKey(String value) {
 
-	setValue(value);
+    setValue(value);
   }
 
   public Long getId() {
@@ -107,28 +114,34 @@ public class IamSshKey implements IamAccountRef {
   @Override
   public int hashCode() {
 
-	final int prime = 31;
-	int result = 1;
-	result = prime * result + ((value == null) ? 0 : value.hashCode());
-	return result;
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((value == null) ? 0 : value.hashCode());
+    return result;
   }
 
   @Override
   public boolean equals(Object obj) {
 
-	if (this == obj)
-	  return true;
-	if (obj == null)
-	  return false;
-	if (getClass() != obj.getClass())
-	  return false;
-	IamSshKey other = (IamSshKey) obj;
-	if (value == null) {
-	  if (other.value != null)
-		return false;
-	} else if (!value.equals(other.value))
-	  return false;
-	return true;
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    IamSshKey other = (IamSshKey) obj;
+    if (value == null) {
+      if (other.value != null)
+        return false;
+    } else if (!value.equals(other.value))
+      return false;
+    return true;
+  }
+
+  @Override
+  public String toString() {
+    return String.format("IamSshKey [label=%s, fingerprint=%s, primary=%s, value=%s", label,
+        fingerprint, primary, value);
   }
 
 }

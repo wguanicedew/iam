@@ -28,7 +28,10 @@ public class IamAuditEventLogger implements AuditEventLogger {
   @Override
   public void logAuditEvent(IamAuditApplicationEvent event) {
     lastEvent = event;
-    LOG.info(AUDIT_MARKER, serializer.serialize(event));
+    if (LOG.isInfoEnabled()){
+      final String serializedEvent = serializer.serialize(event);
+      LOG.info(AUDIT_MARKER, serializedEvent);
+    }
   }
   
   public IamAuditApplicationEvent getLastEvent() {

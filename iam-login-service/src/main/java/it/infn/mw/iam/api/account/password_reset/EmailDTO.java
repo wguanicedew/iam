@@ -10,8 +10,6 @@ public class EmailDTO {
   @NotNull(message = "please specify an email address")
   private String email;
 
-  public EmailDTO() {}
-
   public String getEmail() {
     return email;
   }

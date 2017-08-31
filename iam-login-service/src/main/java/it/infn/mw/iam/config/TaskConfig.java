@@ -5,6 +5,8 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import org.mitre.oauth2.service.OAuth2TokenEntityService;
 import org.mitre.openid.connect.service.ApprovedSiteService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -14,17 +16,22 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
+import it.infn.mw.iam.core.user.IamAccountService;
 import it.infn.mw.iam.notification.NotificationService;
 
 @Configuration
 @EnableScheduling
 public class TaskConfig implements SchedulingConfigurer {
 
+  public static final Logger LOG = LoggerFactory.getLogger(TaskConfig.class);
+
   public static final long ONE_SECOND_MSEC = 1000;
   public static final long TEN_SECONDS_MSEC = 10 * ONE_SECOND_MSEC;
   public static final long THIRTY_SECONDS_MSEC = 30 * ONE_SECOND_MSEC;
   public static final long ONE_MINUTE_MSEC = 60 * ONE_SECOND_MSEC;
   public static final long TEN_MINUTES_MSEC = 10 * ONE_MINUTE_MSEC;
+  public static final long ONE_HOUR_MSEC = 60 * ONE_MINUTE_MSEC;
+  public static final long ONE_DAY_MSEC = 24 * ONE_HOUR_MSEC;
 
   @Autowired
   OAuth2TokenEntityService tokenEntityService;
@@ -36,6 +43,9 @@ public class TaskConfig implements SchedulingConfigurer {
   @Qualifier("defaultNotificationService")
   NotificationService notificationService;
 
+  @Autowired
+  IamAccountService accountService;
+  
   @Bean(destroyMethod = "shutdown")
   public ScheduledExecutorService taskScheduler() {
     return Executors.newSingleThreadScheduledExecutor();
@@ -63,10 +73,9 @@ public class TaskConfig implements SchedulingConfigurer {
   public void clearExpiredNotifications() {
     notificationService.clearExpiredNotifications();
   }
-
+    
   @Override
   public void configureTasks(final ScheduledTaskRegistrar taskRegistrar) {
-
     taskRegistrar.setScheduler(taskScheduler());
   }
 

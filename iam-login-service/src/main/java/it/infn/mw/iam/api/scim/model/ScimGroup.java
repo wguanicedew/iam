@@ -8,6 +8,7 @@ import java.util.Set;
 
 import javax.validation.Valid;
 
+import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotBlank;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -24,6 +25,7 @@ public final class ScimGroup extends ScimResource {
   public static final String RESOURCE_TYPE = "Group";
 
   @NotBlank
+  @Length(max = 512)
   private final String displayName;
 
   @Valid
@@ -63,7 +65,7 @@ public final class ScimGroup extends ScimResource {
 
     return members;
   }
-  
+
   public ScimIndigoGroup getIndigoGroup() {
     return indigoGroup;
   }
@@ -76,7 +78,7 @@ public final class ScimGroup extends ScimResource {
   public static class Builder extends ScimResource.Builder<ScimGroup> {
 
     private String displayName;
-    private Set<ScimMemberRef> members = new HashSet<ScimMemberRef>();
+    private Set<ScimMemberRef> members = new HashSet<>();
     private ScimIndigoGroup indigoGroup = null;
 
     public Builder(String displayName) {

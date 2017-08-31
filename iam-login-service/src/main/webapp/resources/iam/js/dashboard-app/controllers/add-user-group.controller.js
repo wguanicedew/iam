@@ -50,14 +50,16 @@ function AddUserGroupController($scope, $state, $filter, Utils, $q, $uibModalIns
 
 		addGroupCtrl.enabled = false;
 		var requests = [];
+		var groupNames = [];
 		angular.forEach(addGroupCtrl.groupsSelected, function(groupToAdd) {
+			groupNames.push(groupToAdd.displayName);
 			requests.push(scimFactory.addUserToGroup(groupToAdd.id,
 					addGroupCtrl.user));
 		});
 
 		$q.all(requests).then(function(response) {
 			console.log("Added ", addGroupCtrl.groupsSelected);
-			$uibModalInstance.close(response);
+			$uibModalInstance.close(`User added to groups: '${groupNames.join(",")}'`);
 			addGroupCtrl.enabled = true;
 		}, function(error) {
 			console.error(error);

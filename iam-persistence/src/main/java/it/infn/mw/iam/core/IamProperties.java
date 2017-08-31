@@ -4,7 +4,7 @@ public enum IamProperties {
 
   INSTANCE;
 
-  private String organisationName;
+  private String organisationName = "indigo-dc";
 
   private IamProperties() {
 

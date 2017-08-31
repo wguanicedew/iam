@@ -11,8 +11,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class SystemTimeProvider implements TimeProvider {
 
-  public SystemTimeProvider() {}
-
   @Override
   public long currentTimeMillis() {
 

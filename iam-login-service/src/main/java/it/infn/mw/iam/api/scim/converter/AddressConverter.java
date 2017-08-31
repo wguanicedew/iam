@@ -28,12 +28,14 @@ public class AddressConverter implements Converter<ScimAddress, Address> {
   @Override
   public ScimAddress toScim(Address entity) {
 
-    ScimAddress address =
-        ScimAddress.builder().country(entity.getCountry()).formatted(entity.getFormatted())
-            .locality(entity.getLocality()).postalCode(entity.getPostalCode())
-            .region(entity.getRegion()).streetAddress(entity.getStreetAddress()).build();
-
-    return address;
+    return ScimAddress.builder()
+      .country(entity.getCountry())
+      .formatted(entity.getFormatted())
+      .locality(entity.getLocality())
+      .postalCode(entity.getPostalCode())
+      .region(entity.getRegion())
+      .streetAddress(entity.getStreetAddress())
+      .build();
   }
 
 }

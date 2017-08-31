@@ -27,8 +27,6 @@ public class IamIntrospectionResultAssembler extends DefaultIntrospectionResultA
   public static final String GROUPS = "groups";
   public static final String ORGANISATION_NAME = "organisation_name";
 
-  public IamIntrospectionResultAssembler() {}
-
   @Override
   public Map<String, Object> assembleFrom(OAuth2AccessTokenEntity accessToken, UserInfo userInfo,
       Set<String> authScopes) {
@@ -39,7 +37,7 @@ public class IamIntrospectionResultAssembler extends DefaultIntrospectionResultA
 
       List<String> audience = accessToken.getJwt().getJWTClaimsSet().getAudience();
 
-      if (audience != null && audience.size() > 0) {
+      if (audience != null && !audience.isEmpty()) {
         result.put("aud", Joiner.on(' ').join(audience));
       }
 
@@ -64,6 +62,8 @@ public class IamIntrospectionResultAssembler extends DefaultIntrospectionResultA
 
         result.put(PREFERRED_USERNAME, iamUserInfo.getPreferredUsername());
 
+        LOGGER.debug("Organisation name: {}", IamProperties.INSTANCE.getOrganisationName());
+        
         result.put(ORGANISATION_NAME, IamProperties.INSTANCE.getOrganisationName());
       }
 

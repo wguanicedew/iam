@@ -13,10 +13,10 @@ import it.infn.mw.iam.core.NameUtils;
 public class ScimName {
 
   interface NewUserValidation {
-  };
+  }
 
   interface UpdateUserValidation {
-  };
+  }
 
   private final String formatted;
 
@@ -34,7 +34,7 @@ public class ScimName {
   private final String honorificSuffix;
 
   @JsonCreator
-  private ScimName(@JsonProperty("givenName") String givenName,
+  private ScimName(@JsonProperty("GIVEN_NAME") String givenName,
       @JsonProperty("familyName") String familyName, @JsonProperty("middleName") String middleName,
       @JsonProperty("honorificPrefix") String honorificPrefix,
       @JsonProperty("honorificSuffix") String honorificSuffix) {

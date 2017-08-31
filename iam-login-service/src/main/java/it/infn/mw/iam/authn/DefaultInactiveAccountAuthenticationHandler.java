@@ -24,18 +24,18 @@ public class DefaultInactiveAccountAuthenticationHandler
 
   EnumSet<IamRegistrationRequestStatus> ongoingStatus = EnumSet.of(NEW, CONFIRMED);
 
-  public final String WAITING_CONFIRMATION_MSG;
-  public final String WAITING_APPROVAL_MSG;
+  public final String waitingConfirmationMsg;
+  public final String waitingApprovalMsg;
 
   @Autowired
   public DefaultInactiveAccountAuthenticationHandler(IamProperties properties) {
     this.iamProps = properties;
 
-    WAITING_CONFIRMATION_MSG = String.format("Your registration request to %s was submitted "
+    waitingConfirmationMsg = String.format("Your registration request to %s was submitted "
         + "successfully, but you haven't confirmed it yet. Check your inbox, you should have received a message with "
         + "a confirmation URL", iamProps.getOrganisationName());
 
-    WAITING_APPROVAL_MSG =
+    waitingApprovalMsg =
         String.format("Your registration request to %s was submitted and confirmed successfully, "
             + "and is now waiting for administrator approval. As soon as your request is approved you will receive a "
             + "confirmation email", iamProps.getOrganisationName());
@@ -43,13 +43,8 @@ public class DefaultInactiveAccountAuthenticationHandler
 
   protected boolean hasOngoingRegistrationRequest(IamAccount account) {
 
-    if (account.getRegistrationRequest() != null) {
-      if (ongoingStatus.contains(account.getRegistrationRequest().getStatus())) {
-        return true;
-      }
-    }
-
-    return false;
+    return (account.getRegistrationRequest() != null
+        && ongoingStatus.contains(account.getRegistrationRequest().getStatus()));
 
   }
 
@@ -81,11 +76,11 @@ public class DefaultInactiveAccountAuthenticationHandler
     if (hasOngoingRegistrationRequest(account)) {
 
       if (requestWaitingForUserConfirmation(account)) {
-        raiseAuthenticationError(WAITING_CONFIRMATION_MSG);
+        raiseAuthenticationError(waitingConfirmationMsg);
       }
 
       if (requestWaitingForAdminApproval(account)) {
-        raiseAuthenticationError(WAITING_APPROVAL_MSG);
+        raiseAuthenticationError(waitingApprovalMsg);
       }
     }
 

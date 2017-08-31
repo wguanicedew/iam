@@ -51,7 +51,7 @@ public class WithMockOAuth2SecurityContextFactory
 
       userAuth.setSourceClass(SamlExternalAuthenticationToken.class.getName());
       additionalInfo.put("type", "saml");
-      additionalInfo.put("epuid", "epuid");
+      additionalInfo.put("EPUID", "EPUID");
       additionalInfo.put("ipdId", "idpid");
     }
 

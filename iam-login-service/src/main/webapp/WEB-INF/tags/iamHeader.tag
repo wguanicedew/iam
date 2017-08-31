@@ -32,9 +32,10 @@
   rel="stylesheet"
   href="resources/iam/css/ionicons/ionicons.min.css"></link>
 
+ 
 <link
   rel="stylesheet"
-  href="<c:url value='/webjars/font-awesome/css/font-awesome.css'/>"></link>
+  href="/webjars/font-awesome/css/font-awesome.css"></link> 
 
 <link
   rel="stylesheet"
@@ -55,6 +56,13 @@
 var _accountLinkingMessage = "${accountLinkingMessage}";
 var _accountLinkingError = "${accountLinkingError}";
 
+function getUserX509CertficateSubject() {
+	return '${sessionScope.IAM_X509_CRED.subject}';
+}
+
+function getUserX509CertficateIssuer() {
+	  return '${sessionScope.IAM_X509_CRED.issuer}';
+}
 //get the info of the currently authenticated user, if available (null otherwise)
 function getUserInfo() {
   return ${userInfoJson};
@@ -75,6 +83,10 @@ function getIamGitCommitId() {
 
 function getRegistrationEnabled() {
   return ${loginPageConfiguration.registrationEnabled};
+}
+
+function getAccountLinkingEnabled() {
+    return ${loginPageConfiguration.accountLinkingEnabled};
 }
 
 function getOrganisationName() {

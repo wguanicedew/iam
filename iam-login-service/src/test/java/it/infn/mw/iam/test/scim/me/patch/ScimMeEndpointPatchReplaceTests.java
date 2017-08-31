@@ -1,267 +1,156 @@
 package it.infn.mw.iam.test.scim.me.patch;
 
-import static it.infn.mw.iam.test.TestUtils.passwordTokenGetter;
-import static org.hamcrest.CoreMatchers.containsString;
+import static it.infn.mw.iam.api.scim.model.ScimPatchOperation.ScimPatchOperationType.replace;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertThat;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-import org.junit.After;
-import org.junit.Assert;
+import java.util.List;
+
 import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.boot.test.WebIntegrationTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.google.common.collect.Lists;
 
 import it.infn.mw.iam.IamLoginService;
-import it.infn.mw.iam.api.scim.model.ScimEmail;
-import it.infn.mw.iam.api.scim.model.ScimName;
+import it.infn.mw.iam.api.scim.model.ScimPatchOperation;
 import it.infn.mw.iam.api.scim.model.ScimPhoto;
 import it.infn.mw.iam.api.scim.model.ScimUser;
-import it.infn.mw.iam.api.scim.model.ScimUserPatchRequest;
-import it.infn.mw.iam.test.ScimRestUtils;
-import it.infn.mw.iam.test.TestUtils;
-import it.infn.mw.iam.test.util.JacksonUtils;
+import it.infn.mw.iam.api.scim.provisioning.ScimUserProvisioning;
+import it.infn.mw.iam.test.core.CoreControllerTestSupport;
+import it.infn.mw.iam.test.scim.ScimRestUtilsMvc;
+import it.infn.mw.iam.test.util.WithMockOAuthUser;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = IamLoginService.class)
-@WebIntegrationTest
-public class ScimMeEndpointPatchReplaceTests {
+@SpringApplicationConfiguration(
+    classes = {IamLoginService.class, CoreControllerTestSupport.class, ScimRestUtilsMvc.class})
+@WebAppConfiguration
+@Transactional
+@WithMockOAuthUser(user = "test_105", authorities = {"ROLE_USER"})
+public class ScimMeEndpointPatchReplaceTests extends ScimMeEndpointUtils {
 
-  private ScimRestUtils adminRestUtils;
-  private ScimRestUtils userRestUtils;
-  private ScimUser testUser;
-
-  final String ANOTHERUSER_USERNAME = "test";
-  final ScimEmail ANOTHERUSER_EMAIL = ScimEmail.builder().email("test@iam.test").build();
-
-  final String TESTUSER_USERNAME = "patchReplaceUser";
-  final String TESTUSER_PASSWORD = "password";
-  final ScimName TESTUSER_NAME = ScimName.builder().givenName("John").familyName("Lennon").build();
-  final ScimEmail TESTUSER_EMAIL = ScimEmail.builder().email("john.lennon@liverpool.uk").build();
-  final ScimPhoto TESTUSER_PHOTO = ScimPhoto.builder().value("http://site.org/user.png").build();
-
-  @BeforeClass
-  public static void init() {
-
-    JacksonUtils.initRestAssured();
-  }
+  @Autowired
+  private ScimRestUtilsMvc scimUtils;
+  @Autowired
+  private ScimUserProvisioning provider;
 
   @Before
-  public void testSetup() {
+  public void init() throws Exception {
 
-    adminRestUtils = ScimRestUtils
-      .getInstance(TestUtils.getAccessToken("scim-client-rw", "secret", "scim:read scim:write"));
+    String uuid = scimUtils.getMe().getId();
 
-    testUser = adminRestUtils
-      .doPost("/scim/Users/",
-          ScimUser.builder()
-            .active(true)
-            .userName(TESTUSER_USERNAME)
-            .password(TESTUSER_PASSWORD)
-            .addEmail(TESTUSER_EMAIL)
-            .name(TESTUSER_NAME)
-            .addPhoto(TESTUSER_PHOTO)
-            .build())
-      .extract().as(ScimUser.class);
+    ScimUser updates = ScimUser.builder()
+      .buildPhoto("http://site.org/user.png")
+      .addOidcId(TESTUSER_OIDCID)
+      .addSamlId(TESTUSER_SAMLID)
+      .addX509Certificate(TESTUSER_X509CERT)
+      .addSshKey(TESTUSER_SSHKEY)
+      .build();
 
-    userRestUtils = ScimRestUtils.getInstance(passwordTokenGetter().username(TESTUSER_USERNAME)
-      .password(TESTUSER_PASSWORD)
-      .getAccessToken());
-  }
-
-  @After
-  public void testTeardown() {
-
-    adminRestUtils.doDelete(testUser.getMeta().getLocation());
-  }
-
-  private ScimUser doGet() {
-
-    return userRestUtils.doGet("/scim/Me").extract().as(ScimUser.class);
-  }
-
-  private void doPatch(ScimUserPatchRequest patchRequest) {
-
-    userRestUtils.doPatch("/scim/Me", patchRequest);
+    List<ScimPatchOperation<ScimUser>> operations = Lists.newArrayList();
+    operations.add(new ScimPatchOperation.Builder<ScimUser>().add().value(updates).build());
+    provider.update(uuid, operations);
   }
 
   @Test
-  @Ignore
-  public void testPatchReplacePassword() {
+  public void testPatchReplacePasswordNotSupported() throws Exception {
 
     final String NEW_PASSWORD = "newpassword";
 
-    ScimUserPatchRequest patchRequest = ScimUserPatchRequest.builder()
-      .replace(ScimUser.builder().password(NEW_PASSWORD).build())
-      .build();
+    ScimUser updates = ScimUser.builder().password(NEW_PASSWORD).build();
 
-    doPatch(patchRequest);
-
-    // Verify that password has been changed
-    passwordTokenGetter().username(TESTUSER_USERNAME).password(NEW_PASSWORD).getAccessToken();
+    scimUtils.patchMe(replace, updates, HttpStatus.BAD_REQUEST);
   }
 
   @Test
-  @Ignore
-  public void testPatchReplacePasswordNoUpdates() {
+  public void testPatchReplaceGivenAndFamilyName() throws Exception {
 
-    ScimUserPatchRequest patchRequest = ScimUserPatchRequest.builder()
-      .replace(ScimUser.builder().password(TESTUSER_PASSWORD).build())
-      .build();
+    ScimUser updates = ScimUser.builder().name(TESTUSER_NEWNAME).build();
 
-    doPatch(patchRequest);
+    scimUtils.patchMe(replace, updates);
 
-    passwordTokenGetter().username(TESTUSER_USERNAME).password(TESTUSER_PASSWORD).getAccessToken();
+    ScimUser userAfter = scimUtils.getMe();
+
+    assertThat(userAfter.getName().getGivenName(), equalTo(updates.getName().getGivenName()));
+    assertThat(userAfter.getName().getFamilyName(), equalTo(updates.getName().getFamilyName()));
   }
 
   @Test
-  public void testPatchReplaceGivenAndFamilyName() {
 
-    ScimName name =
-        ScimName.builder().givenName("John").familyName("Kennedy").build();
+  public void testPatchReplacePicture() throws Exception {
 
-    ScimUserPatchRequest patchRequest =
-        ScimUserPatchRequest.builder().replace(ScimUser.builder().name(name).build()).build();
+    ScimUser updates = ScimUser.builder().addPhoto(TESTUSER_NEWPHOTO).build();
 
-    doPatch(patchRequest);
+    scimUtils.patchMe(replace, updates);
 
-    ScimName updatedName = doGet().getName();
+    ScimPhoto updatedPhoto = scimUtils.getMe().getPhotos().get(0);
 
-    Assert.assertTrue(updatedName.equals(name));
+    assertThat(updatedPhoto, equalTo(TESTUSER_NEWPHOTO));
   }
 
   @Test
-  public void testPatchReplaceNameNoUpdates() {
 
-    ScimUserPatchRequest patchRequest = ScimUserPatchRequest.builder()
-      .replace(ScimUser.builder().name(TESTUSER_NAME).build())
-      .build();
+  public void testPatchReplaceEmail() throws Exception {
 
-    doPatch(patchRequest);
+    ScimUser updates = ScimUser.builder().addEmail(TESTUSER_NEWEMAIL).build();
 
-    ScimName updatedName = doGet().getName();
+    scimUtils.patchMe(replace, updates);
 
-    Assert.assertTrue(updatedName.equals(TESTUSER_NAME));
+    ScimUser updatedUser = scimUtils.getMe();
+
+    assertThat(updatedUser.getEmails().get(0), equalTo(TESTUSER_NEWEMAIL));
   }
 
   @Test
-  public void testPatchReplacePicture() {
+  public void testPatchReplaceAlreadyUsedEmail() throws Exception {
 
-    final ScimPhoto newPhoto = ScimPhoto.builder().value("http://site.org/user2.png").build();
+    ScimUser updates = ScimUser.builder().addEmail(ANOTHERUSER_EMAIL).build();
 
-    final ScimUserPatchRequest patchRequest =
-        ScimUserPatchRequest.builder().add(ScimUser.builder().addPhoto(newPhoto).build()).build();
-
-    doPatch(patchRequest);
-
-    ScimPhoto updatedPhoto = doGet().getPhotos().get(0);
-
-    Assert.assertTrue(updatedPhoto.equals(newPhoto));
+    scimUtils.patchMe(replace, updates, HttpStatus.CONFLICT)
+      .andExpect(jsonPath("$.detail", containsString("already bound to another user")));
   }
 
   @Test
-  public void testPatchReplacePictureNoUpdates() {
+  public void testPatchReplaceOidcIdNotSupported() throws Exception {
 
-    ScimUserPatchRequest patchRequest = ScimUserPatchRequest.builder()
-      .replace(ScimUser.builder().addPhoto(TESTUSER_PHOTO).build())
-      .build();
+    ScimUser updates = ScimUser.builder().addOidcId(TESTUSER_OIDCID).build();
 
-    doPatch(patchRequest);
-
-    ScimPhoto updatedPhoto = doGet().getPhotos().get(0);
-
-    Assert.assertTrue(updatedPhoto.equals(TESTUSER_PHOTO));
+    scimUtils.patchMe(replace, updates, HttpStatus.BAD_REQUEST)
+      .andExpect(jsonPath("$.detail", containsString("replace operation not supported")));
   }
 
   @Test
-  public void testPatchReplaceEmail() {
+  public void testPatchReplaceSamlIdNotSupported() throws Exception {
 
-    final ScimEmail email = ScimEmail.builder().email("john.kennedy@washington.us").build();
+    ScimUser updates = ScimUser.builder().addSamlId(TESTUSER_SAMLID).build();
 
-    final ScimUserPatchRequest patchRequest =
-        ScimUserPatchRequest.builder().replace(ScimUser.builder().addEmail(email).build()).build();
-
-    doPatch(patchRequest);
-
-    ScimEmail updatedEmail = doGet().getEmails().get(0);
-
-    Assert.assertTrue(updatedEmail.equals(email));
+    scimUtils.patchMe(replace, updates, HttpStatus.BAD_REQUEST)
+      .andExpect(jsonPath("$.detail", containsString("replace operation not supported")));
   }
 
   @Test
-  public void testPatchReplaceAlreadyUsedEmail() {
+  public void testPatchReplaceX509CertificateNotSupported() throws Exception {
 
-    final ScimUserPatchRequest patchRequest = ScimUserPatchRequest.builder()
-      .replace(ScimUser.builder().addEmail(ANOTHERUSER_EMAIL).build())
-      .build();
+    ScimUser updates = ScimUser.builder().addX509Certificate(TESTUSER_X509CERT).build();
 
-    userRestUtils.doPatch(testUser.getMeta().getLocation(), patchRequest, HttpStatus.CONFLICT)
-      .body("status", equalTo("409"))
-      .body("detail", containsString("already bound to another user"));
+    scimUtils.patchMe(replace, updates, HttpStatus.BAD_REQUEST)
+      .andExpect(jsonPath("$.detail", containsString("replace operation not supported")));
   }
 
   @Test
-  public void testPatchReplaceEmailNoUpdates() {
+  public void testPatchReplaceSshKeyNotSupported() throws Exception {
 
-    final ScimUserPatchRequest patchRequest = ScimUserPatchRequest.builder()
-      .replace(ScimUser.builder().addEmail(TESTUSER_EMAIL).build())
-      .build();
+    ScimUser updates = ScimUser.builder().addSshKey(TESTUSER_SSHKEY).build();
 
-    doPatch(patchRequest);
-
-    ScimEmail updatedEmail = doGet().getEmails().get(0);
-
-    Assert.assertTrue(updatedEmail.equals(TESTUSER_EMAIL));
-  }
-
-  @Test
-  public void testPatchReplaceAll() {
-
-    final ScimName NEW_NAME =
-        ScimName.builder().givenName("John").familyName("Kennedy").build();
-
-    final ScimEmail NEW_EMAIL = ScimEmail.builder().email("john.kennedy@washington.us").build();
-    final ScimPhoto NEW_PHOTO =
-        ScimPhoto.builder().value("http://notarealurl.com/image.jpg").build();
-
-    final ScimUserPatchRequest patchRequest = ScimUserPatchRequest.builder()
-      .replace(ScimUser.builder()
-        .name(NEW_NAME)
-        .addEmail(NEW_EMAIL)
-        .addPhoto(NEW_PHOTO)
-        .build())
-      .build();
-
-    doPatch(patchRequest);
-
-    ScimUser updatedUser = doGet();
-
-    Assert.assertTrue(updatedUser.getName().equals(NEW_NAME));
-    Assert.assertTrue(updatedUser.getPhotos().get(0).equals(NEW_PHOTO));
-    Assert.assertTrue(updatedUser.getEmails().get(0).equals(NEW_EMAIL));
-  }
-
-  @Test
-  public void testPatchReplaceAllNoUpdates() {
-
-    final ScimUserPatchRequest patchRequest = ScimUserPatchRequest.builder()
-      .replace(ScimUser.builder()
-        .name(TESTUSER_NAME)
-        .addEmail(TESTUSER_EMAIL)
-        .addPhoto(TESTUSER_PHOTO)
-        .build())
-      .build();
-
-    doPatch(patchRequest);
-
-    ScimUser updatedUser = doGet();
-
-    Assert.assertTrue(updatedUser.getName().equals(TESTUSER_NAME));
-    Assert.assertTrue(updatedUser.getPhotos().get(0).equals(TESTUSER_PHOTO));
-    Assert.assertTrue(updatedUser.getEmails().get(0).equals(TESTUSER_EMAIL));
+    scimUtils.patchMe(replace, updates, HttpStatus.BAD_REQUEST)
+      .andExpect(jsonPath("$.detail", containsString("replace operation not supported")));
   }
 }
