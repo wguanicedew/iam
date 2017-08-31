@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0 (2017-8-xx)
+## 1.0.0 (2017-8-31)
 
 This release provides improvements, bug fixes and new features:
 
@@ -14,6 +14,8 @@ This release provides improvements, bug fixes and new features:
   users from a trusted IdP/federation after a succesfull external
   authentication (i.e. no former registration or administration approval is
   required to on-board users) (#130)
+- IAM now provides an enhanced token management and revocation API that can be
+  used by IAM administrators to see and revoke active tokens in the system (#121)
 - Account linking can be now be disabled via a configuration option (#142)
 - IAM dashboard now correctly displays valid active access tokens for a user
   (#112) 
@@ -36,7 +38,8 @@ This release provides improvements, bug fixes and new features:
 - Starting from this release, we provide RPM and Deb packages (#110) and a
   puppet module to configure the IAM service (#109)
 - The spring-boot dependency has been updated to version 1.3.8.RELEASE (#144)
-
+- An issue that prevented access to the token revocation endpoint has been
+  fixed (#159)
 
 ## 0.6.0 (2017-3-31)
 
