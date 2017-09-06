@@ -16,6 +16,7 @@ import java.util.UUID;
 import javax.transaction.Transactional;
 
 import org.hamcrest.Matchers;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,6 +46,7 @@ import it.infn.mw.iam.persistence.repository.IamScopePolicyRepository;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 import it.infn.mw.iam.test.repository.ScopePolicyTestUtils;
 import it.infn.mw.iam.test.util.WithMockOAuthUser;
+import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class})
@@ -63,6 +65,7 @@ public class ScopePolicyApiIntegrationTests extends ScopePolicyTestUtils {
 
   @Autowired
   private IamScopePolicyRepository scopePolicyRepo;
+  
 
   @Autowired
   private ScimResourceLocationProvider locationProvider;
@@ -71,6 +74,8 @@ public class ScopePolicyApiIntegrationTests extends ScopePolicyTestUtils {
   @Autowired
   private ObjectMapper mapper;
 
+  @Autowired
+  private MockOAuth2Filter mockOAuth2Filter;
 
   private MockMvc mvc;
 
@@ -82,10 +87,16 @@ public class ScopePolicyApiIntegrationTests extends ScopePolicyTestUtils {
       .build();
   }
 
+  @After
+  public void cleanupOAuthUser() {
+    mockOAuth2Filter.cleanupSecurityContext();
+  }
+  
   @Test
   public void listPolicyRequiresFullAuthenticationTest() throws Exception {
 
-    mvc.perform(get("/iam/scope_policies")).andExpect(status().isUnauthorized());
+    mvc.perform(get("/iam/scope_policies"))
+      .andExpect(status().isUnauthorized());
 
   }
 
@@ -292,7 +303,7 @@ public class ScopePolicyApiIntegrationTests extends ScopePolicyTestUtils {
 
     assertThat(scopePolicyRepo.count(), equalTo(2L));
   }
-  
+
   @Test
   @WithMockOAuthUser(user = "admin", authorities = {"ROLE_USER", "ROLE_ADMIN"})
   public void testDefaultPolicyCreationNoScopes() throws Exception {
@@ -345,76 +356,100 @@ public class ScopePolicyApiIntegrationTests extends ScopePolicyTestUtils {
       .andExpect(jsonPath("$[0].account.location")
         .value(equalTo(locationProvider.userLocation(testAccount.getUuid()))));
   }
+
+  @Test
+  @WithMockOAuthUser(user = "admin", authorities = {"ROLE_USER", "ROLE_ADMIN"})
+  public void testGroupPolicyCreation() throws Exception {
+    // Cleanup all policies
+    scopePolicyRepo.deleteAll();
+
+    assertThat(scopePolicyRepo.count(), equalTo(0L));
+
+    IamGroup analysisGroup = groupRepo.findByName("Analysis")
+      .orElseThrow(() -> new AssertionError("Expected Analysis group not found"));
+
+    ScopePolicyDTO sp = new ScopePolicyDTO();
+    sp.setRule(IamScopePolicy.Rule.DENY.name());
+    sp.setScopes(Sets.newHashSet("scim:read", "scim:write"));
+
+    IamGroupRefDTO groupRef = new IamGroupRefDTO();
+    groupRef.setUuid(analysisGroup.getUuid());
+    sp.setGroup(groupRef);
+
+    String serializedSp = mapper.writeValueAsString(sp);
+    mvc.perform(post("/iam/scope_policies").content(serializedSp).contentType(APPLICATION_JSON))
+      .andExpect(status().isCreated());
+
+    mvc.perform(get("/iam/scope_policies"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$").isArray())
+      .andExpect(jsonPath("$").value(Matchers.hasSize(1)))
+      .andExpect(jsonPath("$[0].description").doesNotExist())
+      .andExpect(jsonPath("$[0].account").doesNotExist())
+      .andExpect(jsonPath("$[0].group").exists())
+      .andExpect(jsonPath("$[0].group.name").value(equalTo(analysisGroup.getName())))
+      .andExpect(jsonPath("$[0].group.uuid").value(equalTo(analysisGroup.getUuid())))
+      .andExpect(jsonPath("$[0].group.location")
+        .value(equalTo(locationProvider.groupLocation(analysisGroup.getUuid()))))
+      .andExpect(jsonPath("$[0].scopes").value(Matchers.hasItems("scim:read", "scim:write")));
+  }
+
+  @Test
+  @WithMockOAuthUser(user = "admin", authorities = {"ROLE_USER", "ROLE_ADMIN"})
+  public void testScopePolicyDeletion() throws Exception {
+    mvc.perform(MockMvcRequestBuilders.delete("/iam/scope_policies/1"))
+      .andExpect(status().isNoContent());
+
+    mvc.perform(get("/iam/scope_policies"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$").isArray())
+      .andExpect(jsonPath("$").value(Matchers.hasSize(0)));
+
+    mvc.perform(MockMvcRequestBuilders.delete("/iam/scope_policies/1"))
+      .andExpect(status().isNotFound())
+      .andExpect(jsonPath("$.error").exists())
+      .andExpect(jsonPath("$.error").value("No scope policy found for id: 1"));
+  }
+
+  @Test
+  @WithMockOAuthUser(user = "admin", authorities = {"ROLE_USER", "ROLE_ADMIN"})
+  public void testScopePolicyAccess() throws Exception {
+
+    mvc.perform(get("/iam/scope_policies/1"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.description").exists())
+      .andExpect(jsonPath("$.description").value("Default Permit ALL policy"));
+
+    scopePolicyRepo.deleteAll();
+
+    mvc.perform(get("/iam/scope_policies/1"))
+      .andExpect(status().isNotFound())
+      .andExpect(jsonPath("$.error").exists())
+      .andExpect(jsonPath("$.error").value("No scope policy found for id: 1"));
+
+  }
   
   @Test
   @WithMockOAuthUser(user = "admin", authorities = {"ROLE_USER", "ROLE_ADMIN"})
-  public void testGroupPolicyCreation() throws Exception{
-    // Cleanup all policies
-    scopePolicyRepo.deleteAll();
-    
-    assertThat(scopePolicyRepo.count(), equalTo(0L));
-    
-    IamGroup analysisGroup = groupRepo.findByName("Analysis")
-        .orElseThrow(() -> new AssertionError("Expected Analysis group not found"));
+  public void testScopeCascade() throws Exception {
     
     ScopePolicyDTO sp = new ScopePolicyDTO();
     sp.setRule(IamScopePolicy.Rule.DENY.name());
     sp.setScopes(Sets.newHashSet("scim:read", "scim:write"));
     
-    IamGroupRefDTO groupRef = new IamGroupRefDTO();
-    groupRef.setUuid(analysisGroup.getUuid());
-    sp.setGroup(groupRef);
-    
     String serializedSp = mapper.writeValueAsString(sp);
     mvc.perform(post("/iam/scope_policies").content(serializedSp).contentType(APPLICATION_JSON))
       .andExpect(status().isCreated());
+
+    sp = new ScopePolicyDTO();
+    sp.setRule(IamScopePolicy.Rule.PERMIT.name());
+    sp.setScopes(Sets.newHashSet("scim:read", "scim:write"));
     
-    mvc.perform(get("/iam/scope_policies"))
-    .andExpect(status().isOk())
-    .andExpect(jsonPath("$").isArray())
-    .andExpect(jsonPath("$").value(Matchers.hasSize(1)))
-    .andExpect(jsonPath("$[0].description").doesNotExist())
-    .andExpect(jsonPath("$[0].account").doesNotExist())
-    .andExpect(jsonPath("$[0].group").exists())
-    .andExpect(jsonPath("$[0].group.name").value(equalTo(analysisGroup.getName())))
-    .andExpect(jsonPath("$[0].group.uuid").value(equalTo(analysisGroup.getUuid())))
-    .andExpect(jsonPath("$[0].group.location")
-        .value(equalTo(locationProvider.groupLocation(analysisGroup.getUuid()))))
-    .andExpect(jsonPath("$[0].scopes").value(Matchers.hasItems("scim:read", "scim:write"))); 
-  }
-  
-  @Test
-  @WithMockOAuthUser(user = "admin", authorities = {"ROLE_USER", "ROLE_ADMIN"})
-  public void testScopePolicyDeletion() throws Exception{
-    mvc.perform(MockMvcRequestBuilders.delete("/iam/scope_policies/1"))
-      .andExpect(status().isNoContent());
+    serializedSp = mapper.writeValueAsString(sp);
+    mvc.perform(post("/iam/scope_policies").content(serializedSp).contentType(APPLICATION_JSON))
+      .andExpect(status().isCreated());
     
-    mvc.perform(get("/iam/scope_policies"))
-    .andExpect(status().isOk())
-    .andExpect(jsonPath("$").isArray())
-    .andExpect(jsonPath("$").value(Matchers.hasSize(0)));
+    assertThat(scopePolicyRepo.count(), equalTo(3L));
     
-    mvc.perform(MockMvcRequestBuilders.delete("/iam/scope_policies/1"))
-    .andExpect(status().isNotFound())
-    .andExpect(jsonPath("$.error").exists())
-    .andExpect(jsonPath("$.error").value("No scope policy found for id: 1"));
-  }
-  
-  @Test
-  @WithMockOAuthUser(user = "admin", authorities = {"ROLE_USER", "ROLE_ADMIN"})
-  public void testScopePolicyAccess() throws Exception{
-    
-    mvc.perform(get("/iam/scope_policies/1"))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$.description").exists())
-      .andExpect(jsonPath("$.description").value("Default Permit ALL policy"));
-     
-    scopePolicyRepo.deleteAll();
-    
-    mvc.perform(get("/iam/scope_policies/1"))
-    .andExpect(status().isNotFound())
-    .andExpect(jsonPath("$.error").exists())
-    .andExpect(jsonPath("$.error").value("No scope policy found for id: 1"));
-      
   }
 }

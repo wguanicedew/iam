@@ -24,6 +24,7 @@ import com.google.common.collect.Sets;
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamGroup;
+import it.infn.mw.iam.persistence.model.IamScope;
 import it.infn.mw.iam.persistence.model.IamScopePolicy;
 import it.infn.mw.iam.persistence.model.IamScopePolicy.Rule;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
@@ -85,6 +86,50 @@ public class IamScopePolicyRepositoryTests extends ScopePolicyTestUtils {
     assertThat(defaultPolicies, hasSize(3));
   }
 
+  @Test
+  public void testScopeCascadeWorks(){
+    
+    IamScopePolicy policy = initDenyScopePolicy();
+    policy.setScopes(Sets.newHashSet(SCIM_READ_SCOPE, SCIM_WRITE_SCOPE));
+    policyRepo.save(policy);
+    
+    IamScopePolicy policy2 = initDenyScopePolicy();
+    policy2.setScopes(Sets.newHashSet(SCIM_READ_SCOPE, SCIM_READ_SCOPE)); // this policy is redundant
+    policyRepo.save(policy2);
+    
+    assertThat(scopeRepo.count(), equalTo(2L));
+    
+    List<IamScopePolicy> defaultPolicies = policyRepo.findDefaultPolicies();
+
+    assertThat(defaultPolicies, not(empty()));
+    assertThat(defaultPolicies, hasSize(3));
+    
+  }
+  
+  @Test
+  public void testUnlinkedScopeRemovalWorks(){
+    
+    IamScopePolicy policy = initDenyScopePolicy();
+    policy.setScopes(Sets.newHashSet(SCIM_READ_SCOPE));
+    policy = policyRepo.save(policy);
+    
+    IamScopePolicy policy2 = initDenyScopePolicy();
+    policy2.setScopes(Sets.newHashSet(SCIM_WRITE_SCOPE, SCIM_READ_SCOPE)); // this policy is redundant
+    policyRepo.save(policy2);
+    
+    assertThat(scopeRepo.count(), equalTo(2L));
+    
+    policyRepo.delete(policy);
+    
+    assertThat(scopeRepo.count(), equalTo(2L));
+    
+    List<IamScope> unlinkedScopes = scopeRepo.findUnlinkedScopes();
+    
+    assertThat(unlinkedScopes, hasSize(1));
+    assertThat(unlinkedScopes, hasItem(SCIM_READ_SCOPE));
+    
+  }
+  
   @Test
   public void testGroupPolicyCreationWorks() {
 
@@ -184,5 +229,6 @@ public class IamScopePolicyRepositoryTests extends ScopePolicyTestUtils {
     assertThat(policies, hasSize(0));
 
   }
+  
 
 }

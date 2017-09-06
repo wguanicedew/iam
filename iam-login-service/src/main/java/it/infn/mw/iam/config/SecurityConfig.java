@@ -706,6 +706,12 @@ public class SecurityConfig {
     @Autowired
     private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
 
+    @Autowired
+    private OAuth2AuthenticationProcessingFilter resourceFilter;
+
+    @Autowired
+    private CorsFilter corsFilter;
+    
     @Override
     protected void configure(HttpSecurity http) throws Exception {
       http.requestMatchers()
@@ -714,6 +720,8 @@ public class SecurityConfig {
         .exceptionHandling()
         .authenticationEntryPoint(authenticationEntryPoint)
         .and()
+        .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
+        .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
         .sessionManagement()
         .sessionCreationPolicy(SessionCreationPolicy.NEVER)
         .and()

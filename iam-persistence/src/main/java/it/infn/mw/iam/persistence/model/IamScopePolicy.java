@@ -70,7 +70,7 @@ public class IamScopePolicy implements Serializable {
   @JoinColumn(name = "account_id")
   private IamAccount account;
 
-  @ManyToMany(cascade = CascadeType.PERSIST)
+  @ManyToMany(cascade={CascadeType.MERGE, CascadeType.PERSIST})
   @JoinTable(name = "iam_scope_policy_scope",
       joinColumns = @JoinColumn(name = "policy_id", referencedColumnName = "id"),
       inverseJoinColumns = @JoinColumn(name = "scope_id", referencedColumnName = "id"))

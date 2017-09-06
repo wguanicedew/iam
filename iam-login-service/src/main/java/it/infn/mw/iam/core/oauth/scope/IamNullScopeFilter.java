@@ -3,7 +3,7 @@ package it.infn.mw.iam.core.oauth.scope;
 import java.util.Set;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -15,7 +15,7 @@ public class IamNullScopeFilter implements IamScopeFilter {
   }
 
   @Override
-  public void filterScopes(Set<String> scopes, OAuth2Authentication authn) {
+  public void filterScopes(Set<String> scopes, Authentication authn) {
     // do nothing
   }
 

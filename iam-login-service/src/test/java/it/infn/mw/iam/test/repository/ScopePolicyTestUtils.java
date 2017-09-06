@@ -2,6 +2,10 @@ package it.infn.mw.iam.test.repository;
 
 import java.util.Date;
 
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.AuthorityUtils;
+
 import it.infn.mw.iam.persistence.model.IamScope;
 import it.infn.mw.iam.persistence.model.IamScopePolicy;
 import it.infn.mw.iam.persistence.model.IamScopePolicy.Rule;
@@ -37,6 +41,11 @@ public class ScopePolicyTestUtils {
     IamScopePolicy p = initScopePolicy();
     p.setRule(Rule.PERMIT);
     return p;
+  }
+  
+  public Authentication anonymousAuthenticationToken() {
+    return new AnonymousAuthenticationToken("key", "anonymous",
+        AuthorityUtils.createAuthorityList("ROLE_ANONYMOUS"));
   }
 
 }

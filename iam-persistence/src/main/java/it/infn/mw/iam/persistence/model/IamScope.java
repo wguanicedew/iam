@@ -1,12 +1,15 @@
 package it.infn.mw.iam.persistence.model;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
 @Entity
@@ -25,13 +28,17 @@ public class IamScope implements Serializable{
   @Column(length = 256, nullable = false, unique = true)
   private String scope;
 
+  @ManyToMany(mappedBy="scopes")
+  Set<IamScopePolicy> policies = new HashSet<>(); 
+  
   public IamScope(String scope) {
     this.scope = scope;
   }
 
   public IamScope() {
-    // Auto-generated constructor stub
+    
   }
+  
   public String getScope() {
     return scope;
   }
@@ -46,6 +53,14 @@ public class IamScope implements Serializable{
 
   public void setId(Long id) {
     this.id = id;
+  }
+
+  public Set<IamScopePolicy> getPolicies() {
+    return policies;
+  }
+
+  public void setPolicies(Set<IamScopePolicy> policies) {
+    this.policies = policies;
   }
 
   @Override

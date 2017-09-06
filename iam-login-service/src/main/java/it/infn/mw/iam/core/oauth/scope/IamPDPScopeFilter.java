@@ -25,10 +25,18 @@ public class IamPDPScopeFilter implements IamScopeFilter {
     this.accountRepo = accountRepo;
   }
 
-  protected Optional<IamAccount> resolveIamAccount(OAuth2Authentication authn) {
+  protected Optional<IamAccount> resolveIamAccount(Authentication authn) {
     
-    Authentication userAuthn = authn.getUserAuthentication();
-
+    if (authn == null){
+      return Optional.empty();
+    }
+    
+    Authentication userAuthn = authn;
+    
+    if (authn instanceof OAuth2Authentication){
+      userAuthn = ((OAuth2Authentication) authn).getUserAuthentication();
+    }
+    
     if (userAuthn == null) {
       return Optional.empty();
     }
@@ -38,8 +46,8 @@ public class IamPDPScopeFilter implements IamScopeFilter {
   }
 
   @Override
-  public void filterScopes(Set<String> scopes, OAuth2Authentication authn) {
-
+  public void filterScopes(Set<String> scopes, Authentication authn) {
+    
     Optional<IamAccount> maybeAccount = resolveIamAccount(authn);
 
     if (maybeAccount.isPresent()) {
