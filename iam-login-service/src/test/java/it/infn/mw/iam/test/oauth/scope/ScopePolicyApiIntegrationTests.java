@@ -7,10 +7,12 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.List;
 import java.util.UUID;
 
 import javax.transaction.Transactional;
@@ -29,6 +31,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
 
@@ -65,7 +68,7 @@ public class ScopePolicyApiIntegrationTests extends ScopePolicyTestUtils {
 
   @Autowired
   private IamScopePolicyRepository scopePolicyRepo;
-  
+
 
   @Autowired
   private ScimResourceLocationProvider locationProvider;
@@ -91,12 +94,11 @@ public class ScopePolicyApiIntegrationTests extends ScopePolicyTestUtils {
   public void cleanupOAuthUser() {
     mockOAuth2Filter.cleanupSecurityContext();
   }
-  
+
   @Test
   public void listPolicyRequiresFullAuthenticationTest() throws Exception {
 
-    mvc.perform(get("/iam/scope_policies"))
-      .andExpect(status().isUnauthorized());
+    mvc.perform(get("/iam/scope_policies")).andExpect(status().isUnauthorized());
 
   }
 
@@ -428,15 +430,15 @@ public class ScopePolicyApiIntegrationTests extends ScopePolicyTestUtils {
       .andExpect(jsonPath("$.error").value("No scope policy found for id: 1"));
 
   }
-  
+
   @Test
   @WithMockOAuthUser(user = "admin", authorities = {"ROLE_USER", "ROLE_ADMIN"})
   public void testScopeCascade() throws Exception {
-    
+
     ScopePolicyDTO sp = new ScopePolicyDTO();
     sp.setRule(IamScopePolicy.Rule.DENY.name());
     sp.setScopes(Sets.newHashSet("scim:read", "scim:write"));
-    
+
     String serializedSp = mapper.writeValueAsString(sp);
     mvc.perform(post("/iam/scope_policies").content(serializedSp).contentType(APPLICATION_JSON))
       .andExpect(status().isCreated());
@@ -444,12 +446,168 @@ public class ScopePolicyApiIntegrationTests extends ScopePolicyTestUtils {
     sp = new ScopePolicyDTO();
     sp.setRule(IamScopePolicy.Rule.PERMIT.name());
     sp.setScopes(Sets.newHashSet("scim:read", "scim:write"));
-    
+
     serializedSp = mapper.writeValueAsString(sp);
     mvc.perform(post("/iam/scope_policies").content(serializedSp).contentType(APPLICATION_JSON))
       .andExpect(status().isCreated());
-    
+
     assertThat(scopePolicyRepo.count(), equalTo(3L));
-    
   }
+
+  @Test
+  @WithMockOAuthUser(user = "test", authorities = {"ROLE_USER"})
+  public void testDefaultPolicyUpdateFailsWithForbiddenForUnauthorizedUser() throws Exception {
+    ScopePolicyDTO sp = new ScopePolicyDTO();
+    sp.setRule(IamScopePolicy.Rule.DENY.name());
+    sp.setId(1L);
+
+    String serializedSp = mapper.writeValueAsString(sp);
+    mvc.perform(put("/iam/scope_policies/1").content(serializedSp).contentType(APPLICATION_JSON))
+      .andExpect(status().isForbidden());
+  }
+
+  @Test
+  public void testDefaultPolicyUpdateFailsWithAnonymousUser() throws Exception {
+    ScopePolicyDTO sp = new ScopePolicyDTO();
+    sp.setRule(IamScopePolicy.Rule.DENY.name());
+    sp.setId(1L);
+
+    String serializedSp = mapper.writeValueAsString(sp);
+    mvc.perform(put("/iam/scope_policies/1").content(serializedSp).contentType(APPLICATION_JSON))
+      .andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  @WithMockOAuthUser(user = "admin", authorities = {"ROLE_USER", "ROLE_ADMIN"})
+  public void testDefaultPolicyUpdate() throws Exception {
+    final String description = "DENY ALL!";
+
+    ScopePolicyDTO sp = new ScopePolicyDTO();
+    sp.setDescription(description);
+    sp.setRule(IamScopePolicy.Rule.DENY.name());
+    sp.setId(1L);
+
+    String serializedSp = mapper.writeValueAsString(sp);
+    mvc.perform(put("/iam/scope_policies/1").content(serializedSp).contentType(APPLICATION_JSON))
+      .andExpect(status().isNoContent());
+
+    mvc.perform(get("/iam/scope_policies/1"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.id", equalTo(1)))
+      .andExpect(jsonPath("$.rule", equalTo("DENY")))
+      .andExpect(jsonPath("$.description", equalTo(description)))
+      .andExpect(jsonPath("$.scopes").doesNotExist());
+
+  }
+  
+  @Test
+  @WithMockOAuthUser(user = "admin", authorities = {"ROLE_USER", "ROLE_ADMIN"})
+  public void testPolicyUpdateValidationError() throws Exception {
+    final String description = "DENY ALL!";
+
+    ScopePolicyDTO sp = new ScopePolicyDTO();
+    sp.setDescription(description);
+    // NO rule set
+    sp.setId(1L);
+
+    String serializedSp = mapper.writeValueAsString(sp);
+    mvc.perform(put("/iam/scope_policies/1").content(serializedSp).contentType(APPLICATION_JSON))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.error").value("Invalid scope policy: rule cannot be empty"));
+  }
+
+  @Test
+  @WithMockOAuthUser(user = "admin", authorities = {"ROLE_USER", "ROLE_ADMIN"})
+  public void testNonExistingPolicyUpdate() throws Exception {
+    final String description = "DENY ALL!";
+
+    ScopePolicyDTO sp = new ScopePolicyDTO();
+    sp.setDescription(description);
+    sp.setRule(IamScopePolicy.Rule.DENY.name());
+    sp.setId(10L);
+
+    String serializedSp = mapper.writeValueAsString(sp);
+    mvc.perform(put("/iam/scope_policies/10").content(serializedSp).contentType(APPLICATION_JSON))
+      .andExpect(status().isNotFound())
+      .andExpect(jsonPath("$.error").value("No scope policy found for id: 10"));
+
+  }
+
+  @Test
+  @WithMockOAuthUser(user = "admin", authorities = {"ROLE_USER", "ROLE_ADMIN"})
+  public void testEquivalentPolicyCreationNotAllowed() throws Exception {
+    IamGroup analysisGroup = groupRepo.findByName("Analysis")
+      .orElseThrow(() -> new AssertionError("Expected Analysis group not found"));
+
+    final String description = "DENY ALL!";
+
+    ScopePolicyDTO sp = new ScopePolicyDTO();
+    sp.setDescription(description);
+    sp.setRule(IamScopePolicy.Rule.DENY.name());
+
+    IamGroupRefDTO groupRef = new IamGroupRefDTO();
+    groupRef.setUuid(analysisGroup.getUuid());
+    sp.setGroup(groupRef);
+
+    String serializedSp = mapper.writeValueAsString(sp);
+    mvc.perform(post("/iam/scope_policies").content(serializedSp).contentType(APPLICATION_JSON))
+      .andExpect(status().isCreated());
+
+    mvc.perform(post("/iam/scope_policies").content(serializedSp).contentType(APPLICATION_JSON))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.error", startsWith("Duplicate policy error")));
+  }
+
+  @Test
+  @WithMockOAuthUser(user = "admin", authorities = {"ROLE_USER", "ROLE_ADMIN"})
+  public void testEquivalentPolicyUpdateNotAllowed() throws Exception {
+    IamGroup analysisGroup = groupRepo.findByName("Analysis")
+      .orElseThrow(() -> new AssertionError("Expected Analysis group not found"));
+
+    ScopePolicyDTO sp = new ScopePolicyDTO();
+    sp.setDescription("sp");
+    sp.setRule(IamScopePolicy.Rule.DENY.name());
+    sp.setScopes(Sets.newHashSet(SCIM_READ, SCIM_WRITE));
+
+    IamGroupRefDTO groupRef = new IamGroupRefDTO();
+    groupRef.setUuid(analysisGroup.getUuid());
+    sp.setGroup(groupRef);
+
+    String serializedSp = mapper.writeValueAsString(sp);
+    mvc.perform(post("/iam/scope_policies").content(serializedSp).contentType(APPLICATION_JSON))
+      .andExpect(status().isCreated());
+
+
+    ScopePolicyDTO sp2 = new ScopePolicyDTO();
+    sp2.setDescription("sp2");
+    sp2.setRule(IamScopePolicy.Rule.DENY.name());
+    sp2.setGroup(groupRef);
+
+    mvc.perform(post("/iam/scope_policies").content(mapper.writeValueAsString(sp2))
+      .contentType(APPLICATION_JSON)).andExpect(status().isCreated());
+    
+    // Resolve sp2 policy id
+    String result = mvc.perform(get("/iam/scope_policies"))
+      .andExpect(status().isOk())
+      .andReturn()
+      .getResponse()
+      .getContentAsString();
+
+    List<ScopePolicyDTO> policies =
+        mapper.readValue(result, new TypeReference<List<ScopePolicyDTO>>() {});
+
+    ScopePolicyDTO savedObject =
+        policies.stream().filter(p -> p.getDescription().equals("sp2")).findAny().orElseThrow(
+            () -> new AssertionError("Expected scope policy not found"));
+
+    sp2.setScopes(Sets.newHashSet(SCIM_READ));
+    
+    mvc
+      .perform(put("/iam/scope_policies/{id}", savedObject.getId())
+        .content(mapper.writeValueAsString(sp2)).contentType(APPLICATION_JSON))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.error", startsWith("Duplicate policy error")));
+
+  }
+
 }

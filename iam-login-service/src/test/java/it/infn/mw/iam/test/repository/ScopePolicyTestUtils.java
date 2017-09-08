@@ -6,7 +6,6 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
 
-import it.infn.mw.iam.persistence.model.IamScope;
 import it.infn.mw.iam.persistence.model.IamScopePolicy;
 import it.infn.mw.iam.persistence.model.IamScopePolicy.Rule;
 
@@ -16,13 +15,7 @@ public class ScopePolicyTestUtils {
   public static final String SCIM_WRITE = "scim:write";
   public static final String OPENID = "openid";
   public static final String PROFILE = "profile";
-  
-  public static final IamScope SCIM_READ_SCOPE = new IamScope(SCIM_READ); 
-  public static final IamScope SCIM_WRITE_SCOPE = new IamScope(SCIM_WRITE);
-  public static final IamScope OPENID_SCOPE = new IamScope(OPENID);
-  public static final IamScope PROFILE_SCOPE = new IamScope(PROFILE);
-  public static final IamScope WHATEVER_SCOPE = new IamScope("whatever");
-
+  public static final String WHATEVER = "whatever";
   
   private IamScopePolicy initScopePolicy() {
     Date now = new Date();

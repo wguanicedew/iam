@@ -29,7 +29,8 @@ public class ScopePolicyController {
   private final IamScopePolicyConverter converter;
 
   @Autowired
-  public ScopePolicyController(ScopePolicyService policyService, IamScopePolicyConverter converter) {
+  public ScopePolicyController(ScopePolicyService policyService,
+      IamScopePolicyConverter converter) {
     this.policyService = policyService;
     this.converter = converter;
   }
@@ -65,9 +66,23 @@ public class ScopePolicyController {
 
     IamScopePolicy p = policyService.findScopePolicyById(id)
       .orElseThrow(() -> new ScopePolicyNotFoundError("No scope policy found for id: " + id));
-    
+
     return converter.fromModel(p);
 
+  }
+
+  @RequestMapping(value = "/iam/scope_policies/{id}", method = RequestMethod.PUT)
+  @ResponseStatus(code = HttpStatus.NO_CONTENT)
+  public void updateScopePolicy(@PathVariable Long id,
+      @Valid @RequestBody ScopePolicyDTO policy, BindingResult validationResult) {
+
+    if (validationResult.hasErrors()) {
+      throw buildValidationError(validationResult);
+    }
+
+    policy.setId(id);
+    
+    policyService.updateScopePolicy(policy);
   }
 
   @RequestMapping(value = "/iam/scope_policies/{id}", method = RequestMethod.DELETE)
@@ -87,6 +102,12 @@ public class ScopePolicyController {
   @ResponseStatus(value = HttpStatus.BAD_REQUEST)
   @ExceptionHandler(InvalidScopePolicyError.class)
   public ErrorDTO validationError(Exception ex) {
+    return ErrorDTO.fromString(ex.getMessage());
+  }
+  
+  @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(DuplicateScopePolicyError.class)
+  public ErrorDTO duplicatePolicyError(Exception ex) {
     return ErrorDTO.fromString(ex.getMessage());
   }
 

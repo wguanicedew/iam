@@ -30,7 +30,6 @@ import com.google.common.collect.Sets;
 
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.persistence.model.IamAccount;
-import it.infn.mw.iam.persistence.model.IamScope;
 import it.infn.mw.iam.persistence.model.IamScopePolicy;
 import it.infn.mw.iam.persistence.model.IamScopePolicy.Rule;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
@@ -76,7 +75,7 @@ public class ScopePolicyFilteringIntegrationTests extends ScopePolicyTestUtils {
     IamScopePolicy up = initDenyScopePolicy();
     up.setAccount(testAccount);
     up.setRule(Rule.DENY);
-    up.setScopes(Sets.newHashSet(SCIM_READ_SCOPE));
+    up.setScopes(Sets.newHashSet(SCIM_READ));
 
     scopePolicyRepo.save(up);
 
@@ -126,7 +125,7 @@ public class ScopePolicyFilteringIntegrationTests extends ScopePolicyTestUtils {
     IamScopePolicy up = initDenyScopePolicy();
     up.setAccount(testAccount);
     up.setRule(Rule.DENY);
-    up.setScopes(Sets.newHashSet(new IamScope("read-tasks")));
+    up.setScopes(Sets.newHashSet("read-tasks"));
 
     scopePolicyRepo.save(up);
 

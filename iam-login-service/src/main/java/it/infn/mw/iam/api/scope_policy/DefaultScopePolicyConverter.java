@@ -8,29 +8,24 @@ import com.google.common.collect.Sets;
 import it.infn.mw.iam.api.scim.converter.ScimResourceLocationProvider;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamGroup;
-import it.infn.mw.iam.persistence.model.IamScope;
 import it.infn.mw.iam.persistence.model.IamScopePolicy;
 import it.infn.mw.iam.persistence.model.IamScopePolicy.Rule;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamGroupRepository;
-import it.infn.mw.iam.persistence.repository.IamScopeRepository;
 
 @Component
 public class DefaultScopePolicyConverter implements IamScopePolicyConverter {
 
   private final ScimResourceLocationProvider resourceLocationProvider;
   private final IamAccountRepository accountRepo;
-  private final IamScopeRepository scopeRepo;
   private final IamGroupRepository groupRepo;
 
   @Autowired
   public DefaultScopePolicyConverter(ScimResourceLocationProvider locationProvider,
-      IamAccountRepository accountRepo, IamGroupRepository groupRepo,
-      IamScopeRepository scopeRepo) {
+      IamAccountRepository accountRepo, IamGroupRepository groupRepo) {
     this.resourceLocationProvider = locationProvider;
     this.accountRepo = accountRepo;
     this.groupRepo = groupRepo;
-    this.scopeRepo = scopeRepo;
   }
 
   public ScopePolicyDTO fromModel(IamScopePolicy sp) {
@@ -44,7 +39,7 @@ public class DefaultScopePolicyConverter implements IamScopePolicyConverter {
 
     if (!sp.getScopes().isEmpty()) {
       dto.setScopes(Sets.newHashSet());
-      sp.getScopes().forEach(s -> dto.getScopes().add(s.getScope()));
+      dto.getScopes().addAll(sp.getScopes());
     }
 
     if (sp.getAccount() != null) {
@@ -79,10 +74,7 @@ public class DefaultScopePolicyConverter implements IamScopePolicyConverter {
     scopePolicy.setRule(Rule.valueOf(sp.getRule()));
 
     if (sp.getScopes() != null) {
-      sp.getScopes().forEach(s -> {
-        IamScope iamScope = scopeRepo.findByScope(s).orElse(new IamScope(s));
-        scopePolicy.getScopes().add(iamScope);
-      });
+      scopePolicy.getScopes().addAll(sp.getScopes());
     }
 
     if (sp.getAccount() != null) {

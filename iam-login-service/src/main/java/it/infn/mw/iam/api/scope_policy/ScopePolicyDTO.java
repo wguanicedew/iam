@@ -4,8 +4,10 @@ import java.util.Date;
 import java.util.Set;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Max;
 import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+
+import org.hibernate.validator.constraints.NotBlank;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -20,7 +22,7 @@ public class ScopePolicyDTO {
 
   private Long id;
 
-  @Max(value = 512, message = "Invalid scope policy: The description string must be at most 512 characters long")
+  @Size(max=512, message = "Invalid scope policy: The description string must be at most 512 characters long")
   private String description;
 
   @JsonSerialize(using = JsonDateSerializer.class)
@@ -30,6 +32,7 @@ public class ScopePolicyDTO {
   private Date lastUpdateTime;
 
   @Pattern(regexp = "PERMIT|DENY", message = "Invalid scope policy: allowed values for 'rule' are: 'PERMIT', 'DENY'")
+  @NotBlank(message="Invalid scope policy: rule cannot be empty")
   private String rule;
 
   @Valid

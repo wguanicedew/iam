@@ -6,17 +6,17 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -70,16 +70,19 @@ public class IamScopePolicy implements Serializable {
   @JoinColumn(name = "account_id")
   private IamAccount account;
 
-  @ManyToMany(cascade={CascadeType.MERGE, CascadeType.PERSIST})
-  @JoinTable(name = "iam_scope_policy_scope",
-      joinColumns = @JoinColumn(name = "policy_id", referencedColumnName = "id"),
-      inverseJoinColumns = @JoinColumn(name = "scope_id", referencedColumnName = "id"))
-  private Set<IamScope> scopes = new HashSet<>();
+
+  @ElementCollection
+  @Column(name = "scope", length = 256)
+  @CollectionTable(name = "iam_scope_policy_scope", joinColumns = @JoinColumn(name = "policy_id"),
+      indexes = {@Index(columnList = "policy_id,scope", unique = true),
+          @Index(columnList = "scope", unique = false)})
+  private Set<String> scopes = new HashSet<>();
+
 
   public IamScopePolicy() {
     // empty constructor
   }
-  
+
   public Long getId() {
     return id;
   }
@@ -127,14 +130,14 @@ public class IamScopePolicy implements Serializable {
 
   public void setGroup(IamGroup group) {
     this.group = group;
-    group.getScopePolicies().add(this);
   }
 
-  public Set<IamScope> getScopes() {
+
+  public Set<String> getScopes() {
     return scopes;
   }
 
-  public void setScopes(Set<IamScope> scopes) {
+  public void setScopes(Set<String> scopes) {
     this.scopes = scopes;
   }
 
@@ -144,16 +147,36 @@ public class IamScopePolicy implements Serializable {
 
   public void setAccount(IamAccount account) {
     this.account = account;
-    account.getScopePolicies().add(this);
   }
 
+  public void linkAccount(){
+    if (account != null){
+      account.getScopePolicies().add(this);
+    }
+  }
+  
+  public void linkGroup(){
+    if (group != null){
+      group.getScopePolicies().add(this);
+    }
+  }
+  
+  public void linkAccount(IamAccount account){
+    setAccount(account);
+    account.getScopePolicies().add(this);
+  }
+  
+  public void linkGroup(IamGroup group){
+    setGroup(group);
+    group.getScopePolicies().add(this);
+  }
 
   @Transient
   public boolean appliesToScope(String scope) {
     if (getScopes().isEmpty()) {
       return true;
     }
-    return getScopes().contains(new IamScope(scope));
+    return getScopes().contains(scope);
   }
 
   @Transient
@@ -174,7 +197,63 @@ public class IamScopePolicy implements Serializable {
     return PolicyType.ACCOUNT;
 
   }
+  
+  
+  public void from(IamScopePolicy other){
+    setAccount(other.getAccount());
+    setGroup(other.getGroup());
+    setDescription(other.getDescription());
+    setRule(other.getRule());
+    setScopes(other.getScopes());
+    linkAccount();
+    linkGroup();
+  }
+  
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((account == null) ? 0 : account.hashCode());
+    result = prime * result + ((group == null) ? 0 : group.hashCode());
+    result = prime * result + ((id == null) ? 0 : id.hashCode());
+    result = prime * result + ((rule == null) ? 0 : rule.hashCode());
+    result = prime * result + ((scopes == null) ? 0 : scopes.hashCode());
+    return result;
+  }
 
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    IamScopePolicy other = (IamScopePolicy) obj;
+    if (account == null) {
+      if (other.account != null)
+        return false;
+    } else if (!account.equals(other.account))
+      return false;
+    if (group == null) {
+      if (other.group != null)
+        return false;
+    } else if (!group.equals(other.group))
+      return false;
+    if (id == null) {
+      if (other.id != null)
+        return false;
+    } else if (!id.equals(other.id))
+      return false;
+    if (rule != other.rule)
+      return false;
+    if (scopes == null) {
+      if (other.scopes != null)
+        return false;
+    } else if (!scopes.equals(other.scopes))
+      return false;
+    return true;
+  }
 
   @Override
   public String toString() {

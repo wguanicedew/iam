@@ -13,5 +13,7 @@ public interface ScopePolicyService {
   void deleteScopePolicyById(Long policyId);
   
   IamScopePolicy createScopePolicy(ScopePolicyDTO scopePolicy);
+  
+  IamScopePolicy updateScopePolicy(ScopePolicyDTO scopePolicy);
 
 }

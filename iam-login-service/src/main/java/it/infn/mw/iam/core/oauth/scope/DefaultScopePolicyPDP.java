@@ -175,7 +175,8 @@ public class DefaultScopePolicyPDP implements ScopePolicyPDP {
       dc.applyPolicy(p, account);
     }
 
-    return dc.getAllowedScopes();
+    allowedScopes.addAll(dc.getAllowedScopes());
+    return allowedScopes;
   }
 
 }
