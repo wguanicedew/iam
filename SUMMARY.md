@@ -9,3 +9,4 @@
     * [OAuth Token exchange support](doc/user-guide/oauth_token_exchange.md)
     * [SCIM API reference](doc/user-guide/scim_api.md)
     * [Registration Service](doc/user-guide/registration_service.md)
+    * [Groups Management](doc/user-guide/groups_management.md)
