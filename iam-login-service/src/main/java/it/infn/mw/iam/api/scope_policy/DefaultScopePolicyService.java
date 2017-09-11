@@ -5,8 +5,12 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
+import it.infn.mw.iam.audit.events.scope_policy.ScopePolicyCreatedEvent;
+import it.infn.mw.iam.audit.events.scope_policy.ScopePolicyDeletedEvent;
+import it.infn.mw.iam.audit.events.scope_policy.ScopePolicyUpdatedEvent;
 import it.infn.mw.iam.persistence.model.IamScopePolicy;
 import it.infn.mw.iam.persistence.repository.IamScopePolicyRepository;
 
@@ -15,16 +19,19 @@ public class DefaultScopePolicyService implements ScopePolicyService {
 
   private final IamScopePolicyRepository scopePolicyRepo;
   private final IamScopePolicyConverter converter;
-
+  private final ApplicationEventPublisher publisher;
+  
   private ScopePolicyNotFoundError notFoundError(Long id) {
     return new ScopePolicyNotFoundError(String.format("No scope policy found for id: %d", id));
   }
 
   @Autowired
   public DefaultScopePolicyService(IamScopePolicyRepository scopePolicyRepo,
-      IamScopePolicyConverter converter) {
+      IamScopePolicyConverter converter,
+      ApplicationEventPublisher publisher) {
     this.scopePolicyRepo = scopePolicyRepo;
     this.converter = converter;
+    this.publisher = publisher;
   }
 
   @Override
@@ -44,6 +51,7 @@ public class DefaultScopePolicyService implements ScopePolicyService {
         scopePolicyRepo.findById(policyId).orElseThrow(() -> notFoundError(policyId));
 
     scopePolicyRepo.delete(sp);
+    publisher.publishEvent(new ScopePolicyDeletedEvent(this, sp));
   }
 
   @Override
@@ -62,7 +70,9 @@ public class DefaultScopePolicyService implements ScopePolicyService {
     sp.linkAccount();
     sp.linkGroup();
 
-    return scopePolicyRepo.save(sp);
+    sp = scopePolicyRepo.save(sp);
+    publisher.publishEvent(new ScopePolicyCreatedEvent(this, sp));
+    return sp;
 
   }
 
@@ -85,7 +95,9 @@ public class DefaultScopePolicyService implements ScopePolicyService {
     existingPolicy.from(updatedPolicy);
     existingPolicy.setLastUpdateTime(new Date());
     
-    return scopePolicyRepo.save(existingPolicy);
+    existingPolicy = scopePolicyRepo.save(existingPolicy);
+    publisher.publishEvent(new ScopePolicyUpdatedEvent(this, existingPolicy));
+    return existingPolicy;
   }
 
 }

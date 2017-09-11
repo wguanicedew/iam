@@ -6,6 +6,7 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
 
+import it.infn.mw.iam.api.scope_policy.ScopePolicyDTO;
 import it.infn.mw.iam.persistence.model.IamScopePolicy;
 import it.infn.mw.iam.persistence.model.IamScopePolicy.Rule;
 
@@ -16,6 +17,18 @@ public class ScopePolicyTestUtils {
   public static final String OPENID = "openid";
   public static final String PROFILE = "profile";
   public static final String WHATEVER = "whatever";
+  
+  protected ScopePolicyDTO initPermitScopePolicyDTO(){
+    ScopePolicyDTO dto = new ScopePolicyDTO();
+    dto.setRule(Rule.PERMIT.name());
+    return dto;
+  }
+  
+  protected ScopePolicyDTO initDenyScopePolicyDTO(){
+    ScopePolicyDTO dto = new ScopePolicyDTO();
+    dto.setRule(Rule.DENY.name());
+    return dto;
+  }
   
   private IamScopePolicy initScopePolicy() {
     Date now = new Date();

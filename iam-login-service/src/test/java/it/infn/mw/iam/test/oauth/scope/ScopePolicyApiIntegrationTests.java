@@ -79,7 +79,7 @@ public class ScopePolicyApiIntegrationTests extends ScopePolicyTestUtils {
 
   @Autowired
   private MockOAuth2Filter mockOAuth2Filter;
-
+  
   private MockMvc mvc;
 
   @Before

@@ -257,8 +257,7 @@ public class IamScopePolicy implements Serializable {
 
   @Override
   public String toString() {
-    return "IamScopePolicy [id=" + id + ", description=" + description + ", creationTime="
-        + creationTime + ", lastUpdateTime=" + lastUpdateTime + ", rule=" + rule + ", group="
-        + group + ", account=" + account + ", scopes=" + scopes + "]";
-  }
+    return "IamScopePolicy [id=" + id + ", description=" + description + ", rule=" + rule
+        + ", group=" + group + ", account=" + account + ", scopes=" + scopes + "]";
+  }  
 }
