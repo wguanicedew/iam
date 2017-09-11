@@ -1,6 +1,5 @@
 package it.infn.mw.iam.persistence.repository;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,7 +17,7 @@ public class IamScopePolicyRepositoryImpl implements IamScopePolicyRepositoryCus
   @Override
   public List<IamScopePolicy> findEquivalentPolicies(IamScopePolicy p) {
 
-    List<IamScopePolicy> equivalentPolicies = Collections.emptyList();
+    List<IamScopePolicy> equivalentPolicies;
 
     if (p.getGroup() != null) {
       equivalentPolicies = repo.findByGroupAndRule(p.getGroup(), p.getRule());
