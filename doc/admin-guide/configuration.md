@@ -172,6 +172,14 @@ Specific options:
 |IAM_NOTIFICATION_CLEANUP_AGE  |30                     |Retention of delivered messages, in days|
 |IAM_NOTIFICATION_ADMIN_ADDRESS|indigo-alerts@localhost|Mail address used as receiver for administrative notifications|
 
+#### Other options
+
+|*Env. variable*        |*Default value*        |*Meaning*|
+|-----------------------|-----------------------|---------|
+| IAM_ORGANIZATION_NAME | indigo-dc             | Organization name. It's used in the web dashboard and into notification emails. |
+| IAM_LOGO_URL          | resources/images/indigo-logo.png | URL of logo image to use in the web dashboard |
+| IAM_TOPBAR_TITLE      | INDIGO IAM for ${iam.organisation.name} | String displayed into the top bar of the browser when using the web dashboard |
+
 
 ### Example configuration
 
