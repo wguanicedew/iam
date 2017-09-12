@@ -211,7 +211,7 @@ public class IamScopePolicy implements Serializable {
   
   @Override
   public int hashCode() {
-    final int prime = 31;
+    int prime = 31;
     int result = 1;
     result = prime * result + ((account == null) ? 0 : account.hashCode());
     result = prime * result + ((group == null) ? 0 : group.hashCode());

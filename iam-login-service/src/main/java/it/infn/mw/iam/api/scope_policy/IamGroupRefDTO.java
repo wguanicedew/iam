@@ -17,6 +17,7 @@ public class IamGroupRefDTO {
   String location;
 
   public IamGroupRefDTO() {
+    // Empty constructor
   }
 
   public String getUuid() {
