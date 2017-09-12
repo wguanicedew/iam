@@ -21,10 +21,6 @@ public class DefaultScopePolicyService implements ScopePolicyService {
   private final IamScopePolicyConverter converter;
   private final ApplicationEventPublisher publisher;
   
-  private ScopePolicyNotFoundError notFoundError(Long id) {
-    return new ScopePolicyNotFoundError(String.format("No scope policy found for id: %d", id));
-  }
-
   @Autowired
   public DefaultScopePolicyService(IamScopePolicyRepository scopePolicyRepo,
       IamScopePolicyConverter converter,
@@ -32,6 +28,10 @@ public class DefaultScopePolicyService implements ScopePolicyService {
     this.scopePolicyRepo = scopePolicyRepo;
     this.converter = converter;
     this.publisher = publisher;
+  }
+  
+  private ScopePolicyNotFoundError notFoundError(Long id) {
+    return new ScopePolicyNotFoundError(String.format("No scope policy found for id: %d", id));
   }
 
   @Override

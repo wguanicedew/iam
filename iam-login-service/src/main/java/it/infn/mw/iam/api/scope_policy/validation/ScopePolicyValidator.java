@@ -18,12 +18,8 @@ public class ScopePolicyValidator implements ConstraintValidator<ScopePolicy, Sc
 
   @Override
   public boolean isValid(ScopePolicyDTO value, ConstraintValidatorContext context) {
-
-    if (value == null || (value.getAccount() != null && value.getGroup() != null)) {
-      return false;
-    }
-
-    return true;
+    
+    return !(value == null || (value.getAccount() != null && value.getGroup() != null));
   }
 
 }
