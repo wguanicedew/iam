@@ -3,7 +3,7 @@
 This is the INDIGO IAM deployment and administration guide.
 
 IAM Login Service can be deployed in two different ways:
- - as Docker container (see [here](docker.md));
+ - as a Docker container (see [here](docker.md));
  - as systemd daemon from precompiled packages (see [here](packages.md)).
 
 Also a Puppet module is provided to simplify the installation

@@ -1,13 +1,11 @@
 ## Deployment with precompiled packages
 
-Since IAM 1.0.0, precompiled packages are available
-to install IAM Login service.
-
-Supported platforms:
+Starting with version 1.0.0, we provided precompiled packages for the IAM Login
+Service for the following platforms:
  - CentOS 7
  - Ubuntu 16.04
 
-Packages and repo files are hosted on https://repo.cloud.cnaf.infn.it/repository/indigo-iam 
+Packages and repo files are hosted on https://repo.cloud.cnaf.infn.it/repository/indigo-iam/index.html
 public repository.
 
 #### Add Indigo repository
@@ -25,8 +23,8 @@ $ sudo wget -O /etc/apt/sources.list.d/indigo-iam.list https://repo.cloud.cnaf.i
 ```
 
 **WARNING: The following steps are required only on Ubuntu**
-The packages are served on HTTPS, on Ubuntu
-install the support to fetch on this protocol:
+The packages are served on HTTPS: on Ubuntu
+install the support to fetch them on this protocol:
 
 ```console
 $ sudo apt-get install -y apt-transport-https
@@ -57,9 +55,9 @@ $ sudo apt-get install -y iam-login-service
 
 #### Configuration
 
-The configuration file contains the environment variables
-used by the Login Service for the configuration.
-The description of all the variables and the can be found [here](admin.md).
+The configuration file contains the environment variables used by the
+Login Service for the configuration.
+The description of all the variables and the can be found [here](configuration.md).
 
 This file is located under different path, according the OS platform.
 
@@ -75,7 +73,7 @@ On Ubuntu:
 
 #### Run the service
 
-The service is managed by Systemd, so to run it use:
+The service is managed by `systemd`, so to run it use:
 ```console
 $ sudo systemctl start iam-login-service
 ```

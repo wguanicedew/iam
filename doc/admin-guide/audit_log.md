@@ -1,9 +1,9 @@
 ## Audit log
 
-IAM Login Service traces remarkable events with audit log.
+IAM Login Service traces interesting, security related events with an audit log.
 
-Audit logs are marked with the tag `AUDIT` in the Java class field. An example
-of audit log is the following:
+Audit log messages are marked with the tag `AUDIT` in the Java class field.
+An example of audit log is the following:
 
 ```console
 2017-09-11 09:58:14.560  INFO 13 --- [o-8080-exec-311] AUDIT : {"@type":"IamAuthenticationSuccessEvent","timestamp":1505116694560,"category":"AUTHENTICATION","principal":"794fb313-6e93-4d02-9d0a-4ed773ee2c5e","message":"794fb313-6e93-4d02-9d0a-4ed773ee2c5e authenticated succesfully","sourceEvent":{"principal":"794fb313-6e93-4d02-9d0a-4ed773ee2c5e","type":"InteractiveAuthenticationSuccessEvent"},"source":"UsernamePasswordAuthenticationToken"}

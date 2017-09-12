@@ -1,18 +1,19 @@
 ## Health checks
 
-IAM Login Service expose health endpoints to monitor the running instance status.
+The IAM Login Service exposes a set of health endpoints that can be used to
+monitor the status of the service.
 
-Health endpoints expose a different set of information, depending on the
-requests is authenticated: users with authority `ROLE_ADMIN` can see more
-details; anonymous requests receive only a summary of the health status.
+Health endpoints expose a different set of information depending on the user
+privileges; administrator users can see more details, while anonymous requests
+typically receive only a summary of the health status.
 
 These endpoints return:
 - HTTP code 200 if everything is ok;
-- HTTP code 500 if any health check fail.
+- HTTP code 500 if any health check fails.
 
 ##### `/health`
-This endpoint monitors the health application, composing disk space and database
-health check.
+This is a general application health check endpoint, which composes disk space
+and database health checks.
 
 Examples.
 ```console
@@ -22,7 +23,7 @@ $ curl -s https://iam.local.io/health | jq
 }
 ```
 
-Sending basic authentication, the endpoint return a response with more details:
+Sending basic authentication, the endpoint returns a response with more details:
 ```console
 $ curl -s -u $ADMINUSER:$ADMINPASSWORD https://iam.local.io/health | jq
 {
@@ -66,7 +67,7 @@ $ curl -u $ADMINUSER:$ADMINPASSWORD https://iam.local.io/health/mail | jq
 
 ##### `/health/external`
 This endpoint checks the reachability of external servers.
-In this IAM release, only Google IDP provider is monitored.
+By default, the endpoint triggers a check on the connectivity to Google.
 
 ```console
 $ curl -s https://iam.local.io/health/external | jq
