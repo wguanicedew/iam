@@ -1,21 +1,61 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-
-<EntitiesDescriptor 
-  xmlns="urn:oasis:names:tc:SAML:2.0:metadata" 
-  xmlns:mdrpi="urn:oasis:names:tc:SAML:metadata:rpi" 
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-  xmlns:mdattr="urn:oasis:names:tc:SAML:metadata:attribute"
-  xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"
-  ID="TEST-14092017" Name="urn:mace:garr.it:edugain-idem">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><EntitiesDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:mdattr="urn:oasis:names:tc:SAML:metadata:attribute" xmlns:mdrpi="urn:oasis:names:tc:SAML:metadata:rpi" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ID="TEST-14092017" Name="urn:mace:garr.it:edugain-idem"><ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+<ds:SignedInfo>
+<ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+<ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
+<ds:Reference URI="#TEST-14092017">
+<ds:Transforms>
+<ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+<ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+</ds:Transforms>
+<ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+<ds:DigestValue>2QqTfXlzNnNsvoxYgzfmOWWQARPJtwDUB2y2M3DbBOw=</ds:DigestValue>
+</ds:Reference>
+</ds:SignedInfo>
+<ds:SignatureValue>
+GKfzko66HzOpyxEISqbBQvPWxPOvqJbWJMeN66b727JzDufSsVAE3Idv2HfnemPIN0LzA9z8xgCY
+J9q2aao0geos/8z1p7veFf9FjCULjgbD4ujBMtHww5TMiGFQk9i3iYT9vmZI+C2doe9Q2pDGwKQh
+VwpPH6+ToBi/gNkrsjQR7Oll8z94fCXKqwQSLi3wrGwP2Vd3tppRW6Ngr1sYnukXxbuH5pWRz6No
+5/GI8LRg2xCHOWqjYD7tiZSHDjEF2ATdqxdj4lJdNPKXld6gz/U4wClCw+xQf3l9v2bZAbTS8u1+
+fGTJ5xRFP/Tem9X5ngx6bcymaUZHE/BKUezuWg==
+</ds:SignatureValue>
+<ds:KeyInfo>
+<ds:KeyValue>
+<ds:RSAKeyValue>
+<ds:Modulus>
+g+m2pHid+pTHxKcoX6jiAugRBFfAQqLcf4dDPwg7BsUU2oWx6M+UxkCOs/sZdv981aXkZofqViDr
+p3xqbjxIflK3tFsem5Pt15AxqRRbeHhdoo0uVMpZwEb/Jzp7qjR9YYqxO0ebfRnT2xK+8Oilk5nq
+J+3cIDCpn06aXfiCg4pgUnkkquOyqg8zS4FBohrp6YRhUYPo8GXIu5tfpyW9afApYDXY8dJ1fCyK
+GJRdjtvhRh7W6DNgOr8pyquf7KRtonI3EtKhY2h61WCaP/9cZsOmNlplkgWUzkKZfVmc/IaTkoJ1
+XPmcVsL9Xo0hwVz18cGiONxMiycSs3+uRCzkuQ==
+</ds:Modulus>
+<ds:Exponent>AQAB</ds:Exponent>
+</ds:RSAKeyValue>
+</ds:KeyValue>
+<ds:X509Data>
+<ds:X509Certificate>
+MIIDhTCCAm2gAwIBAgIEbWwNojANBgkqhkiG9w0BAQsFADBzMQswCQYDVQQGEwJJVDEXMBUGA1UE
+CBMORW1pbGlhIFJvbWFnbmExEDAOBgNVBAcTB0JvbG9nbmExDTALBgNVBAoTBENOQUYxFzAVBgNV
+BAsTDk1XIGRldmVsb3BtZW50MREwDwYDVQQDEwhpYW0tdGVzdDAeFw0xNjA2MjcxNDA5MDJaFw0y
+NjA2MjUxNDA5MDJaMHMxCzAJBgNVBAYTAklUMRcwFQYDVQQIEw5FbWlsaWEgUm9tYWduYTEQMA4G
+A1UEBxMHQm9sb2duYTENMAsGA1UEChMEQ05BRjEXMBUGA1UECxMOTVcgZGV2ZWxvcG1lbnQxETAP
+BgNVBAMTCGlhbS10ZXN0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAg+m2pHid+pTH
+xKcoX6jiAugRBFfAQqLcf4dDPwg7BsUU2oWx6M+UxkCOs/sZdv981aXkZofqViDrp3xqbjxIflK3
+tFsem5Pt15AxqRRbeHhdoo0uVMpZwEb/Jzp7qjR9YYqxO0ebfRnT2xK+8Oilk5nqJ+3cIDCpn06a
+XfiCg4pgUnkkquOyqg8zS4FBohrp6YRhUYPo8GXIu5tfpyW9afApYDXY8dJ1fCyKGJRdjtvhRh7W
+6DNgOr8pyquf7KRtonI3EtKhY2h61WCaP/9cZsOmNlplkgWUzkKZfVmc/IaTkoJ1XPmcVsL9Xo0h
+wVz18cGiONxMiycSs3+uRCzkuQIDAQABoyEwHzAdBgNVHQ4EFgQUDrOQxRP+kA7D0YboHtUlDmvp
+zuwwDQYJKoZIhvcNAQELBQADggEBAH9R3YDoIpDR95XwPuO012euPBZP2ZJ5oxD5ARmAIYeMe5rC
+epxRx5JzD3Arc2WGUB9YmRV74aub4Ak/TMawqUr7LwvahNDUYD1+BjbLlUu9/eLnt4P55xnfxEsd
+HDeiAL3HRkKonB6Qfzd+R8+yqBATa4jPaDme4n5oD1eSyHDAfYxCDUtuors1vjjZNJa2ixskjX71
+BJE3ERvXzQJrzGA+kBsau1FDRfbtRH/EdQrNuBQiOHUcFdtycDH5ng3hFy3sW4ZXJviAtnOVPaEU
+XlEYHhzCJRIY52stMHdc3ygToorBcm/q7StGXUBzHzuF46SSr0zjXTE3xIS2NByAwlE=
+</ds:X509Certificate>
+</ds:X509Data>
+</ds:KeyInfo>
+</ds:Signature>
 
 <!-- INFN IDP -->
-<EntityDescriptor  
-xmlns="urn:oasis:names:tc:SAML:2.0:metadata" 
-xmlns:ds="http://www.w3.org/2000/09/xmldsig#" 
-xmlns:shibmd="urn:mace:shibboleth:metadata:1.0" 
-xmlns:xml="http://www.w3.org/XML/1998/namespace" 
-xmlns:mdui="urn:oasis:names:tc:SAML:metadata:ui" 
-entityID="urn:example:idp1">
+<EntityDescriptor xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:mdui="urn:oasis:names:tc:SAML:metadata:ui" xmlns:shibmd="urn:mace:shibboleth:metadata:1.0" entityID="urn:example:idp1">
 <Extensions>
 <mdattr:EntityAttributes>
 <saml:Attribute Name="http://macedir.org/entity-category-support" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
@@ -141,13 +181,7 @@ M2vuvHO4YsOmkAOxj2Wk/itj5MnK1tT0u840b61Q/j4SJGuKLe4Tzzg=
 </EntityDescriptor>
 
 <!-- TEST IDP -->
-<EntityDescriptor  
-xmlns="urn:oasis:names:tc:SAML:2.0:metadata" 
-xmlns:ds="http://www.w3.org/2000/09/xmldsig#" 
-xmlns:shibmd="urn:mace:shibboleth:metadata:1.0" 
-xmlns:xml="http://www.w3.org/XML/1998/namespace" 
-xmlns:mdui="urn:oasis:names:tc:SAML:metadata:ui" 
-entityID="https://idptestbed/idp/shibboleth">
+<EntityDescriptor xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:mdui="urn:oasis:names:tc:SAML:metadata:ui" xmlns:shibmd="urn:mace:shibboleth:metadata:1.0" entityID="https://idptestbed/idp/shibboleth">
 
 <IDPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol urn:oasis:names:tc:SAML:1.1:protocol urn:mace:shibboleth:1.0">
 
@@ -231,23 +265,17 @@ p+tGUbGS2l873J5PrsbpeKEVR/IIoKo=
 </ds:KeyInfo>
 </KeyDescriptor>
 
-<ArtifactResolutionService Binding="urn:oasis:names:tc:SAML:1.0:bindings:SOAP-binding"
-Location="https://idptestbed:8443/idp/profile/SAML1/SOAP/ArtifactResolution" index="1"/>
+<ArtifactResolutionService Binding="urn:oasis:names:tc:SAML:1.0:bindings:SOAP-binding" Location="https://idptestbed:8443/idp/profile/SAML1/SOAP/ArtifactResolution" index="1"/>
 
-<ArtifactResolutionService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP"
-Location="https://idptestbed:8443/idp/profile/SAML2/SOAP/ArtifactResolution" index="2"/>
+<ArtifactResolutionService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP" Location="https://idptestbed:8443/idp/profile/SAML2/SOAP/ArtifactResolution" index="2"/>
 
 <NameIDFormat>urn:mace:shibboleth:1.0:nameIdentifier</NameIDFormat>
 <NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</NameIDFormat>
 
-<SingleSignOnService Binding="urn:mace:shibboleth:1.0:profiles:AuthnRequest"
-Location="https://idptestbed/idp/profile/Shibboleth/SSO"/>
-<SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
-Location="https://idptestbed/idp/profile/SAML2/POST/SSO"/>
-<SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST-SimpleSign"
-Location="https://idptestbed/idp/profile/SAML2/POST-SimpleSign/SSO"/>
-<SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
-Location="https://idptestbed/idp/profile/SAML2/Redirect/SSO"/>
+<SingleSignOnService Binding="urn:mace:shibboleth:1.0:profiles:AuthnRequest" Location="https://idptestbed/idp/profile/Shibboleth/SSO"/>
+<SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://idptestbed/idp/profile/SAML2/POST/SSO"/>
+<SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST-SimpleSign" Location="https://idptestbed/idp/profile/SAML2/POST-SimpleSign/SSO"/>
+<SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://idptestbed/idp/profile/SAML2/Redirect/SSO"/>
 </IDPSSODescriptor>
 <AttributeAuthorityDescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:1.1:protocol urn:oasis:names:tc:SAML:2.0:protocol">
 
@@ -334,10 +362,8 @@ p+tGUbGS2l873J5PrsbpeKEVR/IIoKo=
 
 </KeyDescriptor>
 
-<AttributeService Binding="urn:oasis:names:tc:SAML:1.0:bindings:SOAP-binding"
-Location="https://idptestbed:8443/idp/profile/SAML1/SOAP/AttributeQuery"/>
-<AttributeService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP"
-Location="https://idptestbed:8443/idp/profile/SAML2/SOAP/AttributeQuery"/>
+<AttributeService Binding="urn:oasis:names:tc:SAML:1.0:bindings:SOAP-binding" Location="https://idptestbed:8443/idp/profile/SAML1/SOAP/AttributeQuery"/>
+<AttributeService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP" Location="https://idptestbed:8443/idp/profile/SAML2/SOAP/AttributeQuery"/>
 
 </AttributeAuthorityDescriptor>
 </EntityDescriptor>

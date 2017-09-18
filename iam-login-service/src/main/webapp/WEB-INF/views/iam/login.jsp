@@ -82,7 +82,7 @@
 
       <c:if test="${loginPageConfiguration.samlEnabled}">
         <div id="saml-login" class="ext-authn-login-button">
-          <a class="btn btn-block btn-default" href="/saml/login"> Sign in with SAML</a>
+          <a class="btn btn-block btn-default" href="/saml/login">${iamSamlProperties.loginButtonText}</a>
         </div>
       </c:if>
     </div>

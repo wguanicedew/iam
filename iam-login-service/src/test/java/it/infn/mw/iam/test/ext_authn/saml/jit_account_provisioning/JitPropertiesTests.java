@@ -12,7 +12,7 @@ import java.util.Set;
 import org.junit.Assert;
 import org.junit.Test;
 
-import it.infn.mw.iam.config.saml.IamSamlProperties.IamSamlJITAccountProvisioningProperties;
+import it.infn.mw.iam.config.saml.IamSamlJITAccountProvisioningProperties;
 
 public class JitPropertiesTests {
 

@@ -30,6 +30,7 @@ public class DefaultLoginPageConfiguration implements LoginPageConfiguration, En
   @Autowired
   GoogleClientProperties googleClientConfiguration;
 
+  
   @PostConstruct
   public void init() {
 

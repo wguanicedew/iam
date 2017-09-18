@@ -11,4 +11,5 @@ public interface LoginPageConfiguration {
   boolean isRegistrationEnabled();
   
   boolean isAccountLinkingEnabled();
+  
 }
