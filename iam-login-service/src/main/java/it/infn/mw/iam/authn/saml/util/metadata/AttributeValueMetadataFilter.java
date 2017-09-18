@@ -6,6 +6,7 @@ import static java.lang.String.format;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.opensaml.saml2.core.Attribute;
@@ -16,7 +17,7 @@ import org.opensaml.xml.schema.XSAny;
 import org.opensaml.xml.schema.XSString;
 
 public class AttributeValueMetadataFilter extends AbstractMetadataFilter {
-  
+
   private final String attributeName;
   private final String attributeNameFormat;
   private final List<String> requiredValues;
@@ -55,6 +56,34 @@ public class AttributeValueMetadataFilter extends AbstractMetadataFilter {
     return null;
   }
 
+  protected Optional<ValidationResult> checkEntityAttributes(EntityAttributes attributes) {
+
+    for (Attribute attr : attributes.getAttributes()) {
+      if (attributeName.equals(attr.getName())
+          && attributeNameFormat.equals(attr.getNameFormat())) {
+        return Optional.of(checkAttributeValues(attr));
+      }
+    }
+    
+    return Optional.empty();
+
+  }
+
+  protected ValidationResult checkAttributeValues(Attribute attribute) {
+    List<String> attributeValues = attribute.getAttributeValues()
+      .stream()
+      .map(this::getAttributeValue)
+      .filter(Objects::nonNull)
+      .collect(Collectors.toList());
+
+    if (attributeValues.containsAll(requiredValues)) {
+      return valid();
+    }
+
+    return invalid(format("Attribute '%s' has values '%s'. Required values: '%s'", attributeName,
+        join(attributeValues), join(requiredValues)));
+  }
+
   @Override
   protected ValidationResult validateEntityDescriptor(EntityDescriptor descriptor) {
     if (descriptor.getExtensions() == null) {
@@ -63,27 +92,11 @@ public class AttributeValueMetadataFilter extends AbstractMetadataFilter {
 
     for (final XMLObject object : descriptor.getExtensions()
       .getUnknownXMLObjects(EntityAttributes.DEFAULT_ELEMENT_NAME)) {
-
-      EntityAttributes attributes = (EntityAttributes) object;
-
-      for (Attribute attr : attributes.getAttributes()) {
-
-        if (attributeName.equals(attr.getName())
-            && attributeNameFormat.equals(attr.getNameFormat())) {
-          
-          List<String> attributeValues = attr.getAttributeValues()
-            .stream()
-            .map(this::getAttributeValue)
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
-
-          if (attributeValues.containsAll(requiredValues)) {
-            return valid();
-          } else {
-            return invalid(format("Attribute '%s' has values '%s'. Required values: '%s'",
-                attributeName, join(attributeValues), join(requiredValues)));
-          }
-        }
+      
+      Optional<ValidationResult> result = checkEntityAttributes((EntityAttributes) object);
+      
+      if (result.isPresent()){
+        return result.get();
       }
     }
 
