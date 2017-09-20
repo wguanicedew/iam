@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.annotation.Generated;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -210,6 +211,7 @@ public class IamScopePolicy implements Serializable {
   }
   
   @Override
+  @Generated("eclipse")
   public int hashCode() {
     int prime = 31;
     int result = 1;
@@ -221,7 +223,9 @@ public class IamScopePolicy implements Serializable {
     return result;
   }
 
+  
   @Override
+  @Generated("eclipse")
   public boolean equals(Object obj) {
     if (this == obj)
       return true;
