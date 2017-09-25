@@ -3,11 +3,10 @@ package it.infn.mw.iam.test.oauth;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
@@ -188,8 +187,8 @@ public class TokenExchangeTests extends EndpointsTestUtils {
     try {
       JWT jwtAccessToken = JWTParser.parse(actorAccessToken);
       JWTClaimsSet claims = jwtAccessToken.getJWTClaimsSet();
-
-      assertThat(claims.getAudience(), is(nullValue()));
+      
+      assertThat(claims.getAudience(), empty());
 
     } catch (ParseException e) {
       fail(e.getMessage());

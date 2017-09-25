@@ -1,11 +1,15 @@
 package it.infn.mw.iam.config;
 
 import java.util.Locale;
+import java.util.Set;
 
 import org.mitre.openid.connect.config.ConfigurationPropertiesBean;
+import org.mitre.openid.connect.config.UIConfiguration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import com.google.common.collect.Sets;
 
 @Configuration
 public class MitreConfig {
@@ -51,4 +55,23 @@ public class MitreConfig {
     return config;
   }
 
+
+  @Bean
+  public UIConfiguration uiConfiguration() {
+    
+    Set<String> jsFiles = Sets.newHashSet("resources/js/client.js",
+        "resources/js/grant.js",
+        "resources/js/scope.js",
+        "resources/js/whitelist.js",
+        "resources/js/dynreg.js",
+        "resources/js/rsreg.js",
+        "resources/js/token.js",
+        "resources/js/blacklist.js",
+        "resources/js/profile.js");
+    
+    UIConfiguration config = new UIConfiguration();
+    config.setJsFiles(jsFiles);
+    return config;
+
+  }
 }

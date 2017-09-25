@@ -98,9 +98,7 @@ public class IamTokenRepositoryTests {
         hasSize(0));
 
     assertThat(accessTokenRepo.findValidAccessTokensForUser(TEST_347_USER, currentTimestamp),
-        hasSize(2)); // access
-    // token
-    // + ID token
+        hasSize(1));
 
     assertThat(refreshTokenRepo.findValidRefreshTokensForUser(TEST_347_USER, currentTimestamp),
         hasSize(1));
@@ -118,11 +116,10 @@ public class IamTokenRepositoryTests {
     Date yesterday = cal.getTime();
 
     at.setExpiration(yesterday);
-    at.getIdToken().setExpiration(yesterday);
+    
     at.getRefreshToken().setExpiration(yesterday);
 
     tokenService.saveAccessToken(at);
-    tokenService.saveAccessToken(at.getIdToken());
     tokenService.saveRefreshToken(at.getRefreshToken());
 
     Date currentTimestamp = new Date();
@@ -152,10 +149,9 @@ public class IamTokenRepositoryTests {
     Date exp = DateUtils.addHours(now, +1);
 
     at.setExpiration(exp);
-    at.getIdToken().setExpiration(exp);
     at.getRefreshToken().setExpiration(exp);
 
-    assertThat(accessTokenRepo.findValidAccessTokensForUser(TEST_347_USER, now), hasSize(2));
+    assertThat(accessTokenRepo.findValidAccessTokensForUser(TEST_347_USER, now), hasSize(1));
     assertThat(refreshTokenRepo.findValidRefreshTokensForUser(TEST_347_USER, now), hasSize(1));
   }
 

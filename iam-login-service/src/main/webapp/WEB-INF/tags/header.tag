@@ -24,9 +24,6 @@
     <link href="resources/css/mitreid-connect-responsive.css" rel="stylesheet">
     <link href="resources/css/mitreid-connect-responsive-local.css" rel="stylesheet">
 
-	  <link href="/webjars/font-awesome/css/font-awesome.css" rel="stylesheet">
-    <link href="resources/bootstrap-social/social-buttons.css" rel="stylesheet">
-
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
     <script src="resources/js/lib/html5.js"></script>
@@ -55,19 +52,19 @@
     	function setPageTitle(title) {
     		document.title = "${config.topbarTitle} - " + title;
     	}
-
+    	
 		// get the info of the current user, if available (null otherwise)
     	function getUserInfo() {
     		return ${userInfoJson};
     	}
-
+		
 		// get the authorities of the current user, if available (null otherwise)
 		function getUserAuthorities() {
 			return ${userAuthorities};
 		}
-
+		
 		// is the current user an admin?
-		// NOTE: this is just for
+		// NOTE: this is just for  
 		function isAdmin() {
 			var auth = getUserAuthorities();
 			if (auth && _.contains(auth, "ROLE_ADMIN")) {
@@ -76,7 +73,10 @@
 				return false;
 			}
 		}
-    </script>
+		
+		var heartMode = ${config.heartMode};
+		
+    </script>    
 </head>
 
 <body>

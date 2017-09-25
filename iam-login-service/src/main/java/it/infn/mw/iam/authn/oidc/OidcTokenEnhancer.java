@@ -19,6 +19,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTClaimsSet.Builder;
 import com.nimbusds.jwt.SignedJWT;
@@ -30,9 +31,9 @@ public class OidcTokenEnhancer extends ConnectTokenEnhancer {
 
   @Autowired
   private OIDCTokenService connectTokenService;
-  
+
   private static final String AUD_KEY = "aud";
-  
+
   private SignedJWT signClaims(JWTClaimsSet claims) {
     JWSAlgorithm signingAlg = getJwtService().getDefaultSigningAlgorithm();
 
@@ -110,11 +111,10 @@ public class OidcTokenEnhancer extends ConnectTokenEnhancer {
 
       ClientDetailsEntity client = getClientService().loadClientByClientId(clientId);
 
-      OAuth2AccessTokenEntity idTokenEntity = connectTokenService.createIdToken(client,
-          originalAuthRequest, issueTime, userInfo.getSub(), accessTokenEntity);
+      JWT idToken = connectTokenService.createIdToken(client, originalAuthRequest, issueTime,
+          userInfo.getSub(), accessTokenEntity);
 
-      accessTokenEntity.setIdToken(idTokenEntity);
-
+      accessTokenEntity.setIdToken(idToken);
     }
 
     return accessTokenEntity;

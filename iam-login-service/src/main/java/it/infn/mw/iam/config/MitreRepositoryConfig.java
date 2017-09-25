@@ -5,8 +5,10 @@ import org.mitre.oauth2.repository.AuthorizationCodeRepository;
 import org.mitre.oauth2.repository.OAuth2ClientRepository;
 import org.mitre.oauth2.repository.OAuth2TokenRepository;
 import org.mitre.oauth2.repository.SystemScopeRepository;
+import org.mitre.oauth2.repository.impl.DeviceCodeRepository;
 import org.mitre.oauth2.repository.impl.JpaAuthenticationHolderRepository;
 import org.mitre.oauth2.repository.impl.JpaAuthorizationCodeRepository;
+import org.mitre.oauth2.repository.impl.JpaDeviceCodeRepository;
 import org.mitre.oauth2.repository.impl.JpaOAuth2ClientRepository;
 import org.mitre.oauth2.repository.impl.JpaOAuth2TokenRepository;
 import org.mitre.oauth2.repository.impl.JpaSystemScopeRepository;
@@ -19,6 +21,7 @@ import org.mitre.openid.connect.repository.impl.JpaApprovedSiteRepository;
 import org.mitre.openid.connect.repository.impl.JpaBlacklistedSiteRepository;
 import org.mitre.openid.connect.repository.impl.JpaPairwiseIdentifierRepository;
 import org.mitre.openid.connect.repository.impl.JpaWhitelistedSiteRepository;
+import org.mitre.openid.connect.service.impl.MITREidDataService_1_3;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -87,4 +90,13 @@ public class MitreRepositoryConfig {
     return new JpaSystemScopeRepository();
   }
 
+  @Bean
+  DeviceCodeRepository deviceCodeRepository() {
+    return new JpaDeviceCodeRepository();
+  }
+  
+  @Bean
+  MITREidDataService_1_3 dataService1_3() {
+    return new MITREidDataService_1_3();
+  }
 }

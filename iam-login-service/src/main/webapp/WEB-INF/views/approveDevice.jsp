@@ -37,7 +37,7 @@
 		</h1>
 
 		<form name="confirmationForm"
-			action="${pageContext.request.contextPath.endsWith('/') ? pageContext.request.contextPath : pageContext.request.contextPath.concat('/') }authorize" method="post">
+			action="${pageContext.request.contextPath.endsWith('/') ? pageContext.request.contextPath : pageContext.request.contextPath.concat('/') }device/approve" method="post">
 
 			<div class="row">
 				<div class="span5 offset1 well-small" style="text-align: left">
@@ -140,22 +140,6 @@
 							</c:if>
 						</div>
 					</c:if>
-					<div>
-						<c:choose>
-							<c:when test="${ empty client.redirectUris }">
-								<div class="alert alert-block alert-error">
-									<h4>
-										<i class="icon-info-sign"></i> <spring:message code="approve.warning"/>:
-									</h4>
-									<spring:message code="approve.no_redirect_uri"/>
-									<spring:message code="approve.redirect_uri" arguments="${ fn:escapeXml(redirect_uri) }"/>
-								</div>
-							</c:when>
-							<c:otherwise>
-                                <spring:message code="approve.redirect_uri" arguments="${ fn:escapeXml(redirect_uri) }" />
-							</c:otherwise>
-						</c:choose>
-					</div>
 
 					<c:if test="${ client.subjectType == 'PAIRWISE' }">
 						<div class="alert alert-success">
@@ -179,10 +163,9 @@
 								</div>
 						</c:if>
 
+						<ul>
 						<c:forEach var="scope" items="${ scopes }">
-
-							<label for="scope_${ fn:escapeXml(scope.value) }" class="checkbox"> 
-								<input type="checkbox" name="scope_${ fn:escapeXml(scope.value) }" id="scope_${ fn:escapeXml(scope.value) }" value="${ fn:escapeXml(scope.value) }" checked="checked"> 
+							<li>
 								<c:if test="${ not empty scope.icon }">
 									<i class="icon-${ fn:escapeXml(scope.icon) }"></i>
 								</c:if> 
@@ -217,28 +200,11 @@
 										
 									</span>
 								</c:if>
-								
-							</label>
-
+								</li>
 						</c:forEach>
-
+						</ul>
 					</fieldset>
 
-					<fieldset style="text-align: left" class="well">
-						<legend style="margin-bottom: 0;"><spring:message code="approve.remember.title"/>:</legend>
-						<label for="remember-forever" class="radio"> 
-						<input type="radio" name="remember" id="remember-forever" value="until-revoked"  ${ !consent ? 'checked="checked"' : '' }> 
-							<spring:message code="approve.remember.until_revoke"/>
-						</label> 
-						<label for="remember-hour" class="radio"> 
-						<input type="radio" name="remember" id="remember-hour" value="one-hour">
-							<spring:message code="approve.remember.one_hour"/>
-						</label> 
-						<label for="remember-not" class="radio"> 
-						<input type="radio" name="remember" id="remember-not" value="none" ${ consent ? 'checked="checked"' : '' }>
-							<spring:message code="approve.remember.next_time"/>
-						</label>
-					</fieldset>
 				</div>
 
 			</div>
@@ -258,6 +224,7 @@
                 <spring:message code="approve.label.authorize" var="authorize_label"/>
                 <spring:message code="approve.label.deny" var="deny_label"/>
 				<input id="user_oauth_approval" name="user_oauth_approval" value="true" type="hidden" />
+				<input type="hidden" name="user_code" value="${ dc.userCode }" />
 				<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
 				<input name="authorize" value="${authorize_label}" type="submit"
 				onclick="$('#user_oauth_approval').attr('value',true)" class="btn btn-success btn-large" /> 

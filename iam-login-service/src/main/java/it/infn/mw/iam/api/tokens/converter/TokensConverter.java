@@ -1,16 +1,5 @@
 package it.infn.mw.iam.api.tokens.converter;
 
-import it.infn.mw.iam.api.scim.converter.ScimResourceLocationProvider;
-import it.infn.mw.iam.api.tokens.TokensResourceLocationProvider;
-import it.infn.mw.iam.api.tokens.model.AccessToken;
-import it.infn.mw.iam.api.tokens.model.ClientRef;
-import it.infn.mw.iam.api.tokens.model.IdTokenRef;
-import it.infn.mw.iam.api.tokens.model.RefreshToken;
-import it.infn.mw.iam.api.tokens.model.UserRef;
-import it.infn.mw.iam.core.user.exception.IamAccountException;
-import it.infn.mw.iam.persistence.model.IamAccount;
-import it.infn.mw.iam.persistence.repository.IamAccountRepository;
-
 import org.mitre.oauth2.model.AuthenticationHolderEntity;
 import org.mitre.oauth2.model.ClientDetailsEntity;
 import org.mitre.oauth2.model.OAuth2AccessTokenEntity;
@@ -19,6 +8,16 @@ import org.mitre.oauth2.model.SavedUserAuthentication;
 import org.mitre.oauth2.service.ClientDetailsEntityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import it.infn.mw.iam.api.scim.converter.ScimResourceLocationProvider;
+import it.infn.mw.iam.api.tokens.TokensResourceLocationProvider;
+import it.infn.mw.iam.api.tokens.model.AccessToken;
+import it.infn.mw.iam.api.tokens.model.ClientRef;
+import it.infn.mw.iam.api.tokens.model.RefreshToken;
+import it.infn.mw.iam.api.tokens.model.UserRef;
+import it.infn.mw.iam.core.user.exception.IamAccountException;
+import it.infn.mw.iam.persistence.model.IamAccount;
+import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
 @Component
 public class TokensConverter {
@@ -41,13 +40,11 @@ public class TokensConverter {
 
     ClientRef clientRef = buildClientRef(ah.getClientId());
     UserRef userRef = buildUserRef(ah.getUserAuth());
-    IdTokenRef idTokenRef = buildIdTokenRef(at.getIdToken());
-
+    
     return AccessToken.builder()
         .id(at.getId())
         .client(clientRef)
         .expiration(at.getExpiration())
-        .idToken(idTokenRef)
         .scopes(at.getScope())
         .user(userRef)
         .value(at.getValue())
@@ -102,18 +99,6 @@ public class TokensConverter {
         .id(account.getUuid())
         .userName(account.getUsername())
         .ref(scimResourceLocationProvider.userLocation(account.getUuid()))
-        .build();
-  }
-
-  private IdTokenRef buildIdTokenRef(OAuth2AccessTokenEntity idToken) {
-
-    if (idToken == null) {
-      return null;
-    }
-
-    return IdTokenRef.builder()
-        .id(idToken.getId())
-        .ref(tokensResourceLocationProvider.accessTokenLocation(idToken.getId()))
         .build();
   }
 }
