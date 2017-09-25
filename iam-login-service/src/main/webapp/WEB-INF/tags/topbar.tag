@@ -43,9 +43,11 @@
 			</a>
 			<c:if test="${ not empty pageName }">
 				<div class="nav-collapse collapse">
+					<%-- comment out mitreid nav
 					<ul class="nav">
 						<o:navmenu pageName="${ pageName }" />
 					</ul>
+					--%>
 	
 					<security:authorize access="hasRole('ROLE_USER')">
 	
@@ -92,7 +94,7 @@
 					</form>
 	                
 	            </div><!--/.nav-collapse -->
-			</c:if>
+		    </c:if>
         </div>
     </div>
 </div>
