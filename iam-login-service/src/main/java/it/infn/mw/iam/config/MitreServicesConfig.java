@@ -288,4 +288,5 @@ public class MitreServicesConfig {
   SelfAssertionValidator selfAssertionValidator() {
     return new SelfAssertionValidator();
   }
+  
 }

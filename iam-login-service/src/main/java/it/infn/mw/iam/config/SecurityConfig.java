@@ -3,17 +3,6 @@ package it.infn.mw.iam.config;
 import static it.infn.mw.iam.api.tokens.Constants.ACCESS_TOKENS_ENDPOINT;
 import static it.infn.mw.iam.api.tokens.Constants.REFRESH_TOKENS_ENDPOINT;
 
-import it.infn.mw.iam.authn.RootIsDashboardSuccessHandler;
-import it.infn.mw.iam.authn.TimestamperSuccessHandler;
-import it.infn.mw.iam.authn.oidc.OidcAccessDeniedHandler;
-import it.infn.mw.iam.authn.oidc.OidcAuthenticationProvider;
-import it.infn.mw.iam.authn.oidc.OidcClientFilter;
-import it.infn.mw.iam.authn.x509.IamX509AuthenticationProvider;
-import it.infn.mw.iam.authn.x509.IamX509AuthenticationUserDetailService;
-import it.infn.mw.iam.authn.x509.IamX509PreauthenticationProcessingFilter;
-import it.infn.mw.iam.authn.x509.X509AuthenticationCredentialExtractor;
-import it.infn.mw.iam.persistence.repository.IamAccountRepository;
-
 import org.mitre.oauth2.service.OAuth2TokenEntityService;
 import org.mitre.oauth2.web.CorsFilter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +39,17 @@ import org.springframework.security.web.context.request.async.WebAsyncManagerInt
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.filter.GenericFilterBean;
+
+import it.infn.mw.iam.authn.RootIsDashboardSuccessHandler;
+import it.infn.mw.iam.authn.TimestamperSuccessHandler;
+import it.infn.mw.iam.authn.oidc.OidcAccessDeniedHandler;
+import it.infn.mw.iam.authn.oidc.OidcAuthenticationProvider;
+import it.infn.mw.iam.authn.oidc.OidcClientFilter;
+import it.infn.mw.iam.authn.x509.IamX509AuthenticationProvider;
+import it.infn.mw.iam.authn.x509.IamX509AuthenticationUserDetailService;
+import it.infn.mw.iam.authn.x509.IamX509PreauthenticationProcessingFilter;
+import it.infn.mw.iam.authn.x509.X509AuthenticationCredentialExtractor;
+import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
 @Configuration
 @EnableWebSecurity
@@ -121,7 +121,7 @@ public class SecurityConfig {
 
       http.requestMatchers()
         .antMatchers("/", "/login**", "/logout", "/authorize", "/manage/**", "/dashboard**", "/register",
-            "/reset-session")
+            "/reset-session", "/device/**")
         .and()
         .sessionManagement()
           .enableSessionUrlRewriting(false)
@@ -131,6 +131,7 @@ public class SecurityConfig {
             .antMatchers("/register").permitAll()
             .antMatchers("/authorize**").permitAll()
             .antMatchers("/reset-session").permitAll()
+            .antMatchers("/device/**").authenticated()
             .antMatchers("/").authenticated()
         .and()
           .formLogin()
@@ -740,6 +741,49 @@ public class SecurityConfig {
         .disable();
       // @formatter:on
     }
+  }
+  
+  @Configuration
+  @Order(26)
+  public static class DeviceCodeEnpointConfig extends WebSecurityConfigurerAdapter {
+    @Autowired
+    private OAuth2AuthenticationProcessingFilter resourceFilter;
+    
+    @Autowired
+    @Qualifier("clientUserDetailsService")
+    private UserDetailsService userDetailsService;
+
+    @Autowired
+    private CorsFilter corsFilter;
+    
+    @Autowired
+    private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
+    
+    @Override
+    protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
+
+      auth.userDetailsService(userDetailsService);
+    }
+    
+    @Override
+    protected void configure(final HttpSecurity http) throws Exception {
+
+      // @formatter:off
+      http.antMatcher("/devicecode/**")
+        .httpBasic()
+          .authenticationEntryPoint(authenticationEntryPoint)
+        .and()
+          .addFilterBefore(corsFilter, SecurityContextPersistenceFilter.class)
+          .sessionManagement()
+            .sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+        .csrf()
+          .disable()
+        .authorizeRequests()
+          .anyRequest()
+            .fullyAuthenticated();
+      // @formatter:on
+    }
+    
   }
 
   @Configuration
