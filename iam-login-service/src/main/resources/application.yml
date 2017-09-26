@@ -45,6 +45,13 @@ iam:
     name: ${IAM_ORGANISATION_NAME:indigo-dc}
 
   keyStoreLocation: ${IAM_KEY_STORE_LOCATION:classpath:keystore.jwks}
+  
+  privacyPolicy:
+    url: ${IAM_PRIVACY_POLICY_URL:}
+    text: ${IAM_PRIVACY_POLICY_TEXT:Privacy policy}
+  
+  loginButton:
+    text: ${IAM_LOGIN_BUTTON_TEXT:Sign in with your ${iam.organisation.name} credentials}
 
 x509:
   trustAnchorsDir: ${IAM_X509_TRUST_ANCHORS_DIR:/etc/grid-security/certificates}

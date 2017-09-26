@@ -44,7 +44,11 @@
         </div>
       </c:if>
     </div>
-
+    
+    <div style="text-align: center">
+      <h3>Welcome to <strong>${iamProperties.organisationName}</strong></h3>
+    </div>
+   
     <form id="login-form" action="/login" method="post">
 
       <div class="form-group">
@@ -68,9 +72,18 @@
 
       <div>
         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"> 
-        <input type="submit" class="btn btn-primary btn-block" value="Login" name="submit" class="form-control">
+        <input type="submit" class="btn btn-primary btn-block" value="${loginPageConfiguration.loginButtonText}" 
+          name="submit" class="form-control">
       </div>
     </form>
+    
+    <c:if test="${loginPageConfiguration.registrationEnabled}">
+       <div id="forgot-password" ng-controller="ForgotPasswordModalController">
+        <a class="btn btn-link btn-block" ng-click="open()">Forgot your password?</a>
+      </div>
+    </c:if>
+    
+    
 
     <div id="login-external-authn">
       <c:if test="${loginPageConfiguration.googleEnabled}">
@@ -91,8 +104,13 @@
       <div id="login-registration">
         <a class="btn btn-success btn-block" href="/register">Register a new account</a>
       </div>
-      <div id="forgot-password" ng-controller="ForgotPasswordModalController">
-        <a class="btn btn-link btn-block" ng-click="open()">Forgot your password?</a>
+    </c:if>
+    
+    <c:if test="${loginPageConfiguration.privacyPolicyUrl.isPresent()}">
+      <div id="privacy-policy">
+          <a class="btn btn-link btn-block" href="${loginPageConfiguration.privacyPolicyUrl.get()}">
+            ${loginPageConfiguration.privacyPolicyText}
+          </a>
       </div>
     </c:if>
   </jsp:body>
