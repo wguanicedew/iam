@@ -80,11 +80,11 @@ notification:
   cleanupAge: ${IAM_NOTIFICATION_CLEANUP_AGE:30}
   adminAddress: ${IAM_NOTIFICATION_ADMIN_ADDRESS:indigo-alerts@localhost}
   subject:
-    confirmation: Confirm Indigo registration request
-    activated: Indigo Account activated
-    rejected: Indigo Account request rejected
-    adminHandleRequest: New Indigo account request
-    resetPassword: Indigo account reset password
+    confirmation: Confirm your ${iam.organisation.name} registration request
+    activated: Your ${iam.organisation.name} account is now active
+    rejected: Your request for a ${iam.organisation.name} account has been rejected
+    adminHandleRequest: New ${iam.organisation.name} account request
+    resetPassword: Reset your ${iam.organisation.name} account password
 
 task:
   tokenCleanupPeriodMsec: ${IAM_TOKEN_CLEANUP_PERIOD_MSEC:300000}
