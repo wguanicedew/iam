@@ -286,6 +286,11 @@
     </dependency>
 
     <dependency>
+      <groupId>cz.jirutka.validator</groupId>
+      <artifactId>validator-collection</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>org.subethamail</groupId>
       <artifactId>subethasmtp-wiser</artifactId>
       <version>1.2</version>

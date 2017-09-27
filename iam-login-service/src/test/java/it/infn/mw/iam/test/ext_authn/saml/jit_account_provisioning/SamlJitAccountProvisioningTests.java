@@ -28,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.authn.saml.util.Saml2Attribute;
-import it.infn.mw.iam.config.saml.IamSamlProperties.IamSamlJITAccountProvisioningProperties;
+import it.infn.mw.iam.config.saml.IamSamlJITAccountProvisioningProperties;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.test.ext_authn.saml.SamlAuthenticationTestSupport;
