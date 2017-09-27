@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
+import it.infn.mw.iam.config.saml.IamSamlProperties;
 import it.infn.mw.iam.core.IamProperties;
 
 @Component
@@ -15,6 +16,7 @@ public class IamViewInfoInterceptor extends HandlerInterceptorAdapter {
 
   public static final String LOGIN_PAGE_CONFIGURATION_KEY = "loginPageConfiguration";
   public static final String IAM_PROPERTIES_KEY = "iamProperties";
+  public static final String IAM_SAML_PROPERTIES_KEY = "iamSamlProperties";
 
   @Value("${iam.version}")
   String iamVersion;
@@ -28,6 +30,9 @@ public class IamViewInfoInterceptor extends HandlerInterceptorAdapter {
   @Autowired
   IamProperties properties;
 
+  @Autowired
+  IamSamlProperties samlProperties;
+  
   @Override
   public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
       throws Exception {
@@ -37,6 +42,7 @@ public class IamViewInfoInterceptor extends HandlerInterceptorAdapter {
 
     request.setAttribute(LOGIN_PAGE_CONFIGURATION_KEY, loginPageConfiguration);
     request.setAttribute(IAM_PROPERTIES_KEY, properties);
+    request.setAttribute(IAM_SAML_PROPERTIES_KEY, samlProperties);
 
     return true;
   }

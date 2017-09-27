@@ -1,12 +1,12 @@
 package it.infn.mw.iam.config.saml;
 
+import static com.google.common.collect.Sets.newHashSet;
 import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.EPPN;
 import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.EPTID;
 import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.EPUID;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,6 +24,8 @@ import org.apache.velocity.app.VelocityEngine;
 import org.opensaml.saml2.core.NameIDType;
 import org.opensaml.saml2.metadata.provider.FileBackedHTTPMetadataProvider;
 import org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider;
+import org.opensaml.saml2.metadata.provider.MetadataFilter;
+import org.opensaml.saml2.metadata.provider.MetadataFilterChain;
 import org.opensaml.saml2.metadata.provider.MetadataProvider;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.saml2.metadata.provider.ResourceBackedMetadataProvider;
@@ -67,7 +69,6 @@ import org.springframework.security.saml.key.KeyManager;
 import org.springframework.security.saml.log.SAMLDefaultLogger;
 import org.springframework.security.saml.metadata.CachingMetadataManager;
 import org.springframework.security.saml.metadata.ExtendedMetadata;
-import org.springframework.security.saml.metadata.ExtendedMetadataDelegate;
 import org.springframework.security.saml.metadata.MetadataDisplayFilter;
 import org.springframework.security.saml.metadata.MetadataGenerator;
 import org.springframework.security.saml.metadata.MetadataGeneratorFilter;
@@ -107,7 +108,6 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 
 import it.infn.mw.iam.authn.ExternalAuthenticationFailureHandler;
@@ -117,6 +117,8 @@ import it.infn.mw.iam.authn.RootIsDashboardSuccessHandler;
 import it.infn.mw.iam.authn.TimestamperSuccessHandler;
 import it.infn.mw.iam.authn.saml.CleanInactiveProvisionedAccounts;
 import it.infn.mw.iam.authn.saml.DefaultSAMLUserDetailsService;
+import it.infn.mw.iam.authn.saml.IamCachingMetadataManader;
+import it.infn.mw.iam.authn.saml.IamExtendedMetadataDelegate;
 import it.infn.mw.iam.authn.saml.IamSamlAuthenticationProvider;
 import it.infn.mw.iam.authn.saml.JustInTimeProvisioningSAMLUserDetailsService;
 import it.infn.mw.iam.authn.saml.MetadataLookupService;
@@ -124,7 +126,8 @@ import it.infn.mw.iam.authn.saml.SamlExceptionMessageHelper;
 import it.infn.mw.iam.authn.saml.util.FirstApplicableChainedSamlIdResolver;
 import it.infn.mw.iam.authn.saml.util.SamlIdResolvers;
 import it.infn.mw.iam.authn.saml.util.SamlUserIdentifierResolver;
-import it.infn.mw.iam.config.saml.IamSamlProperties.IamSamlJITAccountProvisioningProperties;
+import it.infn.mw.iam.authn.saml.util.metadata.ResearchAndScholarshipMetadataFilter;
+import it.infn.mw.iam.authn.saml.util.metadata.SirtfiAttributeMetadataFilter;
 import it.infn.mw.iam.config.saml.SamlConfig.IamProperties;
 import it.infn.mw.iam.config.saml.SamlConfig.ServerProperties;
 import it.infn.mw.iam.core.time.SystemTimeProvider;
@@ -443,14 +446,52 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
     extendedMetadata.setIdpDiscoveryEnabled(true);
     extendedMetadata.setIdpDiscoveryURL(discoveryUrl);
     extendedMetadata.setSignMetadata(false);
+    
     return extendedMetadata;
   }
 
-  private ExtendedMetadataDelegate metadataDelegate(MetadataProvider p) {
-    ExtendedMetadataDelegate extendedMetadataDelegate =
-        new ExtendedMetadataDelegate(p, extendedMetadata());
+  private void configureMetadataFiltering(MetadataProvider p, IamSamlIdpMetadataProperties props) {
+
+    List<MetadataFilter> filters = new ArrayList<>();
+
+    if (props.getRequireRs()) {
+      filters.add(new ResearchAndScholarshipMetadataFilter());
+    }
+
+    if (props.getRequireSirtfi()) {
+      filters.add(new SirtfiAttributeMetadataFilter());
+    }
+
+    if (!filters.isEmpty()) {
+      try {
+        
+        MetadataFilterChain chain = new MetadataFilterChain();
+        chain.setFilters(filters);
+
+        p.setMetadataFilter(chain);
+      } catch (MetadataProviderException e) {
+        LOG.error(e.getMessage(), e);
+      }
+    }
+  }
+
+  private IamExtendedMetadataDelegate metadataDelegate(MetadataProvider p,
+      IamSamlIdpMetadataProperties props) {
+
+    configureMetadataFiltering(p, props);
+
+    IamExtendedMetadataDelegate extendedMetadataDelegate =
+        new IamExtendedMetadataDelegate(p, extendedMetadata());
+    
     extendedMetadataDelegate.setMetadataTrustCheck(true);
-    extendedMetadataDelegate.setMetadataRequireSignature(false);
+    extendedMetadataDelegate.setRequireValidMetadata(true);
+    
+    if (props.getKeyAlias()!= null){
+      extendedMetadataDelegate.setMetadataTrustedKeys(newHashSet(props.getKeyAlias()));
+    }
+    
+    extendedMetadataDelegate.setMetadataRequireSignature(props.getRequireValidSignature());
+
     return extendedMetadataDelegate;
   }
 
@@ -459,54 +500,48 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
 
     List<MetadataProvider> providers = new ArrayList<>();
 
-    String metadata = samlProperties.getIdpMetadata();
+    for (IamSamlIdpMetadataProperties p : samlProperties.getIdpMetadata()) {
+      String trimmedMedataUrl = p.getMetadataUrl().trim();
 
-    Iterable<String> metadataIterable =
-        Splitter.on(",").trimResults().omitEmptyStrings().split(metadata);
-
-
-    for (String m : metadataIterable) {
-      if (m.startsWith("classpath:")) {
-        LOG.info("Adding classpath based metadata provider for URL: {}", m);
+      if (trimmedMedataUrl.startsWith("classpath:")) {
+        LOG.info("Adding classpath based metadata provider for URL: {}", trimmedMedataUrl);
 
         ClasspathResource cpMetadataResources =
-            new ClasspathResource(m.replaceFirst("classpath:", ""));
+            new ClasspathResource(trimmedMedataUrl.replaceFirst("classpath:", ""));
 
         ResourceBackedMetadataProvider metadataProvider =
             new ResourceBackedMetadataProvider(metadataFetchTimer, cpMetadataResources);
 
         metadataProvider.setParserPool(basicParserPool);
-        metadataProvider.initialize();
-        providers.add(metadataDelegate(metadataProvider));
+        providers.add(metadataDelegate(metadataProvider, p));
 
-      } else if (m.startsWith("file:")) {
+      } else if (trimmedMedataUrl.startsWith("file:")) {
 
-        LOG.info("Adding File based metadata provider for URL: {}", m);
-        Resource metadataResource = resourceLoader.getResource(m);
+        LOG.info("Adding File based metadata provider for URL: {}", trimmedMedataUrl);
+        Resource metadataResource = resourceLoader.getResource(trimmedMedataUrl);
 
 
         FilesystemMetadataProvider metadataProvider =
             new FilesystemMetadataProvider(metadataResource.getFile());
 
         metadataProvider.setParserPool(basicParserPool);
-        metadataProvider.initialize();
-        providers.add(metadataDelegate(metadataProvider));
+        providers.add(metadataDelegate(metadataProvider, p));
 
-      } else if (m.startsWith("http")) {
+      } else if (trimmedMedataUrl.startsWith("http")) {
 
-        LOG.info("Adding HTTP metadata provider for URL: {}", m);
+        LOG.info("Adding HTTP metadata provider for URL: {}", trimmedMedataUrl);
 
         File metadataBackupFile = Files.createTempFile("metadata", "xml").toFile();
         metadataBackupFile.deleteOnExit();
 
-        FileBackedHTTPMetadataProvider metadataProvider = new FileBackedHTTPMetadataProvider(
-            metadataFetchTimer, httpClient(), m, metadataBackupFile.getAbsolutePath());
+        FileBackedHTTPMetadataProvider metadataProvider =
+            new FileBackedHTTPMetadataProvider(metadataFetchTimer, httpClient(), trimmedMedataUrl,
+                metadataBackupFile.getAbsolutePath());
 
         metadataProvider.setParserPool(basicParserPool);
-        metadataProvider.initialize();
-        providers.add(metadataDelegate(metadataProvider));
+        providers.add(metadataDelegate(metadataProvider, p));
       } else {
-        LOG.error("Skipping invalid saml.idp-metatadata value: {}", m);
+        LOG.error("Skipping invalid saml.idp-metatadata value: {}", trimmedMedataUrl);
       }
     }
 
@@ -523,9 +558,12 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
   @Bean
   @Qualifier("metadata")
   public CachingMetadataManager metadata()
-      throws MetadataProviderException, URISyntaxException, IOException, ResourceException {
+      throws MetadataProviderException, IOException, ResourceException {
 
-    return new CachingMetadataManager(metadataProviders());
+    CachingMetadataManager manager = new IamCachingMetadataManader(metadataProviders());
+    manager.setKeyManager(keyManager());
+    manager.refreshMetadata();
+    return manager;
   }
 
   @Bean

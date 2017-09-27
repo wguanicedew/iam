@@ -11,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import it.infn.mw.iam.config.saml.IamSamlProperties;
 import it.infn.mw.iam.core.IamProperties;
 
 @Controller
@@ -24,6 +25,9 @@ public class LoginController {
 
   @Autowired
   IamProperties properties;
+  
+  @Autowired
+  IamSamlProperties samlProperties;
 
   @RequestMapping("/login")
   public String login(Authentication authentication, Model model, HttpServletRequest request) {
