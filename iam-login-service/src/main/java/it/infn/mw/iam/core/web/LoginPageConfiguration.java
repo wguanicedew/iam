@@ -1,5 +1,7 @@
 package it.infn.mw.iam.core.web;
 
+import java.util.Optional;
+
 public interface LoginPageConfiguration {
 
   boolean isGoogleEnabled();
