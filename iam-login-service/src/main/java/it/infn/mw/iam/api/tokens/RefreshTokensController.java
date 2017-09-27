@@ -2,13 +2,7 @@ package it.infn.mw.iam.api.tokens;
 
 import static it.infn.mw.iam.api.tokens.Constants.REFRESH_TOKENS_ENDPOINT;
 
-import it.infn.mw.iam.api.account.authority.ErrorDTO;
-import it.infn.mw.iam.api.tokens.exception.TokenNotFoundException;
-import it.infn.mw.iam.api.tokens.model.RefreshToken;
-import it.infn.mw.iam.api.tokens.model.TokensListResponse;
-import it.infn.mw.iam.api.tokens.service.TokenService;
-import it.infn.mw.iam.api.tokens.service.paging.TokensPageRequest;
-import it.infn.mw.iam.core.user.exception.IamAccountException;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,7 +17,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Optional;
+import it.infn.mw.iam.api.common.ErrorDTO;
+import it.infn.mw.iam.api.tokens.exception.TokenNotFoundException;
+import it.infn.mw.iam.api.tokens.model.RefreshToken;
+import it.infn.mw.iam.api.tokens.model.TokensListResponse;
+import it.infn.mw.iam.api.tokens.service.TokenService;
+import it.infn.mw.iam.api.tokens.service.paging.TokensPageRequest;
+import it.infn.mw.iam.core.user.exception.IamAccountException;
 
 @RestController
 @Transactional

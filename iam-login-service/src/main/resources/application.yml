@@ -5,9 +5,9 @@ server:
   port: ${IAM_PORT:8080}
   tomcat:
     accesslog:
-      enabled: true
-      directory: /tmp
-      pattern: "%a asdasd"
+      enabled: ${IAM_TOMCAT_ACCESS_LOG_ENABLED:false}
+      directory: ${IAM_TOMCAT_ACCESS_LOG_DIRECTORY:/tmp}
+      pattern: "%{X-Forwarded-For}i %l %u %t \"%r\" %s %b"
 
   use-forward-headers: ${IAM_USE_FORWARDED_HEADERS:false}
 
@@ -45,6 +45,14 @@ iam:
     name: ${IAM_ORGANISATION_NAME:indigo-dc}
 
   keyStoreLocation: ${IAM_KEY_STORE_LOCATION:classpath:keystore.jwks}
+  
+  privacyPolicy:
+    url: ${IAM_PRIVACY_POLICY_URL:}
+    text: ${IAM_PRIVACY_POLICY_TEXT:Privacy policy}
+  
+  loginButton:
+    text: ${IAM_LOGIN_BUTTON_TEXT:Sign in}
+
   enableScopeAuthz: ${IAM_ENABLE_SCOPE_AUTHZ:true}
 
 x509:
