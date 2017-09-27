@@ -5,9 +5,9 @@ server:
   port: ${IAM_PORT:8080}
   tomcat:
     accesslog:
-      enabled: true
-      directory: /tmp
-      pattern: "%a asdasd"
+      enabled: ${IAM_TOMCAT_ACCESS_LOG_ENABLED:false}
+      directory: ${IAM_TOMCAT_ACCESS_LOG_DIRECTORY:/tmp}
+      pattern: "%{X-Forwarded-For}i %l %u %t \"%r\" %s %b"
 
   use-forward-headers: ${IAM_USE_FORWARDED_HEADERS:false}
 
@@ -51,7 +51,7 @@ iam:
     text: ${IAM_PRIVACY_POLICY_TEXT:Privacy policy}
   
   loginButton:
-    text: ${IAM_LOGIN_BUTTON_TEXT:Sign in with your ${iam.organisation.name} credentials}
+    text: ${IAM_LOGIN_BUTTON_TEXT:Sign in}
 
 x509:
   trustAnchorsDir: ${IAM_X509_TRUST_ANCHORS_DIR:/etc/grid-security/certificates}
