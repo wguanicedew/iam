@@ -27,6 +27,7 @@ import it.infn.mw.iam.core.IamBanner;
     "it.infn.mw.iam.authn",
     "it.infn.mw.iam.persistence", 
     "it.infn.mw.iam.core",
+    "it.infn.mw.iam.core.oauth.scope",
     "it.infn.mw.iam.api", 
     "it.infn.mw.iam.registration", 
     "it.infn.mw.iam.dashboard",

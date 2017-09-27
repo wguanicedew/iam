@@ -45,6 +45,7 @@ iam:
     name: ${IAM_ORGANISATION_NAME:indigo-dc}
 
   keyStoreLocation: ${IAM_KEY_STORE_LOCATION:classpath:keystore.jwks}
+  enableScopeAuthz: ${IAM_ENABLE_SCOPE_AUTHZ:true}
 
 x509:
   trustAnchorsDir: ${IAM_X509_TRUST_ANCHORS_DIR:/etc/grid-security/certificates}
