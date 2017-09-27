@@ -203,6 +203,16 @@
 
   </dependencyManagement>
 
+  <repositories>
+    <repository>
+      <id>infn-cnaf</id>
+      <url>https://repo.cloud.cnaf.infn.it/repository/maven-public/</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+
   <build>
 
     <pluginManagement>
