@@ -1,5 +1,25 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- The login button text can now be customised for local (#185) and SAML
+  login (#177)
+- A privacy policy can now be linked to the IAM login page (#182)
+- Improved error pages rendering (#178)
+- SAML metadata can now be filtered according to certain conditions (e.g.,
+  SIRTFI compliance)
+- The organisation name is now included in the IAM dashboard top bar (#186)
+- IAM now implements a scope policy management API that allows to restrict the
+  use of OAuth scopes only to selected users or group of users (#80)
+
+### Fixed
+
+- IAM now correctly enforces SAML metadata signature checks (#175)
+- The subject of IAM notification messages now includes the organisation name
+  (#163)
+
 ## 1.0.0 (2017-8-31)
 
 This release provides improvements, bug fixes and new features:
