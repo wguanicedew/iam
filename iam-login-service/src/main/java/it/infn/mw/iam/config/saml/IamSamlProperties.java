@@ -3,31 +3,23 @@ package it.infn.mw.iam.config.saml;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import org.hibernate.validator.constraints.NotBlank;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "saml")
 public class IamSamlProperties {
 
-  @NotBlank
   private String entityId;
   
-  @NotBlank
   private String keystore;
   
-  @NotBlank
   private String keystorePassword;
   
-  @NotBlank
   private String keyId;
   
-  @NotBlank
-  private String keyPassword;
+  private String keyPassword ;
   
-  @NotBlank
   private String idResolvers;
   
-  @NotBlank
   private String loginButtonText;
 
   private int maxAssertionTimeSec;

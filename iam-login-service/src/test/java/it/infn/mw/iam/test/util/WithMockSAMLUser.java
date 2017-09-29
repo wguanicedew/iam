@@ -28,6 +28,8 @@ public @interface WithMockSAMLUser {
 
   String issuer() default DEFAULT_IDP_ID;
 
+  String eppn() default "test-saml-user@" + DEFAULT_IDP_ID;
+
   String[] authorities() default {EXT_AUTHN_UNREGISTERED_USER_ROLE};
 
   long expirationTime() default -1;

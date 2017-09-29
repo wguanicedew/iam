@@ -11,9 +11,9 @@ import org.springframework.security.saml.SAMLCredential;
 import com.google.common.base.Strings;
 
 import it.infn.mw.iam.authn.saml.SamlExternalAuthenticationToken;
+import it.infn.mw.iam.authn.saml.util.Saml2Attribute;
 import it.infn.mw.iam.authn.saml.util.SamlAttributeNames;
 import it.infn.mw.iam.persistence.model.IamSamlId;
-
 import it.infn.mw.iam.test.ext_authn.saml.SamlAuthenticationTestSupport;
 import it.infn.mw.iam.test.util.SecurityContextBuilderSupport;
 
@@ -27,6 +27,12 @@ public class SamlSecurityContextBuilder extends SecurityContextBuilderSupport {
     samlCredential = Mockito.mock(SAMLCredential.class);
     issuer = SamlAuthenticationTestSupport.DEFAULT_IDP_ID;
     subject = "test-saml-user";
+  }
+
+  public SamlSecurityContextBuilder samlAttribute(Saml2Attribute attribute, String attributeValue) {
+    when(samlCredential.getAttributeAsString(attribute.getAttributeName()))
+      .thenReturn(attributeValue);
+    return this;
   }
 
   public SamlSecurityContextBuilder subjectAttribute(String subjectAttr) {
@@ -63,7 +69,7 @@ public class SamlSecurityContextBuilder extends SecurityContextBuilderSupport {
         expirationTime, subject, samlCredential, authorities);
 
     IamSamlId samlId = new IamSamlId(issuer, subjectAttribute, subject);
-    
+
     SamlExternalAuthenticationToken token = new SamlExternalAuthenticationToken(samlId, samlToken,
         samlToken.getTokenExpiration(), subject, samlToken.getCredentials(), authorities);
 
