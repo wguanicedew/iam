@@ -9,7 +9,7 @@
 
   <groupId>it.infn.mw</groupId>
   <artifactId>iam-parent</artifactId>
-  <version>1.0.0</version>
+  <version>1.1.0</version>
   <packaging>pom</packaging>
   <name>INDIGO Identity and Access Manager (IAM)</name>
 
@@ -41,6 +41,7 @@
     <json-path.version>2.2.0</json-path.version>
 
     <flyway-test.version>4.0</flyway-test.version>
+    <validator-collection.version>2.2.0</validator-collection.version>
 
     <resource.delimiter>@</resource.delimiter>
   </properties>
@@ -199,9 +200,25 @@
         <scope>test</scope>
       </dependency>
 
+      <dependency>
+        <groupId>cz.jirutka.validator</groupId>
+        <artifactId>validator-collection</artifactId>
+        <version>${validator-collection.version}</version>
+      </dependency>
+
     </dependencies>
 
   </dependencyManagement>
+
+  <repositories>
+    <repository>
+      <id>infn-cnaf</id>
+      <url>https://repo.cloud.cnaf.infn.it/repository/maven-public/</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
 
   <build>
 

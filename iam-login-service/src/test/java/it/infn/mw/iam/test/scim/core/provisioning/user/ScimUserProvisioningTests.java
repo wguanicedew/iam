@@ -72,7 +72,7 @@ public class ScimUserProvisioningTests {
     userService.create(scimUser);
 
     IamAccount iamAccount = accountRepo.findByUsername(scimUser.getUserName())
-      .orElseThrow(() -> new AssertionError("Expected user not found by repo"));
+      .orElseThrow(() -> new AssertionError("Expected user not found by policyRepo"));
 
     assertNotNull(iamAccount);
 

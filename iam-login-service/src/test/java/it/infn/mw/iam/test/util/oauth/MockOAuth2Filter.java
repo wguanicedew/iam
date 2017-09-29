@@ -48,4 +48,8 @@ public class MockOAuth2Filter extends OAuth2AuthenticationProcessingFilter {
     this.securityContext = securityContext;
   }
 
+  public void cleanupSecurityContext() {
+    setSecurityContext(null);
+    SecurityContextHolder.clearContext();
+  }
 }

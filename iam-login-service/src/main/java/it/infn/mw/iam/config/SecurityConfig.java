@@ -3,17 +3,6 @@ package it.infn.mw.iam.config;
 import static it.infn.mw.iam.api.tokens.Constants.ACCESS_TOKENS_ENDPOINT;
 import static it.infn.mw.iam.api.tokens.Constants.REFRESH_TOKENS_ENDPOINT;
 
-import it.infn.mw.iam.authn.RootIsDashboardSuccessHandler;
-import it.infn.mw.iam.authn.TimestamperSuccessHandler;
-import it.infn.mw.iam.authn.oidc.OidcAccessDeniedHandler;
-import it.infn.mw.iam.authn.oidc.OidcAuthenticationProvider;
-import it.infn.mw.iam.authn.oidc.OidcClientFilter;
-import it.infn.mw.iam.authn.x509.IamX509AuthenticationProvider;
-import it.infn.mw.iam.authn.x509.IamX509AuthenticationUserDetailService;
-import it.infn.mw.iam.authn.x509.IamX509PreauthenticationProcessingFilter;
-import it.infn.mw.iam.authn.x509.X509AuthenticationCredentialExtractor;
-import it.infn.mw.iam.persistence.repository.IamAccountRepository;
-
 import org.mitre.oauth2.service.OAuth2TokenEntityService;
 import org.mitre.oauth2.web.CorsFilter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +39,17 @@ import org.springframework.security.web.context.request.async.WebAsyncManagerInt
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.filter.GenericFilterBean;
+
+import it.infn.mw.iam.authn.RootIsDashboardSuccessHandler;
+import it.infn.mw.iam.authn.TimestamperSuccessHandler;
+import it.infn.mw.iam.authn.oidc.OidcAccessDeniedHandler;
+import it.infn.mw.iam.authn.oidc.OidcAuthenticationProvider;
+import it.infn.mw.iam.authn.oidc.OidcClientFilter;
+import it.infn.mw.iam.authn.x509.IamX509AuthenticationProvider;
+import it.infn.mw.iam.authn.x509.IamX509AuthenticationUserDetailService;
+import it.infn.mw.iam.authn.x509.IamX509PreauthenticationProcessingFilter;
+import it.infn.mw.iam.authn.x509.X509AuthenticationCredentialExtractor;
+import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
 @Configuration
 @EnableWebSecurity
@@ -702,9 +702,43 @@ public class SecurityConfig {
       // @formatter:on
     }
   }
-
+  
   @Configuration
   @Order(25)
+  public static class ScopePoliciesEndpointConfig extends WebSecurityConfigurerAdapter {
+    @Autowired
+    private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
+
+    @Autowired
+    private OAuth2AuthenticationProcessingFilter resourceFilter;
+
+    @Autowired
+    private CorsFilter corsFilter;
+    
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+      http.requestMatchers()
+        .antMatchers("/iam/scope_policies/**")
+        .and()
+        .exceptionHandling()
+        .authenticationEntryPoint(authenticationEntryPoint)
+        .and()
+        .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
+        .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
+        .sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.NEVER)
+        .and()
+        .authorizeRequests()
+        .antMatchers("/iam/scope_policies/**")
+        .authenticated()
+        .and()
+        .csrf()
+        .disable();
+    }
+  }
+
+  @Configuration
+  @Order(26)
   public static class TokensApiEndpointConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired

@@ -23,6 +23,8 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTClaimsSet.Builder;
 import com.nimbusds.jwt.SignedJWT;
 
+import it.infn.mw.iam.core.oauth.scope.IamScopeFilter;
+
 public class OidcTokenEnhancer extends ConnectTokenEnhancer {
 
   @Autowired
@@ -30,6 +32,9 @@ public class OidcTokenEnhancer extends ConnectTokenEnhancer {
 
   @Autowired
   private OIDCTokenService connectTokenService;
+  
+  @Autowired
+  private IamScopeFilter scopeFilter;
   
   private static final String AUD_KEY = "aud";
   
@@ -92,6 +97,8 @@ public class OidcTokenEnhancer extends ConnectTokenEnhancer {
 
     UserInfo userInfo = userInfoService.getByUsernameAndClientId(username, clientId);
 
+    scopeFilter.filterScopes(accessToken.getScope(), authentication);
+    
     Date issueTime = new Date();
     OAuth2AccessTokenEntity accessTokenEntity =
         buildAccessToken(accessToken, authentication, userInfo, issueTime);
