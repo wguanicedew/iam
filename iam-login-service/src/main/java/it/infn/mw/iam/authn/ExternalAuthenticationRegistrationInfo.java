@@ -27,6 +27,8 @@ public class ExternalAuthenticationRegistrationInfo implements Serializable {
 
   private String givenName;
   private String familyName;
+  
+  private String suggestedUsername;
 
   public ExternalAuthenticationRegistrationInfo(ExternalAuthenticationType type) {
     this.type = type;
@@ -37,7 +39,8 @@ public class ExternalAuthenticationRegistrationInfo implements Serializable {
       @JsonProperty("issuer") String issuer, @JsonProperty("subject") String subject,
       @JsonProperty("subject_attribute") String subjectAttribute,
       @JsonProperty("email") String email, @JsonProperty("given_name") String givenName,
-      @JsonProperty("family_name") String familyName) {
+      @JsonProperty("family_name") String familyName,
+      @JsonProperty("suggested_username") String suggestedUsername) {
 
     this.type = ExternalAuthenticationType.valueOf(type);
     this.issuer = issuer;
@@ -46,6 +49,7 @@ public class ExternalAuthenticationRegistrationInfo implements Serializable {
     this.givenName = givenName;
     this.familyName = familyName;
     this.subjectAttribute = subjectAttribute;
+    this.suggestedUsername = suggestedUsername;
   }
 
   public ExternalAuthenticationType getType() {
@@ -102,4 +106,15 @@ public class ExternalAuthenticationRegistrationInfo implements Serializable {
   public void setSubjectAttribute(String subjectAttribute) {
     this.subjectAttribute = subjectAttribute;
   }
+
+  @JsonProperty("suggested_username")
+  public String getSuggestedUsername() {
+    return suggestedUsername;
+  }
+
+  public void setSuggestedUsername(String suggestedUsername) {
+    this.suggestedUsername = suggestedUsername;
+  }
+  
+  
 }

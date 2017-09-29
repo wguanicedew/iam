@@ -1,5 +1,6 @@
 package it.infn.mw.iam.authn.saml;
 
+import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.EPPN;
 import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.GIVEN_NAME;
 import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.MAIL;
 import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.SN;
@@ -64,6 +65,10 @@ public class SamlExternalAuthenticationToken
 
     if (!Strings.isNullOrEmpty(cred.getAttributeAsString(MAIL.getAttributeName()))) {
       ri.setEmail(cred.getAttributeAsString(MAIL.getAttributeName()));
+    }
+    
+    if (!Strings.isNullOrEmpty(cred.getAttributeAsString(EPPN.getAttributeName()))) {
+      ri.setSuggestedUsername(cred.getAttributeAsString(EPPN.getAttributeName()));
     }
 
     return ri;

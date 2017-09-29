@@ -70,7 +70,8 @@ public class SamlExternalAuthenticationTests extends SamlAuthenticationTestSuppo
       .andExpect(jsonPath("$.email").value(equalTo(T1_MAIL)))
       .andExpect(jsonPath("$.type").value(equalTo(SAML.name())))
       .andExpect(jsonPath("$.issuer").value(equalTo(DEFAULT_IDP_ID)))
-      .andExpect(jsonPath("$.subject").value(equalTo(T1_EPUID)));
+      .andExpect(jsonPath("$.subject").value(equalTo(T1_EPUID)))
+      .andExpect(jsonPath("$.suggested_username").value(equalTo(T1_EPPN)));
 
   }
 
