@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## 1.1.0 (2017-9-29)
 
 ### Added
 
@@ -19,6 +19,7 @@
 - IAM now correctly enforces SAML metadata signature checks (#175)
 - The subject of IAM notification messages now includes the organisation name
   (#163)
+- EPPN is used as username for users registered via SAML (#188)
 
 ## 1.0.0 (2017-8-31)
 
