@@ -86,9 +86,7 @@ angular
                 url : '/tokens',
                 resolve : {
                   clients : loadClients,
-                  users : loadUsers,
-                  accessTokensCount: loadAccessTokensCount,
-                  refreshTokensCount: loadRefreshTokensCount
+                  users : loadUsers
                 },
                 views : {
                   content : {
@@ -126,18 +124,6 @@ angular
           function loadClients(ClientsService) {
             return ClientsService.getClientList().then(function(r) {
               return r.data;
-            });
-          }
-
-          function loadAccessTokensCount(TokensService) {
-            return TokensService.getAccessTokensCount().then(function(r) {
-              return r.data.totalResults;
-            });
-          }
-
-          function loadRefreshTokensCount(TokensService) {
-            return TokensService.getRefreshTokensCount().then(function(r) {
-              return r.data.totalResults;
             });
           }
         });

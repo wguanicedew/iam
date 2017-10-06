@@ -13,8 +13,16 @@
         <div class="row" ng-cloak>
             <div class="col-xs-12">
                 <ul class="nav nav-tabs">
-	                <li ng-class="$ctrl.selected == 0 ? 'active' : ''"><a href="" ng-click="$ctrl.selected = 0"><strong>Access Tokens</strong>&nbsp;&nbsp;<span class="label label-primary">{{$ctrl.totAccessTokens}}</span></a></li>
-	                <li ng-class="$ctrl.selected == 1 ? 'active' : ''"><a href="" ng-click="$ctrl.selected = 1"><strong>Refresh Tokens</strong>&nbsp;&nbsp;<span class="label label-primary">{{$ctrl.totRefreshTokens}}</span></a></li>
+	                <li ng-class="$ctrl.selected == 0 ? 'active' : ''">
+	                   <a href="" ng-click="$ctrl.selected = 0" id="tabAccessTokens">
+	                       <strong>Access Tokens</strong>&nbsp;&nbsp;<span class="label label-primary" id="atBadge">{{$root.loggedUser.accessTokensCount}}</span>
+	                   </a>
+	                </li>
+	                <li ng-class="$ctrl.selected == 1 ? 'active' : ''">
+	                   <a href="" ng-click="$ctrl.selected = 1" id="tabRefreshTokens">
+	                       <strong>Refresh Tokens</strong>&nbsp;&nbsp;<span class="label label-primary" id="rtBadge">{{$root.loggedUser.refreshTokensCount}}</span>
+	                   </a>
+	                </li>
 	            </ul>
 	            <br/>
                 <tokens-accesslist ng-show="$ctrl.selected == 0" totAccessTokens="$ctrl.totAccessTokens" clients="$ctrl.clients" users="$ctrl.users"></tokens-accesslist>

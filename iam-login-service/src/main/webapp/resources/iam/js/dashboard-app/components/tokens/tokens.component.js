@@ -4,8 +4,6 @@
   function TokensManagementController() {
 
     var self = this;
-    self.totAccessTokens = self.accessTokensCount;
-    self.totRefreshTokens = self.refreshTokensCount;
     self.selected = 0;
 
     self.$onInit = function() {
@@ -19,9 +17,7 @@
         '/resources/iam/js/dashboard-app/components/tokens/tokens.component.html',
     bindings: {
         clients: '<',
-        users: '<',
-        accessTokensCount: '<',
-        refreshTokensCount: '<'
+        users: '<'
     },
     controller: [
       TokensManagementController

@@ -55,7 +55,7 @@
             <i class="fa fa-key"></i>
             <span>Active Tokens</span>
             <span class="pull-right-container" ng-show="($root.loggedUser.accessTokensCount + $root.loggedUser.refreshTokensCount) > 0">
-                <small class="label pull-right bg-yellow">{{$root.loggedUser.accessTokensCount + $root.loggedUser.refreshTokensCount}}</small>
+                <small class="label pull-right bg-yellow" id="tokensBadge">{{$root.loggedUser.accessTokensCount + $root.loggedUser.refreshTokensCount}}</small>
             </span>
         </a>
     </li>

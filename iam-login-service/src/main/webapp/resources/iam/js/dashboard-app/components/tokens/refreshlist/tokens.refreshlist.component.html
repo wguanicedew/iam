@@ -4,7 +4,7 @@
 
         <div class="row">
             <div class="col-md-5">
-                <ui-select ng-model="$ctrl.clientSelected" theme="bootstrap" sortable="true" close-on-select="true" input-id="search-client" style="width: 100%;" on-select="$ctrl.searchTokens()">
+                <ui-select id="rtok_client_search_btn" ng-model="$ctrl.clientSelected" theme="bootstrap" sortable="true" close-on-select="true" input-id="rtok_client_search" style="width: 100%;" on-select="$ctrl.searchTokens()">
                     <ui-select-match allow-clear="true" placeholder="Filter client...">{{$ctrl.clientSelected.clientId}}</ui-select-match>
                     <ui-select-choices repeat="client in $ctrl.clients | filter: {clientId: $select.search}">
                         <div ng-bind-html="client.clientId | highlight: $select.search"></div>
@@ -14,7 +14,7 @@
                 </ui-select>
             </div>
            <div class="col-md-5">
-                <ui-select ng-model="$ctrl.userSelected" theme="bootstrap" sortable="true" close-on-select="true" input-id="search-user" style="width: 100%;" on-select="$ctrl.searchTokens()">
+                <ui-select id="rtok_user_search_btn" ng-model="$ctrl.userSelected" theme="bootstrap" sortable="true" close-on-select="true" input-id="rtok_user_search" style="width: 100%;" on-select="$ctrl.searchTokens()">
                     <ui-select-match allow-clear="true" placeholder="Filter user...">{{$ctrl.userSelected.name.formatted}}</ui-select-match>
                     <ui-select-choices repeat="user in $ctrl.users | filter: {userName: $select.search}">
                         <div ng-bind-html="user.userName | highlight: $select.search"></div>
@@ -24,25 +24,32 @@
                 </ui-select>
             </div>
             <div class="col-md-2 text-right">
-                <button class="btn btn-default" ng-click="$ctrl.searchTokens()"><i class="fa fa-refresh"></i></button>
+                <button class="btn btn-default" id="refresh_rtoken_list" ng-click="$ctrl.searchTokens()"><i class="fa fa-refresh"></i></button>
             </div>
        </div>
     </div>
     <div class="box-body">
+
+        <div class="text-center" ng-if="$ctrl.clientSelected !== undefined || $ctrl.userSelected !== undefined">
+            <p>Filtered <span id="rtoken_filtered"><strong>{{$ctrl.tokens.length}}</strong></span> of <strong>{{$root.loggedUser.refreshTokensCount}}</strong></p>
+        </div>
+
         <div ng-if="!$ctrl.tokens.length">No active refresh-tokens found</div>
+
         <div class="table-responsive" ng-if="$ctrl.tokens.length">
 
-	       <div class="text-center">
-	            <ul uib-pagination
-	                ng-model="$ctrl.currentPage" 
-	                items-per-page="$ctrl.itemsPerPage"
-	                total-items="$ctrl.tokens.length"
-	                max-size="5"
-	                boundary-links="true">
-	            </ul>
-	        </div>
+           <div class="text-center">
+                <ul id="rtoken_pagination_top"
+                    uib-pagination
+                    ng-model="$ctrl.currentPage"
+                    items-per-page="$ctrl.itemsPerPage"
+                    total-items="$ctrl.tokens.length"
+                    max-size="5"
+                    boundary-links="true">
+                </ul>
+            </div>
 
-            <table class="table no-margin table-striped" id="tokenslist">
+            <table class="table no-margin table-striped" id="refresh_token_list">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -82,7 +89,7 @@
                             <h5>{{token.expiration | relativeDate}}</h5>
                         </td>
                         <td class="align-middle text-right">
-                            <button class="btn btn-xs btn-danger" ng-click="$ctrl.openRevokeRefreshTokenDialog(token)">
+                            <button class="btn btn-xs btn-danger" ng-click="$ctrl.openRevokeRefreshTokenDialog(token)" id="revoke_{{token.value}}">
                                 <i class="fa fa-times"></i> Revoke
                             </button>
                         </td>
@@ -91,14 +98,15 @@
             </table>
 
             <div class="text-center">
-	            <ul uib-pagination
-	                ng-model="$ctrl.currentPage" 
-	                items-per-page="$ctrl.itemsPerPage"
-	                total-items="$ctrl.tokens.length"
-	                max-size="5"
-	                boundary-links="true">
-	            </ul>
-	        </div>
+                <ul id="rtoken_pagination_bottom"
+                    uib-pagination
+                    ng-model="$ctrl.currentPage"
+                    items-per-page="$ctrl.itemsPerPage"
+                    total-items="$ctrl.tokens.length"
+                    max-size="5"
+                    boundary-links="true">
+                </ul>
+            </div>
         </div>
     </div>
     <div class="box-footer">

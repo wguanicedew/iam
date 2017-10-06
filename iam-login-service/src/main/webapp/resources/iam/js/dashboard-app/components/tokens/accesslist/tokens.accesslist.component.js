@@ -1,7 +1,7 @@
 (function() {
   'use strict';
 
-  function RevokeAccessTokenController($uibModalInstance, TokensService, token) {
+  function RevokeAccessTokenController($rootScope, $uibModalInstance, TokensService, token) {
     var self = this;
 
     self.token = token;
@@ -13,6 +13,7 @@
       self.enabled = false;
       TokensService.revokeAccessToken(token.id).then(function (response) {
         $uibModalInstance.close(token);
+        $rootScope.reloadInfo();
         self.enabled = true;
       }).catch(function (error) {
         console.error(error);
@@ -83,9 +84,9 @@
             p.then(handleResponse);
           });
           $rootScope.pageLoadingProgress = 100;
-          self.$parent.totAccessTokens = self.tokens.length;
           self.loaded = true;
           self.loadingModal.dismiss("Cancel");
+          $rootScope.reloadInfo();
         }, handleError);
       };
       

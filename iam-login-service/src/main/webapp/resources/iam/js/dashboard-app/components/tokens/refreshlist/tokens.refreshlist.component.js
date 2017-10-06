@@ -1,7 +1,7 @@
 (function() {
   'use strict';
 
-  function RevokeRefreshTokenController($uibModalInstance, TokensService, token) {
+  function RevokeRefreshTokenController($rootScope, $uibModalInstance, TokensService, token) {
     var self = this;
 
     self.token = token;
@@ -13,6 +13,7 @@
       self.enabled = false;
       TokensService.revokeRefreshToken(token.id).then(function (response) {
         $uibModalInstance.close(token);
+        $rootScope.reloadInfo();
         self.enabled = true;
       }).catch(function (error) {
         console.error(error);
@@ -84,9 +85,9 @@
             p.then(handleResponse);
           });
           $rootScope.pageLoadingProgress = 100;
-          self.$parent.totRefreshTokens = self.tokens.length;
           self.loaded = true;
           self.loadingModal.dismiss("Cancel");
+          $rootScope.reloadInfo();
         }, handleError);
       };
       
