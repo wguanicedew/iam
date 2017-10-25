@@ -5,6 +5,7 @@ target/
 .springBeans
 .factoryPath
 *.md.html
+.vscode
 iam-login-service/ddl.sql
 
 # Node rules:
