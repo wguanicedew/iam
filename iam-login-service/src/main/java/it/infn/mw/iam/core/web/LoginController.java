@@ -53,7 +53,6 @@ public class LoginController {
   public String resetSession(HttpSession session) {
 
     session.invalidate();
-    // SecurityContextHolder.clearContext();
 
     return "redirect:/";
   }

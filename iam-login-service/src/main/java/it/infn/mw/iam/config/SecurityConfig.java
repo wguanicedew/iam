@@ -110,11 +110,9 @@ public class SecurityConfig {
 
 
     public IamX509PreauthenticationProcessingFilter iamX509Filter() throws Exception {
-      IamX509PreauthenticationProcessingFilter filter =
-          new IamX509PreauthenticationProcessingFilter(x509CredentialExtractor,
-              iamX509AuthenticationProvider(), successHandler());
+      return new IamX509PreauthenticationProcessingFilter(x509CredentialExtractor,
+          iamX509AuthenticationProvider(), successHandler());
 
-      return filter;
     }
 
     @Override
