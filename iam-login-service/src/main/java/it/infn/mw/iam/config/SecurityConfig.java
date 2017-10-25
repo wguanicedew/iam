@@ -110,8 +110,11 @@ public class SecurityConfig {
 
 
     public IamX509PreauthenticationProcessingFilter iamX509Filter() throws Exception {
-      return new IamX509PreauthenticationProcessingFilter(x509CredentialExtractor,
-          iamX509AuthenticationProvider());
+      IamX509PreauthenticationProcessingFilter filter =
+          new IamX509PreauthenticationProcessingFilter(x509CredentialExtractor,
+              iamX509AuthenticationProvider(), successHandler());
+
+      return filter;
     }
 
     @Override
@@ -702,7 +705,7 @@ public class SecurityConfig {
       // @formatter:on
     }
   }
-  
+
   @Configuration
   @Order(25)
   public static class ScopePoliciesEndpointConfig extends WebSecurityConfigurerAdapter {
@@ -714,7 +717,7 @@ public class SecurityConfig {
 
     @Autowired
     private CorsFilter corsFilter;
-    
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
       http.requestMatchers()

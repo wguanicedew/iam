@@ -3,10 +3,10 @@ package it.infn.mw.iam.core.web;
 import static it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport.EXT_AUTHN_UNREGISTERED_USER_AUTH;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -50,9 +50,10 @@ public class LoginController {
   }
 
   @RequestMapping("/reset-session")
-  public String resetSession() {
+  public String resetSession(HttpSession session) {
 
-    SecurityContextHolder.clearContext();
+    session.invalidate();
+    // SecurityContextHolder.clearContext();
 
     return "redirect:/";
   }
