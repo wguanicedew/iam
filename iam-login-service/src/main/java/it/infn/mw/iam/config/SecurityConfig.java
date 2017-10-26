@@ -778,7 +778,7 @@ public class SecurityConfig {
   }
   
   @Configuration
-  @Order(26)
+  @Order(27)
   public static class DeviceCodeEnpointConfig extends WebSecurityConfigurerAdapter {
     
     @Autowired
