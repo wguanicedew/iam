@@ -703,9 +703,43 @@ public class SecurityConfig {
       // @formatter:on
     }
   }
-
+  
   @Configuration
   @Order(25)
+  public static class ScopePoliciesEndpointConfig extends WebSecurityConfigurerAdapter {
+    @Autowired
+    private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
+
+    @Autowired
+    private OAuth2AuthenticationProcessingFilter resourceFilter;
+
+    @Autowired
+    private CorsFilter corsFilter;
+    
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+      http.requestMatchers()
+        .antMatchers("/iam/scope_policies/**")
+        .and()
+        .exceptionHandling()
+        .authenticationEntryPoint(authenticationEntryPoint)
+        .and()
+        .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
+        .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
+        .sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.NEVER)
+        .and()
+        .authorizeRequests()
+        .antMatchers("/iam/scope_policies/**")
+        .authenticated()
+        .and()
+        .csrf()
+        .disable();
+    }
+  }
+
+  @Configuration
+  @Order(26)
   public static class TokensApiEndpointConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired

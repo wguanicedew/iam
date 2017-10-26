@@ -61,6 +61,7 @@ import org.springframework.security.web.authentication.Http403ForbiddenEntryPoin
 import org.springframework.web.servlet.AsyncHandlerInterceptor;
 
 import it.infn.mw.iam.core.IamOAuth2RequestFactory;
+import it.infn.mw.iam.core.oauth.scope.IamScopeFilter;
 
 @Configuration
 public class MitreServicesConfig {
@@ -84,10 +85,10 @@ public class MitreServicesConfig {
   }
 
   @Bean
-  OAuth2RequestFactory requestFactory() {
-    return new IamOAuth2RequestFactory(clientDetailsEntityService());
+  OAuth2RequestFactory requestFactory(IamScopeFilter scopeFilter) {
+    return new IamOAuth2RequestFactory(clientDetailsEntityService(), scopeFilter);
   }
-
+   
   @Bean
   @Qualifier("iamClientDetailsEntityService")
   ClientDetailsEntityService clientDetailsEntityService() {

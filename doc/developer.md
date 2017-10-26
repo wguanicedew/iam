@@ -7,9 +7,18 @@ The IAM is a Spring Boot Java application.
 To build it, you will need:
 
 - Java 8
-- Maven
+- Maven 
+- Git
 
-Build command:
+## Checking out the IAM code
+
+You can check out the IAM code as follows:
+
+  git clone https://github.com/indigo-iam/iam.git
+
+## Building the IAM
+
+You can build the IAM packages with the following command:
 
   mvn package
 

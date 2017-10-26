@@ -1,30 +1,3 @@
-# Deployment and Administration guide
-
-This is the INDIGO IAM deployment and administration guide.
-
-## Requirements
-
-### Docker
-
-The IAM service is currently distributed as a docker image from Dockerhub, so in
-order to run the service, you will need:
-
-- Docker v. 1.11.1 or greater
-
-If you want to use docker-compose to deploy the service, you will also need
-
-- docker-compose v.1.7.0 or greater
-
-### MariaDB/MySQL
-
-The IAM service stores information in a mariadb/mysql database.
-
-### NginX
-
-The IAM service is designed to run as a backend Java application behind an
-NGINX reverse proxy (it could run equally well behing apache, but we tested it
-behind NGINX).
-
 ## Configuration
 
 ### Prerequisites
@@ -75,18 +48,18 @@ server {
 
 Checkout the json-web-key-generator repository:
 
-```bash
+```console
 git clone https://github.com/mitreid-connect/json-web-key-generator
 ```
 
 Build the code with:
 
-```bash
+```console
 mvn package
 ```
 
 Generate a key with the following command:
-```bash
+```console
 java -jar target/json-web-key-generator-0.3-SNAPSHOT-jar-with-dependencies.jar \
   -t RSA -s 1024 -S -i rsa1
 Full key:
@@ -109,19 +82,9 @@ Full key:
 ```
 Save the output of the above command (minus the `Full key:` initial text) in a file.
 
-### IAM docker image
-
-The IAM service is provided on the following Dockerhub repositories:
-
-- indigoiam/iam-login-service
-- indigodatacloud/iam-login-service
-
-We keep the images in sync, so the following instructions apply to images
-fetched from any of the two repositories. 
-
 ### IAM configuration
 
-The IAM service is configured via spring profiles and environment variables.
+The IAM service is configured via Spring profiles and environment variables.
 
 #### IAM profiles
 
@@ -130,18 +93,18 @@ following profiles are defined:
 
 |*Profile name*|*Active by default*|*Description*|
 |--------------|-------------------|-------------|
-| h2 | yes | Enables h2 in-memory database, useful for development and testing |
-| mysql  | no | Enables MySQL database backend |
-| google | no | Enables Google authentication |
-| saml | no | Enables SAML authentication |
-| dev | yes | Enables development debugging information |
-| registration | yes | Enables user registration and reset password functionalities |
+| h2           | yes               | Enables h2 in-memory database, useful for development and testing |
+| mysql        | no                | Enables MySQL database backend |
+| google       | no                | Enables Google authentication |
+| saml         | no                | Enables SAML authentication |
+| dev          | yes               | Enables development debugging information |
+| registration | yes               | Enables user registration and reset password functionalities |
 
 Profiles are enabled by setting the `spring.profiles.active` Java system
 property when starting the IAM service. This can be done, using the official
 IAM docker image, by setting the IAM_JAVA_OPTS environment variable as follows:
 
-```
+```bash
 IAM_JAVA_OPTS="-Dspring.profiles.active=mysql,google,saml"
 ```
 
@@ -204,27 +167,23 @@ Specific options:
 |*Env. variable*               |*Default value*        |*Meaning*|
 |------------------------------|-----------------------|---------|
 |IAM_NOTIFICATION_DISABLE      |false                  |Turn on the notification service. If set to `true`, notifications aren't send to mail server, but logged into the log file|
-|IAM_NOTIFICATION_FROM         |indigo@localhost       |Mail address used as mail sender| 
+|IAM_NOTIFICATION_FROM         |indigo@localhost       |Mail address used as mail sender|
 |IAM_NOTIFICATION_TASK_DELAY   |30000                  |Time interval, in milliseconds, between two consecutive runs of the job that send notifications|
 |IAM_NOTIFICATION_CLEANUP_AGE  |30                     |Retention of delivered messages, in days|
 |IAM_NOTIFICATION_ADMIN_ADDRESS|indigo-alerts@localhost|Mail address used as receiver for administrative notifications|
 
+#### Other options
+
+|*Env. variable*        |*Default value*        |*Meaning*|
+|-----------------------|-----------------------|---------|
+| IAM_ORGANIZATION_NAME | indigo-dc             | Organization name. It's used in the web dashboard and into notification emails. |
+| IAM_LOGO_URL          | resources/images/indigo-logo.png | URL of logo image to use in the web dashboard |
+| IAM_TOPBAR_TITLE      | INDIGO IAM for ${iam.organisation.name} | String displayed into the top bar of the browser when using the web dashboard |
+
 
 ### Example configuration
 
-The IAM service is run starting the docker container with the following command:
-
 ```bash
-/usr/bin/docker run \
-  --name iam-login-service --net=iam -p 8080:8080 \
-  --env-file=/path/to//iam-login-service/env \
-   -v /path/to//keystore.jks:/keystore.jks:ro \
-  indigodatacloud/iam-login-service
-```
-
-The env file content is the following: 
-
-```
 IAM_JAVA_OPTS=-Dspring.profiles.active=google,mysql -Djava.security.egd=file:/dev/urandom
 IAM_BASE_URL=https://iam-test.indigo-datacloud.eu
 IAM_ISSUER=https://iam-test.indigo-datacloud.eu/
