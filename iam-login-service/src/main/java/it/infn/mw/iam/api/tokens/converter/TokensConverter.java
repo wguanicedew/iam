@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import it.infn.mw.iam.api.scim.converter.ScimResourceLocationProvider;
-import it.infn.mw.iam.api.tokens.TokensResourceLocationProvider;
 import it.infn.mw.iam.api.tokens.model.AccessToken;
 import it.infn.mw.iam.api.tokens.model.ClientRef;
 import it.infn.mw.iam.api.tokens.model.RefreshToken;
@@ -27,9 +26,6 @@ public class TokensConverter {
 
   @Autowired
   private IamAccountRepository accountRepository;
-
-  @Autowired
-  private TokensResourceLocationProvider tokensResourceLocationProvider;
 
   @Autowired
   private ScimResourceLocationProvider scimResourceLocationProvider;

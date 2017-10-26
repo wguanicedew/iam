@@ -96,7 +96,7 @@ public class MitreRepositoryConfig {
   }
   
   @Bean
-  MITREidDataService_1_3 dataService1_3() {
+  MITREidDataService_1_3 dataService13() {
     return new MITREidDataService_1_3();
   }
 }

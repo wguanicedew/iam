@@ -27,7 +27,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.scim.converter.ScimResourceLocationProvider;
-import it.infn.mw.iam.api.tokens.TokensResourceLocationProvider;
 import it.infn.mw.iam.api.tokens.model.AccessToken;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
@@ -45,8 +44,6 @@ public class AccessTokenGetRevokeTests extends TestTokensUtils {
   public static final String TEST_CLIENT2_ID = "password-grant";
   public static final int FAKE_TOKEN_ID = 12345;
 
-  @Autowired
-  private TokensResourceLocationProvider tokensResourceLocationProvider;
 
   @Autowired
   private ScimResourceLocationProvider scimResourceLocationProvider;

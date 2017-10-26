@@ -59,6 +59,7 @@ public abstract class AbstractExternalAuthenticationToken<T extends Serializable
       return false;
     if (getClass() != obj.getClass())
       return false;
+    @SuppressWarnings("rawtypes")
     AbstractExternalAuthenticationToken other = (AbstractExternalAuthenticationToken) obj;
     if (wrappedAuthentication == null) {
       if (other.wrappedAuthentication != null)

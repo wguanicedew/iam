@@ -29,7 +29,7 @@ public class IamDeviceCodeTokenGranter extends AbstractTokenGranter {
   }
 
 
-  // FIXME: revert back to mitre implementation as soon as they have fixed how
+  // Revert back to mitre implementation as soon as they have fixed how
   // they manage the granter creation (use proper constructor injection)
   @Override
   protected OAuth2Authentication getOAuth2Authentication(ClientDetails client,

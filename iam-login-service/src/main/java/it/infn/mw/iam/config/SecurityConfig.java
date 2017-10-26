@@ -746,8 +746,6 @@ public class SecurityConfig {
   @Configuration
   @Order(26)
   public static class DeviceCodeEnpointConfig extends WebSecurityConfigurerAdapter {
-    @Autowired
-    private OAuth2AuthenticationProcessingFilter resourceFilter;
     
     @Autowired
     @Qualifier("clientUserDetailsService")
