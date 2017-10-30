@@ -1,6 +1,6 @@
 package it.infn.mw.iam.test.api.tokens;
 
-import static it.infn.mw.iam.api.tokens.TokensControllerSupport.CONTENT_TYPE;
+import static it.infn.mw.iam.api.tokens.TokensControllerSupport.APPLICATION_JSON_CONTENT_TYPE;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -75,13 +75,12 @@ public class AccessTokenGetRevokeTests extends TestTokensUtils {
 
     String path = String.format("%s/%d", ACCESS_TOKENS_BASE_PATH, at.getId());
 
-    AccessToken remoteAt = mapper.readValue(
-        mvc.perform(get(path).contentType(CONTENT_TYPE))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString(),
-        AccessToken.class);
+    AccessToken remoteAt =
+        mapper.readValue(mvc.perform(get(path).contentType(APPLICATION_JSON_CONTENT_TYPE))
+          .andExpect(status().isOk())
+          .andReturn()
+          .getResponse()
+          .getContentAsString(), AccessToken.class);
 
     System.out.println(remoteAt);
 
@@ -107,7 +106,8 @@ public class AccessTokenGetRevokeTests extends TestTokensUtils {
       UnsupportedEncodingException, IOException, Exception {
 
     String path = String.format("%s/%d", ACCESS_TOKENS_BASE_PATH, FAKE_TOKEN_ID);
-    mvc.perform(get(path).contentType(CONTENT_TYPE)).andExpect(status().isNotFound());
+    mvc.perform(get(path).contentType(APPLICATION_JSON_CONTENT_TYPE))
+      .andExpect(status().isNotFound());
   }
 
   @Test
@@ -118,7 +118,8 @@ public class AccessTokenGetRevokeTests extends TestTokensUtils {
     OAuth2AccessTokenEntity at = buildAccessToken(client, TESTUSER_USERNAME, SCOPES);
     String path = String.format("%s/%d", ACCESS_TOKENS_BASE_PATH, at.getId());
 
-    mvc.perform(delete(path).contentType(CONTENT_TYPE)).andExpect(status().isNoContent());
+    mvc.perform(delete(path).contentType(APPLICATION_JSON_CONTENT_TYPE))
+      .andExpect(status().isNoContent());
 
     assertThat(tokenService.getAccessTokenById(at.getId()), equalTo(null));
   }
@@ -128,6 +129,21 @@ public class AccessTokenGetRevokeTests extends TestTokensUtils {
       UnsupportedEncodingException, IOException, Exception {
 
     String path = String.format("%s/%d", ACCESS_TOKENS_BASE_PATH, FAKE_TOKEN_ID);
-    mvc.perform(delete(path).contentType(CONTENT_TYPE)).andExpect(status().isNotFound());
+    mvc.perform(delete(path))
+      .andExpect(status().isNotFound());
+  }
+
+  @Test
+  public void testRevokeAllTokens() throws Exception {
+
+    ClientDetailsEntity client = loadTestClient(TEST_CLIENT_ID);
+    buildAccessToken(client, TESTUSER_USERNAME, SCOPES);
+    buildAccessToken(client, TESTUSER_USERNAME, SCOPES);
+    
+    assertThat(accessTokenRepository.count(), equalTo(2L));
+    
+    mvc.perform(delete(ACCESS_TOKENS_BASE_PATH)).andExpect(status().isNoContent());
+    
+    assertThat(accessTokenRepository.count(), equalTo(0L));
   }
 }

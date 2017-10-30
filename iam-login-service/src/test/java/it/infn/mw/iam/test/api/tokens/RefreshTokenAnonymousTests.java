@@ -1,6 +1,6 @@
 package it.infn.mw.iam.test.api.tokens;
 
-import static it.infn.mw.iam.api.tokens.TokensControllerSupport.CONTENT_TYPE;
+import static it.infn.mw.iam.api.tokens.TokensControllerSupport.APPLICATION_JSON_CONTENT_TYPE;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.unauthenticated;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -32,7 +32,7 @@ public class RefreshTokenAnonymousTests extends TestTokensUtils {
   @Test
   public void authenticationRequiredOnGettingListTest() throws Exception {
 
-    mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(CONTENT_TYPE)
+    mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE)
         .with(authentication(anonymousAuthenticationToken()))).andExpect(unauthenticated());
   }
 
@@ -41,7 +41,7 @@ public class RefreshTokenAnonymousTests extends TestTokensUtils {
 
     String path = String.format("%s/%d", REFRESH_TOKENS_BASE_PATH, FAKE_TOKEN_ID);
     mvc.perform(
-        delete(path).contentType(CONTENT_TYPE).with(authentication(anonymousAuthenticationToken())))
+        delete(path).contentType(APPLICATION_JSON_CONTENT_TYPE).with(authentication(anonymousAuthenticationToken())))
         .andExpect(unauthenticated());
 
   }

@@ -266,7 +266,7 @@ public class IamScopePolicyRepositoryTests extends ScopePolicyTestUtils {
     IamAccount testAccount = accountRepo.findByUsername("test")
       .orElseThrow(() -> new AssertionError("Expected 'test' user not found"));
 
-    IamAccount adminAccount = accountRepo.findByUsername("admin")
+    accountRepo.findByUsername("admin")
         .orElseThrow(()-> new AssertionError("Expected 'admin' user not found"));
     
     

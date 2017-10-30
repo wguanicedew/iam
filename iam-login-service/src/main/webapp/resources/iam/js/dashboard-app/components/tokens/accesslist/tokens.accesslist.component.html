@@ -5,8 +5,8 @@
         <div class="row">
             <div class="col-md-5">
 
-                <ui-select id="atok_client_search_btn" ng-model="$ctrl.clientSelected" theme="bootstrap" sortable="true" close-on-select="true" input-id="atok_client_search" style="width: 100%;" on-select="$ctrl.searchTokens()"> 
-                    <ui-select-match allow-clear="true" placeholder="Filter client...">{{$ctrl.clientSelected.clientId}}</ui-select-match>
+                <ui-select id="atok_client_search_btn" ng-model="$ctrl.clientSelected" theme="bootstrap" sortable="true" close-on-select="true" input-id="atok_client_search" style="width: 100%;" on-select="$ctrl.searchTokens()">
+                    <ui-select-match allow-clear="true" placeholder="Filter tokens by client...">{{$ctrl.clientSelected.clientId}}</ui-select-match>
                     <ui-select-choices repeat="client in $ctrl.clients | filter: {clientId: $select.search}">
                         <div ng-bind-html="client.clientId | highlight: $select.search"></div>
                         <small> {{ client.clientName }} </small>
@@ -17,7 +17,7 @@
             </div>
             <div class="col-md-5">
                 <ui-select id="atok_user_search_btn" ng-model="$ctrl.userSelected" theme="bootstrap" sortable="true" close-on-select="true" input-id="atok_user_search" style="width: 100%;" on-select="$ctrl.searchTokens()">
-                    <ui-select-match allow-clear="true" placeholder="Filter user...">{{$ctrl.userSelected.name.formatted}}</ui-select-match>
+                    <ui-select-match allow-clear="true" placeholder="Filter tokens by user...">{{$ctrl.userSelected.name.formatted}}</ui-select-match>
                     <ui-select-choices repeat="user in $ctrl.users | filter: {userName: $select.search}">
                         <div ng-bind-html="user.userName | highlight: $select.search"></div>
                         <small>{{ user.id }}</small>
@@ -28,7 +28,7 @@
             <div class="col-md-2 text-right">
                 <button class="btn btn-default" id="refresh_atoken_list" ng-click="$ctrl.searchTokens()"><i class="fa fa-refresh"></i></button>
             </div>
-       </div>
+        </div>
     </div>
     <div class="box-body">
 
@@ -36,17 +36,11 @@
             <p>Filtered <span id="atoken_filtered"><strong>{{$ctrl.tokens.length}}</strong></span> of <strong>{{$root.loggedUser.accessTokensCount}}</strong></p>
         </div>
 
-        <div ng-if="!$ctrl.tokens.length">No active access-tokens found</div>
+        <div ng-if="!$ctrl.tokens.length">No active access tokens found</div>
         <div class="table-responsive" ng-if="$ctrl.tokens.length">
 
-           <div class="text-center">
-                <ul id="atoken_pagination_top"
-                    uib-pagination
-                    ng-model="$ctrl.currentPage" 
-                    items-per-page="$ctrl.itemsPerPage"
-                    total-items="$ctrl.tokens.length"
-                    max-size="5"
-                    boundary-links="true">
+            <div class="text-center">
+                <ul id="atoken_pagination_top" uib-pagination ng-model="$ctrl.currentPage" items-per-page="$ctrl.itemsPerPage" total-items="$ctrl.tokens.length" max-size="5" boundary-links="true">
                 </ul>
             </div>
 
@@ -54,7 +48,6 @@
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>Type</th>
                         <th>Client</th>
                         <th>User</th>
                         <th>Value</th>
@@ -70,13 +63,6 @@
                             <h5>{{$index + ($ctrl.currentPage-1)*$ctrl.itemsPerPage + 1}}</h5>
                         </td>
                         <td class="align-middle">
-                            <h5>
-                            <span ng-if="token.scopes.indexOf('id-token') !== -1" title="ID-TOKEN"><strong><i class="fa fa-id-card"></i> </strong></span>
-                            <span ng-if="token.scopes.indexOf('id-token') == -1" title="ACCESS-TOKEN"><strong><i class="fa fa-key"></i> </strong></span>
-                            <span ng-if="token.idToken" title="ID-TOKEN"><strong>+ <i class="fa fa-id-card"></i> </strong></span>
-                            </h5>
-                        </td>
-                        <td class="align-middle">
                             <h5><a ui-sref="client({id: token.client.id})">{{token.client.clientId}}</a></h5>
                         </td>
                         <td class="align-middle" ng-if="token.user != null">
@@ -85,7 +71,7 @@
                             <small>{{token.user.id}}</small>
                         </td>
                         <td class="align-middle" ng-if="token.user == null">
-                            <h5><small><i>This is a client specific token, not bound to a user.</i></small></h5>
+                            <h5><small><i>This is a client specific token, not bound to a user account.</i></small></h5>
                         </td>
                         <td class="align-middle">
                             <div class="input-group ">
@@ -113,15 +99,9 @@
             </table>
 
             <div class="text-center">
-	            <ul id="atoken_pagination_bottom"
-	                uib-pagination
-	                ng-model="$ctrl.currentPage" 
-	                items-per-page="$ctrl.itemsPerPage"
-	                total-items="$ctrl.tokens.length"
-	                max-size="5"
-	                boundary-links="true">
-	            </ul>
-	        </div>
+                <ul id="atoken_pagination_bottom" uib-pagination ng-model="$ctrl.currentPage" items-per-page="$ctrl.itemsPerPage" total-items="$ctrl.tokens.length" max-size="5" boundary-links="true">
+                </ul>
+            </div>
         </div>
     </div>
     <div class="box-footer">

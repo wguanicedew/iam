@@ -1,6 +1,6 @@
 package it.infn.mw.iam.test.api.tokens;
 
-import static it.infn.mw.iam.api.tokens.TokensControllerSupport.CONTENT_TYPE;
+import static it.infn.mw.iam.api.tokens.TokensControllerSupport.APPLICATION_JSON_CONTENT_TYPE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -33,7 +33,7 @@ public class RefreshTokenAuthenticatedTests extends TestTokensUtils {
   @WithMockOAuthUser(user = TESTUSER_USERNAME, authorities = {"ROLE_USER"})
   public void forbiddenOnGettingListTest() throws Exception {
 
-    mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(CONTENT_TYPE)).andExpect(status().isForbidden());
+    mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE)).andExpect(status().isForbidden());
   }
 
   @Test
@@ -41,6 +41,6 @@ public class RefreshTokenAuthenticatedTests extends TestTokensUtils {
   public void forbiddenOnRevokingTest() throws Exception {
 
     String path = String.format("%s/%d", REFRESH_TOKENS_BASE_PATH, FAKE_TOKEN_ID);
-    mvc.perform(delete(path).contentType(CONTENT_TYPE)).andExpect(status().isForbidden());
+    mvc.perform(delete(path).contentType(APPLICATION_JSON_CONTENT_TYPE)).andExpect(status().isForbidden());
   }
 }

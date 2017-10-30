@@ -2,10 +2,10 @@
 <div ng-if="$ctrl.loaded">
     <section class="content-header" ng-cloak>
         <h1>
-            <i class="fa fa-key"></i>&nbsp;&nbsp;Manage Active Tokens
+            <i class="fa fa-key"></i>Tokens
         </h1>
         <ol class="breadcrumb hidden-xs">
-            <li><a><i class="fa fa-key"></i> Active Tokens</a></li>
+            <li><a><i class="fa fa-key"></i>Tokens</a></li>
         </ol>
     </section>
     <section class="content" ng-cloak>
@@ -13,18 +13,18 @@
         <div class="row" ng-cloak>
             <div class="col-xs-12">
                 <ul class="nav nav-tabs">
-	                <li ng-class="$ctrl.selected == 0 ? 'active' : ''">
-	                   <a href="" ng-click="$ctrl.selected = 0" id="tabAccessTokens">
-	                       <strong>Access Tokens</strong>&nbsp;&nbsp;<span class="label label-primary" id="atBadge">{{$root.loggedUser.accessTokensCount}}</span>
-	                   </a>
-	                </li>
-	                <li ng-class="$ctrl.selected == 1 ? 'active' : ''">
-	                   <a href="" ng-click="$ctrl.selected = 1" id="tabRefreshTokens">
-	                       <strong>Refresh Tokens</strong>&nbsp;&nbsp;<span class="label label-primary" id="rtBadge">{{$root.loggedUser.refreshTokensCount}}</span>
-	                   </a>
-	                </li>
-	            </ul>
-	            <br/>
+                    <li ng-class="$ctrl.selected == 0 ? 'active' : ''">
+                        <a href="" ng-click="$ctrl.selected = 0" id="tabAccessTokens">
+                            <strong>Access Tokens</strong>&nbsp;&nbsp;<span class="label label-primary" id="atBadge">{{$root.loggedUser.accessTokensCount}}</span>
+                        </a>
+                    </li>
+                    <li ng-class="$ctrl.selected == 1 ? 'active' : ''">
+                        <a href="" ng-click="$ctrl.selected = 1" id="tabRefreshTokens">
+                            <strong>Refresh Tokens</strong>&nbsp;&nbsp;<span class="label label-primary" id="rtBadge">{{$root.loggedUser.refreshTokensCount}}</span>
+                        </a>
+                    </li>
+                </ul>
+                <br/>
                 <tokens-accesslist ng-show="$ctrl.selected == 0" totAccessTokens="$ctrl.totAccessTokens" clients="$ctrl.clients" users="$ctrl.users"></tokens-accesslist>
                 <tokens-refreshlist ng-show="$ctrl.selected == 1" totRefreshTokens="$ctrl.totRefreshTokens" clients="$ctrl.clients" users="$ctrl.users"></tokens-refreshlist>
             </div>

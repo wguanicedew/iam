@@ -18,5 +18,7 @@ public interface TokenService<T> {
   T getTokenById(Long id);
 
   void revokeTokenById(Long id);
+  
+  void deleteAllTokens();
 
 }

@@ -3,14 +3,6 @@ package it.infn.mw.iam.test.api.tokens;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
-import it.infn.mw.iam.api.tokens.Constants;
-import it.infn.mw.iam.core.user.exception.IamAccountException;
-import it.infn.mw.iam.persistence.model.IamAccount;
-import it.infn.mw.iam.persistence.repository.IamAccountRepository;
-import it.infn.mw.iam.persistence.repository.IamOAuthAccessTokenRepository;
-import it.infn.mw.iam.persistence.repository.IamOAuthRefreshTokenRepository;
-import it.infn.mw.iam.test.util.oauth.MockOAuth2Request;
-
 import org.mitre.oauth2.model.ClientDetailsEntity;
 import org.mitre.oauth2.model.OAuth2AccessTokenEntity;
 import org.mitre.oauth2.service.ClientDetailsEntityService;
@@ -25,22 +17,30 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import it.infn.mw.iam.api.tokens.Constants;
+import it.infn.mw.iam.core.user.exception.IamAccountException;
+import it.infn.mw.iam.persistence.model.IamAccount;
+import it.infn.mw.iam.persistence.repository.IamAccountRepository;
+import it.infn.mw.iam.persistence.repository.IamOAuthAccessTokenRepository;
+import it.infn.mw.iam.persistence.repository.IamOAuthRefreshTokenRepository;
+import it.infn.mw.iam.test.util.oauth.MockOAuth2Request;
+
 public class TestTokensUtils {
 
   protected static final String REFRESH_TOKENS_BASE_PATH = Constants.REFRESH_TOKENS_ENDPOINT;
   protected static final String ACCESS_TOKENS_BASE_PATH = Constants.ACCESS_TOKENS_ENDPOINT;
 
   @Autowired
-  private IamOAuthAccessTokenRepository accessTokenRepository;
+  protected IamOAuthAccessTokenRepository accessTokenRepository;
 
   @Autowired
-  private IamOAuthRefreshTokenRepository refreshTokenRepository;
+  protected IamOAuthRefreshTokenRepository refreshTokenRepository;
 
   @Autowired
   private ClientDetailsEntityService clientDetailsService;
 
   @Autowired
-  private IamAccountRepository accountRepository;
+  protected IamAccountRepository accountRepository;
 
   @Autowired
   protected DefaultOAuth2ProviderTokenService tokenService;
