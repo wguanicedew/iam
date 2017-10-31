@@ -390,6 +390,27 @@ public class NotificationTests {
 
     deleteUser(reg.getAccountId());
   }
+  
+  @Test
+  public void testAdminNotificationMailShouldContainNotes()
+      throws MessagingException, IOException {
+
+    String username = "test_user";
+
+    RegistrationRequestDto reg = createRegistrationRequest(username);
+    String confirmationKey = generator.getLastToken();
+    confirmRegistrationRequest(confirmationKey);
+
+    notificationService.sendPendingNotifications();
+
+    WiserMessage message = wiser.getMessages().get(1);
+
+    assertThat(message.getMimeMessage().isMimeType("text/plain"), is(true));
+    String content = message.getMimeMessage().getContent().toString();
+    assertThat(content, containsString("Some short notes..."));
+
+    deleteUser(reg.getAccountId());
+  }
 
   @Test
   public void testPasswordResetMailContainsUsername() throws MessagingException, IOException {

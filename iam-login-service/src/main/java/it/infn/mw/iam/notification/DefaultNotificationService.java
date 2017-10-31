@@ -118,6 +118,7 @@ public class DefaultNotificationService implements NotificationService {
     model.put("email", email);
     model.put("indigoDashboardUrl", dashboardUrl);
     model.put("organisationName", organisationName);
+    model.put("notes", request.getNotes());
 
     return createMessage("adminHandleRequest.vm", model, IamNotificationType.CONFIRMATION,
         properties.getSubject().get("adminHandleRequest"), properties.getAdminAddress());
