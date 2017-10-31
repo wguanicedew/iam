@@ -122,7 +122,7 @@ public class SecurityConfig {
 
       http.requestMatchers()
         .antMatchers("/", "/login**", "/logout", "/authorize", "/manage/**", "/dashboard**", "/register",
-            "/reset-session")
+            "/reset-session", "/device/**")
         .and()
         .sessionManagement()
           .enableSessionUrlRewriting(false)
@@ -132,6 +132,7 @@ public class SecurityConfig {
             .antMatchers("/register").permitAll()
             .antMatchers("/authorize**").permitAll()
             .antMatchers("/reset-session").permitAll()
+            .antMatchers("/device/**").authenticated()
             .antMatchers("/").authenticated()
         .and()
           .formLogin()
@@ -775,6 +776,47 @@ public class SecurityConfig {
         .disable();
       // @formatter:on
     }
+  }
+  
+  @Configuration
+  @Order(27)
+  public static class DeviceCodeEnpointConfig extends WebSecurityConfigurerAdapter {
+    
+    @Autowired
+    @Qualifier("clientUserDetailsService")
+    private UserDetailsService userDetailsService;
+
+    @Autowired
+    private CorsFilter corsFilter;
+    
+    @Autowired
+    private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
+    
+    @Override
+    protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
+
+      auth.userDetailsService(userDetailsService);
+    }
+    
+    @Override
+    protected void configure(final HttpSecurity http) throws Exception {
+
+      // @formatter:off
+      http.antMatcher("/devicecode/**")
+        .httpBasic()
+          .authenticationEntryPoint(authenticationEntryPoint)
+        .and()
+          .addFilterBefore(corsFilter, SecurityContextPersistenceFilter.class)
+          .sessionManagement()
+            .sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+        .csrf()
+          .disable()
+        .authorizeRequests()
+          .anyRequest()
+            .fullyAuthenticated();
+      // @formatter:on
+    }
+    
   }
 
   @Configuration

@@ -3,6 +3,7 @@ package it.infn.mw.iam.config;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.mitre.oauth2.service.DeviceCodeService;
 import org.mitre.oauth2.service.OAuth2TokenEntityService;
 import org.mitre.openid.connect.service.ApprovedSiteService;
 import org.slf4j.Logger;
@@ -45,7 +46,10 @@ public class TaskConfig implements SchedulingConfigurer {
 
   @Autowired
   IamAccountService accountService;
-  
+
+  @Autowired
+  DeviceCodeService deviceCodeService;
+
   @Bean(destroyMethod = "shutdown")
   public ScheduledExecutorService taskScheduler() {
     return Executors.newSingleThreadScheduledExecutor();
@@ -73,7 +77,13 @@ public class TaskConfig implements SchedulingConfigurer {
   public void clearExpiredNotifications() {
     notificationService.clearExpiredNotifications();
   }
-    
+
+  @Scheduled(fixedDelayString = "${task.deviceCodeCleanupPeriodMsec}",
+      initialDelay = TEN_MINUTES_MSEC)
+  public void clearExpiredDeviceCodes() {
+    deviceCodeService.clearExpiredDeviceCodes();
+  }
+
   @Override
   public void configureTasks(final ScheduledTaskRegistrar taskRegistrar) {
     taskRegistrar.setScheduler(taskScheduler());

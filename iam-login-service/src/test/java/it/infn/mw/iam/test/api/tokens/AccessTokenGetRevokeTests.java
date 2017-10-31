@@ -1,22 +1,14 @@
 package it.infn.mw.iam.test.api.tokens;
 
-import static it.infn.mw.iam.api.tokens.TokensControllerSupport.CONTENT_TYPE;
+import static it.infn.mw.iam.api.tokens.TokensControllerSupport.APPLICATION_JSON_CONTENT_TYPE;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import it.infn.mw.iam.IamLoginService;
-import it.infn.mw.iam.api.scim.converter.ScimResourceLocationProvider;
-import it.infn.mw.iam.api.tokens.TokensResourceLocationProvider;
-import it.infn.mw.iam.api.tokens.model.AccessToken;
-import it.infn.mw.iam.persistence.model.IamAccount;
-import it.infn.mw.iam.test.core.CoreControllerTestSupport;
-import it.infn.mw.iam.test.util.WithMockOAuthUser;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 import org.junit.After;
 import org.junit.Before;
@@ -29,8 +21,16 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import it.infn.mw.iam.IamLoginService;
+import it.infn.mw.iam.api.scim.converter.ScimResourceLocationProvider;
+import it.infn.mw.iam.api.tokens.model.AccessToken;
+import it.infn.mw.iam.persistence.model.IamAccount;
+import it.infn.mw.iam.test.core.CoreControllerTestSupport;
+import it.infn.mw.iam.test.util.WithMockOAuthUser;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class})
@@ -44,8 +44,6 @@ public class AccessTokenGetRevokeTests extends TestTokensUtils {
   public static final String TEST_CLIENT2_ID = "password-grant";
   public static final int FAKE_TOKEN_ID = 12345;
 
-  @Autowired
-  private TokensResourceLocationProvider tokensResourceLocationProvider;
 
   @Autowired
   private ScimResourceLocationProvider scimResourceLocationProvider;
@@ -77,13 +75,12 @@ public class AccessTokenGetRevokeTests extends TestTokensUtils {
 
     String path = String.format("%s/%d", ACCESS_TOKENS_BASE_PATH, at.getId());
 
-    AccessToken remoteAt = mapper.readValue(
-        mvc.perform(get(path).contentType(CONTENT_TYPE))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString(),
-        AccessToken.class);
+    AccessToken remoteAt =
+        mapper.readValue(mvc.perform(get(path).contentType(APPLICATION_JSON_CONTENT_TYPE))
+          .andExpect(status().isOk())
+          .andReturn()
+          .getResponse()
+          .getContentAsString(), AccessToken.class);
 
     System.out.println(remoteAt);
 
@@ -94,10 +91,6 @@ public class AccessTokenGetRevokeTests extends TestTokensUtils {
     assertThat(remoteAt.getScopes().contains("openid"), equalTo(true));
     assertThat(remoteAt.getScopes().contains("profile"), equalTo(true));
 
-    assertThat(remoteAt.getIdToken().getId(), equalTo(at.getIdToken().getId()));
-    assertThat(remoteAt.getIdToken().getRef(),
-        equalTo(tokensResourceLocationProvider.accessTokenLocation(at.getIdToken().getId())));
-
     assertThat(remoteAt.getClient().getId(), equalTo(client.getId()));
     assertThat(remoteAt.getClient().getClientId(), equalTo(client.getClientId()));
 
@@ -106,20 +99,6 @@ public class AccessTokenGetRevokeTests extends TestTokensUtils {
     assertThat(remoteAt.getUser().getRef(),
         equalTo(scimResourceLocationProvider.userLocation(user.getUuid())));
 
-    String idPath = tokensResourceLocationProvider.accessTokenLocation(at.getIdToken().getId());
-    AccessToken remoteId = mapper.readValue(
-        mvc.perform(get(idPath).contentType(CONTENT_TYPE))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString(),
-        AccessToken.class);
-
-    assertThat(remoteId.getId(), equalTo(at.getIdToken().getId()));
-    assertThat(remoteId.getValue(), equalTo(at.getIdToken().getValue()));
-    assertThat(remoteId.getExpiration(), equalTo(at.getIdToken().getExpiration()));
-    assertThat(remoteId.getScopes().contains("id-token"), equalTo(true));
-    assertThat(remoteId.getScopes().size(), equalTo(1));
   }
 
   @Test
@@ -127,7 +106,8 @@ public class AccessTokenGetRevokeTests extends TestTokensUtils {
       UnsupportedEncodingException, IOException, Exception {
 
     String path = String.format("%s/%d", ACCESS_TOKENS_BASE_PATH, FAKE_TOKEN_ID);
-    mvc.perform(get(path).contentType(CONTENT_TYPE)).andExpect(status().isNotFound());
+    mvc.perform(get(path).contentType(APPLICATION_JSON_CONTENT_TYPE))
+      .andExpect(status().isNotFound());
   }
 
   @Test
@@ -138,10 +118,10 @@ public class AccessTokenGetRevokeTests extends TestTokensUtils {
     OAuth2AccessTokenEntity at = buildAccessToken(client, TESTUSER_USERNAME, SCOPES);
     String path = String.format("%s/%d", ACCESS_TOKENS_BASE_PATH, at.getId());
 
-    mvc.perform(delete(path).contentType(CONTENT_TYPE)).andExpect(status().isNoContent());
+    mvc.perform(delete(path).contentType(APPLICATION_JSON_CONTENT_TYPE))
+      .andExpect(status().isNoContent());
 
     assertThat(tokenService.getAccessTokenById(at.getId()), equalTo(null));
-    assertThat(tokenService.getAccessTokenById(at.getIdToken().getId()), equalTo(null));
   }
 
   @Test
@@ -149,6 +129,21 @@ public class AccessTokenGetRevokeTests extends TestTokensUtils {
       UnsupportedEncodingException, IOException, Exception {
 
     String path = String.format("%s/%d", ACCESS_TOKENS_BASE_PATH, FAKE_TOKEN_ID);
-    mvc.perform(delete(path).contentType(CONTENT_TYPE)).andExpect(status().isNotFound());
+    mvc.perform(delete(path))
+      .andExpect(status().isNotFound());
+  }
+
+  @Test
+  public void testRevokeAllTokens() throws Exception {
+
+    ClientDetailsEntity client = loadTestClient(TEST_CLIENT_ID);
+    buildAccessToken(client, TESTUSER_USERNAME, SCOPES);
+    buildAccessToken(client, TESTUSER_USERNAME, SCOPES);
+    
+    assertThat(accessTokenRepository.count(), equalTo(2L));
+    
+    mvc.perform(delete(ACCESS_TOKENS_BASE_PATH)).andExpect(status().isNoContent());
+    
+    assertThat(accessTokenRepository.count(), equalTo(0L));
   }
 }

@@ -90,10 +90,10 @@ This username is already linked to another user
             </div>
         </div>
         <div class="form-group">
-            <button class="btn btn-primary" type="submit" name="register" ng-disabled="!registrationForm.$valid || submitDisabled" ng-click="rc.submit()">
+            <button class="btn btn-primary" type="submit" id="register-submit-btn" name="register" ng-disabled="!registrationForm.$valid || submitDisabled" ng-click="rc.submit()">
         Register
       </button>
-            <button class="btn btn-warning" type="button" name="reset" ng-click="rc.reset()" ng-disabled="registrationForm.$pristine">
+            <button class="btn btn-warning" type="button" id="register-reset-btn" name="reset" ng-click="rc.reset()" ng-disabled="registrationForm.$pristine">
         Reset Form
       </button>
         </div>

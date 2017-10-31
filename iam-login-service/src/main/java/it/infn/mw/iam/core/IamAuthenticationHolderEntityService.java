@@ -3,6 +3,7 @@ package it.infn.mw.iam.core;
 import java.util.List;
 import java.util.Map;
 
+import org.mitre.data.PageCriteria;
 import org.mitre.oauth2.model.AuthenticationHolderEntity;
 import org.mitre.oauth2.repository.AuthenticationHolderRepository;
 import org.mitre.oauth2.service.AuthenticationHolderEntityService;
@@ -60,5 +61,10 @@ public class IamAuthenticationHolderEntityService implements AuthenticationHolde
   public List<AuthenticationHolderEntity> getOrphanedAuthenticationHolders() {
 
     return repo.getOrphanedAuthenticationHolders();
+  }
+
+  @Override
+  public List<AuthenticationHolderEntity> getOrphanedAuthenticationHolders(PageCriteria page) {
+    return repo.getOrphanedAuthenticationHolders(page);
   }
 }

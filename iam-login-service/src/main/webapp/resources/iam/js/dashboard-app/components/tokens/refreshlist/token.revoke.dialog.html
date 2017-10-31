@@ -1,0 +1,25 @@
+<div class="modal-header">
+    <h3 class="modal-title">Revoke Refresh Token?</h3>
+</div>
+<div class="modal-body">
+    <p>
+        The following Refresh Token will be revoked:
+    </p>
+
+    <dl class="row">
+        <dt class="col-sm-3 text-right">Client Id</dt>
+        <dd class="col-sm-9">{{$ctrl.token.client.clientId}}</dd>
+        <dt class="col-sm-3 text-right">User</dt>
+        <dd class="col-sm-9">{{$ctrl.token.user.userName}}</dd>
+        <dt class="col-sm-3 text-right">Expires in</dt>
+        <dd class="col-sm-9">{{$ctrl.token.expiration | relativeDate}}</dd>
+    </dl>
+    <p>
+        Token refresh with this token will not be possible if you proceed.
+    </p>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-primary" type="button" id="modal-btn-confirm" ng-disabled="!$ctrl.enabled" ng-click="$ctrl.doRevoke($ctrl.token)">Revoke Refresh Token</button>
+    <button class="btn btn-danger" type="button" id="modal-btn-cancel" ng-click="$ctrl.cancel()">Cancel</button>
+</div>

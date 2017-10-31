@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import org.mitre.oauth2.service.ClientDetailsEntityService;
+import org.mitre.oauth2.service.DeviceCodeService;
 import org.mitre.oauth2.service.OAuth2TokenEntityService;
 import org.mitre.oauth2.service.SystemScopeService;
 import org.mitre.oauth2.token.ChainedTokenGranter;
@@ -38,6 +39,7 @@ import org.springframework.security.oauth2.provider.implicit.ImplicitTokenGrante
 import org.springframework.security.oauth2.provider.password.ResourceOwnerPasswordTokenGranter;
 import org.springframework.security.oauth2.provider.refresh.RefreshTokenGranter;
 
+import it.infn.mw.iam.core.oauth.IamDeviceCodeTokenGranter;
 import it.infn.mw.iam.core.oauth.TokenExchangeTokenGranter;
 import it.infn.mw.iam.core.util.IamAuthenticationEventPublisher;
 
@@ -74,6 +76,8 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
   @Autowired
   private SystemScopeService systemScopeService;
 
+  @Autowired
+  private DeviceCodeService deviceCodeService;
 
   @Bean
   WebResponseExceptionTranslator webResponseExceptionTranslator() {
@@ -117,7 +121,9 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
         new JWTAssertionTokenGranter(tokenServices, clientDetailsService, requestFactory),
         new ChainedTokenGranter(tokenServices, clientDetailsService, requestFactory),
         new TokenExchangeTokenGranter(tokenServices, clientDetailsService, requestFactory,
-            systemScopeService)));
+            systemScopeService),
+        new IamDeviceCodeTokenGranter(tokenServices, clientDetailsService, requestFactory,
+            deviceCodeService)));
   }
 
   @Override

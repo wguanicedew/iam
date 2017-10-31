@@ -9,7 +9,7 @@ angular.module('dashboardApp')
     .run(function(
         $window, $rootScope, $state, $stateParams, $q, $uibModal, $trace, Utils,
         scimFactory, UserService, RegistrationRequestService,
-        LoadTemplatesService) {
+        LoadTemplatesService, TokensService) {
 
       $state.defaultErrorHandler(function(error) { console.error(error); });
 
@@ -54,6 +54,12 @@ angular.module('dashboardApp')
         if ($rootScope.isRegistrationEnabled && Utils.isAdmin()) {
           promises.push(RegistrationRequestService.listPending().then(function(
               r) { $rootScope.loggedUser.pendingRequests = r.data; }));
+          promises.push(TokensService.getAccessTokensCount().then(function(r) {
+            $rootScope.loggedUser.accessTokensCount = r.data.totalResults;
+          }));
+          promises.push(TokensService.getRefreshTokensCount().then(function(r) {
+            $rootScope.loggedUser.refreshTokensCount = r.data.totalResults;
+          }));
         }
 
         return $q.all(promises).catch(function(error){

@@ -1,6 +1,6 @@
 package it.infn.mw.iam.test.api.tokens;
 
-import static it.infn.mw.iam.api.tokens.TokensControllerSupport.CONTENT_TYPE;
+import static it.infn.mw.iam.api.tokens.TokensControllerSupport.APPLICATION_JSON_CONTENT_TYPE;
 import static it.infn.mw.iam.api.tokens.TokensControllerSupport.TOKENS_MAX_PAGE_SIZE;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
@@ -72,7 +72,7 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
   public void getEmptyRefreshTokenList() throws Exception {
 
     TokensListResponse<RefreshToken> atl = mapper.readValue(
-        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(CONTENT_TYPE))
+        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE))
             .andExpect(status().isOk())
             .andReturn()
             .getResponse()
@@ -90,7 +90,7 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
     buildAccessToken(loadTestClient(TEST_CLIENT_ID), TESTUSER_USERNAME, SCOPES);
 
     TokensListResponse<RefreshToken> atl = mapper.readValue(
-        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(CONTENT_TYPE).param("count", "0"))
+        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE).param("count", "0"))
             .andExpect(status().isOk())
             .andReturn()
             .getResponse()
@@ -111,7 +111,7 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
     OAuth2RefreshTokenEntity at = buildAccessToken(client, TESTUSER_USERNAME, SCOPES).getRefreshToken();
 
     TokensListResponse<RefreshToken> atl = mapper.readValue(
-        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(CONTENT_TYPE).param("attributes", "user,idToken"))
+        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE).param("attributes", "user,idToken"))
             .andExpect(status().isOk())
             .andReturn()
             .getResponse()
@@ -148,7 +148,7 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
     refreshTokens.add(buildAccessToken(client2, TESTUSER_USERNAME, SCOPES).getRefreshToken());
 
     TokensListResponse<RefreshToken> atl = mapper.readValue(
-        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(CONTENT_TYPE)
+        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE)
             .param("clientId", client1.getClientId()))
             .andExpect(status().isOk())
             .andReturn()
@@ -188,7 +188,7 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
     refreshTokens.add(buildAccessToken(client, TESTUSER2_USERNAME, SCOPES).getRefreshToken());
 
     TokensListResponse<RefreshToken> atl = mapper.readValue(
-        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(CONTENT_TYPE)
+        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE)
             .param("userId", user1.getUsername()))
             .andExpect(status().isOk())
             .andReturn()
@@ -231,7 +231,7 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
     refreshTokens.add(buildAccessToken(client2, TESTUSER2_USERNAME, SCOPES).getRefreshToken());
 
     TokensListResponse<RefreshToken> atl = mapper.readValue(
-        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(CONTENT_TYPE)
+        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE)
             .param("userId", user1.getUsername())
             .param("clientId", client1.getClientId()))
             .andExpect(status().isOk())
@@ -269,7 +269,7 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
 
     /* get first page */
     TokensListResponse<RefreshToken> atl = mapper.readValue(
-        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(CONTENT_TYPE))
+        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE))
             .andExpect(status().isOk())
             .andReturn()
             .getResponse()
@@ -291,7 +291,7 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
 
     /* get second page */
     TokensListResponse<RefreshToken> atl = mapper.readValue(
-        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(CONTENT_TYPE).param("startIndex",
+        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE).param("startIndex",
             String.valueOf(TOKENS_MAX_PAGE_SIZE)))
             .andExpect(status().isOk())
             .andReturn()
@@ -315,7 +315,7 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
     assertThat(tokenRepository.count(), equalTo(1L));
 
     TokensListResponse<RefreshToken> atl = mapper.readValue(
-        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(CONTENT_TYPE)
+        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE)
             .param("userId", "1%; DELETE FROM access_token; SELECT * FROM refresh_token WHERE userId LIKE %"))
             .andExpect(status().isOk())
             .andReturn()

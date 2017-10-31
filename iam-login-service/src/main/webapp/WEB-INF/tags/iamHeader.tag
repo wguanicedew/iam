@@ -35,11 +35,7 @@
  
 <link
   rel="stylesheet"
-  href="/webjars/font-awesome/css/font-awesome.css"></link> 
-
-<link
-  rel="stylesheet"
-  href="resources/bootstrap-social/bootstrap-social.css">
+  href="/webjars/font-awesome/css/font-awesome.css"></link>
 
 <link 
   rel="stylesheet"
