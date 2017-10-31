@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.2.0 (2017-10-31)
+
+### Added
+
+- IAM now provides a token management section in the dashboard that can be used
+  by administrators to view active tokens in the system, filter tokens by user
+  and client and revoke tokens (#161)
+
+### Fixed
+
+- IAM now provides user-friendlier X.509 authentication support. When a client
+  certificate is found linked to the TLS session, the IAM now displays
+  certificate information and displays a button that can be used to sign in
+  with the certificate (#193)
+- Admin-targeted email notifications that result from membership requests now
+  include the contents of the Notes field (#190)
+
+### Changed
+
+- IAM now depends on MitreID connect v. 1.3.2.cnaf.rc0 (#180)
+
 ## 1.1.0 (2017-9-29)
 
 ### Added
