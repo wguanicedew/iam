@@ -70,17 +70,17 @@ public class RefreshTokenGetRevokeTests extends TestTokensUtils {
     ClientDetailsEntity client = loadTestClient(TEST_CLIENT_ID);
     IamAccount user = loadTestUser(TESTUSER_USERNAME);
 
-    OAuth2RefreshTokenEntity rt = buildAccessToken(client, TESTUSER_USERNAME, SCOPES).getRefreshToken();
+    OAuth2RefreshTokenEntity rt =
+        buildAccessToken(client, TESTUSER_USERNAME, SCOPES).getRefreshToken();
 
     String path = String.format("%s/%d", REFRESH_TOKENS_BASE_PATH, rt.getId());
 
-    RefreshToken remoteRt = mapper.readValue(
-        mvc.perform(get(path).contentType(APPLICATION_JSON_CONTENT_TYPE))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString(),
-        RefreshToken.class);
+    RefreshToken remoteRt =
+        mapper.readValue(mvc.perform(get(path).contentType(APPLICATION_JSON_CONTENT_TYPE))
+          .andExpect(status().isOk())
+          .andReturn()
+          .getResponse()
+          .getContentAsString(), RefreshToken.class);
 
     System.out.println(remoteRt);
 
@@ -102,7 +102,8 @@ public class RefreshTokenGetRevokeTests extends TestTokensUtils {
       UnsupportedEncodingException, IOException, Exception {
 
     String path = String.format("%s/%d", REFRESH_TOKENS_BASE_PATH, FAKE_TOKEN_ID);
-    mvc.perform(get(path).contentType(APPLICATION_JSON_CONTENT_TYPE)).andExpect(status().isNotFound());
+    mvc.perform(get(path).contentType(APPLICATION_JSON_CONTENT_TYPE))
+      .andExpect(status().isNotFound());
   }
 
   @Test
@@ -110,10 +111,12 @@ public class RefreshTokenGetRevokeTests extends TestTokensUtils {
       UnsupportedEncodingException, IOException, Exception {
 
     ClientDetailsEntity client = loadTestClient(TEST_CLIENT_ID);
-    OAuth2RefreshTokenEntity rt = buildAccessToken(client, TESTUSER_USERNAME, SCOPES).getRefreshToken();
+    OAuth2RefreshTokenEntity rt =
+        buildAccessToken(client, TESTUSER_USERNAME, SCOPES).getRefreshToken();
     String path = String.format("%s/%d", REFRESH_TOKENS_BASE_PATH, rt.getId());
 
-    mvc.perform(delete(path).contentType(APPLICATION_JSON_CONTENT_TYPE)).andExpect(status().isNoContent());
+    mvc.perform(delete(path).contentType(APPLICATION_JSON_CONTENT_TYPE))
+      .andExpect(status().isNoContent());
 
     assertThat(tokenService.getRefreshTokenById(rt.getId()), equalTo(null));
   }
@@ -123,7 +126,22 @@ public class RefreshTokenGetRevokeTests extends TestTokensUtils {
       UnsupportedEncodingException, IOException, Exception {
 
     String path = String.format("%s/%d", REFRESH_TOKENS_BASE_PATH, FAKE_TOKEN_ID);
-    mvc.perform(delete(path).contentType(APPLICATION_JSON_CONTENT_TYPE)).andExpect(status().isNotFound());
+    mvc.perform(delete(path).contentType(APPLICATION_JSON_CONTENT_TYPE))
+      .andExpect(status().isNotFound());
   }
-  
+
+  @Test
+  public void testRevokeAllTokens() throws Exception {
+    ClientDetailsEntity client = loadTestClient(TEST_CLIENT_ID);
+
+    buildAccessToken(client, TESTUSER_USERNAME, SCOPES).getRefreshToken();
+    buildAccessToken(client, TESTUSER_USERNAME, SCOPES).getRefreshToken();
+    
+    assertThat(refreshTokenRepository.count(), equalTo(2L));
+    
+    mvc.perform(delete(REFRESH_TOKENS_BASE_PATH)).andExpect(status().isNoContent());
+    
+    assertThat(refreshTokenRepository.count(), equalTo(0L));
+
+  }
 }
