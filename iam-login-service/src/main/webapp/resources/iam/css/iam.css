@@ -202,3 +202,10 @@ body.skin-blue {
   font-size: smaller;
   color: #4b646f;
 }
+
+#x509-authn-info {
+  max-width: 400px;
+  margin: 0 auto;
+  margin-top: 2em;
+  text-align: center;
+}

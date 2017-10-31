@@ -8,7 +8,9 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import java.time.Instant;
 
@@ -69,8 +71,8 @@ public class LoginTests {
             .param("username", ADMIN_USERNAME)
             .param("password", ADMIN_PASSWORD)
             .param("submit", "Login"))
-      .andExpect(status().is3xxRedirection())
-      .andExpect(MockMvcResultMatchers.redirectedUrl("/dashboard"))
+      .andExpect(status().isFound())
+      .andExpect(redirectedUrl("/dashboard"))
       .andReturn()
       .getRequest()
       .getSession();
@@ -78,7 +80,7 @@ public class LoginTests {
 
     mvc.perform(get("/dashboard").session(session))
       .andExpect(status().isOk())
-      .andExpect(MockMvcResultMatchers.view().name("iam/dashboard"))
+      .andExpect(view().name("iam/dashboard"))
       .andReturn();
 
     IamAccount adminAccount = accountRepo.findByUsername(ADMIN_USERNAME)
