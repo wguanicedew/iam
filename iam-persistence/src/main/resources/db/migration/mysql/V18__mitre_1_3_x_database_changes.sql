@@ -26,11 +26,11 @@ CREATE TABLE device_code (
    approved BOOLEAN,
    auth_holder_id BIGINT);
    
-CREATE TABLE IF NOT EXISTS device_code_scope (
+CREATE TABLE device_code_scope (
    owner_id BIGINT NOT NULL,
    scope VARCHAR(256) NOT NULL);
  
-CREATE TABLE IF NOT EXISTS device_code_request_parameter (
+CREATE TABLE device_code_request_parameter (
    owner_id BIGINT,
    param VARCHAR(2048),
    val VARCHAR(2048));

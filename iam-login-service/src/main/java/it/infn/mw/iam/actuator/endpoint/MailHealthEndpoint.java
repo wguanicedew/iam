@@ -13,7 +13,7 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConfigurationProperties(prefix = "endpoints.healthMail")
+@ConfigurationProperties(prefix = "health.mailProbe")
 public class MailHealthEndpoint extends AbstractEndpoint<Health> {
 
   public static final String ENDPOINT_ID = "healthMail";

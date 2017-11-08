@@ -10,23 +10,23 @@ import org.springframework.boot.actuate.health.Health.Builder;
 import org.springframework.stereotype.Component;
 
 @Component
-public class GoogleHealthIndicator extends AbstractHealthIndicator {
+public class ExternalServiceProbeIndicator extends AbstractHealthIndicator {
 
-  private final String googleEndpoint;
+  private final String endpoint;
   private final int timeout;
 
   @Autowired
-  public GoogleHealthIndicator(@Value("${health.googleEndpoint}") String googleEndpoint,
-      @Value("${health.timeout}") int timeout) {
-    this.googleEndpoint = googleEndpoint;
+  public ExternalServiceProbeIndicator(@Value("${health.externalServiceProbe.endpoint}") String endpoint,
+      @Value("${health.externalServiceProbe.timeout}") int timeout) {
+    this.endpoint = endpoint;
     this.timeout = timeout;
   }
 
   @Override
   protected void doHealthCheck(Builder builder) throws Exception {
-    builder.withDetail("location", googleEndpoint);
+    builder.withDetail("location", endpoint);
 
-    HttpURLConnection conn = (HttpURLConnection) new URL(googleEndpoint).openConnection();
+    HttpURLConnection conn = (HttpURLConnection) new URL(endpoint).openConnection();
     conn.setRequestMethod("HEAD");
     conn.setConnectTimeout(timeout);
     int responseCode = conn.getResponseCode();

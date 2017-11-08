@@ -31,6 +31,7 @@ import it.infn.mw.iam.api.tokens.model.TokensListResponse;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.repository.IamOAuthAccessTokenRepository;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
+import it.infn.mw.iam.test.util.DateEqualModulo1Second;
 import it.infn.mw.iam.test.util.WithMockOAuthUser;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -74,10 +75,10 @@ public class AccessTokenGetListTests extends TestTokensUtils {
 
     TokensListResponse<AccessToken> atl = mapper.readValue(
         mvc.perform(get(ACCESS_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString(),
+          .andExpect(status().isOk())
+          .andReturn()
+          .getResponse()
+          .getContentAsString(),
         new TypeReference<TokensListResponse<AccessToken>>() {});
 
     assertThat(atl.getTotalResults(), equalTo(0L));
@@ -90,13 +91,13 @@ public class AccessTokenGetListTests extends TestTokensUtils {
 
     buildAccessToken(loadTestClient(TEST_CLIENT_ID), TESTUSER_USERNAME, SCOPES);
 
-    TokensListResponse<AccessToken> atl = mapper.readValue(
-        mvc.perform(get(ACCESS_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE).param("count", "0"))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString(),
-        new TypeReference<TokensListResponse<AccessToken>>() {});
+    TokensListResponse<AccessToken> atl = mapper.readValue(mvc
+      .perform(get(ACCESS_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE)
+        .param("count", "0"))
+      .andExpect(status().isOk())
+      .andReturn()
+      .getResponse()
+      .getContentAsString(), new TypeReference<TokensListResponse<AccessToken>>() {});
 
     assertThat(atl.getTotalResults(), equalTo(1L));
     assertThat(atl.getStartIndex(), equalTo(1L));
@@ -111,14 +112,13 @@ public class AccessTokenGetListTests extends TestTokensUtils {
 
     OAuth2AccessTokenEntity at = buildAccessToken(client, TESTUSER_USERNAME, SCOPES);
 
-    TokensListResponse<AccessToken> atl = mapper.readValue(
-        mvc.perform(get(ACCESS_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE).param("attributes",
-            "user,idToken"))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString(),
-        new TypeReference<TokensListResponse<AccessToken>>() {});
+    TokensListResponse<AccessToken> atl = mapper.readValue(mvc
+      .perform(get(ACCESS_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE)
+        .param("attributes", "user,idToken"))
+      .andExpect(status().isOk())
+      .andReturn()
+      .getResponse()
+      .getContentAsString(), new TypeReference<TokensListResponse<AccessToken>>() {});
 
     assertThat(atl.getTotalResults(), equalTo(1L));
     assertThat(atl.getStartIndex(), equalTo(1L));
@@ -131,8 +131,7 @@ public class AccessTokenGetListTests extends TestTokensUtils {
     assertThat(remoteAt.getId(), equalTo(at.getId()));
     assertThat(remoteAt.getClient(), equalTo(null));
     assertThat(remoteAt.getExpiration(), equalTo(null));
-    // FIXME
-    // assertThat(remoteAt.getIdToken().getId(), equalTo(at.getIdToken().getId()));
+
     assertThat(remoteAt.getUser().getId(), equalTo(user.getUuid()));
     assertThat(remoteAt.getUser().getUserName(), equalTo(user.getUsername()));
     assertThat(remoteAt.getUser().getRef(),
@@ -152,14 +151,13 @@ public class AccessTokenGetListTests extends TestTokensUtils {
     accessTokens.add(target);
     accessTokens.add(buildAccessToken(client2, TESTUSER_USERNAME, SCOPES));
 
-    TokensListResponse<AccessToken> atl = mapper.readValue(
-        mvc.perform(get(ACCESS_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE).param("clientId",
-            client1.getClientId()))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString(),
-        new TypeReference<TokensListResponse<AccessToken>>() {});
+    TokensListResponse<AccessToken> atl = mapper.readValue(mvc
+      .perform(get(ACCESS_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE)
+        .param("clientId", client1.getClientId()))
+      .andExpect(status().isOk())
+      .andReturn()
+      .getResponse()
+      .getContentAsString(), new TypeReference<TokensListResponse<AccessToken>>() {});
 
     assertThat(atl.getTotalResults(), equalTo(1L));
     assertThat(atl.getStartIndex(), equalTo(1L));
@@ -174,9 +172,8 @@ public class AccessTokenGetListTests extends TestTokensUtils {
     assertThat(remoteAt.getClient().getClientId(), equalTo(target.getClient().getClientId()));
     assertThat(remoteAt.getClient().getRef(), equalTo(target.getClient().getClientUri()));
 
-    assertThat(remoteAt.getExpiration(), equalTo(target.getExpiration()));
-    // FIXME
-    // assertThat(remoteAt.getIdToken().getId(), equalTo(target.getIdToken().getId()));
+    assertThat(remoteAt.getExpiration(), new DateEqualModulo1Second(target.getExpiration()));
+
     assertThat(remoteAt.getUser().getId(), equalTo(user.getUuid()));
     assertThat(remoteAt.getUser().getUserName(), equalTo(user.getUsername()));
     assertThat(remoteAt.getUser().getRef(),
@@ -195,14 +192,13 @@ public class AccessTokenGetListTests extends TestTokensUtils {
     accessTokens.add(target);
     accessTokens.add(buildAccessToken(client, TESTUSER2_USERNAME, SCOPES));
 
-    TokensListResponse<AccessToken> atl = mapper.readValue(
-        mvc.perform(get(ACCESS_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE).param("userId",
-            user1.getUsername()))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString(),
-        new TypeReference<TokensListResponse<AccessToken>>() {});
+    TokensListResponse<AccessToken> atl = mapper.readValue(mvc
+      .perform(get(ACCESS_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE)
+        .param("userId", user1.getUsername()))
+      .andExpect(status().isOk())
+      .andReturn()
+      .getResponse()
+      .getContentAsString(), new TypeReference<TokensListResponse<AccessToken>>() {});
 
     assertThat(atl.getTotalResults(), equalTo(1L));
     assertThat(atl.getStartIndex(), equalTo(1L));
@@ -217,9 +213,8 @@ public class AccessTokenGetListTests extends TestTokensUtils {
     assertThat(remoteAt.getClient().getClientId(), equalTo(target.getClient().getClientId()));
     assertThat(remoteAt.getClient().getRef(), equalTo(target.getClient().getClientUri()));
 
-    assertThat(remoteAt.getExpiration(), equalTo(target.getExpiration()));
-    // FIXME
-    // assertThat(remoteAt.getIdToken().getId(), equalTo(target.getIdToken().getId()));
+    assertThat(remoteAt.getExpiration(), new DateEqualModulo1Second(target.getExpiration()));
+
     assertThat(remoteAt.getUser().getId(), equalTo(user1.getUuid()));
     assertThat(remoteAt.getUser().getUserName(), equalTo(user1.getUsername()));
     assertThat(remoteAt.getUser().getRef(),
@@ -241,15 +236,14 @@ public class AccessTokenGetListTests extends TestTokensUtils {
     accessTokens.add(buildAccessToken(client2, TESTUSER_USERNAME, SCOPES));
     accessTokens.add(buildAccessToken(client2, TESTUSER2_USERNAME, SCOPES));
 
-    TokensListResponse<AccessToken> atl = mapper.readValue(
-        mvc.perform(get(ACCESS_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE)
-            .param("userId", user1.getUsername())
-            .param("clientId", client1.getClientId()))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString(),
-        new TypeReference<TokensListResponse<AccessToken>>() {});
+    TokensListResponse<AccessToken> atl = mapper.readValue(mvc
+      .perform(get(ACCESS_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE)
+        .param("userId", user1.getUsername())
+        .param("clientId", client1.getClientId()))
+      .andExpect(status().isOk())
+      .andReturn()
+      .getResponse()
+      .getContentAsString(), new TypeReference<TokensListResponse<AccessToken>>() {});
 
     assertThat(atl.getTotalResults(), equalTo(1L));
     assertThat(atl.getStartIndex(), equalTo(1L));
@@ -264,9 +258,8 @@ public class AccessTokenGetListTests extends TestTokensUtils {
     assertThat(remoteAt.getClient().getClientId(), equalTo(target.getClient().getClientId()));
     assertThat(remoteAt.getClient().getRef(), equalTo(target.getClient().getClientUri()));
 
-    assertThat(remoteAt.getExpiration(), equalTo(target.getExpiration()));
-    // FIXME
-    // assertThat(remoteAt.getIdToken().getId(), equalTo(target.getIdToken().getId()));
+    assertThat(remoteAt.getExpiration(), new DateEqualModulo1Second(target.getExpiration()));
+    
     assertThat(remoteAt.getUser().getId(), equalTo(user1.getUuid()));
     assertThat(remoteAt.getUser().getUserName(), equalTo(user1.getUsername()));
     assertThat(remoteAt.getUser().getRef(),
@@ -281,14 +274,13 @@ public class AccessTokenGetListTests extends TestTokensUtils {
     buildAccessToken(client, TESTUSER_USERNAME, SCOPES);
     buildAccessToken(client, TESTUSER2_USERNAME, SCOPES);
 
-    TokensListResponse<AccessToken> atl = mapper.readValue(
-        mvc.perform(get(ACCESS_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE).param("userId",
-            PARTIAL_USERNAME))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString(),
-        new TypeReference<TokensListResponse<AccessToken>>() {});
+    TokensListResponse<AccessToken> atl = mapper.readValue(mvc
+      .perform(get(ACCESS_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE)
+        .param("userId", PARTIAL_USERNAME))
+      .andExpect(status().isOk())
+      .andReturn()
+      .getResponse()
+      .getContentAsString(), new TypeReference<TokensListResponse<AccessToken>>() {});
 
     assertThat(atl.getTotalResults(), equalTo(0L));
     assertThat(atl.getStartIndex(), equalTo(1L));
@@ -306,10 +298,10 @@ public class AccessTokenGetListTests extends TestTokensUtils {
     /* get first page */
     TokensListResponse<AccessToken> atl = mapper.readValue(
         mvc.perform(get(ACCESS_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString(),
+          .andExpect(status().isOk())
+          .andReturn()
+          .getResponse()
+          .getContentAsString(),
         new TypeReference<TokensListResponse<AccessToken>>() {});
 
     assertThat(atl.getTotalResults(), equalTo(Long.valueOf(TOKENS_MAX_PAGE_SIZE)));
@@ -326,14 +318,13 @@ public class AccessTokenGetListTests extends TestTokensUtils {
     }
 
     /* get second page */
-    TokensListResponse<AccessToken> atl = mapper.readValue(
-        mvc.perform(get(ACCESS_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE).param("startIndex",
-            String.valueOf(TOKENS_MAX_PAGE_SIZE)))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString(),
-        new TypeReference<TokensListResponse<AccessToken>>() {});
+    TokensListResponse<AccessToken> atl = mapper.readValue(mvc
+      .perform(get(ACCESS_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE)
+        .param("startIndex", String.valueOf(TOKENS_MAX_PAGE_SIZE)))
+      .andExpect(status().isOk())
+      .andReturn()
+      .getResponse()
+      .getContentAsString(), new TypeReference<TokensListResponse<AccessToken>>() {});
 
     assertThat(atl.getTotalResults(), equalTo(Long.valueOf(TOKENS_MAX_PAGE_SIZE)));
     assertThat(atl.getStartIndex(), equalTo(Long.valueOf(TOKENS_MAX_PAGE_SIZE)));
@@ -350,14 +341,13 @@ public class AccessTokenGetListTests extends TestTokensUtils {
 
     assertThat(tokenRepository.count(), equalTo(1L));
 
-    TokensListResponse<AccessToken> atl = mapper.readValue(
-        mvc.perform(get(ACCESS_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE).param("userId",
-            "1%; DELETE FROM access_token; SELECT * FROM access_token WHERE userId LIKE %"))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString(),
-        new TypeReference<TokensListResponse<AccessToken>>() {});
+    TokensListResponse<AccessToken> atl = mapper.readValue(mvc
+      .perform(get(ACCESS_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE).param(
+          "userId", "1%; DELETE FROM access_token; SELECT * FROM access_token WHERE userId LIKE %"))
+      .andExpect(status().isOk())
+      .andReturn()
+      .getResponse()
+      .getContentAsString(), new TypeReference<TokensListResponse<AccessToken>>() {});
 
     assertThat(atl.getTotalResults(), equalTo(0L));
     assertThat(atl.getStartIndex(), equalTo(1L));
@@ -376,10 +366,10 @@ public class AccessTokenGetListTests extends TestTokensUtils {
 
     TokensListResponse<AccessToken> atl = mapper.readValue(
         mvc.perform(get(ACCESS_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString(),
+          .andExpect(status().isOk())
+          .andReturn()
+          .getResponse()
+          .getContentAsString(),
         new TypeReference<TokensListResponse<AccessToken>>() {});
 
     assertThat(atl.getTotalResults(), equalTo(2L));

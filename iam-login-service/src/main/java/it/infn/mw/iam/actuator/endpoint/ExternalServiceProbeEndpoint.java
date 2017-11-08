@@ -10,13 +10,13 @@ import org.springframework.boot.actuate.health.OrderedHealthAggregator;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import it.infn.mw.iam.actuator.health.GoogleHealthIndicator;
+import it.infn.mw.iam.actuator.health.ExternalServiceProbeIndicator;
 
 @Component
-@ConfigurationProperties(prefix = "endpoints.externalService")
-public class ExternalServiceHealthEndpoint extends AbstractEndpoint<Health> {
+@ConfigurationProperties(prefix = "health.externalServiceProbe")
+public class ExternalServiceProbeEndpoint extends AbstractEndpoint<Health> {
 
-  private static final String ENDPOINT_ID = "externalService";
+  private static final String ENDPOINT_ID = "healthExternalService";
 
   private final HealthIndicator healthIndicator;
 
@@ -24,11 +24,11 @@ public class ExternalServiceHealthEndpoint extends AbstractEndpoint<Health> {
   private HealthAggregator healthAggregator = new OrderedHealthAggregator();
 
   @Autowired
-  public ExternalServiceHealthEndpoint(GoogleHealthIndicator googleHealthIndicator) {
+  public ExternalServiceProbeEndpoint(ExternalServiceProbeIndicator remoteHttpHostHealthIndicator) {
     super(ENDPOINT_ID, false);
 
     CompositeHealthIndicator indicator = new CompositeHealthIndicator(healthAggregator);
-    indicator.addHealthIndicator("google", googleHealthIndicator);
+    indicator.addHealthIndicator("external", remoteHttpHostHealthIndicator);
 
     this.healthIndicator = indicator;
   }

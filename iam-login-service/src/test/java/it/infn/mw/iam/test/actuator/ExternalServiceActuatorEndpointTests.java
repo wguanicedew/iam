@@ -1,8 +1,5 @@
 package it.infn.mw.iam.test.actuator;
 
-import static it.infn.mw.iam.test.util.MockSmtpServerUtils.startMockSmtpServer;
-import static it.infn.mw.iam.test.util.MockSmtpServerUtils.stopMockSmtpServer;
-import static java.lang.String.format;
 import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -10,8 +7,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,19 +14,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.annotation.IfProfileValue;
+import org.springframework.test.annotation.ProfileValueSourceConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import org.subethamail.wiser.Wiser;
 
 import it.infn.mw.iam.IamLoginService;
+import it.infn.mw.iam.test.util.NullSafeSystemProfileValueSource;
+import it.infn.mw.iam.test.util.WithAnonymousUser;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {IamLoginService.class})
 @WebAppConfiguration
-public class MailHealthEndpointsTests {
+@WithAnonymousUser
+@IfProfileValue(name = "iam.offline", values = {"false", "<null>"})
+@ProfileValueSourceConfiguration(NullSafeSystemProfileValueSource.class)
+public class ExternalServiceActuatorEndpointTests {
 
   private static final String ADMIN_USERNAME = "admin";
   private static final String ADMIN_ROLE = "ADMIN";
@@ -41,77 +42,56 @@ public class MailHealthEndpointsTests {
 
   private static final String STATUS_UP = "UP";
 
-  @Value("${spring.mail.host}")
-  private String mailHost;
+  @Value("${health.externalServiceProbe.path}")
+  private String externalHealthEndpoint;
 
-  @Value("${spring.mail.port}")
-  private Integer mailPort;
-
-  @Value("${health.mailProbe.path}")
-  private String mailEndpointPath;
+  @Value("${health.externalServiceProbe.endpoint}")
+  private String checkedEndpoint;
 
   @Autowired
   private WebApplicationContext context;
 
   private MockMvc mvc;
-  private Wiser wiser;
 
   @Before
-  public synchronized void setup() throws InterruptedException {
-
+  public void setup() {
     mvc = MockMvcBuilders.webAppContextSetup(context)
       .apply(springSecurity())
       .alwaysDo(print())
       .build();
-    
-    wiser = startMockSmtpServer(mailHost, mailPort);
-  }
-
-  @After
-  public synchronized void teardown() {
-
-    stopMockSmtpServer(wiser);
-    
-    if (wiser.getServer().isRunning()) {
-      Assert.fail("Fake mail server is still running after stop!!");
-    }
   }
 
   @Test
-  public void testMailHealthEndpointWithSmtp() throws Exception {
-
+  public void testExternalServicesHealthEndpoint() throws Exception {
     // @formatter:off
-    mvc.perform(get(mailEndpointPath))
+    mvc.perform(get(externalHealthEndpoint))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.status", equalTo(STATUS_UP)))
-      .andExpect(jsonPath("$.mail").doesNotExist());
+      .andExpect(jsonPath("$.external").doesNotExist());
     // @formatter:on
   }
 
   @Test
   @WithMockUser(username = USER_USERNAME, roles = {USER_ROLE})
-  public void testMailHealthEndpointWithSmtpAsUser() throws Exception {
-
+  public void testExternalServicesHealthEndpointAsUser() throws Exception {
     // @formatter:off
-    mvc.perform(get(mailEndpointPath))
+    mvc.perform(get(externalHealthEndpoint))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.status", equalTo(STATUS_UP)))
-      .andExpect(jsonPath("$.mail").doesNotExist());
-      ;
+      .andExpect(jsonPath("$.external").doesNotExist());
     // @formatter:on
   }
 
   @Test
   @WithMockUser(username = ADMIN_USERNAME, roles = {ADMIN_ROLE})
-  public void testMailHealthEndpointWithSmtpAsAdmin() throws Exception {
-
+  public void testExternalServicesHealthEndpointAsAdmin() throws Exception {
     // @formatter:off
-    mvc.perform(get(mailEndpointPath))
+    mvc.perform(get(externalHealthEndpoint))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.status", equalTo(STATUS_UP)))
-      .andExpect(jsonPath("$.mail.status", equalTo(STATUS_UP)))
-      .andExpect(jsonPath("$.mail.location", equalTo(format("%s:%d", mailHost, mailPort))))
-      ;
+      .andExpect(jsonPath("$.external.status", equalTo(STATUS_UP)))
+      .andExpect(jsonPath("$.external.location", equalTo(checkedEndpoint)))
+      .andExpect(jsonPath("$.external.error").doesNotExist());
     // @formatter:on
   }
 

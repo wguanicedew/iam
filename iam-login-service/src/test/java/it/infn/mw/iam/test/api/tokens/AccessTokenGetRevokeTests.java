@@ -30,6 +30,7 @@ import it.infn.mw.iam.api.scim.converter.ScimResourceLocationProvider;
 import it.infn.mw.iam.api.tokens.model.AccessToken;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
+import it.infn.mw.iam.test.util.DateEqualModulo1Second;
 import it.infn.mw.iam.test.util.WithMockOAuthUser;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -86,7 +87,7 @@ public class AccessTokenGetRevokeTests extends TestTokensUtils {
 
     assertThat(remoteAt.getId(), equalTo(at.getId()));
     assertThat(remoteAt.getValue(), equalTo(at.getValue()));
-    assertThat(remoteAt.getExpiration(), equalTo(at.getExpiration()));
+    assertThat(remoteAt.getExpiration(), new DateEqualModulo1Second(at.getExpiration()));
 
     assertThat(remoteAt.getScopes().contains("openid"), equalTo(true));
     assertThat(remoteAt.getScopes().contains("profile"), equalTo(true));

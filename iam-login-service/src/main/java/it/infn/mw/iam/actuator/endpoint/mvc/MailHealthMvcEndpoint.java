@@ -22,7 +22,7 @@ import com.google.common.collect.Maps;
 import it.infn.mw.iam.actuator.endpoint.MailHealthEndpoint;
 
 @Component
-@ConfigurationProperties(prefix = "endpoints.healthMail")
+@ConfigurationProperties(prefix = "health.mailProbe")
 public class MailHealthMvcEndpoint extends AbstractEndpointMvcAdapter<MailHealthEndpoint> {
 
   private Map<String, HttpStatus> statusMapping = Maps.newLinkedHashMap();
