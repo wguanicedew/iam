@@ -3,14 +3,14 @@ sudo: false
 install: true
 addons:
   sonarcloud:
-    organization: "andreaceccanti-github"
+    organization: andreaceccanti-github
     token:
-			secure: "zjfOmdQ2Ii5FB6ifhixQI3+CaD9+yOwe1bbH7am5SwyPfaMWJJImylIJrYxcY4OzLRSDDlPENuILlldyZR5ewWbs2yffxGSxtTJXM1YbkAYI+I25kQbaecsRu6yOQvNoiyFxBdMbmVdNVF9FZZUd0ME/eVMqAE88g8bzzoAo1rQMKOsqOeIKhMeLhz0xqPxcfXOblDoKvsxNxNrDv2vRDF91jB+OL5pi8ciukGuaGsTLETfQUcn1sQJAzgySNPNQKWFjdFMxEUg3rms6obgbioO5KJPnLNmNfH28vR6cM0bpmygRxGkLz7CPoyzZTHhzUYuOWrAHQMfWY/2w66mpOYj4q/ZYEvFfUM8Ati01pnNu/DWm60ctnO9aetAeSa5toePWKDaxvECKy8CdgqZFfblOVIWhSsNWlbyhU2l8vVfhtaiHPipbsrrjyp4i8NPqTrJM2taYdtiu5WzfgxH3FeVpAnLrvB9YpFtfq9r0pxNBpF0y8eWCrdd/tF6cMO63hfxkH3YIWAaK4e8o/wrAIufB2SqzxjCSTTZ7KYtipS8nWXZbTiEaCeRuMAh3dg5kdhIrWzN9HpULha6a1FoM5LdEXI6sTFUOogxBhbPfqv7iGr6Zg3vo9LHt2dFqxT5UiowXWEh3GT05eP3QiiA0tTqIXjq5CLSGowMSH5KMHDc="
+      secure: Q2VrpnSpskLti04/MZEUW9viFK/sKXP310p8TymCV8lka3c6465KjpTi87IIzKjEj8M+QICKEiTVTD446nyGMczmdjij29UND69MrVSMhFZfLSastIKmKvP99hiRUbiuQSJ/tow5mLPZk08IaEfYCMC2s1W5kq6ovfzVXPsUdkWNp7e767zyBNvgBgemyq5yPOtEZm4L2AiTkby6SGlWDWxSDw/IBWQ+Zc80KqQVAKW/Nmxg0GhWPPy2KA/jPIy4fdmbKI5+MyLPBgOWZITUpiV0dRSRIJyYVlt+Xikn6eujV6PR0vrBcOO62ncOx/1k69kUWCNC4Q0vv3RoBzCcFptWNBNwqq/U39Uz/mBnWjbRJ84hT3isYAPZ1B4+Ne6r1EqkmMUzzAPOEGP1wkHyz1O/k74NY/tzC7AuirZ779pBgSqQ9db+/Hts6w8GHTcHpHA3AiD8J3Sa4uWy1Z433z+76CXSxxak7LuZS8Qm/BO3CWSXblitY7Wjr6PAwybmUoY4cmNBSfm3EWXtpeIk8/2iaz0FzxTMegBzo2tJgEP1UvW6HulokNzwxRur2kGpGuS/08Gu0KZ9vzrpY7YIqCsnEy5G4niZ2ASUpItyw/IHHIW60DH9GBmiIBWVtkji7njynHIEua8hWdgGCa1VXAglnXJX27OTUh4B/HlBlN0=
 jdk:
-  - oraclejdk8
+- oraclejdk8
 script:
-  - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent package sonar:sonar
+- mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent package sonar:sonar
 cache:
   directories:
-    - '$HOME/.m2/repository'
-    - '$HOME/.sonar/cache'
+  - "$HOME/.m2/repository"
+  - "$HOME/.sonar/cache"
