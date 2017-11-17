@@ -119,7 +119,7 @@ public class DefaultRegistrationRequestService
     extAuthnInfo.ifPresent(i -> addExternalAuthnInfo(userBuilder, i));
 
     IamAccount newAccount =
-        accountService.createAccount(userConverter.fromScim(userBuilder.build()));
+        accountService.createAccount(userConverter.entityFromDto(userBuilder.build()));
     newAccount.setConfirmationKey(tokenGenerator.generateToken());
     newAccount.setActive(false);
 

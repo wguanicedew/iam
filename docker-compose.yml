@@ -23,8 +23,9 @@ services:
       - "3306:3306"
 
   trust:
-    build:
-      context: ./docker/trust-anchors
+    image: italiangrid/trustanchors
+    # build:
+    #  context: ./docker/trust-anchors
     command: /bin/true
 
   iam-be:

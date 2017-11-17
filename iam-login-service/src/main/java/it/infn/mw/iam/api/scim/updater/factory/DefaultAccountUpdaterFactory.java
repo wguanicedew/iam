@@ -66,23 +66,23 @@ public class DefaultAccountUpdaterFactory implements AccountUpdaterFactory<IamAc
   private ScimCollectionConverter<IamSshKey, ScimSshKey> sshKeyConverter(ScimUser user) {
 
     return new ScimCollectionConverter<>(user.getIndigoUser()::getSshKeys,
-        sshKeyConverter::fromScim);
+        sshKeyConverter::entityFromDto);
   }
 
   private ScimCollectionConverter<IamOidcId, ScimOidcId> oidcIdConverter(ScimUser user) {
     return new ScimCollectionConverter<>(user.getIndigoUser()::getOidcIds,
-        oidcIdConverter::fromScim);
+        oidcIdConverter::entityFromDto);
   }
 
   private ScimCollectionConverter<IamSamlId, ScimSamlId> samlIdConverter(ScimUser user) {
     return new ScimCollectionConverter<>(user.getIndigoUser()::getSamlIds,
-        samlIdConverter::fromScim);
+        samlIdConverter::entityFromDto);
   }
 
   private ScimCollectionConverter<IamX509Certificate, ScimX509Certificate> x509CertificateConverter(
       ScimUser user) {
     return new ScimCollectionConverter<>(
-        user.getIndigoUser()::getCertificates, x509CertificateConverter::fromScim);
+        user.getIndigoUser()::getCertificates, x509CertificateConverter::entityFromDto);
   }
 
   private static <T> AccountUpdater buildUpdater(AccountUpdaterBuilder<T> factory,

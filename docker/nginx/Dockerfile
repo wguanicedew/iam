@@ -1,4 +1,4 @@
-FROM nginx
+FROM nginx:latest
 COPY ./wait-for-it.sh /
 RUN chmod +x /wait-for-it.sh
 RUN apt-get update && apt-get install -y ca-certificates && apt-get clean all

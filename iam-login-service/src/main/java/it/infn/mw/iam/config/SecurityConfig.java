@@ -820,6 +820,39 @@ public class SecurityConfig {
   }
 
   @Configuration
+  @Order(28)
+  public static class AupApiEndpointConfig extends WebSecurityConfigurerAdapter {
+    @Autowired
+    private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
+
+    @Autowired
+    private OAuth2AuthenticationProcessingFilter resourceFilter;
+
+    @Autowired
+    private CorsFilter corsFilter;
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+      http.requestMatchers()
+        .antMatchers("/iam/aup/**")
+        .and()
+        .exceptionHandling()
+        .authenticationEntryPoint(authenticationEntryPoint)
+        .and()
+        .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
+        .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
+        .sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.NEVER)
+        .and()
+        .authorizeRequests()
+        .antMatchers(HttpMethod.GET,"/iam/aup").permitAll()
+        .antMatchers(HttpMethod.POST,"/iam/aup").authenticated()
+        .and()
+        .csrf()
+        .disable();
+    }
+  }
+  @Configuration
   @Order(Ordered.HIGHEST_PRECEDENCE)
   @Profile("dev")
   public static class H2ConsoleEndpointAuthorizationConfig extends WebSecurityConfigurerAdapter {
