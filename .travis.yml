@@ -12,7 +12,7 @@ addons:
 jdk:
 - openjdk8
 script:
-- mvn clean package 
+- /bin/bash travis/build.sh
 cache:
   directories:
   - "$HOME/.m2/repository"
