@@ -1,9 +1,10 @@
 language: java
-sudo: false
+sudo: required
+services:
+  - docker
 dist: trusty
 install:
-  - git clone https://github.com/indigo-iam/OpenID-Connect-Java-Spring-Server.git $HOME/mitreid-cnaf
-  - pushd $HOME/mitreid-cnaf && git checkout develop-1.3.x && mvn install > mitre-build.out && popd
+  - /bin/bash travis/install-mitreid.sh
 addons:
   sonarcloud:
     organization: andreaceccanti-github

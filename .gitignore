@@ -25,3 +25,4 @@ _book
 *.mobi
 *.pdf
 travis/travis-build.out
+travis/travis-mitre-build.out
