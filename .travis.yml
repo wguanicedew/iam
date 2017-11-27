@@ -2,6 +2,7 @@ language: java
 sudo: required
 services:
   - docker
+  - mysql
 dist: trusty
 install:
   - /bin/bash travis/install-mitreid.sh

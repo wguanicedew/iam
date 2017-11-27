@@ -21,9 +21,9 @@ trap 'error_handler' ERR
 bash -c "while true; do echo \$(date) - building ...; sleep $PING_SLEEP; done" &
 PING_LOOP_PID=$!
 
-docker-compose up -d db
 mvn clean package >> $BUILD_OUTPUT 2>&1
 echo "IAM H2 build & test completed succesfully"
+mysql -uroot -e "CREATE DATABASE iam; GRANT ALL PRIVILEGES on iam.* to 'iam'@'%' identified by 'pwd';"
 echo "--> MySQL build & test" >> $BUILD_OUTPUT
 IAM_DB_HOST=127.0.0.1 mvn -Dspring.profiles.active=mysql-test >> $BUILD_OUTPUT 2>&1
 dump_output
