@@ -1,6 +1,6 @@
 #!/bin/bash
 # Freely adapted from https://stackoverflow.com/questions/26082444/how-to-work-around-travis-cis-4mb-output-limit
-set -e
+set -ex
 
 export PING_SLEEP=30s
 export BUILD_OUTPUT=travis/travis-build.out
@@ -21,6 +21,10 @@ trap 'error_handler' ERR
 bash -c "while true; do echo \$(date) - building ...; sleep $PING_SLEEP; done" &
 PING_LOOP_PID=$!
 
+docker-compose up -d db
 mvn clean package >> $BUILD_OUTPUT 2>&1
+echo "IAM H2 build & test completed succesfully"
+echo "--> MySQL build & test" >> $BUILD_OUTPUT
+IAM_DB_HOST=127.0.0.1 mvn -Dspring.profiles.active=mysql-test >> $BUILD_OUTPUT 2>&1
 dump_output
 kill ${PING_LOOP_PID}
