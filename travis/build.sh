@@ -1,6 +1,6 @@
 #!/bin/bash
 # Freely adapted from https://stackoverflow.com/questions/26082444/how-to-work-around-travis-cis-4mb-output-limit
-set -ex
+set -e
 
 export PING_SLEEP=30s
 export BUILD_OUTPUT=travis/travis-build.out
@@ -26,5 +26,6 @@ echo "IAM H2 build & test completed succesfully"
 mysql -uroot -e "CREATE DATABASE iam; GRANT ALL PRIVILEGES on iam.* to 'iam'@'%' identified by 'pwd';"
 echo "--> MySQL build & test" >> $BUILD_OUTPUT
 IAM_DB_HOST=127.0.0.1 mvn -Dspring.profiles.active=mysql-test test >> $BUILD_OUTPUT 2>&1
-dump_output
+echo "IAM MySQL tests completed successfully"
+tail -100 $BUILD_OUTPUT
 kill ${PING_LOOP_PID}
