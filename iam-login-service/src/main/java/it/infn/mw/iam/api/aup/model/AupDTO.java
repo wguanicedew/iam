@@ -1,4 +1,4 @@
-package it.infn.mw.iam.api.aup;
+package it.infn.mw.iam.api.aup.model;
 
 import java.util.Date;
 

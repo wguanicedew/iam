@@ -15,6 +15,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import it.infn.mw.iam.api.aup.error.AupAlreadyExistsError;
+import it.infn.mw.iam.api.aup.error.AupNotFoundError;
+import it.infn.mw.iam.api.aup.error.InvalidAupError;
+import it.infn.mw.iam.api.aup.model.AupConverter;
+import it.infn.mw.iam.api.aup.model.AupDTO;
 import it.infn.mw.iam.api.common.ErrorDTO;
 import it.infn.mw.iam.persistence.model.IamAup;
 

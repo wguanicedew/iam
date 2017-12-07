@@ -33,8 +33,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 
 import it.infn.mw.iam.IamLoginService;
-import it.infn.mw.iam.api.aup.AupConverter;
-import it.infn.mw.iam.api.aup.AupDTO;
+import it.infn.mw.iam.api.aup.model.AupConverter;
+import it.infn.mw.iam.api.aup.model.AupDTO;
 import it.infn.mw.iam.persistence.model.IamAup;
 import it.infn.mw.iam.persistence.repository.IamAupRepository;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;

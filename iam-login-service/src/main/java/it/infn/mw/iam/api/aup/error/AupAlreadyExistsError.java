@@ -1,4 +1,4 @@
-package it.infn.mw.iam.api.aup;
+package it.infn.mw.iam.api.aup.error;
 
 public class AupAlreadyExistsError extends RuntimeException {
 

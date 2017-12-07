@@ -7,6 +7,9 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import it.infn.mw.iam.api.aup.error.AupNotFoundError;
+import it.infn.mw.iam.api.aup.model.AupConverter;
+import it.infn.mw.iam.api.aup.model.AupDTO;
 import it.infn.mw.iam.persistence.model.IamAup;
 import it.infn.mw.iam.persistence.repository.IamAupRepository;
 
