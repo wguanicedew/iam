@@ -24,3 +24,5 @@ _book
 *.epub
 *.mobi
 *.pdf
+travis/travis-build.out
+travis/travis-mitre-build.out
