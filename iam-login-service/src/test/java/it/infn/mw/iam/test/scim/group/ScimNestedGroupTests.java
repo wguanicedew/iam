@@ -19,6 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import javax.transaction.Transactional;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,6 +40,7 @@ import it.infn.mw.iam.api.scim.model.ScimGroupRef;
 import it.infn.mw.iam.api.scim.model.ScimIndigoGroup;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 import it.infn.mw.iam.test.util.WithMockOAuthUser;
+import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class})
@@ -54,6 +56,9 @@ public class ScimNestedGroupTests {
 
   @Autowired
   private ScimResourceLocationProvider scimResourceLocationProvider;
+  
+  @Autowired
+  private MockOAuth2Filter mockOAuth2Filter;
 
   private MockMvc mvc;
 
@@ -63,6 +68,11 @@ public class ScimNestedGroupTests {
       .apply(springSecurity())
       .alwaysDo(print())
       .build();
+  }
+  
+  @After
+  public void teardown() {
+    mockOAuth2Filter.cleanupSecurityContext();
   }
 
   @Test

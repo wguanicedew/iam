@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import javax.transaction.Transactional;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,6 +33,7 @@ import it.infn.mw.iam.persistence.repository.IamAupRepository;
 import it.infn.mw.iam.persistence.repository.IamAupSignatureRepository;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 import it.infn.mw.iam.test.util.WithAnonymousUser;
+import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class})
@@ -59,13 +61,22 @@ public class AupSignatureIntegrationTests extends AupTestSupport {
   private AupSignatureConverter signatureConverter;
 
   private MockMvc mvc;
+  
+  @Autowired
+  private MockOAuth2Filter mockOAuth2Filter;
 
   @Before
   public void setup() {
+    mockOAuth2Filter.cleanupSecurityContext();
     mvc = MockMvcBuilders.webAppContextSetup(context)
       .alwaysDo(print())
       .apply(springSecurity())
       .build();
+  }
+  
+  @After
+  public void cleanupOAuthUser() {
+    mockOAuth2Filter.cleanupSecurityContext();
   }
 
   @Test

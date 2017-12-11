@@ -7,18 +7,7 @@ import static org.junit.Assert.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.google.common.collect.Lists;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import it.infn.mw.iam.IamLoginService;
-import it.infn.mw.iam.api.scim.converter.ScimResourceLocationProvider;
-import it.infn.mw.iam.api.tokens.model.RefreshToken;
-import it.infn.mw.iam.api.tokens.model.TokensListResponse;
-import it.infn.mw.iam.persistence.model.IamAccount;
-import it.infn.mw.iam.persistence.repository.IamOAuthRefreshTokenRepository;
-import it.infn.mw.iam.test.core.CoreControllerTestSupport;
-import it.infn.mw.iam.test.util.WithMockOAuthUser;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
@@ -31,7 +20,19 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import java.util.List;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
+
+import it.infn.mw.iam.IamLoginService;
+import it.infn.mw.iam.api.scim.converter.ScimResourceLocationProvider;
+import it.infn.mw.iam.api.tokens.model.RefreshToken;
+import it.infn.mw.iam.api.tokens.model.TokensListResponse;
+import it.infn.mw.iam.persistence.model.IamAccount;
+import it.infn.mw.iam.persistence.repository.IamOAuthRefreshTokenRepository;
+import it.infn.mw.iam.test.core.CoreControllerTestSupport;
+import it.infn.mw.iam.test.util.WithMockOAuthUser;
+import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class})
@@ -44,6 +45,9 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
   public static final String TEST_CLIENT_ID = "token-lookup-client";
   public static final String TEST_CLIENT2_ID = "password-grant";
   public static final int FAKE_TOKEN_ID = 12345;
+  private static final String TESTUSER_USERNAME = "test_102";
+  private static final String TESTUSER2_USERNAME = "test_103";
+
 
   @Autowired
   private ScimResourceLocationProvider scimResourceLocationProvider;
@@ -53,10 +57,10 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
 
   @Autowired
   private IamOAuthRefreshTokenRepository tokenRepository;
-
-  private static final String TESTUSER_USERNAME = "test_102";
-  private static final String TESTUSER2_USERNAME = "test_103";
-
+  
+  @Autowired
+  private MockOAuth2Filter mockOAuth2Filter;
+  
   @Before
   public void setup() {
     clearAllTokens();
@@ -66,6 +70,7 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
   @After
   public void teardown() {
     clearAllTokens();
+    mockOAuth2Filter.cleanupSecurityContext();
   }
 
   @Test

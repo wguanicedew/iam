@@ -42,6 +42,7 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 import it.infn.mw.iam.test.scim.ScimRestUtilsMvc;
 import it.infn.mw.iam.test.util.WithMockOAuthUser;
+import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(
@@ -59,6 +60,9 @@ public class ScimUserProvisioningPatchTests extends ScimUserTestSupport {
 
   @Autowired
   private PasswordEncoder encoder;
+  
+  @Autowired
+  private MockOAuth2Filter mockOAuth2Filter;
 
   private final String PICTURE_URL = "http://iosicongallery.com/img/512/angry-birds-2-2016.png";
 
@@ -77,6 +81,7 @@ public class ScimUserProvisioningPatchTests extends ScimUserTestSupport {
 
     deleteScimUser(lennon);
     deleteScimUser(lincoln);
+    mockOAuth2Filter.cleanupSecurityContext();
   }
 
   @Test

@@ -5,16 +5,19 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import it.infn.mw.iam.IamLoginService;
-import it.infn.mw.iam.test.core.CoreControllerTestSupport;
-import it.infn.mw.iam.test.util.WithMockOAuthUser;
-
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
+
+import it.infn.mw.iam.IamLoginService;
+import it.infn.mw.iam.test.core.CoreControllerTestSupport;
+import it.infn.mw.iam.test.util.WithMockOAuthUser;
+import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class})
@@ -23,10 +26,18 @@ public class RefreshTokenAuthenticatedTests extends TestTokensUtils {
 
   private static final String TESTUSER_USERNAME = "test_102";
   private static final int FAKE_TOKEN_ID = 12345;
+  
+  @Autowired
+  private MockOAuth2Filter mockOAuth2Filter;
 
   @Before
   public void setup() {
     initMvc();
+  }
+  
+  @After
+  public void teardown() {
+    mockOAuth2Filter.cleanupSecurityContext();
   }
 
   @Test
