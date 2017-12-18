@@ -2,6 +2,7 @@ package it.infn.mw.iam.config;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.mitre.oauth2.service.DeviceCodeService;
 import org.mitre.oauth2.service.OAuth2TokenEntityService;
@@ -10,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -50,6 +52,12 @@ public class TaskConfig implements SchedulingConfigurer {
   @Autowired
   DeviceCodeService deviceCodeService;
 
+  @Value("${notification.disable}")
+  boolean notificationDisabled;
+
+  @Value("${notification.taskDelay}")
+  long notificationTaskPeriodMsec;
+
   @Bean(destroyMethod = "shutdown")
   public ScheduledExecutorService taskScheduler() {
     return Executors.newSingleThreadScheduledExecutor();
@@ -68,10 +76,11 @@ public class TaskConfig implements SchedulingConfigurer {
     approvedSiteService.clearExpiredSites();
   }
 
-  @Scheduled(fixedDelayString = "${notification.taskDelay}", initialDelay = TEN_SECONDS_MSEC)
-  public void sendNotifications() {
-    notificationService.sendPendingNotifications();
-  }
+
+//  @Scheduled(fixedDelayString = "${notification.taskDelay}", initialDelay = TEN_SECONDS_MSEC)
+//  public void sendNotifications() {
+//    notificationService.sendPendingNotifications();
+//  }
 
   @Scheduled(fixedDelay = THIRTY_SECONDS_MSEC, initialDelay = TEN_MINUTES_MSEC)
   public void clearExpiredNotifications() {
@@ -84,9 +93,23 @@ public class TaskConfig implements SchedulingConfigurer {
     deviceCodeService.clearExpiredDeviceCodes();
   }
 
+  public void schedulePendingNotificationsDelivery(final ScheduledTaskRegistrar taskRegistrar) {
+    if (notificationDisabled) {
+      LOG.info("Notification is DISABLED. Periodic notification delivery task will "
+          + "NOT be scheduled");
+      return;
+    }
+
+    LOG.info("Scheduling pending notification delivery task to run every {} sec",
+        TimeUnit.MILLISECONDS.toSeconds(notificationTaskPeriodMsec));
+    taskRegistrar.addFixedRateTask(() -> notificationService.sendPendingNotifications(),
+        notificationTaskPeriodMsec);
+  }
+
   @Override
   public void configureTasks(final ScheduledTaskRegistrar taskRegistrar) {
     taskRegistrar.setScheduler(taskScheduler());
+    schedulePendingNotificationsDelivery(taskRegistrar);
   }
 
 }
