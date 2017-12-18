@@ -41,6 +41,8 @@ import it.infn.mw.iam.notification.NotificationService;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamRegistrationRequest;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
+import it.infn.mw.iam.persistence.repository.IamAupRepository;
+import it.infn.mw.iam.persistence.repository.IamAupSignatureRepository;
 import it.infn.mw.iam.persistence.repository.IamRegistrationRequestRepository;
 
 @Service
@@ -68,6 +70,12 @@ public class DefaultRegistrationRequestService
 
   @Autowired
   private IamAccountRepository iamAccountRepo;
+  
+  @Autowired
+  private IamAupRepository iamAupRepo;
+  
+  @Autowired
+  private IamAupSignatureRepository iamAupSignatureRepo;
 
   private ApplicationEventPublisher eventPublisher;
 
@@ -104,6 +112,12 @@ public class DefaultRegistrationRequestService
     }
   }
 
+  private void createAupSignatureForAccountIfNeeded(IamAccount account) {
+    iamAupRepo.findByName(IamAupRepository.DEFAULT_AUP_NAME).ifPresent(a -> 
+      iamAupSignatureRepo.createSignatureForAccount(account)
+    );
+  }
+  
   @Override
   public RegistrationRequestDto createRequest(RegistrationRequestDto request,
       Optional<ExternalAuthenticationRegistrationInfo> extAuthnInfo) {
@@ -123,6 +137,8 @@ public class DefaultRegistrationRequestService
     newAccount.setConfirmationKey(tokenGenerator.generateToken());
     newAccount.setActive(false);
 
+    createAupSignatureForAccountIfNeeded(newAccount);
+    
     IamRegistrationRequest regRequest = new IamRegistrationRequest();
     regRequest.setUuid(UUID.randomUUID().toString());
     regRequest.setCreationTime(new Date());

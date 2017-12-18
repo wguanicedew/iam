@@ -4,11 +4,11 @@ angular.module('registrationApp').controller('RegistrationController',
     RegistrationController);
 
 RegistrationController.$inject = ['$scope', '$q', '$window', '$cookies',
-    'RegistrationRequestService', 'AuthnInfo'
+    'RegistrationRequestService', 'AuthnInfo', 'Aup'
 ];
 
 function RegistrationController($scope, $q, $window, $cookies,
-    RegistrationRequestService, AuthnInfo) {
+    RegistrationRequestService, AuthnInfo, Aup) {
 
     var vm = this;
     var EXT_AUTHN_ROLE = 'ROLE_EXT_AUTH_UNREGISTERED';
@@ -37,6 +37,14 @@ function RegistrationController($scope, $q, $window, $cookies,
     function activate() {
         vm.resetRequest();
         vm.populateRequest();
+        Aup.getAup().then(function(res) {
+            if (res != null) {
+                $scope.aup = res.data.text;
+            }
+        }).catch(function(res) {
+            console.error("Error getting AUP : " +
+                res.status + " " + res.statusText);
+        });
     }
 
     function userIsExternallyAuthenticated() {

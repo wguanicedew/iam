@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 
 import it.infn.mw.iam.IamLoginService;
+import it.infn.mw.iam.api.aup.error.AupNotFoundError;
 import it.infn.mw.iam.api.aup.model.AupConverter;
 import it.infn.mw.iam.api.aup.model.AupDTO;
 import it.infn.mw.iam.persistence.model.IamAup;
@@ -63,7 +64,7 @@ public class AupIntegrationTests extends AupTestSupport {
 
   @Autowired
   private MockOAuth2Filter mockOAuth2Filter;
-  
+
   private MockMvc mvc;
 
   @Before
@@ -73,7 +74,7 @@ public class AupIntegrationTests extends AupTestSupport {
       .apply(springSecurity())
       .build();
   }
-  
+
   @After
   public void cleanupOAuthUser() {
     mockOAuth2Filter.cleanupSecurityContext();
@@ -82,7 +83,8 @@ public class AupIntegrationTests extends AupTestSupport {
 
   @Test
   public void noAupDefinedResultsin404() throws Exception {
-    mvc.perform(get("/iam/aup")).andExpect(status().isNotFound());
+    mvc.perform(get("/iam/aup")).andExpect(status().isNotFound()).andExpect(
+        jsonPath("$.error", equalTo(AupNotFoundError.AUP_NOT_DEFINED)));
   }
 
   @Test
@@ -176,42 +178,42 @@ public class AupIntegrationTests extends AupTestSupport {
     assertThat(createdAup.getCreationTime(), greaterThan(aup.getCreationTime()));
     assertThat(createdAup.getLastUpdateTime(), greaterThan(aup.getLastUpdateTime()));
   }
-  
+
   @Test
   @WithMockUser(username = "admin", roles = {"ADMIN"})
   public void aupCreationFailsIfAupAlreadyDefined() throws JsonProcessingException, Exception {
-    
+
     AupDTO aup = converter.dtoFromEntity(buildDefaultAup());
 
     mvc
       .perform(
           post("/iam/aup").contentType(APPLICATION_JSON).content(mapper.writeValueAsString(aup)))
       .andExpect(status().isCreated());
-    
+
     mvc
-    .perform(
-        post("/iam/aup").contentType(APPLICATION_JSON).content(mapper.writeValueAsString(aup)))
-    .andExpect(status().isConflict())
-    .andExpect(jsonPath("$.error", equalTo("AUP already exists")));    
+      .perform(
+          post("/iam/aup").contentType(APPLICATION_JSON).content(mapper.writeValueAsString(aup)))
+      .andExpect(status().isConflict())
+      .andExpect(jsonPath("$.error", equalTo("AUP already exists")));
   }
-  
+
   @Test
   public void aupDeletionRequiresAuthenticatedUser() throws Exception {
     mvc.perform(delete("/iam/aup")).andExpect(status().isUnauthorized());
   }
-  
+
   @Test
   @WithMockUser(username = "test", roles = {"USER"})
   public void aupDeletionRequiresAdminUser() throws Exception {
     mvc.perform(delete("/iam/aup")).andExpect(status().isForbidden());
   }
-  
+
   @Test
   @WithMockUser(username = "admin", roles = {"ADMIN"})
   public void aupDeletionReturns404IfAupIsNotDefined() throws Exception {
     mvc.perform(delete("/iam/aup")).andExpect(status().isNotFound());
   }
-  
+
   @Test
   @WithMockUser(username = "admin", roles = {"ADMIN"})
   public void aupDeletionWorks() throws Exception {
@@ -221,9 +223,9 @@ public class AupIntegrationTests extends AupTestSupport {
       .perform(
           post("/iam/aup").contentType(APPLICATION_JSON).content(mapper.writeValueAsString(aup)))
       .andExpect(status().isCreated());
-    
+
     mvc.perform(delete("/iam/aup")).andExpect(status().isNoContent());
-    
+
     mvc.perform(get("/iam/aup")).andExpect(status().isNotFound());
   }
 

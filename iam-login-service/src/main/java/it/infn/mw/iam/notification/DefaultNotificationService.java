@@ -226,9 +226,7 @@ public class DefaultNotificationService implements NotificationService {
     receivers.add(rcv);
 
     message.setReceivers(receivers);
-
     notificationRepository.save(message);
-
     return message;
   }
 

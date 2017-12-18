@@ -84,9 +84,10 @@ public class IamAupSignatureRepositoryTests extends AupTestSupport {
 
     IamAupSignature sig = repo.findSignatureForAccount(testAccount)
       .orElseThrow(() -> new AssertionError("Expected signature not found in database"));
-
+    
     assertThat(sig.getAccount(), equalTo(testAccount));
     assertThat(sig.getAup(), equalTo(aup));
+    assertThat(testAccount.getAupSignature(), equalTo(sig));
 
     Instant signatureTime = sig.getSignatureTime().toInstant();
     assertThat(signatureTime.isAfter(now.toInstant()), is(true));

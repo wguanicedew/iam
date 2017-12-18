@@ -35,6 +35,7 @@ public class IamAupSignatureRepositoryImpl implements IamAupSignatureRepositoryC
     IamAupSignature newSignature = new IamAupSignature();
     newSignature.setAccount(account);
     newSignature.setAup(aup);
+    account.setAupSignature(newSignature);
     return newSignature;
   }
 
