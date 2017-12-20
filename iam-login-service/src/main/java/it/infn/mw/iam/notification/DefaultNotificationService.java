@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -32,10 +33,11 @@ import it.infn.mw.iam.persistence.model.IamRegistrationRequest;
 import it.infn.mw.iam.persistence.repository.IamEmailNotificationRepository;
 
 @Service
+@ConditionalOnProperty(name = "notification.disable", havingValue = "false")
 @Qualifier("defaultNotificationService")
 public class DefaultNotificationService implements NotificationService {
 
-  private static final Logger logger = LoggerFactory.getLogger(DefaultNotificationService.class);
+  private static final Logger LOG = LoggerFactory.getLogger(DefaultNotificationService.class);
 
   private static final String RECIPIENT_FIELD = "recipient";
 
@@ -73,8 +75,14 @@ public class DefaultNotificationService implements NotificationService {
     model.put("confirmURL", confirmURL);
     model.put("organisationName", organisationName);
 
-    return createMessage("confirmRegistration.vm", model, IamNotificationType.CONFIRMATION,
-        properties.getSubject().get("confirmation"), request.getAccount().getUserInfo().getEmail());
+    IamEmailNotification notification = createMessage("confirmRegistration.vm", model,
+        IamNotificationType.CONFIRMATION, properties.getSubject().get("confirmation"),
+        request.getAccount().getUserInfo().getEmail());
+
+    LOG.debug("Created confirmation message for registration request {}. Confirmation URL: {}",
+        request.getUuid(), confirmURL);
+
+    return notification;
   }
 
   @Override
@@ -89,8 +97,15 @@ public class DefaultNotificationService implements NotificationService {
     model.put("resetPasswordUrl", resetPasswordUrl);
     model.put("organisationName", organisationName);
 
-    return createMessage("accountActivated.vm", model, IamNotificationType.ACTIVATED,
-        properties.getSubject().get("activated"), request.getAccount().getUserInfo().getEmail());
+    IamEmailNotification notification = createMessage("accountActivated.vm", model,
+        IamNotificationType.ACTIVATED, properties.getSubject().get("activated"),
+        request.getAccount().getUserInfo().getEmail());
+
+    LOG.debug(
+        "Create account activated message for registration request {}. Reset password URL: {}",
+        request.getUuid(), resetPasswordUrl);
+
+    return notification;
   }
 
   @Override
@@ -137,8 +152,14 @@ public class DefaultNotificationService implements NotificationService {
     model.put("organisationName", organisationName);
     model.put("username", account.getUsername());
 
-    return createMessage("resetPassword.vm", model, IamNotificationType.RESETPASSWD,
-        properties.getSubject().get("resetPassword"), account.getUserInfo().getEmail());
+    IamEmailNotification notification =
+        createMessage("resetPassword.vm", model, IamNotificationType.RESETPASSWD,
+            properties.getSubject().get("resetPassword"), account.getUserInfo().getEmail());
+
+    LOG.debug("Created reset password message for account {}. Reset password URL: {}",
+        account.getUsername(), resetPasswordUrl);
+
+    return notification;
   }
 
   @Override
@@ -164,14 +185,14 @@ public class DefaultNotificationService implements NotificationService {
 
         elem.setDeliveryStatus(IamDeliveryStatus.DELIVERED);
 
-        logger.info("Sent mail. message_id:{} status:{} message_type:{} mail_from:{} rcpt_to:{}",
+        LOG.info("Sent mail. message_id:{} status:{} message_type:{} mail_from:{} rcpt_to:{}",
             elem.getUuid(), elem.getDeliveryStatus().name(), elem.getType(),
             properties.getMailFrom(), messageTemplate.getTo());
 
       } catch (MailException me) {
         elem.setDeliveryStatus(IamDeliveryStatus.DELIVERY_ERROR);
-        logger.error("Message delivery fail. message_id:{} reason:{}", elem.getUuid(),
-            me.getMessage(), me);
+        LOG.error("Message delivery fail. message_id:{} reason:{}", elem.getUuid(), me.getMessage(),
+            me);
       }
 
       elem.setLastUpdate(new Date());
@@ -190,18 +211,14 @@ public class DefaultNotificationService implements NotificationService {
 
     if (!messageList.isEmpty()) {
       notificationRepository.delete(messageList);
-      logger.info("Deleted {} messages in status {} older than {}", messageList.size(),
+      LOG.info("Deleted {} messages in status {} older than {}", messageList.size(),
           IamDeliveryStatus.DELIVERED, threshold);
     }
   }
 
 
   protected void doSend(final SimpleMailMessage message) {
-    if (!properties.getDisable()) {
-      mailSender.send(message);
-    } else {
-      logger.info("Notification disabled: statusMessage {}", message);
-    }
+    mailSender.send(message);
   }
 
 
