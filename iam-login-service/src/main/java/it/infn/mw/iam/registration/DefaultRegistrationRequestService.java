@@ -114,7 +114,7 @@ public class DefaultRegistrationRequestService
 
   private void createAupSignatureForAccountIfNeeded(IamAccount account) {
     iamAupRepo.findByName(IamAupRepository.DEFAULT_AUP_NAME).ifPresent(a -> 
-      iamAupSignatureRepo.createSignatureForAccount(account)
+      iamAupSignatureRepo.createSignatureForAccount(account, new Date())
     );
   }
   

@@ -18,7 +18,7 @@ public class IamAupSignatureRepositoryImpl implements IamAupSignatureRepositoryC
 
   @Autowired
   IamAupRepository aupRepo;
-
+  
   @Override
   public Optional<IamAupSignature> findSignatureForAccount(IamAccount account) {
 
@@ -40,7 +40,7 @@ public class IamAupSignatureRepositoryImpl implements IamAupSignatureRepositoryC
   }
 
   @Override
-  public IamAupSignature createSignatureForAccount(IamAccount account) {
+  public IamAupSignature createSignatureForAccount(IamAccount account, Date currentTime) {
     IamAup aup = aupRepo.findByName(IamAupRepository.DEFAULT_AUP_NAME)
       .orElseThrow(() -> new IllegalStateException(
           "Default AUP not found in database, cannot create signature"));
@@ -48,18 +48,20 @@ public class IamAupSignatureRepositoryImpl implements IamAupSignatureRepositoryC
     IamAupSignature signature = repo.findSignatureForAccount(account)
       .orElseGet(() -> createSignatureForAccount(aup, account));
 
-    signature.setSignatureTime(new Date());
+    signature.setSignatureTime(currentTime);
+    
     repo.save(signature);
     return signature;
   }
 
   @Override
-  public IamAupSignature updateSignatureForAccount(IamAccount account) {
+  public IamAupSignature updateSignatureForAccount(IamAccount account, Date currentTime) {
 
     IamAupSignature signature = findSignatureForAccount(account)
       .orElseThrow(() -> new IamAupSignatureNotFoundError(account));
 
-    signature.setSignatureTime(new Date());
+
+    signature.setSignatureTime(currentTime);
     repo.save(signature);
 
     return signature;

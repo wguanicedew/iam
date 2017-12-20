@@ -64,7 +64,7 @@ public class IamAupSignatureRepositoryTests extends AupTestSupport {
   public void signatureCreationWithoutDefaultAupRaisesException() {
     IamAccount testAccount = findTestAccount();
     try {
-      repo.createSignatureForAccount(testAccount);
+      repo.createSignatureForAccount(testAccount, new Date());
     } catch (Exception e) {
       assertThat(e.getMessage(),
           equalTo("Default AUP not found in database, cannot create signature"));
@@ -80,7 +80,7 @@ public class IamAupSignatureRepositoryTests extends AupTestSupport {
 
     IamAccount testAccount = findTestAccount();
     Date now = new Date();
-    repo.createSignatureForAccount(testAccount);
+    repo.createSignatureForAccount(testAccount, new Date());
 
     IamAupSignature sig = repo.findSignatureForAccount(testAccount)
       .orElseThrow(() -> new AssertionError("Expected signature not found in database"));
@@ -88,9 +88,8 @@ public class IamAupSignatureRepositoryTests extends AupTestSupport {
     assertThat(sig.getAccount(), equalTo(testAccount));
     assertThat(sig.getAup(), equalTo(aup));
     assertThat(testAccount.getAupSignature(), equalTo(sig));
-
-    Instant signatureTime = sig.getSignatureTime().toInstant();
-    assertThat(signatureTime.isAfter(now.toInstant()), is(true));
+    
+    assertThat(sig.getSignatureTime(), equalTo(now));
   }
 
   @Test
@@ -100,32 +99,31 @@ public class IamAupSignatureRepositoryTests extends AupTestSupport {
 
     IamAccount testAccount = findTestAccount();
     Date now = new Date();
-    repo.createSignatureForAccount(testAccount);
+    repo.createSignatureForAccount(testAccount, now);
 
     IamAupSignature sig = repo.findSignatureForAccount(testAccount)
       .orElseThrow(() -> new AssertionError("Expected signature not found in database"));
 
     assertThat(sig.getAccount(), equalTo(testAccount));
     assertThat(sig.getAup(), equalTo(aup));
-
-    Instant signatureTime = sig.getSignatureTime().toInstant();
-    assertThat(signatureTime.isAfter(now.toInstant()), is(true));
+    assertThat(sig.getSignatureTime(), equalTo(now));
     
     Instant firstSigTime = sig.getSignatureTime().toInstant();
-    repo.createSignatureForAccount(testAccount);
+    now = new Date();
+    repo.createSignatureForAccount(testAccount, now);
     
     sig = repo.findSignatureForAccount(testAccount)
         .orElseThrow(() -> new AssertionError("Expected signature not found in database"));
     
-    signatureTime = sig.getSignatureTime().toInstant();
-    assertThat(signatureTime.isAfter(firstSigTime), is(true));
+    assertThat(sig.getSignatureTime(), equalTo(now));
   }
 
   @Test(expected = IamAupSignatureNotFoundError.class)
   public void signatureUpdateWithoutDefaultAupRaisesException() {
     IamAccount testAccount = findTestAccount();
+    
     try {
-      repo.updateSignatureForAccount(testAccount);
+      repo.updateSignatureForAccount(testAccount, new Date());
     } catch (Exception e) {
       assertThat(e.getMessage(), equalTo("AUP signature not found for user 'test'"));
       throw e;
@@ -138,7 +136,7 @@ public class IamAupSignatureRepositoryTests extends AupTestSupport {
     aupRepo.save(aup);
     IamAccount testAccount = findTestAccount();
     try {
-      repo.updateSignatureForAccount(testAccount);
+      repo.updateSignatureForAccount(testAccount, new Date());
     } catch (Exception e) {
       assertThat(e.getMessage(), equalTo("AUP signature not found for user 'test'"));
       throw e;
@@ -146,15 +144,16 @@ public class IamAupSignatureRepositoryTests extends AupTestSupport {
   }
 
   @Test
-  public void signatureUpdateUpdatesSignatureTime() {
+  public void signatureUpdateUpdatesSignatureTime() throws InterruptedException {
     IamAup aup = buildDefaultAup();
     aupRepo.save(aup);
     IamAccount testAccount = findTestAccount();
 
-    IamAupSignature sig = repo.createSignatureForAccount(testAccount);
-    Instant oldSigTime = sig.getSignatureTime().toInstant();
-    sig = repo.updateSignatureForAccount(testAccount);
-    assertThat(sig.getSignatureTime().toInstant().isAfter(oldSigTime), is(true));
+    IamAupSignature sig = repo.createSignatureForAccount(testAccount, new Date());
+    
+    Date updateTime = new Date();
+    sig = repo.updateSignatureForAccount(testAccount, updateTime);
+    assertThat(sig.getSignatureTime(), equalTo(updateTime));
   }
 
 }

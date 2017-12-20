@@ -1,5 +1,7 @@
 package it.infn.mw.iam.api.aup;
 
+import java.util.Date;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -40,7 +42,7 @@ public class AupSignatureController {
     IamAccount account = accountUtils.getAuthenticatedUserAccount()
       .orElseThrow(() -> new IllegalStateException("Account not found for authenticated user"));
 
-    signatureRepo.createSignatureForAccount(account);
+    signatureRepo.createSignatureForAccount(account, new Date());
   }
 
   @RequestMapping(value = "/iam/aup/signature", method = RequestMethod.GET)
