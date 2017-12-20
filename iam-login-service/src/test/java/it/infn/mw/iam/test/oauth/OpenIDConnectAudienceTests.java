@@ -80,7 +80,7 @@ public class OpenIDConnectAudienceTests {
       .build();
   }
 
-
+  
   @Test
   public void testOidcAuthorizationRequestWithAudience() throws Exception {
 
