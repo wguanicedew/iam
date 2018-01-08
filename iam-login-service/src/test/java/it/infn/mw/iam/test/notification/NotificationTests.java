@@ -137,26 +137,6 @@ public class NotificationTests {
   }
 
   @Test
-  public void testDisableNotificationOption() {
-    String username = "test_user";
-
-    RegistrationRequestDto reg = createRegistrationRequest(username);
-
-    properties.setDisable(true);
-    notificationService.sendPendingNotifications();
-
-    assertThat(wiser.getMessages(), hasSize(0));
-
-    Iterable<IamEmailNotification> queue = notificationRepository.findAll();
-    for (IamEmailNotification elem : queue) {
-      assertThat(elem.getDeliveryStatus(), equalTo(IamDeliveryStatus.DELIVERED));
-    }
-
-    deleteUser(reg.getAccountId());
-    properties.setDisable(false);
-  }
-
-  @Test
   public void testSendMultipleNotifications() {
 
     int count = 3;
