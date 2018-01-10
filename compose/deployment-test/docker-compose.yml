@@ -132,6 +132,7 @@ services:
       IAM_BASE_URL: https://${IAM_HOSTNAME:-iam.local.io}
       IAM_TEST_CLIENT_URL: https://${IAM_HOSTNAME:-iam.local.io}/iam-test-client
       REMOTE_URL: http://selenium-hub:4444/wd/hub 
+      SERVICE_WAIT_TIMEOUT: ${IAM_TESTSUITE_SERVICE_WAIT_TIMEOUT:-120}
       BROWSER: ${IAM_TESTSUITE_BROWSER:-chrome}
       TIMEOUT: ${IAM_TESTSUITE_TIMEOUT:-5}
       IMPLICIT_WAIT: ${IAM_TESTSUITE_IMPLICIT_WAIT:-2}
