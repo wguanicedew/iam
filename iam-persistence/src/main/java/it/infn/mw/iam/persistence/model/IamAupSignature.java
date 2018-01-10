@@ -1,5 +1,6 @@
 package it.infn.mw.iam.persistence.model;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -17,7 +18,12 @@ import javax.persistence.UniqueConstraint;
 @Entity
 @Table(name = "iam_aup_signature",
     uniqueConstraints = {@UniqueConstraint(columnNames = {"aup_id", "account_id"})})
-public class IamAupSignature {
+public class IamAupSignature implements Serializable{
+
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 2948891215385302461L;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

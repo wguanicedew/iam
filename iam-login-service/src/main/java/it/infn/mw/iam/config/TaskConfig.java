@@ -76,12 +76,6 @@ public class TaskConfig implements SchedulingConfigurer {
     approvedSiteService.clearExpiredSites();
   }
 
-
-//  @Scheduled(fixedDelayString = "${notification.taskDelay}", initialDelay = TEN_SECONDS_MSEC)
-//  public void sendNotifications() {
-//    notificationService.sendPendingNotifications();
-//  }
-
   @Scheduled(fixedDelay = THIRTY_SECONDS_MSEC, initialDelay = TEN_MINUTES_MSEC)
   public void clearExpiredNotifications() {
     notificationService.clearExpiredNotifications();
