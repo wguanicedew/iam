@@ -22,7 +22,7 @@ public class IamAupSignatureRepositoryImpl implements IamAupSignatureRepositoryC
   @Override
   public Optional<IamAupSignature> findSignatureForAccount(IamAccount account) {
 
-    Optional<IamAup> aup = aupRepo.findByName(IamAupRepository.DEFAULT_AUP_NAME);
+    Optional<IamAup> aup = aupRepo.findDefaultAup();
 
     if (!aup.isPresent()) {
       return Optional.empty();
@@ -41,7 +41,7 @@ public class IamAupSignatureRepositoryImpl implements IamAupSignatureRepositoryC
 
   @Override
   public IamAupSignature createSignatureForAccount(IamAccount account, Date currentTime) {
-    IamAup aup = aupRepo.findByName(IamAupRepository.DEFAULT_AUP_NAME)
+    IamAup aup = aupRepo.findDefaultAup()
       .orElseThrow(() -> new IllegalStateException(
           "Default AUP not found in database, cannot create signature"));
 

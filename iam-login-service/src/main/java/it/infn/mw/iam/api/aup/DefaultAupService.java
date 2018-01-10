@@ -1,7 +1,5 @@
 package it.infn.mw.iam.api.aup;
 
-import static it.infn.mw.iam.persistence.repository.IamAupRepository.DEFAULT_AUP_NAME;
-
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,20 +25,19 @@ public class DefaultAupService implements AupService {
 
   @Override
   public Optional<IamAup> findAup() {
-    return repo.findByName(DEFAULT_AUP_NAME);
+    return repo.findDefaultAup();
   }
 
   @Override
   public IamAup saveAup(AupDTO aupDto) {
     IamAup aup = converter.entityFromDto(aupDto);
-    aup.setName(DEFAULT_AUP_NAME);
-    repo.save(aup);
+    repo.saveDefaultAup(aup);
     return aup;
   }
 
   @Override
   public void deleteAup() {
-    IamAup aup = repo.findByName(DEFAULT_AUP_NAME).orElseThrow(AupNotFoundError::new);
+    IamAup aup = repo.findDefaultAup().orElseThrow(AupNotFoundError::new);
     repo.delete(aup);
   }
 
