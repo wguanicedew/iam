@@ -26,6 +26,8 @@ services:
 
   trust:
     image: indigoiam/trustanchors:latest
+    environment:
+      SKIP_UPDATE_TRUST_ANCHORS: ${SKIP_UPDATE_TRUST_ANCHORS}
 
   iam-be:
     container_name: iam-be
@@ -96,6 +98,7 @@ services:
 
     ports:
       - "443:443"
+      - "80:80"
 
     volumes:
       - /dev/urandom:/dev/random
@@ -107,6 +110,7 @@ services:
 
   selenium-hub:
     image: selenium/hub:latest
+    container_name: selenium-hub
     ports:
       - "4444:4444"
     environment:
@@ -114,12 +118,14 @@ services:
 
   selenium-chrome:
     image: selenium/node-chrome:3.8.1
+    container_name: selenium-chrome
     environment:
       - HUB_PORT_4444_TCP_ADDR=selenium-hub
       - HUB_PORT_4444_TCP_PORT=4444
 
   selenium-firefox:
     image: selenium/node-firefox:3.8.1
+    container_name: selenium-firefox
     environment:
       - HUB_PORT_4444_TCP_ADDR=selenium-hub
       - HUB_PORT_4444_TCP_PORT=4444
@@ -128,6 +134,7 @@ services:
     image: ${IAM_TESTSUITE_IMAGE:-indigoiam/iam-robot-testsuite:latest}
     environment:
       IAM_TESTSUITE_DEBUG: ${IAM_TESTSUITE_DEBUG}
+      OUTPUT_REPORTS: ${IAM_TESTSUITE_OUTPUT_REPORTS:-reports}
       SERVICE_WAIT_TIMEOUT: ${IAM_TESTSUITE_SERVICE_WAIT_TIMEOUT:-120}
       TESTSUITE_REPO: ${IAM_TESTSUITE_REPO:-https://github.com/indigo-iam/iam-robot-testsuite.git}
       TESTSUITE_BRANCH: ${IAM_TESTSUITE_BRANCH:-develop}
@@ -151,3 +158,7 @@ services:
       - selenium-hub
       - selenium-chrome
       - selenium-firefox
+
+    volumes:
+      - ${HOME}/git/iam-robot-testsuite:/code:ro
+      - /tmp/reports:/reports:rw
