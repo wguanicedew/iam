@@ -16,8 +16,6 @@ pipeline {
   stages {
     stage('checkout') {
       steps {
-        deleteDir()
-        checkout scm
         stash name: 'code', useDefaultExcludes: false
       }
     }
@@ -25,7 +23,6 @@ pipeline {
     stage('build') {
       steps {
         container('maven-runner'){
-          unstash 'code'
           sh 'mvn -B clean compile'
         }
       }
