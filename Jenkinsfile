@@ -13,6 +13,10 @@ pipeline {
     choice(name: 'RUN_SONAR', choices: 'yes\nno', description: 'Run Sonar static analysis')
   }
   
+  environment {
+  	DOCKER_REGISTRY_HOST="${env.DOCKER_REGISTRY_HOST}"
+  }
+  
   stages {
     stage('checkout') {
       steps {
