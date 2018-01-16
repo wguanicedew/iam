@@ -1,4 +1,4 @@
 #!/bin/bash
 
-docker build --no-cache=true --rm=true -t indigoiam/nginx .
+docker build --no-cache=true --rm=true -t indigoiam/nginx:latest .
 
