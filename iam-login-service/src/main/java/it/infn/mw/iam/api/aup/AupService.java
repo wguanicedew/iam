@@ -11,6 +11,8 @@ public interface AupService {
   
   IamAup saveAup(AupDTO aupDto);
   
+  IamAup updateAup(AupDTO aupDto);
+  
   void deleteAup();
 
 }

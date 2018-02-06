@@ -42,5 +42,10 @@ public class AupSignatureDTO {
   public void setSignatureTime(Date signatureTime) {
     this.signatureTime = signatureTime;
   }
-  
+
+
+  public Date getSignatureTime() {
+    return signatureTime;
+  }
+    
 }

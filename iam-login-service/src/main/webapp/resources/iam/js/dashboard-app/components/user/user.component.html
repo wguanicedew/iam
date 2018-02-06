@@ -22,22 +22,22 @@
             <section id="user-profile-left" class="col-sm-12 col-md-5 col-lg-4">
                 <div class="box box-primary">
                     <div class="box-body">
-                        <user-detail user="$ctrl.user"></user-detail>
+                        <user-detail user="$ctrl.user" aup="$ctrl.aup"></user-detail>
                     </div>
                     <div class="box-footer">
                         <!-- Edit details button -->
                         <user-edit user="$ctrl.user"></user-edit>
-                        
+
                         <div ng-if="$ctrl.isVoAdmin()">
                             <!-- Enable/disable user buttons -->
                             <user-status user="$ctrl.user"></user-status>
                             <!-- Assign/Revoke VO admin privileges -->
                             <user-privileges user="$ctrl.user"></user-privileges>
                         </div>
-                        
+
                         <!-- Send reset password email or change password-->
                         <user-password user="$ctrl.user"></user-password>
-                        
+
                     </div>
                 </div>
             </section>

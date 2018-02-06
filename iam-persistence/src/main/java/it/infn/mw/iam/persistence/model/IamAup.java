@@ -46,7 +46,7 @@ public class IamAup implements Serializable {
   @Lob
   @Column(name="text", nullable=false)
   String text;
-
+  
   public IamAup() {
     // empty constructor
   }
@@ -146,5 +146,5 @@ public class IamAup implements Serializable {
   public void setText(String text) {
     this.text = text;
   }
-
+  
 }

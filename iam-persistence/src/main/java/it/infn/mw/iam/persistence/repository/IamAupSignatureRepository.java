@@ -15,4 +15,6 @@ public interface IamAupSignatureRepository
 
   Optional<IamAupSignature> findByAupAndAccount(IamAup aup, IamAccount account);
   
+  Long deleteByAup(IamAup aup);
+  
 }

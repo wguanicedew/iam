@@ -16,7 +16,8 @@ angular
                 .state('home', {
                     url: '/home',
                     resolve: {
-                        user: loadLoggedUser
+                        user: loadLoggedUser,
+                        aup: loadAup
                     },
                     views: {
                         content: {
@@ -27,7 +28,8 @@ angular
                 .state('user', {
                     url: '/user/:id',
                     resolve: {
-                        user: loadUser
+                        user: loadUser,
+                        aup: loadAup
                     },
                     views: {
                         content: {

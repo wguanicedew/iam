@@ -69,9 +69,6 @@ function getUserAuthorities() {
   return ${userAuthorities};
 }
 
-function getUserAupSignatureDate() {
-	return ${userAupSignatureDate};
-}
 
 function getIamVersion() {
   return '${iamVersion}';

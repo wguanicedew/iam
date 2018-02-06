@@ -1,12 +1,11 @@
 package it.infn.mw.iam.api.aup;
 
-import java.util.Date;
-
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,6 +23,7 @@ import it.infn.mw.iam.api.common.ErrorDTO;
 import it.infn.mw.iam.persistence.model.IamAup;
 
 @RestController
+@Transactional
 public class AupController {
 
   private final AupService service;
@@ -60,12 +60,22 @@ public class AupController {
       throw buildValidationError(validationResult);
     }
 
-    // Enforce local creation and last update time
-    Date now = new Date();
-    aup.setCreationTime(now);
-    aup.setLastUpdateTime(now);
+   
 
     service.saveAup(aup);
+  }
+
+  @RequestMapping(value = "/iam/aup", method = RequestMethod.PATCH)
+  @ResponseStatus(code = HttpStatus.OK)
+  @PreAuthorize("hasRole('ADMIN')")
+  public AupDTO updateAup(@Valid @RequestBody AupDTO aup, BindingResult validationResult) {
+
+    if (validationResult.hasErrors()) {
+      throw buildValidationError(validationResult);
+    }
+
+    IamAup updatedAup = service.updateAup(aup);
+    return converter.dtoFromEntity(updatedAup);
   }
 
   @RequestMapping(value = "/iam/aup", method = RequestMethod.DELETE)

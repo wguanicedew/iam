@@ -40,6 +40,7 @@ public class IamAupRepositoryTests extends AupTestSupport{
     assertThat(aup.isPresent(), is(false));
   }
 
+  @Test
   public void aupCreationWorks() {
   
     IamAup aup = buildDefaultAup();
@@ -51,7 +52,7 @@ public class IamAupRepositoryTests extends AupTestSupport{
     
     assertThat(aup.getName(), equalTo(DEFAULT_AUP_NAME));
     assertThat(aup.getText(), equalTo(DEFAULT_AUP_TEXT));
-    assertThat(aup.getDescription(), equalTo(DEFAULT_AUP_TEXT));
+    assertThat(aup.getDescription(), equalTo(DEFAULT_AUP_DESC));
     assertThat(aup.getCreationTime(), new DateEqualModulo1Second(creationTime));
     assertThat(aup.getLastUpdateTime(), new DateEqualModulo1Second(creationTime));
     assertThat(aup.getSignatureValidityInDays(), equalTo(365L));

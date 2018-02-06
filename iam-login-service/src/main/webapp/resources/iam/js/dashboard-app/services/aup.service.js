@@ -11,6 +11,7 @@
         var service = {
             getAup: getAup,
             createAup: createAup,
+            updateAup: updateAup,
             deleteAup: deleteAup,
             getAupSignature: getAupSignature,
             getAupSignatureForUser: getAupSignatureForUser
@@ -24,6 +25,10 @@
 
         function createAup(aup) {
             return $http.post('/iam/aup', aup);
+        }
+
+        function updateAup(aup) {
+            return $http.patch('/iam/aup', aup);
         }
 
         function getAupSignatureForUser(userId) {

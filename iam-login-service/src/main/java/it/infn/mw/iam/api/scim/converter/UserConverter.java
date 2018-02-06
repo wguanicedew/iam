@@ -211,6 +211,10 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
     entity.getX509Certificates()
       .forEach(cert -> indigoUserBuilder.addCertificate(x509CertificateIamConverter.dtoFromEntity(cert)));
     
+    if (entity.getAupSignature() != null) {
+      indigoUserBuilder.aupSignatureTime(entity.getAupSignature().getSignatureTime());
+    }
+    
     ScimIndigoUser indigoUser = indigoUserBuilder.build();
 
     return indigoUser.isEmpty() ? null : indigoUser;

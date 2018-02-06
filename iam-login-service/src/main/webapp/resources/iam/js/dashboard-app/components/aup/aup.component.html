@@ -27,6 +27,10 @@
                         <div>{{$ctrl.aup.data.creationTime | relativeDate}}</div>
                     </div>
                     <div class="form-group">
+                        <label>Last updated</label>
+                        <div>{{$ctrl.aup.data.lastUpdateTime | relativeDate}}</div>
+                    </div>
+                    <div class="form-group">
                         <label>Signature Validity (in days)</label>
                         <p class="aup-text">
                             {{$ctrl.aup.data.signatureValidityInDays}}
@@ -45,16 +49,22 @@
             </div>
             <div class="box-footer">
                 <div ng-if="$ctrl.aup == null">
-                    <button class="btn btn-success" id="create-aup-btn" ng-click="$ctrl.openCreateAupDialog()">
-                        <i class="fa fa-plus"></i>
-                        Create AUP
-                    </button>
+                    <button class="btn btn-success pull-left" id="create-aup-btn" ng-click="$ctrl.openCreateAupDialog()">
+                            <i class="fa fa-plus"></i>
+                            Create AUP
+                        </button>
                 </div>
                 <div ng-if="$ctrl.aup != null">
-                    <button class="btn btn-danger" id="delete-aup-btn" ng-click="$ctrl.openDeleteAupDialog()">
-                            Delete AUP
-                    </button>
+                    <button class="btn btn-primary pull-left" id="edit-aup-btn" ng-click="$ctrl.openEditAupDialog()">
+                                Edit AUP
+                        </button>
                 </div>
+                <div ng-if="$ctrl.aup != null">
+                    <button class="btn btn-danger pull-left" style="margin-left: 10px" id="delete-aup-btn" ng-click="$ctrl.openDeleteAupDialog()">
+                                Delete AUP
+                        </button>
+                </div>
+                <div class="clearfix"></div>
             </div>
         </div>
     </section>
