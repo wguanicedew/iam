@@ -14,7 +14,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.data.domain.Sort;
@@ -37,7 +36,7 @@ import it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo;
 import it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo.ExternalAuthenticationType;
 import it.infn.mw.iam.core.IamRegistrationRequestStatus;
 import it.infn.mw.iam.core.user.IamAccountService;
-import it.infn.mw.iam.notification.NotificationService;
+import it.infn.mw.iam.notification.NotificationFactory;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamRegistrationRequest;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
@@ -59,8 +58,7 @@ public class DefaultRegistrationRequestService
   private UserConverter userConverter;
 
   @Autowired
-  @Qualifier("defaultNotificationService")
-  private NotificationService notificationService;
+  private NotificationFactory notificationFactory;
 
   @Autowired
   private RegistrationConverter converter;
@@ -154,7 +152,7 @@ public class DefaultRegistrationRequestService
     eventPublisher.publishEvent(new RegistrationRequestEvent(this, regRequest,
         "New registration request from user " + newAccount.getUsername()));
 
-    notificationService.createConfirmationMessage(regRequest);
+    notificationFactory.createConfirmationMessage(regRequest);
 
     return converter.fromEntity(regRequest);
   }
@@ -262,7 +260,7 @@ public class DefaultRegistrationRequestService
     account.setResetKey(tokenGenerator.generateToken());
     account.setLastUpdateTime(new Date());
 
-    notificationService.createAccountActivatedMessage(request);
+    notificationFactory.createAccountActivatedMessage(request);
 
     request.setStatus(APPROVED);
     request.setLastUpdateTime(new Date());
@@ -280,7 +278,7 @@ public class DefaultRegistrationRequestService
 
     if (request.getStatus().equals(NEW)) {
       request.setStatus(CONFIRMED);
-      notificationService.createAdminHandleRequestMessage(request);
+      notificationFactory.createAdminHandleRequestMessage(request);
     }
 
     request.setLastUpdateTime(new Date());
@@ -294,7 +292,7 @@ public class DefaultRegistrationRequestService
 
   private RegistrationRequestDto handleReject(IamRegistrationRequest request) {
     request.setStatus(REJECTED);
-    notificationService.createRequestRejectedMessage(request);
+    notificationFactory.createRequestRejectedMessage(request);
     RegistrationRequestDto retval = converter.fromEntity(request);
 
     accountService.deleteAccount(request.getAccount());

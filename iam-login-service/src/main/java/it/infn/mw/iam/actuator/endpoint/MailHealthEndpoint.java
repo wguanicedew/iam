@@ -9,7 +9,6 @@ import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.boot.actuate.health.MailHealthIndicator;
 import org.springframework.boot.actuate.health.OrderedHealthAggregator;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -24,11 +23,11 @@ public class MailHealthEndpoint extends AbstractEndpoint<Health> {
   private HealthAggregator healthAggregator = new OrderedHealthAggregator();
 
   @Autowired
-  public MailHealthEndpoint(JavaMailSenderImpl mailSender) {
+  public MailHealthEndpoint(MailHealthIndicator mailHealthIndicator) {
     super(ENDPOINT_ID, false);
 
     CompositeHealthIndicator indicator = new CompositeHealthIndicator(healthAggregator);
-    indicator.addHealthIndicator("mail", new MailHealthIndicator(mailSender));
+    indicator.addHealthIndicator("mail", mailHealthIndicator);
 
     this.healthIndicator = indicator;
   }

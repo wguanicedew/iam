@@ -84,7 +84,6 @@ import org.springframework.security.saml.processor.SAMLProcessorImpl;
 import org.springframework.security.saml.trust.httpclient.TLSProtocolConfigurer;
 import org.springframework.security.saml.trust.httpclient.TLSProtocolSocketFactory;
 import org.springframework.security.saml.userdetails.SAMLUserDetailsService;
-import org.springframework.security.saml.util.VelocityFactory;
 import org.springframework.security.saml.websso.ArtifactResolutionProfile;
 import org.springframework.security.saml.websso.ArtifactResolutionProfileImpl;
 import org.springframework.security.saml.websso.SingleLogoutProfile;
@@ -173,6 +172,9 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
 
   @Autowired
   MetadataLookupService metadataLookupService;
+  
+  @Autowired
+  VelocityEngine velocityEngine;
 
 
   Timer metadataFetchTimer = new Timer();
@@ -266,12 +268,6 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
 
     return new DefaultSAMLUserDetailsService(resolver, accountRepo, handler);
 
-  }
-
-  @Bean
-  public VelocityEngine velocityEngine() {
-
-    return VelocityFactory.getEngine();
   }
 
   // XML parser pool needed for OpenSAML parsing
@@ -686,7 +682,7 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
   @Bean
   public HTTPPostBinding httpPostBinding() {
 
-    return new HTTPPostBinding(parserPool(), velocityEngine());
+    return new HTTPPostBinding(parserPool(), velocityEngine);
   }
 
   @Bean
@@ -713,7 +709,7 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
     Collection<SAMLBinding> bindings = new ArrayList<>();
     bindings.add(httpRedirectDeflateBinding());
     bindings.add(httpPostBinding());
-    bindings.add(artifactBinding(parserPool(), velocityEngine()));
+    bindings.add(artifactBinding(parserPool(), velocityEngine));
     bindings.add(httpSOAP11Binding());
     bindings.add(httpPAOS11Binding());
     return new SAMLProcessorImpl(bindings);

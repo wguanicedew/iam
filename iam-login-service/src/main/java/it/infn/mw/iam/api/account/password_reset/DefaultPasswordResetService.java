@@ -16,7 +16,7 @@ import it.infn.mw.iam.api.account.password_reset.error.UserNotActiveOrNotVerifie
 import it.infn.mw.iam.api.account.password_reset.error.UserNotFoundError;
 import it.infn.mw.iam.audit.events.account.password.PasswordResetEvent;
 import it.infn.mw.iam.audit.events.account.password.PasswordUpdatedEvent;
-import it.infn.mw.iam.notification.NotificationService;
+import it.infn.mw.iam.notification.NotificationFactory;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.registration.TokenGenerator;
@@ -28,18 +28,18 @@ public class DefaultPasswordResetService
   private static final Logger logger = LoggerFactory.getLogger(DefaultPasswordResetService.class);
 
   private final IamAccountRepository accountRepository;
-  private final NotificationService notificationService;
+  private final NotificationFactory notificationFactory;
   private final TokenGenerator tokenGenerator;
   private final PasswordEncoder passwordEncoder;
   private ApplicationEventPublisher eventPublisher;
 
   @Autowired
   public DefaultPasswordResetService(IamAccountRepository accountRepository,
-      NotificationService notificationService, TokenGenerator tokenGenerator,
+      NotificationFactory notificationFactory, TokenGenerator tokenGenerator,
       PasswordEncoder passwordEncoder) {
 
     this.accountRepository = accountRepository;
-    this.notificationService = notificationService;
+    this.notificationFactory= notificationFactory;
     this.tokenGenerator = tokenGenerator;
     this.passwordEncoder = passwordEncoder;
   }
@@ -90,7 +90,7 @@ public class DefaultPasswordResetService
           String resetKey = tokenGenerator.generateToken();
           a.setResetKey(resetKey);
           accountRepository.save(a);
-          notificationService.createResetPasswordMessage(a);
+          notificationFactory.createResetPasswordMessage(a);
         } 
       });
       

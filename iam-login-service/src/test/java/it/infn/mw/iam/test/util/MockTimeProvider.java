@@ -1,12 +1,7 @@
-package it.infn.mw.iam.notification;
-
-import org.springframework.context.annotation.Primary;
-import org.springframework.stereotype.Component;
+package it.infn.mw.iam.test.util;
 
 import it.infn.mw.iam.core.time.TimeProvider;
 
-@Component
-@Primary
 public class MockTimeProvider implements TimeProvider {
 
   private long currentTimeMillis = System.currentTimeMillis();

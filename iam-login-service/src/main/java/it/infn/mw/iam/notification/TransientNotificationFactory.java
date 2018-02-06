@@ -7,51 +7,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.apache.commons.lang.time.DateUtils;
 import org.apache.velocity.app.VelocityEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.mail.MailException;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.velocity.VelocityEngineUtils;
 
 import it.infn.mw.iam.api.account.password_reset.PasswordResetController;
 import it.infn.mw.iam.core.IamDeliveryStatus;
 import it.infn.mw.iam.core.IamNotificationType;
-import it.infn.mw.iam.core.time.TimeProvider;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamEmailNotification;
 import it.infn.mw.iam.persistence.model.IamNotificationReceiver;
 import it.infn.mw.iam.persistence.model.IamRegistrationRequest;
-import it.infn.mw.iam.persistence.repository.IamEmailNotificationRepository;
 
-@Service
-@ConditionalOnProperty(name = "notification.disable", havingValue = "false")
-@Qualifier("defaultNotificationService")
-public class DefaultNotificationService implements NotificationService {
+public class TransientNotificationFactory implements NotificationFactory {
 
-  private static final Logger LOG = LoggerFactory.getLogger(DefaultNotificationService.class);
-
+  private static final Logger LOG = LoggerFactory.getLogger(TransientNotificationFactory.class);
   private static final String RECIPIENT_FIELD = "recipient";
-
-  @Autowired
-  private VelocityEngine velocityEngine;
-
-  @Autowired
-  private JavaMailSender mailSender;
-
-  @Autowired
-  private IamEmailNotificationRepository notificationRepository;
-
-  @Autowired
-  private NotificationProperties properties;
 
   @Value("${iam.baseUrl}")
   private String baseUrl;
@@ -59,9 +33,14 @@ public class DefaultNotificationService implements NotificationService {
   @Value("${iam.organisation.name}")
   private String organisationName;
 
-  @Autowired
-  private TimeProvider timeProvider;
+  private final VelocityEngine velocityEngine;
+  private final NotificationProperties properties;
 
+  @Autowired
+  public TransientNotificationFactory(VelocityEngine ve, NotificationProperties np) {
+    this.velocityEngine = ve;
+    this.properties = np;
+  }
 
   @Override
   public IamEmailNotification createConfirmationMessage(IamRegistrationRequest request) {
@@ -162,67 +141,8 @@ public class DefaultNotificationService implements NotificationService {
     return notification;
   }
 
-  @Override
-  @Transactional
-  public void sendPendingNotifications() {
 
-    SimpleMailMessage messageTemplate = new SimpleMailMessage();
-    messageTemplate.setFrom(properties.getMailFrom());
-
-    List<IamEmailNotification> messageQueue =
-        notificationRepository.findByDeliveryStatus(IamDeliveryStatus.PENDING);
-
-    for (IamEmailNotification elem : messageQueue) {
-      messageTemplate.setSubject(elem.getSubject());
-      messageTemplate.setText(elem.getBody());
-
-      for (IamNotificationReceiver receiver : elem.getReceivers()) {
-        messageTemplate.setTo(receiver.getEmailAddress());
-      }
-
-      try {
-        doSend(messageTemplate);
-
-        elem.setDeliveryStatus(IamDeliveryStatus.DELIVERED);
-
-        LOG.info("Sent mail. message_id:{} status:{} message_type:{} mail_from:{} rcpt_to:{}",
-            elem.getUuid(), elem.getDeliveryStatus().name(), elem.getType(),
-            properties.getMailFrom(), messageTemplate.getTo());
-
-      } catch (MailException me) {
-        elem.setDeliveryStatus(IamDeliveryStatus.DELIVERY_ERROR);
-        LOG.error("Message delivery fail. message_id:{} reason:{}", elem.getUuid(), me.getMessage(),
-            me);
-      }
-
-      elem.setLastUpdate(new Date());
-      notificationRepository.save(elem);
-    }
-  }
-
-  @Override
-  public void clearExpiredNotifications() {
-
-    Date currentTime = new Date(timeProvider.currentTimeMillis());
-    Date threshold = DateUtils.addDays(currentTime, -properties.getCleanupAge());
-
-    List<IamEmailNotification> messageList =
-        notificationRepository.findByStatusWithUpdateTime(IamDeliveryStatus.DELIVERED, threshold);
-
-    if (!messageList.isEmpty()) {
-      notificationRepository.delete(messageList);
-      LOG.info("Deleted {} messages in status {} older than {}", messageList.size(),
-          IamDeliveryStatus.DELIVERED, threshold);
-    }
-  }
-
-
-  protected void doSend(final SimpleMailMessage message) {
-    mailSender.send(message);
-  }
-
-
-  private IamEmailNotification createMessage(String template, Map<String, Object> model,
+  protected IamEmailNotification createMessage(String template, Map<String, Object> model,
       IamNotificationType messageType, String subject, String receiverAddress) {
 
     String body =
@@ -243,19 +163,6 @@ public class DefaultNotificationService implements NotificationService {
     receivers.add(rcv);
 
     message.setReceivers(receivers);
-    notificationRepository.save(message);
     return message;
   }
-
-  @Override
-  public int countPendingNotifications() {
-
-    return notificationRepository.countByDeliveryStatus(IamDeliveryStatus.PENDING);
-  }
-
-  @Override
-  public void clearAllNotifications() {
-    notificationRepository.deleteAll();
-  }
-
 }

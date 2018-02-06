@@ -1,28 +1,46 @@
 package it.infn.mw.iam.test.account;
 
+import static it.infn.mw.iam.test.util.AuthenticationUtils.adminAuthentication;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.boot.test.WebIntegrationTest;
+import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.WebApplicationContext;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
-import it.infn.mw.iam.persistence.repository.IamEmailNotificationRepository;
 import it.infn.mw.iam.registration.PersistentUUIDTokenGenerator;
 import it.infn.mw.iam.registration.RegistrationRequestDto;
-import it.infn.mw.iam.test.RegistrationUtils;
-import it.infn.mw.iam.test.TestUtils;
+import it.infn.mw.iam.test.core.CoreControllerTestSupport;
+import it.infn.mw.iam.test.util.WithAnonymousUser;
+import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = IamLoginService.class)
-@WebIntegrationTest
+@SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class})
+@Transactional
+@WebAppConfiguration
 public class PasswordEncodingTests {
 
   @Autowired
@@ -35,39 +53,80 @@ public class PasswordEncodingTests {
   private IamAccountRepository iamAccountRepository;
 
   @Autowired
-  private IamEmailNotificationRepository notificationRepository;
+  private WebApplicationContext context;
 
-  private RegistrationRequestDto reg;
+  @Autowired
+  private ObjectMapper mapper;
 
-  @BeforeClass
-  public static void init() {
-    TestUtils.initRestAssured();
+
+  @Autowired
+  private MockOAuth2Filter mockOAuth2Filter;
+
+
+  private MockMvc mvc;
+
+  @Before
+  public void setup() {
+    mvc = MockMvcBuilders.webAppContextSetup(context)
+      .apply(springSecurity())
+      .alwaysDo(print())
+      .build();
   }
 
   @After
-  public void tearDown() {
-    notificationRepository.deleteAll();
+  public void cleanupOAuthUser() {
+    mockOAuth2Filter.cleanupSecurityContext();
   }
 
+
   @Test
-  public void testPasswordEncoded() {
-    String username = "test_user";
+  @WithAnonymousUser
+  public void testPasswordEncoded() throws Exception {
+    String username = "password_encoded";
     String newPassword = "secure_password";
 
-    reg = RegistrationUtils.createRegistrationRequest(username);
+    RegistrationRequestDto request = new RegistrationRequestDto();
+    request.setGivenname("Password encoded");
+    request.setFamilyname("Test");
+    request.setEmail("password_encoded@example.org");
+    request.setUsername(username);
+    request.setNotes("Some short notes...");
+
+    String rs = mvc
+      .perform(post("/registration/create").contentType(MediaType.APPLICATION_JSON)
+        .content(mapper.writeValueAsString(request)))
+      .andExpect(status().isOk())
+      .andReturn()
+      .getResponse()
+      .getContentAsString();
+
+    request = mapper.readValue(rs, RegistrationRequestDto.class);
+
     String confirmationKey = tokenGenerator.getLastToken();
-    RegistrationUtils.confirmRegistrationRequest(confirmationKey);
-    RegistrationUtils.approveRequest(reg.getUuid());
+    mvc
+      .perform(get("/registration/confirm/{token}", confirmationKey)
+        .contentType(APPLICATION_JSON))
+      .andExpect(status().isOk());
+
+    mvc.perform(post("/registration/{uuid}/APPROVED", request.getUuid())
+      .with(authentication(adminAuthentication()))
+      .contentType(APPLICATION_JSON)).andExpect(status().isOk());
 
     String resetKey = tokenGenerator.getLastToken();
 
-    RegistrationUtils.changePassword(resetKey, newPassword);
+    mvc
+      .perform(post("/iam/password-reset").param("token", resetKey)
+        .param("password", newPassword)
+        .with(authentication(adminAuthentication()))
+        .contentType(MediaType.APPLICATION_JSON))
+      .andExpect(MockMvcResultMatchers.status().isOk());
 
-    IamAccount account = iamAccountRepository.findByUuid(reg.getAccountId()).get();
+    IamAccount account = iamAccountRepository.findByUuid(request.getAccountId())
+      .orElseThrow(() -> new AssertionError("Expected account not found"));
 
     Assert.assertTrue(passwordEncoder.matches(newPassword, account.getPassword()));
 
-    RegistrationUtils.deleteUser(reg.getAccountId());
+
   }
 
 }

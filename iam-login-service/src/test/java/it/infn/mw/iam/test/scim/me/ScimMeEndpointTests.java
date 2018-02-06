@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import javax.transaction.Transactional;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,6 +25,7 @@ import org.springframework.web.context.WebApplicationContext;
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 import it.infn.mw.iam.test.util.WithMockOAuthUser;
+import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class})
@@ -36,6 +38,9 @@ public class ScimMeEndpointTests {
   @Autowired
   private WebApplicationContext context;
 
+  @Autowired
+  private MockOAuth2Filter mockOAuth2Filter;
+  
   private MockMvc mvc;
 
   @Before
@@ -46,6 +51,11 @@ public class ScimMeEndpointTests {
       .build();
   }
 
+  @After
+  public void teardown() {
+    mockOAuth2Filter.cleanupSecurityContext();
+  }
+  
   @Test
   @WithMockOAuthUser(clientId = "password-grant", user = "test", authorities = {"ROLE_USER"},
       scopes = {"openid", "profile"})
@@ -66,4 +76,6 @@ public class ScimMeEndpointTests {
       .andExpect(jsonPath("$.status", equalTo("400")))
       .andExpect(jsonPath("$.detail", equalTo("No user linked to the current OAuth token")));
   }
+  
+  
 }
