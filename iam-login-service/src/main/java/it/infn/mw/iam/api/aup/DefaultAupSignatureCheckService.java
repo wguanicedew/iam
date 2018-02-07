@@ -4,12 +4,14 @@ import static java.util.Objects.isNull;
 
 import java.util.Date;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import it.infn.mw.iam.core.time.TimeProvider;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamAup;
 import it.infn.mw.iam.persistence.repository.IamAupRepository;
@@ -22,17 +24,21 @@ public class DefaultAupSignatureCheckService implements AUPSignatureCheckService
 
   final IamAupRepository aupRepo;
   final IamAupSignatureRepository signatureRepo;
+  final TimeProvider timeProvider;
 
   @Autowired
   public DefaultAupSignatureCheckService(IamAupRepository aupRepo,
-      IamAupSignatureRepository signatureRepo) {
+      IamAupSignatureRepository signatureRepo, TimeProvider timeProvider) {
     this.aupRepo = aupRepo;
     this.signatureRepo = signatureRepo;
+    this.timeProvider = timeProvider;
   }
 
   @Override
   public boolean needsAupSignature(IamAccount account) {
     Optional<IamAup> aup = aupRepo.findDefaultAup();
+
+    Date now = new Date(timeProvider.currentTimeMillis());
 
     if (!aup.isPresent()) {
       LOG.debug("AUP signature not needed for account '{}': AUP is not defined",
@@ -48,14 +54,33 @@ public class DefaultAupSignatureCheckService implements AUPSignatureCheckService
 
     Date signatureTime = account.getAupSignature().getSignatureTime();
     Date aupLastModifiedTime = aup.get().getLastUpdateTime();
+    Long signatureValidityInDays = aup.get().getSignatureValidityInDays();
 
-    boolean signatureNeeded = signatureTime.compareTo(aupLastModifiedTime) < 0;
-    String signatureNeededString = (signatureNeeded ? "needed" : "not needed");
+    if (signatureTime.compareTo(aupLastModifiedTime) > 0) {
+
+      if (signatureValidityInDays > 0) {
+
+        Date signatureValidTime =
+            new Date(signatureTime.getTime() + TimeUnit.DAYS.toMillis(signatureValidityInDays));
+
+        // The signature was on the last version of the AUP
+        boolean signatureNeeded = now.compareTo(signatureValidTime) > 0;
+        String signatureNeededString = (signatureNeeded ? "needed" : "not needed");
+        LOG.debug(
+            "AUP signature {} for account '{}': Now '{}' AUP signature time '{}', AUP signature end of validity '{}'",
+            signatureNeededString, account.getUsername(), now, signatureTime, signatureValidTime);
+        return signatureNeeded;
+      }
+
+      return false;
+    }
+
+    // The signature is needed anyway since it was done before the last changes to the AUP
     LOG.debug(
-        "AUP signature {} for account '{}': AUP signature time '{}', AUP last modified time '{}'",
-        signatureNeededString, account.getUsername(), signatureTime, aupLastModifiedTime);
+        "AUP signature needed for account '{}': AUP signature time '{}', AUP last modified time '{}'",
+        account.getUsername(), signatureTime, aupLastModifiedTime);
 
-    return signatureNeeded;
+    return true;
   }
 
 }

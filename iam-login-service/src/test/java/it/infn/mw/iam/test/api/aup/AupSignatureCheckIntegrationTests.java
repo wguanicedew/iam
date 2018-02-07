@@ -139,7 +139,18 @@ public class AupSignatureCheckIntegrationTests extends AupTestSupport {
     .andExpect(status().isOk());
     
     assertThat(service.needsAupSignature(testAccount), is(true));
+    
+    mockTimeProvider.setTime(now.getTime() + TimeUnit.MINUTES.toMillis(20));
 
+    signatureRepo.createSignatureForAccount(testAccount,
+        new Date(mockTimeProvider.currentTimeMillis()));
+
+    assertThat(service.needsAupSignature(testAccount), is(false));
+    
+    mockTimeProvider.setTime(now.getTime() + TimeUnit.DAYS.toMillis(366));
+    
+    assertThat(service.needsAupSignature(testAccount), is(true));
+    
   }
 
 }
