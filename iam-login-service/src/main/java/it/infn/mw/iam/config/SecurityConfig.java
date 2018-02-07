@@ -40,8 +40,10 @@ import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.filter.GenericFilterBean;
 
+import it.infn.mw.iam.api.account.AccountUtils;
+import it.infn.mw.iam.api.aup.AUPSignatureCheckService;
+import it.infn.mw.iam.authn.EnforceAupSignatureSuccessHandler;
 import it.infn.mw.iam.authn.RootIsDashboardSuccessHandler;
-import it.infn.mw.iam.authn.TimestamperSuccessHandler;
 import it.infn.mw.iam.authn.oidc.OidcAccessDeniedHandler;
 import it.infn.mw.iam.authn.oidc.OidcAuthenticationProvider;
 import it.infn.mw.iam.authn.oidc.OidcClientFilter;
@@ -84,6 +86,12 @@ public class SecurityConfig {
 
     @Autowired
     private IamAccountRepository accountRepo;
+
+    @Autowired
+    private AUPSignatureCheckService aupSignatureCheckService;
+    
+    @Autowired
+    private AccountUtils accountUtils;
 
     @Autowired
     public void configureGlobal(final AuthenticationManagerBuilder auth) throws Exception {
@@ -162,10 +170,12 @@ public class SecurityConfig {
     }
 
     public AuthenticationSuccessHandler successHandler() {
-
-      return new TimestamperSuccessHandler(
-          new RootIsDashboardSuccessHandler(iamBaseUrl, new HttpSessionRequestCache()),
-          accountRepo);
+      AuthenticationSuccessHandler delegate= new RootIsDashboardSuccessHandler(iamBaseUrl, 
+          new HttpSessionRequestCache());
+          
+      
+      return new EnforceAupSignatureSuccessHandler(delegate, aupSignatureCheckService,
+          accountUtils, accountRepo);
     }
   }
 
@@ -777,27 +787,27 @@ public class SecurityConfig {
       // @formatter:on
     }
   }
-  
+
   @Configuration
   @Order(27)
   public static class DeviceCodeEnpointConfig extends WebSecurityConfigurerAdapter {
-    
+
     @Autowired
     @Qualifier("clientUserDetailsService")
     private UserDetailsService userDetailsService;
 
     @Autowired
     private CorsFilter corsFilter;
-    
+
     @Autowired
     private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
-    
+
     @Override
     protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
 
       auth.userDetailsService(userDetailsService);
     }
-    
+
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
 
@@ -816,7 +826,7 @@ public class SecurityConfig {
             .fullyAuthenticated();
       // @formatter:on
     }
-    
+
   }
 
   @Configuration
@@ -845,8 +855,10 @@ public class SecurityConfig {
         .sessionCreationPolicy(SessionCreationPolicy.NEVER)
         .and()
         .authorizeRequests()
-        .antMatchers(HttpMethod.GET,"/iam/aup").permitAll()
-        .antMatchers(HttpMethod.POST,"/iam/aup").authenticated()
+        .antMatchers(HttpMethod.GET, "/iam/aup")
+        .permitAll()
+        .antMatchers(HttpMethod.POST, "/iam/aup")
+        .authenticated()
         .and()
         .csrf()
         .disable();

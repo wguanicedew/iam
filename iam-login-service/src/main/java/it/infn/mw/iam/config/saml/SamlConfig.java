@@ -109,11 +109,13 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import com.google.common.base.Strings;
 
+import it.infn.mw.iam.api.account.AccountUtils;
+import it.infn.mw.iam.api.aup.AUPSignatureCheckService;
+import it.infn.mw.iam.authn.EnforceAupSignatureSuccessHandler;
 import it.infn.mw.iam.authn.ExternalAuthenticationFailureHandler;
 import it.infn.mw.iam.authn.ExternalAuthenticationSuccessHandler;
 import it.infn.mw.iam.authn.InactiveAccountAuthenticationHander;
 import it.infn.mw.iam.authn.RootIsDashboardSuccessHandler;
-import it.infn.mw.iam.authn.TimestamperSuccessHandler;
 import it.infn.mw.iam.authn.saml.CleanInactiveProvisionedAccounts;
 import it.infn.mw.iam.authn.saml.DefaultSAMLUserDetailsService;
 import it.infn.mw.iam.authn.saml.IamCachingMetadataManader;
@@ -172,10 +174,15 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
 
   @Autowired
   MetadataLookupService metadataLookupService;
-  
+
   @Autowired
   VelocityEngine velocityEngine;
 
+  @Autowired
+  private AUPSignatureCheckService aupSignatureCheckService;
+
+  @Autowired
+  private AccountUtils accountUtils;
 
   Timer metadataFetchTimer = new Timer();
 
@@ -442,7 +449,7 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
     extendedMetadata.setIdpDiscoveryEnabled(true);
     extendedMetadata.setIdpDiscoveryURL(discoveryUrl);
     extendedMetadata.setSignMetadata(false);
-    
+
     return extendedMetadata;
   }
 
@@ -460,7 +467,7 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
 
     if (!filters.isEmpty()) {
       try {
-        
+
         MetadataFilterChain chain = new MetadataFilterChain();
         chain.setFilters(filters);
 
@@ -478,14 +485,14 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
 
     IamExtendedMetadataDelegate extendedMetadataDelegate =
         new IamExtendedMetadataDelegate(p, extendedMetadata());
-    
+
     extendedMetadataDelegate.setMetadataTrustCheck(true);
     extendedMetadataDelegate.setRequireValidMetadata(true);
-    
-    if (props.getKeyAlias()!= null){
+
+    if (props.getKeyAlias() != null) {
       extendedMetadataDelegate.setMetadataTrustedKeys(newHashSet(props.getKeyAlias()));
     }
-    
+
     extendedMetadataDelegate.setMetadataRequireSignature(props.getRequireValidSignature());
 
     return extendedMetadataDelegate;
@@ -590,7 +597,10 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
     RootIsDashboardSuccessHandler sa = new RootIsDashboardSuccessHandler(iamProperties.getBaseUrl(),
         new HttpSessionRequestCache());
 
-    return new ExternalAuthenticationSuccessHandler(new TimestamperSuccessHandler(sa, repo), "/");
+    EnforceAupSignatureSuccessHandler aup =
+        new EnforceAupSignatureSuccessHandler(sa, aupSignatureCheckService, accountUtils, repo);
+
+    return new ExternalAuthenticationSuccessHandler(aup, "/");
   }
 
 

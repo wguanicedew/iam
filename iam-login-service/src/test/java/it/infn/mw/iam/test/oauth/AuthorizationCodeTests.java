@@ -1,11 +1,15 @@
 package it.infn.mw.iam.test.oauth;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.securityContext;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+
+import java.util.Date;
 
 import javax.transaction.Transactional;
 
@@ -15,6 +19,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.mock.web.MockHttpSession;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -26,6 +31,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import it.infn.mw.iam.IamLoginService;
+import it.infn.mw.iam.persistence.model.IamAup;
+import it.infn.mw.iam.persistence.repository.IamAupRepository;
 import it.infn.mw.iam.test.util.WithAnonymousUser;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -41,10 +48,13 @@ public class AuthorizationCodeTests {
       "https://iam.local.io/iam-test-client/openid_connect_login";
 
   public static final String LOGIN_URL = "http://localhost/login";
+
   public static final String AUTHORIZE_URL = "http://localhost/authorize";
+  public static final String SIGN_AUP_URL = "/iam/aup/sign";
+  public static final String SIGN_AUP_URL_EXTENDED = "http://localhost/iam/aup/sign";
 
   public static final String RESPONSE_TYPE_CODE = "code";
-  
+
   public static final String SCOPE = "openid profile";
 
   public static final String TEST_USER_ID = "test";
@@ -55,6 +65,9 @@ public class AuthorizationCodeTests {
 
   @Autowired
   ObjectMapper objectMapper;
+
+  @Autowired
+  IamAupRepository aupRepo;
 
   MockMvc mvc;
 
@@ -71,17 +84,17 @@ public class AuthorizationCodeTests {
   public void testOidcAuthorizationCodeFlow() throws Exception {
 
     UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(AUTHORIZE_URL)
-        .queryParam("response_type", RESPONSE_TYPE_CODE)
-        .queryParam("client_id", TEST_CLIENT_ID)
-        .queryParam("redirect_uri", TEST_CLIENT_REDIRECT_URI)
-        .queryParam("scope", SCOPE)
-        .queryParam("nonce", "1")
-        .queryParam("state", "1").build();
-    
-    String authzEndpointUrl =  uriComponents.toUriString();
+      .queryParam("response_type", RESPONSE_TYPE_CODE)
+      .queryParam("client_id", TEST_CLIENT_ID)
+      .queryParam("redirect_uri", TEST_CLIENT_REDIRECT_URI)
+      .queryParam("scope", SCOPE)
+      .queryParam("nonce", "1")
+      .queryParam("state", "1")
+      .build();
 
-    MockHttpSession session = (MockHttpSession) mvc
-      .perform(get(authzEndpointUrl))
+    String authzEndpointUrl = uriComponents.toUriString();
+
+    MockHttpSession session = (MockHttpSession) mvc.perform(get(authzEndpointUrl))
       .andExpect(status().isFound())
       .andExpect(redirectedUrl(LOGIN_URL))
       .andReturn()
@@ -93,6 +106,71 @@ public class AuthorizationCodeTests {
         .param("password", TEST_USER_PASSWORD)
         .param("submit", "Login")
         .session(session))
+      .andExpect(status().isFound())
+      .andExpect(redirectedUrl(uriComponents.encode().toUriString()))
+      .andReturn()
+      .getRequest()
+      .getSession();
+
+  }
+
+  @Test
+  public void testOidcAuthorizationCodeFlowWithAUPSignature() throws Exception {
+
+    IamAup aup = new IamAup();
+
+    aup.setCreationTime(new Date());
+    aup.setLastUpdateTime(new Date());
+    aup.setName("default-aup");
+    aup.setText("AUP text");
+    aup.setDescription("AUP description");
+    aup.setSignatureValidityInDays(0L);
+
+    aupRepo.save(aup);
+
+    UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(AUTHORIZE_URL)
+      .queryParam("response_type", RESPONSE_TYPE_CODE)
+      .queryParam("client_id", TEST_CLIENT_ID)
+      .queryParam("redirect_uri", TEST_CLIENT_REDIRECT_URI)
+      .queryParam("scope", SCOPE)
+      .queryParam("nonce", "1")
+      .queryParam("state", "1")
+      .build();
+
+    String authzEndpointUrl = uriComponents.toUriString();
+
+    MockHttpSession session = (MockHttpSession) mvc.perform(get(authzEndpointUrl))
+      .andExpect(status().isFound())
+      .andExpect(redirectedUrl(LOGIN_URL))
+      .andReturn()
+      .getRequest()
+      .getSession();
+
+    session = (MockHttpSession) mvc
+      .perform(post(LOGIN_URL).session(session)
+        .param("username", TEST_USER_ID)
+        .param("password", TEST_USER_PASSWORD)
+        .param("submit", "Login"))
+      .andExpect(status().isFound())
+      .andExpect(redirectedUrl(SIGN_AUP_URL))
+      .andReturn()
+      .getRequest()
+      .getSession();
+
+    SecurityContext context = (SecurityContext) session.getAttribute("SPRING_SECURITY_CONTEXT");
+
+    
+    session = (MockHttpSession) mvc
+       // Not sure why I have to do this, since using session *should be* enough
+      .perform(get(SIGN_AUP_URL).session(session).with(securityContext(context)))
+      .andExpect(status().isOk())
+      .andExpect(view().name("iam/signAup"))
+      .andReturn()
+      .getRequest()
+      .getSession();
+    
+    
+    mvc.perform(post(SIGN_AUP_URL).session(session).with(securityContext(context)))
       .andExpect(status().isFound())
       .andExpect(redirectedUrl(uriComponents.encode().toUriString()))
       .andReturn()

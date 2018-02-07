@@ -14,4 +14,9 @@ public class AuthenticationUtils {
     return new UsernamePasswordAuthenticationToken("admin", "",
         AuthorityUtils.createAuthorityList("ROLE_USER", "ROLE_ADMIN"));
   }
+  
+  public static Authentication userAuthentication() {
+    return new UsernamePasswordAuthenticationToken("test", "",
+        AuthorityUtils.createAuthorityList("ROLE_USER"));
+  }
 }

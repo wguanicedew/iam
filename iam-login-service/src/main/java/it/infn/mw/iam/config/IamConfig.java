@@ -10,14 +10,19 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.Ordered;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 
+import it.infn.mw.iam.api.account.AccountUtils;
+import it.infn.mw.iam.api.aup.AUPSignatureCheckService;
 import it.infn.mw.iam.authn.oidc.OidcTokenEnhancer;
 import it.infn.mw.iam.core.IamIntrospectionResultAssembler;
 import it.infn.mw.iam.core.IamProperties;
+import it.infn.mw.iam.core.web.EnforceAupFilter;
+import it.infn.mw.iam.persistence.repository.IamAupRepository;
 import it.infn.mw.iam.util.DumpHeadersFilter;
 
 @Configuration
@@ -25,7 +30,6 @@ public class IamConfig {
 
   @Value("${iam.organisation.name}")
   private String iamOrganisationName;
-
 
   @Bean
   AuthorizationCodeServices authorizationCodeServices() {
@@ -58,6 +62,14 @@ public class IamConfig {
     return new BCryptPasswordEncoder();
   }
 
+  @Bean
+  FilterRegistrationBean aupSignatureCheckFilter(AUPSignatureCheckService service, 
+      AccountUtils utils, IamAupRepository repo) {
+    EnforceAupFilter aupFilter = new EnforceAupFilter(service, utils, repo);
+    FilterRegistrationBean frb = new FilterRegistrationBean(aupFilter);
+    frb.setOrder(Ordered.LOWEST_PRECEDENCE);
+    return frb;
+  }
   @Bean
   @Profile("dev")
   ServletRegistrationBean h2Console() {
