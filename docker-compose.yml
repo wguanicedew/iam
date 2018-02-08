@@ -41,7 +41,7 @@ services:
 
     environment:
       TZ: Europe/Rome
-      IAM_JAVA_OPTS: -Diam.show_sql=true -Djava.security.egd=file:/dev/./urandom -Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n,address=1044 -Dspring.profiles.active=mysql-test
+      IAM_JAVA_OPTS: -Djava.security.egd=file:/dev/./urandom -Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n,address=1044 -Dspring.profiles.active=mysql-test
       IAM_JAR: /code/iam-login-service/target/iam-login-service.war
       IAM_HOST: iam.local.io
       IAM_BASE_URL: https://iam.local.io
