@@ -43,7 +43,7 @@ public class EnforceAupSignatureSuccessHandler implements AuthenticationSuccessH
   }
 
   protected void setAuthenticationTimestamp(HttpServletRequest request,
-      HttpServletResponse response, Authentication authentication) {
+      Authentication authentication) {
 
     Date timestamp = new Date();
     HttpSession session = request.getSession();
@@ -68,7 +68,7 @@ public class EnforceAupSignatureSuccessHandler implements AuthenticationSuccessH
 
     HttpSession session = request.getSession(false);
     
-    setAuthenticationTimestamp(request, response, auth);
+    setAuthenticationTimestamp(request, auth);
     touchLastLoginTimeForIamAccount(auth);
     
     IamAccount authenticatedUser = lookupAuthenticatedUser(auth);

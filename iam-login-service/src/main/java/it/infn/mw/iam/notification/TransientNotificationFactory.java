@@ -26,6 +26,7 @@ public class TransientNotificationFactory implements NotificationFactory {
 
   private static final Logger LOG = LoggerFactory.getLogger(TransientNotificationFactory.class);
   private static final String RECIPIENT_FIELD = "recipient";
+  private static final String ORGANISATION_NAME = "organisationName";
 
   @Value("${iam.baseUrl}")
   private String baseUrl;
@@ -52,7 +53,7 @@ public class TransientNotificationFactory implements NotificationFactory {
     Map<String, Object> model = new HashMap<>();
     model.put(RECIPIENT_FIELD, recipient);
     model.put("confirmURL", confirmURL);
-    model.put("organisationName", organisationName);
+    model.put(ORGANISATION_NAME, organisationName);
 
     IamEmailNotification notification = createMessage("confirmRegistration.vm", model,
         IamNotificationType.CONFIRMATION, properties.getSubject().get("confirmation"),
@@ -74,7 +75,7 @@ public class TransientNotificationFactory implements NotificationFactory {
     Map<String, Object> model = new HashMap<>();
     model.put(RECIPIENT_FIELD, recipient);
     model.put("resetPasswordUrl", resetPasswordUrl);
-    model.put("organisationName", organisationName);
+    model.put(ORGANISATION_NAME, organisationName);
 
     IamEmailNotification notification = createMessage("accountActivated.vm", model,
         IamNotificationType.ACTIVATED, properties.getSubject().get("activated"),
@@ -93,7 +94,7 @@ public class TransientNotificationFactory implements NotificationFactory {
 
     Map<String, Object> model = new HashMap<>();
     model.put(RECIPIENT_FIELD, recipient);
-    model.put("organisationName", organisationName);
+    model.put(ORGANISATION_NAME, organisationName);
 
     return createMessage("requestRejected.vm", model, IamNotificationType.REJECTED,
         properties.getSubject().get("rejected"), request.getAccount().getUserInfo().getEmail());
@@ -111,7 +112,7 @@ public class TransientNotificationFactory implements NotificationFactory {
     model.put("username", username);
     model.put("email", email);
     model.put("indigoDashboardUrl", dashboardUrl);
-    model.put("organisationName", organisationName);
+    model.put(ORGANISATION_NAME, organisationName);
     model.put("notes", request.getNotes());
 
     return createMessage("adminHandleRequest.vm", model, IamNotificationType.CONFIRMATION,
@@ -128,7 +129,7 @@ public class TransientNotificationFactory implements NotificationFactory {
     Map<String, Object> model = new HashMap<>();
     model.put(RECIPIENT_FIELD, recipient);
     model.put("resetPasswordUrl", resetPasswordUrl);
-    model.put("organisationName", organisationName);
+    model.put(ORGANISATION_NAME, organisationName);
     model.put("username", account.getUsername());
 
     IamEmailNotification notification =

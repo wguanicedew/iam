@@ -31,6 +31,7 @@ public class EnforceAupFilter implements Filter {
   public static final Logger LOG = LoggerFactory.getLogger(EnforceAupFilter.class);
   
   public static final String AUP_SIGN_PATH = "/iam/aup/sign";
+  public static final String SIGN_AUP_JSP = "signAup.jsp";
 
   public static final String REQUESTING_SIGNATURE = "iam.aup.requesting-signature";
 
@@ -81,7 +82,7 @@ public class EnforceAupFilter implements Filter {
     
     if (!isNull(session.getAttribute(REQUESTING_SIGNATURE))) {
       String requestURL = req.getRequestURL().toString();
-      if (requestURL.endsWith("/iam/aup/sign") || requestURL.endsWith("signAup.jsp")) {
+      if (requestURL.endsWith(AUP_SIGN_PATH) || requestURL.endsWith(SIGN_AUP_JSP)) {
         chain.doFilter(request, response);
         return;
       }
@@ -91,18 +92,14 @@ public class EnforceAupFilter implements Filter {
     
     if (signatureCheckService.needsAupSignature(authenticatedUser.get())) {
 
-      if (!sessionOlderThanAupCreation(session)) {
-        if (!res.isCommitted()) {
+      if (!sessionOlderThanAupCreation(session) && !res.isCommitted()) {
           session.setAttribute(REQUESTING_SIGNATURE, true);
           res.sendRedirect(AUP_SIGN_PATH);
-        }
-      } else {
-        chain.doFilter(request, response);
+          return;
       }
-    } else {
-      chain.doFilter(request, response);
-    }
-
+    } 
+      
+    chain.doFilter(request, response);
   }
 
   @Override

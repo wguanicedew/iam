@@ -34,7 +34,6 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.registration.PersistentUUIDTokenGenerator;
 import it.infn.mw.iam.registration.RegistrationRequestDto;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
-import it.infn.mw.iam.test.util.WithAnonymousUser;
 import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -71,6 +70,7 @@ public class PasswordEncodingTests {
       .apply(springSecurity())
       .alwaysDo(print())
       .build();
+    mockOAuth2Filter.cleanupSecurityContext();
   }
 
   @After
@@ -80,7 +80,6 @@ public class PasswordEncodingTests {
 
 
   @Test
-  @WithAnonymousUser
   public void testPasswordEncoded() throws Exception {
     String username = "password_encoded";
     String newPassword = "secure_password";

@@ -18,32 +18,28 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 public class AccountUtils {
 
   IamAccountRepository accountRepo;
-  
+
   @Autowired
   public AccountUtils(IamAccountRepository accountRepo) {
     this.accountRepo = accountRepo;
   }
-  
-  
+
+
   public boolean isAuthenticated() {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
     return isAuthenticated(auth);
   }
-  
+
   public boolean isAuthenticated(Authentication auth) {
-    if (isNull(auth) || auth instanceof AnonymousAuthenticationToken ) {
-      return false;
-    }
-    
-    return true;
+    return !(isNull(auth) || auth instanceof AnonymousAuthenticationToken);
   }
-  
-  public Optional<IamAccount> getAuthenticatedUserAccount(Authentication authn){
+
+  public Optional<IamAccount> getAuthenticatedUserAccount(Authentication authn) {
     if (!isAuthenticated(authn)) {
       return Optional.empty();
     }
-    
+
     if (authn instanceof OAuth2Authentication) {
       OAuth2Authentication oauth = (OAuth2Authentication) authn;
       if (oauth.getUserAuthentication() == null) {
@@ -51,15 +47,16 @@ public class AccountUtils {
       }
       authn = oauth.getUserAuthentication();
     }
-    
+
     return accountRepo.findByUsername(authn.getName());
-    
+
   }
+
   public Optional<IamAccount> getAuthenticatedUserAccount() {
-   
+
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    
+
     return getAuthenticatedUserAccount(auth);
-      
+
   }
 }
