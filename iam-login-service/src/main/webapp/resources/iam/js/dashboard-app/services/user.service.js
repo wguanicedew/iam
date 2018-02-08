@@ -23,9 +23,17 @@ function UserService($q, $rootScope, scimFactory, Authorities, Utils, AupService
         ]).then(
             function(result) {
                 var user = result[0];
-                user.aupSignature = result[1];
+                if (result[1] !== null) {
+                    user.aupSignature = result[1].data;
+                } else {
+                    user.aupSignature = null;
+                }
+
                 return user;
-            });
+            }).catch(function(error) {
+            console.error('Error loading authenticated user information: ', error);
+            return $q.reject(error);
+        });
     }
 
     function getUser(userId) {
@@ -34,7 +42,11 @@ function UserService($q, $rootScope, scimFactory, Authorities, Utils, AupService
             .then(function(result) {
                 var user = result[0].data;
                 user.authorities = result[1].data.authorities;
-                user.aupSignature = result[2];
+                if (result[2] !== null) {
+                    user.aupSignature = result[2].data;
+                } else {
+                    user.aupSignature = null;
+                }
                 return user;
             })
             .catch(function(error) {

@@ -7,7 +7,6 @@
         self.$onInit = function() {
             console.log('userDetailController onInit');
             console.log('userDetailController self.aup: ', self.aup);
-            console.log('userDetailController self.indigoUser().aupSignatureTime: ', self.indigoUser().aupSignatureTime);
         };
 
         self.isVoAdmin = function() {
@@ -23,7 +22,7 @@
         };
 
         self.hasAupSignatureTime = function() {
-            return self.indigoUser().aupSignatureTime !== undefined;
+            return self.user.aupSignature !== null;
         };
     }
 

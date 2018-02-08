@@ -113,12 +113,8 @@ angular
                     }
                 });
 
-            function loadLoggedUser(scimFactory) {
-                return scimFactory.getMe().then(function(r) {
-                    var user = r.data;
-                    user.authorities = getUserAuthorities();
-                    return user;
-                });
+            function loadLoggedUser(UserService) {
+                return UserService.getMe();
             }
 
             function loadUser(UserService, $stateParams) {
