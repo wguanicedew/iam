@@ -29,7 +29,7 @@ import it.infn.mw.iam.persistence.repository.IamAupRepository;
 public class EnforceAupFilter implements Filter {
 
   public static final Logger LOG = LoggerFactory.getLogger(EnforceAupFilter.class);
-  
+
   public static final String AUP_SIGN_PATH = "/iam/aup/sign";
   public static final String SIGN_AUP_JSP = "signAup.jsp";
 
@@ -72,14 +72,14 @@ public class EnforceAupFilter implements Filter {
       chain.doFilter(request, response);
       return;
     }
-    
+
     Optional<IamAccount> authenticatedUser = accountUtils.getAuthenticatedUserAccount();
 
     if (!authenticatedUser.isPresent() || !aupRepo.findDefaultAup().isPresent()) {
       chain.doFilter(request, response);
       return;
     }
-    
+
     if (!isNull(session.getAttribute(REQUESTING_SIGNATURE))) {
       String requestURL = req.getRequestURL().toString();
       if (requestURL.endsWith(AUP_SIGN_PATH) || requestURL.endsWith(SIGN_AUP_JSP)) {
@@ -89,16 +89,16 @@ public class EnforceAupFilter implements Filter {
       res.sendRedirect(AUP_SIGN_PATH);
       return;
     }
-    
-    if (signatureCheckService.needsAupSignature(authenticatedUser.get())) {
 
-      if (!sessionOlderThanAupCreation(session) && !res.isCommitted()) {
-          session.setAttribute(REQUESTING_SIGNATURE, true);
-          res.sendRedirect(AUP_SIGN_PATH);
-          return;
-      }
-    } 
-      
+    if (signatureCheckService.needsAupSignature(authenticatedUser.get())
+        && !sessionOlderThanAupCreation(session) && !res.isCommitted()) {
+
+      session.setAttribute(REQUESTING_SIGNATURE, true);
+      res.sendRedirect(AUP_SIGN_PATH);
+      return;
+
+    }
+
     chain.doFilter(request, response);
   }
 
