@@ -74,13 +74,16 @@ public class AupIntegrationTests extends AupTestSupport {
   
   private MockMvc mvc;
 
+  
+  
   @Before
   public void setup() {
     mvc = MockMvcBuilders.webAppContextSetup(context)
       .alwaysDo(print())
       .apply(springSecurity())
       .build();
-  }
+    mockOAuth2Filter.cleanupSecurityContext();
+    }
 
   @After
   public void cleanupOAuthUser() {

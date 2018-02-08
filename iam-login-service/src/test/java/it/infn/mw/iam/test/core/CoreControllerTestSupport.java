@@ -1,5 +1,7 @@
 package it.infn.mw.iam.test.core;
 
+import org.mockito.Mockito;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -22,5 +24,11 @@ public class CoreControllerTestSupport {
   @Primary
   MockTimeProvider mockTimeProvider() {
     return new MockTimeProvider();
+  }
+  
+  @Bean
+  @Primary
+  ApplicationEventPublisher mockApplicationEventPublisher() {
+    return Mockito.mock(ApplicationEventPublisher.class);
   }
 }

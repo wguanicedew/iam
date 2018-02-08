@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.stereotype.Controller;
@@ -21,9 +22,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
 import it.infn.mw.iam.api.account.AccountUtils;
+import it.infn.mw.iam.audit.events.aup.AupSignedEvent;
 import it.infn.mw.iam.core.time.TimeProvider;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamAup;
+import it.infn.mw.iam.persistence.model.IamAupSignature;
 import it.infn.mw.iam.persistence.repository.IamAupRepository;
 import it.infn.mw.iam.persistence.repository.IamAupSignatureRepository;
 
@@ -35,15 +38,17 @@ public class AupSignaturePageController {
   final IamAupSignatureRepository signatureRepo;
   final AccountUtils accountUtils;
   final TimeProvider timeProvider;
+  final ApplicationEventPublisher publisher;
 
   @Autowired
   public AupSignaturePageController(IamAupRepository aupRepo,
       IamAupSignatureRepository aupSignatureRepo, AccountUtils accountUtils,
-      TimeProvider timeProvider) {
+      TimeProvider timeProvider, ApplicationEventPublisher publisher) {
     this.repo = aupRepo;
     this.signatureRepo = aupSignatureRepo;
     this.accountUtils = accountUtils;
     this.timeProvider = timeProvider;
+    this.publisher = publisher;
   }
 
   @PreAuthorize("hasRole('USER')")
@@ -93,8 +98,9 @@ public class AupSignaturePageController {
       IamAccount account = accountUtils.getAuthenticatedUserAccount().orElseThrow(
           () -> new IllegalStateException("No iam account found for authenticated user"));
 
-      signatureRepo.createSignatureForAccount(account, now);
+      IamAupSignature signature = signatureRepo.createSignatureForAccount(account, now);
 
+      publisher.publishEvent(new AupSignedEvent(this, signature));
       if (!isNull(session.getAttribute(REQUESTING_SIGNATURE))) {
         session.removeAttribute(REQUESTING_SIGNATURE);
         Optional<SavedRequest> savedRequest = checkForSavedSpringSecurityRequest(session);
