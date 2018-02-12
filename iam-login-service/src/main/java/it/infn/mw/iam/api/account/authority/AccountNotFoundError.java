@@ -11,4 +11,8 @@ public class AccountNotFoundError extends RuntimeException {
     super(message);
 
   }
+  
+  public static final AccountNotFoundError forUuid(String uuid) {
+    return new AccountNotFoundError(String.format("Account not found for id '%s'", uuid));
+  }
 }

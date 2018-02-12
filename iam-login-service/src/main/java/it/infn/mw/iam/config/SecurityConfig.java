@@ -28,7 +28,6 @@ import org.springframework.security.oauth2.provider.authentication.OAuth2Authent
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationProcessingFilter;
 import org.springframework.security.oauth2.provider.client.ClientCredentialsTokenEndpointFilter;
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
-import org.springframework.security.oauth2.provider.expression.OAuth2WebSecurityExpressionHandler;
 import org.springframework.security.web.access.AccessDeniedHandlerImpl;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
@@ -51,6 +50,7 @@ import it.infn.mw.iam.authn.x509.IamX509AuthenticationProvider;
 import it.infn.mw.iam.authn.x509.IamX509AuthenticationUserDetailService;
 import it.infn.mw.iam.authn.x509.IamX509PreauthenticationProcessingFilter;
 import it.infn.mw.iam.authn.x509.X509AuthenticationCredentialExtractor;
+import it.infn.mw.iam.core.expression.IamWebSecurityExpressionHandler;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
 @Configuration
@@ -65,7 +65,7 @@ public class SecurityConfig {
     private String iamBaseUrl;
 
     @Autowired
-    private OAuth2WebSecurityExpressionHandler oAuth2WebSecurityExpressionHandler;
+    private IamWebSecurityExpressionHandler webSecurityExpressionHandler;
 
     @Autowired
     @Qualifier("mitreAuthzRequestFilter")
@@ -89,7 +89,7 @@ public class SecurityConfig {
 
     @Autowired
     private AUPSignatureCheckService aupSignatureCheckService;
-    
+
     @Autowired
     private AccountUtils accountUtils;
 
@@ -105,7 +105,7 @@ public class SecurityConfig {
     @Override
     public void configure(final WebSecurity web) throws Exception {
 
-      web.expressionHandler(oAuth2WebSecurityExpressionHandler);
+      web.expressionHandler(webSecurityExpressionHandler);
     }
 
 
@@ -163,19 +163,14 @@ public class SecurityConfig {
       // @formatter:on
     }
 
-    @Bean
-    public OAuth2WebSecurityExpressionHandler oAuth2WebSecurityExpressionHandler() {
-
-      return new OAuth2WebSecurityExpressionHandler();
-    }
 
     public AuthenticationSuccessHandler successHandler() {
-      AuthenticationSuccessHandler delegate= new RootIsDashboardSuccessHandler(iamBaseUrl, 
-          new HttpSessionRequestCache());
-          
-      
-      return new EnforceAupSignatureSuccessHandler(delegate, aupSignatureCheckService,
-          accountUtils, accountRepo);
+      AuthenticationSuccessHandler delegate =
+          new RootIsDashboardSuccessHandler(iamBaseUrl, new HttpSessionRequestCache());
+
+
+      return new EnforceAupSignatureSuccessHandler(delegate, aupSignatureCheckService, accountUtils,
+          accountRepo);
     }
   }
 
@@ -858,6 +853,40 @@ public class SecurityConfig {
         .antMatchers(HttpMethod.GET, "/iam/aup")
         .permitAll()
         .antMatchers(HttpMethod.POST, "/iam/aup")
+        .authenticated()
+        .and()
+        .csrf()
+        .disable();
+    }
+  }
+
+  @Configuration
+  @Order(29)
+  public static class AccountManagerApiEndpointConfig extends WebSecurityConfigurerAdapter {
+    @Autowired
+    private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
+
+    @Autowired
+    private OAuth2AuthenticationProcessingFilter resourceFilter;
+
+    @Autowired
+    private CorsFilter corsFilter;
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+      http.requestMatchers()
+        .antMatchers("/iam/account/**", "/iam/group/**")
+        .and()
+        .exceptionHandling()
+        .authenticationEntryPoint(authenticationEntryPoint)
+        .and()
+        .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
+        .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
+        .sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.NEVER)
+        .and()
+        .authorizeRequests()
+        .anyRequest()
         .authenticated()
         .and()
         .csrf()

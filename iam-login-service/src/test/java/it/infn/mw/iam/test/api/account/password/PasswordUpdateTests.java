@@ -1,4 +1,4 @@
-package it.infn.mw.iam.test.account;
+package it.infn.mw.iam.test.api.account.password;
 
 import static it.infn.mw.iam.test.TestUtils.passwordTokenGetter;
 import static org.hamcrest.Matchers.containsString;

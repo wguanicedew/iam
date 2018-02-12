@@ -1,4 +1,4 @@
-package it.infn.mw.iam.test.api.account;
+package it.infn.mw.iam.test.api.account.password;
 
 import static org.mockito.Matchers.anyString;
 

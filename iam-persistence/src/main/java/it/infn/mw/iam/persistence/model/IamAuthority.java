@@ -52,6 +52,14 @@ public class IamAuthority implements Serializable{
 
     this.authority = authority;
   }
+  
+  public boolean isGroupManagerAuthority() {
+    return this.authority.startsWith("ROLE_GM:");
+  }
+  
+  public String getManagedGroupId() {
+    return this.authority.substring(8);
+  }
 
   @Override
   public int hashCode() {

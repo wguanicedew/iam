@@ -1,4 +1,4 @@
-package it.infn.mw.iam.test.account.authority;
+package it.infn.mw.iam.test.api.account.authority;
 
 import static java.lang.String.format;
 import static org.hamcrest.Matchers.contains;

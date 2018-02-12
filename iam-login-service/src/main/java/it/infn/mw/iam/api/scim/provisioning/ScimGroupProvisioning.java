@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -36,8 +37,10 @@ import it.infn.mw.iam.audit.events.group.GroupCreatedEvent;
 import it.infn.mw.iam.audit.events.group.GroupRemovedEvent;
 import it.infn.mw.iam.audit.events.group.GroupReplacedEvent;
 import it.infn.mw.iam.persistence.model.IamAccount;
+import it.infn.mw.iam.persistence.model.IamAuthority;
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
+import it.infn.mw.iam.persistence.repository.IamAuthoritiesRepository;
 import it.infn.mw.iam.persistence.repository.IamGroupRepository;
 
 @Service
@@ -57,14 +60,21 @@ public class ScimGroupProvisioning
 
   private ApplicationEventPublisher eventPublisher;
 
+  private final IamAuthoritiesRepository authoritiesRepo;
+
+  private final IamAccountRepository accountRepo;
+
   @Autowired
   public ScimGroupProvisioning(IamGroupRepository groupRepository,
-      IamAccountRepository accountRepository, GroupConverter converter) {
+      IamAccountRepository accountRepository, GroupConverter converter,
+      IamAuthoritiesRepository authoritiesRepo, IamAccountRepository accountRepo) {
 
     this.accountRepository = accountRepository;
     this.groupRepository = groupRepository;
     this.converter = converter;
     this.groupUpdaterFactory = new DefaultGroupMembershipUpdaterFactory(accountRepository);
+    this.authoritiesRepo = authoritiesRepo;
+    this.accountRepo = accountRepo;
 
   }
 
@@ -92,6 +102,32 @@ public class ScimGroupProvisioning
       .orElseThrow(() -> new ScimResourceNotFoundException("No group mapped to id '" + id + "'"));
 
     return converter.dtoFromEntity(group);
+  }
+
+  private String groupManagerAuthority(IamGroup group) {
+    return String.format("ROLE_GM:%s", group.getUuid());
+  }
+
+  private void createGroupManagerAuthority(IamGroup group) {
+    IamAuthority authority = new IamAuthority(groupManagerAuthority(group));
+    authoritiesRepo.save(authority);
+  }
+
+  private void deleteAccountAuthority(IamAccount account, IamAuthority auth) {
+    account.getAuthorities().removeIf(a -> a.getAuthority().equals(auth.getAuthority()));
+    accountRepo.save(account);
+  }
+
+  private void deleteGroupManagerAuthority(IamGroup group) {
+    String authorityString = groupManagerAuthority(group);
+
+    Optional<IamAuthority> auth = authoritiesRepo.findByAuthority(authorityString);
+
+    auth.ifPresent(authority->{
+      accountRepo.findByAuthority(authorityString)
+      .forEach(account -> deleteAccountAuthority(account, authority));
+      authoritiesRepo.delete(authority);
+    });
   }
 
   @Override
@@ -132,11 +168,12 @@ public class ScimGroupProvisioning
     }
 
     groupRepository.save(iamGroup);
-    
+    createGroupManagerAuthority(iamGroup);
+
     if (iamParentGroup != null) {
       groupRepository.save(iamParentGroup);
     }
-    
+
     eventPublisher.publishEvent(
         new GroupCreatedEvent(this, iamGroup, "Group created with name " + iamGroup.getName()));
 
@@ -164,6 +201,8 @@ public class ScimGroupProvisioning
     }
 
     groupRepository.delete(group);
+
+    deleteGroupManagerAuthority(group);
 
     eventPublisher.publishEvent(new GroupRemovedEvent(this, group,
         String.format("Group %s has been removed", group.getName())));

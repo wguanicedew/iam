@@ -1,4 +1,4 @@
-package it.infn.mw.iam.test.account;
+package it.infn.mw.iam.test.api.account.password;
 
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.head;
@@ -22,7 +22,6 @@ import org.springframework.web.context.WebApplicationContext;
 
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.registration.PersistentUUIDTokenGenerator;
-import it.infn.mw.iam.registration.RegistrationRequestDto;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 import it.infn.mw.iam.test.notification.NotificationTestConfig;
 import it.infn.mw.iam.test.util.WithAnonymousUser;
@@ -51,8 +50,6 @@ public class PasswordResetTests {
   private WebApplicationContext context;
 
   private MockMvc mvc;
-
-  private RegistrationRequestDto registrationRequest;
 
   @Before
   public void setup() {
