@@ -77,6 +77,7 @@
   <script type="text/javascript" src="/resources/iam/js/dashboard-app/services/clients.service.js"></script>
   <script type="text/javascript" src="/resources/iam/js/dashboard-app/services/clipboard.service.js"></script>
   <script type="text/javascript" src="/resources/iam/js/dashboard-app/services/aup.service.js"></script>
+  <script type="text/javascript" src="/resources/iam/js/dashboard-app/services/account-group-manager.service.js"></script>
   <!-- Controllers -->
   <script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/group.controller.js"></script>
   <script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/users.controller.js"></script>
