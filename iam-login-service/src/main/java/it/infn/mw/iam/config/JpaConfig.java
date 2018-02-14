@@ -42,6 +42,12 @@ public class JpaConfig extends JpaBaseConfiguration {
     map.put("eclipselink.logging.level", "INFO");
     map.put("eclipselink.logging.level.sql", "OFF");
     map.put("eclipselink.cache.shared.default", "false");
+    
+    if (System.getProperty("iam.show_sql") != null) {
+      map.put("eclipselink.logging.level", "FINE");
+      map.put("eclipselink.logging.level.sql", "FINE");
+      map.put("eclipselink.logging.parameters", "true");
+    }
 
     if (System.getProperty("iam.generate-ddl-sql-script") != null){
       map.put("eclipselink.ddl-generation.output-mode", "sql-script");

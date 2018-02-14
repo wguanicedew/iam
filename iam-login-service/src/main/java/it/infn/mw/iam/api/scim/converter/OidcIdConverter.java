@@ -9,7 +9,7 @@ import it.infn.mw.iam.persistence.model.IamOidcId;
 public class OidcIdConverter implements Converter<ScimOidcId, IamOidcId> {
 
   @Override
-  public IamOidcId fromScim(ScimOidcId scim) {
+  public IamOidcId entityFromDto(ScimOidcId scim) {
 
     IamOidcId oidcId = new IamOidcId();
     oidcId.setIssuer(scim.getIssuer());
@@ -20,7 +20,7 @@ public class OidcIdConverter implements Converter<ScimOidcId, IamOidcId> {
   }
 
   @Override
-  public ScimOidcId toScim(IamOidcId entity) {
+  public ScimOidcId dtoFromEntity(IamOidcId entity) {
 
     ScimOidcId.Builder builder = ScimOidcId.builder()
       .issuer(entity.getIssuer())

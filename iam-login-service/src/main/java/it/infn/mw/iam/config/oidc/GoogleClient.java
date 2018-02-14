@@ -34,11 +34,13 @@ import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import it.infn.mw.iam.api.account.AccountUtils;
+import it.infn.mw.iam.api.aup.AUPSignatureCheckService;
+import it.infn.mw.iam.authn.EnforceAupSignatureSuccessHandler;
 import it.infn.mw.iam.authn.ExternalAuthenticationFailureHandler;
 import it.infn.mw.iam.authn.ExternalAuthenticationSuccessHandler;
 import it.infn.mw.iam.authn.InactiveAccountAuthenticationHander;
 import it.infn.mw.iam.authn.RootIsDashboardSuccessHandler;
-import it.infn.mw.iam.authn.TimestamperSuccessHandler;
 import it.infn.mw.iam.authn.oidc.DefaultOidcTokenRequestor;
 import it.infn.mw.iam.authn.oidc.DefaultRestTemplateFactory;
 import it.infn.mw.iam.authn.oidc.OidcAuthenticationProvider;
@@ -62,6 +64,12 @@ public class GoogleClient {
 
   @Autowired
   private IamAccountRepository accountRepo;
+
+  @Autowired
+  private AUPSignatureCheckService aupSignatureCheckService;
+
+  @Autowired
+  private AccountUtils accountUtils;
 
   @Bean
   public FilterRegistrationBean disabledAutomaticOidcFilterRegistration(OidcClientFilter f) {
@@ -115,7 +123,8 @@ public class GoogleClient {
     RootIsDashboardSuccessHandler sa =
         new RootIsDashboardSuccessHandler(iamBaseUrl, new HttpSessionRequestCache());
 
-    AuthenticationSuccessHandler successHandler = new TimestamperSuccessHandler(sa, accountRepo);
+    EnforceAupSignatureSuccessHandler successHandler = new EnforceAupSignatureSuccessHandler(sa,
+        aupSignatureCheckService, accountUtils, accountRepo);
 
     return new ExternalAuthenticationSuccessHandler(successHandler, "/");
 

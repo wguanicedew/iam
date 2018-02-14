@@ -33,6 +33,7 @@ import it.infn.mw.iam.persistence.repository.IamOAuthAccessTokenRepository;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 import it.infn.mw.iam.test.util.DateEqualModulo1Second;
 import it.infn.mw.iam.test.util.WithMockOAuthUser;
+import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class})
@@ -58,6 +59,9 @@ public class AccessTokenGetListTests extends TestTokensUtils {
   private static final String TESTUSER_USERNAME = "test_102";
   private static final String TESTUSER2_USERNAME = "test_103";
   private static final String PARTIAL_USERNAME = "test_10";
+  
+  @Autowired
+  private MockOAuth2Filter mockOAuth2Filter;
 
   @Before
   public void setup() {
@@ -68,6 +72,7 @@ public class AccessTokenGetListTests extends TestTokensUtils {
   @After
   public void teardown() {
     clearAllTokens();
+    mockOAuth2Filter.cleanupSecurityContext();
   }
 
   @Test

@@ -341,6 +341,7 @@ public class ScopePolicyApiIntegrationTests extends ScopePolicyTestUtils {
     sp.setAccount(account);
 
     String serializedSp = mapper.writeValueAsString(sp);
+    System.out.println(serializedSp);
     mvc.perform(post("/iam/scope_policies").content(serializedSp).contentType(APPLICATION_JSON))
       .andExpect(status().isCreated());
 
@@ -379,6 +380,7 @@ public class ScopePolicyApiIntegrationTests extends ScopePolicyTestUtils {
     sp.setGroup(groupRef);
 
     String serializedSp = mapper.writeValueAsString(sp);
+    
     mvc.perform(post("/iam/scope_policies").content(serializedSp).contentType(APPLICATION_JSON))
       .andExpect(status().isCreated());
 

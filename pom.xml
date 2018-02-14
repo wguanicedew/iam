@@ -210,7 +210,6 @@
 
   </dependencyManagement>
 
-  <!--
   <repositories>
     <repository>
       <id>infn-cnaf</id>
@@ -220,7 +219,6 @@
       </snapshots>
     </repository>
   </repositories>
-  -->
 
   <build>
 

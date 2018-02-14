@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Set;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,6 +27,7 @@ import com.google.common.collect.Sets;
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 import it.infn.mw.iam.test.util.WithMockOAuthUser;
+import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class})
@@ -50,6 +52,9 @@ public class ActuatorEndpointsWithTokenAuthTests {
   private WebApplicationContext context;
 
   private MockMvc mvc;
+  
+  @Autowired
+  private MockOAuth2Filter mockOAuth2Filter;
 
   @Before
   public void setup() {
@@ -57,6 +62,11 @@ public class ActuatorEndpointsWithTokenAuthTests {
       .apply(springSecurity())
       .alwaysDo(print())
       .build();
+  }
+  
+  @After
+  public void cleanupOAuthUser() {
+    mockOAuth2Filter.cleanupSecurityContext();
   }
 
   @Test

@@ -7,9 +7,8 @@ spring:
     username: sa
     password:
 
-  mail:
-    host: localhost
-    port: 10125
+notification:
+  disable: true
 
 flyway:
   locations:

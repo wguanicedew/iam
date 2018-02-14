@@ -89,7 +89,7 @@ public class ScimMeController implements ApplicationEventPublisherAware {
   public ScimUser whoami() {
 
     IamAccount account = getCurrentUserAccount();
-    return userConverter.toScim(account);
+    return userConverter.dtoFromEntity(account);
 
   }
 

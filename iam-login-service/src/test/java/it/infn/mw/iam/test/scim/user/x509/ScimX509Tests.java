@@ -15,6 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import javax.transaction.Transactional;
 
 import org.hamcrest.Matchers;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,6 +42,7 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 import it.infn.mw.iam.test.ext_authn.x509.X509TestSupport;
 import it.infn.mw.iam.test.util.WithMockOAuthUser;
+import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class})
@@ -60,6 +62,9 @@ public class ScimX509Tests extends X509TestSupport implements ScimConstants {
 
   @Autowired
   private ObjectMapper mapper;
+  
+  @Autowired
+  private MockOAuth2Filter mockOAuth2Filter;
 
   private MockMvc mvc;
 
@@ -69,6 +74,11 @@ public class ScimX509Tests extends X509TestSupport implements ScimConstants {
       .apply(springSecurity())
       .alwaysDo(print())
       .build();
+  }
+  
+  @After
+  public void teardown() throws Exception {
+    mockOAuth2Filter.cleanupSecurityContext();
   }
 
   @Test

@@ -10,6 +10,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 import it.infn.mw.iam.test.scim.ScimRestUtilsMvc;
 import it.infn.mw.iam.test.scim.ScimUtils.ParamsBuilder;
 import it.infn.mw.iam.test.util.WithMockOAuthUser;
+import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(
@@ -32,6 +34,14 @@ public class ScimUserProvisioningAttributeFilterTests {
 
   @Autowired
   private ScimRestUtilsMvc scimUtils;
+  
+  @Autowired
+  private MockOAuth2Filter mockOAuth2Filter;
+  
+  @After
+  public void teardown() {
+    mockOAuth2Filter.cleanupSecurityContext();
+  }
 
   @Test
   public void testReuturnOnlyUsernameRequest() throws Exception {

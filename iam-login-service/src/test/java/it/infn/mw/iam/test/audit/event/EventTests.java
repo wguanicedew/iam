@@ -113,7 +113,7 @@ public class EventTests extends X509TestSupport {
       .build();
 
 
-    account = accountService.createAccount(userConverter.fromScim(user));
+    account = accountService.createAccount(userConverter.entityFromDto(user));
 
     assertNotNull(account);
 

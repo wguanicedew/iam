@@ -48,7 +48,7 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
   }
 
   @Override
-  public IamAccount fromScim(ScimUser scimUser) {
+  public IamAccount entityFromDto(ScimUser scimUser) {
 
     IamAccount account = new IamAccount();
 
@@ -69,7 +69,7 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
 
       scimUser.getIndigoUser().getOidcIds().forEach(oidcId -> {
 
-        IamOidcId iamOidcId = oidcIdConverter.fromScim(oidcId);
+        IamOidcId iamOidcId = oidcIdConverter.entityFromDto(oidcId);
         iamOidcId.setAccount(account);
         account.getOidcIds().add(iamOidcId);
 
@@ -80,7 +80,7 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
 
       scimUser.getIndigoUser().getSshKeys().forEach(sshKey -> {
 
-        IamSshKey iamSshKey = sshKeyConverter.fromScim(sshKey);
+        IamSshKey iamSshKey = sshKeyConverter.entityFromDto(sshKey);
 
         if (iamSshKey.getFingerprint() == null && iamSshKey.getValue() != null) {
 
@@ -106,7 +106,7 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
 
       scimUser.getIndigoUser().getSamlIds().forEach(samlId -> {
 
-        IamSamlId iamSamlId = samlIdConverter.fromScim(samlId);
+        IamSamlId iamSamlId = samlIdConverter.entityFromDto(samlId);
         iamSamlId.setAccount(account);
         account.getSamlIds().add(iamSamlId);
 
@@ -115,7 +115,7 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
     
     if (scimUser.hasX509Certificates()) {
       scimUser.getIndigoUser().getCertificates().forEach(c -> {
-        IamX509Certificate cert = x509CertificateIamConverter.fromScim(c);
+        IamX509Certificate cert = x509CertificateIamConverter.entityFromDto(c);
         cert.setAccount(account);
         account.getX509Certificates().add(cert);
       });
@@ -133,7 +133,7 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
     }
 
     if (scimUser.hasAddresses()) {
-      userInfo.setAddress(addressConverter.fromScim(scimUser.getAddresses().get(0)));
+      userInfo.setAddress(addressConverter.entityFromDto(scimUser.getAddresses().get(0)));
     }
 
     account.setUserInfo(userInfo);
@@ -143,7 +143,7 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
   }
 
   @Override
-  public ScimUser toScim(IamAccount entity) {
+  public ScimUser dtoFromEntity(IamAccount entity) {
 
     ScimMeta meta = getScimMeta(entity);
     ScimName name = getScimName(entity);
@@ -200,16 +200,20 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
     ScimIndigoUser.Builder indigoUserBuilder = new ScimIndigoUser.Builder();
 
     entity.getOidcIds()
-      .forEach(oidcId -> indigoUserBuilder.addOidcid(oidcIdConverter.toScim(oidcId)));
+      .forEach(oidcId -> indigoUserBuilder.addOidcid(oidcIdConverter.dtoFromEntity(oidcId)));
 
     entity.getSshKeys()
-      .forEach(sshKey -> indigoUserBuilder.addSshKey(sshKeyConverter.toScim(sshKey)));
+      .forEach(sshKey -> indigoUserBuilder.addSshKey(sshKeyConverter.dtoFromEntity(sshKey)));
 
     entity.getSamlIds()
-      .forEach(samlId -> indigoUserBuilder.addSamlId(samlIdConverter.toScim(samlId)));
+      .forEach(samlId -> indigoUserBuilder.addSamlId(samlIdConverter.dtoFromEntity(samlId)));
 
     entity.getX509Certificates()
-      .forEach(cert -> indigoUserBuilder.addCertificate(x509CertificateIamConverter.toScim(cert)));
+      .forEach(cert -> indigoUserBuilder.addCertificate(x509CertificateIamConverter.dtoFromEntity(cert)));
+    
+    if (entity.getAupSignature() != null) {
+      indigoUserBuilder.aupSignatureTime(entity.getAupSignature().getSignatureTime());
+    }
     
     ScimIndigoUser indigoUser = indigoUserBuilder.build();
 
@@ -229,7 +233,7 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
 
     if (entity.getUserInfo() != null && entity.getUserInfo().getAddress() != null) {
 
-      return addressConverter.toScim(entity.getUserInfo().getAddress());
+      return addressConverter.dtoFromEntity(entity.getUserInfo().getAddress());
     }
     return null;
   }

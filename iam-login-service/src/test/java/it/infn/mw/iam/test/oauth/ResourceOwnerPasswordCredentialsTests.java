@@ -10,6 +10,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.Date;
+
 import javax.transaction.Transactional;
 
 import org.junit.Before;
@@ -30,6 +32,8 @@ import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
 
 import it.infn.mw.iam.IamLoginService;
+import it.infn.mw.iam.persistence.model.IamAup;
+import it.infn.mw.iam.persistence.repository.IamAupRepository;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {IamLoginService.class})
@@ -47,6 +51,9 @@ public class ResourceOwnerPasswordCredentialsTests {
 
   @Autowired
   private ObjectMapper mapper;
+
+  @Autowired
+  private IamAupRepository aupRepo;
 
   private MockMvc mvc;
 
@@ -83,6 +90,37 @@ public class ResourceOwnerPasswordCredentialsTests {
         .param("scope", SCOPE))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.scope", equalTo(SCOPE)));
+    // @formatter:on
+  }
+
+  @Test
+  public void testResourceOwnerPasswordCredentialsFailsIfAupIsNotSigned() throws Exception {
+
+    IamAup aup = new IamAup();
+
+    aup.setCreationTime(new Date());
+    aup.setLastUpdateTime(new Date());
+    aup.setName("default-aup");
+    aup.setText("AUP text");
+    aup.setDescription("AUP description");
+    aup.setSignatureValidityInDays(0L);
+
+    aupRepo.save(aup);
+
+
+    String clientId = "password-grant";
+    String clientSecret = "secret";
+
+    // @formatter:off
+    mvc.perform(post("/token")
+        .with(httpBasic(clientId, clientSecret))
+        .param("grant_type", GRANT_TYPE)
+        .param("username", USERNAME)
+        .param("password", PASSWORD)
+        .param("scope", SCOPE))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.error").value("invalid_grant"))
+      .andExpect(jsonPath("$.error_description").value("User 'test' needs to sign AUP for this organization in order to proceed."));
     // @formatter:on
   }
 

@@ -36,10 +36,12 @@ import org.springframework.security.oauth2.provider.code.AuthorizationCodeTokenG
 import org.springframework.security.oauth2.provider.error.DefaultWebResponseExceptionTranslator;
 import org.springframework.security.oauth2.provider.error.WebResponseExceptionTranslator;
 import org.springframework.security.oauth2.provider.implicit.ImplicitTokenGranter;
-import org.springframework.security.oauth2.provider.password.ResourceOwnerPasswordTokenGranter;
 import org.springframework.security.oauth2.provider.refresh.RefreshTokenGranter;
 
+import it.infn.mw.iam.api.account.AccountUtils;
+import it.infn.mw.iam.api.aup.AUPSignatureCheckService;
 import it.infn.mw.iam.core.oauth.IamDeviceCodeTokenGranter;
+import it.infn.mw.iam.core.oauth.IamResourceOwnerPasswordTokenGranter;
 import it.infn.mw.iam.core.oauth.TokenExchangeTokenGranter;
 import it.infn.mw.iam.core.util.IamAuthenticationEventPublisher;
 
@@ -79,6 +81,12 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
   @Autowired
   private DeviceCodeService deviceCodeService;
 
+  @Autowired
+  private AccountUtils accountUtils;
+
+  @Autowired
+  private AUPSignatureCheckService signatureCheckService;
+
   @Bean
   WebResponseExceptionTranslator webResponseExceptionTranslator() {
 
@@ -110,20 +118,30 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 
     AuthenticationManager authenticationManager = authenticationManager();
 
+    IamResourceOwnerPasswordTokenGranter resourceOwnerPasswordCredentialGranter =
+        new IamResourceOwnerPasswordTokenGranter(authenticationManager, tokenServices,
+            clientDetailsService, requestFactory);
+
+    resourceOwnerPasswordCredentialGranter.setAccountUtils(accountUtils);
+    resourceOwnerPasswordCredentialGranter.setSignatureCheckService(signatureCheckService);
+
+    TokenExchangeTokenGranter tokenExchangeGranter = new TokenExchangeTokenGranter(tokenServices,
+        clientDetailsService, requestFactory, systemScopeService);
+
+    tokenExchangeGranter.setAccountUtils(accountUtils);
+    tokenExchangeGranter.setSignatureCheckService(signatureCheckService);
+
     return new CompositeTokenGranter(Arrays.<TokenGranter>asList(
         new AuthorizationCodeTokenGranter(tokenServices, authorizationCodeServices,
             clientDetailsService, requestFactory),
         new ImplicitTokenGranter(tokenServices, clientDetailsService, requestFactory),
         new RefreshTokenGranter(tokenServices, clientDetailsService, requestFactory),
         new ClientCredentialsTokenGranter(tokenServices, clientDetailsService, requestFactory),
-        new ResourceOwnerPasswordTokenGranter(authenticationManager, tokenServices,
-            clientDetailsService, requestFactory),
+        resourceOwnerPasswordCredentialGranter,
         new JWTAssertionTokenGranter(tokenServices, clientDetailsService, requestFactory),
         new ChainedTokenGranter(tokenServices, clientDetailsService, requestFactory),
-        new TokenExchangeTokenGranter(tokenServices, clientDetailsService, requestFactory,
-            systemScopeService),
-        new IamDeviceCodeTokenGranter(tokenServices, clientDetailsService, requestFactory,
-            deviceCodeService)));
+        tokenExchangeGranter, new IamDeviceCodeTokenGranter(tokenServices, clientDetailsService,
+            requestFactory, deviceCodeService)));
   }
 
   @Override

@@ -50,7 +50,7 @@
                         <th>Client</th>
                         <th>User</th>
                         <th>Value</th>
-                        <th>Expires at</th>
+                        <th>Expires</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -80,7 +80,8 @@
                             </div>
                         </td>
                         <td class="align-middle">
-                            <h5>{{token.expiration | relativeDate}}</h5>
+                            <h5 ng-if="token.expiration != null">{{token.expiration | relativeDate}}</h5>
+                            <h5 ng-if="token.expiration == null">Never</h5>
                         </td>
                         <td class="align-middle text-right">
                             <button class="btn btn-xs btn-danger" ng-click="$ctrl.openRevokeRefreshTokenDialog(token)" id="revoke_{{token.value}}">
