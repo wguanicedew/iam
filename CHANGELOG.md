@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.2.0 (2018-01-29)
+## 1.2.0 (2018-02-19)
 
 ### Added
 
@@ -9,7 +9,7 @@
   and client and revoke tokens (#161)
 
 - IAM now provides an Acceptable Usage Policy (AUP) API that can be used to require
-  that users accept the AUP terms at registration time (#86)
+  that users accept the AUP terms at registration time or later (#86)
 
 - IAM now exposes the 'iss' claim in the response retuned by the token
   introspection endpoint (#58)
