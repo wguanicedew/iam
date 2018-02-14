@@ -2,24 +2,29 @@ package it.infn.mw.iam.api.scim.converter;
 
 /**
  * 
- * Converts IAM entities to SCIM objects. Design shamelessly inspired by
+ * Converts IAM entities to DTO objects. Design shamelessly inspired by
  * https://github.com/osiam/osiam.
  *
- * @param <S> the Scim type @param <E> The Entity type
+ * @param <D> the DTO type @param <E> The Entity type
  */
-public interface Converter<S, E> {
+public interface Converter<D, E> {
 
   /**
-   * Converts a SCIM object in an entity object @param scim the SCIM object to be converted @return
-   * an Entity object
-   */
-  E fromScim(S scim);
-
-  /**
-   * Converts an IAM entity to SCIM.
+   * Converts a DTO object in an entity object
    * 
-   * @param entity an entity @return a SCIM representation of the entity
+   * @param dto the DTO object to be converted
+   * 
+   * @return an Entity object
    */
-  S toScim(E entity);
+  E entityFromDto(D dto);
+
+  /**
+   * Converts an IAM entity to the related DTO.
+   * 
+   * @param entity an entity 
+   * 
+   * @return a DTO representation of the entity
+   */
+  D dtoFromEntity(E entity);
 
 }

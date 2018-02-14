@@ -14,6 +14,7 @@ import java.util.List;
 
 import javax.transaction.Transactional;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,6 +29,7 @@ import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 import it.infn.mw.iam.test.scim.ScimRestUtilsMvc;
 import it.infn.mw.iam.test.util.WithMockOAuthUser;
+import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(
@@ -37,16 +39,26 @@ import it.infn.mw.iam.test.util.WithMockOAuthUser;
 @WithMockOAuthUser(clientId = SCIM_CLIENT_ID, scopes = {SCIM_READ_SCOPE, SCIM_WRITE_SCOPE})
 public class ScimUserProvisioningPatchRemoveTests extends ScimUserTestSupport {
 
+  private List<ScimUser> testUsers = new ArrayList<ScimUser>();
+
   @Autowired
   private ScimRestUtilsMvc scimUtils;
 
-  private List<ScimUser> testUsers = new ArrayList<ScimUser>();
+  @Autowired
+  private MockOAuth2Filter mockOAuth2Filter;
+
 
   @Before
   public void setup() throws Exception {
 
     testUsers = createTestUsers();
   }
+
+  @After
+  public void teardown() {
+    mockOAuth2Filter.cleanupSecurityContext();
+  }
+
 
   @Test
   public void testPatchRemoveOidcId() throws Exception {

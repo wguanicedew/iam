@@ -1,215 +1,135 @@
 package it.infn.mw.iam.test.account;
 
-import org.hamcrest.Matchers;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.head;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.boot.test.WebIntegrationTest;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import com.jayway.restassured.RestAssured;
+import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.WebApplicationContext;
 
 import it.infn.mw.iam.IamLoginService;
-import it.infn.mw.iam.notification.NotificationService;
 import it.infn.mw.iam.registration.PersistentUUIDTokenGenerator;
 import it.infn.mw.iam.registration.RegistrationRequestDto;
-import it.infn.mw.iam.test.RegistrationUtils;
-import it.infn.mw.iam.test.TestUtils;
+import it.infn.mw.iam.test.core.CoreControllerTestSupport;
+import it.infn.mw.iam.test.notification.NotificationTestConfig;
+import it.infn.mw.iam.test.util.WithAnonymousUser;
+import it.infn.mw.iam.test.util.notification.MockNotificationDelivery;
+import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = IamLoginService.class)
-@WebIntegrationTest
+@SpringApplicationConfiguration(classes = {IamLoginService.class, NotificationTestConfig.class,
+    CoreControllerTestSupport.class})
+@WebAppConfiguration
+@Transactional
+@WithAnonymousUser
 public class PasswordResetTests {
 
-  @Value("${server.port}")
-  private Integer iamPort;
-
+  
   @Autowired
   private PersistentUUIDTokenGenerator tokenGenerator;
 
   @Autowired
-  private NotificationService notificationService;
+  private MockNotificationDelivery notificationDelivery;
+
+  @Autowired
+  private MockOAuth2Filter mockOAuth2Filter;
+
+  @Autowired
+  private WebApplicationContext context;
+
+  private MockMvc mvc;
 
   private RegistrationRequestDto registrationRequest;
 
-  @BeforeClass
-  public static void init() {
-    TestUtils.initRestAssured();
-  }
-
   @Before
   public void setup() {
-    String username = "test_user";
-
-    registrationRequest = RegistrationUtils.createRegistrationRequest(username);
-    String confirmationKey = tokenGenerator.getLastToken();
-    RegistrationUtils.confirmRegistrationRequest(confirmationKey);
-    RegistrationUtils.approveRequest(registrationRequest.getUuid());
+    mvc = MockMvcBuilders.webAppContextSetup(context)
+      .apply(springSecurity())
+      .alwaysDo(print())
+      .build();
   }
+
+  // @Before
+  // public void setup() {
+  // String username = "test_user";
+  //
+  // registrationRequest = RegistrationUtils.createRegistrationRequest(username, iamPort);
+  // String confirmationKey = tokenGenerator.getLastToken();
+  // RegistrationUtils.confirmRegistrationRequest(confirmationKey, iamPort);
+  // RegistrationUtils.approveRequest(registrationRequest.getUuid(), iamPort);
+  // }
 
   @After
   public void tearDown() {
-    RegistrationUtils.deleteUser(registrationRequest.getAccountId());
-    notificationService.clearAllNotifications();
+    notificationDelivery.clearDeliveredNotifications();
+    mockOAuth2Filter.cleanupSecurityContext();
   }
 
 
 
   @Test
-  public void testChangePassword() {
+  public void testChangePassword() throws Exception {
+    String testEmail = "test@iam.test";
+
     String newPassword = "secure_password";
 
-    // @formatter:off
-    RestAssured.given()
-      .port(iamPort)
-      .formParam("email", "test_user@example.org")
-    .when()
-      .post("/iam/password-reset/token")
-    .then()
-      .log()
-        .all(true)
-      .statusCode(HttpStatus.OK.value());
-    // @formatter:on
+    mvc.perform(post("/iam/password-reset/token").param("email", testEmail))
+      .andExpect(status().isOk());
 
     String resetToken = tokenGenerator.getLastToken();
 
+    mvc.perform(head("/iam/password-reset/token/{token}", resetToken)).andExpect(status().isOk());
 
-    // Check token is valid
+    mvc
+      .perform(
+          post("/iam/password-reset").param("token", resetToken).param("password", newPassword))
+      .andExpect(status().isOk());
 
-    // @formatter:off
-    RestAssured.given()
-      .log().all()
-      .port(iamPort)
-      .pathParam("token", resetToken)
-    .when()
-      .head("/iam/password-reset/token/{token}")
-    .then()
-      .log()
-        .all(true)
-      .statusCode(HttpStatus.OK.value());
-    // @formatter:on
-
-
-    // Reset password
-
-    // @formatter:off
-    RestAssured.given()
-      .port(iamPort)
-      .log().all()
-      .param("token", resetToken)
-      .param("password", newPassword)
-    .when()
-      .post("/iam/password-reset")
-    .then()
-      .log()
-        .all()
-      .statusCode(HttpStatus.OK.value());
-    // @formatter:on
-
-
-    // Check token is invalid
-
-    // @formatter:off
-    RestAssured.given()
-      .port(iamPort)
-      .log().all()
-      .pathParam("token", resetToken)
-    .when()
-      .head("/iam/password-reset/token/{token}")
-    .then()
-      .log()
-        .all()
-      .statusCode(HttpStatus.NOT_FOUND.value());
-    // @formatter:on
+    mvc.perform(head("/iam/password-reset/token/{token}", resetToken))
+      .andExpect(status().isNotFound());
 
   }
 
   @Test
-  public void testResetPasswordWithInvalidResetToken() {
+  public void testResetPasswordWithInvalidResetToken() throws Exception {
 
     String resetToken = "abcdefghilmnopqrstuvz";
 
-    // @formatter:off
-    RestAssured.given()
-      .port(iamPort)
-      .log().all()
-      .pathParam("token", resetToken)
-    .when()
-      .head("/iam/password-reset/token/{token}")
-    .then()
-      .log()
-        .body(true)
-      .statusCode(HttpStatus.NOT_FOUND.value())
-    ;
-    // @formatter:on
+    mvc.perform(head("/iam/password-reset/token/{token}", resetToken)).andExpect(status().isNotFound());
+   
   }
 
   @Test
-  public void testCreatePasswordResetTokenReturnsOkForUnknownAddress() {
+  public void testCreatePasswordResetTokenReturnsOkForUnknownAddress() throws Exception {
 
-    String emailAddress = "test@foo.bar";
-
-    // This is needed to "forget" the token generated for the user
-    // created by the setup method (which is not used by this test)
-    String lastToken = tokenGenerator.getLastToken();
-
-    // @formatter:off
-    RestAssured.given()
-      .log().all()
-      .port(iamPort)
-      .formParam("email", emailAddress)
-    .when()
-      .post("/iam/password-reset/token")
-    .then()
-      .log()
-        .all()
-      .statusCode(HttpStatus.OK.value())
-    ;
-    // @formatter:on
-
-
-    // This checks that the token generator has not been called
-    Assert.assertThat(tokenGenerator.getLastToken(), Matchers.equalTo(lastToken));
+    String testEmail = "test@foo.bar";
+   
+    mvc.perform(post("/iam/password-reset/token").param("email", testEmail))
+    .andExpect(status().isOk());
 
   }
 
   @Test
-  public void testEmailValidationForPasswordResetTokenCreation() {
+  public void testEmailValidationForPasswordResetTokenCreation() throws Exception {
     String invalidEmailAddress = "this_is_not_an_email";
-
-    // @formatter:off
-    RestAssured.given()
-      .log().all()
-      .port(iamPort)
-      .formParam("email", invalidEmailAddress)
-    .when()
-      .post("/iam/password-reset/token")
-    .then()
-      .log()
-        .all()
-      .statusCode(HttpStatus.BAD_REQUEST.value())
-      .body(Matchers.equalTo("validation error: please specify a valid email address"));
-    ; 
     
-    // @formatter:off
-    RestAssured.given()
-      .log().all()
-      .port(iamPort)
-    .when()
-      .post("/iam/password-reset/token")
-    .then()
-      .log()
-        .all()
-      .statusCode(HttpStatus.BAD_REQUEST.value())
-      .body(Matchers.equalTo("validation error: please specify an email address"));
-    ; 
+    mvc.perform(post("/iam/password-reset/token").param("email", invalidEmailAddress))
+    .andExpect(status().isBadRequest())
+    .andExpect(MockMvcResultMatchers.content().string("validation error: please specify a valid email address"));
+     
   }
 
 }

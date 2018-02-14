@@ -21,7 +21,7 @@ CREATE TABLE device_code (
    id BIGINT AUTO_INCREMENT PRIMARY KEY,
    device_code VARCHAR(1024),
    user_code VARCHAR(1024),
-   expiration TIMESTAMP,
+   expiration TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
    client_id VARCHAR(256),
    approved BOOLEAN,
    auth_holder_id BIGINT);

@@ -119,6 +119,9 @@ public class IamAccount implements Serializable{
   @OneToMany(mappedBy="account", cascade = CascadeType.REMOVE)
   private Set<IamScopePolicy> scopePolicies = new HashSet<>();
   
+  @OneToOne(cascade = CascadeType.REMOVE, mappedBy = "account")
+  private IamAupSignature aupSignature;
+  
   public IamAccount() {
     // empty constructor
   }
@@ -447,6 +450,14 @@ public class IamAccount implements Serializable{
   public void setRegistrationRequest(final IamRegistrationRequest registrationRequest) {
 
     this.registrationRequest = registrationRequest;
+  }
+  
+  public IamAupSignature getAupSignature() {
+    return aupSignature;
+  }
+
+  public void setAupSignature(IamAupSignature aupSignature) {
+    this.aupSignature = aupSignature;
   }
 
   public void touch() {

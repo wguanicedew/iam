@@ -69,6 +69,7 @@ function getUserAuthorities() {
   return ${userAuthorities};
 }
 
+
 function getIamVersion() {
   return '${iamVersion}';
 }

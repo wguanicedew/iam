@@ -1,0 +1,4 @@
+[mysqld]
+general-log
+general-log-file=queries.log
+log-output=file

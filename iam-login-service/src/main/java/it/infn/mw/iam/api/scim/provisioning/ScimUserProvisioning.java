@@ -108,7 +108,7 @@ public class ScimUserProvisioning
     IamAccount account = accountRepository.findByUuid(id)
       .orElseThrow(() -> new ScimResourceNotFoundException("No user mapped to id '" + id + "'"));
 
-    return userConverter.toScim(account);
+    return userConverter.dtoFromEntity(account);
 
   }
 
@@ -128,11 +128,11 @@ public class ScimUserProvisioning
   @Override
   public ScimUser create(final ScimUser user) {
 
-    IamAccount newAccount = userConverter.fromScim(user);
+    IamAccount newAccount = userConverter.entityFromDto(user);
 
     try {
       IamAccount account = accountService.createAccount(newAccount);
-      return userConverter.toScim(account);
+      return userConverter.dtoFromEntity(account);
     } catch (CredentialAlreadyBoundException | UserAlreadyExistsException e) {
       throw new ScimResourceExistsException(e.getMessage(),e);
     }
@@ -152,7 +152,7 @@ public class ScimUserProvisioning
 
     List<ScimUser> resources = new ArrayList<>();
 
-    results.getContent().forEach(a -> resources.add(userConverter.toScim(a)));
+    results.getContent().forEach(a -> resources.add(userConverter.dtoFromEntity(a)));
 
     return new ScimListResponse<>(resources, results.getTotalElements(), resources.size(),
         op.getOffset() + 1);
@@ -179,7 +179,7 @@ public class ScimUserProvisioning
           "email " + updatedEmail + " already assigned to another user");
     }
 
-    IamAccount updatedAccount = userConverter.fromScim(scimItemToBeUpdated);
+    IamAccount updatedAccount = userConverter.entityFromDto(scimItemToBeUpdated);
 
     updatedAccount.setId(existingAccount.getId());
     updatedAccount.setUuid(existingAccount.getUuid());
@@ -199,7 +199,7 @@ public class ScimUserProvisioning
         String.format("Replaced user %s with new user %s", updatedAccount.getUsername(),
             existingAccount.getUsername())));
 
-    return userConverter.toScim(updatedAccount);
+    return userConverter.dtoFromEntity(updatedAccount);
   }
 
   private void executePatchOperation(IamAccount account, ScimPatchOperation<ScimUser> op) {

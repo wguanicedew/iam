@@ -1,11 +1,11 @@
 spring:
   profiles:
     include: mysql,google,registration,saml
-    
-  mail:
-    host: localhost
-    port: 10125
 
+notification:
+  disable: true
+
+ 
 flyway:
   locations:
     - classpath:db/migration/mysql

@@ -35,6 +35,9 @@ public class IntrospectionEndpointTests extends EndpointsTestUtils {
 
   @Value("${iam.organisation.name}")
   String organisationName;
+  
+  @Value("${iam.issuer}")
+  String issuer;
 
   private static final String ENDPOINT = "/introspect";
   private static final String CLIENT_ID = "password-grant";
@@ -61,6 +64,7 @@ public class IntrospectionEndpointTests extends EndpointsTestUtils {
         .param("token", accessToken))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.active", equalTo(true)))
+      .andExpect(jsonPath("$.iss", equalTo(issuer)))
       .andExpect(jsonPath("$.groups", hasSize(equalTo(2))))
       .andExpect(jsonPath("$.groups", containsInAnyOrder("Production", "Analysis")))
       .andExpect(jsonPath("$.preferred_username", equalTo("test")))

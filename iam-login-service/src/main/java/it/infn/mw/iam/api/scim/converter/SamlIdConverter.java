@@ -9,7 +9,7 @@ import it.infn.mw.iam.persistence.model.IamSamlId;
 public class SamlIdConverter implements Converter<ScimSamlId, IamSamlId> {
 
   @Override
-  public IamSamlId fromScim(ScimSamlId scim) {
+  public IamSamlId entityFromDto(ScimSamlId scim) {
 
     IamSamlId samlId = new IamSamlId();
     samlId.setIdpId(scim.getIdpId());
@@ -21,7 +21,7 @@ public class SamlIdConverter implements Converter<ScimSamlId, IamSamlId> {
   }
 
   @Override
-  public ScimSamlId toScim(IamSamlId entity) {
+  public ScimSamlId dtoFromEntity(IamSamlId entity) {
 
     return ScimSamlId.builder().idpId(entity.getIdpId()).
         userId(entity.getUserId())

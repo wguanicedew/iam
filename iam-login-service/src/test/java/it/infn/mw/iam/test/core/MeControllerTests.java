@@ -10,7 +10,7 @@ import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-import org.junit.Before;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +21,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.test.scim.ScimRestUtilsMvc;
 import it.infn.mw.iam.test.util.WithMockOAuthUser;
+import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(
@@ -28,14 +29,19 @@ import it.infn.mw.iam.test.util.WithMockOAuthUser;
 @WebAppConfiguration
 public class MeControllerTests {
 
-  @Autowired
-  private ScimRestUtilsMvc restUtils;
-
   private final static String TESTUSER_USERNAME = "test_101";
   private final static String NOT_FOUND_USERNAME = "not_found";
 
-  @Before
-  public void setup() {}
+  @Autowired
+  private ScimRestUtilsMvc restUtils;
+
+  @Autowired
+  private MockOAuth2Filter mockOAuth2Filter;
+
+  @After
+  public void teardown() {
+    mockOAuth2Filter.cleanupSecurityContext();
+  }
 
   @Test
   @WithMockOAuthUser(user = TESTUSER_USERNAME, authorities = {})

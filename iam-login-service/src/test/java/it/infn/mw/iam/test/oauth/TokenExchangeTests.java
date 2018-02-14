@@ -17,6 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.text.ParseException;
+import java.util.Date;
 
 import javax.transaction.Transactional;
 
@@ -37,6 +38,8 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
 
 import it.infn.mw.iam.IamLoginService;
+import it.infn.mw.iam.persistence.model.IamAup;
+import it.infn.mw.iam.persistence.repository.IamAupRepository;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -57,6 +60,9 @@ public class TokenExchangeTests extends EndpointsTestUtils {
 
   @Autowired
   private ObjectMapper mapper;
+
+  @Autowired
+  private IamAupRepository aupRepo;
 
   @Before
   public void setup() throws Exception {
@@ -145,6 +151,53 @@ public class TokenExchangeTests extends EndpointsTestUtils {
   }
 
   @Test
+  public void testImpersonationFlowFailsIfAUPNotSigned() throws Exception {
+    String clientId = "token-exchange-subject";
+    String clientSecret = "secret";
+
+    String actorClientId = "token-exchange-actor";
+    String actorClientSecret = "secret";
+
+    String accessToken = new AccessTokenGetter().grantType("password")
+      .clientId(clientId)
+      .clientSecret(clientSecret)
+      .username(USERNAME)
+      .password(PASSWORD)
+      .scope("openid profile")
+      .getAccessTokenValue();
+
+    mvc
+      .perform(post(TOKEN_ENDPOINT).with(httpBasic(actorClientId, actorClientSecret))
+        .param("grant_type", GRANT_TYPE)
+        .param("subject_token", accessToken)
+        .param("subject_token_type", TOKEN_TYPE)
+        .param("scope", "read-tasks openid profile"))
+      .andExpect(status().isOk());
+
+    IamAup aup = new IamAup();
+
+    aup.setCreationTime(new Date());
+    aup.setLastUpdateTime(new Date());
+    aup.setName("default-aup");
+    aup.setText("AUP text");
+    aup.setDescription("AUP description");
+    aup.setSignatureValidityInDays(0L);
+
+    aupRepo.save(aup);
+
+    mvc
+      .perform(post(TOKEN_ENDPOINT).with(httpBasic(actorClientId, actorClientSecret))
+        .param("grant_type", GRANT_TYPE)
+        .param("subject_token", accessToken)
+        .param("subject_token_type", TOKEN_TYPE)
+        .param("scope", "read-tasks openid profile"))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.error", equalTo("invalid_grant")))
+      .andExpect(jsonPath("$.error_description",
+          equalTo("User 'test' needs to sign AUP for this organization in order to proceed.")));
+  }
+
+  @Test
   public void testImpersonationFlowWithoutAudience() throws Exception {
 
     String clientId = "token-exchange-subject";
@@ -187,7 +240,7 @@ public class TokenExchangeTests extends EndpointsTestUtils {
     try {
       JWT jwtAccessToken = JWTParser.parse(actorAccessToken);
       JWTClaimsSet claims = jwtAccessToken.getJWTClaimsSet();
-      
+
       assertThat(claims.getAudience(), empty());
 
     } catch (ParseException e) {

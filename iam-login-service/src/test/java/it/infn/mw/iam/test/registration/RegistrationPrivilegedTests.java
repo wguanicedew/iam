@@ -17,6 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import javax.transaction.Transactional;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,6 +39,7 @@ import it.infn.mw.iam.registration.PersistentUUIDTokenGenerator;
 import it.infn.mw.iam.registration.RegistrationRequestDto;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 import it.infn.mw.iam.test.util.WithMockOAuthUser;
+import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class})
@@ -54,6 +56,9 @@ public class RegistrationPrivilegedTests {
   @Autowired
   private ObjectMapper objectMapper;
 
+  @Autowired
+  private MockOAuth2Filter mockOAuth2Filter;
+  
   private MockMvc mvc;
 
   @Before
@@ -62,6 +67,11 @@ public class RegistrationPrivilegedTests {
       .apply(springSecurity())
       .alwaysDo(print())
       .build();
+  }
+  
+  @After
+  public void teardown() {
+    mockOAuth2Filter.cleanupSecurityContext();
   }
 
   @Test
