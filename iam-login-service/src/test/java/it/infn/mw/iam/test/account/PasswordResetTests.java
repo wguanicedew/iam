@@ -22,7 +22,6 @@ import org.springframework.web.context.WebApplicationContext;
 
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.registration.PersistentUUIDTokenGenerator;
-import it.infn.mw.iam.registration.RegistrationRequestDto;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 import it.infn.mw.iam.test.notification.NotificationTestConfig;
 import it.infn.mw.iam.test.util.WithAnonymousUser;
@@ -52,7 +51,6 @@ public class PasswordResetTests {
 
   private MockMvc mvc;
 
-  private RegistrationRequestDto registrationRequest;
 
   @Before
   public void setup() {
@@ -62,23 +60,11 @@ public class PasswordResetTests {
       .build();
   }
 
-  // @Before
-  // public void setup() {
-  // String username = "test_user";
-  //
-  // registrationRequest = RegistrationUtils.createRegistrationRequest(username, iamPort);
-  // String confirmationKey = tokenGenerator.getLastToken();
-  // RegistrationUtils.confirmRegistrationRequest(confirmationKey, iamPort);
-  // RegistrationUtils.approveRequest(registrationRequest.getUuid(), iamPort);
-  // }
-
   @After
   public void tearDown() {
     notificationDelivery.clearDeliveredNotifications();
     mockOAuth2Filter.cleanupSecurityContext();
   }
-
-
 
   @Test
   public void testChangePassword() throws Exception {

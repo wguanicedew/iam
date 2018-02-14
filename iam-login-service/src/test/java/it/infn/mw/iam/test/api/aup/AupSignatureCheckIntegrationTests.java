@@ -36,7 +36,6 @@ import it.infn.mw.iam.api.aup.model.AupConverter;
 import it.infn.mw.iam.api.aup.model.AupDTO;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
-import it.infn.mw.iam.persistence.repository.IamAupRepository;
 import it.infn.mw.iam.persistence.repository.IamAupSignatureRepository;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 import it.infn.mw.iam.test.util.MockTimeProvider;
@@ -55,9 +54,6 @@ public class AupSignatureCheckIntegrationTests extends AupTestSupport {
 
   @Autowired
   private ObjectMapper mapper;
-
-  @Autowired
-  private IamAupRepository aupRepo;
 
   @Autowired
   private IamAupSignatureRepository signatureRepo;
@@ -86,6 +82,7 @@ public class AupSignatureCheckIntegrationTests extends AupTestSupport {
       .alwaysDo(print())
       .apply(springSecurity())
       .build();
+    mockOAuth2Filter.cleanupSecurityContext();
   }
 
   @After

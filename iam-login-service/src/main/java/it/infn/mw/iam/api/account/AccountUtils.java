@@ -16,7 +16,7 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
 @Component
 public class AccountUtils {
-
+  
   IamAccountRepository accountRepo;
 
   @Autowired
@@ -40,23 +40,24 @@ public class AccountUtils {
       return Optional.empty();
     }
 
+    Authentication userAuthn = authn;
+    
     if (authn instanceof OAuth2Authentication) {
       OAuth2Authentication oauth = (OAuth2Authentication) authn;
       if (oauth.getUserAuthentication() == null) {
         return Optional.empty();
       }
-      authn = oauth.getUserAuthentication();
+      userAuthn = oauth.getUserAuthentication();
     }
 
-    return accountRepo.findByUsername(authn.getName());
+    return accountRepo.findByUsername(userAuthn.getName());
 
   }
 
   public Optional<IamAccount> getAuthenticatedUserAccount() {
-
+    
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
+ 
     return getAuthenticatedUserAccount(auth);
-
   }
 }

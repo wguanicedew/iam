@@ -4,7 +4,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
-import java.time.Instant;
 import java.util.Date;
 import java.util.Optional;
 
@@ -108,7 +107,6 @@ public class IamAupSignatureRepositoryTests extends AupTestSupport {
     assertThat(sig.getAup(), equalTo(aup));
     assertThat(sig.getSignatureTime(), equalTo(now));
     
-    Instant firstSigTime = sig.getSignatureTime().toInstant();
     now = new Date();
     repo.createSignatureForAccount(testAccount, now);
     

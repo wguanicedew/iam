@@ -4,6 +4,7 @@ import static it.infn.mw.iam.core.web.EnforceAupFilter.REQUESTING_SIGNATURE;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.Optional;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -36,10 +37,24 @@ public class EnforceAupSignatureSuccessHandler implements AuthenticationSuccessH
     this.accountRepo = accountRepo;
   }
 
-  private IamAccount lookupAuthenticatedUser(Authentication auth) {
-    return accountUtils.getAuthenticatedUserAccount()
-      .orElseThrow(() -> new IllegalArgumentException(
-          "IamAccount not found for succesfull user authentication: " + auth.getName()));
+  private Optional<Authentication> resolveUserAuthentication(Authentication auth) {
+    if (auth instanceof OAuth2Authentication) {
+      OAuth2Authentication oauth = (OAuth2Authentication) auth;
+      return Optional.ofNullable(oauth.getUserAuthentication());
+    }
+    return Optional.of(auth);
+  }
+
+  private Optional<IamAccount> lookupAuthenticatedUser(Authentication auth) {
+
+    Optional<Authentication> userAuth = resolveUserAuthentication(auth);
+
+    if (userAuth.isPresent()) {
+      return accountUtils.getAuthenticatedUserAccount(userAuth.get());
+    }
+
+    return Optional.empty();
+
   }
 
   protected void setAuthenticationTimestamp(HttpServletRequest request,
@@ -52,14 +67,9 @@ public class EnforceAupSignatureSuccessHandler implements AuthenticationSuccessH
   }
 
   protected void touchLastLoginTimeForIamAccount(Authentication authentication) {
-    if (authentication instanceof OAuth2Authentication) {
-      OAuth2Authentication oauth = (OAuth2Authentication) authentication;
-      if (oauth.getUserAuthentication() != null) {
-        accountRepo.touchLastLoginTimeForUserWithUsername(oauth.getUserAuthentication().getName());
-      }
-    } else {
-      accountRepo.touchLastLoginTimeForUserWithUsername(authentication.getName());
-    }
+
+    resolveUserAuthentication(authentication)
+      .ifPresent(a -> accountRepo.touchLastLoginTimeForUserWithUsername(a.getName()));
   }
 
   @Override
@@ -67,19 +77,20 @@ public class EnforceAupSignatureSuccessHandler implements AuthenticationSuccessH
       Authentication auth) throws IOException, ServletException {
 
     HttpSession session = request.getSession(false);
-    
+
     setAuthenticationTimestamp(request, auth);
     touchLastLoginTimeForIamAccount(auth);
-    
-    IamAccount authenticatedUser = lookupAuthenticatedUser(auth);
-    
-    if (!service.needsAupSignature(authenticatedUser)) {
-      delegate.onAuthenticationSuccess(request, response, auth);
-      return;
-    }
 
-    session.setAttribute(REQUESTING_SIGNATURE, true);
-    response.sendRedirect("/iam/aup/sign");
+    Optional<IamAccount> authenticatedAccount = lookupAuthenticatedUser(auth);
+
+    if (!authenticatedAccount.isPresent()
+        || !service.needsAupSignature(authenticatedAccount.get())) {
+      delegate.onAuthenticationSuccess(request, response, auth);
+
+    } else {
+      session.setAttribute(REQUESTING_SIGNATURE, true);
+      response.sendRedirect("/iam/aup/sign");
+    }
 
   }
 

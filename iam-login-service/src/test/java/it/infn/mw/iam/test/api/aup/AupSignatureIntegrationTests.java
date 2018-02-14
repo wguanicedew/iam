@@ -31,15 +31,12 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import it.infn.mw.iam.IamLoginService;
-import it.infn.mw.iam.api.aup.model.AupConverter;
-import it.infn.mw.iam.api.aup.model.AupSignatureConverter;
 import it.infn.mw.iam.api.aup.model.AupSignatureDTO;
 import it.infn.mw.iam.core.user.IamAccountService;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamAup;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamAupRepository;
-import it.infn.mw.iam.persistence.repository.IamAupSignatureRepository;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 import it.infn.mw.iam.test.util.DateEqualModulo1Second;
 import it.infn.mw.iam.test.util.MockTimeProvider;
@@ -63,19 +60,10 @@ public class AupSignatureIntegrationTests extends AupTestSupport {
   private IamAupRepository aupRepo;
 
   @Autowired
-  private IamAupSignatureRepository signatureRepo;
-
-  @Autowired
   private IamAccountService accountService;
 
   @Autowired
   private IamAccountRepository accountRepo;
-
-  @Autowired
-  private AupConverter aupConverter;
-
-  @Autowired
-  private AupSignatureConverter signatureConverter;
 
   private MockMvc mvc;
 

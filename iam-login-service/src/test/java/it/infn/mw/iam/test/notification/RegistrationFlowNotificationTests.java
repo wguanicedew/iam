@@ -32,14 +32,11 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import it.infn.mw.iam.IamLoginService;
-import it.infn.mw.iam.api.account.password_reset.PasswordResetService;
 import it.infn.mw.iam.notification.NotificationProperties;
 import it.infn.mw.iam.persistence.model.IamEmailNotification;
-import it.infn.mw.iam.persistence.repository.IamEmailNotificationRepository;
 import it.infn.mw.iam.registration.PersistentUUIDTokenGenerator;
 import it.infn.mw.iam.registration.RegistrationRequestDto;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
-import it.infn.mw.iam.test.util.MockTimeProvider;
 import it.infn.mw.iam.test.util.WithAnonymousUser;
 import it.infn.mw.iam.test.util.notification.MockNotificationDelivery;
 import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
@@ -67,15 +64,6 @@ public class RegistrationFlowNotificationTests {
 
   @Value("${iam.baseUrl}")
   private String baseUrl;
-
-  @Autowired
-  private IamEmailNotificationRepository notificationRepository;
-
-  @Autowired
-  private PasswordResetService passwordResetService;
-
-  @Autowired
-  private MockTimeProvider timeProvider;
 
   @Autowired
   private PersistentUUIDTokenGenerator generator;
