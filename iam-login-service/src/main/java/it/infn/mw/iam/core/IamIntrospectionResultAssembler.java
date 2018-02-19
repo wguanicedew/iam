@@ -38,7 +38,9 @@ public class IamIntrospectionResultAssembler extends DefaultIntrospectionResultA
 
     Map<String, Object> result = super.assembleFrom(accessToken, userInfo, authScopes);
     
-    result.put(ISSUER, oidcIssuer);
+    String trailingSlashIssuer = oidcIssuer.endsWith("/") ? oidcIssuer : oidcIssuer + "/";
+    
+    result.put(ISSUER, trailingSlashIssuer);
     
     try {
 

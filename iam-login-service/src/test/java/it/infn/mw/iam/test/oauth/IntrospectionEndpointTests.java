@@ -64,7 +64,7 @@ public class IntrospectionEndpointTests extends EndpointsTestUtils {
         .param("token", accessToken))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.active", equalTo(true)))
-      .andExpect(jsonPath("$.iss", equalTo(issuer)))
+      .andExpect(jsonPath("$.iss", equalTo(issuer+"/")))
       .andExpect(jsonPath("$.groups", hasSize(equalTo(2))))
       .andExpect(jsonPath("$.groups", containsInAnyOrder("Production", "Analysis")))
       .andExpect(jsonPath("$.preferred_username", equalTo("test")))
