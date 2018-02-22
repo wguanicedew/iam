@@ -28,7 +28,7 @@ services:
       - "3306:3306"
 
   trust:
-    image: italiangrid/trustanchors
+    image: indigoiam/trustanchors
     # build:
     #  context: ./docker/trust-anchors
     command: /bin/true
