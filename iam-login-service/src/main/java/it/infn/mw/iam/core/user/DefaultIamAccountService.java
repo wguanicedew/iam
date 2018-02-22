@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import it.infn.mw.iam.audit.events.account.AccountCreatedEvent;
 import it.infn.mw.iam.audit.events.account.AccountRemovedEvent;
+import it.infn.mw.iam.core.time.TimeProvider;
 import it.infn.mw.iam.core.user.exception.CredentialAlreadyBoundException;
 import it.infn.mw.iam.core.user.exception.InvalidCredentialException;
 import it.infn.mw.iam.core.user.exception.UserAlreadyExistsException;
@@ -28,6 +29,8 @@ import it.infn.mw.iam.persistence.model.IamSshKey;
 import it.infn.mw.iam.persistence.model.IamX509Certificate;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamAuthoritiesRepository;
+import it.infn.mw.iam.persistence.repository.IamOAuthAccessTokenRepository;
+import it.infn.mw.iam.persistence.repository.IamOAuthRefreshTokenRepository;
 
 @Service
 @Transactional
@@ -37,16 +40,23 @@ public class DefaultIamAccountService implements IamAccountService {
   private final IamAuthoritiesRepository authoritiesRepo;
   private final PasswordEncoder passwordEncoder;
   private final ApplicationEventPublisher eventPublisher;
+  private final IamOAuthAccessTokenRepository accessTokenRepo;
+  private final IamOAuthRefreshTokenRepository refreshTokenRepo;
+  private final TimeProvider timeProvider;
 
   @Autowired
   public DefaultIamAccountService(IamAccountRepository accountRepo,
       IamAuthoritiesRepository authoritiesRepo, PasswordEncoder passwordEncoder,
-      ApplicationEventPublisher eventPublisher) {
+      ApplicationEventPublisher eventPublisher, IamOAuthAccessTokenRepository accessTokenRepo,
+      IamOAuthRefreshTokenRepository refreshTokenRepo, TimeProvider timeProvider) {
 
     this.accountRepo = accountRepo;
     this.authoritiesRepo = authoritiesRepo;
     this.passwordEncoder = passwordEncoder;
     this.eventPublisher = eventPublisher;
+    this.accessTokenRepo = accessTokenRepo;
+    this.refreshTokenRepo = refreshTokenRepo;
+    this.timeProvider = timeProvider;
   }
 
   @Override
@@ -86,7 +96,7 @@ public class DefaultIamAccountService implements IamAccountService {
     newAccountSshKeysSanityChecks(account);
     newAccountSamlIdsSanityChecks(account);
     newAccountOidcIdsSanityChecks(account);
-    
+
     // Set creation time for certificates
     account.getX509Certificates().forEach(c -> {
       c.setCreationTime(now);
@@ -101,9 +111,22 @@ public class DefaultIamAccountService implements IamAccountService {
     return account;
   }
 
+
+  protected void deleteTokensForAccount(IamAccount account) {
+    Date now = new Date(timeProvider.currentTimeMillis());
+
+    accessTokenRepo.findValidAccessTokensForUser(account.getUsername(), now)
+      .forEach(accessTokenRepo::delete);
+    
+    refreshTokenRepo.findValidRefreshTokensForUser(account.getUsername(), now)
+      .forEach(refreshTokenRepo::delete);
+
+  }
+
   @Override
   public IamAccount deleteAccount(IamAccount account) {
     checkNotNull(account, "cannot delete a null account");
+    deleteTokensForAccount(account);
     accountRepo.delete(account);
 
     eventPublisher.publishEvent(new AccountRemovedEvent(this, account,
@@ -222,8 +245,9 @@ public class DefaultIamAccountService implements IamAccountService {
     checkArgument(!isNullOrEmpty(cert.getLabel()), "null or empty X.509 certificate label");
 
     accountRepo.findByCertificateSubject(cert.getSubjectDn()).ifPresent(c -> {
-      throw new CredentialAlreadyBoundException(String
-        .format("X509 certificate with subject '%s' is already bound to another user", cert.getSubjectDn()));
+      throw new CredentialAlreadyBoundException(
+          String.format("X509 certificate with subject '%s' is already bound to another user",
+              cert.getSubjectDn()));
     });
   }
 

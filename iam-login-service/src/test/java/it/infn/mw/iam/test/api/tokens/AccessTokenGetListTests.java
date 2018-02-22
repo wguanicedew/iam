@@ -66,6 +66,7 @@ public class AccessTokenGetListTests extends TestTokensUtils {
   @Before
   public void setup() {
     clearAllTokens();
+    mockOAuth2Filter.cleanupSecurityContext();
     initMvc();
   }
 
