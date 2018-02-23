@@ -69,6 +69,7 @@ public class NotificationDisabledTests {
 
   @Before
   public void setUp() throws InterruptedException {
+    mockOAuth2Filter.cleanupSecurityContext();
     mvc = MockMvcBuilders.webAppContextSetup(context)
       .apply(springSecurity())
       .alwaysDo(print())

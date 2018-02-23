@@ -1,7 +1,9 @@
 package it.infn.mw.iam.test.oauth;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -11,6 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import javax.transaction.Transactional;
 
@@ -32,11 +35,18 @@ import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
 
 import it.infn.mw.iam.IamLoginService;
+import it.infn.mw.iam.core.user.IamAccountService;
+import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamAup;
+import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamAupRepository;
+import it.infn.mw.iam.persistence.repository.IamOAuthAccessTokenRepository;
+import it.infn.mw.iam.persistence.repository.IamOAuthRefreshTokenRepository;
+import it.infn.mw.iam.test.core.CoreControllerTestSupport;
+import it.infn.mw.iam.test.util.MockTimeProvider;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = {IamLoginService.class})
+@SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class})
 @WebAppConfiguration
 @Transactional
 public class ResourceOwnerPasswordCredentialsTests {
@@ -54,6 +64,21 @@ public class ResourceOwnerPasswordCredentialsTests {
 
   @Autowired
   private IamAupRepository aupRepo;
+
+  @Autowired
+  private IamAccountService accountService;
+
+  @Autowired
+  private IamAccountRepository accountRepo;
+
+  @Autowired
+  private IamOAuthAccessTokenRepository accessTokenRepo;
+
+  @Autowired
+  private IamOAuthRefreshTokenRepository refreshTokenRepo;
+
+  @Autowired
+  private MockTimeProvider timeProvider;
 
   private MockMvc mvc;
 
@@ -209,7 +234,42 @@ public class ResourceOwnerPasswordCredentialsTests {
     String idToken = tokenResponse.getAdditionalInformation().get("id_token").toString();
 
     JWT token = JWTParser.parse(idToken);
-    System.out.println(token.getJWTClaimsSet());
     assertNotNull(token.getJWTClaimsSet().getClaim("auth_time"));
+  }
+
+  @Test
+  public void testTokensAreCleanedUpWhenAccountRemoved() throws Exception {
+
+    String clientId = "password-grant";
+    String clientSecret = "secret";
+
+    // @formatter:off
+    mvc.perform(post("/token")
+        .with(httpBasic(clientId, clientSecret))
+        .param("grant_type", GRANT_TYPE)
+        .param("username", USERNAME)
+        .param("password", PASSWORD)
+        .param("scope", "openid profile offline_access"))
+      .andExpect(status().isOk());
+    // @formatter:on
+
+    Date now = new Date(timeProvider.currentTimeMillis());
+    timeProvider.setTime(now.getTime());
+    
+    assertThat(accessTokenRepo.findValidAccessTokensForUser(USERNAME, now), hasSize(1));
+
+    assertThat(refreshTokenRepo.findValidRefreshTokensForUser(USERNAME, now), hasSize(1));
+
+    IamAccount testAccount = accountRepo.findByUsername(USERNAME)
+      .orElseThrow(() -> new AssertionError(String.format("Expected %s user not found", USERNAME)));
+    
+    accountService.deleteAccount(testAccount);
+    
+    timeProvider.setTime(now.getTime() + TimeUnit.MINUTES.toMillis(1));
+    
+    Date afterOneMinute = new Date(timeProvider.currentTimeMillis());
+    
+    assertThat(accessTokenRepo.findValidAccessTokensForUser(USERNAME, afterOneMinute), hasSize(0));
+    assertThat(refreshTokenRepo.findValidRefreshTokensForUser(USERNAME, afterOneMinute), hasSize(0));
   }
 }

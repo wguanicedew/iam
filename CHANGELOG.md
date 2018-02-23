@@ -22,6 +22,8 @@
   with the certificate (#193)
 - Admin-targeted email notifications that result from membership requests now
   include the contents of the Notes field (#190)
+- Tokens linked to an account are now removed when the account is removed
+  (#204)
 
 ### Changed
 
