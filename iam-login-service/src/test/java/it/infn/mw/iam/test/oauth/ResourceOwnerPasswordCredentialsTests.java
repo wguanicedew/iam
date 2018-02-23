@@ -13,6 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import javax.transaction.Transactional;
 
@@ -233,7 +234,6 @@ public class ResourceOwnerPasswordCredentialsTests {
     String idToken = tokenResponse.getAdditionalInformation().get("id_token").toString();
 
     JWT token = JWTParser.parse(idToken);
-    System.out.println(token.getJWTClaimsSet());
     assertNotNull(token.getJWTClaimsSet().getClaim("auth_time"));
   }
 
@@ -254,6 +254,8 @@ public class ResourceOwnerPasswordCredentialsTests {
     // @formatter:on
 
     Date now = new Date(timeProvider.currentTimeMillis());
+    timeProvider.setTime(now.getTime());
+    
     assertThat(accessTokenRepo.findValidAccessTokensForUser(USERNAME, now), hasSize(1));
 
     assertThat(refreshTokenRepo.findValidRefreshTokensForUser(USERNAME, now), hasSize(1));
@@ -263,7 +265,11 @@ public class ResourceOwnerPasswordCredentialsTests {
     
     accountService.deleteAccount(testAccount);
     
-    assertThat(accessTokenRepo.findValidAccessTokensForUser(USERNAME, now), hasSize(0));
-    assertThat(refreshTokenRepo.findValidRefreshTokensForUser(USERNAME, now), hasSize(0));
+    timeProvider.setTime(now.getTime() + TimeUnit.MINUTES.toMillis(1));
+    
+    Date afterOneMinute = new Date(timeProvider.currentTimeMillis());
+    
+    assertThat(accessTokenRepo.findValidAccessTokensForUser(USERNAME, afterOneMinute), hasSize(0));
+    assertThat(refreshTokenRepo.findValidRefreshTokensForUser(USERNAME, afterOneMinute), hasSize(0));
   }
 }
