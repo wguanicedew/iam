@@ -1,12 +1,12 @@
 # Changelog
 
-## 1.2.0 (2018-02-19)
+## 1.2.0 (2018-02-26)
 
 ### Added
 
 - IAM now provides a token management section in the dashboard that can be used
-  by administrators to view active tokens in the system, filter tokens by user
-  and client and revoke tokens (#161)
+  by administrators to view active tokens in the system, filter tokens (by user
+  and client) and revoke tokens (#161)
 
 - IAM now provides an Acceptable Usage Policy (AUP) API that can be used to require
   that users accept the AUP terms at registration time or later (#86)
