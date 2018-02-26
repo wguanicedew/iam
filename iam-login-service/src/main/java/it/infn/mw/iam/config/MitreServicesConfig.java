@@ -20,6 +20,7 @@ import org.mitre.openid.connect.filter.AuthorizationRequestFilter;
 import org.mitre.openid.connect.service.ApprovedSiteService;
 import org.mitre.openid.connect.service.BlacklistedSiteService;
 import org.mitre.openid.connect.service.ClientLogoLoadingService;
+import org.mitre.openid.connect.service.IDTokenClaimsEnhancer;
 import org.mitre.openid.connect.service.LoginHintExtracter;
 import org.mitre.openid.connect.service.OIDCTokenService;
 import org.mitre.openid.connect.service.PairwiseIdentiferService;
@@ -59,8 +60,8 @@ import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEn
 import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
 import org.springframework.web.servlet.AsyncHandlerInterceptor;
-
 import it.infn.mw.iam.core.IamOAuth2RequestFactory;
+import it.infn.mw.iam.core.oauth.IamIdTokenClaimsEnhancer;
 import it.infn.mw.iam.core.oauth.scope.IamScopeFilter;
 
 @Configuration
@@ -289,5 +290,9 @@ public class MitreServicesConfig {
   SelfAssertionValidator selfAssertionValidator() {
     return new SelfAssertionValidator();
   }
-  
+
+  @Bean
+  IDTokenClaimsEnhancer defaultIdTokenClaimsEnhancer() {
+	return new IamIdTokenClaimsEnhancer();
+  }
 }
