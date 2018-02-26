@@ -39,7 +39,7 @@ pipeline {
     stage('test') {
       steps {
         container('maven-runner') {
-          sh 'mvn -DfailIfNoTests=false -Dtest=it.infn.mw.iam.test.oauth.ResourceOwnerPasswordCredentialsTests#testTokensAreCleanedUpWhenAccountRemoved test'
+          sh 'mvn -B clean test'
         }
       }
 
