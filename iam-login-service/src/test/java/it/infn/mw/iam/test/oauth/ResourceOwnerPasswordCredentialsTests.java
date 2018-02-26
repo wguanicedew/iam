@@ -15,8 +15,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import javax.transaction.Transactional;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,6 +26,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -255,7 +254,7 @@ public class ResourceOwnerPasswordCredentialsTests {
 
     Date now = new Date(timeProvider.currentTimeMillis());
     timeProvider.setTime(now.getTime());
-    
+
     assertThat(accessTokenRepo.findValidAccessTokensForUser(USERNAME, now), hasSize(1));
 
     assertThat(refreshTokenRepo.findValidRefreshTokensForUser(USERNAME, now), hasSize(1));
@@ -264,12 +263,12 @@ public class ResourceOwnerPasswordCredentialsTests {
       .orElseThrow(() -> new AssertionError(String.format("Expected %s user not found", USERNAME)));
     
     accountService.deleteAccount(testAccount);
-    
+
     timeProvider.setTime(now.getTime() + TimeUnit.MINUTES.toMillis(1));
-    
+
     Date afterOneMinute = new Date(timeProvider.currentTimeMillis());
-    
     assertThat(accessTokenRepo.findValidAccessTokensForUser(USERNAME, afterOneMinute), hasSize(0));
-    assertThat(refreshTokenRepo.findValidRefreshTokensForUser(USERNAME, afterOneMinute), hasSize(0));
+    assertThat(refreshTokenRepo.findValidRefreshTokensForUser(USERNAME, afterOneMinute),
+        hasSize(0));
   }
 }
