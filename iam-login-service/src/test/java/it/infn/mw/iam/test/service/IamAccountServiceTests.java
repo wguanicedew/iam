@@ -24,12 +24,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mitre.oauth2.model.OAuth2AccessTokenEntity;
 import org.mitre.oauth2.model.OAuth2RefreshTokenEntity;
+import org.mitre.oauth2.service.OAuth2TokenEntityService;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+import com.google.common.collect.Sets;
 
 import it.infn.mw.iam.core.time.TimeProvider;
 import it.infn.mw.iam.core.user.DefaultIamAccountService;
@@ -43,8 +46,6 @@ import it.infn.mw.iam.persistence.model.IamSshKey;
 import it.infn.mw.iam.persistence.model.IamX509Certificate;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamAuthoritiesRepository;
-import it.infn.mw.iam.persistence.repository.IamOAuthAccessTokenRepository;
-import it.infn.mw.iam.persistence.repository.IamOAuthRefreshTokenRepository;
 
 @RunWith(MockitoJUnitRunner.class)
 public class IamAccountServiceTests extends IamAccountServiceTestSupport {
@@ -65,10 +66,7 @@ public class IamAccountServiceTests extends IamAccountServiceTestSupport {
   private TimeProvider timeProvider;
   
   @Mock
-  private IamOAuthAccessTokenRepository accessTokenRepo;
-  
-  @Mock
-  private IamOAuthRefreshTokenRepository refreshTokenRepo;
+  private OAuth2TokenEntityService tokenService;
 
   @InjectMocks
   private DefaultIamAccountService accountService;
@@ -727,13 +725,12 @@ public class IamAccountServiceTests extends IamAccountServiceTestSupport {
     OAuth2AccessTokenEntity accessToken  = mock(OAuth2AccessTokenEntity.class);
     OAuth2RefreshTokenEntity refreshToken = mock(OAuth2RefreshTokenEntity.class);
     
-    when(accessTokenRepo.findValidAccessTokensForUser(Mockito.eq(CICCIO_USERNAME), anyObject()))
-      .thenReturn(Arrays.asList(accessToken));
-    when(refreshTokenRepo.findValidRefreshTokensForUser(Mockito.eq(CICCIO_USERNAME), anyObject()))
-      .thenReturn(Arrays.asList(refreshToken));
+    when(tokenService.getAllAccessTokensForUser(CICCIO_USERNAME)).thenReturn(Sets.newHashSet(accessToken));
+    when(tokenService.getAllRefreshTokensForUser(CICCIO_USERNAME)).thenReturn(Sets.newHashSet(refreshToken));
+    
     
     accountService.deleteAccount(CICCIO_ACCOUNT);
-    verify(accessTokenRepo).delete(Mockito.eq(accessToken));
-    verify(refreshTokenRepo).delete(Mockito.eq(refreshToken));
+    verify(tokenService).revokeAccessToken(Mockito.eq(accessToken));
+    verify(tokenService).revokeRefreshToken(Mockito.eq(refreshToken));
   }
 }

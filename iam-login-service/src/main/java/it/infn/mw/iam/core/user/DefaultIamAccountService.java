@@ -6,18 +6,20 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
-import org.springframework.transaction.annotation.Transactional;
-
+import org.mitre.oauth2.model.OAuth2AccessTokenEntity;
+import org.mitre.oauth2.model.OAuth2RefreshTokenEntity;
+import org.mitre.oauth2.service.OAuth2TokenEntityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import it.infn.mw.iam.audit.events.account.AccountCreatedEvent;
 import it.infn.mw.iam.audit.events.account.AccountRemovedEvent;
-import it.infn.mw.iam.core.time.TimeProvider;
 import it.infn.mw.iam.core.user.exception.CredentialAlreadyBoundException;
 import it.infn.mw.iam.core.user.exception.InvalidCredentialException;
 import it.infn.mw.iam.core.user.exception.UserAlreadyExistsException;
@@ -29,8 +31,6 @@ import it.infn.mw.iam.persistence.model.IamSshKey;
 import it.infn.mw.iam.persistence.model.IamX509Certificate;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamAuthoritiesRepository;
-import it.infn.mw.iam.persistence.repository.IamOAuthAccessTokenRepository;
-import it.infn.mw.iam.persistence.repository.IamOAuthRefreshTokenRepository;
 
 @Service
 @Transactional
@@ -40,23 +40,18 @@ public class DefaultIamAccountService implements IamAccountService {
   private final IamAuthoritiesRepository authoritiesRepo;
   private final PasswordEncoder passwordEncoder;
   private final ApplicationEventPublisher eventPublisher;
-  private final IamOAuthAccessTokenRepository accessTokenRepo;
-  private final IamOAuthRefreshTokenRepository refreshTokenRepo;
-  private final TimeProvider timeProvider;
+  private final OAuth2TokenEntityService tokenService;
 
   @Autowired
   public DefaultIamAccountService(IamAccountRepository accountRepo,
       IamAuthoritiesRepository authoritiesRepo, PasswordEncoder passwordEncoder,
-      ApplicationEventPublisher eventPublisher, IamOAuthAccessTokenRepository accessTokenRepo,
-      IamOAuthRefreshTokenRepository refreshTokenRepo, TimeProvider timeProvider) {
+      ApplicationEventPublisher eventPublisher, OAuth2TokenEntityService tokenService) {
 
     this.accountRepo = accountRepo;
     this.authoritiesRepo = authoritiesRepo;
     this.passwordEncoder = passwordEncoder;
     this.eventPublisher = eventPublisher;
-    this.accessTokenRepo = accessTokenRepo;
-    this.refreshTokenRepo = refreshTokenRepo;
-    this.timeProvider = timeProvider;
+    this.tokenService = tokenService;
   }
 
   @Override
@@ -113,14 +108,20 @@ public class DefaultIamAccountService implements IamAccountService {
 
 
   protected void deleteTokensForAccount(IamAccount account) {
-    Date now = new Date(timeProvider.currentTimeMillis());
 
-    accessTokenRepo.findValidAccessTokensForUser(account.getUsername(), now)
-      .forEach(accessTokenRepo::delete);
+    Set<OAuth2AccessTokenEntity> accessTokens =
+        tokenService.getAllAccessTokensForUser(account.getUsername());
+
+    Set<OAuth2RefreshTokenEntity> refreshTokens = 
+        tokenService.getAllRefreshTokensForUser(account.getUsername());
     
-    refreshTokenRepo.findValidRefreshTokensForUser(account.getUsername(), now)
-      .forEach(refreshTokenRepo::delete);
-
+    for (OAuth2AccessTokenEntity t: accessTokens) {
+      tokenService.revokeAccessToken(t);
+    }
+    
+    for (OAuth2RefreshTokenEntity t: refreshTokens) {
+      tokenService.revokeRefreshToken(t);
+    }
   }
 
   @Override

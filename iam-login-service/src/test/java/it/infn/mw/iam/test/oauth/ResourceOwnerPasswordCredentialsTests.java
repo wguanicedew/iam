@@ -13,11 +13,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mitre.oauth2.service.OAuth2TokenEntityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.http.MediaType;
@@ -41,11 +41,9 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamAupRepository;
 import it.infn.mw.iam.persistence.repository.IamOAuthAccessTokenRepository;
 import it.infn.mw.iam.persistence.repository.IamOAuthRefreshTokenRepository;
-import it.infn.mw.iam.test.core.CoreControllerTestSupport;
-import it.infn.mw.iam.test.util.MockTimeProvider;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class})
+@SpringApplicationConfiguration(classes = {IamLoginService.class})
 @WebAppConfiguration
 @Transactional
 public class ResourceOwnerPasswordCredentialsTests {
@@ -71,13 +69,13 @@ public class ResourceOwnerPasswordCredentialsTests {
   private IamAccountRepository accountRepo;
 
   @Autowired
+  private OAuth2TokenEntityService tokenService;
+  
+  @Autowired
   private IamOAuthAccessTokenRepository accessTokenRepo;
-
+  
   @Autowired
   private IamOAuthRefreshTokenRepository refreshTokenRepo;
-
-  @Autowired
-  private MockTimeProvider timeProvider;
 
   private MockMvc mvc;
 
@@ -87,6 +85,9 @@ public class ResourceOwnerPasswordCredentialsTests {
       .apply(springSecurity())
       .alwaysDo(print())
       .build();
+    
+    accessTokenRepo.deleteAll();
+    refreshTokenRepo.deleteAll();
   }
 
   @Test
@@ -252,23 +253,16 @@ public class ResourceOwnerPasswordCredentialsTests {
       .andExpect(status().isOk());
     // @formatter:on
 
-    Date now = new Date(timeProvider.currentTimeMillis());
-    timeProvider.setTime(now.getTime());
-
-    assertThat(accessTokenRepo.findValidAccessTokensForUser(USERNAME, now), hasSize(1));
-
-    assertThat(refreshTokenRepo.findValidRefreshTokensForUser(USERNAME, now), hasSize(1));
+    assertThat(tokenService.getAllAccessTokensForUser(USERNAME), hasSize(1));
+    assertThat(tokenService.getAllRefreshTokensForUser(USERNAME), hasSize(1));
 
     IamAccount testAccount = accountRepo.findByUsername(USERNAME)
       .orElseThrow(() -> new AssertionError(String.format("Expected %s user not found", USERNAME)));
     
     accountService.deleteAccount(testAccount);
 
-    timeProvider.setTime(now.getTime() + TimeUnit.MINUTES.toMillis(1));
-
-    Date afterOneMinute = new Date(timeProvider.currentTimeMillis());
-    assertThat(accessTokenRepo.findValidAccessTokensForUser(USERNAME, afterOneMinute), hasSize(0));
-    assertThat(refreshTokenRepo.findValidRefreshTokensForUser(USERNAME, afterOneMinute),
-        hasSize(0));
+    assertThat(tokenService.getAllAccessTokensForUser(USERNAME), hasSize(0));
+    assertThat(tokenService.getAllRefreshTokensForUser(USERNAME), hasSize(0));
+    
   }
 }
