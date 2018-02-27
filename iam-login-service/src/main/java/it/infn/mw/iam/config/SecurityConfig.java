@@ -832,6 +832,8 @@ public class SecurityConfig {
   @Configuration
   @Order(28)
   public static class AupApiEndpointConfig extends WebSecurityConfigurerAdapter {
+    
+    private static final String AUP_PATH = "/iam/aup";
     @Autowired
     private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
 
@@ -855,9 +857,11 @@ public class SecurityConfig {
         .sessionCreationPolicy(SessionCreationPolicy.NEVER)
         .and()
         .authorizeRequests()
-        .antMatchers(HttpMethod.GET, "/iam/aup")
+        .antMatchers(HttpMethod.GET, AUP_PATH)
         .permitAll()
-        .antMatchers(HttpMethod.POST, "/iam/aup")
+        .antMatchers(HttpMethod.POST, AUP_PATH)
+        .authenticated()
+        .antMatchers(HttpMethod.DELETE, AUP_PATH)
         .authenticated()
         .and()
         .csrf()

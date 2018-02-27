@@ -2,6 +2,8 @@ package it.infn.mw.iam.api.aup.model;
 
 import java.util.Date;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.NotBlank;
@@ -19,7 +21,9 @@ public class AupDTO {
   @Size(max = 128,
       message = "Invalid AUP: the description string must be at most 128 characters long")
   String description;
-
+  
+  @NotNull(message = "Invalid AUP: signatureValidityInDays is required")
+  @Min(value=0L, message="Invalid AUP: signatureValidityInDays must be >= 0")
   Long signatureValidityInDays;
 
   @JsonSerialize(using = JsonDateSerializer.class)
@@ -39,6 +43,9 @@ public class AupDTO {
     this.lastUpdateTime = lastUpdateTime;
   }
 
+  public AupDTO() {
+    // empty constructor, useful for testing
+  }
 
   public String getDescription() {
     return description;

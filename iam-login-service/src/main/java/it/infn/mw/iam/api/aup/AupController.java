@@ -4,6 +4,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
@@ -100,6 +101,12 @@ public class AupController {
   @ResponseStatus(value = HttpStatus.NOT_FOUND)
   @ExceptionHandler(AupNotFoundError.class)
   public ErrorDTO notFoundError(Exception ex) {
+    return ErrorDTO.fromString(ex.getMessage());
+  }
+  
+  @ResponseStatus(value = HttpStatus.FORBIDDEN)
+  @ExceptionHandler(AccessDeniedException.class)
+  public ErrorDTO accessDeniedError(Exception ex) {
     return ErrorDTO.fromString(ex.getMessage());
   }
 }
