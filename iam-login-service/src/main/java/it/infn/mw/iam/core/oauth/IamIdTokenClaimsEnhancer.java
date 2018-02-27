@@ -1,7 +1,6 @@
 package it.infn.mw.iam.core.oauth;
 
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -9,6 +8,7 @@ import org.mitre.oauth2.model.OAuth2AccessTokenEntity;
 import org.mitre.openid.connect.service.IDTokenClaimsEnhancer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.provider.OAuth2Request;
+import com.google.common.collect.Sets;
 import com.nimbusds.jwt.JWTClaimsSet;
 import it.infn.mw.iam.api.account.password_reset.error.UserNotFoundError;
 import it.infn.mw.iam.core.IamProperties;
@@ -32,52 +32,39 @@ public class IamIdTokenClaimsEnhancer implements IDTokenClaimsEnhancer {
 
   private String organisationName = IamProperties.INSTANCE.getOrganisationName();
 
-  private final Set<String> enhancedClaims = new HashSet<String>() {
-
-    private static final long serialVersionUID = 1L;
-
-    {
-      add("email");
-      add("preferred_username");
-      add("organisation_name");
-      add("groups");
-    }
-  };
+  private final Set<String> enhancedClaims =
+      Sets.newHashSet("email", "preferred_username", "organisation_name", "groups");
 
   @Override
-  public void enhanceIdTokenClaims(JWTClaimsSet.Builder claimsBuilder, OAuth2Request request, Date issueTime,
-      String sub, OAuth2AccessTokenEntity accessToken) {
+  public void enhanceIdTokenClaims(JWTClaimsSet.Builder claimsBuilder, OAuth2Request request,
+      Date issueTime, String sub, OAuth2AccessTokenEntity accessToken) {
 
     IamAccount account = iamAccountRepository.findByUuid(sub)
-        .orElseThrow(() -> new UserNotFoundError("No user found for uuid " + sub));
+        .orElseThrow(() -> new UserNotFoundError(String.format("No user found for uuid %s", sub)));
     IamUserInfo info = account.getUserInfo();
 
     Set<String> requiredClaims = scopeClaimConverter.getClaimsForScopeSet(request.getScope());
 
-    for (String claim: requiredClaims) {
-      if (enhancedClaims.contains(claim)) {
-        claimsBuilder.claim(claim, getClaimValueFromUserInfo(claim, info));
-      }
-    }
+    requiredClaims.stream().filter(claim -> enhancedClaims.contains(claim)).forEach(c -> {
+      claimsBuilder.claim(c, getClaimValueFromUserInfo(c, info));
+    });
   }
 
   private Object getClaimValueFromUserInfo(String claim, IamUserInfo info) {
 
-    if ("email".equals(claim)) {
-      return info.getEmail();
+    switch (claim) {
+      case "email":
+        return info.getEmail();
+      case "preferred_username":
+        return info.getPreferredUsername();
+      case "organisation_name":
+        return organisationName;
+      case "groups":
+        List<String> names =
+            info.getGroups().stream().map(IamGroup::getName).collect(Collectors.toList());
+        return names.toArray(new String[0]);
+      default:
+        return null;
     }
-    if ("preferred_username".equals(claim)) {
-      return info.getPreferredUsername();
-    }
-    if ("organisation_name".equals(claim)) {
-      return organisationName;
-    }
-    if ("groups".equals(claim)) {
-      List<String> names =
-          info.getGroups().stream().map(IamGroup::getName).collect(Collectors.toList());
-      return names.toArray(new String[0]);
-    }
-
-    return null;
   }
 }
