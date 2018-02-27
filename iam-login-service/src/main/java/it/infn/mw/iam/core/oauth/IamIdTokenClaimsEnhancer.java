@@ -17,22 +17,18 @@ import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.model.IamUserInfo;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
-import it.infn.mw.iam.persistence.repository.IamUserinfoRepository;
 
 public class IamIdTokenClaimsEnhancer implements IDTokenClaimsEnhancer {
 
   @Autowired
-  IamUserinfoRepository iamUserInfoRepository;
+  private IamAccountRepository iamAccountRepository;
 
   @Autowired
-  IamAccountRepository iamAccountRepository;
-
-  @Autowired
-  IamScopeClaimTranslationService scopeClaimConverter;
+  private IamScopeClaimTranslationService scopeClaimConverter;
 
   private String organisationName = IamProperties.INSTANCE.getOrganisationName();
 
-  private final Set<String> enhancedClaims =
+  private static final Set<String> enhancedClaims =
       Sets.newHashSet("email", "preferred_username", "organisation_name", "groups");
 
   @Override
