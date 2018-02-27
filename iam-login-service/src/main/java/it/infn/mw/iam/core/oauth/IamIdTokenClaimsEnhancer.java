@@ -41,9 +41,13 @@ public class IamIdTokenClaimsEnhancer implements IDTokenClaimsEnhancer {
 
     Set<String> requiredClaims = scopeClaimConverter.getClaimsForScopeSet(request.getScope());
 
-    requiredClaims.stream().filter(claim -> enhancedClaims.contains(claim)).forEach(c -> {
-      claimsBuilder.claim(c, getClaimValueFromUserInfo(c, info));
-    });
+    requiredClaims.stream().filter(IamIdTokenClaimsEnhancer::isEnhancedClaim)
+        .forEach(c -> claimsBuilder.claim(c, getClaimValueFromUserInfo(c, info)));
+  }
+
+  private static boolean isEnhancedClaim(String claim) {
+
+    return enhancedClaims.contains(claim);
   }
 
   private Object getClaimValueFromUserInfo(String claim, IamUserInfo info) {
