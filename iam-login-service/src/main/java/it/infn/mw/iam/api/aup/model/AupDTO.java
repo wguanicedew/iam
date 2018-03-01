@@ -43,10 +43,6 @@ public class AupDTO {
     this.lastUpdateTime = lastUpdateTime;
   }
 
-  public AupDTO() {
-    // empty constructor, useful for testing
-  }
-
   public String getDescription() {
     return description;
   }

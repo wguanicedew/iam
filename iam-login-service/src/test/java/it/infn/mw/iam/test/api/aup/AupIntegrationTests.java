@@ -167,11 +167,8 @@ public class AupIntegrationTests extends AupTestSupport {
   @Test
   @WithMockUser(username = "admin", roles = {"ADMIN", "USER"})
   public void aupCreationRequiresSignatureValidityDays() throws JsonProcessingException, Exception {
-    AupDTO aup = new AupDTO();
-    aup.setText("This is a text");
-    aup.setSignatureValidityInDays(null);
-
-
+    AupDTO aup = new AupDTO("Text", null, null, null, null);
+    
     Date now = new Date();
     mockTimeProvider.setTime(now.getTime());
 
@@ -184,12 +181,9 @@ public class AupIntegrationTests extends AupTestSupport {
 
   @Test
   @WithMockUser(username = "admin", roles = {"ADMIN", "USER"})
-  public void aupCreationRequiresPositiveSignatureValidityDays() throws JsonProcessingException, Exception {
-    AupDTO aup = new AupDTO();
-    aup.setText("This is a text");
-    aup.setSignatureValidityInDays(-1L);
-
-
+  public void aupCreationRequiresPositiveSignatureValidityDays()
+      throws JsonProcessingException, Exception {
+    AupDTO aup = new AupDTO("Text", null, -1L, null, null);
     Date now = new Date();
     mockTimeProvider.setTime(now.getTime());
 
@@ -199,6 +193,7 @@ public class AupIntegrationTests extends AupTestSupport {
       .andExpect(status().isBadRequest())
       .andExpect(jsonPath("$.error").value("Invalid AUP: signatureValidityInDays must be >= 0"));
   }
+
   @Test
   @WithMockUser(username = "admin", roles = {"ADMIN", "USER"})
   public void aupCreationWorks() throws JsonProcessingException, Exception {
