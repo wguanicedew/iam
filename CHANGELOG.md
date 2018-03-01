@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.1 (2018-03-02)
+
+Disable token management dashboard
+
 ## 1.2.0 (2018-03-01)
 
 ### Added
