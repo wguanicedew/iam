@@ -1,8 +1,11 @@
 # Changelog
 
-## 1.2.0 (2018-02-26)
+## 1.2.0 (2018-03-01)
 
 ### Added
+
+- IAM documentation has been migrate from Gitbook to its [own dedicated
+  site][iam-docs] on Github pages 
 
 - IAM now provides a token management section in the dashboard that can be used
   by administrators to view active tokens in the system, filter tokens (by user
@@ -176,3 +179,4 @@ GitBook manual][gitbook-manual] or on [Github][github-doc].
 [gitbook-manual]: https://www.gitbook.com/book/andreaceccanti/iam/details
 [github-doc]: https://github.com/indigo-iam/iam/blob/master/SUMMARY.md
 [jira-v0.4.0]: https://issues.infn.it/jira/browse/INDIAM/fixforversion/13811 
+[iam-docs]: https://indigo-iam.github.io/docs

@@ -19,9 +19,9 @@ context of the [INDIGO-Datacloud H2020 project][indigo-datacloud].
 
 See the [changelog](CHANGELOG.md).
 
-## Build instructions
+## Documentation
 
-See the [developer guide](doc/developer.md).
+See the [IAM documentation][iam-doc].
 
 ## License
 
@@ -31,3 +31,4 @@ See the [developer guide](doc/developer.md).
 [mitreid]: https://github.com/mitreid-connect/OpenID-Connect-Java-Spring-Server
 [scim]: http://www.simplecloud.info/
 [token-exchange]: https://tools.ietf.org/html/draft-ietf-oauth-token-exchange-09
+[iam-doc]: https://indigo-iam.github.io/docs
