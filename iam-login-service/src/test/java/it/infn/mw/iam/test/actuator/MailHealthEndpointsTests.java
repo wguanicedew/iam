@@ -1,7 +1,5 @@
 package it.infn.mw.iam.test.actuator;
 
-import static it.infn.mw.iam.test.util.MockSmtpServerUtils.startMockSmtpServer;
-import static it.infn.mw.iam.test.util.MockSmtpServerUtils.stopMockSmtpServer;
 import static java.lang.String.format;
 import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -10,8 +8,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,12 +20,13 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import org.subethamail.wiser.Wiser;
 
 import it.infn.mw.iam.IamLoginService;
+import it.infn.mw.iam.test.util.MockMailHealthIndicator;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = {IamLoginService.class})
+@SpringApplicationConfiguration(
+    classes = {IamLoginService.class, MailHealthEndpointsTestsConfig.class})
 @WebAppConfiguration
 public class MailHealthEndpointsTests {
 
@@ -47,14 +44,18 @@ public class MailHealthEndpointsTests {
   @Value("${spring.mail.port}")
   private Integer mailPort;
 
-  @Value("${endpoints.healthMail.path}")
+  @Value("${health.mailProbe.path}")
   private String mailEndpointPath;
+  
+  
 
   @Autowired
   private WebApplicationContext context;
+  
+  @Autowired
+  private MockMailHealthIndicator mhi;
 
   private MockMvc mvc;
-  private Wiser wiser;
 
   @Before
   public synchronized void setup() throws InterruptedException {
@@ -63,23 +64,14 @@ public class MailHealthEndpointsTests {
       .apply(springSecurity())
       .alwaysDo(print())
       .build();
-    
-    wiser = startMockSmtpServer(mailHost, mailPort);
+
   }
 
-  @After
-  public synchronized void teardown() {
-
-    stopMockSmtpServer(wiser);
-    
-    if (wiser.getServer().isRunning()) {
-      Assert.fail("Fake mail server is still running after stop!!");
-    }
-  }
 
   @Test
   public void testMailHealthEndpointWithSmtp() throws Exception {
 
+    mhi.setActive(true);
     // @formatter:off
     mvc.perform(get(mailEndpointPath))
       .andExpect(status().isOk())
@@ -92,6 +84,8 @@ public class MailHealthEndpointsTests {
   @WithMockUser(username = USER_USERNAME, roles = {USER_ROLE})
   public void testMailHealthEndpointWithSmtpAsUser() throws Exception {
 
+    mhi.setActive(true);
+    
     // @formatter:off
     mvc.perform(get(mailEndpointPath))
       .andExpect(status().isOk())
@@ -105,6 +99,10 @@ public class MailHealthEndpointsTests {
   @WithMockUser(username = ADMIN_USERNAME, roles = {ADMIN_ROLE})
   public void testMailHealthEndpointWithSmtpAsAdmin() throws Exception {
 
+    mhi.setActive(true);
+    mhi.setMailhost(mailHost);
+    mhi.setMailPort(mailPort);
+    
     // @formatter:off
     mvc.perform(get(mailEndpointPath))
       .andExpect(status().isOk())

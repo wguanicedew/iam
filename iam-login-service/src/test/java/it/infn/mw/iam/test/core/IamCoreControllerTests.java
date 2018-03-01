@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,6 +29,7 @@ import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo.ExternalAuthenticationType;
 import it.infn.mw.iam.test.util.WithMockOAuthUser;
 import it.infn.mw.iam.test.util.WithMockOIDCUser;
+import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class})
@@ -37,6 +39,9 @@ public class IamCoreControllerTests {
   @Autowired
   protected WebApplicationContext context;
 
+  @Autowired
+  private MockOAuth2Filter mockOAuth2Filter;
+  
   protected MockMvc mvc;
 
   @Value("${iam.baseUrl}")
@@ -51,6 +56,10 @@ public class IamCoreControllerTests {
   }
 
 
+  @After
+  public void teardown() {
+    mockOAuth2Filter.cleanupSecurityContext();
+  }
 
   @Test
   public void registerRedirectsToRegisterPage() throws Exception {

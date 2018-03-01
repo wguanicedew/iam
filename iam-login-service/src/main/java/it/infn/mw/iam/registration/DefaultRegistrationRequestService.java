@@ -14,7 +14,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.data.domain.Sort;
@@ -37,10 +36,12 @@ import it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo;
 import it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo.ExternalAuthenticationType;
 import it.infn.mw.iam.core.IamRegistrationRequestStatus;
 import it.infn.mw.iam.core.user.IamAccountService;
-import it.infn.mw.iam.notification.NotificationService;
+import it.infn.mw.iam.notification.NotificationFactory;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamRegistrationRequest;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
+import it.infn.mw.iam.persistence.repository.IamAupRepository;
+import it.infn.mw.iam.persistence.repository.IamAupSignatureRepository;
 import it.infn.mw.iam.persistence.repository.IamRegistrationRequestRepository;
 
 @Service
@@ -57,8 +58,7 @@ public class DefaultRegistrationRequestService
   private UserConverter userConverter;
 
   @Autowired
-  @Qualifier("defaultNotificationService")
-  private NotificationService notificationService;
+  private NotificationFactory notificationFactory;
 
   @Autowired
   private RegistrationConverter converter;
@@ -68,6 +68,12 @@ public class DefaultRegistrationRequestService
 
   @Autowired
   private IamAccountRepository iamAccountRepo;
+  
+  @Autowired
+  private IamAupRepository iamAupRepo;
+  
+  @Autowired
+  private IamAupSignatureRepository iamAupSignatureRepo;
 
   private ApplicationEventPublisher eventPublisher;
 
@@ -104,6 +110,12 @@ public class DefaultRegistrationRequestService
     }
   }
 
+  private void createAupSignatureForAccountIfNeeded(IamAccount account) {
+    iamAupRepo.findDefaultAup().ifPresent(a -> 
+      iamAupSignatureRepo.createSignatureForAccount(account, new Date())
+    );
+  }
+  
   @Override
   public RegistrationRequestDto createRequest(RegistrationRequestDto request,
       Optional<ExternalAuthenticationRegistrationInfo> extAuthnInfo) {
@@ -119,10 +131,12 @@ public class DefaultRegistrationRequestService
     extAuthnInfo.ifPresent(i -> addExternalAuthnInfo(userBuilder, i));
 
     IamAccount newAccount =
-        accountService.createAccount(userConverter.fromScim(userBuilder.build()));
+        accountService.createAccount(userConverter.entityFromDto(userBuilder.build()));
     newAccount.setConfirmationKey(tokenGenerator.generateToken());
     newAccount.setActive(false);
 
+    createAupSignatureForAccountIfNeeded(newAccount);
+    
     IamRegistrationRequest regRequest = new IamRegistrationRequest();
     regRequest.setUuid(UUID.randomUUID().toString());
     regRequest.setCreationTime(new Date());
@@ -138,7 +152,7 @@ public class DefaultRegistrationRequestService
     eventPublisher.publishEvent(new RegistrationRequestEvent(this, regRequest,
         "New registration request from user " + newAccount.getUsername()));
 
-    notificationService.createConfirmationMessage(regRequest);
+    notificationFactory.createConfirmationMessage(regRequest);
 
     return converter.fromEntity(regRequest);
   }
@@ -246,7 +260,7 @@ public class DefaultRegistrationRequestService
     account.setResetKey(tokenGenerator.generateToken());
     account.setLastUpdateTime(new Date());
 
-    notificationService.createAccountActivatedMessage(request);
+    notificationFactory.createAccountActivatedMessage(request);
 
     request.setStatus(APPROVED);
     request.setLastUpdateTime(new Date());
@@ -264,7 +278,7 @@ public class DefaultRegistrationRequestService
 
     if (request.getStatus().equals(NEW)) {
       request.setStatus(CONFIRMED);
-      notificationService.createAdminHandleRequestMessage(request);
+      notificationFactory.createAdminHandleRequestMessage(request);
     }
 
     request.setLastUpdateTime(new Date());
@@ -278,7 +292,7 @@ public class DefaultRegistrationRequestService
 
   private RegistrationRequestDto handleReject(IamRegistrationRequest request) {
     request.setStatus(REJECTED);
-    notificationService.createRequestRejectedMessage(request);
+    notificationFactory.createRequestRejectedMessage(request);
     RegistrationRequestDto retval = converter.fromEntity(request);
 
     accountService.deleteAccount(request.getAccount());

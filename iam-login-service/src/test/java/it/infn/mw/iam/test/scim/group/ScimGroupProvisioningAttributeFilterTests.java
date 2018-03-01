@@ -13,9 +13,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 
 import org.hamcrest.Matchers;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,6 +33,7 @@ import it.infn.mw.iam.api.scim.model.ScimListResponse;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 import it.infn.mw.iam.test.scim.ScimUtils;
 import it.infn.mw.iam.test.util.WithMockOAuthUser;
+import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class})
@@ -42,6 +44,9 @@ public class ScimGroupProvisioningAttributeFilterTests {
 
   @Autowired
   private WebApplicationContext context;
+  
+  @Autowired
+  private MockOAuth2Filter mockOAuth2Filter;
 
   private MockMvc mvc;
 
@@ -53,6 +58,11 @@ public class ScimGroupProvisioningAttributeFilterTests {
       .apply(springSecurity())
       .alwaysDo(print())
       .build();
+  }
+  
+  @After
+  public void teardown() {
+    mockOAuth2Filter.cleanupSecurityContext();
   }
 
   @Test

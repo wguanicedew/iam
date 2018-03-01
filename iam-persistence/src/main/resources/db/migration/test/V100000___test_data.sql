@@ -13,6 +13,12 @@ INSERT INTO client_details (id, client_id, client_secret, client_name, dynamical
   (10, 'registration-client', 'secret', 'Registration service test client', false, null, 3600, 600, true, 'SECRET_POST',false),
   (11, 'token-lookup-client', 'secret', 'Token lookup client', false, null, 3600, 600, true, 'SECRET_BASIC', false);
 
+INSERT INTO client_details (id, client_id, client_secret, client_name, dynamically_registered,
+  refresh_token_validity_seconds, access_token_validity_seconds, id_token_validity_seconds, allow_introspection,
+  token_endpoint_auth_method, require_auth_time, device_code_validity_seconds) VALUES
+  (12, 'device-code-client', 'secret', 'Device code client', false, null, 3600, 600, true, 'SECRET_BASIC', false, 
+   600);
+
 INSERT INTO client_scope (owner_id, scope) VALUES
   (1, 'openid'),
   (1, 'profile'),
@@ -81,7 +87,14 @@ INSERT INTO client_scope (owner_id, scope) VALUES
   (11, 'phone'),
   (11, 'offline_access'),
   (11, 'read-tasks'),
-  (11, 'write-tasks');
+  (11, 'write-tasks'),
+  (12, 'openid'),
+  (12, 'profile'),
+  (12, 'email'),
+  (12, 'address'),
+  (12, 'phone'),
+  (12, 'offline_access');
+  
   
   
 INSERT INTO client_redirect_uri (owner_id, redirect_uri) VALUES
@@ -113,7 +126,9 @@ INSERT INTO client_grant_type (owner_id, grant_type) VALUES
   (10, 'refresh_token'),
   (11, 'authorization_code'),
   (11, 'refresh_token'),
-  (11, 'client_credentials');
+  (11, 'client_credentials'),
+  (12, 'refresh_token'),
+  (12, 'urn:ietf:params:oauth:grant-type:device_code');
     
 INSERT INTO iam_user_info(ID,GIVENNAME,FAMILYNAME, EMAIL, EMAILVERIFIED, BIRTHDATE, GENDER) VALUES
 (2, 'Test', 'User', 'test@iam.test', true, '1950-01-01','M');

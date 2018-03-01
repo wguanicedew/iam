@@ -63,7 +63,7 @@ public class IamGroup implements Serializable {
   private Set<IamScopePolicy> scopePolicies = new HashSet<>();
 
   public IamGroup() {
-
+    // empty constructor
   }
 
   public Long getId() {

@@ -8,11 +8,14 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import java.time.Instant;
+import java.util.Date;
 
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -23,13 +26,14 @@ import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.persistence.model.IamAccount;
+import it.infn.mw.iam.persistence.model.IamAup;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
+import it.infn.mw.iam.persistence.repository.IamAupRepository;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {IamLoginService.class})
@@ -46,6 +50,9 @@ public class LoginTests {
 
   @Autowired
   private IamAccountRepository accountRepo;
+
+  @Autowired
+  private IamAupRepository aupRepo;
 
   private MockMvc mvc;
 
@@ -69,8 +76,8 @@ public class LoginTests {
             .param("username", ADMIN_USERNAME)
             .param("password", ADMIN_PASSWORD)
             .param("submit", "Login"))
-      .andExpect(status().is3xxRedirection())
-      .andExpect(MockMvcResultMatchers.redirectedUrl("/dashboard"))
+      .andExpect(status().isFound())
+      .andExpect(redirectedUrl("/dashboard"))
       .andReturn()
       .getRequest()
       .getSession();
@@ -78,7 +85,7 @@ public class LoginTests {
 
     mvc.perform(get("/dashboard").session(session))
       .andExpect(status().isOk())
-      .andExpect(MockMvcResultMatchers.view().name("iam/dashboard"))
+      .andExpect(view().name("iam/dashboard"))
       .andReturn();
 
     IamAccount adminAccount = accountRepo.findByUsername(ADMIN_USERNAME)
@@ -96,14 +103,36 @@ public class LoginTests {
         .param("password", "whatever")
         .param("submit", "Login"))
       .andExpect(status().is3xxRedirection())
-      .andExpect(MockMvcResultMatchers.redirectedUrl("/login?error=failure"));
+      .andExpect(redirectedUrl("/login?error=failure"));
 
     mvc.perform(post(LOGIN_URL)
         .param("username", "whatever")
         .param("password", "whatever")
         .param("submit", "Login"))
       .andExpect(status().is3xxRedirection())
-      .andExpect(MockMvcResultMatchers.redirectedUrl("/login?error=failure"));
+      .andExpect(redirectedUrl("/login?error=failure"));
     //@formatter:on
+  }
+
+  @Test
+  public void loginRedirectsToSignAupPageWhenNeeded() throws Exception {
+    IamAup aup = new IamAup();
+
+    aup.setCreationTime(new Date());
+    aup.setLastUpdateTime(new Date());
+    aup.setName("default-aup");
+    aup.setText("AUP text");
+    aup.setDescription("AUP description");
+    aup.setSignatureValidityInDays(0L);
+
+    aupRepo.save(aup);
+
+    mvc
+      .perform(
+          post(LOGIN_URL).param("username", ADMIN_USERNAME).param("password", ADMIN_PASSWORD).param(
+              "submit", "Login"))
+      .andExpect(status().isFound())
+      .andExpect(redirectedUrl("/iam/aup/sign"));
+
   }
 }

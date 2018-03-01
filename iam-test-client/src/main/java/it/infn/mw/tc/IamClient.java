@@ -29,6 +29,7 @@ import org.mitre.openid.connect.client.service.impl.StaticAuthRequestOptionsServ
 import org.mitre.openid.connect.client.service.impl.StaticClientConfigurationService;
 import org.mitre.openid.connect.client.service.impl.StaticSingleIssuerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.embedded.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,6 +38,7 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 
+import eu.emi.security.authn.x509.NamespaceCheckingMode;
 import eu.emi.security.authn.x509.X509CertChainValidatorExt;
 import eu.emi.security.authn.x509.impl.SocketFactoryCreator;
 
@@ -45,7 +47,13 @@ public class IamClient {
 
   @Autowired
   private IamClientConfig iamClientConfig;
-
+  
+  @Value("${iam.tls.version}")
+  private String tlsVersion;
+  
+  @Value("${iam.tls.ignoreNamespaceChecks}")
+  private boolean ignoreNamespaceChecks;
+  
   @Bean
   public FilterRegistrationBean disabledAutomaticOidcFilterRegistration(
       OIDCAuthenticationFilter f) {
@@ -121,15 +129,25 @@ public class IamClient {
 
   @Bean
   public X509CertChainValidatorExt certificateValidator() {
-
-    return new CertificateValidatorBuilder().lazyAnchorsLoading(false).build();
+    NamespaceCheckingMode namespaceChecks = CertificateValidatorBuilder.DEFAULT_NS_CHECKS;
+    
+    if (ignoreNamespaceChecks) {
+      namespaceChecks = NamespaceCheckingMode.IGNORE;
+    }
+    
+    return new CertificateValidatorBuilder()
+        .lazyAnchorsLoading(false)
+        .namespaceChecks(namespaceChecks)
+        .build();
   }
 
+  
+ 
   @Bean
   public SSLContext sslContext() {
 
     try {
-      SSLContext context = SSLContext.getInstance("TLSv1");
+      SSLContext context = SSLContext.getInstance(tlsVersion);
 
       X509TrustManager tm = SocketFactoryCreator.getSSLTrustManager(certificateValidator());
       SecureRandom r = new SecureRandom();

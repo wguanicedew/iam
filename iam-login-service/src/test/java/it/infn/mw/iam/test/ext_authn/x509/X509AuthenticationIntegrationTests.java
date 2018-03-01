@@ -2,23 +2,32 @@ package it.infn.mw.iam.test.ext_authn.x509;
 
 import static it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport.ACCOUNT_LINKING_DASHBOARD_ERROR_KEY;
 import static it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport.ACCOUNT_LINKING_DASHBOARD_MESSAGE_KEY;
+import static it.infn.mw.iam.authn.x509.IamX509PreauthenticationProcessingFilter.X509_AUTHN_REQUESTED_PARAM;
+import static it.infn.mw.iam.authn.x509.IamX509PreauthenticationProcessingFilter.X509_CAN_LOGIN_KEY;
 import static it.infn.mw.iam.authn.x509.IamX509PreauthenticationProcessingFilter.X509_CREDENTIAL_SESSION_KEY;
+import static java.lang.Boolean.TRUE;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.Instant;
 import java.util.Date;
 
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -72,8 +81,10 @@ public class X509AuthenticationIntegrationTests extends X509TestSupport {
   }
 
   @Test
-  public void testX509AuthenticationSuccessUserFoundLeadsToHomePage() throws Exception {
+  public void testX509AuthenticationSuccessButNotRequestedLeadsToLoginPage() throws Exception {
 
+    Instant now = Instant.now();
+    
     IamAccount testAccount = iamAccountRepo.findByUsername("test")
       .orElseThrow(() -> new AssertionError("Expected test user not found"));
 
@@ -87,9 +98,24 @@ public class X509AuthenticationIntegrationTests extends X509TestSupport {
 
     assertThat(resolvedAccount.getUsername(), equalTo("test"));
 
-    mvc.perform(MockMvcRequestBuilders.get("/").headers(test0SSLHeadersVerificationSuccess()))
-      .andExpect(status().isOk())
-      .andExpect(forwardedUrl("/WEB-INF/views/home.jsp"));
+    mvc.perform(get("/").headers(test0SSLHeadersVerificationSuccess()))
+      .andExpect(status().isFound())
+      .andExpect(redirectedUrl("http://localhost/login"))
+      .andExpect(request().sessionAttribute(X509_CREDENTIAL_SESSION_KEY, not(nullValue())))
+      .andExpect(request().attribute(X509_CAN_LOGIN_KEY, is(TRUE)));
+    
+    mvc.perform(get("/dashboard").param(X509_AUTHN_REQUESTED_PARAM, "true").headers(test0SSLHeadersVerificationSuccess()))
+    .andExpect(status().isFound())
+    .andExpect(redirectedUrl("/dashboard"))
+    .andExpect(authenticated().withUsername("test"));
+    
+    resolvedAccount =
+        iamAccountRepo.findByCertificateSubject(TEST_0_SUBJECT).orElseThrow(
+            () -> new AssertionError("Expected test user linked with subject " + TEST_0_SUBJECT));
+    
+    // Check that last login time is updated when loggin in with X.509 credentials
+    assertThat(resolvedAccount.getLastLoginTime().toInstant(), greaterThan(now));
+    
   }
 
   @Test
@@ -115,14 +141,14 @@ public class X509AuthenticationIntegrationTests extends X509TestSupport {
       .andExpect(redirectedUrl("http://localhost/login"));
   }
 
-  
+
   @Test
   public void testX509AccountLinkingRequiresAuthenticatedUser() throws Exception {
     mvc.perform(post("/iam/account-linking/X509").with(csrf().asHeader()))
-    .andExpect(status().isUnauthorized());
+      .andExpect(status().isUnauthorized());
   }
-  
-  
+
+
   @Test
   @WithMockUser(username = "test")
   public void testX509AccountLinkingWithoutCertFails() throws Exception {
@@ -188,8 +214,11 @@ public class X509AuthenticationIntegrationTests extends X509TestSupport {
 
     assertThat(linkedAccount.getUsername(), equalTo("test"));
 
-    mvc.perform(delete("/iam/account-linking/X509").param("certificateSubject", TEST_0_SUBJECT)
-      .with(csrf().asHeader())).andDo(print()).andExpect(status().isNoContent());
+    mvc
+      .perform(delete("/iam/account-linking/X509").param("certificateSubject", TEST_0_SUBJECT)
+        .with(csrf().asHeader()))
+      .andDo(print())
+      .andExpect(status().isNoContent());
 
     iamAccountRepo.findByCertificateSubject(TEST_0_SUBJECT).ifPresent(a -> {
       throw new AssertionError(
@@ -209,8 +238,10 @@ public class X509AuthenticationIntegrationTests extends X509TestSupport {
           "Found unexpected user linked with certificate subject " + TEST_0_SUBJECT);
     });
 
-    mvc.perform(delete("/iam/account-linking/X509").param("certificateSubject", TEST_0_SUBJECT)
-      .with(csrf().asHeader())).andExpect(status().isNoContent());
+    mvc
+      .perform(delete("/iam/account-linking/X509").param("certificateSubject", TEST_0_SUBJECT)
+        .with(csrf().asHeader()))
+      .andExpect(status().isNoContent());
 
     iamAccountRepo.findByCertificateSubject(TEST_0_SUBJECT).ifPresent(a -> {
       throw new AssertionError(
@@ -220,8 +251,11 @@ public class X509AuthenticationIntegrationTests extends X509TestSupport {
 
   @Test
   public void x509AccountUnlinkingFailsForUnauthenticatedUsers() throws Exception {
-    mvc.perform(delete("/iam/account-linking/X509").param("certificateSubject", TEST_0_SUBJECT)
-      .with(csrf().asHeader())).andDo(print()).andExpect(status().isUnauthorized());
+    mvc
+      .perform(delete("/iam/account-linking/X509").param("certificateSubject", TEST_0_SUBJECT)
+        .with(csrf().asHeader()))
+      .andDo(print())
+      .andExpect(status().isUnauthorized());
   }
 
 }

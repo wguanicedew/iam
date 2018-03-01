@@ -34,6 +34,7 @@ import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.test.TestUtils;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 import it.infn.mw.iam.test.util.WithMockOAuthUser;
+import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class})
@@ -44,6 +45,9 @@ public class ScimGroupProvisioningPatchReplaceTests extends ScimGroupPatchUtils 
   @Autowired
   private WebApplicationContext context;
 
+  @Autowired
+  private MockOAuth2Filter mockOAuth2Filter;
+  
   private ScimGroup engineers;
   private ScimUser lennon, lincoln;
 
@@ -64,6 +68,7 @@ public class ScimGroupProvisioningPatchReplaceTests extends ScimGroupPatchUtils 
     deleteScimResource(lennon);
     deleteScimResource(lincoln);
     deleteScimResource(engineers);
+    mockOAuth2Filter.cleanupSecurityContext();
   }
 
   @Test

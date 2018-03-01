@@ -63,6 +63,29 @@
   max-width: 250px;
 }
 
+#sign-aup-form {
+  padding-top: 2em;
+  margin: 0 auto;
+  max-width: 400px;
+}
+
+#sign-aup-form p {
+  font-size: larger;
+  text-align: justify;
+}
+
+#sign-aup-form .aup-text {
+    font-size: x-large;
+    text-align: justify;
+}
+
+#sign-aup-form .sign-aup-btns {
+    margin-top: 2em;
+    font-size: x-large;
+    text-align: center;
+}
+
+
 #login-error {
   margin: 0 auto;
   max-width: 400px;
@@ -201,4 +224,11 @@ body.skin-blue {
   margin-top: .2em;
   font-size: smaller;
   color: #4b646f;
+}
+
+#x509-authn-info {
+  max-width: 400px;
+  margin: 0 auto;
+  margin-top: 2em;
+  text-align: center;
 }

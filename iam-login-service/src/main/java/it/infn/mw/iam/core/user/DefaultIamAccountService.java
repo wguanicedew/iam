@@ -6,14 +6,17 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
-import javax.transaction.Transactional;
-
+import org.mitre.oauth2.model.OAuth2AccessTokenEntity;
+import org.mitre.oauth2.model.OAuth2RefreshTokenEntity;
+import org.mitre.oauth2.service.OAuth2TokenEntityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import it.infn.mw.iam.audit.events.account.AccountCreatedEvent;
 import it.infn.mw.iam.audit.events.account.AccountRemovedEvent;
@@ -37,16 +40,18 @@ public class DefaultIamAccountService implements IamAccountService {
   private final IamAuthoritiesRepository authoritiesRepo;
   private final PasswordEncoder passwordEncoder;
   private final ApplicationEventPublisher eventPublisher;
+  private final OAuth2TokenEntityService tokenService;
 
   @Autowired
   public DefaultIamAccountService(IamAccountRepository accountRepo,
       IamAuthoritiesRepository authoritiesRepo, PasswordEncoder passwordEncoder,
-      ApplicationEventPublisher eventPublisher) {
+      ApplicationEventPublisher eventPublisher, OAuth2TokenEntityService tokenService) {
 
     this.accountRepo = accountRepo;
     this.authoritiesRepo = authoritiesRepo;
     this.passwordEncoder = passwordEncoder;
     this.eventPublisher = eventPublisher;
+    this.tokenService = tokenService;
   }
 
   @Override
@@ -86,7 +91,7 @@ public class DefaultIamAccountService implements IamAccountService {
     newAccountSshKeysSanityChecks(account);
     newAccountSamlIdsSanityChecks(account);
     newAccountOidcIdsSanityChecks(account);
-    
+
     // Set creation time for certificates
     account.getX509Certificates().forEach(c -> {
       c.setCreationTime(now);
@@ -101,9 +106,28 @@ public class DefaultIamAccountService implements IamAccountService {
     return account;
   }
 
+
+  protected void deleteTokensForAccount(IamAccount account) {
+
+    Set<OAuth2AccessTokenEntity> accessTokens =
+        tokenService.getAllAccessTokensForUser(account.getUsername());
+
+    Set<OAuth2RefreshTokenEntity> refreshTokens = 
+        tokenService.getAllRefreshTokensForUser(account.getUsername());
+    
+    for (OAuth2AccessTokenEntity t: accessTokens) {
+      tokenService.revokeAccessToken(t);
+    }
+    
+    for (OAuth2RefreshTokenEntity t: refreshTokens) {
+      tokenService.revokeRefreshToken(t);
+    }
+  }
+
   @Override
   public IamAccount deleteAccount(IamAccount account) {
     checkNotNull(account, "cannot delete a null account");
+    deleteTokensForAccount(account);
     accountRepo.delete(account);
 
     eventPublisher.publishEvent(new AccountRemovedEvent(this, account,
@@ -222,8 +246,9 @@ public class DefaultIamAccountService implements IamAccountService {
     checkArgument(!isNullOrEmpty(cert.getLabel()), "null or empty X.509 certificate label");
 
     accountRepo.findByCertificateSubject(cert.getSubjectDn()).ifPresent(c -> {
-      throw new CredentialAlreadyBoundException(String
-        .format("X509 certificate with subject '%s' is already bound to another user", cert.getSubjectDn()));
+      throw new CredentialAlreadyBoundException(
+          String.format("X509 certificate with subject '%s' is already bound to another user",
+              cert.getSubjectDn()));
     });
   }
 

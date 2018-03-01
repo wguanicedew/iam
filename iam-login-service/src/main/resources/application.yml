@@ -97,16 +97,17 @@ notification:
 task:
   tokenCleanupPeriodMsec: ${IAM_TOKEN_CLEANUP_PERIOD_MSEC:300000}
   approvalCleanupPeriodMsec: ${IAM_APPROVAL_CLEANUP_PERIOD_MSEC:300000}
+  deviceCodeCleanupPeriodMsec: ${IAM_DEVICE_CODE_CLEANUP_PERIOD_MSEC:300000}
 
-endpoints:
-  healthMail:
-    path: /health/mail
-  externalService:
-    path: /health/external
-    
 health:
-  timeout: 5000
-  googleEndpoint: http://www.google.it
+  externalServiceProbe:
+    enabled: ${IAM_HEALTH_EXTERNAL_SERVICE_PROBE_ENABLED:true}
+    endpoint: ${IAM_HEALTH_EXTERNAL_SERVICE_PROBE_ENDPOINT:http://www.google.it}
+    timeout: ${IAM_HEALTH_EXTERNAL_SERVICE_PROBE_TIMEOUT:5000}
+    path: /health/external
+  mailProbe:
+    enabled: ${IAM_HEALTH_MAIL_PROBE_ENABLED:true}
+    path: /health/mail
     
 accountLinking:
   disable: ${IAM_ACCOUNT_LINKING_DISABLE:false}

@@ -10,7 +10,10 @@ server:
 
 iam:
     issuer: ${IAM_CLIENT_ISSUER:http://localhost:8080/}
-
+    tls:
+      version: ${IAM_CLIENT_TLS_VERSION:TLSv1.2}
+      ignoreNamespaceChecks: ${IAM_CLIENT_TLS_IGNORE_NAMESPACE_CHECKS:false}
+    
     client:
       clientId: ${IAM_CLIENT_ID:client}
       clientSecret: ${IAM_CLIENT_SECRET:secret}

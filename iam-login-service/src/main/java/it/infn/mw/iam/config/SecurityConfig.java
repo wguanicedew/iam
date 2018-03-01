@@ -40,8 +40,10 @@ import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.filter.GenericFilterBean;
 
+import it.infn.mw.iam.api.account.AccountUtils;
+import it.infn.mw.iam.api.aup.AUPSignatureCheckService;
+import it.infn.mw.iam.authn.EnforceAupSignatureSuccessHandler;
 import it.infn.mw.iam.authn.RootIsDashboardSuccessHandler;
-import it.infn.mw.iam.authn.TimestamperSuccessHandler;
 import it.infn.mw.iam.authn.oidc.OidcAccessDeniedHandler;
 import it.infn.mw.iam.authn.oidc.OidcAuthenticationProvider;
 import it.infn.mw.iam.authn.oidc.OidcClientFilter;
@@ -86,6 +88,12 @@ public class SecurityConfig {
     private IamAccountRepository accountRepo;
 
     @Autowired
+    private AUPSignatureCheckService aupSignatureCheckService;
+    
+    @Autowired
+    private AccountUtils accountUtils;
+
+    @Autowired
     public void configureGlobal(final AuthenticationManagerBuilder auth) throws Exception {
       // @formatter:off
       auth
@@ -111,7 +119,8 @@ public class SecurityConfig {
 
     public IamX509PreauthenticationProcessingFilter iamX509Filter() throws Exception {
       return new IamX509PreauthenticationProcessingFilter(x509CredentialExtractor,
-          iamX509AuthenticationProvider());
+          iamX509AuthenticationProvider(), successHandler());
+
     }
 
     @Override
@@ -121,7 +130,7 @@ public class SecurityConfig {
 
       http.requestMatchers()
         .antMatchers("/", "/login**", "/logout", "/authorize", "/manage/**", "/dashboard**", "/register",
-            "/reset-session")
+            "/reset-session", "/device/**")
         .and()
         .sessionManagement()
           .enableSessionUrlRewriting(false)
@@ -131,6 +140,7 @@ public class SecurityConfig {
             .antMatchers("/register").permitAll()
             .antMatchers("/authorize**").permitAll()
             .antMatchers("/reset-session").permitAll()
+            .antMatchers("/device/**").authenticated()
             .antMatchers("/").authenticated()
         .and()
           .formLogin()
@@ -160,10 +170,12 @@ public class SecurityConfig {
     }
 
     public AuthenticationSuccessHandler successHandler() {
-
-      return new TimestamperSuccessHandler(
-          new RootIsDashboardSuccessHandler(iamBaseUrl, new HttpSessionRequestCache()),
-          accountRepo);
+      AuthenticationSuccessHandler delegate= new RootIsDashboardSuccessHandler(iamBaseUrl, 
+          new HttpSessionRequestCache());
+          
+      
+      return new EnforceAupSignatureSuccessHandler(delegate, aupSignatureCheckService,
+          accountUtils, accountRepo);
     }
   }
 
@@ -702,7 +714,7 @@ public class SecurityConfig {
       // @formatter:on
     }
   }
-  
+
   @Configuration
   @Order(25)
   public static class ScopePoliciesEndpointConfig extends WebSecurityConfigurerAdapter {
@@ -714,7 +726,7 @@ public class SecurityConfig {
 
     @Autowired
     private CorsFilter corsFilter;
-    
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
       http.requestMatchers()
@@ -776,6 +788,86 @@ public class SecurityConfig {
     }
   }
 
+  @Configuration
+  @Order(27)
+  public static class DeviceCodeEnpointConfig extends WebSecurityConfigurerAdapter {
+
+    @Autowired
+    @Qualifier("clientUserDetailsService")
+    private UserDetailsService userDetailsService;
+
+    @Autowired
+    private CorsFilter corsFilter;
+
+    @Autowired
+    private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
+
+    @Override
+    protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
+
+      auth.userDetailsService(userDetailsService);
+    }
+
+    @Override
+    protected void configure(final HttpSecurity http) throws Exception {
+
+      // @formatter:off
+      http.antMatcher("/devicecode/**")
+        .httpBasic()
+          .authenticationEntryPoint(authenticationEntryPoint)
+        .and()
+          .addFilterBefore(corsFilter, SecurityContextPersistenceFilter.class)
+          .sessionManagement()
+            .sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+        .csrf()
+          .disable()
+        .authorizeRequests()
+          .anyRequest()
+            .fullyAuthenticated();
+      // @formatter:on
+    }
+
+  }
+
+  @Configuration
+  @Order(28)
+  public static class AupApiEndpointConfig extends WebSecurityConfigurerAdapter {
+    
+    private static final String AUP_PATH = "/iam/aup";
+    @Autowired
+    private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
+
+    @Autowired
+    private OAuth2AuthenticationProcessingFilter resourceFilter;
+
+    @Autowired
+    private CorsFilter corsFilter;
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+      http.requestMatchers()
+        .antMatchers("/iam/aup/**")
+        .and()
+        .exceptionHandling()
+        .authenticationEntryPoint(authenticationEntryPoint)
+        .and()
+        .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
+        .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
+        .sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.NEVER)
+        .and()
+        .authorizeRequests()
+        .antMatchers(HttpMethod.GET, AUP_PATH)
+        .permitAll()
+        .antMatchers(HttpMethod.POST, AUP_PATH)
+        .authenticated()
+        .antMatchers(HttpMethod.DELETE, AUP_PATH)
+        .authenticated()
+        .and()
+        .csrf()
+        .disable();
+    }
+  }
   @Configuration
   @Order(Ordered.HIGHEST_PRECEDENCE)
   @Profile("dev")

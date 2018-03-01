@@ -40,8 +40,10 @@ else
 fi
 
 GIT_COMMIT_SHA=$(git rev-parse --short HEAD)
+GIT_BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD | sed 's#/#_#g')
 
 docker tag ${IAM_LOGIN_SERVICE_IMAGE} ${IAM_LOGIN_SERVICE_IMAGE}:${POM_VERSION}-${GIT_COMMIT_SHA}
 docker tag ${IAM_LOGIN_SERVICE_IMAGE} ${IAM_LOGIN_SERVICE_IMAGE}:${POM_VERSION}-latest
+docker tag ${IAM_LOGIN_SERVICE_IMAGE} ${IAM_LOGIN_SERVICE_IMAGE}:${GIT_BRANCH_NAME}-latest
 
 rm iam-login-service.war

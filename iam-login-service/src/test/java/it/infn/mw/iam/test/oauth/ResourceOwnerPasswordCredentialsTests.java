@@ -1,7 +1,9 @@
 package it.infn.mw.iam.test.oauth;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -10,11 +12,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import javax.transaction.Transactional;
+import java.util.Date;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mitre.oauth2.service.OAuth2TokenEntityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.http.MediaType;
@@ -23,6 +26,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,6 +34,13 @@ import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
 
 import it.infn.mw.iam.IamLoginService;
+import it.infn.mw.iam.core.user.IamAccountService;
+import it.infn.mw.iam.persistence.model.IamAccount;
+import it.infn.mw.iam.persistence.model.IamAup;
+import it.infn.mw.iam.persistence.repository.IamAccountRepository;
+import it.infn.mw.iam.persistence.repository.IamAupRepository;
+import it.infn.mw.iam.persistence.repository.IamOAuthAccessTokenRepository;
+import it.infn.mw.iam.persistence.repository.IamOAuthRefreshTokenRepository;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {IamLoginService.class})
@@ -48,6 +59,24 @@ public class ResourceOwnerPasswordCredentialsTests {
   @Autowired
   private ObjectMapper mapper;
 
+  @Autowired
+  private IamAupRepository aupRepo;
+
+  @Autowired
+  private IamAccountService accountService;
+
+  @Autowired
+  private IamAccountRepository accountRepo;
+
+  @Autowired
+  private OAuth2TokenEntityService tokenService;
+  
+  @Autowired
+  private IamOAuthAccessTokenRepository accessTokenRepo;
+  
+  @Autowired
+  private IamOAuthRefreshTokenRepository refreshTokenRepo;
+
   private MockMvc mvc;
 
   @Before
@@ -56,6 +85,9 @@ public class ResourceOwnerPasswordCredentialsTests {
       .apply(springSecurity())
       .alwaysDo(print())
       .build();
+    
+    accessTokenRepo.deleteAll();
+    refreshTokenRepo.deleteAll();
   }
 
   @Test
@@ -83,6 +115,37 @@ public class ResourceOwnerPasswordCredentialsTests {
         .param("scope", SCOPE))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.scope", equalTo(SCOPE)));
+    // @formatter:on
+  }
+
+  @Test
+  public void testResourceOwnerPasswordCredentialsFailsIfAupIsNotSigned() throws Exception {
+
+    IamAup aup = new IamAup();
+
+    aup.setCreationTime(new Date());
+    aup.setLastUpdateTime(new Date());
+    aup.setName("default-aup");
+    aup.setText("AUP text");
+    aup.setDescription("AUP description");
+    aup.setSignatureValidityInDays(0L);
+
+    aupRepo.save(aup);
+
+
+    String clientId = "password-grant";
+    String clientSecret = "secret";
+
+    // @formatter:off
+    mvc.perform(post("/token")
+        .with(httpBasic(clientId, clientSecret))
+        .param("grant_type", GRANT_TYPE)
+        .param("username", USERNAME)
+        .param("password", PASSWORD)
+        .param("scope", SCOPE))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.error").value("invalid_grant"))
+      .andExpect(jsonPath("$.error_description").value("User 'test' needs to sign AUP for this organization in order to proceed."));
     // @formatter:on
   }
 
@@ -171,7 +234,35 @@ public class ResourceOwnerPasswordCredentialsTests {
     String idToken = tokenResponse.getAdditionalInformation().get("id_token").toString();
 
     JWT token = JWTParser.parse(idToken);
-    System.out.println(token.getJWTClaimsSet());
     assertNotNull(token.getJWTClaimsSet().getClaim("auth_time"));
+  }
+
+  @Test
+  public void testTokensAreCleanedUpWhenAccountRemoved() throws Exception {
+
+    String clientId = "password-grant";
+    String clientSecret = "secret";
+
+    // @formatter:off
+    mvc.perform(post("/token")
+        .with(httpBasic(clientId, clientSecret))
+        .param("grant_type", GRANT_TYPE)
+        .param("username", USERNAME)
+        .param("password", PASSWORD)
+        .param("scope", "openid profile offline_access"))
+      .andExpect(status().isOk());
+    // @formatter:on
+
+    assertThat(tokenService.getAllAccessTokensForUser(USERNAME), hasSize(1));
+    assertThat(tokenService.getAllRefreshTokensForUser(USERNAME), hasSize(1));
+
+    IamAccount testAccount = accountRepo.findByUsername(USERNAME)
+      .orElseThrow(() -> new AssertionError(String.format("Expected %s user not found", USERNAME)));
+    
+    accountService.deleteAccount(testAccount);
+
+    assertThat(tokenService.getAllAccessTokensForUser(USERNAME), hasSize(0));
+    assertThat(tokenService.getAllRefreshTokensForUser(USERNAME), hasSize(0));
+    
   }
 }

@@ -1,24 +1,13 @@
 package it.infn.mw.iam.test.api.tokens;
 
-import static it.infn.mw.iam.api.tokens.TokensControllerSupport.CONTENT_TYPE;
+import static it.infn.mw.iam.api.tokens.TokensControllerSupport.APPLICATION_JSON_CONTENT_TYPE;
 import static it.infn.mw.iam.api.tokens.TokensControllerSupport.TOKENS_MAX_PAGE_SIZE;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.google.common.collect.Lists;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import it.infn.mw.iam.IamLoginService;
-import it.infn.mw.iam.api.scim.converter.ScimResourceLocationProvider;
-import it.infn.mw.iam.api.tokens.model.RefreshToken;
-import it.infn.mw.iam.api.tokens.model.TokensListResponse;
-import it.infn.mw.iam.persistence.model.IamAccount;
-import it.infn.mw.iam.persistence.repository.IamOAuthRefreshTokenRepository;
-import it.infn.mw.iam.test.core.CoreControllerTestSupport;
-import it.infn.mw.iam.test.util.WithMockOAuthUser;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
@@ -31,7 +20,19 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import java.util.List;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
+
+import it.infn.mw.iam.IamLoginService;
+import it.infn.mw.iam.api.scim.converter.ScimResourceLocationProvider;
+import it.infn.mw.iam.api.tokens.model.RefreshToken;
+import it.infn.mw.iam.api.tokens.model.TokensListResponse;
+import it.infn.mw.iam.persistence.model.IamAccount;
+import it.infn.mw.iam.persistence.repository.IamOAuthRefreshTokenRepository;
+import it.infn.mw.iam.test.core.CoreControllerTestSupport;
+import it.infn.mw.iam.test.util.WithMockOAuthUser;
+import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class})
@@ -44,6 +45,9 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
   public static final String TEST_CLIENT_ID = "token-lookup-client";
   public static final String TEST_CLIENT2_ID = "password-grant";
   public static final int FAKE_TOKEN_ID = 12345;
+  private static final String TESTUSER_USERNAME = "test_102";
+  private static final String TESTUSER2_USERNAME = "test_103";
+
 
   @Autowired
   private ScimResourceLocationProvider scimResourceLocationProvider;
@@ -53,10 +57,10 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
 
   @Autowired
   private IamOAuthRefreshTokenRepository tokenRepository;
-
-  private static final String TESTUSER_USERNAME = "test_102";
-  private static final String TESTUSER2_USERNAME = "test_103";
-
+  
+  @Autowired
+  private MockOAuth2Filter mockOAuth2Filter;
+  
   @Before
   public void setup() {
     clearAllTokens();
@@ -66,13 +70,14 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
   @After
   public void teardown() {
     clearAllTokens();
+    mockOAuth2Filter.cleanupSecurityContext();
   }
 
   @Test
   public void getEmptyRefreshTokenList() throws Exception {
 
     TokensListResponse<RefreshToken> atl = mapper.readValue(
-        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(CONTENT_TYPE))
+        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE))
             .andExpect(status().isOk())
             .andReturn()
             .getResponse()
@@ -90,7 +95,7 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
     buildAccessToken(loadTestClient(TEST_CLIENT_ID), TESTUSER_USERNAME, SCOPES);
 
     TokensListResponse<RefreshToken> atl = mapper.readValue(
-        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(CONTENT_TYPE).param("count", "0"))
+        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE).param("count", "0"))
             .andExpect(status().isOk())
             .andReturn()
             .getResponse()
@@ -111,7 +116,7 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
     OAuth2RefreshTokenEntity at = buildAccessToken(client, TESTUSER_USERNAME, SCOPES).getRefreshToken();
 
     TokensListResponse<RefreshToken> atl = mapper.readValue(
-        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(CONTENT_TYPE).param("attributes", "user,idToken"))
+        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE).param("attributes", "user,idToken"))
             .andExpect(status().isOk())
             .andReturn()
             .getResponse()
@@ -148,7 +153,7 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
     refreshTokens.add(buildAccessToken(client2, TESTUSER_USERNAME, SCOPES).getRefreshToken());
 
     TokensListResponse<RefreshToken> atl = mapper.readValue(
-        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(CONTENT_TYPE)
+        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE)
             .param("clientId", client1.getClientId()))
             .andExpect(status().isOk())
             .andReturn()
@@ -188,7 +193,7 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
     refreshTokens.add(buildAccessToken(client, TESTUSER2_USERNAME, SCOPES).getRefreshToken());
 
     TokensListResponse<RefreshToken> atl = mapper.readValue(
-        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(CONTENT_TYPE)
+        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE)
             .param("userId", user1.getUsername()))
             .andExpect(status().isOk())
             .andReturn()
@@ -231,7 +236,7 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
     refreshTokens.add(buildAccessToken(client2, TESTUSER2_USERNAME, SCOPES).getRefreshToken());
 
     TokensListResponse<RefreshToken> atl = mapper.readValue(
-        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(CONTENT_TYPE)
+        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE)
             .param("userId", user1.getUsername())
             .param("clientId", client1.getClientId()))
             .andExpect(status().isOk())
@@ -269,7 +274,7 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
 
     /* get first page */
     TokensListResponse<RefreshToken> atl = mapper.readValue(
-        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(CONTENT_TYPE))
+        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE))
             .andExpect(status().isOk())
             .andReturn()
             .getResponse()
@@ -291,7 +296,7 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
 
     /* get second page */
     TokensListResponse<RefreshToken> atl = mapper.readValue(
-        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(CONTENT_TYPE).param("startIndex",
+        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE).param("startIndex",
             String.valueOf(TOKENS_MAX_PAGE_SIZE)))
             .andExpect(status().isOk())
             .andReturn()
@@ -315,7 +320,7 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
     assertThat(tokenRepository.count(), equalTo(1L));
 
     TokensListResponse<RefreshToken> atl = mapper.readValue(
-        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(CONTENT_TYPE)
+        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE)
             .param("userId", "1%; DELETE FROM access_token; SELECT * FROM refresh_token WHERE userId LIKE %"))
             .andExpect(status().isOk())
             .andReturn()

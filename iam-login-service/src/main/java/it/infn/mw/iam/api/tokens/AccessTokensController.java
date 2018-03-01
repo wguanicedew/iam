@@ -34,7 +34,7 @@ public class AccessTokensController extends TokensControllerSupport {
   @Autowired
   private TokenService<AccessToken> tokenService;
 
-  @RequestMapping(method = RequestMethod.GET, produces = CONTENT_TYPE)
+  @RequestMapping(method = RequestMethod.GET, produces = APPLICATION_JSON_CONTENT_TYPE)
   public MappingJacksonValue listAccessTokens(@RequestParam(required = false) Integer count,
       @RequestParam(required = false) Integer startIndex,
       @RequestParam(required = false) String userId,
@@ -44,6 +44,12 @@ public class AccessTokensController extends TokensControllerSupport {
     TokensPageRequest pr = buildTokensPageRequest(count, startIndex);
     TokensListResponse<AccessToken> results = getFilteredList(pr, userId, clientId);
     return filterAttributes(results, attributes);
+  }
+  
+  @RequestMapping(method = RequestMethod.DELETE)
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void deleteAllTokens() {
+    tokenService.deleteAllTokens();
   }
 
   private TokensListResponse<AccessToken> getFilteredList(TokensPageRequest pageRequest,
@@ -64,7 +70,7 @@ public class AccessTokensController extends TokensControllerSupport {
     return tokenService.getAllTokens(pageRequest);
   }
 
-  @RequestMapping(method = RequestMethod.GET, value = "/{id}", produces = CONTENT_TYPE)
+  @RequestMapping(method = RequestMethod.GET, value = "/{id}", produces = APPLICATION_JSON_CONTENT_TYPE)
   public AccessToken getAccessToken(@PathVariable("id") Long id) {
 
     return tokenService.getTokenById(id);

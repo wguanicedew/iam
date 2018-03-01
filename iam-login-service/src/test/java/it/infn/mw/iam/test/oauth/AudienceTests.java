@@ -1,41 +1,80 @@
 package it.infn.mw.iam.test.oauth;
 
-import static it.infn.mw.iam.test.TestUtils.passwordTokenGetter;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.text.ParseException;
-
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.boot.test.WebIntegrationTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.WebApplicationContext;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
 
 import it.infn.mw.iam.IamLoginService;
-import it.infn.mw.iam.test.TestUtils;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = IamLoginService.class)
-@WebIntegrationTest
+@WebAppConfiguration
+@Transactional
 public class AudienceTests {
 
   public static final String TEST_USERNAME = "test";
   public static final String TEST_PASSWORD = "password";
 
-  @Test
-  public void testAudienceRequestPasswordFlow() throws ParseException {
+  public static final String PASSWORD_GRANT_CLIENT_ID = "password-grant";
+  public static final String PASSWORD_GRANT_CLIENT_SECRET = "secret";
+  
+  public static final String CLIENT_CRED_GRANT_CLIENT_ID = "client-cred";
+  public static final String CLIENT_CRED_GRANT_CLIENT_SECRET = "secret";
 
-    String accessToken = passwordTokenGetter().username(TEST_USERNAME)
-      .password(TEST_PASSWORD)
-      .audience("example-audience")
-      .getAccessToken();
+  @Autowired
+  private WebApplicationContext context;
+
+  @Autowired
+  private ObjectMapper mapper;
+
+  private MockMvc mvc;
+
+  @Before
+  public void before() {
+    mvc = MockMvcBuilders.webAppContextSetup(context)
+        .alwaysDo(print())
+        .apply(springSecurity())
+        .build();
+  }
+  @Test
+  public void testAudienceRequestPasswordFlow() throws Exception {
+
+    String tokenResponseJson = mvc
+      .perform(post("/token").param("grant_type", "password")
+        .param("client_id", PASSWORD_GRANT_CLIENT_ID)
+        .param("client_secret", PASSWORD_GRANT_CLIENT_SECRET)
+        .param("username", TEST_USERNAME)
+        .param("password", TEST_PASSWORD)
+        .param("scope", "openid profile")
+        .param("audience", "example-audience"))
+      .andExpect(status().isOk())
+      .andReturn()
+      .getResponse()
+      .getContentAsString();
+    
+    String accessToken = mapper.readTree(tokenResponseJson).get("access_token").asText();
 
     JWT token = JWTParser.parse(accessToken);
 
@@ -47,11 +86,19 @@ public class AudienceTests {
   }
 
   @Test
-  public void testAudienceRequestClientCredentialsFlow() throws ParseException {
-
-    String accessToken =
-        TestUtils.clientCredentialsTokenGetter().audience("example-audience").getAccessToken();
-
+  public void testAudienceRequestClientCredentialsFlow() throws Exception {
+    
+    String tokenResponseJson = mvc
+        .perform(post("/token").param("grant_type", "client_credentials")
+          .param("client_id", CLIENT_CRED_GRANT_CLIENT_ID)
+          .param("client_secret", CLIENT_CRED_GRANT_CLIENT_SECRET)
+          .param("audience", "example-audience"))
+        .andExpect(status().isOk())
+        .andReturn()
+        .getResponse()
+        .getContentAsString();
+    
+    String accessToken = mapper.readTree(tokenResponseJson).get("access_token").asText();
     JWT token = JWTParser.parse(accessToken);
 
     JWTClaimsSet claims = token.getJWTClaimsSet();

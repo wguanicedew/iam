@@ -19,17 +19,17 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.google.common.collect.Maps;
 
-import it.infn.mw.iam.actuator.endpoint.ExternalServiceHealthEndpoint;
+import it.infn.mw.iam.actuator.endpoint.ExternalServiceProbeEndpoint;
 
 @Component
-@ConfigurationProperties(prefix = "endpoints.externalService")
+@ConfigurationProperties(prefix = "health.externalServiceProbe")
 public class ExternalServiceHealthMvcEndpoint
-    extends AbstractEndpointMvcAdapter<ExternalServiceHealthEndpoint> {
+    extends AbstractEndpointMvcAdapter<ExternalServiceProbeEndpoint> {
 
   private Map<String, HttpStatus> statusMapping = Maps.newLinkedHashMap();
 
   @Autowired
-  public ExternalServiceHealthMvcEndpoint(ExternalServiceHealthEndpoint delegate) {
+  public ExternalServiceHealthMvcEndpoint(ExternalServiceProbeEndpoint delegate) {
     super(delegate);
     statusMapping.put("DOWN", HttpStatus.SERVICE_UNAVAILABLE);
   }

@@ -1,21 +1,14 @@
 package it.infn.mw.iam.test.api.tokens;
 
-import static it.infn.mw.iam.api.tokens.TokensControllerSupport.CONTENT_TYPE;
+import static it.infn.mw.iam.api.tokens.TokensControllerSupport.APPLICATION_JSON_CONTENT_TYPE;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import it.infn.mw.iam.IamLoginService;
-import it.infn.mw.iam.api.scim.converter.ScimResourceLocationProvider;
-import it.infn.mw.iam.api.tokens.model.RefreshToken;
-import it.infn.mw.iam.persistence.model.IamAccount;
-import it.infn.mw.iam.test.core.CoreControllerTestSupport;
-import it.infn.mw.iam.test.util.WithMockOAuthUser;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 import org.junit.After;
 import org.junit.Before;
@@ -28,8 +21,16 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import it.infn.mw.iam.IamLoginService;
+import it.infn.mw.iam.api.scim.converter.ScimResourceLocationProvider;
+import it.infn.mw.iam.api.tokens.model.RefreshToken;
+import it.infn.mw.iam.persistence.model.IamAccount;
+import it.infn.mw.iam.test.core.CoreControllerTestSupport;
+import it.infn.mw.iam.test.util.WithMockOAuthUser;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class})
@@ -69,17 +70,17 @@ public class RefreshTokenGetRevokeTests extends TestTokensUtils {
     ClientDetailsEntity client = loadTestClient(TEST_CLIENT_ID);
     IamAccount user = loadTestUser(TESTUSER_USERNAME);
 
-    OAuth2RefreshTokenEntity rt = buildAccessToken(client, TESTUSER_USERNAME, SCOPES).getRefreshToken();
+    OAuth2RefreshTokenEntity rt =
+        buildAccessToken(client, TESTUSER_USERNAME, SCOPES).getRefreshToken();
 
     String path = String.format("%s/%d", REFRESH_TOKENS_BASE_PATH, rt.getId());
 
-    RefreshToken remoteRt = mapper.readValue(
-        mvc.perform(get(path).contentType(CONTENT_TYPE))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString(),
-        RefreshToken.class);
+    RefreshToken remoteRt =
+        mapper.readValue(mvc.perform(get(path).contentType(APPLICATION_JSON_CONTENT_TYPE))
+          .andExpect(status().isOk())
+          .andReturn()
+          .getResponse()
+          .getContentAsString(), RefreshToken.class);
 
     System.out.println(remoteRt);
 
@@ -101,7 +102,8 @@ public class RefreshTokenGetRevokeTests extends TestTokensUtils {
       UnsupportedEncodingException, IOException, Exception {
 
     String path = String.format("%s/%d", REFRESH_TOKENS_BASE_PATH, FAKE_TOKEN_ID);
-    mvc.perform(get(path).contentType(CONTENT_TYPE)).andExpect(status().isNotFound());
+    mvc.perform(get(path).contentType(APPLICATION_JSON_CONTENT_TYPE))
+      .andExpect(status().isNotFound());
   }
 
   @Test
@@ -109,19 +111,37 @@ public class RefreshTokenGetRevokeTests extends TestTokensUtils {
       UnsupportedEncodingException, IOException, Exception {
 
     ClientDetailsEntity client = loadTestClient(TEST_CLIENT_ID);
-    OAuth2RefreshTokenEntity rt = buildAccessToken(client, TESTUSER_USERNAME, SCOPES).getRefreshToken();
+    OAuth2RefreshTokenEntity rt =
+        buildAccessToken(client, TESTUSER_USERNAME, SCOPES).getRefreshToken();
     String path = String.format("%s/%d", REFRESH_TOKENS_BASE_PATH, rt.getId());
 
-    mvc.perform(delete(path).contentType(CONTENT_TYPE)).andExpect(status().isNoContent());
+    mvc.perform(delete(path).contentType(APPLICATION_JSON_CONTENT_TYPE))
+      .andExpect(status().isNoContent());
 
     assertThat(tokenService.getRefreshTokenById(rt.getId()), equalTo(null));
   }
 
   @Test
-  public void revokeAccessTokenNotFound() throws JsonParseException, JsonMappingException,
+  public void revokeRefreshTokenNotFound() throws JsonParseException, JsonMappingException,
       UnsupportedEncodingException, IOException, Exception {
 
     String path = String.format("%s/%d", REFRESH_TOKENS_BASE_PATH, FAKE_TOKEN_ID);
-    mvc.perform(delete(path).contentType(CONTENT_TYPE)).andExpect(status().isNotFound());
+    mvc.perform(delete(path).contentType(APPLICATION_JSON_CONTENT_TYPE))
+      .andExpect(status().isNotFound());
+  }
+
+  @Test
+  public void testRevokeAllTokens() throws Exception {
+    ClientDetailsEntity client = loadTestClient(TEST_CLIENT_ID);
+
+    buildAccessToken(client, TESTUSER_USERNAME, SCOPES).getRefreshToken();
+    buildAccessToken(client, TESTUSER_USERNAME, SCOPES).getRefreshToken();
+    
+    assertThat(refreshTokenRepository.count(), equalTo(2L));
+    
+    mvc.perform(delete(REFRESH_TOKENS_BASE_PATH)).andExpect(status().isNoContent());
+    
+    assertThat(refreshTokenRepository.count(), equalTo(0L));
+
   }
 }

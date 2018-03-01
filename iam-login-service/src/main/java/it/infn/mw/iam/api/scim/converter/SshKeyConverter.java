@@ -10,7 +10,7 @@ import it.infn.mw.iam.util.ssh.RSAPublicKeyUtils;
 public class SshKeyConverter implements Converter<ScimSshKey, IamSshKey> {
 
   @Override
-  public IamSshKey fromScim(ScimSshKey scim) {
+  public IamSshKey entityFromDto(ScimSshKey scim) {
 
     IamSshKey sshKey = new IamSshKey();
 
@@ -28,7 +28,7 @@ public class SshKeyConverter implements Converter<ScimSshKey, IamSshKey> {
   }
 
   @Override
-  public ScimSshKey toScim(IamSshKey entity) {
+  public ScimSshKey dtoFromEntity(IamSshKey entity) {
 
     return ScimSshKey.builder()
       .display(entity.getLabel())

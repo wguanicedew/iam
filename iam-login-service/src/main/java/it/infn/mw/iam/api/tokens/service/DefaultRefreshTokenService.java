@@ -1,12 +1,10 @@
 package it.infn.mw.iam.api.tokens.service;
 
-import it.infn.mw.iam.api.tokens.converter.TokensConverter;
-import it.infn.mw.iam.api.tokens.exception.TokenNotFoundException;
-import it.infn.mw.iam.api.tokens.model.RefreshToken;
-import it.infn.mw.iam.api.tokens.model.TokensListResponse;
-import it.infn.mw.iam.api.tokens.service.paging.OffsetPageable;
-import it.infn.mw.iam.api.tokens.service.paging.TokensPageRequest;
-import it.infn.mw.iam.persistence.repository.IamOAuthRefreshTokenRepository;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 import org.mitre.oauth2.model.OAuth2RefreshTokenEntity;
 import org.mitre.oauth2.service.impl.DefaultOAuth2ProviderTokenService;
@@ -14,11 +12,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import it.infn.mw.iam.api.tokens.converter.TokensConverter;
+import it.infn.mw.iam.api.tokens.exception.TokenNotFoundException;
+import it.infn.mw.iam.api.tokens.model.RefreshToken;
+import it.infn.mw.iam.api.tokens.model.TokensListResponse;
+import it.infn.mw.iam.api.tokens.service.paging.OffsetPageable;
+import it.infn.mw.iam.api.tokens.service.paging.TokensPageRequest;
+import it.infn.mw.iam.persistence.repository.IamOAuthRefreshTokenRepository;
 
 @Service
 public class DefaultRefreshTokenService implements TokenService<RefreshToken> {
@@ -119,5 +119,10 @@ public class DefaultRefreshTokenService implements TokenService<RefreshToken> {
     return buildTokensListResponse(
         tokenRepository.findValidRefreshTokensForUserAndClient(userId, clientId, new Date(), op),
         op);
+  }
+
+  @Override
+  public void deleteAllTokens() {
+    tokenRepository.deleteAll();
   }
 }

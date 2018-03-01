@@ -1,11 +1,9 @@
 <!-- Profile image -->
 <div ng-if="$ctrl.user.photos[0].value">
-    <img class="profile-user-img big-profile-user-img light-bordered-profile-img img-responsive img-circle" ng-src="{{$ctrl.user.photos[0].value}}"
-        alt="User profile picture" />
+    <img class="profile-user-img big-profile-user-img light-bordered-profile-img img-responsive img-circle" ng-src="{{$ctrl.user.photos[0].value}}" alt="User profile picture" />
 </div>
 <div ng-if="!$ctrl.user.photos">
-    <img class="profile-user-img big-profile-user-img light-bordered-profile-img img-responsive img-circle" ng-src="resources/iam/img/default-avatar.png"
-        alt="User profile picture" />
+    <img class="profile-user-img big-profile-user-img light-bordered-profile-img img-responsive img-circle" ng-src="resources/iam/img/default-avatar.png" alt="User profile picture" />
 </div>
 <!-- Full name -->
 <h3 class="profile-username text-center">{{$ctrl.user.name.formatted}}</h3>
@@ -51,6 +49,17 @@
                 </td>
                 <td class="text-right">
                     <a>{{$ctrl.user.meta.lastModified | relativeDate }}</a>
+                </td>
+            </tr>
+            <tr ng-if="$ctrl.aupIsEnabled()">
+                <td class="text-bold text-left">
+                    Signed AUP
+                </td>
+                <td class="text-right" ng-if="$ctrl.hasAupSignatureTime()">
+                    <a>{{$ctrl.user.aupSignature.signatureTime | relativeDate }}</a>
+                </td>
+                <td class="text-right" ng-if="!$ctrl.hasAupSignatureTime()">
+                    <a>No AUP signature found</a>
                 </td>
             </tr>
         </tbody>

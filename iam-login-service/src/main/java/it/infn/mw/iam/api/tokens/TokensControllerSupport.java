@@ -19,7 +19,7 @@ import java.util.Set;
 
 public class TokensControllerSupport {
 
-  public static final String CONTENT_TYPE = "application/json";
+  public static final String APPLICATION_JSON_CONTENT_TYPE = "application/json";
   public static final int TOKENS_MAX_PAGE_SIZE = 20;
 
   protected TokensPageRequest buildTokensPageRequest(Integer count, Integer startIndex) {

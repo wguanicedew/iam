@@ -1,7 +1,7 @@
-<%@page import="org.springframework.security.web.WebAttributes"%>
+<%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
 <%@ page import="org.springframework.security.core.AuthenticationException"%>
 <%@ page import="org.springframework.security.oauth2.common.exceptions.UnapprovedClientAuthenticationException"%>
-<%@ page import="org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter"%>
+<%@ page import="org.springframework.security.web.WebAttributes"%>
 <%@ taglib prefix="authz" uri="http://www.springframework.org/security/tags"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
@@ -37,7 +37,7 @@
 		</h1>
 
 		<form name="confirmationForm"
-			action="<%=request.getContextPath()%>/authorize" method="post">
+			action="${pageContext.request.contextPath.endsWith('/') ? pageContext.request.contextPath : pageContext.request.contextPath.concat('/') }authorize" method="post">
 
 			<div class="row">
 				<div class="span5 offset1 well-small" style="text-align: left">
@@ -148,11 +148,11 @@
 										<i class="icon-info-sign"></i> <spring:message code="approve.warning"/>:
 									</h4>
 									<spring:message code="approve.no_redirect_uri"/>
-									<spring:message code="approve.redirect_uri" arguments="${redirect_uri}"/>
+									<spring:message code="approve.redirect_uri" arguments="${ fn:escapeXml(redirect_uri) }"/>
 								</div>
 							</c:when>
 							<c:otherwise>
-                                <spring:message code="approve.redirect_uri" arguments="${redirect_uri}" />
+                                <spring:message code="approve.redirect_uri" arguments="${ fn:escapeXml(redirect_uri) }" />
 							</c:otherwise>
 						</c:choose>
 					</div>
@@ -216,10 +216,6 @@
 										<i class="icon-question-sign"></i>
 										
 									</span>
-								</c:if>
-								
-								<c:if test="${ scope.structured }">
-									<input name="scopeparam_${ fn:escapeXml(scope.value) }" type="text" value="${ fn:escapeXml(scope.structuredValue) }" placeholder="${ fn:escapeXml(scope.structuredParamDescription) }">
 								</c:if>
 								
 							</label>

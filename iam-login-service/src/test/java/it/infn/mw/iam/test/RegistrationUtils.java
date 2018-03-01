@@ -1,20 +1,31 @@
 package it.infn.mw.iam.test;
 
 import static com.jayway.restassured.RestAssured.given;
-import static it.infn.mw.iam.api.scim.model.ScimConstants.SCIM_CONTENT_TYPE;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 import org.hamcrest.Matchers;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.restassured.RestAssured;
-import com.jayway.restassured.http.ContentType;
 
 import it.infn.mw.iam.core.IamRegistrationRequestStatus;
 import it.infn.mw.iam.registration.RegistrationRequestDto;
 
 public class RegistrationUtils {
 
-  public static RegistrationRequestDto createRegistrationRequest(String username) {
+  final MockMvc mvc;
+  final ObjectMapper mapper;
+
+  public RegistrationUtils(MockMvc mvc, ObjectMapper mapper) {
+    this.mvc = mvc;
+    this.mapper = mapper;
+  }
+
+  public RegistrationRequestDto createRegistrationRequest(String username) throws Exception {
 
     String email = username + "@example.org";
     RegistrationRequestDto request = new RegistrationRequestDto();
@@ -23,66 +34,24 @@ public class RegistrationUtils {
     request.setEmail(email);
     request.setUsername(username);
     request.setNotes("Some short notes...");
-    request.setPassword("password");
 
-    // @formatter:off
-    RegistrationRequestDto reg = given()
-        .port(8080)
-        .contentType(ContentType.JSON)
-        .body(request)
-          .log()
-            .all(true)
-        .when()
-          .post("/registration/create")
-        .then()
-          .log()
-            .body(true)
-          .statusCode(HttpStatus.OK.value())
-          .extract()
-            .as(RegistrationRequestDto.class)
-    ;
-    // @formatter:on
+    String responseJson =
+    mvc
+      .perform(post("/registration/create").contentType(MediaType.APPLICATION_JSON)
+        .content(mapper.writeValueAsString(request)))
+      .andExpect(MockMvcResultMatchers.status().isOk())
+      .andReturn().getResponse().getContentAsString();
 
-    return reg;
+    request = mapper.readValue(responseJson, RegistrationRequestDto.class);
+    
+    return request;
   }
-
-  public static void deleteUser(String userId) {
-
-    String accessToken =
-        TestUtils.getAccessToken("registration-client", "secret", "scim:write scim:read");
-
-    String location = "/scim/Users/" + userId;
-    // @formatter:off
-    given()
-      .port(8080)
-      .auth()
-        .preemptive()
-        .oauth2(accessToken)
-      .contentType(SCIM_CONTENT_TYPE)
-    .when()
-      .delete(location)
-    .then()
-      .statusCode(HttpStatus.NO_CONTENT.value());
-
-    given()
-      .port(8080)
-      .auth()
-        .preemptive()
-        .oauth2(accessToken)
-      .contentType(SCIM_CONTENT_TYPE)
-    .when()
-      .get(location)
-    .then()
-      .statusCode(HttpStatus.NOT_FOUND.value())
-    ;
-    // @formatter:on
-  }
-
-  public static void confirmRegistrationRequest(String confirmationKey) {
+  
+  public void confirmRegistrationRequest(String confirmationKey, int port) {
 
     // @formatter:off
     given()
-      .port(8080)
+      .port(port)
       .pathParam("token", confirmationKey)
     .when()
       .get("/registration/confirm/{token}")
@@ -95,18 +64,18 @@ public class RegistrationUtils {
     // @formatter:on
   }
 
-  public static RegistrationRequestDto approveRequest(String uuid) {
-    return requestDecision(uuid, IamRegistrationRequestStatus.APPROVED);
+  public static RegistrationRequestDto approveRequest(String uuid, int port) {
+    return requestDecision(uuid, IamRegistrationRequestStatus.APPROVED, port);
   }
 
-  public static RegistrationRequestDto rejectRequest(String uuid) {
-    return requestDecision(uuid, IamRegistrationRequestStatus.REJECTED);
+  public static RegistrationRequestDto rejectRequest(String uuid, int port) {
+    return requestDecision(uuid, IamRegistrationRequestStatus.REJECTED, port);
   }
 
-  public static void changePassword(String resetKey, String newPassword) {
+  public static void changePassword(String resetKey, String newPassword, int port) {
     // @formatter:off
     RestAssured.given()
-      .port(8080)
+      .port(port)
       .param("token", resetKey)
       .param("password", newPassword)
     .when()
@@ -120,14 +89,14 @@ public class RegistrationUtils {
   }
 
   private static RegistrationRequestDto requestDecision(String uuid,
-      IamRegistrationRequestStatus decision) {
+      IamRegistrationRequestStatus decision, int port) {
     String accessToken =
         TestUtils.getAccessToken("registration-client", "secret", "registration:write");
 
     // @formatter:off
     RegistrationRequestDto req =
     given()
-      .port(8080)
+      .port(port)
       .auth()
         .preemptive()
         .oauth2(accessToken)

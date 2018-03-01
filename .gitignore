@@ -5,6 +5,7 @@ target/
 .springBeans
 .factoryPath
 *.md.html
+.vscode
 iam-login-service/ddl.sql
 
 # Node rules:
@@ -23,3 +24,5 @@ _book
 *.epub
 *.mobi
 *.pdf
+travis/travis-build.out
+travis/travis-mitre-build.out

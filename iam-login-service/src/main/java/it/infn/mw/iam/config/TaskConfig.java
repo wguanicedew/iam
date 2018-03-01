@@ -2,13 +2,15 @@ package it.infn.mw.iam.config;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
+import org.mitre.oauth2.service.DeviceCodeService;
 import org.mitre.oauth2.service.OAuth2TokenEntityService;
 import org.mitre.openid.connect.service.ApprovedSiteService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -17,7 +19,9 @@ import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 import it.infn.mw.iam.core.user.IamAccountService;
-import it.infn.mw.iam.notification.NotificationService;
+import it.infn.mw.iam.notification.NotificationDelivery;
+import it.infn.mw.iam.notification.NotificationDeliveryTask;
+import it.infn.mw.iam.notification.NotificationStoreService;
 
 @Configuration
 @EnableScheduling
@@ -40,12 +44,26 @@ public class TaskConfig implements SchedulingConfigurer {
   ApprovedSiteService approvedSiteService;
 
   @Autowired
-  @Qualifier("defaultNotificationService")
-  NotificationService notificationService;
+  NotificationStoreService notificationStoreService;
+
+  @Autowired
+  NotificationDelivery notificationDelivery;
 
   @Autowired
   IamAccountService accountService;
-  
+
+  @Autowired
+  DeviceCodeService deviceCodeService;
+
+  @Autowired
+  NotificationDeliveryTask deliveryTask;
+
+  @Value("${notification.disable}")
+  boolean notificationDisabled;
+
+  @Value("${notification.taskDelay}")
+  long notificationTaskPeriodMsec;
+
   @Bean(destroyMethod = "shutdown")
   public ScheduledExecutorService taskScheduler() {
     return Executors.newSingleThreadScheduledExecutor();
@@ -64,19 +82,37 @@ public class TaskConfig implements SchedulingConfigurer {
     approvedSiteService.clearExpiredSites();
   }
 
-  @Scheduled(fixedDelayString = "${notification.taskDelay}", initialDelay = TEN_SECONDS_MSEC)
-  public void sendNotifications() {
-    notificationService.sendPendingNotifications();
-  }
-
   @Scheduled(fixedDelay = THIRTY_SECONDS_MSEC, initialDelay = TEN_MINUTES_MSEC)
   public void clearExpiredNotifications() {
-    notificationService.clearExpiredNotifications();
+    notificationStoreService.clearExpiredNotifications();
   }
+
+  @Scheduled(fixedDelayString = "${task.deviceCodeCleanupPeriodMsec}",
+      initialDelay = TEN_MINUTES_MSEC)
+  public void clearExpiredDeviceCodes() {
+    deviceCodeService.clearExpiredDeviceCodes();
+  }
+
+  public void schedulePendingNotificationsDelivery(final ScheduledTaskRegistrar taskRegistrar) {
     
+    if (notificationTaskPeriodMsec < 0) {
+      LOG.info(
+          "Period notification delivery task will NOT be scheduled, since "
+          + "notificationTaskPeriodMsec is a negative number: {}",
+          notificationTaskPeriodMsec);
+      return;
+    }
+
+    LOG.info("Scheduling pending notification delivery task to run every {} sec",
+        TimeUnit.MILLISECONDS.toSeconds(notificationTaskPeriodMsec));
+    
+    taskRegistrar.addFixedRateTask(deliveryTask, notificationTaskPeriodMsec);
+  }
+
   @Override
   public void configureTasks(final ScheduledTaskRegistrar taskRegistrar) {
     taskRegistrar.setScheduler(taskScheduler());
+    schedulePendingNotificationsDelivery(taskRegistrar);
   }
 
 }

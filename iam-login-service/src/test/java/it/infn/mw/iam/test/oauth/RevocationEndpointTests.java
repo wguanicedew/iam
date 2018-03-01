@@ -9,7 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Set;
 
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -79,7 +79,7 @@ public class RevocationEndpointTests extends EndpointsTestUtils {
 
     accessTokens = iamTokenService.getAllAccessTokensForUser("test");
 
-    assertThat(accessTokens, hasSize(2)); // access token + id token -> size 2
+    assertThat(accessTokens, hasSize(1)); // access token
 
     mvc
       .perform(post(REVOKE_ENDPOINT)
@@ -105,7 +105,7 @@ public class RevocationEndpointTests extends EndpointsTestUtils {
     String tokenTwo = getPasswordAccessToken();
 
     accessTokens = iamTokenService.getAllAccessTokensForUser("test");
-    assertThat(accessTokens, hasSize(4));
+    assertThat(accessTokens, hasSize(2));
 
     mvc
       .perform(post(REVOKE_ENDPOINT)
@@ -115,7 +115,7 @@ public class RevocationEndpointTests extends EndpointsTestUtils {
       .andExpect(status().isOk());
 
     accessTokens = iamTokenService.getAllAccessTokensForUser("test");
-    assertThat(accessTokens, hasSize(2));
+    assertThat(accessTokens, hasSize(1));
     accessTokens.stream().filter(t -> t.getValue().equals(tokenTwo)).findAny().orElseThrow(
         () -> new AssertionError("Expected access token not found"));
   }

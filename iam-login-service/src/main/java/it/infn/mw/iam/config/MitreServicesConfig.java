@@ -1,17 +1,20 @@
 package it.infn.mw.iam.config;
 
+import org.mitre.jwt.assertion.impl.SelfAssertionValidator;
 import org.mitre.jwt.signer.service.impl.ClientKeyCacheService;
 import org.mitre.jwt.signer.service.impl.JWKSetCacheService;
 import org.mitre.jwt.signer.service.impl.SymmetricKeyJWTValidatorCacheService;
 import org.mitre.oauth2.service.ClientDetailsEntityService;
+import org.mitre.oauth2.service.DeviceCodeService;
 import org.mitre.oauth2.service.OAuth2TokenEntityService;
 import org.mitre.oauth2.service.SystemScopeService;
 import org.mitre.oauth2.service.impl.BlacklistAwareRedirectResolver;
 import org.mitre.oauth2.service.impl.DefaultClientUserDetailsService;
+import org.mitre.oauth2.service.impl.DefaultDeviceCodeService;
 import org.mitre.oauth2.service.impl.DefaultOAuth2ClientDetailsEntityService;
 import org.mitre.oauth2.service.impl.DefaultOAuth2ProviderTokenService;
 import org.mitre.oauth2.service.impl.DefaultSystemScopeService;
-import org.mitre.oauth2.token.StructuredScopeAwareOAuth2RequestValidator;
+import org.mitre.oauth2.token.ScopeServiceAwareOAuth2RequestValidator;
 import org.mitre.oauth2.web.CorsFilter;
 import org.mitre.openid.connect.filter.AuthorizationRequestFilter;
 import org.mitre.openid.connect.service.ApprovedSiteService;
@@ -72,7 +75,7 @@ public class MitreServicesConfig {
   @Bean
   OAuth2RequestValidator requestValidator() {
 
-    return new StructuredScopeAwareOAuth2RequestValidator();
+    return new ScopeServiceAwareOAuth2RequestValidator();
   }
 
   @Bean
@@ -276,4 +279,15 @@ public class MitreServicesConfig {
 
     return new ClientKeyCacheService();
   }
+  
+  @Bean
+  DeviceCodeService defaultDeviceCodeService() {
+    return new DefaultDeviceCodeService();
+  }
+  
+  @Bean
+  SelfAssertionValidator selfAssertionValidator() {
+    return new SelfAssertionValidator();
+  }
+  
 }

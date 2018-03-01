@@ -27,10 +27,12 @@ import org.springframework.web.context.WebApplicationContext;
 import com.google.common.collect.Sets;
 
 import it.infn.mw.iam.IamLoginService;
+import it.infn.mw.iam.test.util.WithAnonymousUser;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {IamLoginService.class})
 @WebAppConfiguration
+@WithAnonymousUser
 public class ActuatorEndpointsTests {
 
   private static final String ADMIN_USERNAME = "admin";
@@ -45,24 +47,18 @@ public class ActuatorEndpointsTests {
   private static final Set<String> SENSITIVE_ENDPOINTS = Sets.newHashSet("/metrics", "/configprops",
       "/env", "/mappings", "/flyway", "/autoconfig", "/beans", "/dump", "/trace");
 
-  @Value("${endpoints.healthMail.path}")
+  @Value("${health.mailProbe.path}")
   private String mailHealthEndpoint;
-
-  @Value("${endpoints.externalService.path}")
-  private String externalHealthEndpoint;
 
   @Value("${spring.mail.host}")
   private String mailHost;
 
   @Value("${spring.mail.port}")
   private Integer mailPort;
-
-  @Value("${health.googleEndpoint}")
-  private String googleEndpoint;
-
+  
   @Autowired
   private WebApplicationContext context;
-
+  
   private MockMvc mvc;
 
   @Before
@@ -72,6 +68,7 @@ public class ActuatorEndpointsTests {
       .alwaysDo(print())
       .build();
   }
+  
 
   @Test
   public void testHealthEndpoint() throws Exception {
@@ -210,37 +207,5 @@ public class ActuatorEndpointsTests {
     // @formatter:on
   }
 
-  @Test
-  public void testExternalServicesHealthEndpoint() throws Exception {
-    // @formatter:off
-    mvc.perform(get(externalHealthEndpoint))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$.status", equalTo(STATUS_UP)))
-      .andExpect(jsonPath("$.google").doesNotExist());
-    // @formatter:on
-  }
-
-  @Test
-  @WithMockUser(username = USER_USERNAME, roles = {USER_ROLE})
-  public void testExternalServicesHealthEndpointAsUser() throws Exception {
-    // @formatter:off
-    mvc.perform(get(externalHealthEndpoint))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$.status", equalTo(STATUS_UP)))
-      .andExpect(jsonPath("$.google").doesNotExist());
-    // @formatter:on
-  }
-
-  @Test
-  @WithMockUser(username = ADMIN_USERNAME, roles = {ADMIN_ROLE})
-  public void testExternalServicesHealthEndpointAsAdmin() throws Exception {
-    // @formatter:off
-    mvc.perform(get(externalHealthEndpoint))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$.status", equalTo(STATUS_UP)))
-      .andExpect(jsonPath("$.google.status", equalTo(STATUS_UP)))
-      .andExpect(jsonPath("$.google.location", equalTo(googleEndpoint)))
-      .andExpect(jsonPath("$.google.error").doesNotExist());
-    // @formatter:on
-  }
+  
 }

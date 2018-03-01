@@ -34,7 +34,7 @@ public class GroupConverter implements Converter<ScimGroup, IamGroup> {
    * </ul>
    */
   @Override
-  public IamGroup fromScim(ScimGroup scimGroup) {
+  public IamGroup entityFromDto(ScimGroup scimGroup) {
 
     IamGroup group = new IamGroup();
 
@@ -44,7 +44,7 @@ public class GroupConverter implements Converter<ScimGroup, IamGroup> {
   }
 
   @Override
-  public ScimGroup toScim(IamGroup entity) {
+  public ScimGroup dtoFromEntity(IamGroup entity) {
 
     ScimMeta meta = ScimMeta.builder(entity.getCreationTime(), entity.getLastUpdateTime())
       .location(resourceLocationProvider.groupLocation(entity.getUuid()))
