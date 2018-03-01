@@ -1,8 +1,12 @@
 # Changelog
 
-## 1.2.1 (2018-03-02)
+## 1.2.1 (2018-03-01)
 
-Disable token management dashboard
+### Changed
+
+The token management section in the dashboard introduced in 1.2.0 has been
+disabled due to performance issues in the token pagination code. We will add
+the interface back as soon as these issues are resolved (#211). 
 
 ## 1.2.0 (2018-03-01)
 
