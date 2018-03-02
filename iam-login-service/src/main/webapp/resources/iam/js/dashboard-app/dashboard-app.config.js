@@ -81,7 +81,6 @@ angular
                             }
                         }
                     })
-/*
                 .state(
                     'tokens', {
                         url: '/tokens',
@@ -95,7 +94,6 @@ angular
                             }
                         }
                     })
-*/
                 .state('test', {
                     url: '/test/:id',
                     resolve: {
@@ -125,7 +123,7 @@ angular
             function loadUser(UserService, $stateParams) {
                 return UserService.getUser($stateParams.id);
             }
-/*
+
             function loadUsers(scimFactory) {
                 return scimFactory.getAllUsers();
             }
@@ -135,7 +133,7 @@ angular
                     return r.data;
                 });
             }
-*/
+
             function loadAup(AupService) {
                 return AupService.getAup();
             }
