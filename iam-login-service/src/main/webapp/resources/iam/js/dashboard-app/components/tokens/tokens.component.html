@@ -13,20 +13,20 @@
         <div class="row" ng-cloak>
             <div class="col-xs-12">
                 <ul class="nav nav-tabs">
-                    <li ng-class="$ctrl.selected == 0 ? 'active' : ''">
-                        <a href="" ng-click="$ctrl.selected = 0" id="tabAccessTokens">
+                    <li ng-class="$ctrl.isSelected(0) ? 'active' : ''">
+                        <a href="" ng-click="$ctrl.doSelect(0)" id="tabAccessTokens">
                             <strong>Access Tokens</strong>&nbsp;&nbsp;<span class="label label-primary" id="atBadge">{{$root.accessTokensCount}}</span>
                         </a>
                     </li>
-                    <li ng-class="$ctrl.selected == 1 ? 'active' : ''">
-                        <a href="" ng-click="$ctrl.selected = 1" id="tabRefreshTokens">
+                    <li ng-class="$ctrl.isSelected(1) ? 'active' : ''">
+                        <a href="" ng-click="$ctrl.doSelect(1)" id="tabRefreshTokens">
                             <strong>Refresh Tokens</strong>&nbsp;&nbsp;<span class="label label-primary" id="rtBadge">{{$root.refreshTokensCount}}</span>
                         </a>
                     </li>
                 </ul>
                 <br/>
-                <tokens-accesslist ng-show="$ctrl.selected == 0" totAccessTokens="$ctrl.totAccessTokens" clients="$ctrl.clients" users="$ctrl.users"></tokens-accesslist>
-                <tokens-refreshlist ng-show="$ctrl.selected == 1" totRefreshTokens="$ctrl.totRefreshTokens" clients="$ctrl.clients" users="$ctrl.users"></tokens-refreshlist>
+                <tokens-accesslist ng-show="$ctrl.isSelected(0)" tokens="$ctrl.accessTokens" clients="$ctrl.clients" users="$ctrl.users"></tokens-accesslist>
+                <tokens-refreshlist ng-show="$ctrl.isSelected(1)" tokens="$ctrl.refreshTokens" clients="$ctrl.clients" users="$ctrl.users"></tokens-refreshlist>
             </div>
         </div>
     </section>

@@ -27,18 +27,24 @@
     };
   }
 
-  function AccessTokensListController($q, $rootScope, $uibModal, ModalService,
+  function AccessTokensListController($q, $scope, $rootScope, $uibModal, ModalService,
       TokensService, scimFactory, clipboardService, Utils, toaster) {
 
     var self = this;
 
     // pagination controls
     self.currentPage = 1;
+    self.currentOffset = 1;
     self.itemsPerPage = 10;
 
     self.$onInit = function() {
-      self.searchTokens(1);
+      console.debug("init AccessTokensListController", self.tokens);
     };
+
+    $scope.$on('refreshAccessTokensList', function(e) {
+      console.debug("received refreshAccessTokensList event");
+      self.searchTokens(1);
+    });
 
     self.copyToClipboard = function(toCopy) {
       clipboardService.copyToClipboard(toCopy);
@@ -57,7 +63,7 @@
 
     self.searchTokens = function(page) {
 
-      console.info("page = ", page);
+      console.debug("page = ", page);
       $rootScope.pageLoadingProgress = 0;
       self.loaded = false;
 
@@ -144,10 +150,11 @@
             },
             bindings: {
               clients: '=',
-              users: '='
+              users: '=',
+              tokens: '<'
             },
             templateUrl : '/resources/iam/js/dashboard-app/components/tokens/accesslist/tokens.accesslist.component.html',
-            controller : [ '$q', '$rootScope', '$uibModal', 'ModalService',
+            controller : [ '$q', '$scope', '$rootScope', '$uibModal', 'ModalService',
                 'TokensService', 'scimFactory', 'clipboardService', 'Utils', 'toaster', AccessTokensListController ]
           });
 })();

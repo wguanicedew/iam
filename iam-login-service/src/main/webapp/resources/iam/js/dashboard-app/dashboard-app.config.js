@@ -86,7 +86,9 @@ angular
                         url: '/tokens',
                         resolve: {
                             clients: loadClients,
-                            users: loadUsers
+                            users: loadUsers,
+                            accessTokens: loadFirstPageOfAccessTokens,
+                            refreshTokens: loadFirstPageOfRefreshTokens
                         },
                         views: {
                             content: {
@@ -136,5 +138,17 @@ angular
 
             function loadAup(AupService) {
                 return AupService.getAup();
+            }
+
+            function loadFirstPageOfAccessTokens(TokensService) {
+                return TokensService.getAccessTokens(1,10).then(function(r) {
+                    return r.data.Resources;
+                });
+            }
+
+            function loadFirstPageOfRefreshTokens(TokensService) {
+                return TokensService.getRefreshTokens(1,10).then(function(r) {
+                    return r.data.Resources;
+                });
             }
         });
