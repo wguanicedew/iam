@@ -11,7 +11,7 @@
     <section class="content" ng-cloak>
         <!-- Main content -->
         <div class="row" ng-cloak>
-            <div class="col-xs-12" ng-init="$ctrl.doSelect(0)">
+            <div class="col-xs-12">
                 <ul class="nav nav-tabs">
                     <li ng-class="$ctrl.isSelected(0) ? 'active' : ''">
                         <a href="" ng-click="$ctrl.doSelect(0)" id="tabAccessTokens">
@@ -25,8 +25,8 @@
                     </li>
                 </ul>
                 <br/>
-                <tokens-accesslist ng-show="$ctrl.isSelected(0)" clients="$ctrl.clients" users="$ctrl.users"></tokens-accesslist>
-                <tokens-refreshlist ng-show="$ctrl.isSelected(1)" clients="$ctrl.clients" users="$ctrl.users"></tokens-refreshlist>
+                <tokens-accesslist ng-show="$ctrl.isSelected(0)" tokens="$ctrl.accessTokens" clients="$ctrl.clients" users="$ctrl.users"></tokens-accesslist>
+                <tokens-refreshlist ng-show="$ctrl.isSelected(1)" tokens="$ctrl.refreshTokens" clients="$ctrl.clients" users="$ctrl.users"></tokens-refreshlist>
             </div>
         </div>
     </section>

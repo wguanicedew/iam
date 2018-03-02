@@ -6,6 +6,9 @@
     var self = this;
 
     self.$onInit = function() {
+      self.selected = 0;
+      $rootScope.accessTokensCount = self.accessTokens.length;
+      $rootScope.refreshTokensCount = self.refreshTokens.length;
       self.loaded = true;
     };
 
@@ -34,7 +37,9 @@
         '/resources/iam/js/dashboard-app/components/tokens/tokens.component.html',
       bindings: {
         clients: '<',
-        users: '<'
+        users: '<',
+        accessTokens: '<',
+        refreshTokens: '<'
       },
       controller: [
         '$scope', '$rootScope', TokensManagementController

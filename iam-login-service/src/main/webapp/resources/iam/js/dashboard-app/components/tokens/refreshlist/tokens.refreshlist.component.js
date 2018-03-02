@@ -34,11 +34,11 @@
 
     // pagination controls
     self.currentPage = 1;
+    self.currentOffset = 1;
     self.itemsPerPage = 10;
 
     self.$onInit = function() {
-      console.debug("init RefreshTokensListController");
-      self.searchTokens(1);
+      console.debug("init RefreshTokensListController", self.tokens);
     };
 
     $scope.$on('refreshRefreshTokensList', function(e) {
@@ -150,7 +150,8 @@
             },
             bindings: {
               clients: '=',
-              users: '='
+              users: '=',
+              tokens: '<'
             },
             templateUrl : '/resources/iam/js/dashboard-app/components/tokens/refreshlist/tokens.refreshlist.component.html',
             controller : [ '$q', '$scope', '$rootScope', '$uibModal', 'ModalService',
