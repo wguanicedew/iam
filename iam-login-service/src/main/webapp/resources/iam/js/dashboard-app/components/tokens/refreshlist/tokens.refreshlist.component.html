@@ -5,7 +5,7 @@
         <div class="row">
             <div class="col-md-5">
                 <ui-select id="rtok_client_search_btn" ng-model="$ctrl.clientSelected" theme="bootstrap" sortable="true" close-on-select="true" input-id="rtok_client_search" style="width: 100%;" on-select="$ctrl.searchTokens(1)">
-                    <ui-select-match allow-clear="true" placeholder="Filter client...">{{$ctrl.clientSelected.clientId}}</ui-select-match>
+                    <ui-select-match allow-clear="true" placeholder="Filter tokens by client...">{{$ctrl.clientSelected.clientId}}</ui-select-match>
                     <ui-select-choices repeat="client in $ctrl.clients | filter: {clientId: $select.search}">
                         <div ng-bind-html="client.clientId | highlight: $select.search"></div>
                         <small> {{ client.clientName }} </small>
@@ -15,7 +15,7 @@
             </div>
             <div class="col-md-5">
                 <ui-select id="rtok_user_search_btn" ng-model="$ctrl.userSelected" theme="bootstrap" sortable="true" close-on-select="true" input-id="rtok_user_search" style="width: 100%;" on-select="$ctrl.searchTokens(1)">
-                    <ui-select-match allow-clear="true" placeholder="Filter user...">{{$ctrl.userSelected.name.formatted}}</ui-select-match>
+                    <ui-select-match allow-clear="true" placeholder="Filter tokens by user...">{{$ctrl.userSelected.name.formatted}}</ui-select-match>
                     <ui-select-choices repeat="user in $ctrl.users | filter: {userName: $select.search}">
                         <div ng-bind-html="user.userName | highlight: $select.search"></div>
                         <small>{{ user.id }}</small>
@@ -31,7 +31,7 @@
     <div class="box-body">
 
         <div class="text-center" ng-if="$ctrl.clientSelected !== undefined || $ctrl.userSelected !== undefined">
-            <p>Filtered <span id="rtoken_filtered"><strong>{{$ctrl.tokens.length}}</strong></span> of <strong>{{$root.refreshTokensCount}}</strong></p>
+            <p>Filtered <span id="rtoken_filtered"><strong>{{$ctrl.totalResults}}</strong></span> of <strong>{{$root.refreshTokensCount}}</strong></p>
         </div>
 
         <div ng-if="!$ctrl.tokens.length">No active refresh tokens found</div>
