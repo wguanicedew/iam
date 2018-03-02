@@ -15,12 +15,12 @@
                 <ul class="nav nav-tabs">
                     <li ng-class="$ctrl.selected == 0 ? 'active' : ''">
                         <a href="" ng-click="$ctrl.selected = 0" id="tabAccessTokens">
-                            <strong>Access Tokens</strong>&nbsp;&nbsp;<span class="label label-primary" id="atBadge">{{$root.loggedUser.accessTokensCount}}</span>
+                            <strong>Access Tokens</strong>&nbsp;&nbsp;<span class="label label-primary" id="atBadge">{{$root.accessTokensCount}}</span>
                         </a>
                     </li>
                     <li ng-class="$ctrl.selected == 1 ? 'active' : ''">
                         <a href="" ng-click="$ctrl.selected = 1" id="tabRefreshTokens">
-                            <strong>Refresh Tokens</strong>&nbsp;&nbsp;<span class="label label-primary" id="rtBadge">{{$root.loggedUser.refreshTokensCount}}</span>
+                            <strong>Refresh Tokens</strong>&nbsp;&nbsp;<span class="label label-primary" id="rtBadge">{{$root.refreshTokensCount}}</span>
                         </a>
                     </li>
                 </ul>

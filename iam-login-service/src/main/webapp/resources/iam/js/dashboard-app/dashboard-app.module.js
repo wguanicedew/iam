@@ -55,10 +55,10 @@ angular.module('dashboardApp')
           promises.push(RegistrationRequestService.listPending().then(function(
               r) { $rootScope.loggedUser.pendingRequests = r.data; }));
           promises.push(TokensService.getAccessTokensCount().then(function(r) {
-            $rootScope.loggedUser.accessTokensCount = r.data.totalResults;
+            $rootScope.accessTokensCount = r.data.totalResults;
           }));
           promises.push(TokensService.getRefreshTokensCount().then(function(r) {
-            $rootScope.loggedUser.refreshTokensCount = r.data.totalResults;
+            $rootScope.refreshTokensCount = r.data.totalResults;
           }));
         }
 

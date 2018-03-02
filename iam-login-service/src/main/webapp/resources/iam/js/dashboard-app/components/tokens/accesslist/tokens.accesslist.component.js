@@ -13,7 +13,7 @@
       self.enabled = false;
       TokensService.revokeAccessToken(token.id).then(function (response) {
         $uibModalInstance.close(token);
-        $rootScope.reloadInfo();
+        $rootScope.accessTokensCount--;
         self.enabled = true;
       }).catch(function (error) {
         console.error(error);
@@ -45,6 +45,16 @@
       toaster.pop({ type: 'success', body: 'Token copied to clipboard!' });
     };
 
+    self.updateAccessTokenCount = function(responseValue) {
+      if (self.clientSelected || self.userSelected) {
+        if (responseValue > $rootScope.accessTokensCount) {
+          $rootScope.accessTokensCount = responseValue;
+        }
+      } else {
+        $rootScope.accessTokensCount = responseValue;
+      }
+    };
+
     self.searchTokens = function(page) {
 
       console.info("page = ", page);
@@ -61,6 +71,7 @@
           self.tokens.push(token);
         });
         $rootScope.pageLoadingProgress = 100;
+        self.updateAccessTokenCount(response.data.totalResults);
         self.loaded = true;
         self.loadingModal.dismiss("Cancel");
       };

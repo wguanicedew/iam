@@ -31,7 +31,7 @@
     <div class="box-body">
 
         <div class="text-center" ng-if="$ctrl.clientSelected !== undefined || $ctrl.userSelected !== undefined">
-            <p>Filtered <span id="rtoken_filtered"><strong>{{$ctrl.tokens.length}}</strong></span> of <strong>{{$root.loggedUser.refreshTokensCount}}</strong></p>
+            <p>Filtered <span id="rtoken_filtered"><strong>{{$ctrl.tokens.length}}</strong></span> of <strong>{{$root.refreshTokensCount}}</strong></p>
         </div>
 
         <div ng-if="!$ctrl.tokens.length">No active refresh tokens found</div>
