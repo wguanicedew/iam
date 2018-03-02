@@ -12,7 +12,8 @@
         <dt class="col-sm-3 text-right">User</dt>
         <dd class="col-sm-9">{{$ctrl.token.user.userName}}</dd>
         <dt class="col-sm-3 text-right">Expires in</dt>
-        <dd class="col-sm-9">{{$ctrl.token.expiration | relativeDate}}</dd>
+        <dd ng-if="$ctrl.token.expiration != null" class="col-sm-9">{{$ctrl.token.expiration | relativeDate}}</dd>
+        <dd ng-if="$ctrl.token.expiration == null" class="col-sm-9">Never</dd>
     </dl>
     <p>
         Token refresh with this token will not be possible if you proceed.
