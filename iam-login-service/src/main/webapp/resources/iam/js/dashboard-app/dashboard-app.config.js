@@ -80,18 +80,23 @@ angular
                                 controllerAs: 'requests'
                             }
                         }
-                    }).state('tokens', {
-                    url: '/tokens',
-                    resolve: {
-                        clients: loadClients,
-                        users: loadUsers
-                    },
-                    views: {
-                        content: {
-                            component: 'tokens'
+                    })
+/*
+                .state(
+                    'tokens', {
+                        url: '/tokens',
+                        resolve: {
+                            clients: loadClients,
+                            users: loadUsers
+                        },
+                        views: {
+                            content: {
+                                component: 'tokens'
+                            }
                         }
-                    }
-                }).state('test', {
+                    })
+*/
+                .state('test', {
                     url: '/test/:id',
                     resolve: {
                         user: loadUser
@@ -120,7 +125,7 @@ angular
             function loadUser(UserService, $stateParams) {
                 return UserService.getUser($stateParams.id);
             }
-
+/*
             function loadUsers(scimFactory) {
                 return scimFactory.getAllUsers();
             }
@@ -130,7 +135,7 @@ angular
                     return r.data;
                 });
             }
-
+*/
             function loadAup(AupService) {
                 return AupService.getAup();
             }
