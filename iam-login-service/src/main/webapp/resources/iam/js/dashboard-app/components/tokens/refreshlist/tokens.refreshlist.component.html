@@ -4,7 +4,7 @@
 
         <div class="row">
             <div class="col-md-5">
-                <ui-select id="rtok_client_search_btn" ng-model="$ctrl.clientSelected" theme="bootstrap" sortable="true" close-on-select="true" input-id="rtok_client_search" style="width: 100%;" on-select="$ctrl.searchTokens()">
+                <ui-select id="rtok_client_search_btn" ng-model="$ctrl.clientSelected" theme="bootstrap" sortable="true" close-on-select="true" input-id="rtok_client_search" style="width: 100%;" on-select="$ctrl.searchTokens(1)">
                     <ui-select-match allow-clear="true" placeholder="Filter client...">{{$ctrl.clientSelected.clientId}}</ui-select-match>
                     <ui-select-choices repeat="client in $ctrl.clients | filter: {clientId: $select.search}">
                         <div ng-bind-html="client.clientId | highlight: $select.search"></div>
@@ -14,7 +14,7 @@
                 </ui-select>
             </div>
             <div class="col-md-5">
-                <ui-select id="rtok_user_search_btn" ng-model="$ctrl.userSelected" theme="bootstrap" sortable="true" close-on-select="true" input-id="rtok_user_search" style="width: 100%;" on-select="$ctrl.searchTokens()">
+                <ui-select id="rtok_user_search_btn" ng-model="$ctrl.userSelected" theme="bootstrap" sortable="true" close-on-select="true" input-id="rtok_user_search" style="width: 100%;" on-select="$ctrl.searchTokens(1)">
                     <ui-select-match allow-clear="true" placeholder="Filter user...">{{$ctrl.userSelected.name.formatted}}</ui-select-match>
                     <ui-select-choices repeat="user in $ctrl.users | filter: {userName: $select.search}">
                         <div ng-bind-html="user.userName | highlight: $select.search"></div>
@@ -24,7 +24,7 @@
                 </ui-select>
             </div>
             <div class="col-md-2 text-right">
-                <button class="btn btn-default" id="refresh_rtoken_list" ng-click="$ctrl.searchTokens()"><i class="fa fa-refresh"></i></button>
+                <button class="btn btn-default" id="refresh_rtoken_list" ng-click="$ctrl.searchTokens(1)"><i class="fa fa-refresh"></i></button>
             </div>
         </div>
     </div>
@@ -39,7 +39,7 @@
         <div class="table-responsive" ng-if="$ctrl.tokens.length">
 
             <div class="text-center">
-                <ul id="rtoken_pagination_top" uib-pagination ng-model="$ctrl.currentPage" items-per-page="$ctrl.itemsPerPage" total-items="$ctrl.tokens.length" max-size="5" boundary-links="true">
+                <ul id="rtoken_pagination_top" uib-pagination ng-model="$ctrl.currentPage" items-per-page="$ctrl.itemsPerPage" total-items="$ctrl.totalResults" max-size="5" boundary-links="true" ng-change="$ctrl.searchTokens($ctrl.currentPage)">
                 </ul>
             </div>
 
@@ -55,10 +55,10 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="token in $ctrl.tokens | orderBy:'id' | startFrom:($ctrl.currentPage-1)*$ctrl.itemsPerPage | limitTo:$ctrl.itemsPerPage">
+                    <tr ng-repeat="token in $ctrl.tokens">
 
                         <td class="align-middle" id="{{token.id}}">
-                            <h5>{{$index + ($ctrl.currentPage-1)*$ctrl.itemsPerPage + 1}}</h5>
+                            <h5>{{$index + $ctrl.currentOffset}}</h5>
                         </td>
                         <td class="align-middle">
                             <h5><a ui-sref="client({id: token.client.id})">{{token.client.clientId}}</a></h5>
@@ -93,7 +93,7 @@
             </table>
 
             <div class="text-center">
-                <ul id="rtoken_pagination_bottom" uib-pagination ng-model="$ctrl.currentPage" items-per-page="$ctrl.itemsPerPage" total-items="$ctrl.tokens.length" max-size="5" boundary-links="true">
+                <ul id="rtoken_pagination_bottom" uib-pagination ng-model="$ctrl.currentPage" items-per-page="$ctrl.itemsPerPage" total-items="$ctrl.totalResults" max-size="5" boundary-links="true" ng-change="$ctrl.searchTokens($ctrl.currentPage)">
                 </ul>
             </div>
         </div>
