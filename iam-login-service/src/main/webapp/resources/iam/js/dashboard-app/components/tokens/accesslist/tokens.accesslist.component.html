@@ -33,10 +33,13 @@
     <div class="box-body">
 
         <div class="text-center" ng-if="$ctrl.clientSelected !== undefined || $ctrl.userSelected !== undefined">
-            <p>Filtered <span id="atoken_filtered"><strong>{{$ctrl.tokens.length}}</strong></span> of <strong>{{$root.accessTokensCount}}</strong></p>
+            <p>Found <span id="atoken_filtered"><strong>{{$ctrl.tokens.length}}</strong></span> tokens matching filter (out of <strong>{{$root.accessTokensCount}}</strong>)</p>
         </div>
 
-        <div ng-if="!$ctrl.tokens.length">No active access tokens found</div>
+        <div ng-if="!$ctrl.tokens.length">No active access tokens found
+            <span ng-if="$ctrl.clientSelected !== undefined || $ctrl.userSelected !== undefined"> matching filter</span>
+
+        </div>
         <div class="table-responsive" ng-if="$ctrl.tokens.length">
 
             <div class="text-center">
