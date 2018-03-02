@@ -37,8 +37,7 @@
     self.itemsPerPage = 10;
 
     self.$onInit = function() {
-      self.searchTokens();
-      self.loaded = true;
+      self.searchTokens(1);
     };
 
     self.copyToClipboard = function(toCopy) {
@@ -46,59 +45,38 @@
       toaster.pop({ type: 'success', body: 'Token copied to clipboard!' });
     };
 
-    self.searchTokens = function() {
+    self.searchTokens = function(page) {
 
-      self.tokens = [];
+      console.info("page = ", page)
+      $rootScope.pageLoadingProgress = 0;
       self.loaded = false;
 
-      var promises = [];
-      var chunkRequestSize = 20;
-      
+      self.tokens = [];
+
+      self.currentOffset = ( page - 1 ) * self.itemsPerPage + 1;
+
       var handleResponse = function(response){
+        self.totalResults = response.data.totalResults;
         angular.forEach(response.data.Resources, function(token){
           self.tokens.push(token);
         });
+        $rootScope.pageLoadingProgress = 100;
+        self.loaded = true;
+        self.loadingModal.dismiss("Cancel");
       };
       
       var handleError = function(error) {
         self.loadingModal.dismiss("Error");
         toaster.pop({type: 'error', body: error});
       };
-      
-      var handleFirstResponse = function(response){
 
-        var totalResults = response.data.totalResults;
-        var lastLoaded = chunkRequestSize;
-        
-        while (lastLoaded < totalResults) {
-          promises.push(self.getAccessTokenList(lastLoaded+1, chunkRequestSize));
-          lastLoaded = lastLoaded + chunkRequestSize;
-        }
-        
-        angular.forEach(response.data.Resources, function(token){
-          self.tokens.push(token);
-        });
-        
-        $q.all(promises).then(function(response){
-          angular.forEach(promises, function(p){
-            p.then(handleResponse);
-          });
-          $rootScope.pageLoadingProgress = 100;
-          self.loaded = true;
-          self.loadingModal.dismiss("Cancel");
-          $rootScope.reloadInfo();
-        }, handleError);
-      };
-      
-      $rootScope.pageLoadingProgress = 0;
-      
       self.loadingModal = $uibModal.open({
         animation: false,
         templateUrl : '/resources/iam/template/dashboard/loading-modal.html'
       });
-      
+
       self.loadingModal.opened.then(function(){
-        self.getAccessTokenList(1, chunkRequestSize).then(handleFirstResponse, handleError);
+        self.getAccessTokenList(self.currentOffset, self.itemsPerPage).then(handleResponse, handleError);
       });
     }
 
@@ -121,7 +99,13 @@
         type: 'success',
         body: 'Token Revoked'
       });
-      self.searchTokens();
+      self.totalResults--;
+      if (self.currentOffset > self.totalResults) {
+          if (self.currentPage > 1) {
+              self.currentPage--;
+          }
+      }
+      self.searchTokens(self.currentPage);
     };
 
     self.openRevokeAccessTokenDialog = function (token) {
