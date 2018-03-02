@@ -47,12 +47,12 @@
 
     self.searchTokens = function(page) {
 
-      console.info("page = ", page)
+      console.info("page = ", page);
       $rootScope.pageLoadingProgress = 0;
       self.loaded = false;
 
       self.tokens = [];
-
+      self.currentPage = page;
       self.currentOffset = ( page - 1 ) * self.itemsPerPage + 1;
 
       var handleResponse = function(response){
@@ -64,7 +64,7 @@
         self.loaded = true;
         self.loadingModal.dismiss("Cancel");
       };
-      
+
       var handleError = function(error) {
         self.loadingModal.dismiss("Error");
         toaster.pop({type: 'error', body: error});
