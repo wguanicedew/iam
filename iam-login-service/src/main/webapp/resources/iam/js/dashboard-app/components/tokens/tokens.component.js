@@ -7,8 +7,8 @@
 
     self.$onInit = function() {
       self.selected = 0;
-      $rootScope.accessTokensCount = self.accessTokens.length;
-      $rootScope.refreshTokensCount = self.refreshTokens.length;
+      $rootScope.accessTokensCount = self.accessTokensFirstResponse.totalResults;
+      $rootScope.refreshTokensCount = self.refreshTokensFirstResponse.totalResults;
       self.loaded = true;
     };
 
@@ -38,8 +38,8 @@
       bindings: {
         clients: '<',
         users: '<',
-        accessTokens: '<',
-        refreshTokens: '<'
+        accessTokensFirstResponse: '<',
+        refreshTokensFirstResponse: '<'
       },
       controller: [
         '$scope', '$rootScope', TokensManagementController

@@ -5,13 +5,11 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-
 import org.mitre.oauth2.model.OAuth2RefreshTokenEntity;
 import org.mitre.oauth2.service.impl.DefaultOAuth2ProviderTokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-
 import it.infn.mw.iam.api.tokens.converter.TokensConverter;
 import it.infn.mw.iam.api.tokens.exception.TokenNotFoundException;
 import it.infn.mw.iam.api.tokens.model.RefreshToken;
@@ -54,71 +52,75 @@ public class DefaultRefreshTokenService implements TokenService<RefreshToken> {
     return Optional.ofNullable(at);
   }
 
-  private TokensListResponse<RefreshToken> buildTokensCountResponse() {
-
-    return new TokensListResponse<>(Collections.emptyList(), tokenRepository.count(), 0, 1);
+  private Page<OAuth2RefreshTokenEntity> getAllValidTokens(OffsetPageable op) {
+    return tokenRepository.findAllValidRefreshTokens(new Date(), op);
   }
 
-  private TokensListResponse<RefreshToken> buildTokensListResponse(
-      Page<OAuth2RefreshTokenEntity> entities, OffsetPageable op) {
+  private Page<OAuth2RefreshTokenEntity> getAllValidTokensForUser(String userId, OffsetPageable op) {
+    return tokenRepository.findValidRefreshTokensForUser(userId, new Date(), op);
+  }
+
+  private Page<OAuth2RefreshTokenEntity> getAllValidTokensForClient(String clientId,
+      OffsetPageable op) {
+    return tokenRepository.findValidRefreshTokensForClient(clientId, new Date(), op);
+  }
+
+  private Page<OAuth2RefreshTokenEntity> getAllValidTokensForUserAndClient(String userId,
+      String clientId, OffsetPageable op) {
+    return tokenRepository.findValidRefreshTokensForUserAndClient(userId, clientId, new Date(), op);
+  }
+
+  private TokensListResponse<RefreshToken> buildResponse(TokensPageRequest pageRequest,
+      Page<OAuth2RefreshTokenEntity> entities) {
+
+    if (pageRequest.getCount() == 0) {
+      return new TokensListResponse<>(Collections.emptyList(), entities.getTotalElements(), 0, 1);
+    }
 
     List<RefreshToken> resources = new ArrayList<>();
 
-    entities.getContent().forEach(a -> resources.add(tokensConverter.toRefreshToken(a)));
+    entities.getContent().forEach(rt -> resources.add(tokensConverter.toRefreshToken(rt)));
 
     return new TokensListResponse<>(resources, entities.getTotalElements(), resources.size(),
-        op.getOffset() + 1);
+        pageRequest.getStartIndex() + 1);
+  }
+
+  private OffsetPageable getOffsetPageable(TokensPageRequest pageRequest) {
+
+    if (pageRequest.getCount() == 0) {
+      return new OffsetPageable(0, 1);
+    }
+    return new OffsetPageable(pageRequest.getStartIndex(), pageRequest.getCount());
   }
 
   @Override
   public TokensListResponse<RefreshToken> getAllTokens(TokensPageRequest pageRequest) {
 
-    if (pageRequest.getCount() == 0) {
-      return buildTokensCountResponse();
-    }
-
-    OffsetPageable op = new OffsetPageable(pageRequest.getStartIndex(), pageRequest.getCount());
-    return buildTokensListResponse(tokenRepository.findAllValidRefreshTokens(new Date(), op), op);
+    return buildResponse(pageRequest, getAllValidTokens(getOffsetPageable(pageRequest)));
   }
 
   @Override
   public TokensListResponse<RefreshToken> getTokensForUser(String userId,
       TokensPageRequest pageRequest) {
 
-    if (pageRequest.getCount() == 0) {
-      return buildTokensCountResponse();
-    }
-
-    OffsetPageable op = new OffsetPageable(pageRequest.getStartIndex(), pageRequest.getCount());
-    return buildTokensListResponse(
-        tokenRepository.findValidRefreshTokensForUser(userId, new Date(), op), op);
+    return buildResponse(pageRequest,
+        getAllValidTokensForUser(userId, getOffsetPageable(pageRequest)));
   }
 
   @Override
   public TokensListResponse<RefreshToken> getTokensForClient(String clientId,
       TokensPageRequest pageRequest) {
 
-    if (pageRequest.getCount() == 0) {
-      return buildTokensCountResponse();
-    }
-
-    OffsetPageable op = new OffsetPageable(pageRequest.getStartIndex(), pageRequest.getCount());
-    return buildTokensListResponse(
-        tokenRepository.findValidRefreshTokensForClient(clientId, new Date(), op), op);
+    return buildResponse(pageRequest,
+        getAllValidTokensForClient(clientId, getOffsetPageable(pageRequest)));
   }
 
   @Override
   public TokensListResponse<RefreshToken> getTokensForClientAndUser(String userId, String clientId,
       TokensPageRequest pageRequest) {
 
-    if (pageRequest.getCount() == 0) {
-      return buildTokensCountResponse();
-    }
-
-    OffsetPageable op = new OffsetPageable(pageRequest.getStartIndex(), pageRequest.getCount());
-    return buildTokensListResponse(
-        tokenRepository.findValidRefreshTokensForUserAndClient(userId, clientId, new Date(), op),
-        op);
+    return buildResponse(pageRequest,
+        getAllValidTokensForUserAndClient(userId, clientId, getOffsetPageable(pageRequest)));
   }
 
   @Override
