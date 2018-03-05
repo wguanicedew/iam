@@ -34,9 +34,8 @@
             <p>Found <span id="rtoken_filtered"><strong>{{$ctrl.tokens.length}}</strong></span> tokens matching filter (out of <strong>{{$root.refreshTokensCount}}</strong>)</p>
         </div>
 
-        <div ng-if="!$ctrl.tokens.length">
+        <div ng-if="!$ctrl.tokens.length && !($ctrl.clientSelected !== undefined || $ctrl.userSelected !== undefined)">
             No active refresh tokens found
-            <span ng-if="$ctrl.clientSelected !== undefined || $ctrl.userSelected !== undefined"> matching filter</span>
         </div>
 
         <div class="table-responsive" ng-if="$ctrl.tokens.length">
