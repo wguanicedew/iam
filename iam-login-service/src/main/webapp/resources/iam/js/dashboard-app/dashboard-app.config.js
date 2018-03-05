@@ -87,8 +87,8 @@ angular
                         resolve: {
                             clients: loadClients,
                             users: loadUsers,
-                            accessTokens: loadFirstPageOfAccessTokens,
-                            refreshTokens: loadFirstPageOfRefreshTokens
+                            accessTokensFirstResponse: loadFirstPageOfAccessTokens,
+                            refreshTokensFirstResponse: loadFirstPageOfRefreshTokens
                         },
                         views: {
                             content: {
@@ -142,13 +142,13 @@ angular
 
             function loadFirstPageOfAccessTokens(TokensService) {
                 return TokensService.getAccessTokens(1,10).then(function(r) {
-                    return r.data.Resources;
+                    return r.data;
                 });
             }
 
             function loadFirstPageOfRefreshTokens(TokensService) {
                 return TokensService.getRefreshTokens(1,10).then(function(r) {
-                    return r.data.Resources;
+                    return r.data;
                 });
             }
         });
