@@ -53,29 +53,54 @@ public class DefaultAccessTokenService implements TokenService<AccessToken> {
   }
 
   private Page<OAuth2AccessTokenEntity> getAllValidTokens(OffsetPageable op) {
+
     return tokenRepository.findAllValidAccessTokens(new Date(), op);
   }
 
+  private int countAllValidTokens() {
+
+    return tokenRepository.countValidAccessTokens(new Date());
+  }
+
   private Page<OAuth2AccessTokenEntity> getAllValidTokensForUser(String userId, OffsetPageable op) {
+
     return tokenRepository.findValidAccessTokensForUser(userId, new Date(), op);
+  }
+
+  private int countAllValidTokensForUser(String userId) {
+
+    return tokenRepository.countValidAccessTokensForUser(userId, new Date());
   }
 
   private Page<OAuth2AccessTokenEntity> getAllValidTokensForClient(String clientId,
       OffsetPageable op) {
+
     return tokenRepository.findValidAccessTokensForClient(clientId, new Date(), op);
+  }
+
+  private int countAllValidTokensForClient(String clientId) {
+
+    return tokenRepository.countValidAccessTokensForClient(clientId, new Date());
   }
 
   private Page<OAuth2AccessTokenEntity> getAllValidTokensForUserAndClient(String userId,
       String clientId, OffsetPageable op) {
+
     return tokenRepository.findValidAccessTokensForUserAndClient(userId, clientId, new Date(), op);
   }
 
-  private TokensListResponse<AccessToken> buildResponse(TokensPageRequest pageRequest,
-      Page<OAuth2AccessTokenEntity> entities) {
+  private int countAllValidTokensForUserAndClient(String userId, String clientId) {
 
-    if (pageRequest.getCount() == 0) {
-      return new TokensListResponse<>(Collections.emptyList(), entities.getTotalElements(), 0, 1);
-    }
+    return tokenRepository.countValidAccessTokensForUserAndClient(userId, clientId, new Date());
+  }
+
+  private TokensListResponse<AccessToken> buildCountResponse(int countResponse) {
+
+    return new TokensListResponse<>(Collections.emptyList(), countResponse, 0, 1);
+  }
+
+  private TokensListResponse<AccessToken> buildListResponse(TokensPageRequest pageRequest,
+      Page<OAuth2AccessTokenEntity> entities) {
 
     List<AccessToken> resources = new ArrayList<>();
 
@@ -93,38 +118,74 @@ public class DefaultAccessTokenService implements TokenService<AccessToken> {
     return new OffsetPageable(pageRequest.getStartIndex(), pageRequest.getCount());
   }
 
+  private boolean isCountRequest(TokensPageRequest pageRequest) {
+
+    return pageRequest.getCount() == 0;
+  }
+
   @Override
   public TokensListResponse<AccessToken> getAllTokens(TokensPageRequest pageRequest) {
 
-    return buildResponse(pageRequest, getAllValidTokens(getOffsetPageable(pageRequest)));
+    if (isCountRequest(pageRequest)) {
+
+      int count = countAllValidTokens();
+      return buildCountResponse(count);
+    }
+
+    OffsetPageable op = getOffsetPageable(pageRequest);
+    Page<OAuth2AccessTokenEntity> entities = getAllValidTokens(op);
+    return buildListResponse(pageRequest, entities);
   }
 
   @Override
   public TokensListResponse<AccessToken> getTokensForUser(String userId,
       TokensPageRequest pageRequest) {
 
-    return buildResponse(pageRequest,
-        getAllValidTokensForUser(userId, getOffsetPageable(pageRequest)));
+    if (isCountRequest(pageRequest)) {
+
+      int count = countAllValidTokensForUser(userId);
+      return buildCountResponse(count);
+    }
+
+    OffsetPageable op = getOffsetPageable(pageRequest);
+    Page<OAuth2AccessTokenEntity> entities = getAllValidTokensForUser(userId, op);
+    return buildListResponse(pageRequest, entities);
   }
 
   @Override
   public TokensListResponse<AccessToken> getTokensForClient(String clientId,
       TokensPageRequest pageRequest) {
 
-    return buildResponse(pageRequest,
-        getAllValidTokensForClient(clientId, getOffsetPageable(pageRequest)));
+    if (isCountRequest(pageRequest)) {
+
+      int count = countAllValidTokensForClient(clientId);
+      return buildCountResponse(count);
+    }
+
+    OffsetPageable op = getOffsetPageable(pageRequest);
+    Page<OAuth2AccessTokenEntity> entities = getAllValidTokensForClient(clientId, op);
+    return buildListResponse(pageRequest, entities);
   }
 
   @Override
   public TokensListResponse<AccessToken> getTokensForClientAndUser(String userId, String clientId,
       TokensPageRequest pageRequest) {
 
-    return buildResponse(pageRequest,
-        getAllValidTokensForUserAndClient(userId, clientId, getOffsetPageable(pageRequest)));
+    if (isCountRequest(pageRequest)) {
+
+      int count = countAllValidTokensForUserAndClient(userId, clientId);
+      return buildCountResponse(count);
+    }
+
+    OffsetPageable op = getOffsetPageable(pageRequest);
+    Page<OAuth2AccessTokenEntity> entities =
+        getAllValidTokensForUserAndClient(userId, clientId, op);
+    return buildListResponse(pageRequest, entities);
   }
 
   @Override
   public void deleteAllTokens() {
+
     tokenRepository.deleteAll();
   }
 }
