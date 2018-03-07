@@ -31,7 +31,7 @@
     <div class="box-body">
 
         <div class="text-center" ng-if="$ctrl.clientSelected !== undefined || $ctrl.userSelected !== undefined">
-            <p>Found <span id="rtoken_filtered"><strong>{{$ctrl.tokens.length}}</strong></span> tokens matching filter (out of <strong>{{$root.refreshTokensCount}}</strong>)</p>
+            <p>Found <span id="rtoken_filtered"><strong>{{$ctrl.totalResults}}</strong></span> tokens matching filter (out of <strong>{{$root.refreshTokensCount}}</strong>)</p>
         </div>
 
         <div ng-if="!$ctrl.tokens.length && !($ctrl.clientSelected !== undefined || $ctrl.userSelected !== undefined)">
