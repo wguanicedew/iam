@@ -6,6 +6,7 @@
     var self = this;
 
     self.$onInit = function() {
+      console.debug(self.accessTokensFirstResponse, self.refreshTokensFirstResponse);
       self.selected = 0;
       $rootScope.accessTokensCount = self.accessTokensFirstResponse.totalResults;
       $rootScope.refreshTokensCount = self.refreshTokensFirstResponse.totalResults;

@@ -25,8 +25,20 @@
                     </li>
                 </ul>
                 <br/>
-                <tokens-accesslist ng-show="$ctrl.isSelected(0)" tokens="$ctrl.accessTokensFirstResponse.Resources" clients="$ctrl.clients" users="$ctrl.users"></tokens-accesslist>
-                <tokens-refreshlist ng-show="$ctrl.isSelected(1)" tokens="$ctrl.refreshTokensFirstResponse.Resources" clients="$ctrl.clients" users="$ctrl.users"></tokens-refreshlist>
+                <tokens-accesslist
+                    ng-show="$ctrl.isSelected(0)"
+                    total="$ctrl.accessTokensFirstResponse.totalResults"
+                    tokens="$ctrl.accessTokensFirstResponse.Resources"
+                    clients="$ctrl.clients"
+                    users="$ctrl.users">
+                </tokens-accesslist>
+                <tokens-refreshlist
+                    ng-show="$ctrl.isSelected(1)"
+                    total="$ctrl.refreshTokensFirstResponse.totalResults"
+                    tokens="$ctrl.refreshTokensFirstResponse.Resources"
+                    clients="$ctrl.clients"
+                    users="$ctrl.users">
+                </tokens-refreshlist>
             </div>
         </div>
     </section>

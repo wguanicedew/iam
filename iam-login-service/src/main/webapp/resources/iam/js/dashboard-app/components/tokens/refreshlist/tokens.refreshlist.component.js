@@ -36,9 +36,10 @@
     self.currentPage = 1;
     self.currentOffset = 1;
     self.itemsPerPage = 10;
+    self.totalResults = self.total;
 
     self.$onInit = function() {
-      console.debug("init RefreshTokensListController", self.tokens);
+      console.debug("init RefreshTokensListController", self.tokens, self.currentPage, self.currentOffset, self.totalResults);
     };
 
     $scope.$on('refreshRefreshTokensList', function(e) {
@@ -151,7 +152,8 @@
             bindings: {
               clients: '=',
               users: '=',
-              tokens: '<'
+              tokens: '<',
+              total: '<'
             },
             templateUrl : '/resources/iam/js/dashboard-app/components/tokens/refreshlist/tokens.refreshlist.component.html',
             controller : [ '$q', '$scope', '$rootScope', '$uibModal', 'ModalService',
