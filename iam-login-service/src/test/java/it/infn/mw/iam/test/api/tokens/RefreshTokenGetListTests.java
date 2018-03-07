@@ -1,14 +1,11 @@
 package it.infn.mw.iam.test.api.tokens;
 
-import static it.infn.mw.iam.api.tokens.TokensControllerSupport.APPLICATION_JSON_CONTENT_TYPE;
 import static it.infn.mw.iam.api.tokens.TokensControllerSupport.TOKENS_MAX_PAGE_SIZE;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
+import java.util.Date;
 import java.util.List;
-
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,17 +14,15 @@ import org.mitre.oauth2.model.ClientDetailsEntity;
 import org.mitre.oauth2.model.OAuth2RefreshTokenEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.data.domain.Page;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
-
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.scim.converter.ScimResourceLocationProvider;
 import it.infn.mw.iam.api.tokens.model.RefreshToken;
 import it.infn.mw.iam.api.tokens.model.TokensListResponse;
+import it.infn.mw.iam.api.tokens.service.paging.OffsetPageable;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.repository.IamOAuthRefreshTokenRepository;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
@@ -47,20 +42,17 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
   public static final int FAKE_TOKEN_ID = 12345;
   private static final String TESTUSER_USERNAME = "test_102";
   private static final String TESTUSER2_USERNAME = "test_103";
-
+  private static final String PARTIAL_USERNAME = "test_10";
 
   @Autowired
   private ScimResourceLocationProvider scimResourceLocationProvider;
 
   @Autowired
-  private ObjectMapper mapper;
+  private IamOAuthRefreshTokenRepository tokenRepository;
 
   @Autowired
-  private IamOAuthRefreshTokenRepository tokenRepository;
-  
-  @Autowired
   private MockOAuth2Filter mockOAuth2Filter;
-  
+
   @Before
   public void setup() {
     clearAllTokens();
@@ -76,35 +68,40 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
   @Test
   public void getEmptyRefreshTokenList() throws Exception {
 
-    TokensListResponse<RefreshToken> atl = mapper.readValue(
-        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString(),
-        new TypeReference<TokensListResponse<RefreshToken>>() {});
+    assertThat(tokenRepository.count(), equalTo(0L));
+
+    /* get list */
+    TokensListResponse<RefreshToken> atl = getRefreshTokenList();
 
     assertThat(atl.getTotalResults(), equalTo(0L));
     assertThat(atl.getStartIndex(), equalTo(1L));
     assertThat(atl.getItemsPerPage(), equalTo(0L));
+    assertThat(atl.getResources().size(), equalTo(0));
+
+    /* get count */
+    atl = getRefreshTokenList(getParams(Lists.newArrayList(Pair.of("count", "0"))));
+
+    assertThat(atl.getTotalResults(), equalTo(0L));
+    assertThat(atl.getStartIndex(), equalTo(1L));
+    assertThat(atl.getItemsPerPage(), equalTo(0L));
+    assertThat(atl.getResources().size(), equalTo(0));
   }
 
   @Test
   public void getNotEmptyRefreshTokenListWithCountZero() throws Exception {
 
-    buildAccessToken(loadTestClient(TEST_CLIENT_ID), TESTUSER_USERNAME, SCOPES);
+    ClientDetailsEntity client = loadTestClient(TEST_CLIENT_ID);
 
-    TokensListResponse<RefreshToken> atl = mapper.readValue(
-        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE).param("count", "0"))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString(),
-        new TypeReference<TokensListResponse<RefreshToken>>() {});
+    buildAccessToken(client, TESTUSER_USERNAME, SCOPES);
 
+    TokensListResponse<RefreshToken> atl =
+        getRefreshTokenList(getParams(Lists.newArrayList(Pair.of("count", "0"))));
+
+    assertThat(tokenRepository.count(), equalTo(1L));
     assertThat(atl.getTotalResults(), equalTo(1L));
     assertThat(atl.getStartIndex(), equalTo(1L));
     assertThat(atl.getItemsPerPage(), equalTo(0L));
+    assertThat(atl.getResources().size(), equalTo(0));
   }
 
   @Test
@@ -113,16 +110,13 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
     ClientDetailsEntity client = loadTestClient(TEST_CLIENT_ID);
     IamAccount user = loadTestUser(TESTUSER_USERNAME);
 
-    OAuth2RefreshTokenEntity at = buildAccessToken(client, TESTUSER_USERNAME, SCOPES).getRefreshToken();
+    OAuth2RefreshTokenEntity at =
+        buildAccessToken(client, TESTUSER_USERNAME, SCOPES).getRefreshToken();
 
-    TokensListResponse<RefreshToken> atl = mapper.readValue(
-        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE).param("attributes", "user,idToken"))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString(),
-        new TypeReference<TokensListResponse<RefreshToken>>() {});
+    TokensListResponse<RefreshToken> atl =
+        getRefreshTokenList(getParams(Lists.newArrayList(Pair.of("attributes", "user,idToken"))));
 
+    assertThat(tokenRepository.count(), equalTo(1L));
     assertThat(atl.getTotalResults(), equalTo(1L));
     assertThat(atl.getStartIndex(), equalTo(1L));
     assertThat(atl.getItemsPerPage(), equalTo(1L));
@@ -148,18 +142,13 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
     IamAccount user = loadTestUser(TESTUSER_USERNAME);
 
     List<OAuth2RefreshTokenEntity> refreshTokens = Lists.newArrayList();
-    OAuth2RefreshTokenEntity target = buildAccessToken(client1, TESTUSER_USERNAME, SCOPES).getRefreshToken();
+    OAuth2RefreshTokenEntity target =
+        buildAccessToken(client1, TESTUSER_USERNAME, SCOPES).getRefreshToken();
     refreshTokens.add(target);
     refreshTokens.add(buildAccessToken(client2, TESTUSER_USERNAME, SCOPES).getRefreshToken());
 
-    TokensListResponse<RefreshToken> atl = mapper.readValue(
-        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE)
-            .param("clientId", client1.getClientId()))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString(),
-        new TypeReference<TokensListResponse<RefreshToken>>() {});
+    TokensListResponse<RefreshToken> atl = getRefreshTokenList(
+        getParams(Lists.newArrayList(Pair.of("clientId", client1.getClientId()))));
 
     assertThat(atl.getTotalResults(), equalTo(1L));
     assertThat(atl.getStartIndex(), equalTo(1L));
@@ -188,18 +177,13 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
     IamAccount user1 = loadTestUser(TESTUSER_USERNAME);
 
     List<OAuth2RefreshTokenEntity> refreshTokens = Lists.newArrayList();
-    OAuth2RefreshTokenEntity target = buildAccessToken(client, TESTUSER_USERNAME, SCOPES).getRefreshToken();
+    OAuth2RefreshTokenEntity target =
+        buildAccessToken(client, TESTUSER_USERNAME, SCOPES).getRefreshToken();
     refreshTokens.add(target);
     refreshTokens.add(buildAccessToken(client, TESTUSER2_USERNAME, SCOPES).getRefreshToken());
 
-    TokensListResponse<RefreshToken> atl = mapper.readValue(
-        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE)
-            .param("userId", user1.getUsername()))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString(),
-        new TypeReference<TokensListResponse<RefreshToken>>() {});
+    TokensListResponse<RefreshToken> atl =
+        getRefreshTokenList(getParams(Lists.newArrayList(Pair.of("userId", user1.getUsername()))));
 
     assertThat(atl.getTotalResults(), equalTo(1L));
     assertThat(atl.getStartIndex(), equalTo(1L));
@@ -229,21 +213,16 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
     IamAccount user1 = loadTestUser(TESTUSER_USERNAME);
 
     List<OAuth2RefreshTokenEntity> refreshTokens = Lists.newArrayList();
-    OAuth2RefreshTokenEntity target = buildAccessToken(client1, TESTUSER_USERNAME, SCOPES).getRefreshToken();
+    OAuth2RefreshTokenEntity target =
+        buildAccessToken(client1, TESTUSER_USERNAME, SCOPES).getRefreshToken();
     refreshTokens.add(target);
     refreshTokens.add(buildAccessToken(client1, TESTUSER2_USERNAME, SCOPES).getRefreshToken());
     refreshTokens.add(buildAccessToken(client2, TESTUSER_USERNAME, SCOPES).getRefreshToken());
     refreshTokens.add(buildAccessToken(client2, TESTUSER2_USERNAME, SCOPES).getRefreshToken());
 
-    TokensListResponse<RefreshToken> atl = mapper.readValue(
-        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE)
-            .param("userId", user1.getUsername())
-            .param("clientId", client1.getClientId()))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString(),
-        new TypeReference<TokensListResponse<RefreshToken>>() {});
+    TokensListResponse<RefreshToken> atl =
+        getRefreshTokenList(getParams(Lists.newArrayList(Pair.of("userId", user1.getUsername()),
+            Pair.of("clientId", client1.getClientId()))));
 
     assertThat(atl.getTotalResults(), equalTo(1L));
     assertThat(atl.getStartIndex(), equalTo(1L));
@@ -264,6 +243,22 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
         equalTo(scimResourceLocationProvider.userLocation(user1.getUuid())));
   }
 
+  @Test
+  public void getRefreshTokenListWithPartialUserIdFilterReturnsEmpty() throws Exception {
+
+    ClientDetailsEntity client = loadTestClient(TEST_CLIENT_ID);
+
+    buildAccessToken(client, TESTUSER_USERNAME, SCOPES);
+    buildAccessToken(client, TESTUSER2_USERNAME, SCOPES);
+
+    TokensListResponse<RefreshToken> atl =
+        getRefreshTokenList(getParams(Lists.newArrayList(Pair.of("userId", PARTIAL_USERNAME))));
+
+    assertThat(atl.getTotalResults(), equalTo(0L));
+    assertThat(atl.getStartIndex(), equalTo(1L));
+    assertThat(atl.getItemsPerPage(), equalTo(0L));
+    assertThat(atl.getResources().size(), equalTo(0));
+  }
 
   @Test
   public void getRefreshTokenListLimitedToPageSizeFirstPage() throws Exception {
@@ -273,13 +268,7 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
     }
 
     /* get first page */
-    TokensListResponse<RefreshToken> atl = mapper.readValue(
-        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString(),
-        new TypeReference<TokensListResponse<RefreshToken>>() {});
+    TokensListResponse<RefreshToken> atl = getRefreshTokenList();
 
     assertThat(atl.getTotalResults(), equalTo(2L * TOKENS_MAX_PAGE_SIZE));
     assertThat(atl.getStartIndex(), equalTo(1L));
@@ -295,14 +284,8 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
     }
 
     /* get second page */
-    TokensListResponse<RefreshToken> atl = mapper.readValue(
-        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE).param("startIndex",
-            String.valueOf(TOKENS_MAX_PAGE_SIZE)))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString(),
-        new TypeReference<TokensListResponse<RefreshToken>>() {});
+    TokensListResponse<RefreshToken> atl = getRefreshTokenList(
+        getParams(Lists.newArrayList(Pair.of("startIndex", String.valueOf(TOKENS_MAX_PAGE_SIZE)))));
 
     assertThat(atl.getTotalResults(), equalTo(2L * TOKENS_MAX_PAGE_SIZE));
     assertThat(atl.getStartIndex(), equalTo(Long.valueOf(TOKENS_MAX_PAGE_SIZE)));
@@ -319,14 +302,9 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
 
     assertThat(tokenRepository.count(), equalTo(1L));
 
-    TokensListResponse<RefreshToken> atl = mapper.readValue(
-        mvc.perform(get(REFRESH_TOKENS_BASE_PATH).contentType(APPLICATION_JSON_CONTENT_TYPE)
-            .param("userId", "1%; DELETE FROM access_token; SELECT * FROM refresh_token WHERE userId LIKE %"))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString(),
-        new TypeReference<TokensListResponse<RefreshToken>>() {});
+    TokensListResponse<RefreshToken> atl =
+        getRefreshTokenList(getParams(Lists.newArrayList(Pair.of("userId",
+            "1%; DELETE FROM access_token; SELECT * FROM refresh_token WHERE userId LIKE %"))));
 
     assertThat(atl.getTotalResults(), equalTo(0L));
     assertThat(atl.getStartIndex(), equalTo(1L));
@@ -334,5 +312,114 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
     assertThat(atl.getResources().size(), equalTo(0));
 
     assertThat(tokenRepository.count(), equalTo(1L));
+  }
+
+  @Test
+  public void getAllValidRefreshTokensCountWithExpiredTokens() throws Exception {
+
+    ClientDetailsEntity client = loadTestClient(TEST_CLIENT_ID);
+
+    buildAccessToken(client, TESTUSER_USERNAME, SCOPES);
+    buildAccessTokenWithExpiredRefreshToken(client, TESTUSER_USERNAME, SCOPES);
+
+    TokensListResponse<RefreshToken> atl =
+        getRefreshTokenList(getParams(Lists.newArrayList(Pair.of("count", "0"))));
+
+    assertThat(atl.getTotalResults(), equalTo(1L));
+    assertThat(atl.getStartIndex(), equalTo(1L));
+    assertThat(atl.getItemsPerPage(), equalTo(0L));
+  }
+
+  @Test
+  public void getAllValidRefreshTokensCountForUserWithExpiredTokens() throws Exception {
+
+    ClientDetailsEntity client = loadTestClient(TEST_CLIENT_ID);
+
+    buildAccessToken(client, TESTUSER_USERNAME, SCOPES);
+    buildAccessToken(client, TESTUSER2_USERNAME, SCOPES);
+    buildAccessTokenWithExpiredRefreshToken(client, TESTUSER_USERNAME, SCOPES);
+
+    assertThat(tokenRepository.count(), equalTo(3L));
+
+    Page<OAuth2RefreshTokenEntity> tokens =
+        tokenRepository.findAllValidRefreshTokens(new Date(), new OffsetPageable(0, 10));
+    assertThat(tokens.getTotalElements(), equalTo(2L));
+    tokens.forEach(t -> System.out.println(t.getExpiration()));
+
+    tokens = tokenRepository.findValidRefreshTokensForUser(TESTUSER_USERNAME, new Date(),
+        new OffsetPageable(0, 10));
+    assertThat(tokens.getTotalElements(), equalTo(1L));
+
+    TokensListResponse<RefreshToken> atl = getRefreshTokenList(
+        getParams(Lists.newArrayList(Pair.of("count", "0"), Pair.of("userId", TESTUSER_USERNAME))));
+
+    assertThat(atl.getTotalResults(), equalTo(1L));
+    assertThat(atl.getStartIndex(), equalTo(1L));
+    assertThat(atl.getItemsPerPage(), equalTo(0L));
+  }
+
+  @Test
+  public void getAllValidRefreshTokensCountForClientWithExpiredTokens() throws Exception {
+
+    ClientDetailsEntity client1 = loadTestClient(TEST_CLIENT_ID);
+    ClientDetailsEntity client2 = loadTestClient(TEST_CLIENT2_ID);
+
+    buildAccessToken(client1, TESTUSER_USERNAME, SCOPES);
+    buildAccessToken(client2, TESTUSER_USERNAME, SCOPES);
+    buildAccessTokenWithExpiredRefreshToken(client1, TESTUSER_USERNAME, SCOPES);
+
+    assertThat(tokenRepository.count(), equalTo(3L));
+
+    Page<OAuth2RefreshTokenEntity> tokens =
+        tokenRepository.findAllValidRefreshTokens(new Date(), new OffsetPageable(0, 10));
+    assertThat(tokens.getTotalElements(), equalTo(2L));
+    tokens.forEach(t -> System.out.println(t.getExpiration()));
+
+    tokens = tokenRepository.findValidRefreshTokensForClient(TEST_CLIENT_ID, new Date(),
+        new OffsetPageable(0, 10));
+    assertThat(tokens.getTotalElements(), equalTo(1L));
+
+    TokensListResponse<RefreshToken> atl = getRefreshTokenList(
+        getParams(Lists.newArrayList(Pair.of("count", "0"), Pair.of("clientId", TEST_CLIENT_ID))));
+
+    assertThat(atl.getTotalResults(), equalTo(1L));
+    assertThat(atl.getStartIndex(), equalTo(1L));
+    assertThat(atl.getItemsPerPage(), equalTo(0L));
+  }
+
+
+  @Test
+  public void getAllValidRefreshTokensCountForUserAndClientWithExpiredTokens() throws Exception {
+
+    ClientDetailsEntity client1 = loadTestClient(TEST_CLIENT_ID);
+    ClientDetailsEntity client2 = loadTestClient(TEST_CLIENT2_ID);
+
+    buildAccessToken(client1, TESTUSER_USERNAME, SCOPES);
+    buildAccessToken(client1, TESTUSER2_USERNAME, SCOPES);
+    buildAccessToken(client2, TESTUSER_USERNAME, SCOPES);
+    buildAccessToken(client2, TESTUSER2_USERNAME, SCOPES);
+    buildAccessTokenWithExpiredRefreshToken(client1, TESTUSER_USERNAME, SCOPES);
+    buildAccessTokenWithExpiredRefreshToken(client2, TESTUSER_USERNAME, SCOPES);
+    buildAccessTokenWithExpiredRefreshToken(client1, TESTUSER2_USERNAME, SCOPES);
+    buildAccessTokenWithExpiredRefreshToken(client2, TESTUSER2_USERNAME, SCOPES);
+
+    assertThat(tokenRepository.count(), equalTo(8L));
+
+    Page<OAuth2RefreshTokenEntity> tokens =
+        tokenRepository.findAllValidRefreshTokens(new Date(), new OffsetPageable(0, 10));
+    assertThat(tokens.getTotalElements(), equalTo(4L));
+    tokens.forEach(t -> System.out.println(t.getExpiration()));
+
+    tokens = tokenRepository.findValidRefreshTokensForUserAndClient(TESTUSER_USERNAME,
+        TEST_CLIENT_ID, new Date(), new OffsetPageable(0, 10));
+    assertThat(tokens.getTotalElements(), equalTo(1L));
+
+    TokensListResponse<RefreshToken> atl =
+        getRefreshTokenList(getParams(Lists.newArrayList(Pair.of("count", "0"),
+            Pair.of("clientId", TEST_CLIENT_ID), Pair.of("userId", TESTUSER_USERNAME))));
+
+    assertThat(atl.getTotalResults(), equalTo(1L));
+    assertThat(atl.getStartIndex(), equalTo(1L));
+    assertThat(atl.getItemsPerPage(), equalTo(0L));
   }
 }
