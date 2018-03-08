@@ -23,6 +23,7 @@ public class IamIntrospectionResultAssembler extends DefaultIntrospectionResultA
   private static final Logger LOGGER =
       LoggerFactory.getLogger(IamIntrospectionResultAssembler.class);
 
+  public static final String NAME = "name";
   public static final String PREFERRED_USERNAME = "preferred_username";
   public static final String EMAIL = "email";
   public static final String GROUPS = "groups";
@@ -69,10 +70,8 @@ public class IamIntrospectionResultAssembler extends DefaultIntrospectionResultA
               iamUserInfo.getGroups().stream().map(IamGroup::getName).collect(Collectors.toList()));
         }
 
+        result.put(NAME, iamUserInfo.getName());
         result.put(PREFERRED_USERNAME, iamUserInfo.getPreferredUsername());
-
-        LOGGER.debug("Organisation name: {}", IamProperties.INSTANCE.getOrganisationName());
-        
         result.put(ORGANISATION_NAME, IamProperties.INSTANCE.getOrganisationName());
       }
 
