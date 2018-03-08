@@ -1,10 +1,15 @@
 package it.infn.mw.iam.test.oauth;
 
+
+import static org.hamcrest.CoreMatchers.hasItem;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
+
 import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,9 +18,11 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.transaction.annotation.Transactional;
+
 import com.google.common.collect.Lists;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
+
 import it.infn.mw.iam.IamLoginService;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -87,9 +94,10 @@ public class EnhancedAccessTokenTests extends EndpointsTestUtils {
     assertThat(organisationName, is(ORGANISATION));
     List<String> groups = (List<String>) token.getJWTClaimsSet().getClaim("groups");
     assertThat(groups, is(notNullValue()));
-    assertThat(groups.size(), is(2));
-    assertThat(GROUPS.contains(groups.get(0)), is(true));
-    assertThat(GROUPS.contains(groups.get(1)), is(true));
+    assertThat(groups, hasSize(2));
+    
+    assertThat(groups, hasItem(GROUPS.get(0)));
+    assertThat(groups, hasItem(GROUPS.get(1)));
   }
 
   @Test
