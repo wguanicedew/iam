@@ -1,5 +1,6 @@
 package it.infn.mw.iam.authn.oidc;
 
+import static java.util.Objects.isNull;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -97,7 +98,7 @@ public class OidcTokenEnhancer extends ConnectTokenEnhancer {
       builder.audience(Lists.newArrayList(audience));
     }
 
-    if (includeAuthnInfo && userInfo != null) {
+    if (includeAuthnInfo && !isNull(userInfo)) {
       Set<String> requiredClaims = scopeClaimConverter.getClaimsForScopeSet(token.getScope());
       requiredClaims.stream().filter(ADDITIONAL_CLAIMS::contains)
           .forEach(c -> builder.claim(c, getClaimValueFromUserInfo(c, (IamUserInfo) userInfo)));
@@ -124,9 +125,9 @@ public class OidcTokenEnhancer extends ConnectTokenEnhancer {
         return organisationName;
 
       case "groups":
-        List<String> names =
+        List<String> groupNames =
             info.getGroups().stream().map(IamGroup::getName).collect(Collectors.toList());
-        return names.toArray(new String[0]);
+        return groupNames.toArray(new String[0]);
 
       default:
         return null;
