@@ -8,6 +8,7 @@ import org.mitre.oauth2.model.OAuth2AccessTokenEntity;
 import org.mitre.openid.connect.service.IDTokenClaimsEnhancer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.provider.OAuth2Request;
+import org.springframework.stereotype.Service;
 import com.google.common.collect.Sets;
 import com.nimbusds.jwt.JWTClaimsSet;
 import it.infn.mw.iam.api.account.password_reset.error.UserNotFoundError;
@@ -18,6 +19,7 @@ import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.model.IamUserInfo;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
+@Service
 public class IamIdTokenClaimsEnhancer implements IDTokenClaimsEnhancer {
 
   @Autowired
@@ -28,7 +30,7 @@ public class IamIdTokenClaimsEnhancer implements IDTokenClaimsEnhancer {
 
   private String organisationName = IamProperties.INSTANCE.getOrganisationName();
 
-  private static final Set<String> enhancedClaims =
+  private static final Set<String> ADDITIONAL_CLAIMS =
       Sets.newHashSet("email", "preferred_username", "organisation_name", "groups");
 
   @Override
@@ -41,28 +43,28 @@ public class IamIdTokenClaimsEnhancer implements IDTokenClaimsEnhancer {
 
     Set<String> requiredClaims = scopeClaimConverter.getClaimsForScopeSet(request.getScope());
 
-    requiredClaims.stream().filter(IamIdTokenClaimsEnhancer::isEnhancedClaim)
+    requiredClaims.stream().filter(ADDITIONAL_CLAIMS::contains)
         .forEach(c -> claimsBuilder.claim(c, getClaimValueFromUserInfo(c, info)));
-  }
-
-  private static boolean isEnhancedClaim(String claim) {
-
-    return enhancedClaims.contains(claim);
   }
 
   private Object getClaimValueFromUserInfo(String claim, IamUserInfo info) {
 
     switch (claim) {
+
       case "email":
         return info.getEmail();
+
       case "preferred_username":
         return info.getPreferredUsername();
+
       case "organisation_name":
         return organisationName;
+
       case "groups":
         List<String> names =
             info.getGroups().stream().map(IamGroup::getName).collect(Collectors.toList());
         return names.toArray(new String[0]);
+
       default:
         return null;
     }
