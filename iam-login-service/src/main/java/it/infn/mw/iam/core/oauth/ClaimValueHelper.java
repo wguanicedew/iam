@@ -1,8 +1,6 @@
 package it.infn.mw.iam.core.oauth;
 
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
@@ -14,7 +12,7 @@ import it.infn.mw.iam.persistence.model.IamUserInfo;
 
 @Component
 public class ClaimValueHelper {
-  
+
   public static final Set<String> ADDITIONAL_CLAIMS =
       ImmutableSet.of("name", "email", "preferred_username", "organisation_name", "groups");
 
@@ -23,10 +21,10 @@ public class ClaimValueHelper {
   public Object getClaimValueFromUserInfo(String claim, IamUserInfo info) {
 
     switch (claim) {
-      
+
       case "name":
         return info.getName();
-        
+
       case "email":
         return info.getEmail();
 
@@ -37,9 +35,7 @@ public class ClaimValueHelper {
         return organisationName;
 
       case "groups":
-        List<String> groupNames =
-            info.getGroups().stream().map(IamGroup::getName).collect(Collectors.toList());
-        return groupNames.toArray(new String[0]);
+        return info.getGroups().stream().map(IamGroup::getName).toArray(String[]::new);
 
       default:
         return null;
