@@ -19,7 +19,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableList;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
 
@@ -30,7 +30,7 @@ import it.infn.mw.iam.IamLoginService;
 @WebAppConfiguration
 @Transactional
 @TestPropertySource(properties = {"iam.access_token.include_authn_info=true"})
-public class EnhancedAccessTokenTests extends EndpointsTestUtils {
+public class AccessTokenEnhancerTests extends EndpointsTestUtils {
 
   private static final String CLIENT_CREDENTIALS_CLIENT_ID = "token-lookup-client";
   private static final String CLIENT_CREDENTIALS_CLIENT_SECRET = "secret";
@@ -41,7 +41,8 @@ public class EnhancedAccessTokenTests extends EndpointsTestUtils {
   private static final String PASSWORD = "password";
   private static final String EMAIL = "test@iam.test";
   private static final String ORGANISATION = "indigo-dc";
-  private static final List<String> GROUPS = Lists.newArrayList("Production", "Analysis");
+  private static final String NAME = "Test User";
+  private static final List<String> GROUPS = ImmutableList.of("Production", "Analysis");
 
   @Before
   public void setup() throws Exception {
@@ -76,6 +77,7 @@ public class EnhancedAccessTokenTests extends EndpointsTestUtils {
 
     JWT token = JWTParser.parse(getAccessTokenForClient("openid profile email"));
     assertThat(token.getJWTClaimsSet().getClaim("email"), is(nullValue()));
+    assertThat(token.getJWTClaimsSet().getClaim("name"), is(nullValue()));
     assertThat(token.getJWTClaimsSet().getClaim("preferred_username"), is(nullValue()));
     assertThat(token.getJWTClaimsSet().getClaim("organisation_name"), is(nullValue()));
     assertThat(token.getJWTClaimsSet().getClaim("groups"), is(nullValue()));
@@ -86,12 +88,19 @@ public class EnhancedAccessTokenTests extends EndpointsTestUtils {
   public void testEnhancedProfileClaimsOk() throws Exception {
 
     JWT token = JWTParser.parse(getAccessTokenForUser("openid profile"));
+    
+    String name = (String) token.getJWTClaimsSet().getClaim("name");
+    assertThat(name, is(notNullValue()));
+    assertThat(name, is(NAME));
+    
     String preferredUsername = (String) token.getJWTClaimsSet().getClaim("preferred_username");
     assertThat(preferredUsername, is(notNullValue()));
     assertThat(preferredUsername, is(USERNAME));
+    
     String organisationName = (String) token.getJWTClaimsSet().getClaim("organisation_name");
     assertThat(organisationName, is(notNullValue()));
     assertThat(organisationName, is(ORGANISATION));
+    
     List<String> groups = (List<String>) token.getJWTClaimsSet().getClaim("groups");
     assertThat(groups, is(notNullValue()));
     assertThat(groups, hasSize(2));
@@ -111,6 +120,7 @@ public class EnhancedAccessTokenTests extends EndpointsTestUtils {
   public void testEnhancedProfileClaimsNotEnhanced() throws Exception {
 
     JWT token = JWTParser.parse(getAccessTokenForUser("openid"));
+    assertThat(token.getJWTClaimsSet().getClaim("name"), is(nullValue()));
     assertThat(token.getJWTClaimsSet().getClaim("preferred_username"), is(nullValue()));
     assertThat(token.getJWTClaimsSet().getClaim("organisation_name"), is(nullValue()));
     assertThat(token.getJWTClaimsSet().getClaim("groups"), is(nullValue()));

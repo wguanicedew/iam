@@ -1,12 +1,15 @@
 package it.infn.mw.iam.test.oauth;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,9 +22,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
+
 import it.infn.mw.iam.IamLoginService;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -76,7 +81,7 @@ public class IdTokenEnhancerTests {
 
     JWT token = JWTParser.parse(getIdToken("openid email"));
     System.out.println(token.getJWTClaimsSet());
-    assertNotNull(token.getJWTClaimsSet().getClaim("email"));
+    assertThat(token.getJWTClaimsSet().getClaim("email"), is(notNullValue()));
   }
 
   @Test
@@ -84,9 +89,12 @@ public class IdTokenEnhancerTests {
 
     JWT token = JWTParser.parse(getIdToken("openid profile"));
     System.out.println(token.getJWTClaimsSet());
-    assertNotNull(token.getJWTClaimsSet().getClaim("preferred_username"));
-    assertNotNull(token.getJWTClaimsSet().getClaim("organisation_name"));
-    assertNotNull(token.getJWTClaimsSet().getClaim("groups"));
+    
+    assertThat(token.getJWTClaimsSet().getClaim("name"), is(notNullValue()));
+    assertThat(token.getJWTClaimsSet().getClaim("preferred_username"), is(notNullValue()));
+    assertThat(token.getJWTClaimsSet().getClaim("organisation_name"), is(notNullValue()));
+    assertThat(token.getJWTClaimsSet().getClaim("groups"), is(notNullValue()));
+    
   }
 
   @Test
@@ -95,7 +103,7 @@ public class IdTokenEnhancerTests {
     JWT token = JWTParser.parse(getIdToken("openid"));
 
     System.out.println(token.getJWTClaimsSet());
-    assertNull(token.getJWTClaimsSet().getClaim("email"));
+    assertThat(token.getJWTClaimsSet().getClaim("email"), is(nullValue()));
   }
 
   @Test
@@ -103,8 +111,9 @@ public class IdTokenEnhancerTests {
 
     JWT token = JWTParser.parse(getIdToken("openid"));
     System.out.println(token.getJWTClaimsSet());
-    assertNull(token.getJWTClaimsSet().getClaim("preferred_username"));
-    assertNull(token.getJWTClaimsSet().getClaim("organisation_name"));
-    assertNull(token.getJWTClaimsSet().getClaim("groups"));
+    assertThat(token.getJWTClaimsSet().getClaim("name"), is(nullValue()));
+    assertThat(token.getJWTClaimsSet().getClaim("preferred_username"), is(nullValue()));
+    assertThat(token.getJWTClaimsSet().getClaim("organisation_name"), is(nullValue()));
+    assertThat(token.getJWTClaimsSet().getClaim("groups"), is(nullValue()));
   }
 }
