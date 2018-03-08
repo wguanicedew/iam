@@ -41,10 +41,6 @@ public class IamGroupRepositoryTests {
   private IamGroup child;
   
   private static final String TEST_001_GROUP_ID = "c617d586-54e6-411d-8e38-649677980001";
-  private static final String TEST_002_GROUP_ID = "c617d586-54e6-411d-8e38-649677980002";
-
-
-
 
   @After
   public void tearDown() {

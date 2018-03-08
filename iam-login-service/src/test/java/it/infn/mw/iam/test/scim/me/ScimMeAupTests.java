@@ -66,6 +66,7 @@ public class ScimMeAupTests extends AupTestSupport {
 
   @Before
   public void setup() throws Exception {
+    mockOAuth2Filter.cleanupSecurityContext();
     mvc = MockMvcBuilders.webAppContextSetup(context)
       .apply(springSecurity())
       .alwaysDo(print())

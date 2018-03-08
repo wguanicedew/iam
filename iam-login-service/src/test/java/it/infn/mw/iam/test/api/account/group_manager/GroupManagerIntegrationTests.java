@@ -30,7 +30,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 
 import it.infn.mw.iam.IamLoginService;
@@ -52,13 +51,9 @@ import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 public class GroupManagerIntegrationTests {
 
   private static final String TEST_001_GROUP_ID = "c617d586-54e6-411d-8e38-649677980001";
-  private static final String TEST_002_GROUP_ID = "c617d586-54e6-411d-8e38-649677980002";
 
   @Autowired
   private WebApplicationContext context;
-
-  @Autowired
-  private ObjectMapper mapper;
 
   @Autowired
   private IamAccountRepository accountRepo;
