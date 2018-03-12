@@ -5,7 +5,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 import java.util.Date;
 import java.util.List;
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,6 +16,7 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.data.domain.Page;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.util.MultiValueMap;
 import com.google.common.collect.Lists;
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.scim.converter.ScimResourceLocationProvider;
@@ -43,6 +43,9 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
   private static final String TESTUSER_USERNAME = "test_102";
   private static final String TESTUSER2_USERNAME = "test_103";
   private static final String PARTIAL_USERNAME = "test_10";
+
+  private static final String INJECTION_QUERY =
+      "1%; DELETE FROM access_token; SELECT * FROM refresh_token WHERE userId LIKE %";
 
   @Autowired
   private ScimResourceLocationProvider scimResourceLocationProvider;
@@ -78,8 +81,10 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
     assertThat(atl.getItemsPerPage(), equalTo(0L));
     assertThat(atl.getResources().size(), equalTo(0));
 
+    MultiValueMap<String, String> params = MultiValueMapBuilder.builder().count(0).build();
+
     /* get count */
-    atl = getRefreshTokenList(getParams(Lists.newArrayList(Pair.of("count", "0"))));
+    atl = getRefreshTokenList(params);
 
     assertThat(atl.getTotalResults(), equalTo(0L));
     assertThat(atl.getStartIndex(), equalTo(1L));
@@ -94,8 +99,9 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
 
     buildAccessToken(client, TESTUSER_USERNAME, SCOPES);
 
-    TokensListResponse<RefreshToken> atl =
-        getRefreshTokenList(getParams(Lists.newArrayList(Pair.of("count", "0"))));
+    MultiValueMap<String, String> params = MultiValueMapBuilder.builder().count(0).build();
+
+    TokensListResponse<RefreshToken> atl = getRefreshTokenList(params);
 
     assertThat(tokenRepository.count(), equalTo(1L));
     assertThat(atl.getTotalResults(), equalTo(1L));
@@ -113,8 +119,10 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
     OAuth2RefreshTokenEntity at =
         buildAccessToken(client, TESTUSER_USERNAME, SCOPES).getRefreshToken();
 
-    TokensListResponse<RefreshToken> atl =
-        getRefreshTokenList(getParams(Lists.newArrayList(Pair.of("attributes", "user,idToken"))));
+    MultiValueMap<String, String> params =
+        MultiValueMapBuilder.builder().attributes("user,idToken").build();
+
+    TokensListResponse<RefreshToken> atl = getRefreshTokenList(params);
 
     assertThat(tokenRepository.count(), equalTo(1L));
     assertThat(atl.getTotalResults(), equalTo(1L));
@@ -147,8 +155,10 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
     refreshTokens.add(target);
     refreshTokens.add(buildAccessToken(client2, TESTUSER_USERNAME, SCOPES).getRefreshToken());
 
-    TokensListResponse<RefreshToken> atl = getRefreshTokenList(
-        getParams(Lists.newArrayList(Pair.of("clientId", client1.getClientId()))));
+    MultiValueMap<String, String> params =
+        MultiValueMapBuilder.builder().clientId(client1.getClientId()).build();
+
+    TokensListResponse<RefreshToken> atl = getRefreshTokenList(params);
 
     assertThat(atl.getTotalResults(), equalTo(1L));
     assertThat(atl.getStartIndex(), equalTo(1L));
@@ -182,8 +192,10 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
     refreshTokens.add(target);
     refreshTokens.add(buildAccessToken(client, TESTUSER2_USERNAME, SCOPES).getRefreshToken());
 
-    TokensListResponse<RefreshToken> atl =
-        getRefreshTokenList(getParams(Lists.newArrayList(Pair.of("userId", user1.getUsername()))));
+    MultiValueMap<String, String> params =
+        MultiValueMapBuilder.builder().userId(user1.getUsername()).build();
+
+    TokensListResponse<RefreshToken> atl = getRefreshTokenList(params);
 
     assertThat(atl.getTotalResults(), equalTo(1L));
     assertThat(atl.getStartIndex(), equalTo(1L));
@@ -220,9 +232,10 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
     refreshTokens.add(buildAccessToken(client2, TESTUSER_USERNAME, SCOPES).getRefreshToken());
     refreshTokens.add(buildAccessToken(client2, TESTUSER2_USERNAME, SCOPES).getRefreshToken());
 
-    TokensListResponse<RefreshToken> atl =
-        getRefreshTokenList(getParams(Lists.newArrayList(Pair.of("userId", user1.getUsername()),
-            Pair.of("clientId", client1.getClientId()))));
+    MultiValueMap<String, String> params = MultiValueMapBuilder.builder()
+        .userId(user1.getUsername()).clientId(client1.getClientId()).build();
+
+    TokensListResponse<RefreshToken> atl = getRefreshTokenList(params);
 
     assertThat(atl.getTotalResults(), equalTo(1L));
     assertThat(atl.getStartIndex(), equalTo(1L));
@@ -251,8 +264,10 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
     buildAccessToken(client, TESTUSER_USERNAME, SCOPES);
     buildAccessToken(client, TESTUSER2_USERNAME, SCOPES);
 
-    TokensListResponse<RefreshToken> atl =
-        getRefreshTokenList(getParams(Lists.newArrayList(Pair.of("userId", PARTIAL_USERNAME))));
+    MultiValueMap<String, String> params =
+        MultiValueMapBuilder.builder().userId(PARTIAL_USERNAME).build();
+
+    TokensListResponse<RefreshToken> atl = getRefreshTokenList(params);
 
     assertThat(atl.getTotalResults(), equalTo(0L));
     assertThat(atl.getStartIndex(), equalTo(1L));
@@ -283,9 +298,11 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
       buildAccessToken(loadTestClient(TEST_CLIENT_ID), TESTUSER_USERNAME, SCOPES);
     }
 
+    MultiValueMap<String, String> params =
+        MultiValueMapBuilder.builder().startIndex(TOKENS_MAX_PAGE_SIZE).build();
+
     /* get second page */
-    TokensListResponse<RefreshToken> atl = getRefreshTokenList(
-        getParams(Lists.newArrayList(Pair.of("startIndex", String.valueOf(TOKENS_MAX_PAGE_SIZE)))));
+    TokensListResponse<RefreshToken> atl = getRefreshTokenList(params);
 
     assertThat(atl.getTotalResults(), equalTo(2L * TOKENS_MAX_PAGE_SIZE));
     assertThat(atl.getStartIndex(), equalTo(Long.valueOf(TOKENS_MAX_PAGE_SIZE)));
@@ -302,9 +319,10 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
 
     assertThat(tokenRepository.count(), equalTo(1L));
 
-    TokensListResponse<RefreshToken> atl =
-        getRefreshTokenList(getParams(Lists.newArrayList(Pair.of("userId",
-            "1%; DELETE FROM access_token; SELECT * FROM refresh_token WHERE userId LIKE %"))));
+    MultiValueMap<String, String> params =
+        MultiValueMapBuilder.builder().userId(INJECTION_QUERY).build();
+
+    TokensListResponse<RefreshToken> atl = getRefreshTokenList(params);
 
     assertThat(atl.getTotalResults(), equalTo(0L));
     assertThat(atl.getStartIndex(), equalTo(1L));
@@ -322,8 +340,9 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
     buildAccessToken(client, TESTUSER_USERNAME, SCOPES);
     buildAccessTokenWithExpiredRefreshToken(client, TESTUSER_USERNAME, SCOPES);
 
-    TokensListResponse<RefreshToken> atl =
-        getRefreshTokenList(getParams(Lists.newArrayList(Pair.of("count", "0"))));
+    MultiValueMap<String, String> params = MultiValueMapBuilder.builder().count(0).build();
+
+    TokensListResponse<RefreshToken> atl = getRefreshTokenList(params);
 
     assertThat(atl.getTotalResults(), equalTo(1L));
     assertThat(atl.getStartIndex(), equalTo(1L));
@@ -350,8 +369,10 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
         new OffsetPageable(0, 10));
     assertThat(tokens.getTotalElements(), equalTo(1L));
 
-    TokensListResponse<RefreshToken> atl = getRefreshTokenList(
-        getParams(Lists.newArrayList(Pair.of("count", "0"), Pair.of("userId", TESTUSER_USERNAME))));
+    MultiValueMap<String, String> params =
+        MultiValueMapBuilder.builder().count(0).userId(TESTUSER_USERNAME).build();
+
+    TokensListResponse<RefreshToken> atl = getRefreshTokenList(params);
 
     assertThat(atl.getTotalResults(), equalTo(1L));
     assertThat(atl.getStartIndex(), equalTo(1L));
@@ -379,8 +400,10 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
         new OffsetPageable(0, 10));
     assertThat(tokens.getTotalElements(), equalTo(1L));
 
-    TokensListResponse<RefreshToken> atl = getRefreshTokenList(
-        getParams(Lists.newArrayList(Pair.of("count", "0"), Pair.of("clientId", TEST_CLIENT_ID))));
+    MultiValueMap<String, String> params =
+        MultiValueMapBuilder.builder().count(0).clientId(TEST_CLIENT_ID).build();
+
+    TokensListResponse<RefreshToken> atl = getRefreshTokenList(params);
 
     assertThat(atl.getTotalResults(), equalTo(1L));
     assertThat(atl.getStartIndex(), equalTo(1L));
@@ -414,9 +437,10 @@ public class RefreshTokenGetListTests extends TestTokensUtils {
         TEST_CLIENT_ID, new Date(), new OffsetPageable(0, 10));
     assertThat(tokens.getTotalElements(), equalTo(1L));
 
-    TokensListResponse<RefreshToken> atl =
-        getRefreshTokenList(getParams(Lists.newArrayList(Pair.of("count", "0"),
-            Pair.of("clientId", TEST_CLIENT_ID), Pair.of("userId", TESTUSER_USERNAME))));
+    MultiValueMap<String, String> params = MultiValueMapBuilder.builder().count(0)
+        .userId(TESTUSER_USERNAME).clientId(TEST_CLIENT_ID).build();
+
+    TokensListResponse<RefreshToken> atl = getRefreshTokenList(params);
 
     assertThat(atl.getTotalResults(), equalTo(1L));
     assertThat(atl.getStartIndex(), equalTo(1L));

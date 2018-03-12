@@ -9,8 +9,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
-import org.apache.commons.lang3.tuple.Pair;
 import org.mitre.oauth2.model.ClientDetailsEntity;
 import org.mitre.oauth2.model.OAuth2AccessTokenEntity;
 import org.mitre.oauth2.model.OAuth2RefreshTokenEntity;
@@ -151,13 +149,6 @@ public class TestTokensUtils {
   public Authentication anonymousAuthenticationToken() {
     return new AnonymousAuthenticationToken("key", "anonymous",
         AuthorityUtils.createAuthorityList("ROLE_ANONYMOUS"));
-  }
-
-  protected LinkedMultiValueMap<String, String> getParams(List<Pair<String, String>> params) {
-
-    LinkedMultiValueMap<String, String> out = new LinkedMultiValueMap<String, String>();
-    params.forEach(param -> out.add(param.getKey(), param.getValue()));
-    return out;
   }
 
   protected TokensListResponse<AccessToken> getAccessTokenList() throws JsonParseException,
