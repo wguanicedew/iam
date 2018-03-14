@@ -4,11 +4,15 @@ import static it.infn.mw.iam.core.IamGroupRequestStatus.APPROVED;
 import static it.infn.mw.iam.core.IamGroupRequestStatus.PENDING;
 import static it.infn.mw.iam.core.IamGroupRequestStatus.REJECTED;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -108,16 +112,50 @@ public class DefaultGroupRequestsService implements GroupRequestsService {
   }
 
   @Override
-  public void rejectGroupRequest(String uuid) {
+  public void rejectGroupRequest(String uuid, String motivation) {
     IamGroupRequest request = checkGroupRequestUuid(uuid);
+    checkRejectMotivation(motivation);
+
+    request.setMotivation(motivation);
     updateGroupRequestStatus(request, REJECTED);
   }
 
   @Override
   public GroupRequestDto getGroupRequestDetails(String uuid) {
     IamGroupRequest request = checkGroupRequestUuid(uuid);
+    if (!isPrivilegedUser()) {
+      validateUserAuth(request.getAccount().getUsername());
+    }
     return converter.fromEntity(request);
   }
+
+  @Override
+  public List<GroupRequestDto> listGroupRequest(String username, String groupName, String status,
+      Pageable pageRequest) {
+
+    Optional<String> usernameFilter = Optional.ofNullable(username);
+    Optional<String> groupNameFilter = Optional.ofNullable(groupName);
+    Optional<String> statusFilter = Optional.ofNullable(status);
+
+    Page<IamGroupRequest> result = null;
+    List<GroupRequestDto> requestList = new ArrayList<>();
+
+    if (usernameFilter.isPresent()) {
+      result = groupRequestRepository.findByUsername(username, pageRequest);
+    } else if (groupNameFilter.isPresent()) {
+      result = groupRequestRepository.findByGroup(groupName, pageRequest);
+    } else if (statusFilter.isPresent()) {
+      result =
+          groupRequestRepository.findByStatus(IamGroupRequestStatus.valueOf(status), pageRequest);
+    } else {
+      result = groupRequestRepository.findAll(pageRequest);
+    }
+
+    result.getContent().forEach(request -> requestList.add(converter.fromEntity(request)));
+
+    return requestList;
+  }
+
 
   private void updateGroupRequestStatus(IamGroupRequest request, IamGroupRequestStatus status) {
     if (allowedStateTransitions.contains(request.getStatus(), status)) {
@@ -155,6 +193,17 @@ public class DefaultGroupRequestsService implements GroupRequestsService {
 
     if (Strings.isNullOrEmpty(notes)) {
       throw new GroupRequestValidationException("Notes cannot be empty");
+    }
+  }
+
+  private void checkRejectMotivation(String motivation) {
+    String value = motivation;
+    if (motivation != null) {
+      value = motivation.trim();
+    }
+
+    if (Strings.isNullOrEmpty(value)) {
+      throw new GroupRequestValidationException("Reject motivation cannot be empty");
     }
   }
 

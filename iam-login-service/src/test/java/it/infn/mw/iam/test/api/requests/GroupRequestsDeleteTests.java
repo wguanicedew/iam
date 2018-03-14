@@ -30,7 +30,7 @@ import it.infn.mw.iam.test.util.WithAnonymousUser;
 @Transactional
 public class GroupRequestsDeleteTests extends GroupRequestsTestUtils {
 
-  private final static String GROUP_REQUESTS_API_PATH = "/iam/group_requests";
+  private final static String DELETE_URL = "/iam/group_requests/{uuid}";
 
   @Autowired
   private WebApplicationContext context;
@@ -52,7 +52,7 @@ public class GroupRequestsDeleteTests extends GroupRequestsTestUtils {
   @WithMockUser(roles = {"ADMIN"})
   public void deletePendingGroupRequestAsAdmin() throws Exception {
     // @formatter:off
-    mvc.perform(delete(GROUP_REQUESTS_API_PATH + "/{uuid}", request.getUuid()))
+    mvc.perform(delete(DELETE_URL, request.getUuid()))
       .andExpect(status().isNoContent());
     // @formatter:on
   }
@@ -62,7 +62,7 @@ public class GroupRequestsDeleteTests extends GroupRequestsTestUtils {
   public void deleteApprovedGroupRequestAsAdmin() throws Exception {
     request = saveApprovedGroupRequest(TEST_USERNAME, TEST_GROUPNAME);
     // @formatter:off
-    mvc.perform(delete(GROUP_REQUESTS_API_PATH + "/{uuid}", request.getUuid()))
+    mvc.perform(delete(DELETE_URL, request.getUuid()))
       .andExpect(status().isNoContent());
     // @formatter:on
   }
@@ -71,7 +71,7 @@ public class GroupRequestsDeleteTests extends GroupRequestsTestUtils {
   @WithMockUser(roles = {"USER"}, username = TEST_USERNAME)
   public void deletePendingGroupRequestAsUser() throws Exception {
     // @formatter:off
-    mvc.perform(delete(GROUP_REQUESTS_API_PATH + "/{uuid}", request.getUuid()))
+    mvc.perform(delete(DELETE_URL, request.getUuid()))
       .andExpect(status().isNoContent());
     // @formatter:on
   }
@@ -83,7 +83,7 @@ public class GroupRequestsDeleteTests extends GroupRequestsTestUtils {
     request = saveApprovedGroupRequest(TEST_USERNAME, TEST_GROUPNAME);
 
     // @formatter:off
-    mvc.perform(delete(GROUP_REQUESTS_API_PATH + "/{uuid}", request.getUuid()))
+    mvc.perform(delete(DELETE_URL, request.getUuid()))
       .andExpect(status().isBadRequest());
     // @formatter:on
   }
@@ -95,7 +95,7 @@ public class GroupRequestsDeleteTests extends GroupRequestsTestUtils {
     request = savePendingGroupRequest("test_101", TEST_GROUPNAME);
 
     // @formatter:off
-    mvc.perform(delete(GROUP_REQUESTS_API_PATH + "/{uuid}", request.getUuid()))
+    mvc.perform(delete(DELETE_URL, request.getUuid()))
       .andExpect(status().isForbidden());
     // @formatter:on
   }
@@ -104,7 +104,7 @@ public class GroupRequestsDeleteTests extends GroupRequestsTestUtils {
   @WithAnonymousUser
   public void deleteGroupRequestAsAnonymous() throws Exception {
     // @formatter:off
-    mvc.perform(delete(GROUP_REQUESTS_API_PATH + "/{uuid}", request.getUuid()))
+    mvc.perform(delete(DELETE_URL, request.getUuid()))
       .andExpect(status().isUnauthorized());
     // @formatter:on
   }
@@ -116,7 +116,7 @@ public class GroupRequestsDeleteTests extends GroupRequestsTestUtils {
     String fakeRequestUuid = UUID.randomUUID().toString();
 
     // @formatter:off
-    mvc.perform(delete(GROUP_REQUESTS_API_PATH + "/{uuid}", fakeRequestUuid))
+    mvc.perform(delete(DELETE_URL, fakeRequestUuid))
       .andExpect(status().isBadRequest());
     // @formatter:on
   }

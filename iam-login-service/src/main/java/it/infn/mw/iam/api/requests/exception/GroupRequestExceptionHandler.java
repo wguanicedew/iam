@@ -7,35 +7,37 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import it.infn.mw.iam.api.common.ErrorDTO;
+
 @ControllerAdvice
-public class GroupRequestExcepionHandler extends ResponseEntityExceptionHandler {
+public class GroupRequestExceptionHandler extends ResponseEntityExceptionHandler {
 
   @ResponseStatus(code = HttpStatus.BAD_REQUEST)
   @ExceptionHandler(GroupRequestValidationException.class)
   @ResponseBody
-  public ErrorResponse handleValidationException(GroupRequestValidationException e) {
+  public ErrorDTO handleValidationException(GroupRequestValidationException e) {
 
-    return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
+    return buildErrorResponse(e.getMessage());
   }
 
   @ResponseStatus(code = HttpStatus.BAD_REQUEST)
   @ExceptionHandler(GroupRequestStatusException.class)
   @ResponseBody
-  public ErrorResponse handleValidationException(GroupRequestStatusException e) {
+  public ErrorDTO handleValidationException(GroupRequestStatusException e) {
 
-    return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
+    return buildErrorResponse(e.getMessage());
   }
 
   @ResponseStatus(code = HttpStatus.FORBIDDEN)
   @ExceptionHandler(UserMismatchException.class)
   @ResponseBody
-  public ErrorResponse handleValidationException(UserMismatchException e) {
+  public ErrorDTO handleValidationException(UserMismatchException e) {
 
-    return buildErrorResponse(HttpStatus.FORBIDDEN, e.getMessage());
+    return buildErrorResponse(e.getMessage());
   }
 
-  private ErrorResponse buildErrorResponse(HttpStatus status, String message) {
-    return new ErrorResponse(status.value(), status.getReasonPhrase(), message);
+  private ErrorDTO buildErrorResponse(String message) {
+    return ErrorDTO.fromString(message);
   }
 
 }

@@ -31,7 +31,7 @@ import it.infn.mw.iam.test.util.WithAnonymousUser;
 @Transactional
 public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
 
-  private final static String GROUP_REQUESTS_API_PATH = "/iam/group_requests";
+  private final static String CREATE_URL = "/iam/group_requests";
 
   @Autowired
   private WebApplicationContext context;
@@ -56,7 +56,7 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
   @WithMockUser(roles = {"ADMIN"})
   public void createGroupRequestAsAdmin() throws Exception {
     // @formatter:off
-    mvc.perform(post(GROUP_REQUESTS_API_PATH)
+    mvc.perform(post(CREATE_URL)
         .contentType(MediaType.APPLICATION_JSON)
         .content(mapper.writeValueAsString(request)))
       .andExpect(status().isOk());
@@ -67,7 +67,7 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
   @WithMockUser(roles = {"USER"}, username = TEST_USERNAME)
   public void createGroupRequestAsUser() throws Exception {
     // @formatter:off
-    mvc.perform(post(GROUP_REQUESTS_API_PATH)
+    mvc.perform(post(CREATE_URL)
         .contentType(MediaType.APPLICATION_JSON)
         .content(mapper.writeValueAsString(request)))
       .andExpect(status().isOk());
@@ -80,7 +80,7 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
     GroupRequestDto request = buildGroupRequest("test_200", TEST_GROUPNAME);
 
     // @formatter:off
-    mvc.perform(post(GROUP_REQUESTS_API_PATH)
+    mvc.perform(post(CREATE_URL)
         .contentType(MediaType.APPLICATION_JSON)
         .content(mapper.writeValueAsString(request)))
       .andExpect(status().isForbidden());
@@ -91,7 +91,7 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
   @WithAnonymousUser
   public void createGroupRequestAsAnonymous() throws Exception {
     // @formatter:off
-    mvc.perform(post(GROUP_REQUESTS_API_PATH)
+    mvc.perform(post(CREATE_URL)
         .contentType(MediaType.APPLICATION_JSON)
         .content(mapper.writeValueAsString(request)))
       .andExpect(status().isUnauthorized());
@@ -104,7 +104,7 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
 
     request.setNotes(null);
     // @formatter:off
-    mvc.perform(post(GROUP_REQUESTS_API_PATH)
+    mvc.perform(post(CREATE_URL)
         .contentType(MediaType.APPLICATION_JSON)
         .content(mapper.writeValueAsString(request)))
       .andExpect(status().isBadRequest());
@@ -112,7 +112,7 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
 
     request.setNotes("");
     // @formatter:off
-    mvc.perform(post(GROUP_REQUESTS_API_PATH)
+    mvc.perform(post(CREATE_URL)
         .contentType(MediaType.APPLICATION_JSON)
         .content(mapper.writeValueAsString(request)))
       .andExpect(status().isBadRequest());
@@ -120,7 +120,7 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
 
     request.setNotes("   ");
     // @formatter:off
-    mvc.perform(post(GROUP_REQUESTS_API_PATH)
+    mvc.perform(post(CREATE_URL)
         .contentType(MediaType.APPLICATION_JSON)
         .content(mapper.writeValueAsString(request)))
       .andExpect(status().isBadRequest());
@@ -133,7 +133,7 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
 
     request.setGroupName("");
     // @formatter:off
-    mvc.perform(post(GROUP_REQUESTS_API_PATH)
+    mvc.perform(post(CREATE_URL)
         .contentType(MediaType.APPLICATION_JSON)
         .content(mapper.writeValueAsString(request)))
       .andExpect(status().isBadRequest());
@@ -141,7 +141,7 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
 
     request.setGroupName("fake_group");
     // @formatter:off
-    mvc.perform(post(GROUP_REQUESTS_API_PATH)
+    mvc.perform(post(CREATE_URL)
         .contentType(MediaType.APPLICATION_JSON)
         .content(mapper.writeValueAsString(request)))
       .andExpect(status().isBadRequest());
@@ -154,7 +154,7 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
 
     request.setUsername("");
     // @formatter:off
-    mvc.perform(post(GROUP_REQUESTS_API_PATH)
+    mvc.perform(post(CREATE_URL)
         .contentType(MediaType.APPLICATION_JSON)
         .content(mapper.writeValueAsString(request)))
       .andExpect(status().isBadRequest());
@@ -162,7 +162,7 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
 
     request.setUsername("fake_user");
     // @formatter:off
-    mvc.perform(post(GROUP_REQUESTS_API_PATH)
+    mvc.perform(post(CREATE_URL)
         .contentType(MediaType.APPLICATION_JSON)
         .content(mapper.writeValueAsString(request)))
       .andExpect(status().isBadRequest());
@@ -175,7 +175,7 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
     savePendingGroupRequest(TEST_USERNAME, TEST_GROUPNAME);
 
     // @formatter:off
-    mvc.perform(post(GROUP_REQUESTS_API_PATH)
+    mvc.perform(post(CREATE_URL)
         .contentType(MediaType.APPLICATION_JSON)
         .content(mapper.writeValueAsString(request)))
       .andExpect(status().isBadRequest());

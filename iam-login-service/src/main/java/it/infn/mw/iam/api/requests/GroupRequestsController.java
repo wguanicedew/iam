@@ -3,12 +3,14 @@ package it.infn.mw.iam.api.requests;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,21 +24,24 @@ public class GroupRequestsController {
   @Autowired
   private GroupRequestsService groupRequestService;
 
-  @RequestMapping(method = RequestMethod.POST, value = {"", "/"}, consumes = "application/json",
-      produces = "application/json")
+  @RequestMapping(method = RequestMethod.POST, value = {"", "/"})
   @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
   public GroupRequestDto createGroupRequest(@RequestBody GroupRequestDto groupRequest) {
     return groupRequestService.createGroupRequest(groupRequest);
   }
 
-  @RequestMapping(method = RequestMethod.GET, value = "/", produces = "application/json")
+  @RequestMapping(method = RequestMethod.GET, value = "/")
   @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-  public List<GroupRequestDto> listGroupRequest() {
-    // TODO:
-    return null;
+  public List<GroupRequestDto> listGroupRequest(@RequestParam(required = false) String username,
+      @RequestParam(required = false) String groupName,
+      @RequestParam(required = false) String status, @RequestParam(required = false) Integer page,
+      @RequestParam(required = false) Integer size) {
+
+    PageRequest pageRequest = new PageRequest(page, size);
+    return groupRequestService.listGroupRequest(username, groupName, status, pageRequest);
   }
 
-  @RequestMapping(method = RequestMethod.GET, value = "/{uuid}", produces = "application/json")
+  @RequestMapping(method = RequestMethod.GET, value = "/{uuid}")
   @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
   public GroupRequestDto getGroupRequestDetails(@PathVariable("uuid") String uuid) {
     return groupRequestService.getGroupRequestDetails(uuid);
@@ -59,8 +64,9 @@ public class GroupRequestsController {
   @RequestMapping(method = RequestMethod.POST, value = "/{uuid}/reject")
   @PreAuthorize("hasRole('ADMIN')")
   @ResponseStatus(HttpStatus.OK)
-  public void rejectGroupRequest(@PathVariable("uuid") String uuid) {
-    groupRequestService.rejectGroupRequest(uuid);
+  public void rejectGroupRequest(@PathVariable("uuid") String uuid,
+      @RequestParam(required = false) String motivation) {
+    groupRequestService.rejectGroupRequest(uuid, motivation);
   }
 
 }

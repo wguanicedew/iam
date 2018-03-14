@@ -14,6 +14,7 @@ public class GroupRequestConverter {
     groupRequest.setUsername(iamGroupRequest.getAccount().getUsername());
     groupRequest.setGroupName(iamGroupRequest.getGroup().getName());
     groupRequest.setStatus(iamGroupRequest.getStatus().name());
+    groupRequest.setNotes(iamGroupRequest.getNotes());
     groupRequest.setCreationTime(iamGroupRequest.getCreationTime());
     groupRequest.setLastUpdateTime(iamGroupRequest.getLastUpdateTime());
 

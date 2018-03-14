@@ -12,6 +12,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -30,7 +31,7 @@ import it.infn.mw.iam.test.util.WithAnonymousUser;
 @Transactional
 public class GroupRequestsRejectTests extends GroupRequestsTestUtils {
 
-  private final static String GROUP_REQUESTS_API_PATH = "/iam/group_requests";
+  private final static String REJECT_URL = "/iam/group_requests/{uuid}/reject";
 
   @Autowired
   private WebApplicationContext context;
@@ -52,7 +53,9 @@ public class GroupRequestsRejectTests extends GroupRequestsTestUtils {
   @WithMockUser(roles = {"ADMIN"})
   public void rejectGroupRequestAsAdmin() throws Exception {
     // @formatter:off
-    mvc.perform(post(GROUP_REQUESTS_API_PATH + "/{uuid}/reject", request.getUuid()))
+    mvc.perform(post(REJECT_URL, request.getUuid())
+        .param("motivation", TEST_REJECT_MOTIVATION)
+        .contentType(MediaType.APPLICATION_JSON))
       .andExpect(status().isOk());
     // @formatter:on
   }
@@ -61,7 +64,9 @@ public class GroupRequestsRejectTests extends GroupRequestsTestUtils {
   @WithMockUser(roles = {"USER"}, username = TEST_USERNAME)
   public void rejectGroupRequestAsUser() throws Exception {
     // @formatter:off
-    mvc.perform(post(GROUP_REQUESTS_API_PATH + "/{uuid}/reject", request.getUuid()))
+    mvc.perform(post(REJECT_URL, request.getUuid())
+        .param("motivation", TEST_REJECT_MOTIVATION)
+        .contentType(MediaType.APPLICATION_JSON))
       .andExpect(status().isForbidden());
     // @formatter:on
   }
@@ -70,7 +75,9 @@ public class GroupRequestsRejectTests extends GroupRequestsTestUtils {
   @WithAnonymousUser
   public void rejectGroupRequestAsAnonymous() throws Exception {
     // @formatter:off
-    mvc.perform(post(GROUP_REQUESTS_API_PATH + "/{uuid}/reject", request.getUuid()))
+    mvc.perform(post(REJECT_URL, request.getUuid())
+        .param("motivation", TEST_REJECT_MOTIVATION)
+        .contentType(MediaType.APPLICATION_JSON))
       .andExpect(status().isUnauthorized());
     // @formatter:on
   }
@@ -82,7 +89,9 @@ public class GroupRequestsRejectTests extends GroupRequestsTestUtils {
     String fakeRequestUuid = UUID.randomUUID().toString();
 
     // @formatter:off
-    mvc.perform(post(GROUP_REQUESTS_API_PATH + "/{uuid}/reject", fakeRequestUuid))
+    mvc.perform(post(REJECT_URL, fakeRequestUuid)
+        .param("motivation", TEST_REJECT_MOTIVATION)
+        .contentType(MediaType.APPLICATION_JSON))
       .andExpect(status().isBadRequest());
     // @formatter:on
   }
@@ -91,12 +100,47 @@ public class GroupRequestsRejectTests extends GroupRequestsTestUtils {
   @WithMockUser(roles = {"ADMIN"})
   public void rejectAlreadyRejectedRequest() throws Exception {
 
-    request = saveRejectedGroupRequest("test_100", "Test-001");
+    request = saveRejectedGroupRequest(TEST_USERNAME, TEST_GROUPNAME);
 
     // @formatter:off
-    mvc.perform(post(GROUP_REQUESTS_API_PATH + "/{uuid}/reject", request.getUuid()))
+    mvc.perform(post(REJECT_URL, request.getUuid())
+        .param("motivation", TEST_REJECT_MOTIVATION)
+        .contentType(MediaType.APPLICATION_JSON))
     .andExpect(status().isBadRequest());
     // @formatter:on
   }
 
+  @Test
+  @WithMockUser(roles = {"ADMIN"})
+  public void rejectAlreadyApprovedRequest() throws Exception {
+
+    request = saveApprovedGroupRequest(TEST_USERNAME, TEST_GROUPNAME);
+
+    // @formatter:off
+    mvc.perform(post(REJECT_URL, request.getUuid())
+        .param("motivation", TEST_REJECT_MOTIVATION)
+        .contentType(MediaType.APPLICATION_JSON))
+    .andExpect(status().isBadRequest());
+    // @formatter:on
+  }
+
+  @Test
+  @WithMockUser(roles = {"ADMIN"})
+  public void rejectRequestWithoutMotivation() throws Exception {
+    // @formatter:off
+    mvc.perform(post(REJECT_URL, request.getUuid())
+        .contentType(MediaType.APPLICATION_JSON))
+    .andExpect(status().isBadRequest());
+    
+    mvc.perform(post(REJECT_URL, request.getUuid())
+        .param("motivation", "")
+        .contentType(MediaType.APPLICATION_JSON))
+    .andExpect(status().isBadRequest());
+    
+    mvc.perform(post(REJECT_URL, request.getUuid())
+        .param("motivation", "     ")
+        .contentType(MediaType.APPLICATION_JSON))
+    .andExpect(status().isBadRequest());
+    // @formatter:on
+  }
 }

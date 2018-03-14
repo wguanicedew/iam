@@ -1,8 +1,10 @@
 package it.infn.mw.iam.test.api.requests;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.UUID;
@@ -28,9 +30,9 @@ import it.infn.mw.iam.test.util.WithAnonymousUser;
 @SpringApplicationConfiguration(classes = {IamLoginService.class})
 @WebAppConfiguration
 @Transactional
-public class GroupRequestsApproveTests extends GroupRequestsTestUtils {
+public class GroupRequestsGetDetailsTests extends GroupRequestsTestUtils {
 
-  private final static String APPROVE_URL = "/iam/group_requests/{uuid}/approve";
+  private final static String GET_DETAILS_URL = "/iam/group_requests/{uuid}";
 
   @Autowired
   private WebApplicationContext context;
@@ -50,64 +52,59 @@ public class GroupRequestsApproveTests extends GroupRequestsTestUtils {
 
   @Test
   @WithMockUser(roles = {"ADMIN"})
-  public void approveGroupRequestAsAdmin() throws Exception {
+  public void getGroupRequestDetailsAsAdmin() throws Exception {
     // @formatter:off
-    mvc.perform(post(APPROVE_URL, request.getUuid()))
-      .andExpect(status().isOk());
+    mvc.perform(get(GET_DETAILS_URL, request.getUuid()))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.uuid", equalTo(request.getUuid())))
+      .andExpect(jsonPath("$.username", equalTo(request.getUsername())))
+      .andExpect(jsonPath("$.groupName", equalTo(request.getGroupName())))
+      .andExpect(jsonPath("$.status", equalTo(request.getStatus())))
+      .andExpect(jsonPath("$.notes", equalTo(request.getNotes())));
     // @formatter:on
   }
 
   @Test
   @WithMockUser(roles = {"USER"}, username = TEST_USERNAME)
-  public void approveGroupRequestAsUser() throws Exception {
+  public void getGroupRequestDetailsAsUser() throws Exception {
     // @formatter:off
-    mvc.perform(post(APPROVE_URL, request.getUuid()))
+    mvc.perform(get(GET_DETAILS_URL, request.getUuid()))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.uuid", equalTo(request.getUuid())))
+      .andExpect(jsonPath("$.username", equalTo(request.getUsername())))
+      .andExpect(jsonPath("$.groupName", equalTo(request.getGroupName())))
+      .andExpect(jsonPath("$.status", equalTo(request.getStatus())));;
+    // @formatter:on
+  }
+
+  @Test
+  @WithMockUser(roles = {"USER"}, username = TEST_USERNAME)
+  public void getGroupRequestDetailsOfAnotherUser() throws Exception {
+    request = savePendingGroupRequest("test_101", TEST_GROUPNAME);
+    // @formatter:off
+    mvc.perform(get(GET_DETAILS_URL, request.getUuid()))
       .andExpect(status().isForbidden());
     // @formatter:on
   }
 
   @Test
   @WithAnonymousUser
-  public void approveGroupRequestAsAnonymous() throws Exception {
+  public void getGroupRequestDetailsAsAnonymous() throws Exception {
     // @formatter:off
-    mvc.perform(post(APPROVE_URL, request.getUuid()))
+    mvc.perform(get(GET_DETAILS_URL, request.getUuid()))
       .andExpect(status().isUnauthorized());
     // @formatter:on
   }
 
   @Test
   @WithMockUser(roles = {"ADMIN"})
-  public void approveNotExitingGroupRequest() throws Exception {
+  public void getDetailsOfNotExitingGroupRequest() throws Exception {
 
     String fakeRequestUuid = UUID.randomUUID().toString();
 
     // @formatter:off
-    mvc.perform(post(APPROVE_URL, fakeRequestUuid))
+    mvc.perform(get(GET_DETAILS_URL, fakeRequestUuid))
       .andExpect(status().isBadRequest());
-    // @formatter:on
-  }
-
-  @Test
-  @WithMockUser(roles = {"ADMIN"})
-  public void approveAlreadyApprovedRequest() throws Exception {
-
-    request = saveApprovedGroupRequest(TEST_USERNAME, TEST_GROUPNAME);
-
-    // @formatter:off
-    mvc.perform(post(APPROVE_URL, request.getUuid()))
-    .andExpect(status().isBadRequest());
-    // @formatter:on
-  }
-
-  @Test
-  @WithMockUser(roles = {"ADMIN"})
-  public void approveRejectedRequest() throws Exception {
-
-    request = saveRejectedGroupRequest(TEST_USERNAME, TEST_GROUPNAME);
-
-    // @formatter:off
-    mvc.perform(post(APPROVE_URL, request.getUuid()))
-    .andExpect(status().isBadRequest());
     // @formatter:on
   }
 

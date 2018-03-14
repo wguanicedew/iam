@@ -46,6 +46,9 @@ public class IamGroupRequest implements Serializable {
   @Column(nullable = false)
   private String notes;
 
+  @Column(nullable = true)
+  private String motivation;
+
   @Temporal(TemporalType.TIMESTAMP)
   @Column(nullable = false)
   private Date creationTime;
@@ -99,6 +102,14 @@ public class IamGroupRequest implements Serializable {
 
   public void setNotes(String notes) {
     this.notes = notes;
+  }
+
+  public String getMotivation() {
+    return motivation;
+  }
+
+  public void setMotivation(String motivation) {
+    this.motivation = motivation;
   }
 
   public Date getCreationTime() {
