@@ -868,6 +868,43 @@ public class SecurityConfig {
         .disable();
     }
   }
+
+  @Configuration
+  @Order(29)
+  public static class AccountSearchApiEndpointConfig extends WebSecurityConfigurerAdapter {
+    
+    private static final String ACCOUNT_SEARCH_PATH = "/iam/account/search";
+    @Autowired
+    private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
+
+    @Autowired
+    private OAuth2AuthenticationProcessingFilter resourceFilter;
+
+    @Autowired
+    private CorsFilter corsFilter;
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+      http.requestMatchers()
+        .antMatchers("/iam/account/search**")
+        .and()
+        .exceptionHandling()
+        .authenticationEntryPoint(authenticationEntryPoint)
+        .and()
+        .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
+        .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
+        .sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.NEVER)
+        .and()
+        .authorizeRequests()
+        .antMatchers(HttpMethod.GET, ACCOUNT_SEARCH_PATH)
+        .permitAll()
+        .and()
+        .csrf()
+        .disable();
+    }
+  }
+
   @Configuration
   @Order(Ordered.HIGHEST_PRECEDENCE)
   @Profile("dev")

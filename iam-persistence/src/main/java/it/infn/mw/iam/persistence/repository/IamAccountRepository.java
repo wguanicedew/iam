@@ -3,11 +3,11 @@ package it.infn.mw.iam.persistence.repository;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
-
 import it.infn.mw.iam.persistence.model.IamAccount;
 
 
@@ -70,4 +70,9 @@ public interface IamAccountRepository
   List<IamAccount> findProvisionedAccountsWithLastLoginTimeBeforeTimestamp(
       @Param("timestamp") Date timestamp);
 
+  @Query("select a from IamAccount a join a.userInfo ui where ui.email LIKE '%:filter%' or a.username LIKE '%:filter%' or a.uuid LIKE '%:filter%' or ui.givenName LIKE '%:filter%' or ui.familyName LIKE '%:filter%'")
+  Page<IamAccount> findByFilter(@Param("filter") String filter, Pageable op);
+
+  @Query("select count(a) from IamAccount a join a.userInfo ui where ui.email LIKE '%:filter%' or a.username LIKE '%:filter%' or a.uuid LIKE '%:filter%' or ui.givenName LIKE '%:filter%' or ui.familyName LIKE '%:filter%'")
+  long countByFilter(@Param("filter") String filter);
 }
