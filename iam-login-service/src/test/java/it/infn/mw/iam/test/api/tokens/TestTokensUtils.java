@@ -29,10 +29,10 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import it.infn.mw.iam.api.common.ListResponseDTO;
 import it.infn.mw.iam.api.tokens.Constants;
 import it.infn.mw.iam.api.tokens.model.AccessToken;
 import it.infn.mw.iam.api.tokens.model.RefreshToken;
-import it.infn.mw.iam.api.tokens.model.TokensListResponse;
 import it.infn.mw.iam.core.user.exception.IamAccountException;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
@@ -151,13 +151,13 @@ public class TestTokensUtils {
         AuthorityUtils.createAuthorityList("ROLE_ANONYMOUS"));
   }
 
-  protected TokensListResponse<AccessToken> getAccessTokenList() throws JsonParseException,
+  protected ListResponseDTO<AccessToken> getAccessTokenList() throws JsonParseException,
       JsonMappingException, UnsupportedEncodingException, IOException, Exception {
 
     return getAccessTokenList(new LinkedMultiValueMap<String, String>());
   }
 
-  protected TokensListResponse<AccessToken> getAccessTokenList(MultiValueMap<String, String> params)
+  protected ListResponseDTO<AccessToken> getAccessTokenList(MultiValueMap<String, String> params)
       throws JsonParseException, JsonMappingException, UnsupportedEncodingException, IOException,
       Exception {
 
@@ -169,17 +169,17 @@ public class TestTokensUtils {
         .andExpect(status().isOk())
         .andReturn()
         .getResponse()
-        .getContentAsString(), new TypeReference<TokensListResponse<AccessToken>>() {});
+        .getContentAsString(), new TypeReference<ListResponseDTO<AccessToken>>() {});
     /* @formatter:on */
   }
 
-  protected TokensListResponse<RefreshToken> getRefreshTokenList() throws JsonParseException,
+  protected ListResponseDTO<RefreshToken> getRefreshTokenList() throws JsonParseException,
       JsonMappingException, UnsupportedEncodingException, IOException, Exception {
 
     return getRefreshTokenList(new LinkedMultiValueMap<String, String>());
   }
 
-  protected TokensListResponse<RefreshToken> getRefreshTokenList(MultiValueMap<String, String> params)
+  protected ListResponseDTO<RefreshToken> getRefreshTokenList(MultiValueMap<String, String> params)
       throws JsonParseException, JsonMappingException, UnsupportedEncodingException, IOException,
       Exception {
 
@@ -191,7 +191,7 @@ public class TestTokensUtils {
         .andExpect(status().isOk())
         .andReturn()
         .getResponse()
-        .getContentAsString(), new TypeReference<TokensListResponse<RefreshToken>>() {});
+        .getContentAsString(), new TypeReference<ListResponseDTO<RefreshToken>>() {});
     /* @formatter:on */
   }
 }

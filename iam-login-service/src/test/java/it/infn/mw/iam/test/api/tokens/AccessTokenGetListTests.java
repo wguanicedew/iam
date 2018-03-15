@@ -19,10 +19,10 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.util.MultiValueMap;
 import com.google.common.collect.Lists;
 import it.infn.mw.iam.IamLoginService;
+import it.infn.mw.iam.api.common.ListResponseDTO;
+import it.infn.mw.iam.api.common.OffsetPageable;
 import it.infn.mw.iam.api.scim.converter.ScimResourceLocationProvider;
 import it.infn.mw.iam.api.tokens.model.AccessToken;
-import it.infn.mw.iam.api.tokens.model.TokensListResponse;
-import it.infn.mw.iam.api.tokens.service.paging.OffsetPageable;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.repository.IamOAuthAccessTokenRepository;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
@@ -79,11 +79,11 @@ public class AccessTokenGetListTests extends TestTokensUtils {
     assertThat(tokenRepository.count(), equalTo(0L));
 
     /* get list */
-    TokensListResponse<AccessToken> atl = getAccessTokenList();
+    ListResponseDTO<AccessToken> atl = getAccessTokenList();
 
     assertThat(atl.getTotalResults(), equalTo(0L));
-    assertThat(atl.getStartIndex(), equalTo(1L));
-    assertThat(atl.getItemsPerPage(), equalTo(0L));
+    assertThat(atl.getStartIndex(), equalTo(1));
+    assertThat(atl.getItemsPerPage(), equalTo(0));
     assertThat(atl.getResources().size(), equalTo(0));
 
     MultiValueMap<String, String> params = MultiValueMapBuilder.builder().count(0).build();
@@ -92,8 +92,8 @@ public class AccessTokenGetListTests extends TestTokensUtils {
     atl = getAccessTokenList(params);
 
     assertThat(atl.getTotalResults(), equalTo(0L));
-    assertThat(atl.getStartIndex(), equalTo(1L));
-    assertThat(atl.getItemsPerPage(), equalTo(0L));
+    assertThat(atl.getStartIndex(), equalTo(1));
+    assertThat(atl.getItemsPerPage(), equalTo(0));
     assertThat(atl.getResources().size(), equalTo(0));
   }
 
@@ -106,12 +106,12 @@ public class AccessTokenGetListTests extends TestTokensUtils {
 
     MultiValueMap<String, String> params = MultiValueMapBuilder.builder().count(0).build();
 
-    TokensListResponse<AccessToken> atl = getAccessTokenList(params);
+    ListResponseDTO<AccessToken> atl = getAccessTokenList(params);
 
     assertThat(tokenRepository.count(), equalTo(1L));
     assertThat(atl.getTotalResults(), equalTo(1L));
-    assertThat(atl.getStartIndex(), equalTo(1L));
-    assertThat(atl.getItemsPerPage(), equalTo(0L));
+    assertThat(atl.getStartIndex(), equalTo(1));
+    assertThat(atl.getItemsPerPage(), equalTo(0));
     assertThat(atl.getResources().size(), equalTo(0));
   }
 
@@ -126,12 +126,12 @@ public class AccessTokenGetListTests extends TestTokensUtils {
     MultiValueMap<String, String> params =
         MultiValueMapBuilder.builder().attributes("user,idToken").build();
 
-    TokensListResponse<AccessToken> atl = getAccessTokenList(params);
+    ListResponseDTO<AccessToken> atl = getAccessTokenList(params);
 
     assertThat(tokenRepository.count(), equalTo(1L));
     assertThat(atl.getTotalResults(), equalTo(1L));
-    assertThat(atl.getStartIndex(), equalTo(1L));
-    assertThat(atl.getItemsPerPage(), equalTo(1L));
+    assertThat(atl.getStartIndex(), equalTo(1));
+    assertThat(atl.getItemsPerPage(), equalTo(1));
     assertThat(atl.getResources().size(), equalTo(1));
 
     List<AccessToken> acl = atl.getResources();
@@ -163,11 +163,11 @@ public class AccessTokenGetListTests extends TestTokensUtils {
     MultiValueMap<String, String> params =
         MultiValueMapBuilder.builder().clientId(client1.getClientId()).build();
 
-    TokensListResponse<AccessToken> atl = getAccessTokenList(params);
+    ListResponseDTO<AccessToken> atl = getAccessTokenList(params);
 
     assertThat(atl.getTotalResults(), equalTo(1L));
-    assertThat(atl.getStartIndex(), equalTo(1L));
-    assertThat(atl.getItemsPerPage(), equalTo(1L));
+    assertThat(atl.getStartIndex(), equalTo(1));
+    assertThat(atl.getItemsPerPage(), equalTo(1));
     assertThat(atl.getResources().size(), equalTo(1));
 
     List<AccessToken> acl = atl.getResources();
@@ -201,11 +201,11 @@ public class AccessTokenGetListTests extends TestTokensUtils {
     MultiValueMap<String, String> params =
         MultiValueMapBuilder.builder().userId(user1.getUsername()).build();
 
-    TokensListResponse<AccessToken> atl = getAccessTokenList(params);
+    ListResponseDTO<AccessToken> atl = getAccessTokenList(params);
 
     assertThat(atl.getTotalResults(), equalTo(1L));
-    assertThat(atl.getStartIndex(), equalTo(1L));
-    assertThat(atl.getItemsPerPage(), equalTo(1L));
+    assertThat(atl.getStartIndex(), equalTo(1));
+    assertThat(atl.getItemsPerPage(), equalTo(1));
     assertThat(atl.getResources().size(), equalTo(1));
 
     List<AccessToken> acl = atl.getResources();
@@ -242,11 +242,11 @@ public class AccessTokenGetListTests extends TestTokensUtils {
     MultiValueMap<String, String> params = MultiValueMapBuilder.builder()
         .userId(user1.getUsername()).clientId(client1.getClientId()).build();
 
-    TokensListResponse<AccessToken> atl = getAccessTokenList(params);
+    ListResponseDTO<AccessToken> atl = getAccessTokenList(params);
 
     assertThat(atl.getTotalResults(), equalTo(1L));
-    assertThat(atl.getStartIndex(), equalTo(1L));
-    assertThat(atl.getItemsPerPage(), equalTo(1L));
+    assertThat(atl.getStartIndex(), equalTo(1));
+    assertThat(atl.getItemsPerPage(), equalTo(1));
     assertThat(atl.getResources().size(), equalTo(1));
 
     List<AccessToken> acl = atl.getResources();
@@ -276,11 +276,11 @@ public class AccessTokenGetListTests extends TestTokensUtils {
     MultiValueMap<String, String> params =
         MultiValueMapBuilder.builder().userId(PARTIAL_USERNAME).build();
 
-    TokensListResponse<AccessToken> atl = getAccessTokenList(params);
+    ListResponseDTO<AccessToken> atl = getAccessTokenList(params);
 
     assertThat(atl.getTotalResults(), equalTo(0L));
-    assertThat(atl.getStartIndex(), equalTo(1L));
-    assertThat(atl.getItemsPerPage(), equalTo(0L));
+    assertThat(atl.getStartIndex(), equalTo(1));
+    assertThat(atl.getItemsPerPage(), equalTo(0));
     assertThat(atl.getResources().size(), equalTo(0));
   }
 
@@ -292,11 +292,11 @@ public class AccessTokenGetListTests extends TestTokensUtils {
     }
 
     /* get first page */
-    TokensListResponse<AccessToken> atl = getAccessTokenList();
+    ListResponseDTO<AccessToken> atl = getAccessTokenList();
 
     assertThat(atl.getTotalResults(), equalTo(Long.valueOf(TOKENS_MAX_PAGE_SIZE)));
-    assertThat(atl.getStartIndex(), equalTo(1L));
-    assertThat(atl.getItemsPerPage(), equalTo(Long.valueOf(TOKENS_MAX_PAGE_SIZE)));
+    assertThat(atl.getStartIndex(), equalTo(1));
+    assertThat(atl.getItemsPerPage(), equalTo(TOKENS_MAX_PAGE_SIZE));
     assertThat(atl.getResources().size(), equalTo(TOKENS_MAX_PAGE_SIZE));
   }
 
@@ -311,11 +311,11 @@ public class AccessTokenGetListTests extends TestTokensUtils {
         MultiValueMapBuilder.builder().startIndex(TOKENS_MAX_PAGE_SIZE).build();
 
     /* get second page */
-    TokensListResponse<AccessToken> atl = getAccessTokenList(params);
+    ListResponseDTO<AccessToken> atl = getAccessTokenList(params);
 
     assertThat(atl.getTotalResults(), equalTo(Long.valueOf(TOKENS_MAX_PAGE_SIZE)));
-    assertThat(atl.getStartIndex(), equalTo(Long.valueOf(TOKENS_MAX_PAGE_SIZE)));
-    assertThat(atl.getItemsPerPage(), equalTo(1L));
+    assertThat(atl.getStartIndex(), equalTo(TOKENS_MAX_PAGE_SIZE));
+    assertThat(atl.getItemsPerPage(), equalTo(1));
     assertThat(atl.getResources().size(), equalTo(1));
   }
 
@@ -331,11 +331,11 @@ public class AccessTokenGetListTests extends TestTokensUtils {
     MultiValueMap<String, String> params =
         MultiValueMapBuilder.builder().userId(INJECTION_QUERY).build();
 
-    TokensListResponse<AccessToken> atl = getAccessTokenList(params);
+    ListResponseDTO<AccessToken> atl = getAccessTokenList(params);
 
     assertThat(atl.getTotalResults(), equalTo(0L));
-    assertThat(atl.getStartIndex(), equalTo(1L));
-    assertThat(atl.getItemsPerPage(), equalTo(0L));
+    assertThat(atl.getStartIndex(), equalTo(1));
+    assertThat(atl.getItemsPerPage(), equalTo(0));
     assertThat(atl.getResources().size(), equalTo(0));
 
     assertThat(tokenRepository.count(), equalTo(1L));
@@ -348,11 +348,11 @@ public class AccessTokenGetListTests extends TestTokensUtils {
     buildAccessToken(loadTestClient(TEST_CLIENT_ID), TESTUSER_USERNAME, SCOPES);
     buildAccessToken(loadTestClient(TEST_CLIENT_ID), SCOPES);
 
-    TokensListResponse<AccessToken> atl = getAccessTokenList();
+    ListResponseDTO<AccessToken> atl = getAccessTokenList();
 
     assertThat(atl.getTotalResults(), equalTo(2L));
-    assertThat(atl.getStartIndex(), equalTo(1L));
-    assertThat(atl.getItemsPerPage(), equalTo(2L));
+    assertThat(atl.getStartIndex(), equalTo(1));
+    assertThat(atl.getItemsPerPage(), equalTo(2));
   }
 
   @Test
@@ -365,11 +365,11 @@ public class AccessTokenGetListTests extends TestTokensUtils {
 
     MultiValueMap<String, String> params = MultiValueMapBuilder.builder().count(0).build();
 
-    TokensListResponse<AccessToken> atl = getAccessTokenList(params);
+    ListResponseDTO<AccessToken> atl = getAccessTokenList(params);
 
     assertThat(atl.getTotalResults(), equalTo(1L));
-    assertThat(atl.getStartIndex(), equalTo(1L));
-    assertThat(atl.getItemsPerPage(), equalTo(0L));
+    assertThat(atl.getStartIndex(), equalTo(1));
+    assertThat(atl.getItemsPerPage(), equalTo(0));
   }
 
   @Test
@@ -395,11 +395,11 @@ public class AccessTokenGetListTests extends TestTokensUtils {
     MultiValueMap<String, String> params =
         MultiValueMapBuilder.builder().count(0).userId(TESTUSER_USERNAME).build();
 
-    TokensListResponse<AccessToken> atl = getAccessTokenList(params);
+    ListResponseDTO<AccessToken> atl = getAccessTokenList(params);
 
     assertThat(atl.getTotalResults(), equalTo(1L));
-    assertThat(atl.getStartIndex(), equalTo(1L));
-    assertThat(atl.getItemsPerPage(), equalTo(0L));
+    assertThat(atl.getStartIndex(), equalTo(1));
+    assertThat(atl.getItemsPerPage(), equalTo(0));
   }
 
   @Test
@@ -426,11 +426,11 @@ public class AccessTokenGetListTests extends TestTokensUtils {
     MultiValueMap<String, String> params =
         MultiValueMapBuilder.builder().count(0).clientId(TEST_CLIENT_ID).build();
 
-    TokensListResponse<AccessToken> atl = getAccessTokenList(params);
+    ListResponseDTO<AccessToken> atl = getAccessTokenList(params);
 
     assertThat(atl.getTotalResults(), equalTo(1L));
-    assertThat(atl.getStartIndex(), equalTo(1L));
-    assertThat(atl.getItemsPerPage(), equalTo(0L));
+    assertThat(atl.getStartIndex(), equalTo(1));
+    assertThat(atl.getItemsPerPage(), equalTo(0));
   }
 
 
@@ -463,10 +463,10 @@ public class AccessTokenGetListTests extends TestTokensUtils {
     MultiValueMap<String, String> params = MultiValueMapBuilder.builder().count(0)
         .userId(TESTUSER_USERNAME).clientId(TEST_CLIENT_ID).build();
 
-    TokensListResponse<AccessToken> atl = getAccessTokenList(params);
+    ListResponseDTO<AccessToken> atl = getAccessTokenList(params);
 
     assertThat(atl.getTotalResults(), equalTo(1L));
-    assertThat(atl.getStartIndex(), equalTo(1L));
-    assertThat(atl.getItemsPerPage(), equalTo(0L));
+    assertThat(atl.getStartIndex(), equalTo(1));
+    assertThat(atl.getItemsPerPage(), equalTo(0));
   }
 }

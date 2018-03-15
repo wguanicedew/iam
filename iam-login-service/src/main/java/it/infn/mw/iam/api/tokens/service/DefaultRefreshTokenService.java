@@ -10,11 +10,11 @@ import org.mitre.oauth2.service.impl.DefaultOAuth2ProviderTokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import it.infn.mw.iam.api.common.ListResponseDTO;
+import it.infn.mw.iam.api.common.OffsetPageable;
 import it.infn.mw.iam.api.tokens.converter.TokensConverter;
 import it.infn.mw.iam.api.tokens.exception.TokenNotFoundException;
 import it.infn.mw.iam.api.tokens.model.RefreshToken;
-import it.infn.mw.iam.api.tokens.model.TokensListResponse;
-import it.infn.mw.iam.api.tokens.service.paging.OffsetPageable;
 import it.infn.mw.iam.api.tokens.service.paging.TokensPageRequest;
 import it.infn.mw.iam.persistence.repository.IamOAuthRefreshTokenRepository;
 
@@ -95,20 +95,26 @@ public class DefaultRefreshTokenService implements TokenService<RefreshToken> {
     return tokenRepository.countValidRefreshTokensForUserAndClient(userId, clientId, new Date());
   }
 
-  private TokensListResponse<RefreshToken> buildCountResponse(int countResponse) {
+  private ListResponseDTO<RefreshToken> buildCountResponse(int countResponse) {
 
-    return new TokensListResponse<>(Collections.emptyList(), countResponse, 0, 1);
+    return new ListResponseDTO.Builder<RefreshToken>().totalResults(countResponse)
+        .resources(Collections.emptyList()).startIndex(1).itemsPerPage(0).build();
   }
 
-  private TokensListResponse<RefreshToken> buildListResponse(TokensPageRequest pageRequest,
-      Page<OAuth2RefreshTokenEntity> entities) {
+  private ListResponseDTO<RefreshToken> buildListResponse(Page<OAuth2RefreshTokenEntity> entities,
+      OffsetPageable op) {
 
     List<RefreshToken> resources = new ArrayList<>();
 
     entities.getContent().forEach(a -> resources.add(tokensConverter.toRefreshToken(a)));
 
-    return new TokensListResponse<>(resources, entities.getTotalElements(), resources.size(),
-        pageRequest.getStartIndex() + 1);
+    ListResponseDTO.Builder<RefreshToken> builder = ListResponseDTO.builder();
+    builder.itemsPerPage(entities.getNumberOfElements());
+    builder.startIndex(op.getOffset() + 1);
+    builder.resources(resources);
+    builder.totalResults(entities.getTotalElements());
+
+    return builder.build();
   }
 
   private OffsetPageable getOffsetPageable(TokensPageRequest pageRequest) {
@@ -125,7 +131,7 @@ public class DefaultRefreshTokenService implements TokenService<RefreshToken> {
   }
 
   @Override
-  public TokensListResponse<RefreshToken> getAllTokens(TokensPageRequest pageRequest) {
+  public ListResponseDTO<RefreshToken> getAllTokens(TokensPageRequest pageRequest) {
 
     if (isCountRequest(pageRequest)) {
 
@@ -135,11 +141,11 @@ public class DefaultRefreshTokenService implements TokenService<RefreshToken> {
 
     OffsetPageable op = getOffsetPageable(pageRequest);
     Page<OAuth2RefreshTokenEntity> entities = getAllValidTokens(op);
-    return buildListResponse(pageRequest, entities);
+    return buildListResponse(entities, op);
   }
 
   @Override
-  public TokensListResponse<RefreshToken> getTokensForUser(String userId,
+  public ListResponseDTO<RefreshToken> getTokensForUser(String userId,
       TokensPageRequest pageRequest) {
 
     if (isCountRequest(pageRequest)) {
@@ -150,11 +156,11 @@ public class DefaultRefreshTokenService implements TokenService<RefreshToken> {
 
     OffsetPageable op = getOffsetPageable(pageRequest);
     Page<OAuth2RefreshTokenEntity> entities = getAllValidTokensForUser(userId, op);
-    return buildListResponse(pageRequest, entities);
+    return buildListResponse(entities, op);
   }
 
   @Override
-  public TokensListResponse<RefreshToken> getTokensForClient(String clientId,
+  public ListResponseDTO<RefreshToken> getTokensForClient(String clientId,
       TokensPageRequest pageRequest) {
 
     if (isCountRequest(pageRequest)) {
@@ -165,11 +171,11 @@ public class DefaultRefreshTokenService implements TokenService<RefreshToken> {
 
     OffsetPageable op = getOffsetPageable(pageRequest);
     Page<OAuth2RefreshTokenEntity> entities = getAllValidTokensForClient(clientId, op);
-    return buildListResponse(pageRequest, entities);
+    return buildListResponse(entities, op);
   }
 
   @Override
-  public TokensListResponse<RefreshToken> getTokensForClientAndUser(String userId, String clientId,
+  public ListResponseDTO<RefreshToken> getTokensForClientAndUser(String userId, String clientId,
       TokensPageRequest pageRequest) {
 
     if (isCountRequest(pageRequest)) {
@@ -181,7 +187,7 @@ public class DefaultRefreshTokenService implements TokenService<RefreshToken> {
     OffsetPageable op = getOffsetPageable(pageRequest);
     Page<OAuth2RefreshTokenEntity> entities =
         getAllValidTokensForUserAndClient(userId, clientId, op);
-    return buildListResponse(pageRequest, entities);
+    return buildListResponse(entities, op);
   }
 
   @Override

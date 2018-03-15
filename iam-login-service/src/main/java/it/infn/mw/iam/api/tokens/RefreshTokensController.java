@@ -18,9 +18,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import it.infn.mw.iam.api.common.ErrorDTO;
+import it.infn.mw.iam.api.common.ListResponseDTO;
 import it.infn.mw.iam.api.tokens.exception.TokenNotFoundException;
 import it.infn.mw.iam.api.tokens.model.RefreshToken;
-import it.infn.mw.iam.api.tokens.model.TokensListResponse;
 import it.infn.mw.iam.api.tokens.service.TokenService;
 import it.infn.mw.iam.api.tokens.service.paging.TokensPageRequest;
 import it.infn.mw.iam.core.user.exception.IamAccountException;
@@ -42,7 +42,7 @@ public class RefreshTokensController extends TokensControllerSupport {
       @RequestParam(required = false) final String attributes) {
 
     TokensPageRequest pr = buildTokensPageRequest(count, startIndex);
-    TokensListResponse<RefreshToken> results = getFilteredList(pr, userId, clientId);
+    ListResponseDTO<RefreshToken> results = getFilteredList(pr, userId, clientId);
     return filterAttributes(results, attributes);
   }
   
@@ -52,7 +52,7 @@ public class RefreshTokensController extends TokensControllerSupport {
     tokenService.deleteAllTokens();
   }
 
-  private TokensListResponse<RefreshToken> getFilteredList(TokensPageRequest pageRequest,
+  private ListResponseDTO<RefreshToken> getFilteredList(TokensPageRequest pageRequest,
       String userId, String clientId) {
 
     Optional<String> user = Optional.ofNullable(userId);

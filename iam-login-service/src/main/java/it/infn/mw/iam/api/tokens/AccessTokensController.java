@@ -18,9 +18,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import it.infn.mw.iam.api.common.ErrorDTO;
+import it.infn.mw.iam.api.common.ListResponseDTO;
 import it.infn.mw.iam.api.tokens.exception.TokenNotFoundException;
 import it.infn.mw.iam.api.tokens.model.AccessToken;
-import it.infn.mw.iam.api.tokens.model.TokensListResponse;
 import it.infn.mw.iam.api.tokens.service.TokenService;
 import it.infn.mw.iam.api.tokens.service.paging.TokensPageRequest;
 import it.infn.mw.iam.core.user.exception.IamAccountException;
@@ -42,7 +42,7 @@ public class AccessTokensController extends TokensControllerSupport {
       @RequestParam(required = false) final String attributes) {
 
     TokensPageRequest pr = buildTokensPageRequest(count, startIndex);
-    TokensListResponse<AccessToken> results = getFilteredList(pr, userId, clientId);
+    ListResponseDTO<AccessToken> results = getFilteredList(pr, userId, clientId);
     return filterAttributes(results, attributes);
   }
   
@@ -52,7 +52,7 @@ public class AccessTokensController extends TokensControllerSupport {
     tokenService.deleteAllTokens();
   }
 
-  private TokensListResponse<AccessToken> getFilteredList(TokensPageRequest pageRequest,
+  private ListResponseDTO<AccessToken> getFilteredList(TokensPageRequest pageRequest,
       String userId, String clientId) {
 
     Optional<String> user = Optional.ofNullable(userId);
