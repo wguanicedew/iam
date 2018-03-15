@@ -2,6 +2,7 @@ package it.infn.mw.iam.api.common;
 
 import java.util.List;
 import org.springframework.data.domain.Page;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ListResponseDTO<T> {
@@ -12,7 +13,10 @@ public class ListResponseDTO<T> {
 
   private List<T> resources;
 
-  public ListResponseDTO(List<T> resources, long totalResults, int startIndex, int itemsPerPage) {
+  @JsonCreator
+  public ListResponseDTO(@JsonProperty("Resources") List<T> resources,
+      @JsonProperty("totalResults") long totalResults, @JsonProperty("startIndex") int startIndex,
+      @JsonProperty("itemsPerPage") int itemsPerPage) {
 
     this.resources = resources;
     this.totalResults = totalResults;
