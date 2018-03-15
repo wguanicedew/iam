@@ -7,7 +7,7 @@ import static org.junit.Assert.assertThat;
 
 import java.io.UnsupportedEncodingException;
 
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 
 import org.hamcrest.Matchers;
 import org.junit.Before;

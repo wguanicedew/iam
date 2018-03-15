@@ -25,10 +25,10 @@ public class LoginController {
 
   @Autowired
   IamProperties properties;
-  
+    
   @Autowired
   IamSamlProperties samlProperties;
-
+  
   @RequestMapping("/login")
   public String login(Authentication authentication, Model model, HttpServletRequest request) {
 

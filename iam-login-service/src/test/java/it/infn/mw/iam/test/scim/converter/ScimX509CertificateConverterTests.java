@@ -30,7 +30,7 @@ public class ScimX509CertificateConverterTests extends X509TestSupport {
       .pemEncodedCertificate(TEST_0_CERT_STRING)
       .build();
 
-    IamX509Certificate iamCert = converter.fromScim(scimCert);
+    IamX509Certificate iamCert = converter.entityFromDto(scimCert);
 
     assertThat(iamCert.getLabel(), equalTo("A label"));
     assertTrue(iamCert.isPrimary());
@@ -48,7 +48,7 @@ public class ScimX509CertificateConverterTests extends X509TestSupport {
     cert.setLabel("A label");
     cert.setPrimary(false);
 
-    ScimX509Certificate scimCert = converter.toScim(cert);
+    ScimX509Certificate scimCert = converter.dtoFromEntity(cert);
 
     assertThat(scimCert.getDisplay(), equalTo("A label"));
     assertFalse(scimCert.getPrimary());

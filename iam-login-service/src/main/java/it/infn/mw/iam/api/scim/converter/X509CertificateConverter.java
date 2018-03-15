@@ -43,7 +43,7 @@ public class X509CertificateConverter
   }
 
   @Override
-  public IamX509Certificate fromScim(ScimX509Certificate scim) {
+  public IamX509Certificate entityFromDto(ScimX509Certificate scim) {
 
     IamX509Certificate cert;
 
@@ -63,7 +63,7 @@ public class X509CertificateConverter
   }
 
   @Override
-  public ScimX509Certificate toScim(IamX509Certificate entity) {
+  public ScimX509Certificate dtoFromEntity(IamX509Certificate entity) {
 
     return ScimX509Certificate.builder()
       .created(entity.getCreationTime())

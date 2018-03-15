@@ -10,7 +10,7 @@ import it.infn.mw.iam.api.scim.model.ScimAddress;
 public class AddressConverter implements Converter<ScimAddress, Address> {
 
   @Override
-  public Address fromScim(ScimAddress scim) {
+  public Address entityFromDto(ScimAddress scim) {
 
     Address address = new DefaultAddress();
 
@@ -26,7 +26,7 @@ public class AddressConverter implements Converter<ScimAddress, Address> {
   }
 
   @Override
-  public ScimAddress toScim(Address entity) {
+  public ScimAddress dtoFromEntity(Address entity) {
 
     return ScimAddress.builder()
       .country(entity.getCountry())

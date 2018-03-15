@@ -1,11 +1,11 @@
 language: java
 sudo: required
 services:
-  - docker
-  - mysql
+- docker
+- mysql
 dist: trusty
 install:
-  - /bin/bash travis/install-mitreid.sh
+- "/bin/bash travis/install-mitreid.sh"
 addons:
   sonarcloud:
     organization: andreaceccanti-github
@@ -14,8 +14,13 @@ addons:
 jdk:
 - openjdk8
 script:
-- /bin/bash travis/build.sh
+- "/bin/bash travis/build.sh"
 cache:
   directories:
   - "$HOME/.m2/repository"
   - "$HOME/.sonar/cache"
+notifications:
+  slack:
+    on_success: always
+    rooms:
+      secure: eeLc5FlACOfYQ4MEvyUh+cO9pc8tAD1s9QwqO6FJjENHK/EPnPCTYpzq4Leqeoi78s6BZ9KwTQu975vsNobUPgrqAGEocE7n3FnBf2VKoXwr1c38suv/jWwUOZjgJyRbEUs0OdyzBGpLUps1Nlm+xN/DM7paUFskui6ofBzusDdcOv+9gKjdply0nuX+vETjCWE6smJ+9Xw4qrFu3nChRiQMp3fyrWcgJNnMjNinqofwUTWcwQXGb4i94LmWI0s8fJk9Gij/7FXH6xcZIpqYw92PlMSzmLaf/HpzjeZaMcqLhg/M+KWo1ognE2oKsdpLwP/9W+sqhrlZVMK118kjePq8274jzwfvLuwoyunFsU00lh6Zu0zAhxqZBuKt3BxRz/yhD63Q3RbRx7QyQ3aca4UbCv/76VhAzzSvRQ2sljx/Ep20nyeKemkfhdvA69WEMzgqyDI6gL/db4+SN21/l7j/C/35kJCvdYlmFIn6sKD7ET/Aive/26zd2GToSPZSvPQCgsn8bdtXbvTH5tMKmk/3ANwrE3SNLXc/+zTIqzrF6iYficqdEmA3T3+F+05Fp7zhAYPvsiUSS6g3OR2g5+bNlotz+xH34lnoK3BizHPvJC4bU0ykEYX0oT1MvoA0dJ9zXutFYb779fkdJioDCLqnKO9DZwARwTccj+rlpkg=

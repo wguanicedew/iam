@@ -1,9 +1,8 @@
 package it.infn.mw.iam.api.requests.service;
 
-import java.util.List;
-
 import org.springframework.data.domain.Pageable;
 
+import it.infn.mw.iam.api.common.ListResponseDTO;
 import it.infn.mw.iam.api.requests.model.GroupRequestDto;
 
 public interface GroupRequestsService {
@@ -18,7 +17,7 @@ public interface GroupRequestsService {
 
   GroupRequestDto getGroupRequestDetails(String uuid);
 
-  List<GroupRequestDto> listGroupRequest(String username, String groupName, String status,
-      Pageable pageRequest);
+  ListResponseDTO<GroupRequestDto> listGroupRequest(String username, String groupName,
+      String status, Pageable pageRequest);
 
 }

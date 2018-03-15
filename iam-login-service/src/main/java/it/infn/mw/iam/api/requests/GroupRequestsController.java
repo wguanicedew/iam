@@ -1,7 +1,5 @@
 package it.infn.mw.iam.api.requests;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -14,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import it.infn.mw.iam.api.common.ListResponseDTO;
 import it.infn.mw.iam.api.requests.model.GroupRequestDto;
 import it.infn.mw.iam.api.requests.service.GroupRequestsService;
 
@@ -32,7 +31,8 @@ public class GroupRequestsController {
 
   @RequestMapping(method = RequestMethod.GET, value = "/")
   @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-  public List<GroupRequestDto> listGroupRequest(@RequestParam(required = false) String username,
+  public ListResponseDTO<GroupRequestDto> listGroupRequest(
+      @RequestParam(required = false) String username,
       @RequestParam(required = false) String groupName,
       @RequestParam(required = false) String status, @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer size) {

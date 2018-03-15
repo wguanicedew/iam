@@ -8,7 +8,7 @@ import static org.junit.Assert.assertThat;
 import java.util.Iterator;
 import java.util.Set;
 
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

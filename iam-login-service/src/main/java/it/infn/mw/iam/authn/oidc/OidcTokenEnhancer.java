@@ -1,6 +1,10 @@
 package it.infn.mw.iam.authn.oidc;
 
+import static it.infn.mw.iam.core.oauth.ClaimValueHelper.ADDITIONAL_CLAIMS;
+import static java.util.Objects.isNull;
+
 import java.util.Date;
+import java.util.Set;
 import java.util.UUID;
 
 import org.mitre.oauth2.model.ClientDetailsEntity;
@@ -11,6 +15,7 @@ import org.mitre.openid.connect.service.OIDCTokenService;
 import org.mitre.openid.connect.service.UserInfoService;
 import org.mitre.openid.connect.token.ConnectTokenEnhancer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
@@ -24,7 +29,10 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTClaimsSet.Builder;
 import com.nimbusds.jwt.SignedJWT;
 
+import it.infn.mw.iam.core.IamScopeClaimTranslationService;
+import it.infn.mw.iam.core.oauth.ClaimValueHelper;
 import it.infn.mw.iam.core.oauth.scope.IamScopeFilter;
+import it.infn.mw.iam.persistence.model.IamUserInfo;
 
 public class OidcTokenEnhancer extends ConnectTokenEnhancer {
 
@@ -33,10 +41,19 @@ public class OidcTokenEnhancer extends ConnectTokenEnhancer {
 
   @Autowired
   private OIDCTokenService connectTokenService;
-  
+
   @Autowired
   private IamScopeFilter scopeFilter;
-  
+
+  @Autowired
+  private IamScopeClaimTranslationService scopeClaimConverter;
+
+  @Autowired
+  private ClaimValueHelper claimValueHelper;
+
+  @Value("${iam.access_token.include_authn_info}")
+  private Boolean includeAuthnInfo;
+
   private static final String AUD_KEY = "aud";
 
   private SignedJWT signClaims(JWTClaimsSet claims) {
@@ -80,12 +97,19 @@ public class OidcTokenEnhancer extends ConnectTokenEnhancer {
       builder.audience(Lists.newArrayList(audience));
     }
 
+    if (includeAuthnInfo && !isNull(userInfo)) {
+      Set<String> requiredClaims = scopeClaimConverter.getClaimsForScopeSet(token.getScope());
+      requiredClaims.stream().filter(ADDITIONAL_CLAIMS::contains).forEach(c -> builder.claim(c,
+          claimValueHelper.getClaimValueFromUserInfo(c, (IamUserInfo) userInfo)));
+    }
+
     JWTClaimsSet claims = builder.build();
     token.setJwt(signClaims(claims));
 
     return token;
 
   }
+
 
   @Override
   public OAuth2AccessToken enhance(OAuth2AccessToken accessToken,
@@ -99,7 +123,7 @@ public class OidcTokenEnhancer extends ConnectTokenEnhancer {
     UserInfo userInfo = userInfoService.getByUsernameAndClientId(username, clientId);
 
     scopeFilter.filterScopes(accessToken.getScope(), authentication);
-    
+
     Date issueTime = new Date();
     OAuth2AccessTokenEntity accessTokenEntity =
         buildAccessToken(accessToken, authentication, userInfo, issueTime);

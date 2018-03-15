@@ -23,6 +23,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 
+import it.infn.mw.iam.api.common.ListResponseDTO;
 import it.infn.mw.iam.api.requests.GroupRequestConverter;
 import it.infn.mw.iam.api.requests.exception.GroupRequestStatusException;
 import it.infn.mw.iam.api.requests.exception.GroupRequestValidationException;
@@ -130,15 +131,15 @@ public class DefaultGroupRequestsService implements GroupRequestsService {
   }
 
   @Override
-  public List<GroupRequestDto> listGroupRequest(String username, String groupName, String status,
-      Pageable pageRequest) {
+  public ListResponseDTO<GroupRequestDto> listGroupRequest(String username, String groupName,
+      String status, Pageable pageRequest) {
 
     Optional<String> usernameFilter = Optional.ofNullable(username);
     Optional<String> groupNameFilter = Optional.ofNullable(groupName);
     Optional<String> statusFilter = Optional.ofNullable(status);
 
     Page<IamGroupRequest> result = null;
-    List<GroupRequestDto> requestList = new ArrayList<>();
+    List<GroupRequestDto> elementList = new ArrayList<>();
 
     if (usernameFilter.isPresent()) {
       result = groupRequestRepository.findByUsername(username, pageRequest);
@@ -151,9 +152,10 @@ public class DefaultGroupRequestsService implements GroupRequestsService {
       result = groupRequestRepository.findAll(pageRequest);
     }
 
-    result.getContent().forEach(request -> requestList.add(converter.fromEntity(request)));
+    result.getContent().forEach(request -> elementList.add(converter.fromEntity(request)));
 
-    return requestList;
+    ListResponseDTO.Builder<GroupRequestDto> builder = ListResponseDTO.builder();
+    return builder.fromPage(result).resources(elementList).build();
   }
 
 

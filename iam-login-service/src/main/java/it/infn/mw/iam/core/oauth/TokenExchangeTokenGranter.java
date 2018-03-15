@@ -1,5 +1,8 @@
 package it.infn.mw.iam.core.oauth;
 
+import static java.lang.String.format;
+
+import java.util.Optional;
 import java.util.Set;
 
 import org.mitre.oauth2.model.ClientDetailsEntity;
@@ -11,9 +14,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
 import org.springframework.security.oauth2.common.exceptions.InvalidScopeException;
-import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
@@ -22,6 +25,10 @@ import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
+
+import it.infn.mw.iam.api.account.AccountUtils;
+import it.infn.mw.iam.api.aup.AUPSignatureCheckService;
+import it.infn.mw.iam.persistence.model.IamAccount;
 
 public class TokenExchangeTokenGranter extends AbstractTokenGranter {
 
@@ -33,6 +40,9 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
 
   private final OAuth2TokenEntityService tokenServices;
   private final SystemScopeService systemScopeService;
+
+  private AccountUtils accountUtils;
+  private AUPSignatureCheckService signatureCheckService;
 
 
   @Autowired
@@ -102,7 +112,7 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
 
   @Override
   protected OAuth2Authentication getOAuth2Authentication(final ClientDetails actorClient,
-      final TokenRequest tokenRequest) throws InvalidTokenException {
+      final TokenRequest tokenRequest) {
 
     if (tokenRequest.getRequestParameters().get("actor_token") != null
         || tokenRequest.getRequestParameters().get("want_composite") != null) {
@@ -118,6 +128,13 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
       throw new InvalidRequestException("No user identity linked to subject token.");
     }
 
+    Optional<IamAccount> account = accountUtils
+      .getAuthenticatedUserAccount(subjectToken.getAuthenticationHolder().getUserAuth());
+    
+    if (account.isPresent() && signatureCheckService.needsAupSignature(account.get())) {
+      throw new InvalidGrantException(format("User '%s' needs to sign AUP for this organization "
+          + "in order to proceed.", account.get().getUsername()));
+    }
 
     validateScopeExchange(actorClient, tokenRequest, subjectToken);
 
@@ -143,5 +160,15 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
 
     return accessToken;
   }
+
+  public void setAccountUtils(AccountUtils accountUtils) {
+    this.accountUtils = accountUtils;
+  }
+
+  public void setSignatureCheckService(AUPSignatureCheckService signatureCheckService) {
+    this.signatureCheckService = signatureCheckService;
+  }
+
+
 
 }

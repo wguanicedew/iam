@@ -59,7 +59,6 @@ import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEn
 import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
 import org.springframework.web.servlet.AsyncHandlerInterceptor;
-
 import it.infn.mw.iam.core.IamOAuth2RequestFactory;
 import it.infn.mw.iam.core.oauth.scope.IamScopeFilter;
 
@@ -289,5 +288,4 @@ public class MitreServicesConfig {
   SelfAssertionValidator selfAssertionValidator() {
     return new SelfAssertionValidator();
   }
-  
 }

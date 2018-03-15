@@ -12,8 +12,9 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,6 +31,7 @@ import it.infn.mw.iam.api.scim.model.ScimX509Certificate;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 import it.infn.mw.iam.test.scim.ScimRestUtilsMvc;
 import it.infn.mw.iam.test.util.WithMockOAuthUser;
+import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(
@@ -41,6 +43,9 @@ public class ScimUserProvisioningPatchReplaceTests extends ScimUserTestSupport {
 
   @Autowired
   private ScimRestUtilsMvc scimUtils;
+  
+  @Autowired
+  private MockOAuth2Filter mockOAuth2Filter;
 
   private ScimUser testUser;
 
@@ -48,6 +53,11 @@ public class ScimUserProvisioningPatchReplaceTests extends ScimUserTestSupport {
   public void setup() throws Exception {
 
     testUser = createTestUsers().get(0);
+  }
+  
+  @After
+  public void teardown() {
+    mockOAuth2Filter.cleanupSecurityContext();
   }
 
   @Test

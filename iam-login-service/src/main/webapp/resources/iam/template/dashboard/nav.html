@@ -50,6 +50,7 @@
             </span>
             </a>
         </li>
+<!-- 
         <li ng-show="$root.loggedUser.isAdmin">
             <a id="nav-tokens" ui-sref="tokens" ui-sref-opts="{reload: true}">
                 <i class="fa fa-key"></i>
@@ -57,6 +58,13 @@
                 <span class="pull-right-container" ng-show="($root.loggedUser.accessTokensCount + $root.loggedUser.refreshTokensCount) > 0">
                 <small class="label pull-right bg-yellow" id="tokensBadge">{{$root.loggedUser.accessTokensCount + $root.loggedUser.refreshTokensCount}}</small>
             </span>
+            </a>
+        </li>
+ -->
+        <li ng-show="$root.loggedUser.isAdmin">
+            <a id="nav-aup" ui-sref="aup" ui-sref-opts="{reload: true}">
+                <i class="fa fa-file-text-o"></i>
+                <span>AUP</span>
             </a>
         </li>
         <li class="header">Client management</li>

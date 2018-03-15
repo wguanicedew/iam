@@ -62,7 +62,9 @@ public class IamGroup implements Serializable {
   @OneToMany(mappedBy = "group", cascade = CascadeType.REMOVE)
   private Set<IamGroupRequest> groupRequests;
 
-  public IamGroup() {}
+  public IamGroup() {
+    // empty constructor
+  }
 
   public Long getId() {
     return id;
@@ -191,6 +193,4 @@ public class IamGroup implements Serializable {
         "IamGroup [id=%s, uuid=%s, name=%s, description=%s, creationTime=%s, lastUpdateTime=%s]",
         id, uuid, name, description, creationTime, lastUpdateTime);
   }
-
-
 }

@@ -83,15 +83,19 @@ public class ScimGroupProvisioning
     }
   }
 
+  private ScimResourceNotFoundException noGroupMappedToId(String id) {
+    return new ScimResourceNotFoundException(String.format("No group mapped to id '%s'", id));
+  }
+  
   @Override
   public ScimGroup getById(String id) {
 
     idSanityChecks(id);
 
     IamGroup group = groupRepository.findByUuid(id)
-      .orElseThrow(() -> new ScimResourceNotFoundException("No group mapped to id '" + id + "'"));
+      .orElseThrow(() -> noGroupMappedToId(id));
 
-    return converter.toScim(group);
+    return converter.dtoFromEntity(group);
   }
 
   @Override
@@ -140,7 +144,7 @@ public class ScimGroupProvisioning
     eventPublisher.publishEvent(
         new GroupCreatedEvent(this, iamGroup, "Group created with name " + iamGroup.getName()));
 
-    return converter.toScim(iamGroup);
+    return converter.dtoFromEntity(iamGroup);
   }
 
   @Override
@@ -149,7 +153,7 @@ public class ScimGroupProvisioning
     idSanityChecks(id);
 
     IamGroup group = groupRepository.findByUuid(id)
-      .orElseThrow(() -> new ScimResourceNotFoundException("No group mapped to id '" + id + "'"));
+      .orElseThrow(() -> noGroupMappedToId(id));
 
     if (!(group.getAccounts().isEmpty() && group.getChildrenGroups().isEmpty())) {
 
@@ -173,7 +177,7 @@ public class ScimGroupProvisioning
   public ScimGroup replace(String id, ScimGroup scimItemToBeReplaced) {
 
     IamGroup existingGroup = groupRepository.findByUuid(id)
-      .orElseThrow(() -> new ScimResourceNotFoundException("No group mapped to id '" + id + "'"));
+      .orElseThrow(() -> noGroupMappedToId(id));
 
     /* displayname is required */
     String displayName = scimItemToBeReplaced.getDisplayName();
@@ -183,7 +187,7 @@ public class ScimGroupProvisioning
       throw new ScimResourceExistsException(displayName + " is already mapped to another group");
     }
 
-    IamGroup updatedGroup = converter.fromScim(scimItemToBeReplaced);
+    IamGroup updatedGroup = converter.entityFromDto(scimItemToBeReplaced);
     /* SCIM resource identifiers cannot be replaced by PUT */
     updatedGroup.setId(existingGroup.getId());
     updatedGroup.setUuid(existingGroup.getUuid());
@@ -202,7 +206,7 @@ public class ScimGroupProvisioning
       .publishEvent(new GroupReplacedEvent(this, updatedGroup, existingGroup, String.format(
           "Replaced group %s with new group %s", existingGroup.getName(), updatedGroup.getName())));
 
-    return converter.toScim(updatedGroup);
+    return converter.dtoFromEntity(updatedGroup);
   }
 
   private boolean isGroupNameAvailable(String displayName, String id) {
@@ -224,7 +228,7 @@ public class ScimGroupProvisioning
 
     List<ScimGroup> resources = new ArrayList<>();
 
-    results.getContent().forEach(g -> resources.add(converter.toScim(g)));
+    results.getContent().forEach(g -> resources.add(converter.dtoFromEntity(g)));
 
     return new ScimListResponse<>(resources, results.getTotalElements(), resources.size(),
         op.getOffset() + 1);
@@ -234,7 +238,7 @@ public class ScimGroupProvisioning
   public void update(String id, List<ScimPatchOperation<List<ScimMemberRef>>> operations) {
 
     IamGroup iamGroup = groupRepository.findByUuid(id)
-      .orElseThrow(() -> new ScimResourceNotFoundException("No group mapped to id '" + id + "'"));
+      .orElseThrow(() -> noGroupMappedToId(id));
 
     operations.forEach(op -> executePatchOperation(iamGroup, op));
   }

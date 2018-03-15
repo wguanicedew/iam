@@ -14,7 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -34,20 +34,37 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import it.infn.mw.iam.IamLoginService;
+import it.infn.mw.iam.persistence.model.IamAccount;
+import it.infn.mw.iam.persistence.model.IamAup;
+import it.infn.mw.iam.persistence.repository.IamAccountRepository;
+import it.infn.mw.iam.persistence.repository.IamAupRepository;
+import it.infn.mw.iam.persistence.repository.IamAupSignatureRepository;
 import it.infn.mw.iam.registration.PersistentUUIDTokenGenerator;
 import it.infn.mw.iam.registration.RegistrationRequestDto;
+import it.infn.mw.iam.test.api.aup.AupTestSupport;
+import it.infn.mw.iam.test.util.WithAnonymousUser;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {IamLoginService.class})
 @WebAppConfiguration
+@WithAnonymousUser
 @Transactional
-public class RegistrationUnprivilegedTests {
+public class RegistrationUnprivilegedTests extends AupTestSupport {
 
   @Autowired
   private WebApplicationContext context;
 
   @Autowired
   private PersistentUUIDTokenGenerator generator;
+
+  @Autowired
+  private IamAupRepository aupRepo;
+
+  @Autowired
+  private IamAupSignatureRepository aupSignatureRepo;
+
+  @Autowired
+  private IamAccountRepository accountRepo;
 
   @Autowired
   private ObjectMapper objectMapper;
@@ -74,6 +91,28 @@ public class RegistrationUnprivilegedTests {
     assertThat(reg.getEmail(), equalTo("test_create@example.org"));
     assertThat(reg.getNotes(), equalTo("Some short notes..."));
   }
+
+  @Test
+  public void createRequestCreatesAupSignatureIfAupIsDefined() throws Exception {
+
+    IamAup aup = buildDefaultAup();
+    aupRepo.save(aup);
+
+    RegistrationRequestDto reg = createRegistrationRequest("test_create");
+
+    assertThat(reg.getUsername(), equalTo("test_create"));
+    assertThat(reg.getGivenname(), equalTo("Test"));
+    assertThat(reg.getFamilyname(), equalTo("User"));
+    assertThat(reg.getEmail(), equalTo("test_create@example.org"));
+    assertThat(reg.getNotes(), equalTo("Some short notes..."));
+
+    IamAccount account = accountRepo.findByUuid(reg.getAccountId())
+      .orElseThrow(() -> new AssertionError("Expected account not found!"));
+
+    aupSignatureRepo.findSignatureForAccount(account)
+      .orElseThrow(() -> new AssertionError("Expected signature not found!"));
+  }
+
 
   @Test
   public void testConfirmRequest() throws Exception {

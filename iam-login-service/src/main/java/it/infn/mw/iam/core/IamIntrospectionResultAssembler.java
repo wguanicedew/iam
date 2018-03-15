@@ -11,6 +11,7 @@ import org.mitre.oauth2.service.impl.DefaultIntrospectionResultAssembler;
 import org.mitre.openid.connect.model.UserInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
@@ -22,17 +23,26 @@ public class IamIntrospectionResultAssembler extends DefaultIntrospectionResultA
   private static final Logger LOGGER =
       LoggerFactory.getLogger(IamIntrospectionResultAssembler.class);
 
+  public static final String NAME = "name";
   public static final String PREFERRED_USERNAME = "preferred_username";
   public static final String EMAIL = "email";
   public static final String GROUPS = "groups";
   public static final String ORGANISATION_NAME = "organisation_name";
+  public static final String ISSUER = "iss";
+  
+  @Value("${iam.issuer}")
+  private String oidcIssuer;
 
   @Override
   public Map<String, Object> assembleFrom(OAuth2AccessTokenEntity accessToken, UserInfo userInfo,
       Set<String> authScopes) {
 
     Map<String, Object> result = super.assembleFrom(accessToken, userInfo, authScopes);
-
+    
+    String trailingSlashIssuer = oidcIssuer.endsWith("/") ? oidcIssuer : oidcIssuer + "/";
+    
+    result.put(ISSUER, trailingSlashIssuer);
+    
     try {
 
       List<String> audience = accessToken.getJwt().getJWTClaimsSet().getAudience();
@@ -45,7 +55,7 @@ public class IamIntrospectionResultAssembler extends DefaultIntrospectionResultA
       LOGGER.error("Error getting audience out of access token: {}", e.getMessage(), e);
     }
 
-    // Intersection of scopes authorised for the client and scopes linked to the
+    // Intersection of scopes authorized for the client and scopes linked to the
     // access token
     Set<String> scopes = Sets.intersection(authScopes, accessToken.getScope());
 
@@ -60,10 +70,8 @@ public class IamIntrospectionResultAssembler extends DefaultIntrospectionResultA
               iamUserInfo.getGroups().stream().map(IamGroup::getName).collect(Collectors.toList()));
         }
 
+        result.put(NAME, iamUserInfo.getName());
         result.put(PREFERRED_USERNAME, iamUserInfo.getPreferredUsername());
-
-        LOGGER.debug("Organisation name: {}", IamProperties.INSTANCE.getOrganisationName());
-        
         result.put(ORGANISATION_NAME, IamProperties.INSTANCE.getOrganisationName());
       }
 

@@ -1,5 +1,6 @@
 package it.infn.mw.iam.api.scim.model;
 
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -9,6 +10,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+import it.infn.mw.iam.api.scim.controller.utils.JsonDateSerializer;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ScimIndigoUser {
@@ -18,7 +22,8 @@ public class ScimIndigoUser {
     SSH_KEYS(ScimConstants.INDIGO_USER_SCHEMA + ".sshKeys"),
     OIDC_IDS(ScimConstants.INDIGO_USER_SCHEMA + ".oidcIds"),
     SAML_IDS(ScimConstants.INDIGO_USER_SCHEMA + ".samlIds"),
-    X509_CERTS(ScimConstants.INDIGO_USER_SCHEMA + ".x509Certificates");
+    X509_CERTS(ScimConstants.INDIGO_USER_SCHEMA + ".x509Certificates"),
+    AUP_SIGNATURE_TIME(ScimConstants.INDIGO_USER_SCHEMA + ".aupSignatureTime");
 
     private final String text;
 
@@ -41,16 +46,21 @@ public class ScimIndigoUser {
   @Valid
   private final List<ScimX509Certificate> certificates;
   
+  @JsonSerialize(using = JsonDateSerializer.class)
+  private final Date aupSignatureTime; 
+  
   @JsonCreator
   private ScimIndigoUser(@JsonProperty("oidcIds") List<ScimOidcId> oidcIds,
       @JsonProperty("sshKeys") List<ScimSshKey> sshKeys,
       @JsonProperty("samlIds") List<ScimSamlId> samlIds,
-      @JsonProperty("x509Certificates") List<ScimX509Certificate> certs ) {
+      @JsonProperty("x509Certificates") List<ScimX509Certificate> certs,
+      @JsonProperty("aupSignatureTime") Date aupSignatureTime) {
 
     this.oidcIds = oidcIds != null ? oidcIds : new LinkedList<>();
     this.sshKeys = sshKeys != null ? sshKeys : new LinkedList<>();
     this.samlIds = samlIds != null ? samlIds : new LinkedList<>();
     this.certificates = certs != null ? certs: new LinkedList<>();
+    this.aupSignatureTime = aupSignatureTime;
 
   }
 
@@ -59,6 +69,7 @@ public class ScimIndigoUser {
     this.oidcIds = b.oidcIds;
     this.samlIds = b.samlIds;
     this.certificates = b.certificates;
+    this.aupSignatureTime = b.aupSignatureTime;
   }
 
   @JsonIgnore
@@ -86,6 +97,10 @@ public class ScimIndigoUser {
     return certificates;
   }
 
+  public Date getAupSignatureTime() {
+    return aupSignatureTime;
+  }
+  
   public static Builder builder() {
 
     return new Builder();
@@ -98,6 +113,8 @@ public class ScimIndigoUser {
     private List<ScimSamlId> samlIds = new LinkedList<>();
     private List<ScimX509Certificate> certificates = new LinkedList<>();
 
+    private Date aupSignatureTime;
+    
     public Builder addSshKey(ScimSshKey sshKey) {
 
       sshKeys.add(sshKey);
@@ -118,6 +135,11 @@ public class ScimIndigoUser {
 
     public Builder addCertificate(ScimX509Certificate cert){
       certificates.add(cert);
+      return this;
+    }
+    
+    public Builder aupSignatureTime(Date signatureTime) {
+      this.aupSignatureTime = signatureTime;
       return this;
     }
     

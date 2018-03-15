@@ -5,7 +5,7 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 
 import org.junit.After;
 import org.junit.Before;
@@ -113,7 +113,7 @@ public class EventTests extends X509TestSupport {
       .build();
 
 
-    account = accountService.createAccount(userConverter.fromScim(user));
+    account = accountService.createAccount(userConverter.entityFromDto(user));
 
     assertNotNull(account);
 

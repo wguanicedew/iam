@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -89,7 +89,7 @@ public class ScimMeController implements ApplicationEventPublisherAware {
   public ScimUser whoami() {
 
     IamAccount account = getCurrentUserAccount();
-    return userConverter.toScim(account);
+    return userConverter.dtoFromEntity(account);
 
   }
 

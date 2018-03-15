@@ -40,8 +40,10 @@ import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.filter.GenericFilterBean;
 
+import it.infn.mw.iam.api.account.AccountUtils;
+import it.infn.mw.iam.api.aup.AUPSignatureCheckService;
+import it.infn.mw.iam.authn.EnforceAupSignatureSuccessHandler;
 import it.infn.mw.iam.authn.RootIsDashboardSuccessHandler;
-import it.infn.mw.iam.authn.TimestamperSuccessHandler;
 import it.infn.mw.iam.authn.oidc.OidcAccessDeniedHandler;
 import it.infn.mw.iam.authn.oidc.OidcAuthenticationProvider;
 import it.infn.mw.iam.authn.oidc.OidcClientFilter;
@@ -84,6 +86,12 @@ public class SecurityConfig {
 
     @Autowired
     private IamAccountRepository accountRepo;
+
+    @Autowired
+    private AUPSignatureCheckService aupSignatureCheckService;
+
+    @Autowired
+    private AccountUtils accountUtils;
 
     @Autowired
     public void configureGlobal(final AuthenticationManagerBuilder auth) throws Exception {
@@ -162,9 +170,11 @@ public class SecurityConfig {
     }
 
     public AuthenticationSuccessHandler successHandler() {
+      AuthenticationSuccessHandler delegate =
+          new RootIsDashboardSuccessHandler(iamBaseUrl, new HttpSessionRequestCache());
 
-      return new TimestamperSuccessHandler(
-          new RootIsDashboardSuccessHandler(iamBaseUrl, new HttpSessionRequestCache()),
+
+      return new EnforceAupSignatureSuccessHandler(delegate, aupSignatureCheckService, accountUtils,
           accountRepo);
     }
   }
@@ -820,6 +830,46 @@ public class SecurityConfig {
 
   @Configuration
   @Order(28)
+  public static class AupApiEndpointConfig extends WebSecurityConfigurerAdapter {
+
+    private static final String AUP_PATH = "/iam/aup";
+    @Autowired
+    private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
+
+    @Autowired
+    private OAuth2AuthenticationProcessingFilter resourceFilter;
+
+    @Autowired
+    private CorsFilter corsFilter;
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+      http.requestMatchers()
+        .antMatchers("/iam/aup/**")
+        .and()
+        .exceptionHandling()
+        .authenticationEntryPoint(authenticationEntryPoint)
+        .and()
+        .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
+        .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
+        .sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.NEVER)
+        .and()
+        .authorizeRequests()
+        .antMatchers(HttpMethod.GET, AUP_PATH)
+        .permitAll()
+        .antMatchers(HttpMethod.POST, AUP_PATH)
+        .authenticated()
+        .antMatchers(HttpMethod.DELETE, AUP_PATH)
+        .authenticated()
+        .and()
+        .csrf()
+        .disable();
+    }
+  }
+
+  @Configuration
+  @Order(29)
   public static class GroupRequestsEndpointConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private OAuth2AuthenticationProcessingFilter resourceFilter;

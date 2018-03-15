@@ -9,6 +9,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -21,6 +22,9 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mitre.oauth2.model.OAuth2AccessTokenEntity;
+import org.mitre.oauth2.model.OAuth2RefreshTokenEntity;
+import org.mitre.oauth2.service.OAuth2TokenEntityService;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -28,6 +32,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.google.common.collect.Sets;
+
+import it.infn.mw.iam.core.time.TimeProvider;
 import it.infn.mw.iam.core.user.DefaultIamAccountService;
 import it.infn.mw.iam.core.user.exception.CredentialAlreadyBoundException;
 import it.infn.mw.iam.core.user.exception.InvalidCredentialException;
@@ -55,6 +62,11 @@ public class IamAccountServiceTests extends IamAccountServiceTestSupport {
   @Mock
   private ApplicationEventPublisher eventPublisher;
 
+  @Mock
+  private TimeProvider timeProvider;
+  
+  @Mock
+  private OAuth2TokenEntityService tokenService;
 
   @InjectMocks
   private DefaultIamAccountService accountService;
@@ -706,5 +718,19 @@ public class IamAccountServiceTests extends IamAccountServiceTestSupport {
     verify(accountRepo, times(1)).delete(CICCIO_ACCOUNT);
     verify(accountRepo, times(1)).delete(TEST_ACCOUNT);
     verify(eventPublisher, times(2)).publishEvent(anyObject());
+  }
+  
+  @Test
+  public void testTokensAreRemovedWhenAccountIsRemoved() {
+    OAuth2AccessTokenEntity accessToken  = mock(OAuth2AccessTokenEntity.class);
+    OAuth2RefreshTokenEntity refreshToken = mock(OAuth2RefreshTokenEntity.class);
+    
+    when(tokenService.getAllAccessTokensForUser(CICCIO_USERNAME)).thenReturn(Sets.newHashSet(accessToken));
+    when(tokenService.getAllRefreshTokensForUser(CICCIO_USERNAME)).thenReturn(Sets.newHashSet(refreshToken));
+    
+    
+    accountService.deleteAccount(CICCIO_ACCOUNT);
+    verify(tokenService).revokeAccessToken(Mockito.eq(accessToken));
+    verify(tokenService).revokeRefreshToken(Mockito.eq(refreshToken));
   }
 }
