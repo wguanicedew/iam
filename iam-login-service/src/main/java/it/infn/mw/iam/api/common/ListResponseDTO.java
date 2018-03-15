@@ -2,14 +2,19 @@ package it.infn.mw.iam.api.common;
 
 import java.util.List;
 import org.springframework.data.domain.Page;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ListResponseDTO<T> {
 
-  private final long totalResults;
-  private final int itemsPerPage;
-  private final int startIndex;
+  private long totalResults;
+  private int itemsPerPage;
+  private int startIndex;
 
-  private final List<T> resources;
+  private List<T> resources;
+
+  public ListResponseDTO() {
+
+  }
 
   private ListResponseDTO(Builder<T> builder) {
     this.totalResults = builder.totalResults;
@@ -30,6 +35,7 @@ public class ListResponseDTO<T> {
     return startIndex;
   }
 
+  @JsonProperty("Resources")
   public List<T> getResources() {
     return resources;
   }
@@ -45,10 +51,10 @@ public class ListResponseDTO<T> {
     private int startIndex;
     private List<T> resources;
 
-    public <S> Builder<T> fromPage(Page<S> page) {
+    public <S> Builder<T> fromPage(Page<S> page, OffsetPageable op) {
       this.totalResults = page.getTotalElements();
-      this.itemsPerPage = page.getSize();
-      this.startIndex = page.getNumber();
+      this.itemsPerPage = page.getNumberOfElements();
+      this.startIndex = op.getOffset() + 1;
       return this;
     }
 
