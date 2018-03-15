@@ -2,8 +2,7 @@ package it.infn.mw.iam.test.scim.paging;
 
 import org.junit.Assert;
 import org.junit.Test;
-
-import it.infn.mw.iam.api.scim.provisioning.paging.OffsetPageable;
+import it.infn.mw.iam.api.common.OffsetPageable;
 
 public class OffsetPageableTests {
 

@@ -6,14 +6,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ListResponseDTO<T> {
 
-  private long totalResults;
-  private int itemsPerPage;
-  private int startIndex;
+  private final long totalResults;
+  private final int itemsPerPage;
+  private final int startIndex;
 
   private List<T> resources;
 
-  public ListResponseDTO() {
+  public ListResponseDTO(List<T> resources, long totalResults, int startIndex, int itemsPerPage) {
 
+    this.resources = resources;
+    this.totalResults = totalResults;
+    this.itemsPerPage = itemsPerPage;
+    this.startIndex = startIndex;
   }
 
   private ListResponseDTO(Builder<T> builder) {
