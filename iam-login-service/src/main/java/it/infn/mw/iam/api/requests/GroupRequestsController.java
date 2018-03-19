@@ -1,7 +1,6 @@
 package it.infn.mw.iam.api.requests;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,12 +12,16 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import it.infn.mw.iam.api.common.ListResponseDTO;
+import it.infn.mw.iam.api.common.OffsetPageable;
+import it.infn.mw.iam.api.common.PagingUtils;
 import it.infn.mw.iam.api.requests.model.GroupRequestDto;
 import it.infn.mw.iam.api.requests.service.GroupRequestsService;
 
 @RestController
 @RequestMapping("/iam/group_requests")
 public class GroupRequestsController {
+
+  private static final Integer GROUP_REQUEST_MAX_PAGE_SIZE = 10;
 
   @Autowired
   private GroupRequestsService groupRequestService;
@@ -34,10 +37,11 @@ public class GroupRequestsController {
   public ListResponseDTO<GroupRequestDto> listGroupRequest(
       @RequestParam(required = false) String username,
       @RequestParam(required = false) String groupName,
-      @RequestParam(required = false) String status, @RequestParam(required = false) Integer page,
-      @RequestParam(required = false) Integer size) {
+      @RequestParam(required = false) String status, @RequestParam(required = false) Integer count,
+      @RequestParam(required = false) Integer startIndex) {
 
-    PageRequest pageRequest = new PageRequest(page, size);
+    OffsetPageable pageRequest =
+        PagingUtils.buildPageRequest(count, startIndex, GROUP_REQUEST_MAX_PAGE_SIZE);
     return groupRequestService.listGroupRequest(username, groupName, status, pageRequest);
   }
 

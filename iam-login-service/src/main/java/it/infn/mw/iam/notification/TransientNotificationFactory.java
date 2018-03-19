@@ -19,6 +19,7 @@ import it.infn.mw.iam.core.IamDeliveryStatus;
 import it.infn.mw.iam.core.IamNotificationType;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamEmailNotification;
+import it.infn.mw.iam.persistence.model.IamGroupRequest;
 import it.infn.mw.iam.persistence.model.IamNotificationReceiver;
 import it.infn.mw.iam.persistence.model.IamRegistrationRequest;
 
@@ -139,6 +140,72 @@ public class TransientNotificationFactory implements NotificationFactory {
     LOG.debug("Created reset password message for account {}. Reset password URL: {}",
         account.getUsername(), resetPasswordUrl);
 
+    return notification;
+  }
+
+  @Override
+  public IamEmailNotification createAdminHandleGroupRequestMessage(IamGroupRequest groupRequest) {
+    String dashboardUrl = String.format("%s/dashboard#/requests", baseUrl);
+    String groupName = groupRequest.getGroup().getName();
+
+    Map<String, Object> model = new HashMap<>();
+    model.put("name", groupRequest.getAccount().getUserInfo().getName());
+    model.put("username", groupRequest.getAccount().getUsername());
+    model.put("groupName", groupName);
+    model.put("notes", groupRequest.getNotes());
+    model.put("indigoDashboardUrl", dashboardUrl);
+    model.put(ORGANISATION_NAME, organisationName);
+
+    String subject = String.format("New membership request for group %s", groupName);
+
+    return createMessage("adminHandleGroupRequest.vm", model, IamNotificationType.GROUP_MEMBERSHIP,
+        subject, properties.getAdminAddress());
+  }
+
+  @Override
+  public IamEmailNotification createGroupMembershipApprovedMessage(IamGroupRequest groupRequest) {
+    String recipient = groupRequest.getAccount().getUserInfo().getName();
+    String groupName = groupRequest.getGroup().getName();
+    String status = groupRequest.getStatus().name();
+
+    Map<String, Object> model = new HashMap<>();
+    model.put(RECIPIENT_FIELD, recipient);
+    model.put("groupName", groupName);
+    model.put("status", status);
+    model.put(ORGANISATION_NAME, organisationName);
+
+    String subject =
+        String.format("Membership request for group %s has been %s", groupName, status);
+
+    IamEmailNotification notification =
+        createMessage("groupMembershipApproved.vm", model, IamNotificationType.GROUP_MEMBERSHIP,
+            subject, groupRequest.getAccount().getUserInfo().getEmail());
+
+    LOG.debug("Create group membership approved message for request {}", groupRequest.getUuid());
+    return notification;
+  }
+
+  @Override
+  public IamEmailNotification createGroupMembershipRejectedMessage(IamGroupRequest groupRequest) {
+    String recipient = groupRequest.getAccount().getUserInfo().getName();
+    String groupName = groupRequest.getGroup().getName();
+    String status = groupRequest.getStatus().name();
+
+    Map<String, Object> model = new HashMap<>();
+    model.put(RECIPIENT_FIELD, recipient);
+    model.put("groupName", groupName);
+    model.put("status", status);
+    model.put("motivation", groupRequest.getMotivation());
+    model.put(ORGANISATION_NAME, organisationName);
+
+    String subject =
+        String.format("Membership request for group %s has been %s", groupName, status);
+
+    IamEmailNotification notification =
+        createMessage("groupMembershipRejected.vm", model, IamNotificationType.GROUP_MEMBERSHIP,
+            subject, groupRequest.getAccount().getUserInfo().getEmail());
+
+    LOG.debug("Create group membership approved message for request {}", groupRequest.getUuid());
     return notification;
   }
 

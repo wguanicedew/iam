@@ -12,7 +12,6 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,6 +23,7 @@ import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 
 import it.infn.mw.iam.api.common.ListResponseDTO;
+import it.infn.mw.iam.api.common.OffsetPageable;
 import it.infn.mw.iam.api.requests.GroupRequestConverter;
 import it.infn.mw.iam.api.requests.exception.GroupRequestStatusException;
 import it.infn.mw.iam.api.requests.exception.GroupRequestValidationException;
@@ -31,6 +31,7 @@ import it.infn.mw.iam.api.requests.exception.UserMismatchException;
 import it.infn.mw.iam.api.requests.model.GroupRequestDto;
 import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
 import it.infn.mw.iam.core.IamGroupRequestStatus;
+import it.infn.mw.iam.notification.NotificationFactory;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.model.IamGroupRequest;
@@ -52,6 +53,9 @@ public class DefaultGroupRequestsService implements GroupRequestsService {
 
   @Autowired
   private GroupRequestConverter converter;
+
+  @Autowired
+  private NotificationFactory notificationFactory;
 
   private static final Table<IamGroupRequestStatus, IamGroupRequestStatus, Boolean> allowedStateTransitions =
       new ImmutableTable.Builder<IamGroupRequestStatus, IamGroupRequestStatus, Boolean>()
@@ -83,6 +87,7 @@ public class DefaultGroupRequestsService implements GroupRequestsService {
     iamGroupRequest.setCreationTime(new Date());
 
     IamGroupRequest result = groupRequestRepository.save(iamGroupRequest);
+    notificationFactory.createAdminHandleGroupRequestMessage(iamGroupRequest);
     return converter.fromEntity(result);
   }
 
@@ -110,6 +115,7 @@ public class DefaultGroupRequestsService implements GroupRequestsService {
 
     accoutRepository.save(account);
     updateGroupRequestStatus(request, APPROVED);
+    notificationFactory.createGroupMembershipApprovedMessage(request);
   }
 
   @Override
@@ -119,6 +125,7 @@ public class DefaultGroupRequestsService implements GroupRequestsService {
 
     request.setMotivation(motivation);
     updateGroupRequestStatus(request, REJECTED);
+    notificationFactory.createGroupMembershipRejectedMessage(request);
   }
 
   @Override
@@ -132,22 +139,30 @@ public class DefaultGroupRequestsService implements GroupRequestsService {
 
   @Override
   public ListResponseDTO<GroupRequestDto> listGroupRequest(String username, String groupName,
-      String status, Pageable pageRequest) {
+      String status, OffsetPageable pageRequest) {
 
     Optional<String> usernameFilter = Optional.ofNullable(username);
     Optional<String> groupNameFilter = Optional.ofNullable(groupName);
     Optional<String> statusFilter = Optional.ofNullable(status);
 
+    if (!isPrivilegedUser()) {
+      if (usernameFilter.isPresent()) {
+        validateUserAuth(username);
+      } else {
+        usernameFilter = Optional.of(getAuthentication().getName());
+      }
+    }
+
     Page<IamGroupRequest> result = null;
     List<GroupRequestDto> elementList = new ArrayList<>();
 
     if (usernameFilter.isPresent()) {
-      result = groupRequestRepository.findByUsername(username, pageRequest);
+      result = groupRequestRepository.findByUsername(usernameFilter.get(), pageRequest);
     } else if (groupNameFilter.isPresent()) {
-      result = groupRequestRepository.findByGroup(groupName, pageRequest);
+      result = groupRequestRepository.findByGroup(groupNameFilter.get(), pageRequest);
     } else if (statusFilter.isPresent()) {
-      result =
-          groupRequestRepository.findByStatus(IamGroupRequestStatus.valueOf(status), pageRequest);
+      result = groupRequestRepository
+        .findByStatus(IamGroupRequestStatus.valueOf(statusFilter.get()), pageRequest);
     } else {
       result = groupRequestRepository.findAll(pageRequest);
     }
@@ -155,7 +170,7 @@ public class DefaultGroupRequestsService implements GroupRequestsService {
     result.getContent().forEach(request -> elementList.add(converter.fromEntity(request)));
 
     ListResponseDTO.Builder<GroupRequestDto> builder = ListResponseDTO.builder();
-    return builder.fromPage(result).resources(elementList).build();
+    return builder.resources(elementList).fromPage(result, pageRequest).build();
   }
 
 
@@ -236,7 +251,7 @@ public class DefaultGroupRequestsService implements GroupRequestsService {
     return String.format("%s with id [%s] does not exist", subject, value);
   }
 
-  private boolean isPrivilegedUser() {
+  private Authentication getAuthentication() {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     if (auth instanceof OAuth2Authentication) {
       OAuth2Authentication oauth = (OAuth2Authentication) auth;
@@ -245,14 +260,15 @@ public class DefaultGroupRequestsService implements GroupRequestsService {
       }
       auth = oauth.getUserAuthentication();
     }
+    return auth;
+  }
 
-    return auth.getAuthorities().contains(ROLE_ADMIN);
+  private boolean isPrivilegedUser() {
+    return getAuthentication().getAuthorities().contains(ROLE_ADMIN);
   }
 
   private void validateUserAuth(String requestUsername) {
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-    String username = auth.getName();
+    String username = getAuthentication().getName();
     if (!username.equals(requestUsername)) {
       throw new UserMismatchException("Cannot handle requests of another user");
     }
