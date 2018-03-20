@@ -10,9 +10,9 @@ public interface GroupRequestsService {
 
   void deleteGroupRequest(String uuid);
 
-  void approveGroupRequest(String uuid);
+  GroupRequestDto approveGroupRequest(String uuid);
 
-  void rejectGroupRequest(String uuid, String motivation);
+  GroupRequestDto rejectGroupRequest(String uuid, String motivation);
 
   GroupRequestDto getGroupRequestDetails(String uuid);
 

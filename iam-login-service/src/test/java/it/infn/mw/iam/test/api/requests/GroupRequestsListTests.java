@@ -1,5 +1,6 @@
 package it.infn.mw.iam.test.api.requests;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
@@ -188,7 +189,8 @@ public class GroupRequestsListTests extends GroupRequestsTestUtils {
     mvc.perform(get(LIST_REQUESTS_URL)
         .contentType(MediaType.APPLICATION_JSON)
         .param("username", USER_101))
-      .andExpect(status().isForbidden());
+      .andExpect(status().isForbidden())
+      .andExpect(jsonPath("$.error", containsString("Cannot handle requests of another user")));
     // @formatter:on
   }
 

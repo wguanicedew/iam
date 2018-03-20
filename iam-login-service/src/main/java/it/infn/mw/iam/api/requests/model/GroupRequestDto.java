@@ -14,6 +14,7 @@ public class GroupRequestDto {
   private String groupName;
   private String status;
   private String notes;
+  private String motivation;
   private Date creationTime;
   private Date lastUpdateTime;
 
@@ -23,6 +24,7 @@ public class GroupRequestDto {
   public GroupRequestDto(@JsonProperty("uuid") String uuid,
       @JsonProperty("username") String username, @JsonProperty("group_name") String groupName,
       @JsonProperty("status") String status, @JsonProperty("notes") String notes,
+      @JsonProperty("motivation") String motivation,
       @JsonProperty("creation_time") Date creationTime,
       @JsonProperty("last_update_time") Date lastUpdateTime) {
     super();
@@ -31,6 +33,7 @@ public class GroupRequestDto {
     this.groupName = groupName;
     this.status = status;
     this.notes = notes;
+    this.motivation = motivation;
     this.creationTime = creationTime;
     this.lastUpdateTime = lastUpdateTime;
   }
@@ -73,6 +76,14 @@ public class GroupRequestDto {
 
   public void setNotes(String notes) {
     this.notes = notes;
+  }
+
+  public String getMotivation() {
+    return motivation;
+  }
+
+  public void setMotivation(String motivation) {
+    this.motivation = motivation;
   }
 
   public Date getCreationTime() {

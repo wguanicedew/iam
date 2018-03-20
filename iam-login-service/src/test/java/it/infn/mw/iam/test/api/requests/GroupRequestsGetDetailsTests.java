@@ -1,5 +1,6 @@
 package it.infn.mw.iam.test.api.requests;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -83,7 +84,8 @@ public class GroupRequestsGetDetailsTests extends GroupRequestsTestUtils {
     request = savePendingGroupRequest("test_101", TEST_GROUPNAME);
     // @formatter:off
     mvc.perform(get(GET_DETAILS_URL, request.getUuid()))
-      .andExpect(status().isForbidden());
+      .andExpect(status().isForbidden())
+      .andExpect(jsonPath("$.error", containsString("Cannot handle requests of another user")));
     // @formatter:on
   }
 
@@ -92,7 +94,9 @@ public class GroupRequestsGetDetailsTests extends GroupRequestsTestUtils {
   public void getGroupRequestDetailsAsAnonymous() throws Exception {
     // @formatter:off
     mvc.perform(get(GET_DETAILS_URL, request.getUuid()))
-      .andExpect(status().isUnauthorized());
+      .andExpect(status().isUnauthorized())
+      .andExpect(jsonPath("$.error", containsString("unauthorized")))
+      .andExpect(jsonPath("$.error_description", containsString("Full authentication is required")));
     // @formatter:on
   }
 
@@ -101,10 +105,10 @@ public class GroupRequestsGetDetailsTests extends GroupRequestsTestUtils {
   public void getDetailsOfNotExitingGroupRequest() throws Exception {
 
     String fakeRequestUuid = UUID.randomUUID().toString();
-
     // @formatter:off
     mvc.perform(get(GET_DETAILS_URL, fakeRequestUuid))
-      .andExpect(status().isBadRequest());
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.error", containsString("does not exist")));
     // @formatter:on
   }
 

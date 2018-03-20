@@ -61,16 +61,16 @@ public class GroupRequestsController {
   @RequestMapping(method = RequestMethod.POST, value = "/{uuid}/approve")
   @PreAuthorize("hasRole('ADMIN')")
   @ResponseStatus(HttpStatus.OK)
-  public void approveGroupRequest(@PathVariable("uuid") String uuid) {
-    groupRequestService.approveGroupRequest(uuid);
+  public GroupRequestDto approveGroupRequest(@PathVariable("uuid") String uuid) {
+    return groupRequestService.approveGroupRequest(uuid);
   }
 
   @RequestMapping(method = RequestMethod.POST, value = "/{uuid}/reject")
   @PreAuthorize("hasRole('ADMIN')")
   @ResponseStatus(HttpStatus.OK)
-  public void rejectGroupRequest(@PathVariable("uuid") String uuid,
+  public GroupRequestDto rejectGroupRequest(@PathVariable("uuid") String uuid,
       @RequestParam(required = false) String motivation) {
-    groupRequestService.rejectGroupRequest(uuid, motivation);
+    return groupRequestService.rejectGroupRequest(uuid, motivation);
   }
 
 }

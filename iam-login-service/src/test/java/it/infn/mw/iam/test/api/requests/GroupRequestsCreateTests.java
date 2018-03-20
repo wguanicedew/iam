@@ -1,8 +1,12 @@
 package it.infn.mw.iam.test.api.requests;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertThat;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.Before;
@@ -23,6 +27,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.requests.model.GroupRequestDto;
+import it.infn.mw.iam.core.IamGroupRequestStatus;
+import it.infn.mw.iam.notification.NotificationStoreService;
 import it.infn.mw.iam.test.util.WithAnonymousUser;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -38,6 +44,9 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
 
   @Autowired
   private ObjectMapper mapper;
+
+  @Autowired
+  private NotificationStoreService notificationService;
 
   private MockMvc mvc;
   private GroupRequestDto request;
@@ -59,8 +68,13 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
     mvc.perform(post(CREATE_URL)
         .contentType(MediaType.APPLICATION_JSON)
         .content(mapper.writeValueAsString(request)))
-      .andExpect(status().isOk());
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.username", equalTo(TEST_USERNAME)))
+      .andExpect(jsonPath("$.groupName", equalTo(TEST_GROUPNAME)))
+      .andExpect(jsonPath("$.status", equalTo(IamGroupRequestStatus.PENDING.name())));
     // @formatter:on
+    int mailCount = notificationService.countPendingNotifications();
+    assertThat(mailCount, equalTo(1));
   }
 
   @Test
@@ -70,8 +84,13 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
     mvc.perform(post(CREATE_URL)
         .contentType(MediaType.APPLICATION_JSON)
         .content(mapper.writeValueAsString(request)))
-      .andExpect(status().isOk());
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.username", equalTo(TEST_USERNAME)))
+      .andExpect(jsonPath("$.groupName", equalTo(TEST_GROUPNAME)))
+      .andExpect(jsonPath("$.status", equalTo(IamGroupRequestStatus.PENDING.name())));
     // @formatter:on
+    int mailCount = notificationService.countPendingNotifications();
+    assertThat(mailCount, equalTo(1));
   }
 
   @Test
@@ -83,7 +102,8 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
     mvc.perform(post(CREATE_URL)
         .contentType(MediaType.APPLICATION_JSON)
         .content(mapper.writeValueAsString(request)))
-      .andExpect(status().isForbidden());
+      .andExpect(status().isForbidden())
+      .andExpect(jsonPath("$.error", containsString("Cannot handle requests of another user")));
     // @formatter:on
   }
 
@@ -107,7 +127,8 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
     mvc.perform(post(CREATE_URL)
         .contentType(MediaType.APPLICATION_JSON)
         .content(mapper.writeValueAsString(request)))
-      .andExpect(status().isBadRequest());
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.error", containsString("Notes cannot be empty")));
     // @formatter:on
 
     request.setNotes("");
@@ -115,7 +136,8 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
     mvc.perform(post(CREATE_URL)
         .contentType(MediaType.APPLICATION_JSON)
         .content(mapper.writeValueAsString(request)))
-      .andExpect(status().isBadRequest());
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.error", containsString("Notes cannot be empty")));
     // @formatter:on
 
     request.setNotes("   ");
@@ -123,7 +145,8 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
     mvc.perform(post(CREATE_URL)
         .contentType(MediaType.APPLICATION_JSON)
         .content(mapper.writeValueAsString(request)))
-      .andExpect(status().isBadRequest());
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.error", containsString("Notes cannot be empty")));
     // @formatter:on
   }
 
@@ -136,7 +159,8 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
     mvc.perform(post(CREATE_URL)
         .contentType(MediaType.APPLICATION_JSON)
         .content(mapper.writeValueAsString(request)))
-      .andExpect(status().isBadRequest());
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.error", containsString("Group name cannot be empty")));
     // @formatter:on
 
     request.setGroupName("fake_group");
@@ -144,7 +168,8 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
     mvc.perform(post(CREATE_URL)
         .contentType(MediaType.APPLICATION_JSON)
         .content(mapper.writeValueAsString(request)))
-      .andExpect(status().isBadRequest());
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.error", containsString("does not exist")));
     // @formatter:on
   }
 
@@ -157,7 +182,8 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
     mvc.perform(post(CREATE_URL)
         .contentType(MediaType.APPLICATION_JSON)
         .content(mapper.writeValueAsString(request)))
-      .andExpect(status().isBadRequest());
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.error", containsString("Username cannot be empty")));
     // @formatter:on
 
     request.setUsername("fake_user");
@@ -165,7 +191,8 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
     mvc.perform(post(CREATE_URL)
         .contentType(MediaType.APPLICATION_JSON)
         .content(mapper.writeValueAsString(request)))
-      .andExpect(status().isBadRequest());
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.error", containsString("does not exist")));
     // @formatter:on
   }
 
@@ -173,13 +200,12 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
   @WithMockUser(roles = {"USER"}, username = TEST_USERNAME)
   public void createGroupRequestAlreadyExists() throws Exception {
     savePendingGroupRequest(TEST_USERNAME, TEST_GROUPNAME);
-
     // @formatter:off
     mvc.perform(post(CREATE_URL)
         .contentType(MediaType.APPLICATION_JSON)
         .content(mapper.writeValueAsString(request)))
-      .andExpect(status().isBadRequest());
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.error", containsString("already exist")));
     // @formatter:on
   }
-
 }

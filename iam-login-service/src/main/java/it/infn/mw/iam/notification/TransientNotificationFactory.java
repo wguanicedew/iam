@@ -28,6 +28,8 @@ public class TransientNotificationFactory implements NotificationFactory {
   private static final Logger LOG = LoggerFactory.getLogger(TransientNotificationFactory.class);
   private static final String RECIPIENT_FIELD = "recipient";
   private static final String ORGANISATION_NAME = "organisationName";
+  private static final String USERNAME_FIELD = "username";
+  private static final String GROUPNAME_FIELD = "groupName";
 
   @Value("${iam.baseUrl}")
   private String baseUrl;
@@ -110,7 +112,7 @@ public class TransientNotificationFactory implements NotificationFactory {
 
     Map<String, Object> model = new HashMap<>();
     model.put("name", name);
-    model.put("username", username);
+    model.put(USERNAME_FIELD, username);
     model.put("email", email);
     model.put("indigoDashboardUrl", dashboardUrl);
     model.put(ORGANISATION_NAME, organisationName);
@@ -131,7 +133,7 @@ public class TransientNotificationFactory implements NotificationFactory {
     model.put(RECIPIENT_FIELD, recipient);
     model.put("resetPasswordUrl", resetPasswordUrl);
     model.put(ORGANISATION_NAME, organisationName);
-    model.put("username", account.getUsername());
+    model.put(USERNAME_FIELD, account.getUsername());
 
     IamEmailNotification notification =
         createMessage("resetPassword.vm", model, IamNotificationType.RESETPASSWD,
@@ -150,14 +152,15 @@ public class TransientNotificationFactory implements NotificationFactory {
 
     Map<String, Object> model = new HashMap<>();
     model.put("name", groupRequest.getAccount().getUserInfo().getName());
-    model.put("username", groupRequest.getAccount().getUsername());
-    model.put("groupName", groupName);
+    model.put(USERNAME_FIELD, groupRequest.getAccount().getUsername());
+    model.put(GROUPNAME_FIELD, groupName);
     model.put("notes", groupRequest.getNotes());
     model.put("indigoDashboardUrl", dashboardUrl);
     model.put(ORGANISATION_NAME, organisationName);
 
     String subject = String.format("New membership request for group %s", groupName);
 
+    LOG.debug("Create group membership admin notification for request {}", groupRequest.getUuid());
     return createMessage("adminHandleGroupRequest.vm", model, IamNotificationType.GROUP_MEMBERSHIP,
         subject, properties.getAdminAddress());
   }
@@ -170,7 +173,7 @@ public class TransientNotificationFactory implements NotificationFactory {
 
     Map<String, Object> model = new HashMap<>();
     model.put(RECIPIENT_FIELD, recipient);
-    model.put("groupName", groupName);
+    model.put(GROUPNAME_FIELD, groupName);
     model.put("status", status);
     model.put(ORGANISATION_NAME, organisationName);
 
@@ -193,7 +196,7 @@ public class TransientNotificationFactory implements NotificationFactory {
 
     Map<String, Object> model = new HashMap<>();
     model.put(RECIPIENT_FIELD, recipient);
-    model.put("groupName", groupName);
+    model.put(GROUPNAME_FIELD, groupName);
     model.put("status", status);
     model.put("motivation", groupRequest.getMotivation());
     model.put(ORGANISATION_NAME, organisationName);
