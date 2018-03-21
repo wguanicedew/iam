@@ -84,7 +84,7 @@ public class GroupRequestsDeleteTests extends GroupRequestsTestUtils {
 
     // @formatter:off
     mvc.perform(delete(DELETE_URL, request.getUuid()))
-      .andExpect(status().isBadRequest());
+      .andExpect(status().isForbidden());
     // @formatter:on
   }
 

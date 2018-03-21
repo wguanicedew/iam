@@ -3,6 +3,7 @@ package it.infn.mw.iam.api.requests.service;
 import static it.infn.mw.iam.core.IamGroupRequestStatus.APPROVED;
 import static it.infn.mw.iam.core.IamGroupRequestStatus.PENDING;
 import static it.infn.mw.iam.core.IamGroupRequestStatus.REJECTED;
+import static it.infn.mw.iam.core.IamGroupRequestStatus.valueOf;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -13,24 +14,19 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Service;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 
+import it.infn.mw.iam.api.account.AccountUtils;
 import it.infn.mw.iam.api.common.ListResponseDTO;
 import it.infn.mw.iam.api.common.OffsetPageable;
 import it.infn.mw.iam.api.requests.GroupRequestConverter;
+import it.infn.mw.iam.api.requests.GroupRequestUtils;
 import it.infn.mw.iam.api.requests.exception.GroupRequestStatusException;
 import it.infn.mw.iam.api.requests.exception.GroupRequestValidationException;
-import it.infn.mw.iam.api.requests.exception.UserMismatchException;
 import it.infn.mw.iam.api.requests.model.GroupRequestDto;
-import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
 import it.infn.mw.iam.audit.events.group.request.GroupRequestApprovedEvent;
 import it.infn.mw.iam.audit.events.group.request.GroupRequestCreatedEvent;
 import it.infn.mw.iam.audit.events.group.request.GroupRequestDeletedEvent;
@@ -41,23 +37,25 @@ import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.model.IamGroupRequest;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
-import it.infn.mw.iam.persistence.repository.IamGroupRepository;
 import it.infn.mw.iam.persistence.repository.IamGroupRequestRepository;
 
 @Service
 public class DefaultGroupRequestsService implements GroupRequestsService {
 
   @Autowired
-  private IamGroupRequestRepository groupRequestRepository;
+  public IamGroupRequestRepository groupRequestRepository;
 
   @Autowired
   private IamAccountRepository accoutRepository;
 
   @Autowired
-  private IamGroupRepository groupRepository;
+  private GroupRequestConverter converter;
 
   @Autowired
-  private GroupRequestConverter converter;
+  private AccountUtils accountUtils;
+
+  @Autowired
+  private GroupRequestUtils groupRequestUtils;
 
   @Autowired
   private NotificationFactory notificationFactory;
@@ -71,26 +69,22 @@ public class DefaultGroupRequestsService implements GroupRequestsService {
         .put(PENDING, REJECTED, true)
         .build();
 
-  private static final SimpleGrantedAuthority ROLE_ADMIN = new SimpleGrantedAuthority("ROLE_ADMIN");
-
   @Override
   public GroupRequestDto createGroupRequest(GroupRequestDto groupRequest) {
 
-    checkMandatoryFields(groupRequest);
+    groupRequestUtils.validateMandatoryFields(groupRequest);
 
-    IamAccount account = checkAccount(groupRequest.getUsername());
-    IamGroup group = checkGroup(groupRequest.getGroupName());
+    IamAccount account = groupRequestUtils.validateAccount(groupRequest.getUsername());
+    IamGroup group = groupRequestUtils.validateGroup(groupRequest.getGroupName());
 
-    checkRequestAlreadyExist(groupRequest);
-
-    if (!isPrivilegedUser()) {
-      validateUserAuth(account.getUsername());
-    }
+    groupRequestUtils.checkRequestAlreadyExist(groupRequest);
+    groupRequestUtils.checkUserMembership(groupRequest);
 
     IamGroupRequest iamGroupRequest = new IamGroupRequest();
     iamGroupRequest.setUuid(UUID.randomUUID().toString());
     iamGroupRequest.setAccount(account);
     iamGroupRequest.setGroup(group);
+    iamGroupRequest.setNotes(groupRequest.getNotes());
     iamGroupRequest.setStatus(PENDING);
     iamGroupRequest.setCreationTime(new Date());
 
@@ -103,21 +97,15 @@ public class DefaultGroupRequestsService implements GroupRequestsService {
 
   @Override
   public void deleteGroupRequest(String uuid) {
-    IamGroupRequest request = checkGroupRequestUuid(uuid);
+    IamGroupRequest request = groupRequestUtils.validateGroupRequestUuid(uuid);
 
-    if (!isPrivilegedUser()) {
-      validateUserAuth(request.getAccount().getUsername());
-      if (!PENDING.equals(request.getStatus())) {
-        throw new GroupRequestStatusException("Cannot delete not pending requests");
-      }
-    }
     groupRequestRepository.delete(request.getId());
     eventPublisher.publishEvent(new GroupRequestDeletedEvent(this, request));
   }
 
   @Override
   public GroupRequestDto approveGroupRequest(String uuid) {
-    IamGroupRequest request = checkGroupRequestUuid(uuid);
+    IamGroupRequest request = groupRequestUtils.validateGroupRequestUuid(uuid);
 
     IamAccount account = request.getAccount();
     IamGroup group = request.getGroup();
@@ -133,8 +121,8 @@ public class DefaultGroupRequestsService implements GroupRequestsService {
 
   @Override
   public GroupRequestDto rejectGroupRequest(String uuid, String motivation) {
-    IamGroupRequest request = checkGroupRequestUuid(uuid);
-    checkRejectMotivation(motivation);
+    IamGroupRequest request = groupRequestUtils.validateGroupRequestUuid(uuid);
+    groupRequestUtils.validateRejectMotivation(motivation);
 
     request.setMotivation(motivation);
     request = updateGroupRequestStatus(request, REJECTED);
@@ -146,49 +134,41 @@ public class DefaultGroupRequestsService implements GroupRequestsService {
 
   @Override
   public GroupRequestDto getGroupRequestDetails(String uuid) {
-    IamGroupRequest request = checkGroupRequestUuid(uuid);
-    if (!isPrivilegedUser()) {
-      validateUserAuth(request.getAccount().getUsername());
+    Optional<IamGroupRequest> request = groupRequestUtils.getGroupRequestUuid(uuid);
+    if (!request.isPresent()) {
+      throw new GroupRequestValidationException(
+          String.format("Group request with id [%s] does not exist", uuid));
     }
-    return converter.fromEntity(request);
+    return converter.fromEntity(request.get());
   }
 
   @Override
   public ListResponseDTO<GroupRequestDto> listGroupRequest(String username, String groupName,
       String status, OffsetPageable pageRequest) {
-
     Optional<String> usernameFilter = Optional.ofNullable(username);
     Optional<String> groupNameFilter = Optional.ofNullable(groupName);
     Optional<String> statusFilter = Optional.ofNullable(status);
 
-    if (!isPrivilegedUser()) {
+    if (!groupRequestUtils.isPrivilegedUser()) {
       if (usernameFilter.isPresent()) {
-        validateUserAuth(username);
+        groupRequestUtils.validateUserAuth(username);
       } else {
-        usernameFilter = Optional.of(getAuthentication().getName());
+        Optional<IamAccount> userAccount = accountUtils.getAuthenticatedUserAccount();
+        if (userAccount.isPresent()) {
+          usernameFilter = Optional.of(userAccount.get().getUsername());
+        }
       }
     }
 
-    Page<IamGroupRequest> result = null;
     List<GroupRequestDto> elementList = new ArrayList<>();
 
-    if (usernameFilter.isPresent()) {
-      result = groupRequestRepository.findByUsername(usernameFilter.get(), pageRequest);
-    } else if (groupNameFilter.isPresent()) {
-      result = groupRequestRepository.findByGroup(groupNameFilter.get(), pageRequest);
-    } else if (statusFilter.isPresent()) {
-      result = groupRequestRepository
-        .findByStatus(IamGroupRequestStatus.valueOf(statusFilter.get()), pageRequest);
-    } else {
-      result = groupRequestRepository.findAll(pageRequest);
-    }
-
+    Page<IamGroupRequest> result =
+        filterRequest(usernameFilter, groupNameFilter, statusFilter, pageRequest);
     result.getContent().forEach(request -> elementList.add(converter.fromEntity(request)));
 
     ListResponseDTO.Builder<GroupRequestDto> builder = ListResponseDTO.builder();
     return builder.resources(elementList).fromPage(result, pageRequest).build();
   }
-
 
   private IamGroupRequest updateGroupRequestStatus(IamGroupRequest request,
       IamGroupRequestStatus status) {
@@ -202,93 +182,32 @@ public class DefaultGroupRequestsService implements GroupRequestsService {
     return groupRequestRepository.save(request);
   }
 
-  private IamGroupRequest checkGroupRequestUuid(String uuid) {
-    if (Strings.isNullOrEmpty(uuid)) {
-      throw new GroupRequestValidationException("uuid cannot be empty");
+  private Page<IamGroupRequest> filterRequest(Optional<String> usernameFilter,
+      Optional<String> groupNameFilter, Optional<String> statusFilter, OffsetPageable pageRequest) {
+
+    if (usernameFilter.isPresent() && statusFilter.isPresent()) {
+      return groupRequestRepository.findByUsernameAndStatus(usernameFilter.get(),
+          valueOf(statusFilter.get()), pageRequest);
     }
 
-    return groupRequestRepository.findByUuid(uuid).orElseThrow(
-        () -> new GroupRequestValidationException(buildExceptionMessage("Group request", uuid)));
-  }
-
-  private void checkMandatoryFields(GroupRequestDto request) {
-    if (Strings.isNullOrEmpty(request.getUsername())) {
-      throw new GroupRequestValidationException("Username cannot be empty");
+    if (usernameFilter.isPresent()) {
+      return groupRequestRepository.findByUsername(usernameFilter.get(), pageRequest);
     }
 
-    if (Strings.isNullOrEmpty(request.getGroupName())) {
-      throw new GroupRequestValidationException("Group name cannot be empty");
+    if (groupNameFilter.isPresent() && statusFilter.isPresent()) {
+      return groupRequestRepository.findByGroupAndStatus(groupNameFilter.get(),
+          valueOf(statusFilter.get()), pageRequest);
     }
 
-    String notes = request.getNotes();
-    if (notes != null) {
-      notes = request.getNotes().trim();
+    if (groupNameFilter.isPresent()) {
+      return groupRequestRepository.findByGroup(groupNameFilter.get(), pageRequest);
     }
 
-    if (Strings.isNullOrEmpty(notes)) {
-      throw new GroupRequestValidationException("Notes cannot be empty");
-    }
-  }
-
-  private void checkRejectMotivation(String motivation) {
-    String value = motivation;
-    if (motivation != null) {
-      value = motivation.trim();
+    if (statusFilter.isPresent()) {
+      return groupRequestRepository.findByStatus(valueOf(statusFilter.get()), pageRequest);
     }
 
-    if (Strings.isNullOrEmpty(value)) {
-      throw new GroupRequestValidationException("Reject motivation cannot be empty");
-    }
-  }
-
-  private IamAccount checkAccount(String username) {
-    return accoutRepository.findByUsername(username).orElseThrow(
-        () -> new GroupRequestValidationException(buildExceptionMessage("Account", username)));
-  }
-
-  private IamGroup checkGroup(String groupName) {
-    return groupRepository.findByName(groupName).orElseThrow(
-        () -> new GroupRequestValidationException(buildExceptionMessage("Group", groupName)));
-  }
-
-  private void checkRequestAlreadyExist(GroupRequestDto request) {
-    Optional<IamGroupRequest> result = groupRequestRepository
-      .findByUsernameAndGroup(request.getUsername(), request.getGroupName());
-    if (result.isPresent()) {
-      IamGroupRequestStatus status = result.get().getStatus();
-      if (PENDING.equals(status) || APPROVED.equals(status)) {
-        throw new GroupRequestValidationException(
-            String.format("Group membership request already exist for [%s, %s]",
-                request.getUsername(), request.getGroupName()));
-      }
-    }
-  }
-
-  private String buildExceptionMessage(String subject, Object value) {
-    return String.format("%s with id [%s] does not exist", subject, value);
-  }
-
-  private Authentication getAuthentication() {
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    if (auth instanceof OAuth2Authentication) {
-      OAuth2Authentication oauth = (OAuth2Authentication) auth;
-      if (oauth.getUserAuthentication() == null) {
-        throw new IllegalArgumentException("No user linked to the current OAuth token");
-      }
-      auth = oauth.getUserAuthentication();
-    }
-    return auth;
-  }
-
-  private boolean isPrivilegedUser() {
-    return getAuthentication().getAuthorities().contains(ROLE_ADMIN);
-  }
-
-  private void validateUserAuth(String requestUsername) {
-    String username = getAuthentication().getName();
-    if (!username.equals(requestUsername)) {
-      throw new UserMismatchException("Cannot handle requests of another user");
-    }
+    return groupRequestRepository.findAll(pageRequest);
   }
 
 }

@@ -33,4 +33,12 @@ public interface IamGroupRequestRepository
   @Query("select r from IamGroupRequest r where r.status = :status")
   Page<IamGroupRequest> findByStatus(@Param("status") IamGroupRequestStatus status,
       Pageable pageRequest);
+
+  @Query("select r from IamGroupRequest r join r.account a where a.username= :username and r.status = :status")
+  Page<IamGroupRequest> findByUsernameAndStatus(@Param("username") String username,
+      @Param("status") IamGroupRequestStatus status, Pageable pageRequest);
+
+  @Query("select r from IamGroupRequest r join r.group g where g.name= :groupName and r.status = :status")
+  Page<IamGroupRequest> findByGroupAndStatus(@Param("groupName") String groupName,
+      @Param("status") IamGroupRequestStatus status, Pageable pageRequest);
 }

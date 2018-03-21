@@ -1,5 +1,6 @@
 package it.infn.mw.iam.test.api.requests;
 
+import static java.lang.String.format;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
@@ -8,6 +9,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -28,7 +31,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.requests.model.GroupRequestDto;
 import it.infn.mw.iam.core.IamGroupRequestStatus;
+import it.infn.mw.iam.core.IamNotificationType;
 import it.infn.mw.iam.notification.NotificationStoreService;
+import it.infn.mw.iam.persistence.model.IamEmailNotification;
+import it.infn.mw.iam.persistence.repository.IamEmailNotificationRepository;
 import it.infn.mw.iam.test.util.WithAnonymousUser;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -47,6 +53,9 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
 
   @Autowired
   private NotificationStoreService notificationService;
+
+  @Autowired
+  private IamEmailNotificationRepository emailRepository;
 
   private MockMvc mvc;
   private GroupRequestDto request;
@@ -71,10 +80,20 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.username", equalTo(TEST_USERNAME)))
       .andExpect(jsonPath("$.groupName", equalTo(TEST_GROUPNAME)))
-      .andExpect(jsonPath("$.status", equalTo(IamGroupRequestStatus.PENDING.name())));
+      .andExpect(jsonPath("$.status", equalTo(IamGroupRequestStatus.PENDING.name())))
+      .andExpect(jsonPath("$.uuid").isNotEmpty())
+      .andExpect(jsonPath("$.notes", equalTo(TEST_NOTES)));
     // @formatter:on
     int mailCount = notificationService.countPendingNotifications();
     assertThat(mailCount, equalTo(1));
+
+    List<IamEmailNotification> mails =
+        emailRepository.findByNotificationType(IamNotificationType.GROUP_MEMBERSHIP);
+    assertThat(mails.size(), equalTo(1));
+    assertThat(mails.get(0).getBody(),
+        containsString(format("Username: %s", request.getUsername())));
+    assertThat(mails.get(0).getBody(), containsString(format("Group: %s", request.getGroupName())));
+    assertThat(mails.get(0).getBody(), containsString(request.getNotes()));
   }
 
   @Test
@@ -91,6 +110,14 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
     // @formatter:on
     int mailCount = notificationService.countPendingNotifications();
     assertThat(mailCount, equalTo(1));
+
+    List<IamEmailNotification> mails =
+        emailRepository.findByNotificationType(IamNotificationType.GROUP_MEMBERSHIP);
+    assertThat(mails.size(), equalTo(1));
+    assertThat(mails.get(0).getBody(),
+        containsString(format("Username: %s", request.getUsername())));
+    assertThat(mails.get(0).getBody(), containsString(format("Group: %s", request.getGroupName())));
+    assertThat(mails.get(0).getBody(), containsString(request.getNotes()));
   }
 
   @Test
@@ -102,8 +129,7 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
     mvc.perform(post(CREATE_URL)
         .contentType(MediaType.APPLICATION_JSON)
         .content(mapper.writeValueAsString(request)))
-      .andExpect(status().isForbidden())
-      .andExpect(jsonPath("$.error", containsString("Cannot handle requests of another user")));
+      .andExpect(status().isForbidden());
     // @formatter:on
   }
 
@@ -182,8 +208,7 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
     mvc.perform(post(CREATE_URL)
         .contentType(MediaType.APPLICATION_JSON)
         .content(mapper.writeValueAsString(request)))
-      .andExpect(status().isBadRequest())
-      .andExpect(jsonPath("$.error", containsString("Username cannot be empty")));
+      .andExpect(status().isForbidden());
     // @formatter:on
 
     request.setUsername("fake_user");
@@ -191,8 +216,7 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
     mvc.perform(post(CREATE_URL)
         .contentType(MediaType.APPLICATION_JSON)
         .content(mapper.writeValueAsString(request)))
-      .andExpect(status().isBadRequest())
-      .andExpect(jsonPath("$.error", containsString("does not exist")));
+      .andExpect(status().isForbidden());
     // @formatter:on
   }
 
@@ -206,6 +230,19 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
         .content(mapper.writeValueAsString(request)))
       .andExpect(status().isBadRequest())
       .andExpect(jsonPath("$.error", containsString("already exist")));
+    // @formatter:on
+  }
+
+  @Test
+  @WithMockUser(roles = {"ADMIN"})
+  public void createGroupRequestUserAlreadyMember() throws Exception {
+    request = buildGroupRequest("test", "Analysis");
+    // @formatter:off
+    mvc.perform(post(CREATE_URL)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(mapper.writeValueAsString(request)))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.error", containsString("already member")));
     // @formatter:on
   }
 }

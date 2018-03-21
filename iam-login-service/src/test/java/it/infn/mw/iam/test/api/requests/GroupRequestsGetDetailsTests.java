@@ -84,8 +84,7 @@ public class GroupRequestsGetDetailsTests extends GroupRequestsTestUtils {
     request = savePendingGroupRequest("test_101", TEST_GROUPNAME);
     // @formatter:off
     mvc.perform(get(GET_DETAILS_URL, request.getUuid()))
-      .andExpect(status().isForbidden())
-      .andExpect(jsonPath("$.error", containsString("Cannot handle requests of another user")));
+      .andExpect(status().isForbidden());
     // @formatter:on
   }
 

@@ -27,13 +27,13 @@ public class GroupRequestsController {
   private GroupRequestsService groupRequestService;
 
   @RequestMapping(method = RequestMethod.POST, value = {"", "/"})
-  @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+  @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and #iam.userCanCreateGroupRequest(#groupRequest))")
   public GroupRequestDto createGroupRequest(@RequestBody GroupRequestDto groupRequest) {
     return groupRequestService.createGroupRequest(groupRequest);
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "/")
-  @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+  @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
   public ListResponseDTO<GroupRequestDto> listGroupRequest(
       @RequestParam(required = false) String username,
       @RequestParam(required = false) String groupName,
@@ -46,13 +46,13 @@ public class GroupRequestsController {
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "/{uuid}")
-  @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+  @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and #iam.isUserGroupRequest(#uuid))")
   public GroupRequestDto getGroupRequestDetails(@PathVariable("uuid") String uuid) {
     return groupRequestService.getGroupRequestDetails(uuid);
   }
 
   @RequestMapping(method = RequestMethod.DELETE, value = "/{uuid}")
-  @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+  @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and #iam.userCanDeleteGroupRequest(#uuid))")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void deleteGroupRequest(@PathVariable("uuid") String uuid) {
     groupRequestService.deleteGroupRequest(uuid);

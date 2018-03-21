@@ -11,6 +11,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
 import it.infn.mw.iam.core.IamDeliveryStatus;
+import it.infn.mw.iam.core.IamNotificationType;
 import it.infn.mw.iam.persistence.model.IamEmailNotification;
 
 public interface IamEmailNotificationRepository
@@ -29,4 +30,8 @@ public interface IamEmailNotificationRepository
   Integer countAllMessages();
 
   Integer countByDeliveryStatus(IamDeliveryStatus deliveryStatus);
+
+  @Query("select n from IamEmailNotification n where n.notificationType = :notificationType")
+  List<IamEmailNotification> findByNotificationType(
+      @Param("notificationType") IamNotificationType notificationType);
 }

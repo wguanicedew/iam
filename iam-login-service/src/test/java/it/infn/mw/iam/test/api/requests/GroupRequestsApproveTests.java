@@ -1,5 +1,6 @@
 package it.infn.mw.iam.test.api.requests;
 
+import static java.lang.String.format;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
@@ -10,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.junit.Before;
@@ -28,7 +30,10 @@ import org.springframework.web.context.WebApplicationContext;
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.requests.model.GroupRequestDto;
 import it.infn.mw.iam.core.IamGroupRequestStatus;
+import it.infn.mw.iam.core.IamNotificationType;
 import it.infn.mw.iam.notification.NotificationStoreService;
+import it.infn.mw.iam.persistence.model.IamEmailNotification;
+import it.infn.mw.iam.persistence.repository.IamEmailNotificationRepository;
 import it.infn.mw.iam.test.util.WithAnonymousUser;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -44,6 +49,9 @@ public class GroupRequestsApproveTests extends GroupRequestsTestUtils {
 
   @Autowired
   private NotificationStoreService notificationService;
+
+  @Autowired
+  private IamEmailNotificationRepository emailRepository;
 
   private MockMvc mvc;
   private GroupRequestDto request;
@@ -80,6 +88,13 @@ public class GroupRequestsApproveTests extends GroupRequestsTestUtils {
 
     int mailCount = notificationService.countPendingNotifications();
     assertThat(mailCount, equalTo(1));
+
+    List<IamEmailNotification> mails =
+        emailRepository.findByNotificationType(IamNotificationType.GROUP_MEMBERSHIP);
+    assertThat(mails.size(), equalTo(1));
+    assertThat(mails.get(0).getBody(),
+        containsString(format("membership request for the group %s", result.getGroupName())));
+    assertThat(mails.get(0).getBody(), containsString(format("has been %s", result.getStatus())));
   }
 
   @Test

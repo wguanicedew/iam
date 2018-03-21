@@ -21,6 +21,7 @@ import it.infn.mw.iam.persistence.repository.IamGroupRequestRepository;
 
 public class GroupRequestsTestUtils {
 
+  protected final static String TEST_ADMIN = "admin";
   protected final static String TEST_USERNAME = "test_100";
   protected final static String TEST_GROUPNAME = "Test-001";
   protected final static String TEST_NOTES = "Test group request membership";
