@@ -50,10 +50,6 @@
 
 <link
   rel="stylesheet"
-  href="resources/bootstrap-social/bootstrap-social.css">
-
-<link
-  rel="stylesheet"
   href="resources/iam/css/toaster.min.css" />
 
 <link
