@@ -32,13 +32,13 @@ public class GroupRequestsController {
   private GroupRequestsService groupRequestService;
 
   @RequestMapping(method = RequestMethod.POST, value = {"", "/"})
-  @PreAuthorize("isAuthenticated()")
+  @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
   public GroupRequestDto createGroupRequest(@RequestBody @Valid GroupRequestDto groupRequest) {
     return groupRequestService.createGroupRequest(groupRequest);
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "/")
-  @PreAuthorize("isAuthenticated()")
+  @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
   public ListResponseDTO<GroupRequestDto> listGroupRequest(
       @RequestParam(required = false) String username,
       @RequestParam(required = false) String groupName,
