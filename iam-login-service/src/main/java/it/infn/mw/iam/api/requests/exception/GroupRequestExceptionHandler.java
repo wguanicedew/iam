@@ -13,25 +13,17 @@ import it.infn.mw.iam.api.common.ErrorDTO;
 public class GroupRequestExceptionHandler extends ResponseEntityExceptionHandler {
 
   @ResponseStatus(code = HttpStatus.BAD_REQUEST)
-  @ExceptionHandler(GroupRequestValidationException.class)
+  @ExceptionHandler(GroupRequestValidationError.class)
   @ResponseBody
-  public ErrorDTO handleValidationException(GroupRequestValidationException e) {
+  public ErrorDTO handleValidationException(GroupRequestValidationError e) {
 
     return buildErrorResponse(e.getMessage());
   }
 
   @ResponseStatus(code = HttpStatus.BAD_REQUEST)
-  @ExceptionHandler(GroupRequestStatusException.class)
+  @ExceptionHandler(InvalidGroupRequestStatusError.class)
   @ResponseBody
-  public ErrorDTO handleValidationException(GroupRequestStatusException e) {
-
-    return buildErrorResponse(e.getMessage());
-  }
-
-  @ResponseStatus(code = HttpStatus.FORBIDDEN)
-  @ExceptionHandler(UserMismatchException.class)
-  @ResponseBody
-  public ErrorDTO handleValidationException(UserMismatchException e) {
+  public ErrorDTO handleValidationException(InvalidGroupRequestStatusError e) {
 
     return buildErrorResponse(e.getMessage());
   }
@@ -39,5 +31,4 @@ public class GroupRequestExceptionHandler extends ResponseEntityExceptionHandler
   private ErrorDTO buildErrorResponse(String message) {
     return ErrorDTO.fromString(message);
   }
-
 }

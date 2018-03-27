@@ -42,9 +42,8 @@ public class GroupRequestsTestUtils {
   @Autowired
   protected ObjectMapper mapper;
 
-  protected GroupRequestDto buildGroupRequest(String username, String groupName) {
+  protected GroupRequestDto buildGroupRequest(String groupName) {
     GroupRequestDto request = new GroupRequestDto();
-    request.setUsername(username);
     request.setGroupName(groupName);
     request.setNotes(TEST_NOTES);
 

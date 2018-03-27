@@ -871,6 +871,8 @@ public class SecurityConfig {
   @Configuration
   @Order(29)
   public static class GroupRequestsEndpointConfig extends WebSecurityConfigurerAdapter {
+    private static final String GROUP_REQUEST_PATH = "/iam/group_requests";
+
     @Autowired
     private OAuth2AuthenticationProcessingFilter resourceFilter;
 
@@ -885,7 +887,7 @@ public class SecurityConfig {
       // @formatter:off
       http
         .requestMatchers()
-          .antMatchers("/iam/group_requests**", "/iam/group_requests/**")
+          .antMatchers(GROUP_REQUEST_PATH+"**", GROUP_REQUEST_PATH+"/**")
           .and()
           .exceptionHandling()
             .authenticationEntryPoint(authenticationEntryPoint)
@@ -896,11 +898,7 @@ public class SecurityConfig {
               .sessionCreationPolicy(SessionCreationPolicy.NEVER)
           .and()
             .authorizeRequests()
-              .antMatchers(HttpMethod.POST, "/iam/group_requests**")
-                .authenticated()
-              .antMatchers(HttpMethod.GET, "/iam/group_requests/**")
-                .authenticated()
-              .antMatchers(HttpMethod.DELETE, "/iam/group_requests/**")
+              .antMatchers(GROUP_REQUEST_PATH+"**", GROUP_REQUEST_PATH+"/**" )
                 .authenticated()
           .and()
             .csrf()

@@ -2,23 +2,41 @@ package it.infn.mw.iam.api.requests.model;
 
 import java.util.Date;
 
+import org.hibernate.validator.constraints.NotEmpty;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import it.infn.mw.iam.api.requests.validator.GroupRequest;
+import it.infn.mw.iam.api.validators.IamGroupName;
+import it.infn.mw.iam.api.validators.IamGroupRequestNotes;
+
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
+@GroupRequest
 public class GroupRequestDto {
 
   private String uuid;
+
   private String username;
+
+  @NotEmpty
+  @IamGroupName(message = "Invalid membership request: group does not exist")
   private String groupName;
+
   private String status;
+
+  @NotEmpty
+  @IamGroupRequestNotes(message = "Invalid membership request: notes cannot be empty")
   private String notes;
+
   private String motivation;
   private Date creationTime;
   private Date lastUpdateTime;
 
-  public GroupRequestDto() {}
+  public GroupRequestDto() {
+    // empty constructor
+  }
 
   @JsonCreator
   public GroupRequestDto(@JsonProperty("uuid") String uuid,

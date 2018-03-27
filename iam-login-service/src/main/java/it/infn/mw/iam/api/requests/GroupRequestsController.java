@@ -1,8 +1,12 @@
 package it.infn.mw.iam.api.requests;
 
+import javax.validation.Valid;
+
+import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,6 +23,7 @@ import it.infn.mw.iam.api.requests.service.GroupRequestsService;
 
 @RestController
 @RequestMapping("/iam/group_requests")
+@Validated
 public class GroupRequestsController {
 
   private static final Integer GROUP_REQUEST_MAX_PAGE_SIZE = 10;
@@ -27,13 +32,13 @@ public class GroupRequestsController {
   private GroupRequestsService groupRequestService;
 
   @RequestMapping(method = RequestMethod.POST, value = {"", "/"})
-  @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and #iam.userCanCreateGroupRequest(#groupRequest))")
-  public GroupRequestDto createGroupRequest(@RequestBody GroupRequestDto groupRequest) {
+  @PreAuthorize("isAuthenticated()")
+  public GroupRequestDto createGroupRequest(@RequestBody @Valid GroupRequestDto groupRequest) {
     return groupRequestService.createGroupRequest(groupRequest);
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "/")
-  @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
+  @PreAuthorize("isAuthenticated()")
   public ListResponseDTO<GroupRequestDto> listGroupRequest(
       @RequestParam(required = false) String username,
       @RequestParam(required = false) String groupName,
@@ -42,35 +47,36 @@ public class GroupRequestsController {
 
     OffsetPageable pageRequest =
         PagingUtils.buildPageRequest(count, startIndex, GROUP_REQUEST_MAX_PAGE_SIZE);
-    return groupRequestService.listGroupRequest(username, groupName, status, pageRequest);
+    return groupRequestService.listGroupRequests(username, groupName, status, pageRequest);
   }
 
-  @RequestMapping(method = RequestMethod.GET, value = "/{uuid}")
-  @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and #iam.isUserGroupRequest(#uuid))")
-  public GroupRequestDto getGroupRequestDetails(@PathVariable("uuid") String uuid) {
-    return groupRequestService.getGroupRequestDetails(uuid);
+  @RequestMapping(method = RequestMethod.GET, value = "/{requestId}")
+  @PreAuthorize("hasRole('ADMIN') or #iam.userOwnsGroupRequest(#requestId)")
+  public GroupRequestDto getGroupRequestDetails(
+      @Valid @PathVariable("requestId") String requestId) {
+    return groupRequestService.getGroupRequestDetails(requestId);
   }
 
-  @RequestMapping(method = RequestMethod.DELETE, value = "/{uuid}")
-  @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and #iam.userCanDeleteGroupRequest(#uuid))")
+  @RequestMapping(method = RequestMethod.DELETE, value = "/{requestId}")
+  @PreAuthorize("hasRole('ADMIN') or #iam.userCanDeleteGroupRequest(#requestId)")
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void deleteGroupRequest(@PathVariable("uuid") String uuid) {
-    groupRequestService.deleteGroupRequest(uuid);
+  public void deleteGroupRequest(@Valid @PathVariable("requestId") String requestId) {
+    groupRequestService.deleteGroupRequest(requestId);
   }
 
-  @RequestMapping(method = RequestMethod.POST, value = "/{uuid}/approve")
+  @RequestMapping(method = RequestMethod.POST, value = "/{requestId}/approve")
   @PreAuthorize("hasRole('ADMIN')")
   @ResponseStatus(HttpStatus.OK)
-  public GroupRequestDto approveGroupRequest(@PathVariable("uuid") String uuid) {
-    return groupRequestService.approveGroupRequest(uuid);
+  public GroupRequestDto approveGroupRequest(@Valid @PathVariable("requestId") String requestId) {
+    return groupRequestService.approveGroupRequest(requestId);
   }
 
-  @RequestMapping(method = RequestMethod.POST, value = "/{uuid}/reject")
+  @RequestMapping(method = RequestMethod.POST, value = "/{requestId}/reject")
   @PreAuthorize("hasRole('ADMIN')")
   @ResponseStatus(HttpStatus.OK)
-  public GroupRequestDto rejectGroupRequest(@PathVariable("uuid") String uuid,
-      @RequestParam(required = false) String motivation) {
-    return groupRequestService.rejectGroupRequest(uuid, motivation);
+  public GroupRequestDto rejectGroupRequest(@Valid @PathVariable("requestId") String requestId,
+      @RequestParam @NotEmpty String motivation) {
+    return groupRequestService.rejectGroupRequest(requestId, motivation);
   }
 
 }

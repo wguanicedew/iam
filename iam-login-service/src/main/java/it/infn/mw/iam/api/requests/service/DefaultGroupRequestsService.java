@@ -24,19 +24,20 @@ import it.infn.mw.iam.api.common.ListResponseDTO;
 import it.infn.mw.iam.api.common.OffsetPageable;
 import it.infn.mw.iam.api.requests.GroupRequestConverter;
 import it.infn.mw.iam.api.requests.GroupRequestUtils;
-import it.infn.mw.iam.api.requests.exception.GroupRequestStatusException;
-import it.infn.mw.iam.api.requests.exception.GroupRequestValidationException;
+import it.infn.mw.iam.api.requests.exception.InvalidGroupRequestStatusError;
 import it.infn.mw.iam.api.requests.model.GroupRequestDto;
 import it.infn.mw.iam.audit.events.group.request.GroupRequestApprovedEvent;
 import it.infn.mw.iam.audit.events.group.request.GroupRequestCreatedEvent;
 import it.infn.mw.iam.audit.events.group.request.GroupRequestDeletedEvent;
 import it.infn.mw.iam.audit.events.group.request.GroupRequestRejectedEvent;
 import it.infn.mw.iam.core.IamGroupRequestStatus;
+import it.infn.mw.iam.core.time.TimeProvider;
 import it.infn.mw.iam.notification.NotificationFactory;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.model.IamGroupRequest;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
+import it.infn.mw.iam.persistence.repository.IamGroupRepository;
 import it.infn.mw.iam.persistence.repository.IamGroupRequestRepository;
 
 @Service
@@ -47,6 +48,9 @@ public class DefaultGroupRequestsService implements GroupRequestsService {
 
   @Autowired
   private IamAccountRepository accoutRepository;
+
+  @Autowired
+  private IamGroupRepository groupRepository;
 
   @Autowired
   private GroupRequestConverter converter;
@@ -61,9 +65,12 @@ public class DefaultGroupRequestsService implements GroupRequestsService {
   private NotificationFactory notificationFactory;
 
   @Autowired
+  private TimeProvider timeProvider;
+
+  @Autowired
   private ApplicationEventPublisher eventPublisher;
 
-  private static final Table<IamGroupRequestStatus, IamGroupRequestStatus, Boolean> allowedStateTransitions =
+  private static final Table<IamGroupRequestStatus, IamGroupRequestStatus, Boolean> ALLOWED_STATE_TRANSITIONS =
       new ImmutableTable.Builder<IamGroupRequestStatus, IamGroupRequestStatus, Boolean>()
         .put(PENDING, APPROVED, true)
         .put(PENDING, REJECTED, true)
@@ -72,40 +79,45 @@ public class DefaultGroupRequestsService implements GroupRequestsService {
   @Override
   public GroupRequestDto createGroupRequest(GroupRequestDto groupRequest) {
 
-    groupRequestUtils.validateMandatoryFields(groupRequest);
+    Optional<IamAccount> account = accountUtils.getAuthenticatedUserAccount();
+    Optional<IamGroup> group = groupRepository.findByName(groupRequest.getGroupName());
 
-    IamAccount account = groupRequestUtils.validateAccount(groupRequest.getUsername());
-    IamGroup group = groupRequestUtils.validateGroup(groupRequest.getGroupName());
+    if (account.isPresent()) {
+      groupRequest.setUsername(account.get().getUsername());
+    }
 
     groupRequestUtils.checkRequestAlreadyExist(groupRequest);
     groupRequestUtils.checkUserMembership(groupRequest);
 
-    IamGroupRequest iamGroupRequest = new IamGroupRequest();
-    iamGroupRequest.setUuid(UUID.randomUUID().toString());
-    iamGroupRequest.setAccount(account);
-    iamGroupRequest.setGroup(group);
-    iamGroupRequest.setNotes(groupRequest.getNotes());
-    iamGroupRequest.setStatus(PENDING);
-    iamGroupRequest.setCreationTime(new Date());
+    IamGroupRequest result = new IamGroupRequest();
 
-    IamGroupRequest result = groupRequestRepository.save(iamGroupRequest);
-    notificationFactory.createAdminHandleGroupRequestMessage(iamGroupRequest);
-    eventPublisher.publishEvent(new GroupRequestCreatedEvent(this, result));
+    if (account.isPresent() && group.isPresent()) {
+      IamGroupRequest iamGroupRequest = new IamGroupRequest();
+      iamGroupRequest.setUuid(UUID.randomUUID().toString());
+      iamGroupRequest.setAccount(account.get());
+      iamGroupRequest.setGroup(group.get());
+      iamGroupRequest.setNotes(groupRequest.getNotes());
+      iamGroupRequest.setStatus(PENDING);
+      iamGroupRequest.setCreationTime(new Date(timeProvider.currentTimeMillis()));
 
+      result = groupRequestRepository.save(iamGroupRequest);
+      notificationFactory.createAdminHandleGroupRequestMessage(iamGroupRequest);
+      eventPublisher.publishEvent(new GroupRequestCreatedEvent(this, result));
+    }
     return converter.fromEntity(result);
   }
 
   @Override
-  public void deleteGroupRequest(String uuid) {
-    IamGroupRequest request = groupRequestUtils.validateGroupRequestUuid(uuid);
+  public void deleteGroupRequest(String requestId) {
+    IamGroupRequest request = groupRequestUtils.getGroupRequest(requestId);
 
     groupRequestRepository.delete(request.getId());
     eventPublisher.publishEvent(new GroupRequestDeletedEvent(this, request));
   }
 
   @Override
-  public GroupRequestDto approveGroupRequest(String uuid) {
-    IamGroupRequest request = groupRequestUtils.validateGroupRequestUuid(uuid);
+  public GroupRequestDto approveGroupRequest(String requestId) {
+    IamGroupRequest request = groupRequestUtils.getGroupRequest(requestId);
 
     IamAccount account = request.getAccount();
     IamGroup group = request.getGroup();
@@ -120,8 +132,8 @@ public class DefaultGroupRequestsService implements GroupRequestsService {
   }
 
   @Override
-  public GroupRequestDto rejectGroupRequest(String uuid, String motivation) {
-    IamGroupRequest request = groupRequestUtils.validateGroupRequestUuid(uuid);
+  public GroupRequestDto rejectGroupRequest(String requestId, String motivation) {
+    IamGroupRequest request = groupRequestUtils.getGroupRequest(requestId);
     groupRequestUtils.validateRejectMotivation(motivation);
 
     request.setMotivation(motivation);
@@ -133,30 +145,22 @@ public class DefaultGroupRequestsService implements GroupRequestsService {
   }
 
   @Override
-  public GroupRequestDto getGroupRequestDetails(String uuid) {
-    Optional<IamGroupRequest> request = groupRequestUtils.getGroupRequestUuid(uuid);
-    if (!request.isPresent()) {
-      throw new GroupRequestValidationException(
-          String.format("Group request with id [%s] does not exist", uuid));
-    }
-    return converter.fromEntity(request.get());
+  public GroupRequestDto getGroupRequestDetails(String requestId) {
+    IamGroupRequest request = groupRequestUtils.getGroupRequest(requestId);
+    return converter.fromEntity(request);
   }
 
   @Override
-  public ListResponseDTO<GroupRequestDto> listGroupRequest(String username, String groupName,
+  public ListResponseDTO<GroupRequestDto> listGroupRequests(String username, String groupName,
       String status, OffsetPageable pageRequest) {
     Optional<String> usernameFilter = Optional.ofNullable(username);
     Optional<String> groupNameFilter = Optional.ofNullable(groupName);
     Optional<String> statusFilter = Optional.ofNullable(status);
 
     if (!groupRequestUtils.isPrivilegedUser()) {
-      if (usernameFilter.isPresent()) {
-        groupRequestUtils.validateUserAuth(username);
-      } else {
-        Optional<IamAccount> userAccount = accountUtils.getAuthenticatedUserAccount();
-        if (userAccount.isPresent()) {
-          usernameFilter = Optional.of(userAccount.get().getUsername());
-        }
+      Optional<IamAccount> userAccount = accountUtils.getAuthenticatedUserAccount();
+      if (userAccount.isPresent()) {
+        usernameFilter = Optional.of(userAccount.get().getUsername());
       }
     }
 
@@ -173,12 +177,12 @@ public class DefaultGroupRequestsService implements GroupRequestsService {
   private IamGroupRequest updateGroupRequestStatus(IamGroupRequest request,
       IamGroupRequestStatus status) {
 
-    if (!allowedStateTransitions.contains(request.getStatus(), status)) {
-      throw new GroupRequestStatusException(
-          String.format("Group request wrong transition: %s -> %s", request.getStatus(), status));
+    if (!ALLOWED_STATE_TRANSITIONS.contains(request.getStatus(), status)) {
+      throw new InvalidGroupRequestStatusError(
+          String.format("Invalid group request transition: %s -> %s", request.getStatus(), status));
     }
     request.setStatus(status);
-    request.setLastUpdateTime(new Date());
+    request.setLastUpdateTime(new Date(timeProvider.currentTimeMillis()));
     return groupRequestRepository.save(request);
   }
 

@@ -18,8 +18,7 @@ public interface IamEmailNotificationRepository
     extends PagingAndSortingRepository<IamEmailNotification, Long> {
 
   @Lock(LockModeType.PESSIMISTIC_WRITE)
-  List<IamEmailNotification> findByDeliveryStatus(
-      @Param("delivery_status") IamDeliveryStatus deliveryStatus);
+  List<IamEmailNotification> findByDeliveryStatus(IamDeliveryStatus deliveryStatus);
 
   @Query("select n from IamEmailNotification n where n.deliveryStatus = :delivery_status and n.lastUpdate < :last_update")
   List<IamEmailNotification> findByStatusWithUpdateTime(
@@ -31,7 +30,5 @@ public interface IamEmailNotificationRepository
 
   Integer countByDeliveryStatus(IamDeliveryStatus deliveryStatus);
 
-  @Query("select n from IamEmailNotification n where n.notificationType = :notificationType")
-  List<IamEmailNotification> findByNotificationType(
-      @Param("notificationType") IamNotificationType notificationType);
+  List<IamEmailNotification> findByNotificationType(IamNotificationType notificationType);
 }

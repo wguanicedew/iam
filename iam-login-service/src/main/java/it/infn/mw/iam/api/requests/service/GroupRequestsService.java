@@ -8,15 +8,15 @@ public interface GroupRequestsService {
 
   GroupRequestDto createGroupRequest(GroupRequestDto groupRequest);
 
-  void deleteGroupRequest(String uuid);
+  void deleteGroupRequest(String requestId);
 
-  GroupRequestDto approveGroupRequest(String uuid);
+  GroupRequestDto approveGroupRequest(String requestId);
 
-  GroupRequestDto rejectGroupRequest(String uuid, String motivation);
+  GroupRequestDto rejectGroupRequest(String requestId, String motivation);
 
-  GroupRequestDto getGroupRequestDetails(String uuid);
+  GroupRequestDto getGroupRequestDetails(String requestId);
 
-  ListResponseDTO<GroupRequestDto> listGroupRequest(String username, String groupName,
+  ListResponseDTO<GroupRequestDto> listGroupRequests(String username, String groupName,
       String status, OffsetPageable pageRequest);
 
 }

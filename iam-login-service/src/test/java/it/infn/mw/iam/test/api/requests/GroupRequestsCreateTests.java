@@ -3,6 +3,7 @@ package it.infn.mw.iam.test.api.requests;
 import static java.lang.String.format;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -67,33 +68,21 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
       .alwaysDo(print())
       .build();
 
-    request = buildGroupRequest(TEST_USERNAME, TEST_GROUPNAME);
+    request = buildGroupRequest(TEST_GROUPNAME);
   }
 
   @Test
-  @WithMockUser(roles = {"ADMIN"})
+  @WithMockUser(roles = {"ADMIN"}, username = TEST_ADMIN)
   public void createGroupRequestAsAdmin() throws Exception {
     // @formatter:off
     mvc.perform(post(CREATE_URL)
         .contentType(MediaType.APPLICATION_JSON)
         .content(mapper.writeValueAsString(request)))
       .andExpect(status().isOk())
-      .andExpect(jsonPath("$.username", equalTo(TEST_USERNAME)))
+      .andExpect(jsonPath("$.username", equalTo(TEST_ADMIN)))
       .andExpect(jsonPath("$.groupName", equalTo(TEST_GROUPNAME)))
-      .andExpect(jsonPath("$.status", equalTo(IamGroupRequestStatus.PENDING.name())))
-      .andExpect(jsonPath("$.uuid").isNotEmpty())
-      .andExpect(jsonPath("$.notes", equalTo(TEST_NOTES)));
+      .andExpect(jsonPath("$.status", equalTo(IamGroupRequestStatus.PENDING.name())));
     // @formatter:on
-    int mailCount = notificationService.countPendingNotifications();
-    assertThat(mailCount, equalTo(1));
-
-    List<IamEmailNotification> mails =
-        emailRepository.findByNotificationType(IamNotificationType.GROUP_MEMBERSHIP);
-    assertThat(mails.size(), equalTo(1));
-    assertThat(mails.get(0).getBody(),
-        containsString(format("Username: %s", request.getUsername())));
-    assertThat(mails.get(0).getBody(), containsString(format("Group: %s", request.getGroupName())));
-    assertThat(mails.get(0).getBody(), containsString(request.getNotes()));
   }
 
   @Test
@@ -113,24 +102,10 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
 
     List<IamEmailNotification> mails =
         emailRepository.findByNotificationType(IamNotificationType.GROUP_MEMBERSHIP);
-    assertThat(mails.size(), equalTo(1));
-    assertThat(mails.get(0).getBody(),
-        containsString(format("Username: %s", request.getUsername())));
+    assertThat(mails, hasSize(1));
+    assertThat(mails.get(0).getBody(), containsString(format("Username: %s", TEST_USERNAME)));
     assertThat(mails.get(0).getBody(), containsString(format("Group: %s", request.getGroupName())));
     assertThat(mails.get(0).getBody(), containsString(request.getNotes()));
-  }
-
-  @Test
-  @WithMockUser(roles = {"USER"}, username = TEST_USERNAME)
-  public void createGroupRequestAsAnotherUser() throws Exception {
-    GroupRequestDto request = buildGroupRequest("test_200", TEST_GROUPNAME);
-
-    // @formatter:off
-    mvc.perform(post(CREATE_URL)
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(mapper.writeValueAsString(request)))
-      .andExpect(status().isForbidden());
-    // @formatter:on
   }
 
   @Test
@@ -147,14 +122,12 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
   @Test
   @WithMockUser(roles = {"USER"}, username = TEST_USERNAME)
   public void createGroupRequestWitInvalidNotes() throws Exception {
-
     request.setNotes(null);
     // @formatter:off
     mvc.perform(post(CREATE_URL)
         .contentType(MediaType.APPLICATION_JSON)
         .content(mapper.writeValueAsString(request)))
-      .andExpect(status().isBadRequest())
-      .andExpect(jsonPath("$.error", containsString("Notes cannot be empty")));
+      .andExpect(status().isBadRequest());
     // @formatter:on
 
     request.setNotes("");
@@ -162,8 +135,7 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
     mvc.perform(post(CREATE_URL)
         .contentType(MediaType.APPLICATION_JSON)
         .content(mapper.writeValueAsString(request)))
-      .andExpect(status().isBadRequest())
-      .andExpect(jsonPath("$.error", containsString("Notes cannot be empty")));
+      .andExpect(status().isBadRequest());
     // @formatter:on
 
     request.setNotes("   ");
@@ -171,22 +143,19 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
     mvc.perform(post(CREATE_URL)
         .contentType(MediaType.APPLICATION_JSON)
         .content(mapper.writeValueAsString(request)))
-      .andExpect(status().isBadRequest())
-      .andExpect(jsonPath("$.error", containsString("Notes cannot be empty")));
+      .andExpect(status().isBadRequest());
     // @formatter:on
   }
 
   @Test
   @WithMockUser(roles = {"USER"}, username = TEST_USERNAME)
   public void createGroupRequestWithInvalidGroup() throws Exception {
-
     request.setGroupName("");
     // @formatter:off
     mvc.perform(post(CREATE_URL)
         .contentType(MediaType.APPLICATION_JSON)
         .content(mapper.writeValueAsString(request)))
-      .andExpect(status().isBadRequest())
-      .andExpect(jsonPath("$.error", containsString("Group name cannot be empty")));
+      .andExpect(status().isBadRequest());
     // @formatter:on
 
     request.setGroupName("fake_group");
@@ -194,29 +163,7 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
     mvc.perform(post(CREATE_URL)
         .contentType(MediaType.APPLICATION_JSON)
         .content(mapper.writeValueAsString(request)))
-      .andExpect(status().isBadRequest())
-      .andExpect(jsonPath("$.error", containsString("does not exist")));
-    // @formatter:on
-  }
-
-  @Test
-  @WithMockUser(roles = {"USER"}, username = TEST_USERNAME)
-  public void createGroupRequestWithInvalidUsername() throws Exception {
-
-    request.setUsername("");
-    // @formatter:off
-    mvc.perform(post(CREATE_URL)
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(mapper.writeValueAsString(request)))
-      .andExpect(status().isForbidden());
-    // @formatter:on
-
-    request.setUsername("fake_user");
-    // @formatter:off
-    mvc.perform(post(CREATE_URL)
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(mapper.writeValueAsString(request)))
-      .andExpect(status().isForbidden());
+      .andExpect(status().isBadRequest());
     // @formatter:on
   }
 
@@ -234,15 +181,29 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
   }
 
   @Test
-  @WithMockUser(roles = {"ADMIN"})
+  @WithMockUser(roles = {"USER"}, username = "test")
   public void createGroupRequestUserAlreadyMember() throws Exception {
-    request = buildGroupRequest("test", "Analysis");
+    request = buildGroupRequest("Analysis");
     // @formatter:off
     mvc.perform(post(CREATE_URL)
         .contentType(MediaType.APPLICATION_JSON)
         .content(mapper.writeValueAsString(request)))
       .andExpect(status().isBadRequest())
       .andExpect(jsonPath("$.error", containsString("already member")));
+    // @formatter:on
+  }
+
+  @Test
+  @WithMockUser(roles = {"ADMIN", "USER"}, username = TEST_USERNAME)
+  public void createGroupRequestAsUserWithBothRoles() throws Exception {
+    // @formatter:off
+    mvc.perform(post(CREATE_URL)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(mapper.writeValueAsString(request)))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.username", equalTo(TEST_USERNAME)))
+      .andExpect(jsonPath("$.groupName", equalTo(TEST_GROUPNAME)))
+      .andExpect(jsonPath("$.status", equalTo(IamGroupRequestStatus.PENDING.name())));
     // @formatter:on
   }
 }

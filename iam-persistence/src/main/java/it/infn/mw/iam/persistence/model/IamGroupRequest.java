@@ -58,7 +58,9 @@ public class IamGroupRequest implements Serializable {
   private Date lastUpdateTime;
 
 
-  public IamGroupRequest() {}
+  public IamGroupRequest() {
+    // empty constructor
+  }
 
   public Long getId() {
     return id;

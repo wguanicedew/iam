@@ -121,4 +121,13 @@ public class GroupRequestsDeleteTests extends GroupRequestsTestUtils {
     // @formatter:on
   }
 
+  @Test
+  @WithMockUser(roles = {"ADMIN", "USER"})
+  public void deletePendingGroupRequestAsUserWithBothRoles() throws Exception {
+    // @formatter:off
+    mvc.perform(delete(DELETE_URL, request.getUuid()))
+      .andExpect(status().isNoContent());
+    // @formatter:on
+  }
+
 }

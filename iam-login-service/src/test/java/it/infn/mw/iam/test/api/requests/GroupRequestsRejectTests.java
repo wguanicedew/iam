@@ -4,6 +4,7 @@ import static java.lang.String.format;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -95,7 +96,7 @@ public class GroupRequestsRejectTests extends GroupRequestsTestUtils {
 
     List<IamEmailNotification> mails =
         emailRepository.findByNotificationType(IamNotificationType.GROUP_MEMBERSHIP);
-    assertThat(mails.size(), equalTo(1));
+    assertThat(mails, hasSize(1));
     assertThat(mails.get(0).getBody(),
         containsString(format("membership request for the group %s", result.getGroupName())));
     assertThat(mails.get(0).getBody(), containsString(format("has been %s", result.getStatus())));
@@ -183,6 +184,25 @@ public class GroupRequestsRejectTests extends GroupRequestsTestUtils {
         .param("motivation", "     ")
         .contentType(MediaType.APPLICATION_JSON))
     .andExpect(status().isBadRequest());
+    // @formatter:on
+  }
+
+  @Test
+  @WithMockUser(roles = {"ADMIN", "USER"})
+  public void rejectGroupRequestAsUserWithBothRoles() throws Exception {
+    // @formatter:off
+    mvc.perform(post(REJECT_URL, request.getUuid())
+        .param("motivation", TEST_REJECT_MOTIVATION)
+        .contentType(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.status", equalTo(IamGroupRequestStatus.REJECTED.name())))
+      .andExpect(jsonPath("$.username", equalTo(TEST_USERNAME)))
+      .andExpect(jsonPath("$.groupName", equalTo(TEST_GROUPNAME)))
+      .andExpect(jsonPath("$.uuid", equalTo(request.getUuid())))
+      .andExpect(jsonPath("$.lastUpdateTime").exists())
+      .andExpect(jsonPath("$.lastUpdateTime").isNotEmpty())
+      .andExpect(jsonPath("$.motivation").exists())
+      .andExpect(jsonPath("$.motivation", equalTo(TEST_REJECT_MOTIVATION)));
     // @formatter:on
   }
 }

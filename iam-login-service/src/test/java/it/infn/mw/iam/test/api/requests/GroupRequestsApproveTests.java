@@ -4,6 +4,7 @@ import static java.lang.String.format;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -91,14 +92,14 @@ public class GroupRequestsApproveTests extends GroupRequestsTestUtils {
 
     List<IamEmailNotification> mails =
         emailRepository.findByNotificationType(IamNotificationType.GROUP_MEMBERSHIP);
-    assertThat(mails.size(), equalTo(1));
+    assertThat(mails, hasSize(1));
     assertThat(mails.get(0).getBody(),
         containsString(format("membership request for the group %s", result.getGroupName())));
     assertThat(mails.get(0).getBody(), containsString(format("has been %s", result.getStatus())));
   }
 
   @Test
-  @WithMockUser(roles = {"USER"}, username = TEST_USERNAME)
+  @WithMockUser(roles = {"USER"})
   public void approveGroupRequestAsUser() throws Exception {
     // @formatter:off
     mvc.perform(post(APPROVE_URL, request.getUuid()))
@@ -135,7 +136,7 @@ public class GroupRequestsApproveTests extends GroupRequestsTestUtils {
     // @formatter:off
     mvc.perform(post(APPROVE_URL, request.getUuid()))
     .andExpect(status().isBadRequest())
-    .andExpect(jsonPath("$.error", containsString("Group request wrong transition")));
+    .andExpect(jsonPath("$.error", containsString("Invalid group request transition")));
     // @formatter:on
   }
 
@@ -146,7 +147,22 @@ public class GroupRequestsApproveTests extends GroupRequestsTestUtils {
     // @formatter:off
     mvc.perform(post(APPROVE_URL, request.getUuid()))
     .andExpect(status().isBadRequest())
-    .andExpect(jsonPath("$.error", containsString("Group request wrong transition")));
+    .andExpect(jsonPath("$.error", containsString("Invalid group request transition")));
+    // @formatter:on
+  }
+
+  @Test
+  @WithMockUser(roles = {"ADMIN", "USER"})
+  public void approveGroupRequestAsUserWithBothRoles() throws Exception {
+    // @formatter:off
+    mvc.perform(post(APPROVE_URL, request.getUuid()))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.status", equalTo(IamGroupRequestStatus.APPROVED.name())))
+      .andExpect(jsonPath("$.username", equalTo(TEST_USERNAME)))
+      .andExpect(jsonPath("$.groupName", equalTo(TEST_GROUPNAME)))
+      .andExpect(jsonPath("$.uuid", equalTo(request.getUuid())))
+      .andExpect(jsonPath("$.lastUpdateTime").exists())
+      .andExpect(jsonPath("$.lastUpdateTime").isNotEmpty());
     // @formatter:on
   }
 

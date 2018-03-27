@@ -1,6 +1,5 @@
 package it.infn.mw.iam.test.api.requests;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
@@ -184,14 +183,23 @@ public class GroupRequestsListTests extends GroupRequestsTestUtils {
 
   @Test
   @WithMockUser(roles = {"USER"}, username = USER_100)
-  public void listGroupRequestOfAnotherUser() throws Exception {
+  public void listGroupRequestOfAnotherUserIgnoreFilter() throws Exception {
     // @formatter:off
-    mvc.perform(get(LIST_REQUESTS_URL)
+    String response = mvc.perform(get(LIST_REQUESTS_URL)
         .contentType(MediaType.APPLICATION_JSON)
         .param("username", USER_101))
-      .andExpect(status().isForbidden())
-      .andExpect(jsonPath("$.error", containsString("Cannot handle requests of another user")));
+      .andExpect(status().isOk())
+      .andReturn()
+      .getResponse()
+      .getContentAsString();
     // @formatter:on
+
+    ListResponseDTO<GroupRequestDto> result =
+        mapper.readValue(response, new TypeReference<ListResponseDTO<GroupRequestDto>>() {});
+
+    for (GroupRequestDto elem : result.getResources()) {
+      assertThat(elem.getUsername(), equalTo(USER_100));
+    }
   }
 
   @Test
@@ -258,5 +266,19 @@ public class GroupRequestsListTests extends GroupRequestsTestUtils {
       assertThat(elem.getGroupName(), equalTo(GROUP_01));
       assertThat(elem.getStatus(), equalTo(testStatus));
     }
+  }
+
+  @Test
+  @WithMockUser(roles = {"ADMIN", "USER"}, username = TEST_ADMIN)
+  public void listRequestAsUserWithBothRoles() throws Exception {
+    // @formatter:off
+    mvc.perform(get(LIST_REQUESTS_URL)
+        .contentType(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.totalResults", equalTo(6)))
+      .andExpect(jsonPath("$.startIndex", equalTo(1)))
+      .andExpect(jsonPath("$.itemsPerPage", equalTo(6)))
+      .andExpect(jsonPath("$.Resources", hasSize(6)));
+    // @formatter:on
   }
 }

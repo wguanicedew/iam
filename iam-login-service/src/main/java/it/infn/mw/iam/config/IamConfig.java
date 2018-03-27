@@ -63,13 +63,14 @@ public class IamConfig {
   }
 
   @Bean
-  FilterRegistrationBean aupSignatureCheckFilter(AUPSignatureCheckService service, 
+  FilterRegistrationBean aupSignatureCheckFilter(AUPSignatureCheckService service,
       AccountUtils utils, IamAupRepository repo) {
     EnforceAupFilter aupFilter = new EnforceAupFilter(service, utils, repo);
     FilterRegistrationBean frb = new FilterRegistrationBean(aupFilter);
     frb.setOrder(Ordered.LOWEST_PRECEDENCE);
     return frb;
   }
+
   @Bean
   @Profile("dev")
   ServletRegistrationBean h2Console() {
