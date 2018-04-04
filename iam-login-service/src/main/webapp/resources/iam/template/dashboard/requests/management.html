@@ -79,11 +79,13 @@
 									<td class="text-right">
 										<button class="btn btn-success btn-xs"
 											ng-click="requests.approveRequest(r)" name="btn_approve"
+											ng-disabled="buttonDisabled"
 											title="Approve request">
 											<i class="fa fa-check"></i> Approve
 										</button>
 										<button class="btn btn-danger btn-xs"
 											ng-click="requests.rejectRequest(r)" name="btn_reject"
+											ng-disabled="buttonDisabled"
 											title="Reject request">
 											<i class="fa fa-times"></i> Reject
 										</button>
