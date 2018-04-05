@@ -1,5 +1,5 @@
 <!-- OidcIds Box -->
-<div class="box box-primary" ng-show="$root.isGoogleEnabled">
+<div class="box box-primary">
     <div class="box-header with-border">
         <h3 class="box-title"><strong>OpenID-Connect accounts</strong></h3>
         <i class="fa fa-lock pull-right"></i>
@@ -34,7 +34,7 @@
             </table>
         </div>
     </div>
-    <div class="box-footer">
+    <div class="box-footer" ng-show="$root.isGoogleEnabled">
         <button class="btn btn-success btn-sm" name="btn-add-oidc" ng-click="$ctrl.openAddOidcAccountDialog()" ng-if="$ctrl.userCtrl.canManageLinkedAccounts()">
             <i class="fa fa-plus"></i> Add OpenID-Connect account
         </button>

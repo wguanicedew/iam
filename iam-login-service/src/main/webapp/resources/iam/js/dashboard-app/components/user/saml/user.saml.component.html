@@ -1,5 +1,5 @@
 <!-- samlIds Box -->
-<div class="box box-primary" ng-show="$root.isSamlEnabled">
+<div class="box box-primary">
     <div class="box-header with-border">
         <h3 class="box-title"><strong>Saml accounts</strong></h3>
         <i class="fa fa-cloud pull-right"></i>
@@ -42,7 +42,7 @@
         </div>
         
     </div>
-    <div class="box-footer">
+    <div class="box-footer" ng-show="$root.isSamlEnabled">
         <button class="btn btn-success btn-sm" name="btn-add-samlid" ng-click="$ctrl.openAddSamlAccountDialog()" ng-if="$ctrl.userCtrl.canManageLinkedAccounts()">
             <i class="fa fa-plus"></i> Add Saml account
         </button>
