@@ -267,6 +267,18 @@
                             <%-($.inArray("refresh_token", client.grant_types) > -1 ? 'checked' : '')%>> 
                         <label for="grantTypes-refresh_token" class="checkbox" data-i18n="client.client-form.refresh">refresh</label>
                     </div>
+
+					<div>
+                        <input id="grantTypes-device" type="checkbox" name="grantTypes"
+                            <%-($.inArray("urn:ietf:params:oauth:grant-type:device_code", client.grant_types) > -1 ? 'checked' : '')%>> 
+                        <label for="grantTypes-device" class="checkbox" data-i18n="client.client-form.device">device</label>
+                    </div>
+
+                    <div>
+                        <input id="grantTypes-token-exchange" type="checkbox" name="grantTypes"
+                            <%-($.inArray("urn:ietf:params:oauth:grant-type:token-exchange", client.grant_types) > -1 ? 'checked' : '')%>> 
+                        <label for="grantTypes-token-exchange" class="checkbox" data-i18n="client.client-form.token-exchange">token exchange</label>
+                    </div>
                 </div>
             </div>
 
