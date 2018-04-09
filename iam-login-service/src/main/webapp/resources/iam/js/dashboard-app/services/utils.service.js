@@ -12,6 +12,8 @@ function Utils() {
 			isUser: isUser,
 			getLoggedUser: getLoggedUser,
 			isRegistrationEnabled: isRegistrationEnabled,
+			isGoogleEnabled: isGoogleEnabled,
+			isSamlEnabled: isSamlEnabled,
 			buildErrorOperationResult: buildErrorOperationResult,
 			buildSuccessOperationResult: buildSuccessOperationResult,
 			buildErrorResult: buildErrorResult,
@@ -61,6 +63,16 @@ function Utils() {
 	function isRegistrationEnabled() {
 
 		return getRegistrationEnabled();
+	}
+	
+	function isGoogleEnabled() {
+
+		return getGoogleEnabled();
+	}
+	
+	function isSamlEnabled() {
+
+		return getSamlEnabled();
 	}
 
 	function buildErrorResult(errorString) {
