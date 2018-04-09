@@ -1,0 +1,209 @@
+package it.infn.mw.iam.test.api.requests;
+
+import static java.lang.String.format;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.assertThat;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.List;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.WebApplicationContext;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import it.infn.mw.iam.IamLoginService;
+import it.infn.mw.iam.api.requests.model.GroupRequestDto;
+import it.infn.mw.iam.core.IamGroupRequestStatus;
+import it.infn.mw.iam.core.IamNotificationType;
+import it.infn.mw.iam.notification.NotificationStoreService;
+import it.infn.mw.iam.persistence.model.IamEmailNotification;
+import it.infn.mw.iam.persistence.repository.IamEmailNotificationRepository;
+import it.infn.mw.iam.test.util.WithAnonymousUser;
+
+@RunWith(SpringJUnit4ClassRunner.class)
+@SpringApplicationConfiguration(classes = {IamLoginService.class})
+@WebAppConfiguration
+@Transactional
+public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
+
+  private final static String CREATE_URL = "/iam/group_requests";
+
+  @Autowired
+  private WebApplicationContext context;
+
+  @Autowired
+  private ObjectMapper mapper;
+
+  @Autowired
+  private NotificationStoreService notificationService;
+
+  @Autowired
+  private IamEmailNotificationRepository emailRepository;
+
+  private MockMvc mvc;
+  private GroupRequestDto request;
+
+  @Before
+  public void setup() {
+    mvc = MockMvcBuilders.webAppContextSetup(context)
+      .apply(springSecurity())
+      .alwaysDo(print())
+      .build();
+
+    request = buildGroupRequest(TEST_GROUPNAME);
+  }
+
+  @Test
+  @WithMockUser(roles = {"ADMIN"}, username = TEST_ADMIN)
+  public void createGroupRequestAsAdmin() throws Exception {
+    // @formatter:off
+    mvc.perform(post(CREATE_URL)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(mapper.writeValueAsString(request)))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.username", equalTo(TEST_ADMIN)))
+      .andExpect(jsonPath("$.groupName", equalTo(TEST_GROUPNAME)))
+      .andExpect(jsonPath("$.status", equalTo(IamGroupRequestStatus.PENDING.name())));
+    // @formatter:on
+  }
+
+  @Test
+  @WithMockUser(roles = {"USER"}, username = TEST_USERNAME)
+  public void createGroupRequestAsUser() throws Exception {
+    // @formatter:off
+    mvc.perform(post(CREATE_URL)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(mapper.writeValueAsString(request)))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.username", equalTo(TEST_USERNAME)))
+      .andExpect(jsonPath("$.groupName", equalTo(TEST_GROUPNAME)))
+      .andExpect(jsonPath("$.status", equalTo(IamGroupRequestStatus.PENDING.name())));
+    // @formatter:on
+    int mailCount = notificationService.countPendingNotifications();
+    assertThat(mailCount, equalTo(1));
+
+    List<IamEmailNotification> mails =
+        emailRepository.findByNotificationType(IamNotificationType.GROUP_MEMBERSHIP);
+    assertThat(mails, hasSize(1));
+    assertThat(mails.get(0).getBody(), containsString(format("Username: %s", TEST_USERNAME)));
+    assertThat(mails.get(0).getBody(), containsString(format("Group: %s", request.getGroupName())));
+    assertThat(mails.get(0).getBody(), containsString(request.getNotes()));
+  }
+
+  @Test
+  @WithAnonymousUser
+  public void createGroupRequestAsAnonymous() throws Exception {
+    // @formatter:off
+    mvc.perform(post(CREATE_URL)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(mapper.writeValueAsString(request)))
+      .andExpect(status().isUnauthorized());
+    // @formatter:on
+  }
+
+  @Test
+  @WithMockUser(roles = {"USER"}, username = TEST_USERNAME)
+  public void createGroupRequestWitInvalidNotes() throws Exception {
+    request.setNotes(null);
+    // @formatter:off
+    mvc.perform(post(CREATE_URL)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(mapper.writeValueAsString(request)))
+      .andExpect(status().isBadRequest());
+    // @formatter:on
+
+    request.setNotes("");
+    // @formatter:off
+    mvc.perform(post(CREATE_URL)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(mapper.writeValueAsString(request)))
+      .andExpect(status().isBadRequest());
+    // @formatter:on
+
+    request.setNotes("   ");
+    // @formatter:off
+    mvc.perform(post(CREATE_URL)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(mapper.writeValueAsString(request)))
+      .andExpect(status().isBadRequest());
+    // @formatter:on
+  }
+
+  @Test
+  @WithMockUser(roles = {"USER"}, username = TEST_USERNAME)
+  public void createGroupRequestWithInvalidGroup() throws Exception {
+    request.setGroupName("");
+    // @formatter:off
+    mvc.perform(post(CREATE_URL)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(mapper.writeValueAsString(request)))
+      .andExpect(status().isBadRequest());
+    // @formatter:on
+
+    request.setGroupName("fake_group");
+    // @formatter:off
+    mvc.perform(post(CREATE_URL)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(mapper.writeValueAsString(request)))
+      .andExpect(status().isBadRequest());
+    // @formatter:on
+  }
+
+  @Test
+  @WithMockUser(roles = {"USER"}, username = TEST_USERNAME)
+  public void createGroupRequestAlreadyExists() throws Exception {
+    savePendingGroupRequest(TEST_USERNAME, TEST_GROUPNAME);
+    // @formatter:off
+    mvc.perform(post(CREATE_URL)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(mapper.writeValueAsString(request)))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.error", containsString("already exist")));
+    // @formatter:on
+  }
+
+  @Test
+  @WithMockUser(roles = {"USER"}, username = "test")
+  public void createGroupRequestUserAlreadyMember() throws Exception {
+    request = buildGroupRequest("Analysis");
+    // @formatter:off
+    mvc.perform(post(CREATE_URL)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(mapper.writeValueAsString(request)))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.error", containsString("already member")));
+    // @formatter:on
+  }
+
+  @Test
+  @WithMockUser(roles = {"ADMIN", "USER"}, username = TEST_USERNAME)
+  public void createGroupRequestAsUserWithBothRoles() throws Exception {
+    // @formatter:off
+    mvc.perform(post(CREATE_URL)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(mapper.writeValueAsString(request)))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.username", equalTo(TEST_USERNAME)))
+      .andExpect(jsonPath("$.groupName", equalTo(TEST_GROUPNAME)))
+      .andExpect(jsonPath("$.status", equalTo(IamGroupRequestStatus.PENDING.name())));
+    // @formatter:on
+  }
+}

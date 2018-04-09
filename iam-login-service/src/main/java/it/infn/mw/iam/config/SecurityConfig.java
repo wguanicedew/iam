@@ -89,7 +89,7 @@ public class SecurityConfig {
 
     @Autowired
     private AUPSignatureCheckService aupSignatureCheckService;
-    
+
     @Autowired
     private AccountUtils accountUtils;
 
@@ -170,12 +170,12 @@ public class SecurityConfig {
     }
 
     public AuthenticationSuccessHandler successHandler() {
-      AuthenticationSuccessHandler delegate= new RootIsDashboardSuccessHandler(iamBaseUrl, 
-          new HttpSessionRequestCache());
-          
-      
-      return new EnforceAupSignatureSuccessHandler(delegate, aupSignatureCheckService,
-          accountUtils, accountRepo);
+      AuthenticationSuccessHandler delegate =
+          new RootIsDashboardSuccessHandler(iamBaseUrl, new HttpSessionRequestCache());
+
+
+      return new EnforceAupSignatureSuccessHandler(delegate, aupSignatureCheckService, accountUtils,
+          accountRepo);
     }
   }
 
@@ -826,13 +826,12 @@ public class SecurityConfig {
             .fullyAuthenticated();
       // @formatter:on
     }
-
   }
 
   @Configuration
   @Order(28)
   public static class AupApiEndpointConfig extends WebSecurityConfigurerAdapter {
-    
+
     private static final String AUP_PATH = "/iam/aup";
     @Autowired
     private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
@@ -868,6 +867,46 @@ public class SecurityConfig {
         .disable();
     }
   }
+
+  @Configuration
+  @Order(29)
+  public static class GroupRequestsEndpointConfig extends WebSecurityConfigurerAdapter {
+    private static final String GROUP_REQUEST_PATH = "/iam/group_requests";
+
+    @Autowired
+    private OAuth2AuthenticationProcessingFilter resourceFilter;
+
+    @Autowired
+    private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
+
+    @Autowired
+    private CorsFilter corsFilter;
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+      // @formatter:off
+      http
+        .requestMatchers()
+          .antMatchers(GROUP_REQUEST_PATH+"**", GROUP_REQUEST_PATH+"/**")
+          .and()
+          .exceptionHandling()
+            .authenticationEntryPoint(authenticationEntryPoint)
+          .and()
+            .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
+            .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
+            .sessionManagement()
+              .sessionCreationPolicy(SessionCreationPolicy.NEVER)
+          .and()
+            .authorizeRequests()
+              .antMatchers(GROUP_REQUEST_PATH+"**", GROUP_REQUEST_PATH+"/**" )
+                .authenticated()
+          .and()
+            .csrf()
+              .disable();
+      // @formatter:on
+    }
+  }
+
   @Configuration
   @Order(Ordered.HIGHEST_PRECEDENCE)
   @Profile("dev")
