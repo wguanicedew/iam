@@ -43,6 +43,8 @@
     <flyway-test.version>4.0</flyway-test.version>
     <validator-collection.version>2.2.0</validator-collection.version>
 
+    <license-maven-plugin.version>3.0</license-maven-plugin.version>
+
     <resource.delimiter>@</resource.delimiter>
   </properties>
 
@@ -224,6 +226,11 @@
 
     <pluginManagement>
       <plugins>
+        <plugin>
+          <groupId>com.mycila</groupId>
+          <artifactId>license-maven-plugin</artifactId>
+          <version>${license-maven-plugin.version}</version>
+        </plugin>
         <plugin>
           <groupId>org.springframework.boot</groupId>
           <artifactId>spring-boot-maven-plugin</artifactId>
