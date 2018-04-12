@@ -84,6 +84,9 @@
         <configuration>
           <header>${project.parent.basedir}/LICENSE</header>
           <useDefaultExcludes>true</useDefaultExcludes>
+          <excludes>
+            <exclude>**/*.sql</exclude>
+          </excludes>
         </configuration>
         <executions>
           <execution>
