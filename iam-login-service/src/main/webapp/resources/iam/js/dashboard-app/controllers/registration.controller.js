@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2018
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 'use strict';
 
 angular.module('dashboardApp').controller('RequestManagementController', RequestManagementController);
@@ -80,6 +95,7 @@ function RequestManagementController($scope, $rootScope, $state, $filter, filter
 		requests.loadingModal = $uibModal
 		.open({
 			animation: false,
+			backdrop: 'static',
 			templateUrl : '/resources/iam/template/dashboard/loading-modal.html'
 		});
 
@@ -104,15 +120,33 @@ function RequestManagementController($scope, $rootScope, $state, $filter, filter
 	}
 
 	function approveRequest(request) {
-		RegistrationRequestService.updateRequest(request.uuid, 'APPROVED').then(
-			function() {
-				var msg = request.givenname + " " + request.familyname + " request APPROVED successfully";
-				$scope.operationResult = Utils.buildSuccessOperationResult(msg);
-				requests.loadData();
-			},
-			function(error) {
-				$scope.operationResult = Utils.buildErrorOperationResult(error);
-			})
+		$scope.buttonDisabled = true;
+		
+		$rootScope.pageLoadingProgress = 50;
+		requests.approvingModal = $uibModal
+		.open({
+			animation: false,
+			backdrop: 'static',
+			templateUrl : '/resources/iam/template/dashboard/loading-modal.html'
+		});
+		
+		requests.approvingModal.opened.then(function(){
+			RegistrationRequestService.updateRequest(request.uuid, 'APPROVED').then(
+				function() {
+					$rootScope.pageLoadingProgress = 100;
+					requests.approvingModal.dismiss("Cancel");
+					var msg = request.givenname + " " + request.familyname + " request APPROVED successfully";
+					$scope.operationResult = Utils.buildSuccessOperationResult(msg);
+					requests.loadData();
+					$scope.buttonDisabled = false;
+				},
+				function(error) {
+					$rootScope.pageLoadingProgress = 100;
+					requests.approvingModal.dismiss("Cancel");
+					$scope.operationResult = Util.buildErrorOperationResult(error);
+					$scope.buttonDisabled = false;
+				})
+		});
 	};
 
 	function rejectRequest(request) {
@@ -126,15 +160,29 @@ function RequestManagementController($scope, $rootScope, $state, $filter, filter
 		
 		ModalService.showModal({}, modalOptions).then(
 				function (){
-					RegistrationRequestService.updateRequest(request.uuid, 'REJECTED').then(
+					$rootScope.pageLoadingProgress = 50;
+					requests.rejectingModal = $uibModal
+					.open({
+						animation: false,
+						backdrop: 'static',
+						templateUrl : '/resources/iam/template/dashboard/loading-modal.html'
+					});
+					
+					requests.rejectingModal.opened.then(function(){
+						RegistrationRequestService.updateRequest(request.uuid, 'REJECTED').then(
 							function() {
+								$rootScope.pageLoadingProgress = 100;
+								requests.rejectingModal.dismiss("Cancel");
 								var msg = request.givenname + " " + request.familyname + " request REJECTED successfully";
 								$scope.operationResult = Utils.buildSuccessOperationResult(msg);
 								requests.loadData();
 							},
 							function(error) {
+								$rootScope.pageLoadingProgress = 100;
+								requests.rejectingModal.dismiss("Cancel");
 								$scope.operationResult = Utils.buildErrorOperationResult(error);
 							})
+					});
 				});
 	};
 };

@@ -1,5 +1,44 @@
 # Changelog
 
+## 1.3.0 (2018-04-12)
+
+### Added
+
+- New group membership requests API: this API allows user to submit requests
+  for membership in groups, and provide administrators the ability to
+  approve/reject such requests. Support for the API will be included in the IAM
+  dashboard in a future release (#200)
+
+- IAM now includes additional claims in the issued ID token:
+  `preferred_username`, `email`, `organisation_name`, `groups` (#202)
+
+- IAM now can be configured to include additional claims in the issued access
+  tokens: `preferred_username`, `email`, `organisation_name`, `groups`. This
+  behaviour is controlled with the `IAM_ACCESS_TOKEN_INCLUDE_AUTHN_INFO`
+  environment variable (#208)
+
+### Fixed
+
+- Dashboard: a problem that prevented the correct setting of the token exchange grant for
+  clients has been fixed (#223)
+
+- Dashboard: protection against double clicks has been added to approve/reject requests
+  buttons (#222)
+
+- Dashboard: a broken import has been removed from the IAM main page (#215)
+
+- A problem in the tokens API that prevented the filtering of expired tokens
+  has been fixed (#213)
+
+- Dashboard: token pagination is now correctly leveraged by the IAM dashboard
+  in the token management page (#211)
+
+- Dashboard: OpenID connect account manangement panel is now hidden when Google
+  authentication is disabled (#206)
+
+- Dashboard: SAML account management panel is now hidden when SAML
+  authentication is disabled (#203)
+
 ## 1.2.1 (2018-03-01)
 
 ### Changed
