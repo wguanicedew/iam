@@ -110,6 +110,4 @@ public class MvcConfig extends WebMvcConfigurerAdapter {
     registry.addMapping("/iam/me/**").allowedOrigins("*");
     registry.addMapping("/scim/**").allowedOrigins("*");
   }
-
-
 }

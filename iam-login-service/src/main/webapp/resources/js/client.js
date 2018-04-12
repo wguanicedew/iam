@@ -949,7 +949,8 @@ var ClientFormView = Backbone.View.extend({
 		'client_credentials': 'client_credentials',
 		'redelegate': 'urn:ietf:params:oauth:grant_type:redelegate',
 		'refresh_token': 'refresh_token',
-		'device': 'urn:ietf:params:oauth:grant-type:device_code'
+		'device': 'urn:ietf:params:oauth:grant-type:device_code',
+		'token-exchange': 'urn:ietf:params:oauth:grant-type:token-exchange'
 	},
 
 	// maps from a form-friendly name to the real response type parameter name

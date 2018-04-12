@@ -28,8 +28,8 @@ function TokensService($q, $rootScope, $http, $httpParamSerializer) {
     return service;
 
     function getAccessTokensFilteredByUser(startIndex, count, userName) {
-        console.info("Getting access-tokens from-to: ", startIndex, count);
-        console.info("Filtered user: ", userName);
+        console.debug("Getting access-tokens offset-limit: ", startIndex, count);
+        console.debug("Filtered user: ", userName);
         var qs = $httpParamSerializer({
             'startIndex' : startIndex,
             'count' : count,
@@ -40,8 +40,8 @@ function TokensService($q, $rootScope, $http, $httpParamSerializer) {
     }
 
     function getRefreshTokensFilteredByUser(startIndex, count, userName) {
-      console.info("Getting refresh-tokens from-to: ", startIndex, count);
-      console.info("Filtered user: ", userName);
+      console.debug("Getting refresh-tokens offset-limit: ", startIndex, count);
+      console.debug("Filtered user: ", userName);
       var qs = $httpParamSerializer({
           'startIndex' : startIndex,
           'count' : count,
@@ -52,8 +52,8 @@ function TokensService($q, $rootScope, $http, $httpParamSerializer) {
     }
 
     function getAccessTokensFilteredByClient(startIndex, count, clientId) {
-        console.info("Getting access-tokens from-to: ", startIndex, count);
-        console.info("Filtered client: ", clientId);
+        console.debug("Getting access-tokens offset-limit: ", startIndex, count);
+        console.debug("Filtered client: ", clientId);
         var qs = $httpParamSerializer({
             'startIndex' : startIndex,
             'count' : count,
@@ -64,8 +64,8 @@ function TokensService($q, $rootScope, $http, $httpParamSerializer) {
     }
 
     function getRefreshTokensFilteredByClient(startIndex, count, clientId) {
-      console.info("Getting refresh-tokens from-to: ", startIndex, count);
-      console.info("Filtered client: ", clientId);
+      console.debug("Getting refresh-tokens offset-limit: ", startIndex, count);
+      console.debug("Filtered client: ", clientId);
       var qs = $httpParamSerializer({
           'startIndex' : startIndex,
           'count' : count,
@@ -76,8 +76,8 @@ function TokensService($q, $rootScope, $http, $httpParamSerializer) {
   }
 
     function getAccessTokensFilteredByUserAndClient(startIndex, count, userName, clientId) {
-        console.info("Getting access-tokens from-to: ", startIndex, count);
-        console.info("Filtered user and client: ", userName, clientId);
+        console.debug("Getting access-tokens offset-limit: ", startIndex, count);
+        console.debug("Filtered user and client: ", userName, clientId);
         var qs = $httpParamSerializer({
             'startIndex' : startIndex,
             'count' : count,
@@ -89,8 +89,8 @@ function TokensService($q, $rootScope, $http, $httpParamSerializer) {
     }
 
     function getRefreshTokensFilteredByUserAndClient(startIndex, count, userName, clientId) {
-        console.info("Getting refresh-tokens from-to: ", startIndex, count);
-        console.info("Filtered user and client: ", userName, clientId);
+        console.debug("Getting refresh-tokens offset-limit: ", startIndex, count);
+        console.debug("Filtered user and client: ", userName, clientId);
         var qs = $httpParamSerializer({
             'startIndex' : startIndex,
             'count' : count,
@@ -102,7 +102,7 @@ function TokensService($q, $rootScope, $http, $httpParamSerializer) {
     }
 
     function getAccessTokens(startIndex, count) {
-      console.info("Getting access-tokens from-to: ", startIndex, count);
+      console.debug("Getting access-tokens offset-limit: ", startIndex, count);
       var qs = $httpParamSerializer({
           'startIndex' : startIndex,
           'count' : count
@@ -112,7 +112,7 @@ function TokensService($q, $rootScope, $http, $httpParamSerializer) {
     }
 
     function getRefreshTokens(startIndex, count) {
-      console.info("Getting refresh-tokens from-to: ", startIndex, count);
+      console.debug("Getting refresh-tokens offset-limit: ", startIndex, count);
       var qs = $httpParamSerializer({
           'startIndex' : startIndex,
           'count' : count
@@ -122,25 +122,25 @@ function TokensService($q, $rootScope, $http, $httpParamSerializer) {
     }
 
     function getAccessToken(id) {
-        console.info("Getting access-token with id: ", id);
+        console.debug("Getting access-token with id: ", id);
         var url = urlAccessTokens + '/' + id;
         return $http.get(url);
     }
 
     function revokeAccessToken(id) {
-      console.info("Revoking access-token with id: ", id);
+      console.debug("Revoking access-token with id: ", id);
       var url = urlAccessTokens + '/' + id;
       return $http.delete(url);
     }
 
     function getRefreshToken(id) {
-      console.info("Getting refresh-token with id: ", id);
+      console.debug("Getting refresh-token with id: ", id);
       var url = urlRefreshTokens + '/' + id;
       return $http.get(url);
     }
 
     function revokeRefreshToken(id) {
-      console.info("Revoking refresh-token with id: ", id);
+      console.debug("Revoking refresh-token with id: ", id);
       var url = urlRefreshTokens + '/' + id;
       return $http.delete(url);
     }

@@ -34,7 +34,7 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
 
   public static final Logger LOG = LoggerFactory.getLogger(TokenExchangeTokenGranter.class);
 
-  private static final String GRANT_TYPE = "urn:ietf:params:oauth:grant-type:token-exchange";
+  public static final String GRANT_TYPE = "urn:ietf:params:oauth:grant-type:token-exchange";
   private static final String TOKEN_TYPE = "urn:ietf:params:oauth:token-type:jwt";
   private static final String AUDIENCE_FIELD = "audience";
 

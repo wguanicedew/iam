@@ -30,7 +30,8 @@
         <div class="col-sm-3 text-right">
             <strong>Expires in:</strong>
         </div>
-        <div class="col-sm-9">{{$ctrl.token.expiration | relativeDate}}</div>
+        <div class="col-sm-9" ng-if="$ctrl.token.expiration != null">{{$ctrl.token.expiration | relativeDate}}</div>
+        <div class="col-sm-9" ng-if="$ctrl.token.expiration == null">Never</div>
     </div>
     <div class="row" ng-if="$ctrl.token.idToken">
         <div ng-if="$ctrl.token.idToken" class="col-sm-3 text-right">

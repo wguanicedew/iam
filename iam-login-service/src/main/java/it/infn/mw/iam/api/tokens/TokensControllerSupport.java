@@ -8,7 +8,7 @@ import com.google.common.collect.Sets;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
-import it.infn.mw.iam.api.tokens.model.TokensListResponse;
+import it.infn.mw.iam.api.common.ListResponseDTO;
 import it.infn.mw.iam.api.tokens.service.paging.DefaultTokensPageRequest;
 import it.infn.mw.iam.api.tokens.service.paging.TokensPageRequest;
 
@@ -72,7 +72,7 @@ public class TokensControllerSupport {
     return result;
   }
 
-  protected <T> MappingJacksonValue filterAttributes(TokensListResponse<T> result,
+  protected <T> MappingJacksonValue filterAttributes(ListResponseDTO<T> result,
       String attributes) {
 
     MappingJacksonValue wrapper = new MappingJacksonValue(result);
