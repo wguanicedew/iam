@@ -15,7 +15,7 @@
 - IAM now can be configured to include additional claims in the issued access
   tokens: `preferred_username`, `email`, `organisation_name`, `groups`. This
   behaviour is controlled with the `IAM_ACCESS_TOKEN_INCLUDE_AUTHN_INFO`
-  environment variable
+  environment variable (#208)
 
 ### Fixed
 
