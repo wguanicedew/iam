@@ -22,7 +22,7 @@
   <parent>
     <groupId>it.infn.mw</groupId>
     <artifactId>iam-parent</artifactId>
-    <version>1.3.0-SNAPSHOT</version>
+    <version>1.3.0</version>
   </parent>
 
   <artifactId>iam-persistence</artifactId>
