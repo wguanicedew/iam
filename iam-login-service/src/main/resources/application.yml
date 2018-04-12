@@ -56,7 +56,7 @@ iam:
   enableScopeAuthz: ${IAM_ENABLE_SCOPE_AUTHZ:true}
 
   access_token:
-    include_authn_info: ${IAM_INCLUDE_AUTHN_INFO:false}
+    include_authn_info: ${IAM_ACCESS_TOKEN_INCLUDE_AUTHN_INFO:false}
 
 x509:
   trustAnchorsDir: ${IAM_X509_TRUST_ANCHORS_DIR:/etc/grid-security/certificates}
