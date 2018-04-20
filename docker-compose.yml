@@ -88,6 +88,7 @@ services:
       IAM_CLIENT_ISSUER: https://iam.local.io/
       IAM_CLIENT_REDIRECT_URIS: https://iam.local.io/iam-test-client/openid_connect_login
       IAM_CLIENT_USE_FORWARD_HEADERS: "true"
+      #IAM_CLIENT_EXT_AUTHN_HINT: saml:exampleIdp
       IAM_CLIENT_JAR: /code/iam-test-client/target/iam-test-client.jar
 
     ports:
