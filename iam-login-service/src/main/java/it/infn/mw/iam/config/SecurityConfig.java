@@ -44,6 +44,7 @@ import org.springframework.security.oauth2.provider.authentication.OAuth2Authent
 import org.springframework.security.oauth2.provider.client.ClientCredentialsTokenEndpointFilter;
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
 import org.springframework.security.oauth2.provider.expression.OAuth2WebSecurityExpressionHandler;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandlerImpl;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
@@ -58,6 +59,8 @@ import org.springframework.web.filter.GenericFilterBean;
 import it.infn.mw.iam.api.account.AccountUtils;
 import it.infn.mw.iam.api.aup.AUPSignatureCheckService;
 import it.infn.mw.iam.authn.EnforceAupSignatureSuccessHandler;
+import it.infn.mw.iam.authn.ExternalAuthenticationHintService;
+import it.infn.mw.iam.authn.HintAwareAuthenticationEntryPoint;
 import it.infn.mw.iam.authn.RootIsDashboardSuccessHandler;
 import it.infn.mw.iam.authn.oidc.OidcAccessDeniedHandler;
 import it.infn.mw.iam.authn.oidc.OidcAuthenticationProvider;
@@ -107,6 +110,9 @@ public class SecurityConfig {
 
     @Autowired
     private AccountUtils accountUtils;
+    
+    @Autowired
+    private ExternalAuthenticationHintService hintService;
 
     @Autowired
     public void configureGlobal(final AuthenticationManagerBuilder auth) throws Exception {
@@ -137,6 +143,13 @@ public class SecurityConfig {
           iamX509AuthenticationProvider(), successHandler());
 
     }
+    
+    protected AuthenticationEntryPoint entryPoint() {
+      LoginUrlAuthenticationEntryPoint delegate = new LoginUrlAuthenticationEntryPoint("/login");
+      HintAwareAuthenticationEntryPoint ep = new HintAwareAuthenticationEntryPoint(
+          delegate, hintService);
+      return ep;
+    }
 
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
@@ -165,6 +178,7 @@ public class SecurityConfig {
         .and()
           .exceptionHandling()
             .accessDeniedHandler(new OidcAccessDeniedHandler())
+            .authenticationEntryPoint(entryPoint()) 
         .and()
           .addFilterBefore(authorizationRequestFilter, SecurityContextPersistenceFilter.class)
         .logout()
