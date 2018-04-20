@@ -1,17 +1,15 @@
 /**
  * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2018
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package it.infn.mw.iam.notification;
 
@@ -54,7 +52,6 @@ public class TransientNotificationFactory implements NotificationFactory {
 
   private final VelocityEngine velocityEngine;
   private final NotificationProperties properties;
-  private final String dashboardRequestsUrl = String.format("%s/dashboard#/requests", baseUrl);
 
   @Autowired
   public TransientNotificationFactory(VelocityEngine ve, NotificationProperties np) {
@@ -129,7 +126,7 @@ public class TransientNotificationFactory implements NotificationFactory {
     model.put("name", name);
     model.put(USERNAME_FIELD, username);
     model.put("email", email);
-    model.put("indigoDashboardUrl", dashboardRequestsUrl);
+    model.put("indigoDashboardUrl", String.format("%s/dashboard#/requests", baseUrl));
     model.put(ORGANISATION_NAME, organisationName);
     model.put("notes", request.getNotes());
 
@@ -169,7 +166,7 @@ public class TransientNotificationFactory implements NotificationFactory {
     model.put(USERNAME_FIELD, groupRequest.getAccount().getUsername());
     model.put(GROUPNAME_FIELD, groupName);
     model.put("notes", groupRequest.getNotes());
-    model.put("indigoDashboardUrl", dashboardRequestsUrl);
+    model.put("indigoDashboardUrl", String.format("%s/dashboard#/requests", baseUrl));
     model.put(ORGANISATION_NAME, organisationName);
 
     String subject = String.format("New membership request for group %s", groupName);
