@@ -873,7 +873,6 @@ public class SecurityConfig {
   @Order(29)
   public static class AccountSearchApiEndpointConfig extends WebSecurityConfigurerAdapter {
     
-    private static final String ACCOUNT_SEARCH_PATH = "/iam/account/search";
     @Autowired
     private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
 
@@ -897,7 +896,42 @@ public class SecurityConfig {
         .sessionCreationPolicy(SessionCreationPolicy.NEVER)
         .and()
         .authorizeRequests()
-        .antMatchers(HttpMethod.GET, ACCOUNT_SEARCH_PATH)
+        .antMatchers(HttpMethod.GET, "/iam/account/search")
+        .permitAll()
+        .and()
+        .csrf()
+        .disable();
+    }
+  }
+
+  @Configuration
+  @Order(30)
+  public static class GroupSearchApiEndpointConfig extends WebSecurityConfigurerAdapter {
+
+    @Autowired
+    private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
+
+    @Autowired
+    private OAuth2AuthenticationProcessingFilter resourceFilter;
+
+    @Autowired
+    private CorsFilter corsFilter;
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+      http.requestMatchers()
+        .antMatchers("/iam/group/search**")
+        .and()
+        .exceptionHandling()
+        .authenticationEntryPoint(authenticationEntryPoint)
+        .and()
+        .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
+        .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
+        .sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.NEVER)
+        .and()
+        .authorizeRequests()
+        .antMatchers(HttpMethod.GET, "/iam/group/search")
         .permitAll()
         .and()
         .csrf()

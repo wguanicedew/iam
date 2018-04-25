@@ -10,44 +10,45 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.google.common.collect.Lists;
-import it.infn.mw.iam.api.account.search.model.IamAccountDTO;
+import it.infn.mw.iam.api.account.search.model.IamGroupDTO;
 import it.infn.mw.iam.api.common.ListResponseDTO;
 import it.infn.mw.iam.api.common.OffsetPageable;
 import it.infn.mw.iam.api.common.PagedResourceService;
-import it.infn.mw.iam.persistence.model.IamAccount;
+import it.infn.mw.iam.persistence.model.IamGroup;
 
 @RestController
 @Transactional
 @PreAuthorize("hasRole('ADMIN')")
-@RequestMapping(AccountSearchController.ACCOUNT_SEARCH_ENDPOINT)
-public class AccountSearchController {
+@RequestMapping(GroupSearchController.GROUP_SEARCH_ENDPOINT)
+public class GroupSearchController {
 
-  public static final String ACCOUNT_SEARCH_ENDPOINT = "/iam/account/search";
+  public static final String GROUP_SEARCH_ENDPOINT = "/iam/group/search";
   public static final int ITEMS_PER_PAGE = 10;
 
   @Autowired
-  private PagedResourceService<IamAccount> accountService;
+  private PagedResourceService<IamGroup> groupService;
 
   @RequestMapping(method = RequestMethod.GET)
-  public ListResponseDTO<IamAccountDTO> getAccounts(
+  public ListResponseDTO<IamGroupDTO> getGroups(
       @RequestParam(required = false, defaultValue = "") String filter,
       @RequestParam(required = false, defaultValue = "1") int startIndex,
       @RequestParam(required = false, defaultValue = "10") int count) {
 
-    ListResponseDTO.Builder<IamAccountDTO> response = new ListResponseDTO.Builder<>();
+
+    ListResponseDTO.Builder<IamGroupDTO> response = new ListResponseDTO.Builder<>();
 
     if (count == 0) {
 
-      /* returns total amount of users - no resources */
+      /* returns total amount of groups - no resources */
       long totalResults = 0;
 
       if (filter.isEmpty()) {
 
-        totalResults = accountService.count();
+        totalResults = groupService.count();
 
       } else {
 
-        totalResults = accountService.count(filter);
+        totalResults = groupService.count(filter);
       }
 
       response.totalResults(totalResults);
@@ -56,23 +57,24 @@ public class AccountSearchController {
 
       OffsetPageable op = new OffsetPageable(startIndex - 1, count);
 
-      Page<IamAccount> accounts;
+      Page<IamGroup> groups;
 
       if (filter.isEmpty()) {
 
-        accounts = accountService.getPage(op);
+        groups = groupService.getPage(op);
 
       } else {
 
-        accounts = accountService.getPage(op, filter);
+        groups = groupService.getPage(op, filter);
       }
 
-      List<IamAccountDTO> resources = Lists.newArrayList();
-      accounts.getContent().forEach(account -> resources.add(IamAccountDTO.builder().fromIamAccount(account).build()));
+      List<IamGroupDTO> resources = Lists.newArrayList();
+      groups.getContent()
+          .forEach(group -> resources.add(IamGroupDTO.builder().fromIamGroup(group).build()));
       response.resources(resources);
-      response.itemsPerPage(accounts.getNumberOfElements());
+      response.itemsPerPage(groups.getNumberOfElements());
       response.startIndex(startIndex);
-      response.totalResults(accounts.getTotalElements());
+      response.totalResults(groups.getTotalElements());
 
     }
 

@@ -70,9 +70,9 @@ public interface IamAccountRepository
   List<IamAccount> findProvisionedAccountsWithLastLoginTimeBeforeTimestamp(
       @Param("timestamp") Date timestamp);
 
-  @Query("select a from IamAccount a join a.userInfo ui where ui.email LIKE '%:filter%' or a.username LIKE '%:filter%' or a.uuid LIKE '%:filter%' or ui.givenName LIKE '%:filter%' or ui.familyName LIKE '%:filter%'")
+  @Query("select a from IamAccount a join a.userInfo ui where ui.email LIKE :filter or a.username LIKE :filter or a.uuid LIKE :filter or ui.givenName LIKE :filter or ui.familyName LIKE :filter")
   Page<IamAccount> findByFilter(@Param("filter") String filter, Pageable op);
 
-  @Query("select count(a) from IamAccount a join a.userInfo ui where ui.email LIKE '%:filter%' or a.username LIKE '%:filter%' or a.uuid LIKE '%:filter%' or ui.givenName LIKE '%:filter%' or ui.familyName LIKE '%:filter%'")
+  @Query("select count(a) from IamAccount a join a.userInfo ui where ui.email LIKE :filter or a.username LIKE :filter or a.uuid LIKE :filter or ui.givenName LIKE :filter or ui.familyName LIKE :filter")
   long countByFilter(@Param("filter") String filter);
 }
