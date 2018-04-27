@@ -1,0 +1,1 @@
+ALTER TABLE client_details ALTER COLUMN device_code_validity_seconds SET DEFAULT 600;
