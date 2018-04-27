@@ -1,1 +1,1 @@
-ALTER TABLE client_details ALTER COLUMN device_code_validity_seconds SET DEFAULT 600;
+UPDATE client_details set device_code_validity_seconds = 600 where device_code_validity_seconds is NULL;
