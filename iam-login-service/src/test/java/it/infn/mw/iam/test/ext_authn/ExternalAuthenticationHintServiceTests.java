@@ -57,5 +57,11 @@ public class ExternalAuthenticationHintServiceTests {
     String url = service.resolve("saml:example");
     assertThat(url, is(String.format("%s/saml/login?idp=example", BASE_URL)));
   }
+  
+  @Test
+  public void testSamlDiscoveryWorks() {
+    String url = service.resolve("saml:");
+    assertThat(url, is(String.format("%s/saml/login", BASE_URL)));
+  }
 
 }

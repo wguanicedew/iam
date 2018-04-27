@@ -49,6 +49,9 @@ public class DefaultExternalAuthenticationHintService implements ExternalAuthent
   public String resolve(String externalAuthnHint) {
     hintSanityChecks(externalAuthnHint);
     if (externalAuthnHint.startsWith("saml:")) {
+      if (externalAuthnHint.equals("saml:")) {
+        return String.format("%s/saml/login", baseUrl); 
+      }
       return String.format("%s/saml/login?idp=%s", baseUrl, externalAuthnHint.substring(5));
     }
     throw new InvalidExternalAuthenticationHintError(
