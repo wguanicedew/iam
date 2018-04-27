@@ -44,7 +44,7 @@ public class ListResponseDTO<T> {
     this.resources = resources;
   }
 
-  private ListResponseDTO(Builder<T> builder) {
+  protected ListResponseDTO(Builder<T> builder) {
     this.totalResults = builder.totalResults;
     this.startIndex = builder.startIndex;
     this.itemsPerPage = builder.itemsPerPage;
@@ -63,6 +63,7 @@ public class ListResponseDTO<T> {
     return startIndex;
   }
 
+  @JsonProperty("Resources")
   public List<T> getResources() {
     return resources;
   }

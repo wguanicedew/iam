@@ -1,17 +1,15 @@
 /**
  * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2018
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package it.infn.mw.iam.api.scim.provisioning;
 
@@ -32,7 +30,6 @@ import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REPLACE_PASSWO
 import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REPLACE_PICTURE;
 import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REPLACE_USERNAME;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +49,7 @@ import it.infn.mw.iam.api.scim.exception.ScimPatchOperationNotSupported;
 import it.infn.mw.iam.api.scim.exception.ScimResourceExistsException;
 import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
 import it.infn.mw.iam.api.scim.model.ScimListResponse;
+import it.infn.mw.iam.api.scim.model.ScimListResponse.ScimListResponseBuilder;
 import it.infn.mw.iam.api.scim.model.ScimPatchOperation;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.provisioning.paging.ScimPageRequest;
@@ -69,12 +67,12 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 public class ScimUserProvisioning
     implements ScimProvisioning<ScimUser, ScimUser>, ApplicationEventPublisherAware {
 
-  protected static final EnumSet<UpdaterType> SUPPORTED_UPDATER_TYPES = EnumSet.of(ACCOUNT_ADD_OIDC_ID,
-      ACCOUNT_REMOVE_OIDC_ID, ACCOUNT_ADD_SAML_ID, ACCOUNT_REMOVE_SAML_ID, ACCOUNT_ADD_SSH_KEY,
-      ACCOUNT_REMOVE_SSH_KEY, ACCOUNT_ADD_X509_CERTIFICATE, ACCOUNT_REMOVE_X509_CERTIFICATE,
-      ACCOUNT_REPLACE_ACTIVE, ACCOUNT_REPLACE_EMAIL, ACCOUNT_REPLACE_FAMILY_NAME,
-      ACCOUNT_REPLACE_GIVEN_NAME, ACCOUNT_REPLACE_PASSWORD, ACCOUNT_REPLACE_PICTURE,
-      ACCOUNT_REPLACE_USERNAME, ACCOUNT_REMOVE_PICTURE);
+  protected static final EnumSet<UpdaterType> SUPPORTED_UPDATER_TYPES = EnumSet.of(
+      ACCOUNT_ADD_OIDC_ID, ACCOUNT_REMOVE_OIDC_ID, ACCOUNT_ADD_SAML_ID, ACCOUNT_REMOVE_SAML_ID,
+      ACCOUNT_ADD_SSH_KEY, ACCOUNT_REMOVE_SSH_KEY, ACCOUNT_ADD_X509_CERTIFICATE,
+      ACCOUNT_REMOVE_X509_CERTIFICATE, ACCOUNT_REPLACE_ACTIVE, ACCOUNT_REPLACE_EMAIL,
+      ACCOUNT_REPLACE_FAMILY_NAME, ACCOUNT_REPLACE_GIVEN_NAME, ACCOUNT_REPLACE_PASSWORD,
+      ACCOUNT_REPLACE_PICTURE, ACCOUNT_REPLACE_USERNAME, ACCOUNT_REMOVE_PICTURE);
 
   private final IamAccountService accountService;
   private final IamAccountRepository accountRepository;
@@ -118,7 +116,7 @@ public class ScimUserProvisioning
     idSanityChecks(id);
 
     IamAccount account = accountRepository.findByUuid(id)
-      .orElseThrow(() -> new ScimResourceNotFoundException("No user mapped to id '" + id + "'"));
+        .orElseThrow(() -> new ScimResourceNotFoundException("No user mapped to id '" + id + "'"));
 
     return userConverter.dtoFromEntity(account);
 
@@ -130,10 +128,10 @@ public class ScimUserProvisioning
     idSanityChecks(id);
 
     IamAccount account = accountRepository.findByUuid(id)
-      .orElseThrow(() -> new ScimResourceNotFoundException("No user mapped to id '" + id + "'"));
+        .orElseThrow(() -> new ScimResourceNotFoundException("No user mapped to id '" + id + "'"));
 
     accountService.deleteAccount(account);
-    
+
   }
 
 
@@ -146,36 +144,43 @@ public class ScimUserProvisioning
       IamAccount account = accountService.createAccount(newAccount);
       return userConverter.dtoFromEntity(account);
     } catch (CredentialAlreadyBoundException | UserAlreadyExistsException e) {
-      throw new ScimResourceExistsException(e.getMessage(),e);
+      throw new ScimResourceExistsException(e.getMessage(), e);
     }
   }
 
   @Override
   public ScimListResponse<ScimUser> list(final ScimPageRequest params) {
 
+    ScimListResponseBuilder<ScimUser> builder = ScimListResponse.builder();
+
     if (params.getCount() == 0) {
-      int userCount = accountRepository.countAllUsers();
-      return new ScimListResponse<>(Collections.emptyList(), userCount, 0, 1);
+
+      long totalResults = accountRepository.countAllUsers();
+      builder.totalResults(totalResults);
+
+    } else {
+
+      OffsetPageable op = new OffsetPageable(params.getStartIndex(), params.getCount());
+
+      Page<IamAccount> results = accountRepository.findAll(op);
+
+      List<ScimUser> resources = new ArrayList<>();
+
+      results.getContent().forEach(a -> resources.add(userConverter.dtoFromEntity(a)));
+
+      builder.resources(resources);
+      builder.fromPage(results, op);
     }
 
-    OffsetPageable op = new OffsetPageable(params.getStartIndex(), params.getCount());
-
-    Page<IamAccount> results = accountRepository.findAll(op);
-
-    List<ScimUser> resources = new ArrayList<>();
-
-    results.getContent().forEach(a -> resources.add(userConverter.dtoFromEntity(a)));
-
-    return new ScimListResponse<>(resources, results.getTotalElements(), resources.size(),
-        op.getOffset() + 1);
+    return builder.build();
   }
 
   @Override
   public ScimUser replace(final String uuid, final ScimUser scimItemToBeUpdated) {
 
     // user must exist
-    IamAccount existingAccount = accountRepository.findByUuid(uuid)
-      .orElseThrow(() -> new ScimResourceNotFoundException("No user mapped to id '" + uuid + "'"));
+    IamAccount existingAccount = accountRepository.findByUuid(uuid).orElseThrow(
+        () -> new ScimResourceNotFoundException("No user mapped to id '" + uuid + "'"));
 
     // username must be available
     final String username = scimItemToBeUpdated.getUserName();
@@ -250,7 +255,7 @@ public class ScimUserProvisioning
   public void update(final String id, final List<ScimPatchOperation<ScimUser>> operations) {
 
     IamAccount account = accountRepository.findByUuid(id)
-      .orElseThrow(() -> new ScimResourceNotFoundException("No user mapped to id '" + id + "'"));
+        .orElseThrow(() -> new ScimResourceNotFoundException("No user mapped to id '" + id + "'"));
 
     operations.forEach(op -> executePatchOperation(account, op));
   }
