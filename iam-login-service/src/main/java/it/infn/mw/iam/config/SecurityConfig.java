@@ -1,3 +1,18 @@
+/**
+ * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2018
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package it.infn.mw.iam.config;
 
 import static it.infn.mw.iam.api.tokens.Constants.ACCESS_TOKENS_ENDPOINT;
@@ -89,7 +104,7 @@ public class SecurityConfig {
 
     @Autowired
     private AUPSignatureCheckService aupSignatureCheckService;
-    
+
     @Autowired
     private AccountUtils accountUtils;
 
@@ -170,12 +185,12 @@ public class SecurityConfig {
     }
 
     public AuthenticationSuccessHandler successHandler() {
-      AuthenticationSuccessHandler delegate= new RootIsDashboardSuccessHandler(iamBaseUrl, 
-          new HttpSessionRequestCache());
-          
-      
-      return new EnforceAupSignatureSuccessHandler(delegate, aupSignatureCheckService,
-          accountUtils, accountRepo);
+      AuthenticationSuccessHandler delegate =
+          new RootIsDashboardSuccessHandler(iamBaseUrl, new HttpSessionRequestCache());
+
+
+      return new EnforceAupSignatureSuccessHandler(delegate, aupSignatureCheckService, accountUtils,
+          accountRepo);
     }
   }
 
@@ -826,13 +841,12 @@ public class SecurityConfig {
             .fullyAuthenticated();
       // @formatter:on
     }
-
   }
 
   @Configuration
   @Order(28)
   public static class AupApiEndpointConfig extends WebSecurityConfigurerAdapter {
-    
+
     private static final String AUP_PATH = "/iam/aup";
     @Autowired
     private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
@@ -871,6 +885,45 @@ public class SecurityConfig {
 
   @Configuration
   @Order(29)
+  public static class GroupRequestsEndpointConfig extends WebSecurityConfigurerAdapter {
+    private static final String GROUP_REQUEST_PATH = "/iam/group_requests";
+
+    @Autowired
+    private OAuth2AuthenticationProcessingFilter resourceFilter;
+
+    @Autowired
+    private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
+
+    @Autowired
+    private CorsFilter corsFilter;
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+      // @formatter:off
+      http
+        .requestMatchers()
+          .antMatchers(GROUP_REQUEST_PATH+"**", GROUP_REQUEST_PATH+"/**")
+          .and()
+          .exceptionHandling()
+            .authenticationEntryPoint(authenticationEntryPoint)
+          .and()
+            .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
+            .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
+            .sessionManagement()
+              .sessionCreationPolicy(SessionCreationPolicy.NEVER)
+          .and()
+            .authorizeRequests()
+              .antMatchers(GROUP_REQUEST_PATH+"**", GROUP_REQUEST_PATH+"/**" )
+                .authenticated()
+          .and()
+            .csrf()
+              .disable();
+      // @formatter:on
+    }
+  }
+
+  @Configuration
+  @Order(30)
   public static class AccountSearchApiEndpointConfig extends WebSecurityConfigurerAdapter {
     
     @Autowired
@@ -905,7 +958,7 @@ public class SecurityConfig {
   }
 
   @Configuration
-  @Order(30)
+  @Order(31)
   public static class GroupSearchApiEndpointConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired

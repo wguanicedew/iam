@@ -1,3 +1,18 @@
+/**
+ * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2018
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package it.infn.mw.iam.persistence.model;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -30,17 +45,10 @@ import javax.validation.constraints.NotNull;
 
 import com.google.common.base.Preconditions;
 
-/**
- * 
- *
- */
 @Entity
 @Table(name = "iam_account")
-public class IamAccount implements Serializable{
+public class IamAccount implements Serializable {
 
-  /**
-   * 
-   */
   private static final long serialVersionUID = 1L;
 
   @Id
@@ -74,9 +82,9 @@ public class IamAccount implements Serializable{
   @OneToOne(cascade = CascadeType.ALL)
   @JoinColumn(name = "user_info_id")
   private IamUserInfo userInfo;
-  
+
   @Temporal(TemporalType.TIMESTAMP)
-  @Column(name="last_login_time", nullable = true)
+  @Column(name = "last_login_time", nullable = true)
   private Date lastLoginTime;
 
   @ManyToMany
@@ -113,15 +121,18 @@ public class IamAccount implements Serializable{
   @Column(name = "reset_key", unique = true, length = 36)
   private String resetKey;
 
-  @OneToOne(cascade = CascadeType.REMOVE, mappedBy = "account")
+  @OneToOne(mappedBy = "account", cascade = CascadeType.REMOVE)
   private IamRegistrationRequest registrationRequest;
 
-  @OneToMany(mappedBy="account", cascade = CascadeType.REMOVE)
+  @OneToMany(mappedBy = "account", cascade = CascadeType.REMOVE)
   private Set<IamScopePolicy> scopePolicies = new HashSet<>();
-  
+
   @OneToOne(cascade = CascadeType.REMOVE, mappedBy = "account")
   private IamAupSignature aupSignature;
-  
+
+  @OneToMany(mappedBy = "account", cascade = CascadeType.REMOVE)
+  private Set<IamGroupRequest> groupRequests;
+
   public IamAccount() {
     // empty constructor
   }
@@ -367,7 +378,7 @@ public class IamAccount implements Serializable{
   public void unlinkX509Certificates(Collection<IamX509Certificate> certs) {
 
     checkNotNull(certs);
-    for (IamX509Certificate c: certs) {
+    for (IamX509Certificate c : certs) {
       unlink(x509Certificates.iterator(), c);
     }
   }
@@ -451,7 +462,7 @@ public class IamAccount implements Serializable{
 
     this.registrationRequest = registrationRequest;
   }
-  
+
   public IamAupSignature getAupSignature() {
     return aupSignature;
   }
@@ -499,7 +510,7 @@ public class IamAccount implements Serializable{
   public void setProvisioned(boolean provisioned) {
     this.provisioned = provisioned;
   }
-  
+
   public Date getLastLoginTime() {
     return lastLoginTime;
   }
@@ -507,13 +518,21 @@ public class IamAccount implements Serializable{
   public void setLastLoginTime(Date lastLoginTime) {
     this.lastLoginTime = lastLoginTime;
   }
-  
+
   public Set<IamScopePolicy> getScopePolicies() {
     return scopePolicies;
   }
 
   public void setScopePolicies(Set<IamScopePolicy> scopePolicies) {
     this.scopePolicies = scopePolicies;
+  }
+
+  public Set<IamGroupRequest> getGroupRequest() {
+    return groupRequests;
+  }
+
+  public void setGroupRequest(Set<IamGroupRequest> groupRequests) {
+    this.groupRequests = groupRequests;
   }
 
   @Override
