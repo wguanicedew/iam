@@ -1,6 +1,7 @@
 package it.infn.mw.iam.api.account.search.model;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+import javax.annotation.Generated;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -52,6 +53,7 @@ public class IamGroupDTO {
     return description;
   }
 
+  @Generated("eclipse")
   @Override
   public int hashCode() {
     final int prime = 31;
@@ -63,6 +65,7 @@ public class IamGroupDTO {
     return result;
   }
 
+  @Generated("eclipse")
   @Override
   public boolean equals(Object obj) {
     if (this == obj)

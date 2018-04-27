@@ -3,6 +3,7 @@ package it.infn.mw.iam.api.account.search.model;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import javax.annotation.Generated;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import it.infn.mw.iam.persistence.model.IamAccount;
@@ -96,6 +97,7 @@ public class IamAccountDTO {
     return groups;
   }
 
+  @Generated("eclipse")
   @Override
   public int hashCode() {
     final int prime = 31;
@@ -113,6 +115,7 @@ public class IamAccountDTO {
     return result;
   }
 
+  @Generated("eclipse")
   @Override
   public boolean equals(Object obj) {
     if (this == obj)
