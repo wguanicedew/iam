@@ -90,6 +90,7 @@ public class ClientRegistrationTestSupport {
       json.add(CLAIMS_REDIRECT_URIS, getAsArray(newHashSet(), true));
       json.add(REQUEST_URIS, getAsArray(newHashSet(), true));
       json.add(CONTACTS, getAsArray(newHashSet("test@iam.test")));
+     
       return json.toString();
     }
     
