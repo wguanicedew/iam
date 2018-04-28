@@ -10,17 +10,18 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.google.common.collect.Lists;
-import it.infn.mw.iam.api.account.search.model.IamAccountDTO;
 import it.infn.mw.iam.api.common.ListResponseDTO;
 import it.infn.mw.iam.api.common.OffsetPageable;
 import it.infn.mw.iam.api.common.PagedResourceService;
+import it.infn.mw.iam.api.scim.converter.UserConverter;
+import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.persistence.model.IamAccount;
 
 @RestController
 @Transactional
 @PreAuthorize("hasRole('ADMIN')")
 @RequestMapping(AccountSearchController.ACCOUNT_SEARCH_ENDPOINT)
-public class AccountSearchController {
+public class AccountSearchController extends AbstractSearchController<ScimUser> {
 
   public static final String ACCOUNT_SEARCH_ENDPOINT = "/iam/account/search";
   public static final int ITEMS_PER_PAGE = 10;
@@ -28,17 +29,20 @@ public class AccountSearchController {
   @Autowired
   private PagedResourceService<IamAccount> accountService;
 
-  @RequestMapping(method = RequestMethod.GET)
-  public ListResponseDTO<IamAccountDTO> getAccounts(
-      @RequestParam(required = false, defaultValue = "") String filter,
-      @RequestParam(required = false, defaultValue = "1") int startIndex,
-      @RequestParam(required = false, defaultValue = "10") int count) {
+  @Autowired
+  private UserConverter scimUserConverter;
 
-    ListResponseDTO.Builder<IamAccountDTO> response = new ListResponseDTO.Builder<>();
+  @Override
+  @RequestMapping(method = RequestMethod.GET)
+  public ListResponseDTO<ScimUser> list(
+      @RequestParam(required = false, defaultValue = "1") int startIndex,
+      @RequestParam(required = false, defaultValue = "" + DEFAULT_ITEMS_PER_PAGE) int count,
+      @RequestParam(required = false, defaultValue = "") String filter) {
+
+    ListResponseDTO.Builder<ScimUser> response = ListResponseDTO.builder();
 
     if (count == 0) {
 
-      /* returns total amount of users - no resources */
       long totalResults = 0;
 
       if (filter.isEmpty()) {
@@ -54,28 +58,25 @@ public class AccountSearchController {
 
     } else {
 
-      OffsetPageable op = new OffsetPageable(startIndex - 1, count);
-
-      Page<IamAccount> accounts;
+      OffsetPageable op = getOffsetPageable(startIndex, count);
+      Page<IamAccount> p;
 
       if (filter.isEmpty()) {
 
-        accounts = accountService.getPage(op);
+        p = accountService.getPage(op);
 
       } else {
 
-        accounts = accountService.getPage(op, filter);
+        p = accountService.getPage(op, filter);
+
       }
 
-      List<IamAccountDTO> resources = Lists.newArrayList();
-      accounts.getContent().forEach(account -> resources.add(IamAccountDTO.builder().fromIamAccount(account).build()));
+      List<ScimUser> resources = Lists.newArrayList();
+      p.getContent().forEach(a -> resources.add(scimUserConverter.dtoFromEntity(a)));
+
       response.resources(resources);
-      response.itemsPerPage(accounts.getNumberOfElements());
-      response.startIndex(startIndex);
-      response.totalResults(accounts.getTotalElements());
-
+      response.fromPage(p, op);
     }
-
     return response.build();
   }
 

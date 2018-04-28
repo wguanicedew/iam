@@ -30,9 +30,10 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import it.infn.mw.iam.IamLoginService;
-import it.infn.mw.iam.api.account.search.model.IamGroupDTO;
 import it.infn.mw.iam.api.common.ListResponseDTO;
 import it.infn.mw.iam.api.common.OffsetPageable;
+import it.infn.mw.iam.api.scim.converter.GroupConverter;
+import it.infn.mw.iam.api.scim.model.ScimGroup;
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.repository.IamGroupRepository;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
@@ -60,6 +61,9 @@ public class GroupSearchControllerTest {
   @Autowired
   private IamGroupRepository groupRepository;
 
+  @Autowired
+  private GroupConverter scimGroupConverter;
+
   @Before
   public void setup() {
     mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
@@ -80,10 +84,10 @@ public class GroupSearchControllerTest {
 
     long expectedSize = groupRepository.count();
 
-    ListResponseDTO<IamGroupDTO> response = mapper.readValue(
+    ListResponseDTO<ScimGroup> response = mapper.readValue(
         mvc.perform(get(GROUP_SEARCH_ENDPOINT).contentType(APPLICATION_JSON_CONTENT_TYPE))
             .andExpect(status().isOk()).andReturn().getResponse().getContentAsString(),
-        new TypeReference<ListResponseDTO<IamGroupDTO>>() {});
+        new TypeReference<ListResponseDTO<ScimGroup>>() {});
     assertThat(response.getTotalResults(), equalTo(expectedSize));
     assertThat(response.getResources().size(), equalTo(ITEMS_PER_PAGE));
     assertThat(response.getStartIndex(), equalTo(1));
@@ -97,11 +101,11 @@ public class GroupSearchControllerTest {
 
     long expectedSize = groupRepository.count();
 
-    ListResponseDTO<IamGroupDTO> response = mapper.readValue(
+    ListResponseDTO<ScimGroup> response = mapper.readValue(
         mvc.perform(get(GROUP_SEARCH_ENDPOINT).contentType(APPLICATION_JSON_CONTENT_TYPE)
             .param("startIndex", String.valueOf(ITEMS_PER_PAGE))).andExpect(status().isOk())
             .andReturn().getResponse().getContentAsString(),
-        new TypeReference<ListResponseDTO<IamGroupDTO>>() {});
+        new TypeReference<ListResponseDTO<ScimGroup>>() {});
     assertThat(response.getTotalResults(), equalTo(expectedSize));
     assertThat(response.getResources().size(), equalTo(ITEMS_PER_PAGE));
     assertThat(response.getStartIndex(), equalTo(ITEMS_PER_PAGE));
@@ -117,11 +121,11 @@ public class GroupSearchControllerTest {
     int startIndex = 3;
     int count = 2;
 
-    ListResponseDTO<IamGroupDTO> response = mapper.readValue(
+    ListResponseDTO<ScimGroup> response = mapper.readValue(
         mvc.perform(get(GROUP_SEARCH_ENDPOINT).contentType(APPLICATION_JSON_CONTENT_TYPE)
             .param("startIndex", String.valueOf(startIndex)).param("count", String.valueOf(count)))
             .andExpect(status().isOk()).andReturn().getResponse().getContentAsString(),
-        new TypeReference<ListResponseDTO<IamGroupDTO>>() {});
+        new TypeReference<ListResponseDTO<ScimGroup>>() {});
     assertThat(response.getTotalResults(), equalTo(expectedSize));
     assertThat(response.getResources().size(), equalTo(count));
     assertThat(response.getStartIndex(), equalTo(startIndex));
@@ -135,11 +139,11 @@ public class GroupSearchControllerTest {
 
     long expectedSize = groupRepository.count();
 
-    ListResponseDTO<IamGroupDTO> response = mapper.readValue(mvc
+    ListResponseDTO<ScimGroup> response = mapper.readValue(mvc
         .perform(get(GROUP_SEARCH_ENDPOINT).contentType(APPLICATION_JSON_CONTENT_TYPE)
             .param("count", "0"))
         .andExpect(status().isOk()).andReturn().getResponse().getContentAsString(),
-        new TypeReference<ListResponseDTO<IamGroupDTO>>() {});
+        new TypeReference<ListResponseDTO<ScimGroup>>() {});
     assertThat(response.getTotalResults(), equalTo(expectedSize));
     assertThat(response.getResources(), equalTo(null));
     assertThat(response.getStartIndex(), equalTo(null));
@@ -155,19 +159,18 @@ public class GroupSearchControllerTest {
     OffsetPageable op = new OffsetPageable(0, 10);
     Page<IamGroup> page = groupRepository.findByFilter("%" + filter + "%", op);
 
-    ListResponseDTO<IamGroupDTO> response = mapper.readValue(mvc
+    ListResponseDTO<ScimGroup> response = mapper.readValue(mvc
         .perform(get(GROUP_SEARCH_ENDPOINT).contentType(APPLICATION_JSON_CONTENT_TYPE)
             .param("filter", filter))
         .andExpect(status().isOk()).andReturn().getResponse().getContentAsString(),
-        new TypeReference<ListResponseDTO<IamGroupDTO>>() {});
+        new TypeReference<ListResponseDTO<ScimGroup>>() {});
 
     assertThat(response.getResources().size(), equalTo(1));
     assertThat(response.getStartIndex(), equalTo(1));
     assertThat(response.getItemsPerPage(), equalTo(1));
 
-    List<IamGroupDTO> expectedGroups = Lists.newArrayList();
-    page.getContent()
-        .forEach(g -> expectedGroups.add(IamGroupDTO.builder().fromIamGroup(g).build()));
+    List<ScimGroup> expectedGroups = Lists.newArrayList();
+    page.getContent().forEach(g -> expectedGroups.add(scimGroupConverter.dtoFromEntity(g)));
     assertThat(response.getResources().containsAll(expectedGroups), equalTo(true));
   }
 
@@ -179,11 +182,12 @@ public class GroupSearchControllerTest {
     final String filter = "duction";
     long expectedSize = groupRepository.countByFilter("%" + filter + "%");
 
-    ListResponseDTO<IamGroupDTO> response = mapper.readValue(
-        mvc.perform(get(GROUP_SEARCH_ENDPOINT).contentType(APPLICATION_JSON_CONTENT_TYPE)
-            .param("count", "0").param("filter", filter)).andExpect(status().isOk()).andReturn()
-            .getResponse().getContentAsString(),
-        new TypeReference<ListResponseDTO<IamGroupDTO>>() {});
+    ListResponseDTO<ScimGroup> response =
+        mapper.readValue(
+            mvc.perform(get(GROUP_SEARCH_ENDPOINT).contentType(APPLICATION_JSON_CONTENT_TYPE)
+                .param("count", "0").param("filter", filter)).andExpect(status().isOk()).andReturn()
+                .getResponse().getContentAsString(),
+            new TypeReference<ListResponseDTO<ScimGroup>>() {});
     assertThat(response.getTotalResults(), equalTo(expectedSize));
     assertThat(response.getResources(), equalTo(null));
     assertThat(response.getStartIndex(), equalTo(null));
