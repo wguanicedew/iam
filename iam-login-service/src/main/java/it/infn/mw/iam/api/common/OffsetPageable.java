@@ -15,9 +15,9 @@
  */
 package it.infn.mw.iam.api.common;
 
+import javax.annotation.Generated;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-
 import com.google.common.base.Preconditions;
 
 public class OffsetPageable implements Pageable {
@@ -88,6 +88,7 @@ public class OffsetPageable implements Pageable {
     return offset > 0;
   }
 
+  @Generated("eclipse")
   @Override
   public int hashCode() {
     final int prime = 31;
@@ -97,6 +98,7 @@ public class OffsetPageable implements Pageable {
     return result;
   }
 
+  @Generated("eclipse")
   @Override
   public boolean equals(Object obj) {
     if (this == obj)

@@ -34,7 +34,7 @@ import it.infn.mw.iam.api.tokens.service.paging.TokensPageRequest;
 import it.infn.mw.iam.persistence.repository.IamOAuthAccessTokenRepository;
 
 @Service
-public class DefaultAccessTokenService implements TokenService<AccessToken> {
+public class DefaultAccessTokenService extends AbstractTokenService<AccessToken> {
 
   @Autowired
   private TokensConverter tokensConverter;
@@ -118,29 +118,8 @@ public class DefaultAccessTokenService implements TokenService<AccessToken> {
   private ListResponseDTO<AccessToken> buildListResponse(Page<OAuth2AccessTokenEntity> entities, OffsetPageable op) {
 
     List<AccessToken> resources = new ArrayList<>();
-
     entities.getContent().forEach(a -> resources.add(tokensConverter.toAccessToken(a)));
-
-    ListResponseDTO.Builder<AccessToken> builder = ListResponseDTO.builder();
-    builder.itemsPerPage(entities.getNumberOfElements());
-    builder.startIndex(op.getOffset() + 1);
-    builder.resources(resources);
-    builder.totalResults(entities.getTotalElements());
-
-    return builder.build();
-  }
-
-  private OffsetPageable getOffsetPageable(TokensPageRequest pageRequest) {
-
-    if (pageRequest.getCount() == 0) {
-      return new OffsetPageable(0, 1);
-    }
-    return new OffsetPageable(pageRequest.getStartIndex(), pageRequest.getCount());
-  }
-
-  private boolean isCountRequest(TokensPageRequest pageRequest) {
-
-    return pageRequest.getCount() == 0;
+    return buildListResponse(resources, op, entities.getTotalElements());
   }
 
   @Override
