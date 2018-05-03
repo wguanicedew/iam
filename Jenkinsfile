@@ -1,5 +1,15 @@
 #!/usr/bin/env groovy
 
+def readProperty(filename, prop) {
+  def value = sh script: "cat ${filename} | grep ${prop} | cut -d'=' -f2-", returnStdout: true
+  return value.trim()
+}
+
+def jsonParse(url, basicAuth, field) {
+  def value =  sh script: "curl -s -u '${basicAuth}' '${url}' | jq -r '${field}'", returnStdout: true
+  return value.trim()
+}
+
 pipeline {
 
   agent { label 'maven' }
@@ -96,9 +106,37 @@ pipeline {
             script{
               def cobertura_opts = 'cobertura:cobertura -Dmaven.test.failure.ignore -DfailIfNoTests=false -Dcobertura.report.format=xml'
               def checkstyle_opts = 'checkstyle:check -Dcheckstyle.config.location=google_checks.xml'
+              def sonarBasicAuth
 
               withSonarQubeEnv{
+                sonarBasicAuth  = "${SONAR_AUTH_TOKEN}:"
+
                 sh "mvn clean -U ${cobertura_opts} ${checkstyle_opts} ${SONAR_MAVEN_GOAL} -Dsonar.host.url=${SONAR_HOST_URL} -Dsonar.login=${SONAR_AUTH_TOKEN}"
+              }
+
+              def sonarServerUrl = readProperty('target/sonar/report-task.txt', 'serverUrl')
+              def ceTaskUrl = readProperty('target/sonar/report-task.txt', 'ceTaskUrl')
+
+              timeout(time: 5, unit: 'MINUTES') {
+                waitUntil {
+                  def result = jsonParse(ceTaskUrl, sonarBasicAuth, '.task.status')
+                  echo "Current CeTask status: ${result}"
+                  return "SUCCESS" == "${result}"
+                }
+              }
+
+              def analysisId = jsonParse(ceTaskUrl, sonarBasicAuth, '.task.analysisId')
+              echo "Analysis ID: ${analysisId}"
+
+              def url = "${sonarServerUrl}/api/qualitygates/project_status?analysisId=${analysisId}"
+              def qualityGate =  jsonParse(url, sonarBasicAuth, '')
+              echo "${qualityGate}"
+
+              def status =  jsonParse(url, sonarBasicAuth, '.projectStatus.status')
+
+              if ("ERROR" == "${status}") {
+                currentBuild.result = 'FAILURE'
+                error 'Quality Gate failure'
               }
             }
           }
