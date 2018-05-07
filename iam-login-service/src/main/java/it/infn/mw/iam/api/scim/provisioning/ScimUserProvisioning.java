@@ -113,6 +113,20 @@ public class ScimUserProvisioning
     return new ScimResourceNotFoundException(String.format("No user mapped to id '%s'", id));
   }
 
+  private ScimResourceExistsException usernameAlreadyAssigned(String username) {
+    return new ScimResourceExistsException(
+        String.format("username %s already assigned to another user", username));
+  }
+
+  private ScimResourceExistsException emailAlreadyAssigned(String email) {
+    return new ScimResourceExistsException(
+        String.format("email %s already assigned to another user", email));
+  }
+
+  private ScimPatchOperationNotSupported notSupportedPatchOp(String op) {
+    return new ScimPatchOperationNotSupported(String.format("%s not supported", op));
+  }
+
   @Override
   public ScimUser getById(final String id) {
 
@@ -179,21 +193,19 @@ public class ScimUserProvisioning
   public ScimUser replace(final String uuid, final ScimUser scimItemToBeUpdated) {
 
     // user must exist
-    IamAccount existingAccount = accountRepository.findByUuid(uuid).orElseThrow(
-        () -> new ScimResourceNotFoundException("No user mapped to id '" + uuid + "'"));
+    IamAccount existingAccount =
+        accountRepository.findByUuid(uuid).orElseThrow(() -> noUserMappedToId(uuid));
 
     // username must be available
     final String username = scimItemToBeUpdated.getUserName();
     if (accountRepository.findByUsernameWithDifferentUUID(username, uuid).isPresent()) {
-      throw new ScimResourceExistsException(
-          "username " + username + " already assigned to another user");
+      throw usernameAlreadyAssigned(username);
     }
 
     // email must be unique
     final String updatedEmail = scimItemToBeUpdated.getEmails().get(0).getValue();
     if (accountRepository.findByEmailWithDifferentUUID(updatedEmail, uuid).isPresent()) {
-      throw new ScimResourceExistsException(
-          "email " + updatedEmail + " already assigned to another user");
+      throw emailAlreadyAssigned(updatedEmail);
     }
 
     IamAccount updatedAccount = userConverter.entityFromDto(scimItemToBeUpdated);
@@ -228,7 +240,7 @@ public class ScimUserProvisioning
 
     for (AccountUpdater u : updaters) {
       if (!SUPPORTED_UPDATER_TYPES.contains(u.getType())) {
-        throw new ScimPatchOperationNotSupported(u.getType().getDescription() + " not supported");
+        throw notSupportedPatchOp(u.getType().getDescription());
       }
 
       boolean lastUpdaterChangedAccount = u.update();
@@ -254,8 +266,7 @@ public class ScimUserProvisioning
   @Override
   public void update(final String id, final List<ScimPatchOperation<ScimUser>> operations) {
 
-    IamAccount account = accountRepository.findByUuid(id)
-        .orElseThrow(() -> new ScimResourceNotFoundException("No user mapped to id '" + id + "'"));
+    IamAccount account = accountRepository.findByUuid(id).orElseThrow(() -> noUserMappedToId(id));
 
     operations.forEach(op -> executePatchOperation(account, op));
   }
