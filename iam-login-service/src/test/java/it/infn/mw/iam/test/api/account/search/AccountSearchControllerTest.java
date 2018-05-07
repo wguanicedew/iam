@@ -191,4 +191,17 @@ public class AccountSearchControllerTest {
     assertThat(response.getStartIndex(), equalTo(null));
     assertThat(response.getItemsPerPage(), equalTo(null));
   }
+
+  @Test
+  public void getUsersAsNoAuthenticatedUser() throws Exception {
+    mvc.perform(get(ACCOUNT_SEARCH_ENDPOINT).contentType(APPLICATION_JSON_CONTENT_TYPE))
+        .andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  @WithMockOAuthUser(user = "test", authorities = {"ROLE_USER"})
+  public void getUsersAsAuthenticatedUser() throws Exception {
+    mvc.perform(get(ACCOUNT_SEARCH_ENDPOINT).contentType(APPLICATION_JSON_CONTENT_TYPE))
+        .andExpect(status().isForbidden());
+  }
 }

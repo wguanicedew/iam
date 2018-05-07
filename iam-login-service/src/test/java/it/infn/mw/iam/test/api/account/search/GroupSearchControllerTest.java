@@ -193,4 +193,17 @@ public class GroupSearchControllerTest {
     assertThat(response.getStartIndex(), equalTo(null));
     assertThat(response.getItemsPerPage(), equalTo(null));
   }
+
+  @Test
+  public void getGroupsAsNoAuthenticatedUser() throws Exception {
+    mvc.perform(get(GROUP_SEARCH_ENDPOINT).contentType(APPLICATION_JSON_CONTENT_TYPE))
+        .andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  @WithMockOAuthUser(user = "test", authorities = {"ROLE_USER"})
+  public void getGroupsAsAuthenticatedUser() throws Exception {
+    mvc.perform(get(GROUP_SEARCH_ENDPOINT).contentType(APPLICATION_JSON_CONTENT_TYPE))
+        .andExpect(status().isForbidden());
+  }
 }

@@ -76,10 +76,9 @@ public class ScimUserProvisioning
 
   private final IamAccountService accountService;
   private final IamAccountRepository accountRepository;
-
+  private final UserConverter userConverter;
   private final DefaultAccountUpdaterFactory updatersFactory;
 
-  private final UserConverter userConverter;
   private ApplicationEventPublisher eventPublisher;
 
   @Autowired
@@ -110,13 +109,16 @@ public class ScimUserProvisioning
     }
   }
 
+  private ScimResourceNotFoundException noUserMappedToId(String id) {
+    return new ScimResourceNotFoundException(String.format("No user mapped to id '%s'", id));
+  }
+
   @Override
   public ScimUser getById(final String id) {
 
     idSanityChecks(id);
 
-    IamAccount account = accountRepository.findByUuid(id)
-        .orElseThrow(() -> new ScimResourceNotFoundException("No user mapped to id '" + id + "'"));
+    IamAccount account = accountRepository.findByUuid(id).orElseThrow(() -> noUserMappedToId(id));
 
     return userConverter.dtoFromEntity(account);
 
@@ -127,13 +129,11 @@ public class ScimUserProvisioning
 
     idSanityChecks(id);
 
-    IamAccount account = accountRepository.findByUuid(id)
-        .orElseThrow(() -> new ScimResourceNotFoundException("No user mapped to id '" + id + "'"));
+    IamAccount account = accountRepository.findByUuid(id).orElseThrow(() -> noUserMappedToId(id));
 
     accountService.deleteAccount(account);
 
   }
-
 
   @Override
   public ScimUser create(final ScimUser user) {

@@ -57,9 +57,7 @@ public class ScimGroupProvisioning
   private static final int GROUP_FULLNAME_MAX_LENGTH = 512;
 
   private final IamGroupRepository groupRepository;
-
   private final IamAccountRepository accountRepository;
-
   private final GroupConverter converter;
 
   private final DefaultGroupMembershipUpdaterFactory groupUpdaterFactory;
@@ -70,8 +68,8 @@ public class ScimGroupProvisioning
   public ScimGroupProvisioning(IamGroupRepository groupRepository,
       IamAccountRepository accountRepository, GroupConverter converter) {
 
-    this.accountRepository = accountRepository;
     this.groupRepository = groupRepository;
+    this.accountRepository = accountRepository;
     this.converter = converter;
     this.groupUpdaterFactory = new DefaultGroupMembershipUpdaterFactory(accountRepository);
 
