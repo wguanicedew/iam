@@ -172,6 +172,18 @@ pipeline {
           /bin/bash iam-test-client/docker/build-prod-image.sh
           /bin/bash iam-test-client/docker/push-prod-image.sh
           '''
+          script {
+            if (env.BRANCH_NAME == 'master') {
+              sh '''
+              sed -i -e 's#iam\\.version#IAM_VERSION#' iam-login-service/target/classes/iam.version.properties
+              source iam-login-service/target/classes/iam.version.properties
+              export IAM_LOGIN_SERVICE_VERSION="v${IAM_VERSION}"
+              unset DOCKER_REGISTRY_HOST
+              /bin/bash iam-login-service/docker/push-prod-image.sh
+              /bin/bash iam-test-client/docker/push-prod-image.sh
+              '''
+            }
+          }
         }
       }
     }
