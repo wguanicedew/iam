@@ -99,12 +99,6 @@ angular
                 .state(
                     'tokens', {
                         url: '/tokens',
-                        resolve: {
-                            clients: loadClients,
-                            users: loadUsers,
-                            accessTokensFirstResponse: loadFirstPageOfAccessTokens,
-                            refreshTokensFirstResponse: loadFirstPageOfRefreshTokens
-                        },
                         views: {
                             content: {
                                 component: 'tokens'
@@ -141,29 +135,7 @@ angular
                 return UserService.getUser($stateParams.id);
             }
 
-            function loadUsers(scimFactory) {
-                return scimFactory.getAllUsers();
-            }
-
-            function loadClients(ClientsService) {
-                return ClientsService.getClientList().then(function(r) {
-                    return r.data;
-                });
-            }
-
             function loadAup(AupService) {
                 return AupService.getAup();
-            }
-
-            function loadFirstPageOfAccessTokens(TokensService) {
-                return TokensService.getAccessTokens(1,10).then(function(r) {
-                    return r.data;
-                });
-            }
-
-            function loadFirstPageOfRefreshTokens(TokensService) {
-                return TokensService.getRefreshTokens(1,10).then(function(r) {
-                    return r.data;
-                });
             }
         });
