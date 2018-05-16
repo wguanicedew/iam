@@ -45,9 +45,15 @@
     }
 
     self.loadUsers = function() {
-        return scimFactory.getAllUsers(USERS_CHUNCK_SIZE).then(function(response) {
-            self.users = response;
-        });;
+        return scimFactory.getAllUsers(USERS_CHUNCK_SIZE)
+            .then(function(data) {
+                console.log('all users received');
+                self.users = data;
+            },
+            function(error) {
+                console.log('error while loading users', error);
+                toaster.pop({ type: 'error', body: error });
+            });
     }
 
     self.loadClients = function() {
@@ -104,10 +110,8 @@
                 return $q.all(promises);
             })
             .then(function(response) {
-                console.debug(self.users);
                 self.closeLoadingModal();
                 self.loaded = true;
-                return response;
             })
             .catch(self.handleError);
     };
