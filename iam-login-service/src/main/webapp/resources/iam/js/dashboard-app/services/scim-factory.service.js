@@ -73,7 +73,6 @@ angular.module('dashboardApp').factory("scimFactory", ['$q', '$http', '$httpPara
 	  var handleResponse = function(response){
 	    angular.forEach(response.data.Resources, function(user){
 	      users.push(user);
-	      deferred.notify("Add user " + user);
 	    });
 	  };
 	  var handleError = function(error) {
@@ -81,6 +80,7 @@ angular.module('dashboardApp').factory("scimFactory", ['$q', '$http', '$httpPara
 	  };
 
 	  var handleFirstResponse = function(response){
+
 	    var totalResults = response.data.totalResults;
 	    var lastLoaded = chunkRequestSize;
 
@@ -91,7 +91,6 @@ angular.module('dashboardApp').factory("scimFactory", ['$q', '$http', '$httpPara
 
 	    angular.forEach(response.data.Resources, function(user){
 	      users.push(user);
-	      deferred.notify("Add user " + user);
 	    });
 
 	    $q.all(promises).then(function(response){
