@@ -142,10 +142,10 @@ public class ScimGroupProvisioningListTests {
         .param("count", count.toString()))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.totalResults", equalTo(totalResults)))
-      .andExpect(jsonPath("$.itemsPerPage", equalTo(0)))
-      .andExpect(jsonPath("$.startIndex", equalTo(1)))
+      .andExpect(jsonPath("$.itemsPerPage").doesNotExist())
+      .andExpect(jsonPath("$.startIndex").doesNotExist())
       .andExpect(jsonPath("$.schemas", contains(ScimListResponse.SCHEMA)))
-      .andExpect(jsonPath("$.Resources", hasSize(equalTo(0))));
+      .andExpect(jsonPath("$.Resources").doesNotExist());
     //@formatter:on
   }
 
