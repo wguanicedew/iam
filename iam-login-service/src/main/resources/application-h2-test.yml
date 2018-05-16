@@ -15,6 +15,8 @@
 #
 
 spring:
+  mail:
+    port: 8125
   profiles:
     include: google,registration,saml
   datasource:
@@ -22,7 +24,7 @@ spring:
     url: jdbc:h2:mem:iam;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     username: sa
     password:
-
+  
 notification:
   disable: true
 
