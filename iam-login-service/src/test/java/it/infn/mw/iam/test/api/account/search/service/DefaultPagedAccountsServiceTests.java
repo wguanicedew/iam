@@ -19,7 +19,7 @@ import it.infn.mw.iam.persistence.model.IamAccount;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {IamLoginService.class})
 @Transactional
-public class DefaultPagedAccountsServiceTest {
+public class DefaultPagedAccountsServiceTests {
 
   public final int ITEMS_PER_PAGE = 10;
   public final long TOTAL_TEST_ACCOUNTS = 253L;

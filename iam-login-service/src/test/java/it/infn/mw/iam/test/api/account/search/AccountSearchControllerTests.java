@@ -43,7 +43,7 @@ import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class})
 @WebAppConfiguration
-public class AccountSearchControllerTest {
+public class AccountSearchControllerTests {
 
   public static final String APPLICATION_JSON_CONTENT_TYPE = "application/json";
 
