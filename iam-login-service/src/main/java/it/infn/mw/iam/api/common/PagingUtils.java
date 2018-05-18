@@ -17,6 +17,10 @@ package it.infn.mw.iam.api.common;
 
 public class PagingUtils {
 
+  private PagingUtils() {
+    // empty constructor
+  }
+
   public static OffsetPageable buildPageRequest(Integer count, Integer startIndex,
       int maxPageSize) {
 

@@ -34,7 +34,7 @@ import it.infn.mw.iam.api.tokens.service.paging.TokensPageRequest;
 import it.infn.mw.iam.persistence.repository.IamOAuthRefreshTokenRepository;
 
 @Service
-public class DefaultRefreshTokenService implements TokenService<RefreshToken> {
+public class DefaultRefreshTokenService extends AbstractTokenService<RefreshToken> {
 
   @Autowired
   private TokensConverter tokensConverter;
@@ -72,7 +72,7 @@ public class DefaultRefreshTokenService implements TokenService<RefreshToken> {
     return tokenRepository.findAllValidRefreshTokens(new Date(), op);
   }
 
-  private int countAllValidTokens() {
+  private long countAllValidTokens() {
 
     return tokenRepository.countValidRefreshTokens(new Date());
   }
@@ -83,7 +83,7 @@ public class DefaultRefreshTokenService implements TokenService<RefreshToken> {
     return tokenRepository.findValidRefreshTokensForUser(userId, new Date(), op);
   }
 
-  private int countAllValidTokensForUser(String userId) {
+  private long countAllValidTokensForUser(String userId) {
 
     return tokenRepository.countValidRefreshTokensForUser(userId, new Date());
   }
@@ -94,7 +94,7 @@ public class DefaultRefreshTokenService implements TokenService<RefreshToken> {
     return tokenRepository.findValidRefreshTokensForClient(clientId, new Date(), op);
   }
 
-  private int countAllValidTokensForClient(String clientId) {
+  private long countAllValidTokensForClient(String clientId) {
 
     return tokenRepository.countValidRefreshTokensForClient(clientId, new Date());
   }
@@ -105,12 +105,12 @@ public class DefaultRefreshTokenService implements TokenService<RefreshToken> {
     return tokenRepository.findValidRefreshTokensForUserAndClient(userId, clientId, new Date(), op);
   }
 
-  private int countAllValidTokensForUserAndClient(String userId, String clientId) {
+  private long countAllValidTokensForUserAndClient(String userId, String clientId) {
 
     return tokenRepository.countValidRefreshTokensForUserAndClient(userId, clientId, new Date());
   }
 
-  private ListResponseDTO<RefreshToken> buildCountResponse(int countResponse) {
+  private ListResponseDTO<RefreshToken> buildCountResponse(long countResponse) {
 
     return new ListResponseDTO.Builder<RefreshToken>().totalResults(countResponse)
         .resources(Collections.emptyList()).startIndex(1).itemsPerPage(0).build();
@@ -120,29 +120,8 @@ public class DefaultRefreshTokenService implements TokenService<RefreshToken> {
       OffsetPageable op) {
 
     List<RefreshToken> resources = new ArrayList<>();
-
     entities.getContent().forEach(a -> resources.add(tokensConverter.toRefreshToken(a)));
-
-    ListResponseDTO.Builder<RefreshToken> builder = ListResponseDTO.builder();
-    builder.itemsPerPage(entities.getNumberOfElements());
-    builder.startIndex(op.getOffset() + 1);
-    builder.resources(resources);
-    builder.totalResults(entities.getTotalElements());
-
-    return builder.build();
-  }
-
-  private OffsetPageable getOffsetPageable(TokensPageRequest pageRequest) {
-
-    if (pageRequest.getCount() == 0) {
-      return new OffsetPageable(0, 1);
-    }
-    return new OffsetPageable(pageRequest.getStartIndex(), pageRequest.getCount());
-  }
-
-  private boolean isCountRequest(TokensPageRequest pageRequest) {
-
-    return pageRequest.getCount() == 0;
+    return buildListResponse(resources, op, entities.getTotalElements());
   }
 
   @Override
@@ -150,7 +129,7 @@ public class DefaultRefreshTokenService implements TokenService<RefreshToken> {
 
     if (isCountRequest(pageRequest)) {
 
-      int count = countAllValidTokens();
+      long count = countAllValidTokens();
       return buildCountResponse(count);
     }
 
@@ -165,7 +144,7 @@ public class DefaultRefreshTokenService implements TokenService<RefreshToken> {
 
     if (isCountRequest(pageRequest)) {
 
-      int count = countAllValidTokensForUser(userId);
+      long count = countAllValidTokensForUser(userId);
       return buildCountResponse(count);
     }
 
@@ -180,7 +159,7 @@ public class DefaultRefreshTokenService implements TokenService<RefreshToken> {
 
     if (isCountRequest(pageRequest)) {
 
-      int count = countAllValidTokensForClient(clientId);
+      long count = countAllValidTokensForClient(clientId);
       return buildCountResponse(count);
     }
 
@@ -195,7 +174,7 @@ public class DefaultRefreshTokenService implements TokenService<RefreshToken> {
 
     if (isCountRequest(pageRequest)) {
 
-      int count = countAllValidTokensForUserAndClient(userId, clientId);
+      long count = countAllValidTokensForUserAndClient(userId, clientId);
       return buildCountResponse(count);
     }
 

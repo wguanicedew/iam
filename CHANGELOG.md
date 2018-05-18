@@ -1,5 +1,28 @@
 # Changelog
 
+## 1.4.0 (2018-05-18)
+
+### Added
+
+- New paginated user and group search API (#217)
+
+- Support for login hint on authorization requests: this feature allows a
+  relying party to specify a preference on which external SAML IdP should be
+  used for authentication (#230)
+
+- Doc: documentation for the IAM group request API (#228)
+
+### Fixed
+
+- A problem that caused the device code expiration time setting to 0 seconds
+  for dynamically registered clients has been fixed (#236)
+
+- Dashboard: the tokens management section now shows a loading modal when
+  loading information (#234)
+
+- Notification: a problem that caused the sending of a "null" string instead of
+  the IAM URL in notification has been fixed (#232)
+
 ## 1.3.0 (2018-04-12)
 
 ### Added

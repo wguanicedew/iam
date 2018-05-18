@@ -62,21 +62,25 @@ angular.module('dashboardApp').factory("scimFactory", ['$q', '$http', '$httpPara
 		return $http.get(url);
 	};
 
-	function getAllUsers() {
+	function getAllUsers(chunkRequestSize = 100) {
 
 	  console.info("Getting all users");
 
+	  var deferred = $q.defer();
+
 	  var promises = [];
-	  var chunkRequestSize = 100;
 	  var users = [];
 	  var handleResponse = function(response){
 	    angular.forEach(response.data.Resources, function(user){
 	      users.push(user);
 	    });
 	  };
-	  var handleError = function(error) { return error; };
+	  var handleError = function(error) {
+		  deferred.reject(error)
+	  };
 
 	  var handleFirstResponse = function(response){
+
 	    var totalResults = response.data.totalResults;
 	    var lastLoaded = chunkRequestSize;
 
@@ -99,7 +103,8 @@ angular.module('dashboardApp').factory("scimFactory", ['$q', '$http', '$httpPara
 	    return users;
 	  };
 
-	  return getUsers(1, chunkRequestSize).then(handleFirstResponse, handleError);
+	  deferred.resolve(getUsers(1, chunkRequestSize).then(handleFirstResponse, handleError));
+	  return deferred.promise;
 	};
 
 	function getGroups(startIndex, count) {

@@ -59,24 +59,24 @@ public interface IamOAuthRefreshTokenRepository
 
   @Query("select count(t) from OAuth2RefreshTokenEntity t "
       + "where (t.expiration is NULL or t.expiration > :timestamp)")
-  int countValidRefreshTokens(@Param("timestamp") Date timestamp);
+  long countValidRefreshTokens(@Param("timestamp") Date timestamp);
 
   @Query("select count(t) from OAuth2RefreshTokenEntity t "
       + "where (t.expiration is NULL or t.expiration > :timestamp) "
       + "and (t.authenticationHolder.userAuth.name = :userId)")
-  int countValidRefreshTokensForUser(@Param("userId") String userId,
+  long countValidRefreshTokensForUser(@Param("userId") String userId,
       @Param("timestamp") Date timestamp);
 
   @Query("select count(t) from OAuth2RefreshTokenEntity t "
       + "where (t.expiration is NULL or t.expiration > :timestamp) "
       + "and (t.authenticationHolder.clientId = :clientId)")
-  int countValidRefreshTokensForClient(@Param("clientId") String clientId,
+  long countValidRefreshTokensForClient(@Param("clientId") String clientId,
       @Param("timestamp") Date timestamp);
 
   @Query("select count(t) from OAuth2RefreshTokenEntity t "
       + "where (t.expiration is NULL or t.expiration > :timestamp) "
       + "and (t.authenticationHolder.userAuth.name = :userId) "
       + "and (t.authenticationHolder.clientId = :clientId)")
-  int countValidRefreshTokensForUserAndClient(@Param("userId") String userId,
+  long countValidRefreshTokensForUserAndClient(@Param("userId") String userId,
       @Param("clientId") String clientId, @Param("timestamp") Date timestamp);
 }

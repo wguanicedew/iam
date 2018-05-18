@@ -27,8 +27,12 @@ public class ScimListResponse<T> extends ListResponseDTO<T> {
 
   private final Set<String> schemas = new HashSet<>(Collections.singletonList(SCHEMA));
 
-  public ScimListResponse(List<T> resources, long totalResults, int startIndex, int itemsPerPage) {
-    super(resources, totalResults, itemsPerPage, startIndex);
+  public ScimListResponse(long totalResults, int itemsPerPage, int startIndex, List<T> resources) {
+    super(totalResults, itemsPerPage, startIndex, resources);
+  }
+
+  private ScimListResponse(ScimListResponseBuilder<T> builder) {
+    super(builder);
   }
 
   public Set<String> getSchemas() {
@@ -36,4 +40,16 @@ public class ScimListResponse<T> extends ListResponseDTO<T> {
     return schemas;
   }
 
+  public static <T> ScimListResponseBuilder<T> builder() {
+    return new ScimListResponseBuilder<>();
+  }
+
+
+  public static class ScimListResponseBuilder<T> extends ListResponseDTO.Builder<T> {
+
+    @Override
+    public ScimListResponse<T> build() {
+      return new ScimListResponse<>(this);
+    }
+  }
 }

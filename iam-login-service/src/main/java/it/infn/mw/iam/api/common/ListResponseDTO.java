@@ -16,47 +16,50 @@
 package it.infn.mw.iam.api.common;
 
 import java.util.List;
-
 import org.springframework.data.domain.Page;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonInclude(Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ListResponseDTO<T> {
 
-  private final long totalResults;
-  private final int itemsPerPage;
-  private final int startIndex;
-
-  private List<T> resources;
+  private final Long totalResults;
+  private final Integer itemsPerPage;
+  private final Integer startIndex;
+  private final List<T> resources;
 
   @JsonCreator
-  public ListResponseDTO(@JsonProperty("Resources") List<T> resources,
-      @JsonProperty("totalResults") long totalResults, @JsonProperty("startIndex") int startIndex,
-      @JsonProperty("itemsPerPage") int itemsPerPage) {
+  public ListResponseDTO(@JsonProperty("totalResults") Long totalResults,
+      @JsonProperty("itemsPerPage") Integer itemsPerPage,
+      @JsonProperty("startIndex") Integer startIndex,
+      @JsonProperty("Resources") List<T> resources) {
 
-    this.resources = resources;
     this.totalResults = totalResults;
     this.itemsPerPage = itemsPerPage;
     this.startIndex = startIndex;
+    this.resources = resources;
   }
 
-  private ListResponseDTO(Builder<T> builder) {
+  protected ListResponseDTO(Builder<T> builder) {
     this.totalResults = builder.totalResults;
     this.startIndex = builder.startIndex;
     this.itemsPerPage = builder.itemsPerPage;
     this.resources = builder.resources;
   }
 
-  public long getTotalResults() {
+  public Long getTotalResults() {
     return totalResults;
   }
 
-  public int getItemsPerPage() {
+  public Integer getItemsPerPage() {
     return itemsPerPage;
   }
 
-  public int getStartIndex() {
+  public Integer getStartIndex() {
     return startIndex;
   }
 
@@ -71,10 +74,11 @@ public class ListResponseDTO<T> {
 
 
   public static class Builder<T> {
-    private long totalResults;
-    private int itemsPerPage;
-    private int startIndex;
-    private List<T> resources;
+
+    private Long totalResults = null;
+    private Integer itemsPerPage = null;
+    private Integer startIndex = null;
+    private List<T> resources = null;
 
     public <S> Builder<T> fromPage(Page<S> page, OffsetPageable op) {
       this.totalResults = page.getTotalElements();
@@ -83,17 +87,17 @@ public class ListResponseDTO<T> {
       return this;
     }
 
-    public Builder<T> totalResults(long totalResults) {
+    public Builder<T> totalResults(Long totalResults) {
       this.totalResults = totalResults;
       return this;
     }
 
-    public Builder<T> itemsPerPage(int itemsPerPage) {
+    public Builder<T> itemsPerPage(Integer itemsPerPage) {
       this.itemsPerPage = itemsPerPage;
       return this;
     }
 
-    public Builder<T> startIndex(int startIndex) {
+    public Builder<T> startIndex(Integer startIndex) {
       this.startIndex = startIndex;
       return this;
     }

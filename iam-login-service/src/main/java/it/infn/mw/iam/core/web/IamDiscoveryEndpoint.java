@@ -105,7 +105,7 @@ public class IamDiscoveryEndpoint {
 
       UriComponents resourceUri = WebfingerURLNormalizer.normalizeResource(resource);
       if (resourceUri != null && resourceUri.getScheme() != null
-          && resourceUri.getScheme().equals("acct")) {
+          && "acct".equals(resourceUri.getScheme())) {
         // acct: URI (email address format)
 
         // check on email addresses first

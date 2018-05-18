@@ -34,7 +34,7 @@ import it.infn.mw.iam.api.tokens.service.paging.TokensPageRequest;
 import it.infn.mw.iam.persistence.repository.IamOAuthAccessTokenRepository;
 
 @Service
-public class DefaultAccessTokenService implements TokenService<AccessToken> {
+public class DefaultAccessTokenService extends AbstractTokenService<AccessToken> {
 
   @Autowired
   private TokensConverter tokensConverter;
@@ -72,7 +72,7 @@ public class DefaultAccessTokenService implements TokenService<AccessToken> {
     return tokenRepository.findAllValidAccessTokens(new Date(), op);
   }
 
-  private int countAllValidTokens() {
+  private long countAllValidTokens() {
 
     return tokenRepository.countValidAccessTokens(new Date());
   }
@@ -82,7 +82,7 @@ public class DefaultAccessTokenService implements TokenService<AccessToken> {
     return tokenRepository.findValidAccessTokensForUser(userId, new Date(), op);
   }
 
-  private int countAllValidTokensForUser(String userId) {
+  private long countAllValidTokensForUser(String userId) {
 
     return tokenRepository.countValidAccessTokensForUser(userId, new Date());
   }
@@ -93,7 +93,7 @@ public class DefaultAccessTokenService implements TokenService<AccessToken> {
     return tokenRepository.findValidAccessTokensForClient(clientId, new Date(), op);
   }
 
-  private int countAllValidTokensForClient(String clientId) {
+  private long countAllValidTokensForClient(String clientId) {
 
     return tokenRepository.countValidAccessTokensForClient(clientId, new Date());
   }
@@ -104,12 +104,12 @@ public class DefaultAccessTokenService implements TokenService<AccessToken> {
     return tokenRepository.findValidAccessTokensForUserAndClient(userId, clientId, new Date(), op);
   }
 
-  private int countAllValidTokensForUserAndClient(String userId, String clientId) {
+  private long countAllValidTokensForUserAndClient(String userId, String clientId) {
 
     return tokenRepository.countValidAccessTokensForUserAndClient(userId, clientId, new Date());
   }
 
-  private ListResponseDTO<AccessToken> buildCountResponse(int countResponse) {
+  private ListResponseDTO<AccessToken> buildCountResponse(long countResponse) {
 
     return new ListResponseDTO.Builder<AccessToken>().totalResults(countResponse)
         .resources(Collections.emptyList()).startIndex(1).itemsPerPage(0).build();
@@ -118,29 +118,8 @@ public class DefaultAccessTokenService implements TokenService<AccessToken> {
   private ListResponseDTO<AccessToken> buildListResponse(Page<OAuth2AccessTokenEntity> entities, OffsetPageable op) {
 
     List<AccessToken> resources = new ArrayList<>();
-
     entities.getContent().forEach(a -> resources.add(tokensConverter.toAccessToken(a)));
-
-    ListResponseDTO.Builder<AccessToken> builder = ListResponseDTO.builder();
-    builder.itemsPerPage(entities.getNumberOfElements());
-    builder.startIndex(op.getOffset() + 1);
-    builder.resources(resources);
-    builder.totalResults(entities.getTotalElements());
-
-    return builder.build();
-  }
-
-  private OffsetPageable getOffsetPageable(TokensPageRequest pageRequest) {
-
-    if (pageRequest.getCount() == 0) {
-      return new OffsetPageable(0, 1);
-    }
-    return new OffsetPageable(pageRequest.getStartIndex(), pageRequest.getCount());
-  }
-
-  private boolean isCountRequest(TokensPageRequest pageRequest) {
-
-    return pageRequest.getCount() == 0;
+    return buildListResponse(resources, op, entities.getTotalElements());
   }
 
   @Override
@@ -148,7 +127,7 @@ public class DefaultAccessTokenService implements TokenService<AccessToken> {
 
     if (isCountRequest(pageRequest)) {
 
-      int count = countAllValidTokens();
+      long count = countAllValidTokens();
       return buildCountResponse(count);
     }
 
@@ -163,7 +142,7 @@ public class DefaultAccessTokenService implements TokenService<AccessToken> {
 
     if (isCountRequest(pageRequest)) {
 
-      int count = countAllValidTokensForUser(userId);
+      long count = countAllValidTokensForUser(userId);
       return buildCountResponse(count);
     }
 
@@ -178,7 +157,7 @@ public class DefaultAccessTokenService implements TokenService<AccessToken> {
 
     if (isCountRequest(pageRequest)) {
 
-      int count = countAllValidTokensForClient(clientId);
+      long count = countAllValidTokensForClient(clientId);
       return buildCountResponse(count);
     }
 
@@ -193,7 +172,7 @@ public class DefaultAccessTokenService implements TokenService<AccessToken> {
 
     if (isCountRequest(pageRequest)) {
 
-      int count = countAllValidTokensForUserAndClient(userId, clientId);
+      long count = countAllValidTokensForUserAndClient(userId, clientId);
       return buildCountResponse(count);
     }
 
