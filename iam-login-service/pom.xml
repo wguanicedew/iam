@@ -24,7 +24,7 @@
   <parent>
     <groupId>it.infn.mw</groupId>
     <artifactId>iam-parent</artifactId>
-    <version>1.4.0.rc0</version>
+    <version>1.4.0</version>
   </parent>
 
   <artifactId>iam-login-service</artifactId>
