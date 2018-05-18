@@ -144,11 +144,11 @@ pipeline {
     }
     
     stage('license-check') {
-
       steps {
         container('maven-runner') {
           sh 'mvn license:check'
         }
+      }
     }
 
     stage('package') {
