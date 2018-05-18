@@ -142,11 +142,19 @@ pipeline {
           }
         }
     }
+    
+    stage('license-check') {
+
+      steps {
+        container('maven-runner') {
+          sh 'mvn license:check'
+        }
+    }
 
     stage('package') {
       steps {
         container('maven-runner') {
-          sh 'mvn -B -DskipTests=true clean package'
+          sh 'mvn -B -DskipTests=true clean package' 
           archive 'iam-login-service/target/iam-login-service.war'
           archive 'iam-login-service/target/classes/iam.version.properties'
           archive 'iam-test-client/target/iam-test-client.jar'
