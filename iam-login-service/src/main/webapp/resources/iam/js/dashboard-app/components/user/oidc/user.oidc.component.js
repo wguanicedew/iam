@@ -94,6 +94,7 @@
     self.type = 'OpenID-Connect';
     self.account = account;
     self.enabled = true;
+    self.showLinkButton=false;
     self.providers;
     
     self.loadOidcProviders = loadOidcProviders;
@@ -107,7 +108,7 @@
     self.doUnlink = function () {
       self.enabled = false;
       AccountLinkingService.unlinkOidcAccount(self.account).then(function (response) {
-        $uibModalInstance.close("Google account unlinked");
+        $uibModalInstance.close("OIDC account unlinked");
       }).catch(function (error) {
         console.error(error);
       });
