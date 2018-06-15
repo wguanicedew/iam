@@ -15,32 +15,34 @@
  */
 package it.infn.mw.iam.authn.saml.util;
 
+import static it.infn.mw.iam.authn.saml.util.NameIdUserIdentifierResolver.NAMEID_RESOLVER;
+import static it.infn.mw.iam.authn.saml.util.PersistentNameIdUserIdentifierResolver.PERSISTENT_NAMEID_RESOLVER;
+
 import com.google.common.collect.ImmutableMap;
 
 public class SamlIdResolvers {
-
-  public static final String NAME_ID_NAME = "nameID";
   
-  private ImmutableMap<String, SamlUserIdentifierResolver> registeredResolvers;
+  private ImmutableMap<String, NamedSamlUserIdentifierResolver> registeredResolvers;
 
   public SamlIdResolvers() {
-    ImmutableMap.Builder<String, SamlUserIdentifierResolver> builder =
-        ImmutableMap.<String, SamlUserIdentifierResolver>builder();
+    ImmutableMap.Builder<String, NamedSamlUserIdentifierResolver> builder =
+        ImmutableMap.<String, NamedSamlUserIdentifierResolver>builder();
 
     for (Saml2Attribute a : Saml2Attribute.values()) {
       builder.put(a.getAlias(), new AttributeUserIdentifierResolver(a));
     }
 
-    builder.put(NAME_ID_NAME, new NameIdUserIdentifierResolver());
+    builder.put(PERSISTENT_NAMEID_RESOLVER, new PersistentNameIdUserIdentifierResolver());
+    builder.put(NAMEID_RESOLVER, new NameIdUserIdentifierResolver());
 
     registeredResolvers = builder.build();
   }
 
-  public SamlUserIdentifierResolver byAttribute(Saml2Attribute attribute) {
+  public NamedSamlUserIdentifierResolver byAttribute(Saml2Attribute attribute) {
     return registeredResolvers.get(attribute.getAlias());
   }
   
-  public SamlUserIdentifierResolver byName(String name) {
+  public NamedSamlUserIdentifierResolver byName(String name) {
     return registeredResolvers.get(name);
   }
 
