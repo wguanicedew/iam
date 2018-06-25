@@ -18,6 +18,8 @@ package it.infn.mw.iam.test.api.account.search;
 import static it.infn.mw.iam.api.account.search.AbstractSearchController.DEFAULT_ITEMS_PER_PAGE;
 import static it.infn.mw.iam.api.account.search.AccountSearchController.ACCOUNT_SEARCH_ENDPOINT;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.junit.Assert.assertThat;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -32,7 +34,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.data.domain.Page;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -43,13 +44,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Lists;
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.common.ListResponseDTO;
-import it.infn.mw.iam.api.common.OffsetPageable;
-import it.infn.mw.iam.api.scim.converter.UserConverter;
 import it.infn.mw.iam.api.scim.model.ScimUser;
-import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 import it.infn.mw.iam.test.util.WithMockOAuthUser;
@@ -58,7 +55,7 @@ import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class})
 @WebAppConfiguration
-public class AccountSearchControllerTests {
+public class AccountSearchControllerSortTests {
 
   public static final String APPLICATION_JSON_CONTENT_TYPE = "application/json";
 
@@ -76,9 +73,6 @@ public class AccountSearchControllerTests {
   @Autowired
   private IamAccountRepository accountRepository;
 
-  @Autowired
-  private UserConverter userConverter;
-
   @Before
   public void setup() {
     mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
@@ -94,203 +88,213 @@ public class AccountSearchControllerTests {
 
   @Test
   @WithMockOAuthUser(user = "admin", authorities = {"ROLE_ADMIN"})
-  public void getFirstPageOfAllUsers() throws JsonParseException, JsonMappingException,
+  public void getUsersWithInvalidSortDirection() throws JsonParseException, JsonMappingException,
       UnsupportedEncodingException, IOException, Exception {
-
-    long expectedSize = accountRepository.count();
-
-    ListResponseDTO<ScimUser> response = mapper.readValue(
-        mvc.perform(get(ACCOUNT_SEARCH_ENDPOINT).contentType(APPLICATION_JSON_CONTENT_TYPE))
-            .andExpect(status().isOk()).andReturn().getResponse().getContentAsString(),
-        new TypeReference<ListResponseDTO<ScimUser>>() {});
-    assertThat(response.getTotalResults(), equalTo(expectedSize));
-    assertThat(response.getResources().size(), equalTo(DEFAULT_ITEMS_PER_PAGE));
-    assertThat(response.getStartIndex(), equalTo(1));
-    assertThat(response.getItemsPerPage(), equalTo(DEFAULT_ITEMS_PER_PAGE));
-  }
-
-  @Test
-  @WithMockOAuthUser(user = "admin", authorities = {"ROLE_ADMIN"})
-  public void getSecondPageOfAllUsers() throws JsonParseException, JsonMappingException,
-      UnsupportedEncodingException, IOException, Exception {
-
-    long expectedSize = accountRepository.count();
-
-    ListResponseDTO<ScimUser> response = mapper.readValue(
-        mvc.perform(get(ACCOUNT_SEARCH_ENDPOINT).contentType(APPLICATION_JSON_CONTENT_TYPE)
-            .param("startIndex", String.valueOf(DEFAULT_ITEMS_PER_PAGE))).andExpect(status().isOk())
-            .andReturn().getResponse().getContentAsString(),
-        new TypeReference<ListResponseDTO<ScimUser>>() {});
-    assertThat(response.getTotalResults(), equalTo(expectedSize));
-    assertThat(response.getResources().size(), equalTo(DEFAULT_ITEMS_PER_PAGE));
-    assertThat(response.getStartIndex(), equalTo(DEFAULT_ITEMS_PER_PAGE));
-    assertThat(response.getItemsPerPage(), equalTo(DEFAULT_ITEMS_PER_PAGE));
-  }
-
-  @Test
-  @WithMockOAuthUser(user = "admin", authorities = {"ROLE_ADMIN"})
-  public void getUsersWithCustomStartIndexAndCount() throws JsonParseException,
-      JsonMappingException, UnsupportedEncodingException, IOException, Exception {
-
-    long expectedSize = accountRepository.count();
-    int startIndex = 3;
-    int count = 2;
-
-    ListResponseDTO<ScimUser> response = mapper.readValue(
-        mvc.perform(get(ACCOUNT_SEARCH_ENDPOINT).contentType(APPLICATION_JSON_CONTENT_TYPE)
-            .param("startIndex", String.valueOf(startIndex)).param("count", String.valueOf(count)))
-            .andExpect(status().isOk()).andReturn().getResponse().getContentAsString(),
-        new TypeReference<ListResponseDTO<ScimUser>>() {});
-    assertThat(response.getTotalResults(), equalTo(expectedSize));
-    assertThat(response.getResources().size(), equalTo(count));
-    assertThat(response.getStartIndex(), equalTo(startIndex));
-    assertThat(response.getItemsPerPage(), equalTo(count));
-  }
-
-  @Test
-  @WithMockOAuthUser(user = "admin", authorities = {"ROLE_ADMIN"})
-  public void getCountOfAllUsers() throws JsonParseException, JsonMappingException,
-      UnsupportedEncodingException, IOException, Exception {
-
-    long expectedSize = accountRepository.count();
 
     ListResponseDTO<ScimUser> response = mapper.readValue(mvc
         .perform(get(ACCOUNT_SEARCH_ENDPOINT).contentType(APPLICATION_JSON_CONTENT_TYPE)
-            .param("count", "0"))
+            .param("sortDirection", "pippo"))
         .andExpect(status().isOk()).andReturn().getResponse().getContentAsString(),
         new TypeReference<ListResponseDTO<ScimUser>>() {});
-    assertThat(response.getTotalResults(), equalTo(expectedSize));
-    assertThat(response.getResources(), equalTo(null));
-    assertThat(response.getStartIndex(), equalTo(null));
-    assertThat(response.getItemsPerPage(), equalTo(null));
-  }
-
-  @Test
-  @WithMockOAuthUser(user = "admin", authorities = {"ROLE_ADMIN"})
-  public void getFirstFilteredPageOfUsers() throws JsonParseException, JsonMappingException,
-      UnsupportedEncodingException, IOException, Exception {
-
-    OffsetPageable op = new OffsetPageable(0, 10);
-    Page<IamAccount> page = accountRepository.findByFilter("admin", op);
-
-    ListResponseDTO<ScimUser> response = mapper.readValue(mvc
-        .perform(get(ACCOUNT_SEARCH_ENDPOINT).contentType(APPLICATION_JSON_CONTENT_TYPE)
-            .param("filter", "admin"))
-        .andExpect(status().isOk()).andReturn().getResponse().getContentAsString(),
-        new TypeReference<ListResponseDTO<ScimUser>>() {});
-
-    assertThat(response.getResources().size(), equalTo(2));
-    assertThat(response.getStartIndex(), equalTo(1));
-    assertThat(response.getItemsPerPage(), equalTo(2));
-
-    List<ScimUser> expectedUsers = Lists.newArrayList();
-
-    page.getContent().forEach(u -> expectedUsers.add(userConverter.dtoFromEntity(u)));
-    assertThat(response.getResources().containsAll(expectedUsers), equalTo(true));
-  }
-
-  @Test
-  @WithMockOAuthUser(user = "admin", authorities = {"ROLE_ADMIN"})
-  public void getCountOfFilteredUsers() throws JsonParseException, JsonMappingException,
-      UnsupportedEncodingException, IOException, Exception {
-
-    long expectedSize = accountRepository.countByFilter("admin");
-
-    ListResponseDTO<ScimUser> response =
-        mapper.readValue(
-            mvc.perform(get(ACCOUNT_SEARCH_ENDPOINT).contentType(APPLICATION_JSON_CONTENT_TYPE)
-                .param("count", "0").param("filter", "admin")).andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString(),
-            new TypeReference<ListResponseDTO<ScimUser>>() {});
-    assertThat(response.getTotalResults(), equalTo(expectedSize));
-    assertThat(response.getResources(), equalTo(null));
-    assertThat(response.getStartIndex(), equalTo(null));
-    assertThat(response.getItemsPerPage(), equalTo(null));
-  }
-
-  @Test
-  public void getUsersAsNoAuthenticatedUser() throws Exception {
-    mvc.perform(get(ACCOUNT_SEARCH_ENDPOINT).contentType(APPLICATION_JSON_CONTENT_TYPE))
-        .andExpect(status().isUnauthorized());
-  }
-
-  @Test
-  @WithMockOAuthUser(user = "test", authorities = {"ROLE_USER"})
-  public void getUsersAsAuthenticatedUser() throws Exception {
-    mvc.perform(get(ACCOUNT_SEARCH_ENDPOINT).contentType(APPLICATION_JSON_CONTENT_TYPE))
-        .andExpect(status().isForbidden());
-  }
-
-  @Test
-  @WithMockOAuthUser(user = "admin", authorities = {"ROLE_ADMIN"})
-  public void getUsersWithNegativeStartIndex() throws JsonParseException, JsonMappingException,
-      UnsupportedEncodingException, IOException, Exception {
-
-    long expectedSize = accountRepository.count();
-
-    ListResponseDTO<ScimUser> response = mapper.readValue(mvc
-        .perform(get(ACCOUNT_SEARCH_ENDPOINT).contentType(APPLICATION_JSON_CONTENT_TYPE)
-            .param("startIndex", "-1"))
-        .andExpect(status().isOk()).andReturn().getResponse().getContentAsString(),
-        new TypeReference<ListResponseDTO<ScimUser>>() {});
-    assertThat(response.getTotalResults(), equalTo(expectedSize));
+    assertThat(response.getTotalResults(), equalTo(accountRepository.count()));
     assertThat(response.getResources().size(), equalTo(DEFAULT_ITEMS_PER_PAGE));
     assertThat(response.getStartIndex(), equalTo(1));
     assertThat(response.getItemsPerPage(), equalTo(DEFAULT_ITEMS_PER_PAGE));
+
+    verifySortIsByNameAsc(response.getResources());
   }
 
   @Test
   @WithMockOAuthUser(user = "admin", authorities = {"ROLE_ADMIN"})
-  public void getUsersWithStartIndexZero() throws JsonParseException, JsonMappingException,
+  public void getUsersSortByNameAsc() throws JsonParseException, JsonMappingException,
       UnsupportedEncodingException, IOException, Exception {
-
-    long expectedSize = accountRepository.count();
 
     ListResponseDTO<ScimUser> response = mapper.readValue(mvc
         .perform(get(ACCOUNT_SEARCH_ENDPOINT).contentType(APPLICATION_JSON_CONTENT_TYPE)
-            .param("startIndex", "0"))
+            .param("sortBy", "name").param("sortDirection", "asc"))
         .andExpect(status().isOk()).andReturn().getResponse().getContentAsString(),
         new TypeReference<ListResponseDTO<ScimUser>>() {});
-    assertThat(response.getTotalResults(), equalTo(expectedSize));
+    assertThat(response.getTotalResults(), equalTo(accountRepository.count()));
     assertThat(response.getResources().size(), equalTo(DEFAULT_ITEMS_PER_PAGE));
     assertThat(response.getStartIndex(), equalTo(1));
     assertThat(response.getItemsPerPage(), equalTo(DEFAULT_ITEMS_PER_PAGE));
+
+    verifySortIsByNameAsc(response.getResources());
   }
 
   @Test
   @WithMockOAuthUser(user = "admin", authorities = {"ROLE_ADMIN"})
-  public void getUsersWithCountBiggerThanPageSize() throws JsonParseException, JsonMappingException,
+  public void getUsersSortByNameDesc() throws JsonParseException, JsonMappingException,
       UnsupportedEncodingException, IOException, Exception {
-
-    long expectedSize = accountRepository.count();
-
-    ListResponseDTO<ScimUser> response =
-        mapper.readValue(
-            mvc.perform(get(ACCOUNT_SEARCH_ENDPOINT).contentType(APPLICATION_JSON_CONTENT_TYPE)
-                .param("count", "" + DEFAULT_ITEMS_PER_PAGE * 2)).andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString(),
-            new TypeReference<ListResponseDTO<ScimUser>>() {});
-    assertThat(response.getTotalResults(), equalTo(expectedSize));
-    assertThat(response.getResources().size(), equalTo(DEFAULT_ITEMS_PER_PAGE));
-    assertThat(response.getStartIndex(), equalTo(1));
-    assertThat(response.getItemsPerPage(), equalTo(DEFAULT_ITEMS_PER_PAGE));
-  }
-
-  @Test
-  @WithMockOAuthUser(user = "admin", authorities = {"ROLE_ADMIN"})
-  public void getUsersWithNegativeCount() throws JsonParseException, JsonMappingException,
-      UnsupportedEncodingException, IOException, Exception {
-
-    long expectedSize = accountRepository.count();
 
     ListResponseDTO<ScimUser> response = mapper.readValue(mvc
         .perform(get(ACCOUNT_SEARCH_ENDPOINT).contentType(APPLICATION_JSON_CONTENT_TYPE)
-            .param("count", "-1"))
+            .param("sortBy", "name").param("sortDirection", "desc"))
         .andExpect(status().isOk()).andReturn().getResponse().getContentAsString(),
         new TypeReference<ListResponseDTO<ScimUser>>() {});
-    assertThat(response.getTotalResults(), equalTo(expectedSize));
+    assertThat(response.getTotalResults(), equalTo(accountRepository.count()));
     assertThat(response.getResources().size(), equalTo(DEFAULT_ITEMS_PER_PAGE));
     assertThat(response.getStartIndex(), equalTo(1));
     assertThat(response.getItemsPerPage(), equalTo(DEFAULT_ITEMS_PER_PAGE));
+
+    verifySortIsByNameDesc(response.getResources());
+  }
+
+  @Test
+  @WithMockOAuthUser(user = "admin", authorities = {"ROLE_ADMIN"})
+  public void getUsersSortByEmailAsc() throws JsonParseException, JsonMappingException,
+      UnsupportedEncodingException, IOException, Exception {
+
+    ListResponseDTO<ScimUser> response = mapper.readValue(mvc
+        .perform(get(ACCOUNT_SEARCH_ENDPOINT).contentType(APPLICATION_JSON_CONTENT_TYPE)
+            .param("sortBy", "email").param("sortDirection", "asc"))
+        .andExpect(status().isOk()).andReturn().getResponse().getContentAsString(),
+        new TypeReference<ListResponseDTO<ScimUser>>() {});
+    assertThat(response.getTotalResults(), equalTo(accountRepository.count()));
+    assertThat(response.getResources().size(), equalTo(DEFAULT_ITEMS_PER_PAGE));
+    assertThat(response.getStartIndex(), equalTo(1));
+    assertThat(response.getItemsPerPage(), equalTo(DEFAULT_ITEMS_PER_PAGE));
+
+    verifySortIsByEmailAsc(response.getResources());
+  }
+
+  @Test
+  @WithMockOAuthUser(user = "admin", authorities = {"ROLE_ADMIN"})
+  public void getUsersSortByEmailDesc() throws JsonParseException, JsonMappingException,
+      UnsupportedEncodingException, IOException, Exception {
+
+    ListResponseDTO<ScimUser> response = mapper.readValue(mvc
+        .perform(get(ACCOUNT_SEARCH_ENDPOINT).contentType(APPLICATION_JSON_CONTENT_TYPE)
+            .param("sortBy", "email").param("sortDirection", "desc"))
+        .andExpect(status().isOk()).andReturn().getResponse().getContentAsString(),
+        new TypeReference<ListResponseDTO<ScimUser>>() {});
+    assertThat(response.getTotalResults(), equalTo(accountRepository.count()));
+    assertThat(response.getResources().size(), equalTo(DEFAULT_ITEMS_PER_PAGE));
+    assertThat(response.getStartIndex(), equalTo(1));
+    assertThat(response.getItemsPerPage(), equalTo(DEFAULT_ITEMS_PER_PAGE));
+
+    verifySortIsByEmailDesc(response.getResources());
+  }
+
+  @Test
+  @WithMockOAuthUser(user = "admin", authorities = {"ROLE_ADMIN"})
+  public void getUsersSortByCreationTimeAsc() throws JsonParseException, JsonMappingException,
+      UnsupportedEncodingException, IOException, Exception {
+
+    ListResponseDTO<ScimUser> response = mapper.readValue(mvc
+        .perform(get(ACCOUNT_SEARCH_ENDPOINT).contentType(APPLICATION_JSON_CONTENT_TYPE)
+            .param("sortBy", "creation").param("sortDirection", "asc"))
+        .andExpect(status().isOk()).andReturn().getResponse().getContentAsString(),
+        new TypeReference<ListResponseDTO<ScimUser>>() {});
+    assertThat(response.getTotalResults(), equalTo(accountRepository.count()));
+    assertThat(response.getResources().size(), equalTo(DEFAULT_ITEMS_PER_PAGE));
+    assertThat(response.getStartIndex(), equalTo(1));
+    assertThat(response.getItemsPerPage(), equalTo(DEFAULT_ITEMS_PER_PAGE));
+
+    verifySortIsByCreationTimeAsc(response.getResources());
+  }
+
+  @Test
+  @WithMockOAuthUser(user = "admin", authorities = {"ROLE_ADMIN"})
+  public void getUsersSortByCreationTimeDesc() throws JsonParseException, JsonMappingException,
+      UnsupportedEncodingException, IOException, Exception {
+
+    ListResponseDTO<ScimUser> response = mapper.readValue(mvc
+        .perform(get(ACCOUNT_SEARCH_ENDPOINT).contentType(APPLICATION_JSON_CONTENT_TYPE)
+            .param("sortBy", "creation").param("sortDirection", "desc"))
+        .andExpect(status().isOk()).andReturn().getResponse().getContentAsString(),
+        new TypeReference<ListResponseDTO<ScimUser>>() {});
+    assertThat(response.getTotalResults(), equalTo(accountRepository.count()));
+    assertThat(response.getResources().size(), equalTo(DEFAULT_ITEMS_PER_PAGE));
+    assertThat(response.getStartIndex(), equalTo(1));
+    assertThat(response.getItemsPerPage(), equalTo(DEFAULT_ITEMS_PER_PAGE));
+
+    verifySortIsByCreationTimeDesc(response.getResources());
+  }
+
+  private void verifySortIsByNameAsc(List<ScimUser> receivedUsers) {
+
+    if (receivedUsers.size() <= 1) {
+      return;
+    }
+    for (int i = 1; i < receivedUsers.size(); i++) {
+      ScimUser previous = receivedUsers.get(i - 1);
+      ScimUser current = receivedUsers.get(i);
+      assertThat(previous.getName().getGivenName(),
+          lessThanOrEqualTo(current.getName().getGivenName()));
+      if (previous.getName().getGivenName().equals(current.getName().getGivenName())) {
+        assertThat(previous.getName().getFamilyName(),
+            lessThanOrEqualTo(current.getName().getFamilyName()));
+      }
+    }
+  }
+
+  private void verifySortIsByNameDesc(List<ScimUser> receivedUsers) {
+
+    if (receivedUsers.size() <= 1) {
+      return;
+    }
+    for (int i = 1; i < receivedUsers.size(); i++) {
+      ScimUser previous = receivedUsers.get(i - 1);
+      ScimUser current = receivedUsers.get(i);
+      assertThat(previous.getName().getGivenName(),
+          greaterThanOrEqualTo(current.getName().getGivenName()));
+      if (previous.getName().getGivenName().equals(current.getName().getGivenName())) {
+        assertThat(previous.getName().getFamilyName(),
+            greaterThanOrEqualTo(current.getName().getFamilyName()));
+      }
+    }
+  }
+
+  private void verifySortIsByEmailAsc(List<ScimUser> receivedUsers) {
+
+    if (receivedUsers.size() <= 1) {
+      return;
+    }
+    for (int i = 1; i < receivedUsers.size(); i++) {
+      ScimUser previous = receivedUsers.get(i - 1);
+      ScimUser current = receivedUsers.get(i);
+      assertThat(previous.getEmails().get(0).getValue(),
+          lessThanOrEqualTo(current.getEmails().get(0).getValue()));
+    }
+  }
+
+  private void verifySortIsByEmailDesc(List<ScimUser> receivedUsers) {
+
+    if (receivedUsers.size() <= 1) {
+      return;
+    }
+    for (int i = 1; i < receivedUsers.size(); i++) {
+      ScimUser previous = receivedUsers.get(i - 1);
+      ScimUser current = receivedUsers.get(i);
+      assertThat(previous.getEmails().get(0).getValue(),
+          greaterThanOrEqualTo(current.getEmails().get(0).getValue()));
+    }
+  }
+
+  private void verifySortIsByCreationTimeAsc(List<ScimUser> receivedUsers) {
+
+    if (receivedUsers.size() <= 1) {
+      return;
+    }
+    for (int i = 1; i < receivedUsers.size(); i++) {
+      ScimUser previous = receivedUsers.get(i - 1);
+      ScimUser current = receivedUsers.get(i);
+      assertThat(previous.getMeta().getCreated(),
+          lessThanOrEqualTo(current.getMeta().getCreated()));
+    }
+  }
+
+  private void verifySortIsByCreationTimeDesc(List<ScimUser> receivedUsers) {
+
+    if (receivedUsers.size() <= 1) {
+      return;
+    }
+    for (int i = 1; i < receivedUsers.size(); i++) {
+      ScimUser previous = receivedUsers.get(i - 1);
+      ScimUser current = receivedUsers.get(i);
+      assertThat(previous.getMeta().getCreated(),
+          greaterThanOrEqualTo(current.getMeta().getCreated()));
+    }
   }
 }

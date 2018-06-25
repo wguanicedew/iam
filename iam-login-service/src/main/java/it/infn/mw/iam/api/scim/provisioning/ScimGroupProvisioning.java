@@ -228,7 +228,7 @@ public class ScimGroupProvisioning
 
     if (params.getCount() == 0) {
 
-      long totalResults = groupRepository.countAllGroups();
+      long totalResults = groupRepository.count();
       builder.totalResults(totalResults);
 
     } else {
