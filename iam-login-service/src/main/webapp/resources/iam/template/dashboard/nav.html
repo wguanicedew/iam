@@ -50,11 +50,29 @@
             </a>
         </li>
         <li ng-show="$root.loggedUser.isAdmin">
+            <a id="nav-users2" ui-sref="users2" ui-sref-opts="{reload: true}">
+                <i class="fa fa-user"></i>
+                <span>Users2</span>
+                <span class="pull-right-container" ng-show="$root.usersCount>0">
+                <small class="label pull-right bg-blue">{{$root.usersCount}}</small>
+            </span>
+            </a>
+        </li>
+        <li ng-show="$root.loggedUser.isAdmin">
             <a id="nav-groups" ui-sref="groups" ui-sref-opts="{reload: true}">
                 <i class="fa fa-users"></i>
                 <span>Groups</span>
                 <span class="pull-right-container" ng-show="$root.loggedUser.totGroups>0">
                 <small class="label pull-right bg-green">{{$root.loggedUser.totGroups}}</small>
+            </span>
+            </a>
+        </li>
+        <li ng-show="$root.loggedUser.isAdmin">
+            <a id="nav-groups2" ui-sref="groups2" ui-sref-opts="{reload: true}">
+                <i class="fa fa-users"></i>
+                <span>Groups2</span>
+                <span class="pull-right-container" ng-show="$root.groupsCount>0">
+                <small class="label pull-right bg-green">{{$root.groupsCount}}</small>
             </span>
             </a>
         </li>

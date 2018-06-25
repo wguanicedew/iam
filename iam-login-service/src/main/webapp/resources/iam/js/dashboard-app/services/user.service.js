@@ -17,9 +17,9 @@
 
 angular.module('dashboardApp').factory('UserService', UserService);
 
-UserService.$inject = ['$q', '$rootScope', 'scimFactory', 'Authorities', 'Utils', 'AupService'];
+UserService.$inject = ['$q', '$rootScope', 'scimFactory', 'Authorities', 'Utils', 'AupService', 'UsersService', 'GroupsService'];
 
-function UserService($q, $rootScope, scimFactory, Authorities, Utils, AupService) {
+function UserService($q, $rootScope, scimFactory, Authorities, Utils, AupService, UsersService, GroupsService) {
     var service = { getUser: getUser, getMe: getMe, updateLoggedUserInfo: updateLoggedUserInfo };
 
     return service;
@@ -84,11 +84,13 @@ function UserService($q, $rootScope, scimFactory, Authorities, Utils, AupService
 
         if (Utils.isAdmin()) {
             promises.push(
-                scimFactory.getUsers(1, 1).then(function(r) {
+                UsersService.getUsersCount().then(function(r) {
                     $rootScope.loggedUser.totUsers = r.data.totalResults;
+                    $rootScope.usersCount = r.data.totalResults;
                 }),
-                scimFactory.getGroups(1, 1).then(function(r) {
+                GroupsService.getGroupsCount().then(function(r) {
                     $rootScope.loggedUser.totGroups = r.data.totalResults;
+                    $rootScope.groupsCount = r.data.totalResults;
                 }));
         }
 

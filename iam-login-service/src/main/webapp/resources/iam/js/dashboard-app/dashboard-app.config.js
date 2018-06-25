@@ -64,6 +64,24 @@ angular
                         }
                     })
                 .state(
+                    'users2', {
+                        url: '/users2',
+                        views: {
+                            content: {
+                                component: 'users'
+                            }
+                        }
+                    })
+                .state(
+                    'groups2', {
+                        url: '/groups2',
+                        views: {
+                            content: {
+                                component: 'groups'
+                            }
+                        }
+                    })
+                .state(
                     'users', {
                         url: '/users',
                         views: {

@@ -94,6 +94,8 @@
   <script type="text/javascript" src="/resources/iam/js/dashboard-app/services/clients.service.js"></script>
   <script type="text/javascript" src="/resources/iam/js/dashboard-app/services/clipboard.service.js"></script>
   <script type="text/javascript" src="/resources/iam/js/dashboard-app/services/aup.service.js"></script>
+  <script type="text/javascript" src="/resources/iam/js/dashboard-app/services/users.service.js"></script>
+  <script type="text/javascript" src="/resources/iam/js/dashboard-app/services/groups.service.js"></script>
   <!-- Controllers -->
   <script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/group.controller.js"></script>
   <script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/users.controller.js"></script>
@@ -121,6 +123,12 @@
   <script type="text/javascript" src="/resources/iam/js/dashboard-app/components/user/saml/user.saml.component.js"></script>
   <script type="text/javascript" src="/resources/iam/js/dashboard-app/components/user/x509/user.x509.component.js"></script>
   <script type="text/javascript" src="/resources/iam/js/dashboard-app/components/user/user.component.js"></script>
+  <!-- Users component -->
+  <script type="text/javascript" src="/resources/iam/js/dashboard-app/components/users/userslist/users.userslist.component.js"></script>
+  <script type="text/javascript" src="/resources/iam/js/dashboard-app/components/users/users.component.js"></script>
+  <!-- Groups component -->
+  <script type="text/javascript" src="/resources/iam/js/dashboard-app/components/groups/groupslist/groups.groupslist.component.js"></script>
+  <script type="text/javascript" src="/resources/iam/js/dashboard-app/components/groups/groups.component.js"></script>
   <!-- Tokens component -->
   <script type="text/javascript"
     src="/resources/iam/js/dashboard-app/components/tokens/refreshlist/tokens.refreshlist.component.js"></script>
