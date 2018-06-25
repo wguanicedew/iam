@@ -98,12 +98,8 @@
   <script type="text/javascript" src="/resources/iam/js/dashboard-app/services/groups.service.js"></script>
   <!-- Controllers -->
   <script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/group.controller.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/users.controller.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/groups.controller.js"></script>
   <script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/registration.controller.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/add-group.controller.js"></script>
   <script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/add-subgroup.controller.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/add-user.controller.js"></script>
   <script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/account-privileges.controller.js"></script>
   <script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/edit-user.controller.js"></script>
   <script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/add-user-group.controller.js"></script>

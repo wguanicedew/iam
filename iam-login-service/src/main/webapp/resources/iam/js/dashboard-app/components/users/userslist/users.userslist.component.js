@@ -49,10 +49,10 @@
 
     self.$onInit = function () {
       self.enabled = true;
-      self.resetUser();
+      self.reset();
     }
 
-    self.resetUser = function () {
+    self.reset = function () {
       self.user = {
         name: '',
         surname: '',
@@ -60,7 +60,7 @@
         email: ''
       };
       if ($scope.userCreationForm) {
-        $scope.userCreationForm.setPristine();
+        $scope.userCreationForm.$setPristine();
       }
       self.enabled = true;
     }

@@ -25,8 +25,6 @@
   var TEMPLATES = [
     '/resources/iam/template/dashboard/common/userinfo-box.html',
     '/resources/iam/template/dashboard/group/group.html',
-    '/resources/iam/template/dashboard/groups/groups.html',
-    '/resources/iam/template/dashboard/groups/newgroup.html',
     '/resources/iam/template/dashboard/header.html',
     '/resources/iam/template/dashboard/home/account-link-dialog.html',
     '/resources/iam/template/dashboard/home/editpassword.html',
@@ -42,9 +40,8 @@
     '/resources/iam/template/dashboard/user/edituser.html',
     '/resources/iam/template/dashboard/user/revoke-vo-admin-privileges.html',
     '/resources/iam/template/dashboard/user/user.html',
-    '/resources/iam/template/dashboard/users/newuser.html',
-    '/resources/iam/template/dashboard/users/users.html',
     '/resources/iam/js/dashboard-app/components/common/result.component.html',
+    '/resources/iam/js/dashboard-app/components/common/user.linking.dialog.html',
     '/resources/iam/js/dashboard-app/components/user/detail/user.detail.component.html',
     '/resources/iam/js/dashboard-app/components/user/edit/user.edit.component.html',
     '/resources/iam/js/dashboard-app/components/user/groups/user.groups.component.html',
@@ -53,12 +50,30 @@
     '/resources/iam/js/dashboard-app/components/user/privileges/user.privileges.component.html',
     '/resources/iam/js/dashboard-app/components/user/saml/user.saml.component.html',
     '/resources/iam/js/dashboard-app/components/user/status/user.status.component.html',
-    '/resources/iam/js/dashboard-app/components/user/user.component.html'
+    '/resources/iam/js/dashboard-app/components/user/user.component.html',
+    '/resources/iam/js/dashboard-app/components/users/users.component.html',
+    '/resources/iam/js/dashboard-app/components/users/userslist/users.userslist.component.html',
+    '/resources/iam/js/dashboard-app/components/users/userslist/user.add.dialog.html',
+    '/resources/iam/js/dashboard-app/components/users/userslist/user.delete.dialog.html',
+    '/resources/iam/js/dashboard-app/components/groups/groups.component.html',
+    '/resources/iam/js/dashboard-app/components/groups/groupslist/groups.groupslist.component.html',
+    '/resources/iam/js/dashboard-app/components/groups/groupslist/group.add.dialog.html',
+    '/resources/iam/js/dashboard-app/components/groups/groupslist/group.delete.dialog.html',
+    '/resources/iam/js/dashboard-app/components/groups/groupslist/subgroup.add.dialog.html',
+    '/resources/iam/js/dashboard-app/components/tokens/tokens.component.html',
+    '/resources/iam/js/dashboard-app/components/tokens/accesslist/token.revoke.dialog.html',
+    '/resources/iam/js/dashboard-app/components/tokens/accesslist/tokens.accesslist.component.html',
+    '/resources/iam/js/dashboard-app/components/tokens/refreshlist/token.revoke.dialog.html',
+    '/resources/iam/js/dashboard-app/components/tokens/refreshlist/tokens.refreshlist.component.html',
+    '/resources/iam/js/dashboard-app/components/aup/aup.component.html',
+    '/resources/iam/js/dashboard-app/components/aup/aup.create.dialog.html',
+    '/resources/iam/js/dashboard-app/components/aup/aup.delete.dialog.html',
+    '/resources/iam/js/dashboard-app/components/aup/aup.edit.dialog.html'
   ];
 
   function LoadTemplatesService($http, $templateCache, $q) {
     var service = {loadTemplates: loadTemplates};
-    
+
     return service;
 
     function loadTemplates() {

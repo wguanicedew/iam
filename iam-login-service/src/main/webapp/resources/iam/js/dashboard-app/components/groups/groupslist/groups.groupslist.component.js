@@ -16,7 +16,7 @@
 (function () {
   'use strict';
 
-  function DeleteGroupController($rootScope, $uibModalInstance, scimFactory, group) {
+  function DeleteGroupController($rootScope, $uibModalInstance, toaster, scimFactory, group) {
     var self = this;
 
     self.group = group;
@@ -32,8 +32,12 @@
         self.enabled = true;
       }).catch(function (error) {
         console.error(error);
-        self.error = error;
         self.enabled = true;
+        self.cancel();
+        toaster.pop({
+          type: 'error',
+          body: "" + error.data.detail
+        });
       });
     };
 
@@ -42,7 +46,7 @@
     };
   }
 
-  function AddParentGroupController($rootScope, $uibModalInstance, scimFactory) {
+  function AddParentGroupController($rootScope, $uibModalInstance, toaster, scimFactory) {
     var self = this;
 
     self.group = {};
@@ -70,9 +74,13 @@
         $uibModalInstance.close(response.data);
         self.enabled = true;
       }, function (error) {
-        console.error('Error creating group', error);
-        self.error = error;
+        console.error(error);
         self.enabled = true;
+        self.cancel();
+        toaster.pop({
+          type: 'error',
+          body: "" + error.data.detail
+        });
       });
     }
 

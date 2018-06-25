@@ -55,7 +55,7 @@ function AddSubGroupController($scope, $rootScope, $uibModalInstance, Utils, sci
 		console.info(addSubGroupCtrl.subgroup);
 
 		scimFactory.createGroup(addSubGroupCtrl.subgroup).then(function(response) {
-			$rootScope.loggedUser.totGroups = $rootScope.loggedUser.totGroups + 1;
+			$rootScope.groupsCount = $rootScope.groupsCount + 1;
 			$uibModalInstance.close(response.data);
 			addSubGroupCtrl.enabled = true;
 		}, function(error) {

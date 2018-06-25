@@ -85,11 +85,9 @@ function UserService($q, $rootScope, scimFactory, Authorities, Utils, AupService
         if (Utils.isAdmin()) {
             promises.push(
                 UsersService.getUsersCount().then(function(r) {
-                    $rootScope.loggedUser.totUsers = r.data.totalResults;
                     $rootScope.usersCount = r.data.totalResults;
                 }),
                 GroupsService.getGroupsCount().then(function(r) {
-                    $rootScope.loggedUser.totGroups = r.data.totalResults;
                     $rootScope.groupsCount = r.data.totalResults;
                 }));
         }
