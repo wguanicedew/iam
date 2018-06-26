@@ -68,13 +68,12 @@ public class AccountSearchController extends AbstractSearchController<ScimUser, 
   private Sort getSort(String orderBy, String sortDirection) {
 
     switch (orderBy.toLowerCase()) {
-      default:
-      case "name":
-        return getSortByName(getSortDirection(sortDirection));
       case "creation":
         return getSortByCreationTime(getSortDirection(sortDirection));
       case "email":
         return getSortByEmail(getSortDirection(sortDirection));
+      default: /* case "name" and anything else */
+        return getSortByName(getSortDirection(sortDirection));
     }
   }
 
