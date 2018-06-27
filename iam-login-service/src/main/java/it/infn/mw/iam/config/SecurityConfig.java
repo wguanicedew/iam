@@ -1,17 +1,15 @@
 /**
  * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2018
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package it.infn.mw.iam.config;
 
@@ -696,11 +694,27 @@ public class SecurityConfig {
   @Order(24)
   public static class ActuatorEndpointsConfig extends WebSecurityConfigurerAdapter {
 
+    @Value("${iam.superuser.username}")
+    private String basicUsername;
+
+    @Value("${iam.superuser.password}")
+    private String basicPassword;
+
+
     @Autowired
     private OAuth2AuthenticationProcessingFilter resourceFilter;
 
     @Autowired
-    private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
+    private CustomAuthenticationEntryPoint customAuthenticationEntyPoint;
+
+    @Override
+    public void configure(AuthenticationManagerBuilder auth) throws Exception {
+      // @formatter:off
+      auth.inMemoryAuthentication()
+        .withUser(basicUsername).password(basicPassword)
+        .roles("SUPERUSER", "ADMIN");
+      // @formatter:on
+    }
 
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
@@ -708,12 +722,11 @@ public class SecurityConfig {
       // @formatter:off
       http
         .requestMatchers()
-          .antMatchers("/metrics", "/configprops", "/env", "/mappings", 
-              "/flyway", "/autoconfig", "/beans", "/dump", "/trace", 
-              "/info", "/health", "/health/mail", "/health/external")
+          .antMatchers("/metrics", "/info", "/health", "/health/mail", "/health/external",
+              "/configprops", "/env", "/mappings", "/flyway", "/autoconfig", "/beans", "/dump", "/trace")
         .and()
           .httpBasic()
-          .authenticationEntryPoint(authenticationEntryPoint)
+          .authenticationEntryPoint(customAuthenticationEntyPoint)
         .and()
           .exceptionHandling()
             .accessDeniedHandler(new AccessDeniedHandlerImpl())
@@ -724,8 +737,8 @@ public class SecurityConfig {
         .and()
           .authorizeRequests()
             .antMatchers(HttpMethod.GET, "/info", "/health", "/health/mail", "/health/external").permitAll()
-            .antMatchers("/metrics", "/configprops", "/env", "/mappings", "/flyway",
-                "/autoconfig", "/beans", "/dump", "/trace").hasRole("ADMIN");
+            .antMatchers(HttpMethod.GET, "/metrics").hasRole("ADMIN")
+            .antMatchers(HttpMethod.GET, "/configprops", "/env", "/mappings", "/flyway", "/autoconfig", "/beans", "/dump", "/trace").hasRole("SUPERUSER");
       // @formatter:on
     }
   }
@@ -925,7 +938,7 @@ public class SecurityConfig {
   @Configuration
   @Order(30)
   public static class SearchApiEndpointConfig extends WebSecurityConfigurerAdapter {
-    
+
     @Autowired
     private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
 
