@@ -49,16 +49,19 @@ public abstract class AbstractSearchController<T, E> {
     this.service = service;
   }
 
-  public MappingJacksonValue getResources(int startIndex, int count, String filter,
-      Set<String> attributes, Sort sort) {
+  public MappingJacksonValue getResources(int requestedStartIndex, int requestedCount, String filter, Set<String> attributes, String sortBy, String sortDirection) {
 
     ListResponseDTO.Builder<T> response = ListResponseDTO.builder();
+
+    int startIndex = requestedStartIndex <= 0 ? 1 : requestedStartIndex;
+    int count = requestedCount < 0 || requestedCount > DEFAULT_ITEMS_PER_PAGE ? DEFAULT_ITEMS_PER_PAGE : requestedCount;
+    boolean hasFilter = filter != null && !filter.isEmpty();
 
     if (count == 0) {
 
       long totalResults;
 
-      if (hasFilter(filter)) {
+      if (hasFilter) {
 
         totalResults = service.count(filter);
 
@@ -71,10 +74,10 @@ public abstract class AbstractSearchController<T, E> {
 
     } else {
 
-      Pageable op = getOffsetPageable(startIndex, count, sort);
+      Pageable op = new OffsetPageable(startIndex - 1, count, getSort(sortBy, sortDirection));
       Page<E> p;
 
-      if (hasFilter(filter)) {
+      if (hasFilter) {
 
         p = service.getPage(op, filter);
 
@@ -91,10 +94,7 @@ public abstract class AbstractSearchController<T, E> {
     return filterResponseAttributes(response.build(), attributes);
   }
 
-  private boolean hasFilter(String filter) {
-
-    return filter != null && !filter.isEmpty();
-  }
+  protected abstract Sort getSort(String sortBy, String sortDirection);
 
   protected Sort.Direction getSortDirection(String value) {
 
@@ -104,13 +104,6 @@ public abstract class AbstractSearchController<T, E> {
       log.error(e.getMessage(), e);
       return Sort.Direction.ASC;
     }
-  }
-
-  private Pageable getOffsetPageable(int startIndex, int count, Sort sort) {
-
-    int validStartIndex = startIndex <= 0 ? 1 : startIndex;
-    int validCount = count < 0 || count > DEFAULT_ITEMS_PER_PAGE ? DEFAULT_ITEMS_PER_PAGE : count;
-    return new OffsetPageable(validStartIndex - 1, validCount, sort);
   }
 
   protected MappingJacksonValue filterResponseAttributes(ListResponseDTO<T> response,

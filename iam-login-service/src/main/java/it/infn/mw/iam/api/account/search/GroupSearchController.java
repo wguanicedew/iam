@@ -19,6 +19,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
@@ -40,8 +42,9 @@ import it.infn.mw.iam.persistence.model.IamGroup;
 @RequestMapping(GroupSearchController.GROUP_SEARCH_ENDPOINT)
 public class GroupSearchController extends AbstractSearchController<ScimGroup, IamGroup> {
 
-  public static final String GROUP_SEARCH_ENDPOINT = "/iam/group/search";
+  public static final Logger log = LoggerFactory.getLogger(GroupSearchController.class);
 
+  public static final String GROUP_SEARCH_ENDPOINT = "/iam/group/search";
   public static final String DEFAULT_SORT_BY = "name";
   public static final String DEFAULT_SORT_DIRECTION = "asc";
 
@@ -63,10 +66,17 @@ public class GroupSearchController extends AbstractSearchController<ScimGroup, I
       @RequestParam(required = false, defaultValue = DEFAULT_SORT_BY) String sortBy,
       @RequestParam(required = false, defaultValue = DEFAULT_SORT_DIRECTION) String sortDirection) {
 
-    return getResources(startIndex, count, filter, filteredAttributes, getSortByName(getSortDirection(sortDirection)));
+    return getResources(startIndex, count, filter, filteredAttributes, sortBy, sortDirection);
+  }
+
+  @Override
+  public Sort getSort(String sortBy, String sortDirection) {
+
+    return getSortByName(getSortDirection(sortDirection));
   }
 
   public static Sort getSortByName(Sort.Direction direction) {
+
     return new Sort(new Order(direction, "name").ignoreCase());
   }
 }

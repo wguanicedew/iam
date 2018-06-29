@@ -26,6 +26,16 @@ public class OffsetPageable implements Pageable {
   private final int count;
   private final Sort sort;
 
+  public OffsetPageable(int count) {
+
+    this(0, count, null);
+  }
+
+  public OffsetPageable(int count, Sort sort) {
+
+    this(0, count, sort);
+  }
+
   public OffsetPageable(int offset, int count) {
 
     this(offset, count, null);

@@ -89,7 +89,7 @@
     }
   }
 
-  function AddSubgroupController($rootScope, $uibModalInstance, scimFactory, parent) {
+  function AddSubgroupController($rootScope, $scope, $uibModalInstance, scimFactory, Utils, parent) {
     var self = this;
 
     self.parent = parent;
@@ -112,11 +112,13 @@
           $ref: self.parent.meta.location
         }
       }
+      $scope.operationResult = undefined;
     }
 
     self.addGroup = function () {
 
       self.enabled = false;
+      $scope.operationResult = undefined;
 
       console.debug(self.group);
 
@@ -126,7 +128,7 @@
         self.enabled = true;
       }, function (error) {
         console.error('Error creating group', error);
-        self.error = error;
+        $scope.operationResult = Utils.buildErrorOperationResult(error);
         self.enabled = true;
       });
     }
@@ -137,7 +139,7 @@
   }
 
   function GroupsListController($q, $scope, $rootScope, $uibModal, $uibModalStack, ModalService,
-    GroupsService, clipboardService, toaster) {
+    GroupsService, Utils, clipboardService, toaster) {
 
     var self = this;
 
@@ -253,7 +255,7 @@
     self.handleAddSubgroupSuccess = function (group) {
       toaster.pop({
         type: 'success',
-        body: 'New Subgroup Added'
+        body: 'New group ' + group.displayName + ' added as subgroup of ' + group["urn:indigo-dc:scim:schemas:IndigoGroup"].parentGroup.display
       });
       self.totalResults++;
       self.searchGroups(self.currentPage);
@@ -277,7 +279,7 @@
       self.enabled = true;
       toaster.pop({
         type: 'success',
-        body: 'Group Deleted'
+        body: 'Group ' + group.displayName + ' successfully deleted'
       });
       self.totalResults--;
       if (self.currentOffset > self.totalResults) {
@@ -317,6 +319,6 @@
         },
         templateUrl: '/resources/iam/js/dashboard-app/components/groups/groupslist/groups.groupslist.component.html',
         controller: ['$q', '$scope', '$rootScope', '$uibModal', '$uibModalStack', 'ModalService',
-          'GroupsService', 'clipboardService', 'toaster', GroupsListController]
+          'GroupsService', 'Utils', 'clipboardService', 'toaster', GroupsListController]
       });
 })();

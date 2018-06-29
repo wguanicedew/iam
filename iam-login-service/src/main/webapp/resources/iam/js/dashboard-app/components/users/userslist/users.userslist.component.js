@@ -206,7 +206,7 @@
       self.enabled = true;
       toaster.pop({
         type: 'success',
-        body: 'User ' + user.name.formatted + ' has been successfully deleted'
+        body: 'User ' + user.name.formatted + ' has been removed successfully'
       });
       self.totalResults--;
       if (self.currentOffset > self.totalResults) {

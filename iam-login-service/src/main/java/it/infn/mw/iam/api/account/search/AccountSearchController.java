@@ -62,31 +62,37 @@ public class AccountSearchController extends AbstractSearchController<ScimUser, 
       @RequestParam(required = false, defaultValue = DEFAULT_SORT_BY) String sortBy,
       @RequestParam(required = false, defaultValue = DEFAULT_SORT_DIRECTION) String sortDirection) {
 
-    return getResources(startIndex, count, filter, filteredAttributes, getSort(sortBy, sortDirection));
+    return getResources(startIndex, count, filter, filteredAttributes, sortBy, sortDirection);
   }
 
-  private Sort getSort(String orderBy, String sortDirection) {
+  @Override
+  public Sort getSort(String sortBy, String sortDirection) {
 
-    switch (orderBy.toLowerCase()) {
+    Sort.Direction direction = getSortDirection(sortDirection);
+
+    switch (sortBy.toLowerCase()) {
       case "creation":
-        return getSortByCreationTime(getSortDirection(sortDirection));
+        return getSortByCreationTime(direction);
       case "email":
-        return getSortByEmail(getSortDirection(sortDirection));
+        return getSortByEmail(direction);
       default: /* case "name" and anything else */
-        return getSortByName(getSortDirection(sortDirection));
+        return getSortByName(direction);
     }
   }
 
   public static Sort getSortByName(Sort.Direction direction) {
+
     return new Sort(new Order(direction, "userInfo.givenName").ignoreCase(),
         new Order(direction, "userInfo.familyName").ignoreCase());
   }
 
   public static Sort getSortByCreationTime(Sort.Direction direction) {
+
     return new Sort(new Order(direction, "creationTime").ignoreCase());
   }
 
   public static Sort getSortByEmail(Sort.Direction direction) {
+
     return new Sort(new Order(direction, "userInfo.email").ignoreCase());
   }
 }
