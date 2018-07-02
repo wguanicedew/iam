@@ -18,19 +18,23 @@ package it.infn.mw.iam.api.scim.model;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotEmpty;
+import org.hibernate.validator.constraints.URL;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import it.infn.mw.iam.api.validators.HtmlEscapeCheck;
+
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ScimPhoto {
 
-  @NotEmpty
   @NotNull
+  @NotEmpty
+  @URL
+  @HtmlEscapeCheck
   private final String value;
 
-  @NotEmpty
   @NotNull
   private final ScimPhotoType type;
 

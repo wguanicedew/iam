@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.validation.Valid;
+import javax.validation.groups.Default;
 
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -37,10 +38,10 @@ import com.google.common.base.Preconditions;
 @JsonFilter("attributeFilter")
 public class ScimUser extends ScimResource {
 
-  public interface NewUserValidation {
+  public interface NewUserValidation extends Default {
   }
 
-  public interface UpdateUserValidation {
+  public interface UpdateUserValidation extends Default {
   }
 
   public static final String USER_SCHEMA = "urn:ietf:params:scim:schemas:core:2.0:User";
@@ -70,6 +71,8 @@ public class ScimUser extends ScimResource {
   private final List<ScimEmail> emails;
 
   private final List<ScimAddress> addresses;
+
+  @Valid
   private final List<ScimPhoto> photos;
 
   private final Set<ScimGroupRef> groups;

@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import it.infn.mw.iam.api.validators.NoSpecialCharacters;
 import it.infn.mw.iam.core.NameUtils;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -35,14 +36,17 @@ public class ScimName {
 
   private final String formatted;
 
-  @Length(groups = {NewUserValidation.class, UpdateUserValidation.class}, max = 64)
+  @Length(max = 64)
+  @NoSpecialCharacters
   private final String familyName;
 
   @NotBlank(groups = {NewUserValidation.class})
-  @Length(groups = {NewUserValidation.class, UpdateUserValidation.class}, max = 64)
+  @Length(max = 64)
+  @NoSpecialCharacters
   private final String givenName;
 
-  @Length(groups = {NewUserValidation.class, UpdateUserValidation.class}, max = 64)
+  @Length(max = 64)
+  @NoSpecialCharacters
   private final String middleName;
 
   private final String honorificPrefix;

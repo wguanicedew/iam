@@ -110,15 +110,16 @@
             <label class="control-label col-sm-2" for="picture">Picture</label>
             <div ng-class="{'has-error': userUpdateForm.picture.$dirty && userUpdateForm.picture.$invalid, 'has-success': userUpdateForm.picture.$dirty && userUpdateForm.picture.$valid}">
                 <div class="col-sm-10">
-                    <input class="form-control" id="picture" name="picture" type="url" ng-model="editUserCtrl.eUser.picture"/>
+                    <input class="form-control" id="picture" name="picture" type="url" ng-model="editUserCtrl.eUser.picture" ng-model-options="{ debounce: 100 }" is-image-validator/>
                     <span class="glyphicon form-control-feedback" ng-class="{'glyphicon-remove': userUpdateForm.picture.$dirty && userUpdateForm.picture.$invalid, 'glyphicon-ok': userUpdateForm.picture.$dirty && userUpdateForm.picture.$valid}" style="right: 15px"></span>
                     <span class="help-block" ng-show="userUpdateForm.picture.$dirty && userUpdateForm.picture.$invalid">This field is invalid</span>
                     <span class="help-block" ng-show="userUpdateForm.picture.$dirty && userUpdateForm.picture.$error.url">
                         This field is not a valid URL</span>
+                    <span class="help-block" ng-show="userUpdateForm.username.$dirty && userUpdateForm.username.$error.isImage">This field is not a valid image</span>
                 </div>
                 <div class="col-sm-12">
                     <br/>
-                    <img ng-src="{{editUserCtrl.eUser.picture}}" ng-show="editUserCtrl.eUser.picture" class="profile-user-img img-responsive img-circle"/>
+                    <img id="picture_preview" ng-src="{{editUserCtrl.eUser.picture}}" ng-show="editUserCtrl.eUser.picture" class="profile-user-img img-responsive img-circle"/>
                 </div>
             </div>
         </div>

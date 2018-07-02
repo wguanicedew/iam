@@ -24,9 +24,6 @@ import org.hibernate.validator.constraints.NotEmpty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import it.infn.mw.iam.api.scim.model.ScimUser.NewUserValidation;
-import it.infn.mw.iam.api.scim.model.ScimUser.UpdateUserValidation;
-
 public class ScimEmail {
 
   public enum ScimEmailType {
@@ -37,11 +34,11 @@ public class ScimEmail {
   @Valid
   private final ScimEmailType type;
 
-  @NotEmpty(groups = {NewUserValidation.class, UpdateUserValidation.class})
-  @Email(groups = {NewUserValidation.class, UpdateUserValidation.class})
+  @NotEmpty
+  @Email
   private final String value;
 
-  @NotNull(groups = {NewUserValidation.class, UpdateUserValidation.class})
+  @NotNull
   private final Boolean primary;
 
   @JsonCreator
