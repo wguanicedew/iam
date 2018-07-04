@@ -590,47 +590,6 @@ public class SecurityConfig {
     }
   }
 
-  // @Configuration
-  // @Order(19)
-  // public static class RegistrationEndpointConfig extends WebSecurityConfigurerAdapter {
-  //
-  // @Autowired
-  // private OAuth2AuthenticationProcessingFilter resourceFilter;
-  //
-  // @Autowired
-  // private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
-  //
-  // @Autowired
-  // private CorsFilter corsFilter;
-  //
-  // @Override
-  // protected void configure(final HttpSecurity http) throws Exception {
-  //
-//      // @formatter:off
-//      http
-//        .antMatcher("/registration/**")
-//          .exceptionHandling()
-//            .authenticationEntryPoint(authenticationEntryPoint)
-//          .and()
-//            .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
-//            .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
-//            .sessionManagement()
-//              .sessionCreationPolicy(SessionCreationPolicy.NEVER)
-//          .and()
-//            .authorizeRequests()
-//              .antMatchers(HttpMethod.POST, "/registration/create").permitAll()
-//              .antMatchers(HttpMethod.GET, "/registration/username-available/**").permitAll()
-//              .antMatchers(HttpMethod.GET, "/registration/email-available/**").permitAll()
-//              .antMatchers(HttpMethod.GET, "/registration/confirm/**").permitAll()
-//              .antMatchers(HttpMethod.GET, "/registration/verify/**").permitAll()
-//              .antMatchers(HttpMethod.GET, "/registration/submitted").permitAll()
-//              .antMatchers("/registration/**").authenticated()
-//          .and()
-//            .csrf()
-//              .disable();
-//      // @formatter:on
-  // }
-  // }
 
   @Configuration
   @Order(20)
@@ -702,40 +661,6 @@ public class SecurityConfig {
     }
   }
 
-  // @Configuration
-  // @Order(23)
-  // public static class PasswordUpdateApiEndpointConfig extends WebSecurityConfigurerAdapter {
-  //
-  // @Autowired
-  // private OAuth2AuthenticationProcessingFilter resourceFilter;
-  //
-  // @Autowired
-  // private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
-  //
-  // @Autowired
-  // private CorsFilter corsFilter;
-  //
-  // @Override
-  // protected void configure(final HttpSecurity http) throws Exception {
-  //
-  // http.antMatcher("/iam/password-update")
-  // .exceptionHandling()
-  // .authenticationEntryPoint(authenticationEntryPoint)
-  // .and()
-  // .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
-  // .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
-  // .sessionManagement()
-  // .sessionCreationPolicy(SessionCreationPolicy.NEVER)
-  // .and()
-  // .authorizeRequests()
-  // .antMatchers("/iam/password-update")
-  // .authenticated()
-  // .and()
-  // .csrf()
-  // .disable();
-  // }
-  // }
-
   @Configuration
   @Order(24)
   public static class ActuatorEndpointsConfig extends WebSecurityConfigurerAdapter {
@@ -745,7 +670,6 @@ public class SecurityConfig {
 
     @Value("${iam.superuser.password}")
     private String basicPassword;
-
 
     @Autowired
     private OAuth2AuthenticationProcessingFilter resourceFilter;
@@ -764,7 +688,6 @@ public class SecurityConfig {
 
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
-
       // @formatter:off
       http
         .requestMatchers()
@@ -788,79 +711,6 @@ public class SecurityConfig {
       // @formatter:on
     }
   }
-
-  // @Configuration
-  // @Order(25)
-  // public static class ScopePoliciesEndpointConfig extends WebSecurityConfigurerAdapter {
-  // @Autowired
-  // private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
-  //
-  // @Autowired
-  // private OAuth2AuthenticationProcessingFilter resourceFilter;
-  //
-  // @Autowired
-  // private CorsFilter corsFilter;
-  //
-  // @Override
-  // protected void configure(HttpSecurity http) throws Exception {
-  // http.requestMatchers()
-  // .antMatchers("/iam/scope_policies/**")
-  // .and()
-  // .exceptionHandling()
-  // .authenticationEntryPoint(authenticationEntryPoint)
-  // .and()
-  // .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
-  // .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
-  // .sessionManagement()
-  // .sessionCreationPolicy(SessionCreationPolicy.NEVER)
-  // .and()
-  // .authorizeRequests()
-  // .antMatchers("/iam/scope_policies/**")
-  // .authenticated()
-  // .and()
-  // .csrf()
-  // .disable();
-  // }
-  // }
-
-  // @Configuration
-  // @Order(26)
-  // public static class TokensApiEndpointConfig extends WebSecurityConfigurerAdapter {
-  //
-  // @Autowired
-  // private OAuth2AuthenticationProcessingFilter resourceFilter;
-  //
-  // @Autowired
-  // private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
-  //
-  // @Autowired
-  // private CorsFilter corsFilter;
-  //
-  // @Override
-  // protected void configure(final HttpSecurity http) throws Exception {
-  //
-//      // @formatter:off
-//      http
-//        .requestMatchers()
-//        .antMatchers(ACCESS_TOKENS_ENDPOINT + "/**", REFRESH_TOKENS_ENDPOINT + "/**")
-//        .and()
-//        .exceptionHandling()
-//        .authenticationEntryPoint(authenticationEntryPoint)
-//        .and()
-//        .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
-//        .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
-//        .sessionManagement()
-//        .sessionCreationPolicy(SessionCreationPolicy.NEVER)
-//        .and()
-//        .authorizeRequests()
-//        .antMatchers(ACCESS_TOKENS_ENDPOINT + "/**", REFRESH_TOKENS_ENDPOINT + "/**")
-//        .authenticated()
-//        .and()
-//        .csrf()
-//        .disable();
-//      // @formatter:on
-  // }
-  // }
 
   @Configuration
   @Order(27)
@@ -902,120 +752,6 @@ public class SecurityConfig {
     }
   }
 
-  // @Configuration
-  // @Order(28)
-  // public static class AupApiEndpointConfig extends WebSecurityConfigurerAdapter {
-  //
-  // private static final String AUP_PATH = "/iam/aup";
-  // @Autowired
-  // private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
-  //
-  // @Autowired
-  // private OAuth2AuthenticationProcessingFilter resourceFilter;
-  //
-  // @Autowired
-  // private CorsFilter corsFilter;
-  //
-  // @Override
-  // protected void configure(HttpSecurity http) throws Exception {
-  // http.requestMatchers()
-  // .antMatchers("/iam/aup/**")
-  // .and()
-  // .exceptionHandling()
-  // .authenticationEntryPoint(authenticationEntryPoint)
-  // .and()
-  // .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
-  // .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
-  // .sessionManagement()
-  // .sessionCreationPolicy(SessionCreationPolicy.NEVER)
-  // .and()
-  // .authorizeRequests()
-  // .antMatchers(HttpMethod.GET, AUP_PATH)
-  // .permitAll()
-  // .antMatchers(HttpMethod.POST, AUP_PATH)
-  // .authenticated()
-  // .antMatchers(HttpMethod.DELETE, AUP_PATH)
-  // .authenticated()
-  // .and()
-  // .csrf()
-  // .disable();
-  // }
-  // }
-
-  // @Configuration
-  // @Order(29)
-  // public static class GroupRequestsEndpointConfig extends WebSecurityConfigurerAdapter {
-  // private static final String GROUP_REQUEST_PATH = "/iam/group_requests";
-  //
-  // @Autowired
-  // private OAuth2AuthenticationProcessingFilter resourceFilter;
-  //
-  // @Autowired
-  // private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
-  //
-  // @Autowired
-  // private CorsFilter corsFilter;
-  //
-  // @Override
-  // protected void configure(HttpSecurity http) throws Exception {
-//      // @formatter:off
-//      http
-//        .requestMatchers()
-//          .antMatchers(GROUP_REQUEST_PATH+"**", GROUP_REQUEST_PATH+"/**")
-//          .and()
-//          .exceptionHandling()
-//            .authenticationEntryPoint(authenticationEntryPoint)
-//          .and()
-//            .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
-//            .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
-//            .sessionManagement()
-//              .sessionCreationPolicy(SessionCreationPolicy.NEVER)
-//          .and()
-//            .authorizeRequests()
-//              .antMatchers(GROUP_REQUEST_PATH+"**", GROUP_REQUEST_PATH+"/**" )
-//                .authenticated()
-//          .and()
-//            .csrf()
-//              .disable();
-//      // @formatter:on
-  // }
-  // }
-
-  // @Configuration
-  // @Order(30)
-  // public static class SearchApiEndpointConfig extends WebSecurityConfigurerAdapter {
-  //
-  // @Autowired
-  // private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
-  //
-  // @Autowired
-  // private OAuth2AuthenticationProcessingFilter resourceFilter;
-  //
-  // @Autowired
-  // private CorsFilter corsFilter;
-  //
-  // @Override
-  // protected void configure(HttpSecurity http) throws Exception {
-  // http.requestMatchers()
-  // .antMatchers("/iam/account/search**", "/iam/group/search**")
-  // .and()
-  // .exceptionHandling()
-  // .authenticationEntryPoint(authenticationEntryPoint)
-  // .and()
-  // .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
-  // .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
-  // .sessionManagement()
-  // .sessionCreationPolicy(SessionCreationPolicy.NEVER)
-  // .and()
-  // .authorizeRequests()
-  // .antMatchers(HttpMethod.GET, "/iam/account/search", "/iam/group/search")
-  // .permitAll()
-  // .and()
-  // .csrf()
-  // .disable();
-  // }
-  // }
-
   @Configuration
   @Order(Ordered.HIGHEST_PRECEDENCE)
   @Profile("dev")
@@ -1042,5 +778,4 @@ public class SecurityConfig {
       builder.debug(true);
     }
   }
-
 }
