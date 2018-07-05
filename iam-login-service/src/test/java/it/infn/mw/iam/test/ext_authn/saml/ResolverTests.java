@@ -15,12 +15,15 @@ package it.infn.mw.iam.test.ext_authn.saml;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -29,10 +32,13 @@ import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.opensaml.saml2.core.Attribute;
 import org.opensaml.saml2.core.NameID;
 import org.opensaml.saml2.core.NameIDType;
+import org.opensaml.xml.XMLObject;
 import org.springframework.security.saml.SAMLCredential;
 
+import it.infn.mw.iam.authn.saml.util.EPTIDUserIdentifierResolver;
 import it.infn.mw.iam.authn.saml.util.FirstApplicableChainedSamlIdResolver;
 import it.infn.mw.iam.authn.saml.util.NameIdUserIdentifierResolver;
 import it.infn.mw.iam.authn.saml.util.NamedSamlUserIdentifierResolver;
@@ -259,4 +265,112 @@ public class ResolverTests {
     assertThat(subjectIdResolver.getName(), is(Saml2Attribute.SUBJECT_ID.name()));
 
   }
+
+
+  @Test
+  public void epitdAttributeIsRegisteredInResolversTest() {
+
+    SamlIdResolvers resolvers = new SamlIdResolvers();
+    SamlUserIdentifierResolver resolver = resolvers.byAttribute(Saml2Attribute.EPTID);
+    assertThat(resolver, is(instanceOf(EPTIDUserIdentifierResolver.class)));
+
+  }
+
+  @Test
+  public void eptidAttributeNotFoundTest() {
+
+    SAMLCredential cred = Mockito.mock(SAMLCredential.class);
+    when(cred.getRemoteEntityID()).thenReturn("entityId");
+
+    SamlUserIdentifierResolver resolver = new EPTIDUserIdentifierResolver();
+
+    SamlUserIdentifierResolutionResult result = resolver.resolveSamlUserIdentifier(cred);
+    assertThat(result.getResolvedId().isPresent(), is(false));
+    assertThat(result.getErrorMessages().isPresent(), is(true));
+    assertThat(result.getErrorMessages().get().get(0),
+        is("Attribute 'eduPersonTargetedId:urn:oid:1.3.6.1.4.1.5923.1.1.1.10' not found in "
+            + "assertion"));
+
+  }
+
+  @Test
+  public void eptidAttributeValuesSanityChecksTest() {
+
+    Attribute attribute = mock(Attribute.class);
+    SAMLCredential cred = mock(SAMLCredential.class);
+    NameID nameid = mock(NameID.class);
+    XMLObject object = mock(XMLObject.class);
+    when(cred.getRemoteEntityID()).thenReturn("entityId");
+
+    when(cred.getAttribute(Saml2Attribute.EPTID.getAttributeName())).thenReturn(attribute);
+
+    when(attribute.getAttributeValues()).thenReturn(null);
+    SamlUserIdentifierResolver resolver = new EPTIDUserIdentifierResolver();
+
+    SamlUserIdentifierResolutionResult result = resolver.resolveSamlUserIdentifier(cred);
+    assertThat(result.getResolvedId().isPresent(), is(false));
+    assertThat(result.getErrorMessages().isPresent(), is(true));
+    assertThat(result.getErrorMessages().get().get(0),
+        is("Attribute 'eduPersonTargetedId:urn:oid:1.3.6.1.4.1.5923.1.1.1.10' is malformed: "
+            + "null or empty list of values"));
+
+    when(attribute.getAttributeValues()).thenReturn(emptyList());
+    result = resolver.resolveSamlUserIdentifier(cred);
+
+    assertThat(result.getResolvedId().isPresent(), is(false));
+    assertThat(result.getErrorMessages().isPresent(), is(true));
+    assertThat(result.getErrorMessages().get().get(0),
+        is("Attribute 'eduPersonTargetedId:urn:oid:1.3.6.1.4.1.5923.1.1.1.10' is malformed: "
+            + "null or empty list of values"));
+
+    when(attribute.getAttributeValues()).thenReturn(asList(nameid, nameid, nameid));
+    result = resolver.resolveSamlUserIdentifier(cred);
+
+    assertThat(result.getResolvedId().isPresent(), is(false));
+    assertThat(result.getErrorMessages().isPresent(), is(true));
+    assertThat(result.getErrorMessages().get().get(0),
+        is("Attribute 'eduPersonTargetedId:urn:oid:1.3.6.1.4.1.5923.1.1.1.10' is malformed: "
+            + "more than one value found"));
+
+    when(attribute.getAttributeValues()).thenReturn(asList(object));
+    result = resolver.resolveSamlUserIdentifier(cred);
+    assertThat(result.getResolvedId().isPresent(), is(false));
+    assertThat(result.getErrorMessages().isPresent(), is(true));
+    assertThat(result.getErrorMessages().get().get(0),
+        is("Attribute 'eduPersonTargetedId:urn:oid:1.3.6.1.4.1.5923.1.1.1.10' is malformed: "
+            + "value is not a NameID"));
+
+    when(nameid.getFormat()).thenReturn(NameIDType.UNSPECIFIED);
+    when(attribute.getAttributeValues()).thenReturn(asList(nameid));
+
+    result = resolver.resolveSamlUserIdentifier(cred);
+    assertThat(result.getResolvedId().isPresent(), is(false));
+    assertThat(result.getErrorMessages().isPresent(), is(true));
+    assertThat(result.getErrorMessages().get().get(0),
+        is("Attribute 'eduPersonTargetedId:urn:oid:1.3.6.1.4.1.5923.1.1.1.10' is malformed: "
+            + "resolved NameID is not persistent: " + NameIDType.UNSPECIFIED));
+  }
+
+  @Test
+  public void eptidResolutionSuccess() {
+    Attribute attribute = mock(Attribute.class);
+    SAMLCredential cred = mock(SAMLCredential.class);
+    NameID nameid = mock(NameID.class);
+
+    when(cred.getRemoteEntityID()).thenReturn("entityId");
+    when(cred.getAttribute(Saml2Attribute.EPTID.getAttributeName())).thenReturn(attribute);
+    when(attribute.getAttributeValues()).thenReturn(asList(nameid));
+    when(nameid.getFormat()).thenReturn(NameIDType.PERSISTENT);
+    when(nameid.getValue()).thenReturn("nameid");
+    when(nameid.getNameQualifier()).thenReturn("nameIdNameQualifier");
+    when(nameid.getSPNameQualifier()).thenReturn("nameIdSPNameQualifier");
+
+    SamlUserIdentifierResolver resolver = new EPTIDUserIdentifierResolver();
+    SamlUserIdentifierResolutionResult result = resolver.resolveSamlUserIdentifier(cred);
+
+    assertThat(result.getResolvedId().isPresent(), is(true));
+    assertThat(result.getErrorMessages().isPresent(), is(false));
+    assertThat(result.getResolvedId().get().getUserId(), is("nameid"));
+  }
+
 }
