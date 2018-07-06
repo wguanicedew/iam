@@ -93,6 +93,7 @@ public class AssertionBuilderTests {
       .givenName("Illo")
       .sn("Camughe")
       .mail("sub@mail.test")
+      .eptid()
       .build();
 
 

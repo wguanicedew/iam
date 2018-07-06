@@ -20,21 +20,19 @@ import static it.infn.mw.iam.authn.saml.util.PersistentNameIdUserIdentifierResol
 import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.EPTID;
 
 import java.util.EnumSet;
+import java.util.Map;
 
 import com.google.common.collect.ImmutableMap;
 
 public class SamlIdResolvers {
 
-  private ImmutableMap<String, NamedSamlUserIdentifierResolver> registeredResolvers;
-
-  public static final EnumSet<Saml2Attribute> STRING_VALUE_ATTRIBUTE_RESOLVERS =
-      EnumSet.complementOf(EnumSet.of(EPTID));
+  private Map<String, NamedSamlUserIdentifierResolver> registeredResolvers;
 
   public SamlIdResolvers() {
     ImmutableMap.Builder<String, NamedSamlUserIdentifierResolver> builder =
         ImmutableMap.<String, NamedSamlUserIdentifierResolver>builder();
 
-    for (Saml2Attribute a: STRING_VALUE_ATTRIBUTE_RESOLVERS) {
+    for (Saml2Attribute a: EnumSet.complementOf(EnumSet.of(EPTID))) {
       builder.put(a.getAlias(), new AttributeUserIdentifierResolver(a));
     }
 

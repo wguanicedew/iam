@@ -38,6 +38,7 @@ import org.opensaml.saml2.core.Attribute;
 import org.opensaml.saml2.core.NameID;
 import org.opensaml.saml2.core.NameIDType;
 import org.opensaml.xml.XMLObject;
+import org.opensaml.xml.schema.XSAny;
 import org.springframework.security.saml.SAMLCredential;
 
 import it.infn.mw.iam.authn.saml.util.EPTIDUserIdentifierResolver;
@@ -300,6 +301,7 @@ public class ResolverTests {
 
     Attribute attribute = mock(Attribute.class);
     SAMLCredential cred = mock(SAMLCredential.class);
+    XSAny attributeValue = mock(XSAny.class);
     NameID nameid = mock(NameID.class);
     XMLObject object = mock(XMLObject.class);
     when(cred.getRemoteEntityID()).thenReturn("entityId");
@@ -340,10 +342,29 @@ public class ResolverTests {
     assertThat(result.getErrorMessages().isPresent(), is(true));
     assertThat(result.getErrorMessages().get().get(0),
         is("Attribute 'eduPersonTargetedId:urn:oid:1.3.6.1.4.1.5923.1.1.1.10' is malformed: "
-            + "value is not a NameID"));
+            + "attribute value is not an XSAny"));
 
+    
+    when(attribute.getAttributeValues()).thenReturn(asList(attributeValue));
+    when(attribute.hasChildren()).thenReturn(false);
+    result = resolver.resolveSamlUserIdentifier(cred);
+    assertThat(result.getResolvedId().isPresent(), is(false));
+    assertThat(result.getErrorMessages().isPresent(), is(true));
+    assertThat(result.getErrorMessages().get().get(0),
+        is("Attribute 'eduPersonTargetedId:urn:oid:1.3.6.1.4.1.5923.1.1.1.10' is malformed: "
+            + "attribute value has no children elements"));
+    
+    when(attributeValue.hasChildren()).thenReturn(true);
+    when(attributeValue.getOrderedChildren()).thenReturn(asList(object));
+    result = resolver.resolveSamlUserIdentifier(cred);
+    assertThat(result.getResolvedId().isPresent(), is(false));
+    assertThat(result.getErrorMessages().isPresent(), is(true));
+    assertThat(result.getErrorMessages().get().get(0),
+        is("Attribute 'eduPersonTargetedId:urn:oid:1.3.6.1.4.1.5923.1.1.1.10' is malformed: "
+            + "attribute value first children value is not a NameID"));
+    
+    when(attributeValue.getOrderedChildren()).thenReturn(asList(nameid));
     when(nameid.getFormat()).thenReturn(NameIDType.UNSPECIFIED);
-    when(attribute.getAttributeValues()).thenReturn(asList(nameid));
 
     result = resolver.resolveSamlUserIdentifier(cred);
     assertThat(result.getResolvedId().isPresent(), is(false));
@@ -357,11 +378,15 @@ public class ResolverTests {
   public void eptidResolutionSuccess() {
     Attribute attribute = mock(Attribute.class);
     SAMLCredential cred = mock(SAMLCredential.class);
+    XSAny attributeValue = mock(XSAny.class);
     NameID nameid = mock(NameID.class);
 
     when(cred.getRemoteEntityID()).thenReturn("entityId");
     when(cred.getAttribute(Saml2Attribute.EPTID.getAttributeName())).thenReturn(attribute);
-    when(attribute.getAttributeValues()).thenReturn(asList(nameid));
+    when(attribute.getAttributeValues()).thenReturn(asList(attributeValue));
+    when(attributeValue.hasChildren()).thenReturn(true);
+    when(attributeValue.getOrderedChildren()).thenReturn(asList(nameid));
+    
     when(nameid.getFormat()).thenReturn(NameIDType.PERSISTENT);
     when(nameid.getValue()).thenReturn("nameid");
     when(nameid.getNameQualifier()).thenReturn("nameIdNameQualifier");

@@ -23,6 +23,7 @@ import org.opensaml.saml2.core.Attribute;
 import org.opensaml.saml2.core.NameID;
 import org.opensaml.saml2.core.NameIDType;
 import org.opensaml.xml.XMLObject;
+import org.opensaml.xml.schema.XSAny;
 import org.springframework.security.saml.SAMLCredential;
 
 import it.infn.mw.iam.persistence.model.IamSamlId;
@@ -45,12 +46,12 @@ public class EPTIDUserIdentifierResolver extends AttributeUserIdentifierResolver
             attribute.getAttributeName()));
     }
 
-    if (isNull(eptidAttr.getAttributeValues()) ) {
+    if (isNull(eptidAttr.getAttributeValues())) {
       return SamlUserIdentifierResolutionResult
-          .resolutionFailure(format("Attribute '%s:%s' is malformed: null or empty list of values",
-              attribute.getAlias(), attribute.getAttributeName()));
+        .resolutionFailure(format("Attribute '%s:%s' is malformed: null or empty list of values",
+            attribute.getAlias(), attribute.getAttributeName()));
     }
-    
+
     if (eptidAttr.getAttributeValues().isEmpty()) {
       return SamlUserIdentifierResolutionResult
         .resolutionFailure(format("Attribute '%s:%s' is malformed: null or empty list of values",
@@ -63,12 +64,27 @@ public class EPTIDUserIdentifierResolver extends AttributeUserIdentifierResolver
             attribute.getAlias(), attribute.getAttributeName()));
     }
 
-    XMLObject maybeNameId = eptidAttr.getAttributeValues().get(0);
+
+    XMLObject maybeAttributeValue = eptidAttr.getAttributeValues().get(0);
+
+    if (!(maybeAttributeValue instanceof XSAny)) {
+      return SamlUserIdentifierResolutionResult.resolutionFailure(
+          format("Attribute '%s:%s' is malformed: attribute value is not an XSAny",
+              attribute.getAlias(), attribute.getAttributeName()));
+    }
+
+    if (!maybeAttributeValue.hasChildren()) {
+      return SamlUserIdentifierResolutionResult.resolutionFailure(
+          format("Attribute '%s:%s' is malformed: attribute value has no children elements",
+              attribute.getAlias(), attribute.getAttributeName()));
+    }
+
+    XMLObject maybeNameId = maybeAttributeValue.getOrderedChildren().get(0);
 
     if (!(maybeNameId instanceof NameID)) {
-      return SamlUserIdentifierResolutionResult
-        .resolutionFailure(format("Attribute '%s:%s' is malformed: value is not a NameID",
-            attribute.getAlias(), attribute.getAttributeName()));
+      return SamlUserIdentifierResolutionResult.resolutionFailure(format(
+          "Attribute '%s:%s' is malformed: attribute value first children value is not a NameID",
+          attribute.getAlias(), attribute.getAttributeName()));
     }
 
     NameID nameId = (NameID) maybeNameId;

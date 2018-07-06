@@ -50,5 +50,4 @@ public class AttributeUserIdentifierResolver extends AbstractSamlUserIdentifierR
     return SamlUserIdentifierResolutionResult.resolutionSuccess(samlId);
 
   }
-
 }
