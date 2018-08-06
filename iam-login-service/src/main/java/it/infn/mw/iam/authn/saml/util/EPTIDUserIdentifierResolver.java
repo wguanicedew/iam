@@ -26,6 +26,8 @@ import org.opensaml.xml.XMLObject;
 import org.opensaml.xml.schema.XSAny;
 import org.springframework.security.saml.SAMLCredential;
 
+import com.google.common.base.Strings;
+
 import it.infn.mw.iam.persistence.model.IamSamlId;
 
 public class EPTIDUserIdentifierResolver extends AttributeUserIdentifierResolver {
@@ -38,6 +40,12 @@ public class EPTIDUserIdentifierResolver extends AttributeUserIdentifierResolver
   public SamlUserIdentifierResolutionResult resolveSamlUserIdentifier(
       SAMLCredential samlCredential) {
 
+    if (Strings.isNullOrEmpty(samlCredential.getRemoteEntityID())) {
+      return SamlUserIdentifierResolutionResult
+          .resolutionFailure(format("Malformed assertion while looking for attribute '%s:%s': remoteEntityID null or empty", attribute.getAlias(),
+              attribute.getAttributeName()));
+    }
+    
     Attribute eptidAttr = samlCredential.getAttribute(attribute.getAttributeName());
 
     if (eptidAttr == null) {
@@ -95,8 +103,8 @@ public class EPTIDUserIdentifierResolver extends AttributeUserIdentifierResolver
     }
 
     IamSamlId samlId = new IamSamlId();
+    
     samlId.setIdpId(samlCredential.getRemoteEntityID());
-    samlId.setIdpId(nameId.getNameQualifier());
     samlId.setAttributeId(attribute.getAttributeName());
     samlId.setUserId(nameId.getValue());
 

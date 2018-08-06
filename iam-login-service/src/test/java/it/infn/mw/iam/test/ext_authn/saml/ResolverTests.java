@@ -304,7 +304,7 @@ public class ResolverTests {
     XSAny attributeValue = mock(XSAny.class);
     NameID nameid = mock(NameID.class);
     XMLObject object = mock(XMLObject.class);
-    when(cred.getRemoteEntityID()).thenReturn("entityId");
+    
 
     when(cred.getAttribute(Saml2Attribute.EPTID.getAttributeName())).thenReturn(attribute);
 
@@ -312,6 +312,15 @@ public class ResolverTests {
     SamlUserIdentifierResolver resolver = new EPTIDUserIdentifierResolver();
 
     SamlUserIdentifierResolutionResult result = resolver.resolveSamlUserIdentifier(cred);
+    assertThat(result.getResolvedId().isPresent(), is(false));
+    assertThat(result.getErrorMessages().isPresent(), is(true));
+    assertThat(result.getErrorMessages().get().get(0),
+        is("Malformed assertion while looking for attribute 'eduPersonTargetedId:urn:oid:1.3.6.1.4.1.5923.1.1.1.10': "
+            + "remoteEntityID null or empty"));
+    
+    when(cred.getRemoteEntityID()).thenReturn("entityId");
+    
+    result = resolver.resolveSamlUserIdentifier(cred);
     assertThat(result.getResolvedId().isPresent(), is(false));
     assertThat(result.getErrorMessages().isPresent(), is(true));
     assertThat(result.getErrorMessages().get().get(0),
@@ -398,6 +407,7 @@ public class ResolverTests {
     assertThat(result.getResolvedId().isPresent(), is(true));
     assertThat(result.getErrorMessages().isPresent(), is(false));
     assertThat(result.getResolvedId().get().getUserId(), is("nameid"));
+    assertThat(result.getResolvedId().get().getIdpId(), is("entityId"));
   }
 
 }
