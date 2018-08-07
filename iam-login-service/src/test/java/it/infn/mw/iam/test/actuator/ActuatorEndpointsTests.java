@@ -25,8 +25,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.Set;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,13 +34,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-
-import com.google.common.collect.Sets;
 
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.test.util.WithAnonymousUser;
@@ -51,22 +48,17 @@ import it.infn.mw.iam.test.util.WithAnonymousUser;
 @SpringApplicationConfiguration(classes = {IamLoginService.class})
 @WebAppConfiguration
 @WithAnonymousUser
-public class ActuatorEndpointsTests {
+@TestPropertySource(properties= {"endpoints.env.enabled=true", 
+    "endpoints.configprops.enabled=true",
+    "endpoints.mappings.enabled=true",
+    "endpoints.flyway.enabled=true",
+    "endpoints.autoconfig.enabled=true",
+    "endpoints.beans.enabled=true",
+    "endpoints.dump.enabled=true",
+    "endpoints.trace.enabled=true"})
+public class ActuatorEndpointsTests extends ActuatorTestSupport {
 
-  private static final String ADMIN_USERNAME = "admin";
-  private static final String ADMIN_ROLE = "ADMIN";
-
-  private static final String USER_USERNAME = "test";
-  private static final String USER_ROLE = "USER";
-
-  private static final String STATUS_UP = "UP";
-  private static final String STATUS_DOWN = "DOWN";
-
-  private static final Set<String> SENSITIVE_ENDPOINTS = Sets.newHashSet("/metrics");
-
-  private static final Set<String> PRIVILEGED_ENDPOINTS = Sets.newHashSet("/configprops", "/env",
-      "/mappings", "/flyway", "/autoconfig", "/beans", "/dump", "/trace");
-
+  
   @Value("${health.mailProbe.path}")
   private String mailHealthEndpoint;
 

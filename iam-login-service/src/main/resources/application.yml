@@ -134,3 +134,12 @@ health:
     
 accountLinking:
   disable: ${IAM_ACCOUNT_LINKING_DISABLE:false}
+  
+endpoints:
+  enabled: false
+  info:
+    enabled: true
+  health:
+    enabled: true
+  metrics:
+    enabled: true
