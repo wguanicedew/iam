@@ -26,7 +26,9 @@ public enum Saml2Attribute {
   SN("sn", "urn:oid:2.5.4.4"),
   CN("cn", "urn:oid:2.5.4.3"),
   EMPLOYEE_NUMBER("employeeNumber", "urn:oid:2.16.840.1.113730.3.1.3"),
-  SPID_CODE("spidCode", "spidCode");
+  SPID_CODE("spidCode", "spidCode"),
+  SUBJECT_ID("subjectId", "urn:oasis:names:tc:SAML:profile:subject-id"),
+  PAIRWISE_ID("pairwiseId", "urn:oasis:names:tc:SAML:profile:pairwise-id");
 
   private String alias;
   private String attributeName;

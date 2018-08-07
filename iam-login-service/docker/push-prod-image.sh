@@ -47,6 +47,7 @@ if [[ -n ${DOCKER_REGISTRY_HOST} ]]; then
   docker push ${DOCKER_REGISTRY_HOST}/${POM_VERSION_TAG}
   docker push ${DOCKER_REGISTRY_HOST}/${POM_VERSION_LATEST_TAG}
   if [ "${GIT_BRANCH_NAME}" != "HEAD" ]; then
+    docker tag ${BRANCH_LATEST_TAG} ${DOCKER_REGISTRY_HOST}/${BRANCH_LATEST_TAG}
     docker push ${DOCKER_REGISTRY_HOST}/${BRANCH_LATEST_TAG}
   fi
 else

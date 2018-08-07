@@ -49,7 +49,14 @@ public class FirstApplicableChainedSamlIdResolver implements SamlUserIdentifierR
         return result;
       }
       
-      result.getErrorMessages().ifPresent(errorMessages::addAll);
+      result.getErrorMessages().ifPresent(messages -> {
+        errorMessages.addAll(messages);
+        if (LOG.isDebugEnabled()) {
+          LOG.debug("SAML user id resolution with resolver {} failed with the following errors",
+              resolver.getClass().getName());
+          messages.forEach(LOG::debug);
+        }
+      });
     }
 
     LOG.debug(
