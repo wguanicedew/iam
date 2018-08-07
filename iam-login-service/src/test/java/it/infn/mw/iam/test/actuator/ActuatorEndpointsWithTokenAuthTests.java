@@ -54,8 +54,10 @@ public class ActuatorEndpointsWithTokenAuthTests {
 
   private static final String STATUS_UP = "UP";
 
-  private static final Set<String> SENSITIVE_ENDPOINTS = Sets.newHashSet("/metrics", "/configprops",
-      "/env", "/mappings", "/flyway", "/autoconfig", "/beans", "/dump", "/trace");
+  private static final Set<String> SENSITIVE_ENDPOINTS = Sets.newHashSet("/metrics");
+
+  private static final Set<String> PRIVILEGED_ENDPOINTS = Sets.newHashSet("/configprops", "/env",
+      "/mappings", "/flyway", "/autoconfig", "/beans", "/dump", "/trace");
 
   @Value("${spring.mail.host}")
   private String mailHost;
@@ -67,7 +69,7 @@ public class ActuatorEndpointsWithTokenAuthTests {
   private WebApplicationContext context;
 
   private MockMvc mvc;
-  
+
   @Autowired
   private MockOAuth2Filter mockOAuth2Filter;
 
@@ -78,7 +80,7 @@ public class ActuatorEndpointsWithTokenAuthTests {
       .alwaysDo(print())
       .build();
   }
-  
+
   @After
   public void cleanupOAuthUser() {
     mockOAuth2Filter.cleanupSecurityContext();
@@ -135,6 +137,33 @@ public class ActuatorEndpointsWithTokenAuthTests {
       // @formatter:off
       mvc.perform(get(endpoint))
         .andExpect(status().isOk())
+        ;
+      // @formatter:on
+    }
+  }
+
+  @Test
+  @WithMockOAuthUser(clientId = "client-cred",
+      scopes = {"openid", "profile", "read-tasks", "write-tasks"})
+  public void testPrivilegedEndpointWithTokenAsUser() throws Exception {
+    for (String endpoint : PRIVILEGED_ENDPOINTS) {
+      // @formatter:off
+      mvc.perform(get(endpoint))
+        .andExpect(status().isForbidden())
+        ;
+      // @formatter:on
+    }
+  }
+
+  @Test
+  @WithMockOAuthUser(clientId = "client-cred",
+      scopes = {"openid", "profile", "read-tasks", "write-tasks"}, user = ADMIN_USERNAME,
+      authorities = {ADMIN_AUTORITY})
+  public void testPrivilegedEndpointWithTokenAsAdmin() throws Exception {
+    for (String endpoint : PRIVILEGED_ENDPOINTS) {
+      // @formatter:off
+      mvc.perform(get(endpoint))
+        .andExpect(status().isForbidden())
         ;
       // @formatter:on
     }

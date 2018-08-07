@@ -696,11 +696,27 @@ public class SecurityConfig {
   @Order(24)
   public static class ActuatorEndpointsConfig extends WebSecurityConfigurerAdapter {
 
+    @Value("${iam.superuser.username}")
+    private String basicUsername;
+
+    @Value("${iam.superuser.password}")
+    private String basicPassword;
+
+
     @Autowired
     private OAuth2AuthenticationProcessingFilter resourceFilter;
 
     @Autowired
-    private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
+    private CustomAuthenticationEntryPoint customAuthenticationEntyPoint;
+
+    @Override
+    public void configure(AuthenticationManagerBuilder auth) throws Exception {
+      // @formatter:off
+      auth.inMemoryAuthentication()
+        .withUser(basicUsername).password(basicPassword)
+        .roles("SUPERUSER", "ADMIN");
+      // @formatter:on
+    }
 
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
@@ -708,12 +724,11 @@ public class SecurityConfig {
       // @formatter:off
       http
         .requestMatchers()
-          .antMatchers("/metrics", "/configprops", "/env", "/mappings", 
-              "/flyway", "/autoconfig", "/beans", "/dump", "/trace", 
-              "/info", "/health", "/health/mail", "/health/external")
+          .antMatchers("/metrics", "/info", "/health", "/health/mail", "/health/external",
+              "/configprops", "/env", "/mappings", "/flyway", "/autoconfig", "/beans", "/dump", "/trace")
         .and()
           .httpBasic()
-          .authenticationEntryPoint(authenticationEntryPoint)
+          .authenticationEntryPoint(customAuthenticationEntyPoint)
         .and()
           .exceptionHandling()
             .accessDeniedHandler(new AccessDeniedHandlerImpl())
@@ -724,8 +739,8 @@ public class SecurityConfig {
         .and()
           .authorizeRequests()
             .antMatchers(HttpMethod.GET, "/info", "/health", "/health/mail", "/health/external").permitAll()
-            .antMatchers("/metrics", "/configprops", "/env", "/mappings", "/flyway",
-                "/autoconfig", "/beans", "/dump", "/trace").hasRole("ADMIN");
+            .antMatchers(HttpMethod.GET, "/metrics").hasRole("ADMIN")
+            .antMatchers(HttpMethod.GET, "/configprops", "/env", "/mappings", "/flyway", "/autoconfig", "/beans", "/dump", "/trace").hasRole("SUPERUSER");
       // @formatter:on
     }
   }
@@ -925,7 +940,7 @@ public class SecurityConfig {
   @Configuration
   @Order(30)
   public static class SearchApiEndpointConfig extends WebSecurityConfigurerAdapter {
-    
+
     @Autowired
     private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
 
