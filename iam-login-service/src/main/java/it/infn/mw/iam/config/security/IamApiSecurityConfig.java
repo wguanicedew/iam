@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.config;
+package it.infn.mw.iam.config.security;
 
 import static it.infn.mw.iam.api.tokens.Constants.ACCESS_TOKENS_ENDPOINT;
 import static it.infn.mw.iam.api.tokens.Constants.REFRESH_TOKENS_ENDPOINT;
@@ -35,9 +35,11 @@ import org.springframework.security.web.access.AccessDeniedHandlerImpl;
 import org.springframework.security.web.context.SecurityContextPersistenceFilter;
 import org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter;
 
+import it.infn.mw.iam.config.CustomAuthenticationEntryPoint;
+
 @Configuration
 @EnableWebSecurity
-public class SecurityIamApiConfig {
+public class IamApiSecurityConfig {
 
   @Configuration
   @Order(20)

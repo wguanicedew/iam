@@ -13,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.config;
+package it.infn.mw.iam.config.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -53,7 +55,7 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityUserLoginConfig {
+public class IamWebSecurityConfig {
 
   @Configuration
   @Order(100)
@@ -216,6 +218,32 @@ public class SecurityUserLoginConfig {
             .enableSessionUrlRewriting(false)
             .sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
       // @formatter:on
+    }
+  }
+  
+  @Configuration
+  @Order(Ordered.HIGHEST_PRECEDENCE)
+  @Profile("dev")
+  public static class H2ConsoleEndpointAuthorizationConfig extends WebSecurityConfigurerAdapter {
+
+    @Override
+    protected void configure(final HttpSecurity http) throws Exception {
+
+      HttpSecurity h2Console = http.requestMatchers()
+        .antMatchers("/h2-console", "/h2-console/**")
+        .and()
+        .csrf()
+        .disable();
+
+      h2Console.httpBasic();
+      h2Console.headers().frameOptions().disable();
+
+      h2Console.authorizeRequests().antMatchers("/h2-console/**", "/h2-console").permitAll();
+    }
+
+    @Override
+    public void configure(final WebSecurity builder) throws Exception {
+      builder.debug(true);
     }
   }
 }
