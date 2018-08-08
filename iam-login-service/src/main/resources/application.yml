@@ -93,7 +93,7 @@ oidc:
       scope: openid,profile,email,address,phone
     loginButton:
       order: 0
-      text: Sign-in with Google
+      text: Sign in with Google
       style: google
 
 github:

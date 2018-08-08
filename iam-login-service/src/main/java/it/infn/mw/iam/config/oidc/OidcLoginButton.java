@@ -28,7 +28,7 @@ public class OidcLoginButton {
 
   public static final Integer DEFAULT_ORDER = 0;
   public static final String DEFAULT_STYLE = "openid";
-  public static final String DEFAULT_TEXT = "Sign-in with OIDC";
+  public static final String DEFAULT_TEXT = "Sign in with OIDC";
 
   private Integer order = DEFAULT_ORDER;
   private String text = DEFAULT_TEXT;

@@ -15,6 +15,9 @@
  */
 package it.infn.mw.iam.config.oidc;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.util.Objects.isNull;
+
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -84,6 +87,8 @@ public class OidcConfiguration {
 
   @Autowired
   private AccountUtils accountUtils;
+
+  public static final String DEFINE_ME_PLEASE = "define_me_please";
 
   @Bean
   public FilterRegistrationBean disabledAutomaticOidcFilterRegistration(OidcClientFilter f) {
@@ -170,21 +175,32 @@ public class OidcConfiguration {
     return new DynamicServerConfigurationService();
   }
 
+  public boolean configuredProvider(OidcProvider provider) {
+    return !isNullOrEmpty(provider.getIssuer())
+        && !(isNull(provider.getClient()) || isNullOrEmpty(provider.getClient().getClientId())
+            || isNullOrEmpty(provider.getClient().getClientSecret())
+            || DEFINE_ME_PLEASE.equals(provider.getClient().getClientId())
+            || DEFINE_ME_PLEASE.equals(provider.getClient().getClientSecret()));
+  }
+
+
+
   @Bean
-  public ClientConfigurationService staticClientConfiguration() {
+  public ClientConfigurationService oidcClientConfiguration() {
 
     Map<String, RegisteredClient> clients = new LinkedHashMap<>();
 
-    for (OidcProvider provider : oidcConfig.getProviders()) {
-      RegisteredClient rc = new RegisteredClient();
-      rc.setClientId(provider.getClient().getClientId());
-      rc.setClientSecret(provider.getClient().getClientSecret());
-      rc.setRedirectUris(
-          Sets.newLinkedHashSet(Arrays.asList(provider.getClient().getRedirectUris())));
-      rc.setScope(Sets.newLinkedHashSet(Arrays.asList(provider.getClient().getScope().split(","))));
-      clients.put(provider.getIssuer(), rc);
-    }
-
+    oidcConfig.getProviders()
+        .stream().filter(this::configuredProvider).forEach(provider -> {
+          RegisteredClient rc = new RegisteredClient();
+          rc.setClientId(provider.getClient().getClientId());
+          rc.setClientSecret(provider.getClient().getClientSecret());
+          rc.setRedirectUris(
+              Sets.newLinkedHashSet(Arrays.asList(provider.getClient().getRedirectUris())));
+          rc.setScope(Sets.newLinkedHashSet(Arrays.asList(provider.getClient().getScope().split(","))));
+          clients.put(provider.getIssuer(), rc);
+        });
+    
     StaticClientConfigurationService config = new StaticClientConfigurationService();
     config.setClients(clients);
 

@@ -373,6 +373,7 @@
             <exclude>**/*.key</exclude>
             <exclude>**/*.jwks</exclude>
             <exclude>**/*.factorypath</exclude>
+            <exclude>**/ddl.sql</exclude>
           </excludes>
           <useDefaultExcludes>true</useDefaultExcludes>
         </configuration>
