@@ -19,12 +19,9 @@ import org.mitre.oauth2.web.CorsFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
-import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -40,40 +37,6 @@ import org.springframework.security.web.context.request.async.WebAsyncManagerInt
 @Configuration
 @EnableWebSecurity
 public class MitreSecurityConfig {
-
-//  @Configuration
-//  @Order(9)
-//  public static class OAuthResourceServerConfiguration {
-//
-//    @Autowired
-//    private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
-//
-//    @Autowired
-//    private OAuth2TokenEntityService tokenService;
-//
-//    @Bean
-//    public FilterRegistrationBean disabledAutomaticFilterRegistration(
-//        final OAuth2AuthenticationProcessingFilter f) {
-//
-//      FilterRegistrationBean b = new FilterRegistrationBean(f);
-//      b.setEnabled(false);
-//      return b;
-//    }
-//
-//    @Bean(name = "resourceServerFilter")
-//    public OAuth2AuthenticationProcessingFilter oauthResourceServerFilter() {
-//
-//      OAuth2AuthenticationManager manager = new OAuth2AuthenticationManager();
-//      manager.setTokenServices(tokenService);
-//
-//      OAuth2AuthenticationProcessingFilter filter = new OAuth2AuthenticationProcessingFilter();
-//      filter.setAuthenticationEntryPoint(authenticationEntryPoint);
-//      filter.setAuthenticationManager(manager);
-//      filter.setStateless(false);
-//      return filter;
-//    }
-//
-//  }
 
   @Configuration
   @Order(10)
@@ -359,32 +322,6 @@ public class MitreSecurityConfig {
           .anyRequest()
             .fullyAuthenticated();
       // @formatter:on
-    }
-  }
-
-  @Configuration
-  @Order(Ordered.HIGHEST_PRECEDENCE)
-  @Profile("dev")
-  public static class H2ConsoleEndpointAuthorizationConfig extends WebSecurityConfigurerAdapter {
-
-    @Override
-    protected void configure(final HttpSecurity http) throws Exception {
-
-      HttpSecurity h2Console = http.requestMatchers()
-        .antMatchers("/h2-console", "/h2-console/**")
-        .and()
-        .csrf()
-        .disable();
-
-      h2Console.httpBasic();
-      h2Console.headers().frameOptions().disable();
-
-      h2Console.authorizeRequests().antMatchers("/h2-console/**", "/h2-console").permitAll();
-    }
-
-    @Override
-    public void configure(final WebSecurity builder) throws Exception {
-      builder.debug(true);
     }
   }
 }
