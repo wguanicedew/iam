@@ -18,24 +18,26 @@ package it.infn.mw.iam.config.saml;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import javax.validation.Valid;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import it.infn.mw.iam.config.login.LoginButtonProperties;
 
 @ConfigurationProperties(prefix = "saml")
 public class IamSamlProperties {
 
   private String entityId;
-  
+
   private String keystore;
-  
+
   private String keystorePassword;
-  
+
   private String keyId;
-  
-  private String keyPassword ;
-  
+
+  private String keyPassword;
+
   private String idResolvers;
-  
-  private String loginButtonText;
 
   private int maxAssertionTimeSec;
 
@@ -44,9 +46,14 @@ public class IamSamlProperties {
   private int metadataLookupServiceRefreshPeriodSec = (int) TimeUnit.MINUTES.toSeconds(5);
 
   private String idpEntityIdWhilelist;
-  
+
   private List<IamSamlIdpMetadataProperties> idpMetadata;
+
+  @Valid
+  private List<IamSamlLoginShortcut> loginShortcuts;
   
+  private LoginButtonProperties wayfLoginButton;
+
   public List<IamSamlIdpMetadataProperties> getIdpMetadata() {
     return idpMetadata;
   }
@@ -127,13 +134,6 @@ public class IamSamlProperties {
     this.metadataLookupServiceRefreshPeriodSec = metadataLookupServiceRefreshPeriodSec;
   }
 
-  public String getLoginButtonText() {
-    return loginButtonText;
-  }
-
-  public void setLoginButtonText(String loginButtonText) {
-    this.loginButtonText = loginButtonText;
-  }
 
   public String getIdpEntityIdWhilelist() {
     return idpEntityIdWhilelist;
@@ -142,4 +142,21 @@ public class IamSamlProperties {
   public void setIdpEntityIdWhilelist(String idpEntityIdWhilelist) {
     this.idpEntityIdWhilelist = idpEntityIdWhilelist;
   }
+
+  public List<IamSamlLoginShortcut> getLoginShortcuts() {
+    return loginShortcuts;
+  }
+
+  public void setLoginShortcuts(List<IamSamlLoginShortcut> loginShortcuts) {
+    this.loginShortcuts = loginShortcuts;
+  }
+
+  public LoginButtonProperties getWayfLoginButton() {
+    return wayfLoginButton;
+  }
+
+  public void setWayfLoginButton(LoginButtonProperties wayfLoginButton) {
+    this.wayfLoginButton = wayfLoginButton;
+  }
+
 }

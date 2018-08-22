@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #iam-content {
     height: calc(100vh - 50px);
     overflow: auto;
@@ -76,7 +75,7 @@
 }
 
 #login-form {
-    padding-top: 2em;
+    padding-top: 1em;
     margin: 0 auto;
     max-width: 250px;
 }
@@ -290,4 +289,46 @@ body.skin-blue {
     padding-bottom: 0;
     margin-bottom: 0;
     border-bottom: none;
+}
+
+.btn-login {
+    background-color: white;
+    border-color: #ddd;
+    color: inherit;
+}
+
+.btn-login:hover {
+    background-color: white;
+}
+
+.login-image-size-small {
+    margin-left: 5px;
+    height: 22px;
+}
+
+.login-image-size-medium {
+    margin-left: 5px;
+    height: 44px;
+}
+
+.login-image-size-large {
+    margin-left: 5px;
+    height: 66px;
+}
+
+.extn-login-preamble {
+    margin-top: 1em;
+}
+
+.signin-preamble {
+    margin-bottom: 1em;
+    text-align: center;
+}
+
+.registration-preamble {
+    margin-bottom: 1em;
+}
+
+.btn-social {
+    padding-left: 0px;
 }

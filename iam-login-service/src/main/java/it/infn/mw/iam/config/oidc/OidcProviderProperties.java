@@ -18,13 +18,18 @@ package it.infn.mw.iam.config.oidc;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.validation.annotation.Validated;
 
 @Configuration
 @ConfigurationProperties(prefix = "oidc")
+@Validated
 public class OidcProviderProperties {
 
+  @Valid
   private List<OidcProvider> providers = new ArrayList<>();
 
   public List<OidcProvider> getProviders() {

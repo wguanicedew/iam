@@ -87,12 +87,11 @@ oidc:
   - name: google
     issuer: https://accounts.google.com
     client:
-      clientId: ${IAM_GOOGLE_CLIENT_ID:define_me_please}
-      clientSecret: ${IAM_GOOGLE_CLIENT_SECRET:define_me_please}
-      redirectUris: ${IAM_GOOGLE_CLIENT_REDIRECT_URIS:${iam.baseUrl}/openid_connect_login}
+      clientId: ${IAM_GOOGLE_CLIENT_ID}
+      clientSecret: ${IAM_GOOGLE_CLIENT_SECRET}
+      redirectUris: ${iam.baseUrl}/openid_connect_login}
       scope: openid,profile,email,address,phone
     loginButton:
-      order: 0
       text: Sign in with Google
       style: google
 

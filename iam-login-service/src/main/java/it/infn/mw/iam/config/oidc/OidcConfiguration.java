@@ -15,9 +15,6 @@
  */
 package it.infn.mw.iam.config.oidc;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
-import static java.util.Objects.isNull;
-
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -49,6 +46,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 
 import it.infn.mw.iam.api.account.AccountUtils;
@@ -66,6 +64,7 @@ import it.infn.mw.iam.authn.oidc.OidcExceptionMessageHelper;
 import it.infn.mw.iam.authn.oidc.OidcTokenRequestor;
 import it.infn.mw.iam.authn.oidc.RestTemplateFactory;
 import it.infn.mw.iam.authn.oidc.service.DefaultOidcUserDetailsService;
+import it.infn.mw.iam.authn.oidc.service.NullClientConfigurationService;
 import it.infn.mw.iam.authn.oidc.service.OidcUserDetailsService;
 import it.infn.mw.iam.core.IamThirdPartyIssuerService;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
@@ -176,31 +175,29 @@ public class OidcConfiguration {
   }
 
   public boolean configuredProvider(OidcProvider provider) {
-    return !isNullOrEmpty(provider.getIssuer())
-        && !(isNull(provider.getClient()) || isNullOrEmpty(provider.getClient().getClientId())
-            || isNullOrEmpty(provider.getClient().getClientSecret())
-            || DEFINE_ME_PLEASE.equals(provider.getClient().getClientId())
-            || DEFINE_ME_PLEASE.equals(provider.getClient().getClientSecret()));
+    return !Strings.isNullOrEmpty(provider.getClient().getClientId());
   }
-
-
-
+  
   @Bean
-  public ClientConfigurationService oidcClientConfiguration() {
+  public ClientConfigurationService oidcClientConfiguration(OidcValidatedProviders providers) {
 
     Map<String, RegisteredClient> clients = new LinkedHashMap<>();
 
-    oidcConfig.getProviders()
-        .stream().filter(this::configuredProvider).forEach(provider -> {
-          RegisteredClient rc = new RegisteredClient();
-          rc.setClientId(provider.getClient().getClientId());
-          rc.setClientSecret(provider.getClient().getClientSecret());
-          rc.setRedirectUris(
-              Sets.newLinkedHashSet(Arrays.asList(provider.getClient().getRedirectUris())));
-          rc.setScope(Sets.newLinkedHashSet(Arrays.asList(provider.getClient().getScope().split(","))));
-          clients.put(provider.getIssuer(), rc);
-        });
-    
+    providers.getValidatedProviders().forEach(provider -> {
+      RegisteredClient rc = new RegisteredClient();
+      rc.setClientId(provider.getClient().getClientId());
+      rc.setClientSecret(provider.getClient().getClientSecret());
+      rc.setRedirectUris(
+          Sets.newLinkedHashSet(Arrays.asList(provider.getClient().getRedirectUris())));
+      rc.setScope(Sets.newLinkedHashSet(Arrays.asList(provider.getClient().getScope().split(","))));
+      clients.put(provider.getIssuer(), rc);
+    });
+
+    if (clients.isEmpty()) {
+      return new NullClientConfigurationService();
+    }
+
+
     StaticClientConfigurationService config = new StaticClientConfigurationService();
     config.setClients(clients);
 

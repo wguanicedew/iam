@@ -13,30 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.api.config;
+package it.infn.mw.iam.config.oidc;
+
+import static java.util.stream.Collectors.toList;
 
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Component;
 
-import it.infn.mw.iam.config.oidc.OidcProvider;
+import com.google.common.base.Strings;
 
-@RestController
-@RequestMapping("/iam/config")
-public class OidcConfigurationController {
+@Component
+public class OidcValidatedProviders {
 
-  private OidcConfigurationService oidcConfService;
+  final List<OidcProvider> validatedProviders;
 
   @Autowired
-  public OidcConfigurationController(OidcConfigurationService oidcConfService) {
-    this.oidcConfService = oidcConfService;
+  public OidcValidatedProviders(OidcProviderProperties properties) {
+
+    validatedProviders = properties.getProviders()
+      .stream()
+      .filter(p -> !Strings.isNullOrEmpty(p.getClient().getClientId()))
+      .collect(toList());
   }
 
-  @RequestMapping(method = RequestMethod.GET, value = "/oidc/providers")
-  public List<OidcProvider> listProviders() {
-    return oidcConfService.getOidcProviders();
+  public List<OidcProvider> getValidatedProviders() {
+    return validatedProviders;
   }
+  
 }

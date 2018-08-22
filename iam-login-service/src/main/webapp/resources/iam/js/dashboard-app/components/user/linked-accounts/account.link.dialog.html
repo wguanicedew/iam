@@ -20,26 +20,44 @@
         Link external account?
     </h3>
 </div>
-<div class="modal-body">
+<div class="modal-body ng-cloak">
     <p>
-        Link an external account to your <strong>{{$root.loggedUser.info.organisation_name}}</strong> account:
+        Link an external account to your
+        <strong>{{$root.loggedUser.info.organisation_name}}</strong> account:
     </p>
 
     <div class="link-external-account">
         <form id="link-oidc-account-form" action="{{$ctrl.oidcActionUrl}}" method="POST">
             <input id="oidc-issuer" name="id" type="hidden">
         </form>
-        <div ng-repeat="provider in $ctrl.oidcProviders">
-            <div id="oidc-login-{{provider.name}}">
-                <button class="btn btn-block btn-social btn-{{provider.loginButton.style}} social-authn btn-link-external-account" type="submit" data-ng-click="$ctrl.doLinkOidc(provider)" ng-disabled="!$ctrl.enabled">
-                        <i class="fa fa-{{provider.loginButton.style}}"></i> Link a <span class="text-capitalize">{{provider.name}}</span> account
+
+        <div ng-repeat="p in $ctrl.oidcProviders" ng-cloak>
+            <div id="oidc-login-{{p.name}}">
+                <button title="{{p.loginButton.title}}" class="btn btn-block btn-link-external-account {{p.loginButton.style}}" type="submit" data-ng-click="$ctrl.doLinkOidc(p)" ng-disabled="!$ctrl.enabled">
+
+                    <i class="fa fa-{{p.loginButton.image.faIcon}}" ng-if="p.loginButton.image.faIcon"></i>
+                    {{p.loginButton.text}}
+                    
+                    <img ng-src="{{p.loginButton.image.url}}" class="login-image-size-{{p.loginButton.image.size}}" ng-if="p.loginButton.image.url" ng-cloak/>
                 </button>
             </div>
         </div>
 
-        <form id="link-saml-account-form" action="{{$ctrl.samlActionUrl}}" method="post">
+        <form id="link-saml-account-form" action="{{$ctrl.samlActionUrl}}" method="post" ng-cloak>
             <div>
-                <button class="btn btn-block btn-default btn-link-external-account" type="submit" ng-disabled="!$ctrl.enabled">Link a SAML account</button>
+                <button title="{{$ctrl.wayfLoginButton.title}}" class="btn btn-block btn-link-external-account {{$ctrl.wayfLoginButton.style}}" type="submit" ng-disabled="!$ctrl.enabled">
+                    {{$ctrl.wayfLoginButton.text}}
+                    
+                    <img ng-src="{{$ctrl.wayfLoginButton.image.url}}" class="login-image-size-{{$ctrl.wayfLoginButton.image.size}}" ng-if="$ctrl.wayfLoginButton.image.url" ng-cloak/>
+                    
+                </button>
+            </div>
+            <div ng-repeat="s in $ctrl.samlLoginShortcuts" ng-cloak>
+                <button title="{{s.loginButton.title}}" class="btn btn-block btn-link-external-account {{s.loginButton.style}}" type="submit" ng-disabled="!$ctrl.enabled">
+                            {{$s.loginButton.text}}
+                            
+                            <img ng-src="{{s.loginButton.image.url}}" class="login-image-size-{{s.loginButton.image.size}}" ng-if="s.loginButton.image.url"/>            
+                </button>
             </div>
         </form>
     </div>

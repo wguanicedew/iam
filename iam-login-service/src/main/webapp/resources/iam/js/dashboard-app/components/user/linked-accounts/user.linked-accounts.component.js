@@ -24,7 +24,6 @@
         self.samlId = samlId;
         self.enabled = true;
 
-
         self.cancel = function() {
             $uibModalInstance.dismiss("Cancel");
         };
@@ -69,11 +68,14 @@
         };
     }
 
-    function LinkAccountController(AccountLinkingService, $uibModalInstance, oidcProviders) {
+    function LinkAccountController(AccountLinkingService, $uibModalInstance, oidcProviders,
+        wayfLoginButton, samlLoginShortcuts) {
         var self = this;
         self.enabled = true;
         self.error = undefined;
         self.oidcProviders = oidcProviders.data;
+        self.wayfLoginButton = wayfLoginButton.data;
+        self.samlLoginShortcuts = samlLoginShortcuts.data;
 
         self.samlActionUrl = '/iam/account-linking/SAML';
         self.oidcActionUrl = '/iam/account-linking/OIDC';
@@ -147,7 +149,6 @@
         self.showLinkButton = false;
         self.providers = [];
 
-        self.loadOidcProviders = loadOidcProviders;
         self.linkOidcAccount = linkOidcAccount;
 
         self.doLink = function() {
@@ -168,29 +169,11 @@
             $uibModalInstance.dismiss('Dismissed');
         };
 
-        self.loadOidcProviders();
-
-        function loadOidcProviders() {
-            AccountLinkingService.getOidcProviders().then(
-                function(result) {
-                    self.providers = result.data;
-                },
-                function(error) {
-                    console.log(error);
-                });
-        }
-
         function linkOidcAccount(issuerName) {
             var provider = findOidcProvider(issuerName);
             var input = angular.element(document.querySelector('#oidc-issuer'));
             input.val(provider.issuer);
             document.getElementById("oidc-link-account").submit();
-        }
-
-        function findOidcProvider(name) {
-            return self.providers.find(item => {
-                return item.name == name;
-            });
         }
     }
 
@@ -257,11 +240,14 @@
                 controller: LinkAccountController,
                 controllerAs: '$ctrl',
                 resolve: {
-                    action: function() {
-                        return 'link';
-                    },
                     oidcProviders: function() {
                         return AccountLinkingService.getOidcProviders();
+                    },
+                    wayfLoginButton: function() {
+                        return AccountLinkingService.getWayfLoginButtonConfiguration();
+                    },
+                    samlLoginShortcuts: function() {
+                        return AccountLinkingService.getSamlLoginShortcuts();
                     }
                 }
             });

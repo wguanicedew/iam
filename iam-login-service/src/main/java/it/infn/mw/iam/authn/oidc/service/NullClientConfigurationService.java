@@ -13,14 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.api.config;
+package it.infn.mw.iam.authn.oidc.service;
 
-import java.util.List;
+import org.mitre.oauth2.model.RegisteredClient;
+import org.mitre.openid.connect.client.service.ClientConfigurationService;
+import org.mitre.openid.connect.config.ServerConfiguration;
 
-import it.infn.mw.iam.config.oidc.OidcProvider;
+public class NullClientConfigurationService implements ClientConfigurationService {
 
-@FunctionalInterface
-public interface OidcConfigurationService {
+  @Override
+  public RegisteredClient getClientConfiguration(ServerConfiguration issuer) {
+    return null;
+  }
 
-  public List<OidcProvider> getOidcProviders();
 }

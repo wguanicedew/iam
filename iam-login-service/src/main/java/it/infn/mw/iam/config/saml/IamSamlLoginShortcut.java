@@ -13,36 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.config.oidc;
+package it.infn.mw.iam.config.saml;
 
 import javax.validation.Valid;
 
 import org.hibernate.validator.constraints.NotBlank;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
 import it.infn.mw.iam.config.login.LoginButtonProperties;
 
-@JsonInclude(Include.NON_EMPTY)
-public class OidcProvider {
-
+public class IamSamlLoginShortcut {
+  
   @NotBlank
   private String name;
   
   @NotBlank
-  private String issuer;
-  
-  @Valid
-  @JsonIgnore
-  private OidcClient client;
+  private String entityId;
   
   @Valid
   private LoginButtonProperties loginButton;
-
-  private boolean enabled = true;
   
+  private boolean enabled = true;
+
   public String getName() {
     return name;
   }
@@ -51,20 +42,12 @@ public class OidcProvider {
     this.name = name;
   }
 
-  public String getIssuer() {
-    return issuer;
+  public String getEntityId() {
+    return entityId;
   }
 
-  public void setIssuer(String issuer) {
-    this.issuer = issuer;
-  }
-
-  public OidcClient getClient() {
-    return client;
-  }
-
-  public void setClient(OidcClient client) {
-    this.client = client;
+  public void setEntityId(String entityId) {
+    this.entityId = entityId;
   }
 
   public LoginButtonProperties getLoginButton() {

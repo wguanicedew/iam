@@ -31,8 +31,8 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
 
-import it.infn.mw.iam.api.config.OidcConfigurationService;
 import it.infn.mw.iam.config.oidc.OidcProvider;
+import it.infn.mw.iam.config.oidc.OidcValidatedProviders;
 
 @Component
 public class DefaultLoginPageConfiguration implements LoginPageConfiguration, EnvironmentAware {
@@ -60,13 +60,12 @@ public class DefaultLoginPageConfiguration implements LoginPageConfiguration, En
   private String loginButtonText;
 
   @Autowired
-  private OidcConfigurationService oidcConfService;
-
-
+  private OidcValidatedProviders providers;
+  
   @PostConstruct
   public void init() {
 
-    oidcEnabled = !oidcConfService.getOidcProviders().isEmpty();
+    oidcEnabled = !providers.getValidatedProviders().isEmpty();
     githubEnabled = activeProfilesContains("github");
     samlEnabled = activeProfilesContains("saml");
     registrationEnabled = activeProfilesContains("registration");
@@ -140,7 +139,7 @@ public class DefaultLoginPageConfiguration implements LoginPageConfiguration, En
 
   @Override
   public List<OidcProvider> getOidcProviders() {
-    return oidcConfService.getOidcProviders();
+    return providers.getValidatedProviders();
   }
 
 }

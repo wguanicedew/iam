@@ -1,23 +1,56 @@
+#
+# Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2018
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
 oidc:
   providers:
   - name: google
     issuer: https://accounts.google.com
     client:
-      clientId: ${IAM_GOOGLE_CLIENT_ID:define_me_please}
-      clientSecret: ${IAM_GOOGLE_CLIENT_SECRET:define_me_please}
+      clientId: ${IAM_GOOGLE_CLIENT_ID:ciccio}
+      clientSecret: ${IAM_GOOGLE_CLIENT_SECRET:caio}
       redirectUris: ${IAM_GOOGLE_CLIENT_REDIRECT_URIS:${iam.baseUrl}/openid_connect_login}
       scope: openid,profile,email,address,phone
     loginButton:
-      order: 0
-      text: Sign in with Google
-      style: google
+      text: Google
+      style: btn-social btn-google
+      image:
+        fa-icon: google
   - name: iam-test
     issuer: https://iam-test.indigo-datacloud.eu/
     client:
-      clientId: ${IAM_IAM_TEST_CLIENT_ID:define_me_please}
-      clientSecret: ${IAM_IAM_TEST_CLIENT_SECRET:define_me_please}
+      clientId: ${IAM_IAM_TEST_CLIENT_ID:ciccio}
+      clientSecret: ${IAM_IAM_TEST_CLIENT_SECRET:caio}
       redirectUris: ${iam.baseUrl}/openid_connect_login
       scope: openid,profile,email
     loginButton:
-      order: 1
-      text: Sign in with IAM Test
+      text: IAM Test
+
+saml:
+  login-shortcuts:
+  - name: checkin
+    entity-id: urn:some-example-entity-id
+    login-button:
+      title: Sign in with EGI Check-In
+      image:
+        url: https://egi.eu/wp-content/uploads/2016/05/cropped-logo_site-1-300x300.png
+        size: medium
+  wayf-login-button:
+    text:
+    title: Sign in with EduGAIN 
+    image:
+      url: /resources/images/edugain-logo.gif
+  
+      

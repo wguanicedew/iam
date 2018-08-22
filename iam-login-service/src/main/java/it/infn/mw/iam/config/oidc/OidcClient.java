@@ -15,14 +15,14 @@
  */
 package it.infn.mw.iam.config.oidc;
 
-import org.springframework.stereotype.Component;
-
-@Component
 public class OidcClient {
 
   private String clientId;
+  
   private String clientSecret;
+  
   private String redirectUris;
+  
   private String scope;
 
   public String getClientId() {

@@ -14,44 +14,53 @@
  * limitations under the License.
  */
 (function() {
-  'use strict';
-  angular.module('dashboardApp')
-      .factory('AccountLinkingService', AccountLinkingService);
+    'use strict';
+    angular.module('dashboardApp')
+        .factory('AccountLinkingService', AccountLinkingService);
 
-  AccountLinkingService.$inject = ['$http'];
+    AccountLinkingService.$inject = ['$http'];
 
-  function AccountLinkingService($http) {
-    var OIDC_RESOURCE = '/iam/account-linking/OIDC';
-    var SAML_RESOURCE = '/iam/account-linking/SAML';
-    var X509_RESOURCE = '/iam/account-linking/X509';
+    function AccountLinkingService($http) {
+        var OIDC_RESOURCE = '/iam/account-linking/OIDC';
+        var SAML_RESOURCE = '/iam/account-linking/SAML';
+        var X509_RESOURCE = '/iam/account-linking/X509';
 
-    var service = {
-      unlinkOidcAccount: unlinkOidcAccount,
-      unlinkSamlAccount: unlinkSamlAccount,
-      unlinkX509Certificate: unlinkX509Certificate,
-      getOidcProviders: getOidcProviders,
-    };
+        var service = {
+            unlinkOidcAccount: unlinkOidcAccount,
+            unlinkSamlAccount: unlinkSamlAccount,
+            unlinkX509Certificate: unlinkX509Certificate,
+            getOidcProviders: getOidcProviders,
+            getWayfLoginButtonConfiguration: getWayfLoginButtonConfiguration,
+            getSamlLoginShortcuts: getSamlLoginShortcuts
+        };
 
-    return service;
+        return service;
 
-    function unlinkOidcAccount(account) {
-      return $http.delete(
-          OIDC_RESOURCE, {params: account});
+        function unlinkOidcAccount(account) {
+            return $http.delete(
+                OIDC_RESOURCE, { params: account });
+        }
+
+        function unlinkSamlAccount(account) {
+            return $http.delete(
+                SAML_RESOURCE, { params: account });
+        }
+
+        function unlinkX509Certificate(cert) {
+            return $http.delete(
+                X509_RESOURCE, { params: { certificateSubject: cert.subjectDn } });
+        }
+
+        function getOidcProviders() {
+            return $http.get('/iam/config/oidc/providers', { cache: true });
+        }
+
+        function getWayfLoginButtonConfiguration() {
+            return $http.get("/iam/config/saml/wayf-login-button", { cache: true });
+        }
+
+        function getSamlLoginShortcuts() {
+            return $http.get("/iam/config/saml/shortcuts", { cache: true });
+        }
     }
-
-    function unlinkSamlAccount(account) {
-      return $http.delete(
-          SAML_RESOURCE, {params: account});
-    }
-
-    function unlinkX509Certificate(cert) {
-      return $http.delete(
-        X509_RESOURCE, {params: {certificateSubject: cert.subjectDn}});
-    }
-    
-    function getOidcProviders(){
-		return $http.get('/iam/config/oidc/providers');
-	}
-  }
-
 })();
