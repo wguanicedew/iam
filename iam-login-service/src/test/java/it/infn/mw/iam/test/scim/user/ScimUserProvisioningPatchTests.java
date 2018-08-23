@@ -480,7 +480,8 @@ public class ScimUserProvisioningPatchTests extends ScimUserTestSupport {
 
     ScimUser updates = ScimUser.builder().buildName(STRING_128, STRING_64).build();
 
-    scimUtils.patchUser(lennon.getId(), replace, updates, HttpStatus.BAD_REQUEST);
+    scimUtils.patchUser(lennon.getId(), replace, updates, HttpStatus.BAD_REQUEST)
+      .andExpect(jsonPath("$.detail", containsString("length must be between 0 and 64")));
   }
 
   @Test
@@ -488,7 +489,8 @@ public class ScimUserProvisioningPatchTests extends ScimUserTestSupport {
 
     ScimUser updates = ScimUser.builder().buildName(INVALID_STRING, VALID_STRING).build();
 
-    scimUtils.patchUser(lennon.getId(), replace, updates, HttpStatus.BAD_REQUEST);
+    scimUtils.patchUser(lennon.getId(), replace, updates, HttpStatus.BAD_REQUEST)
+      .andExpect(jsonPath("$.detail", containsString("String contains invalid characters")));
   }
 
   @Test
@@ -496,7 +498,8 @@ public class ScimUserProvisioningPatchTests extends ScimUserTestSupport {
 
     ScimUser updates = ScimUser.builder().buildName(VALID_STRING, INVALID_STRING).build();
 
-    scimUtils.patchUser(lennon.getId(), replace, updates, HttpStatus.BAD_REQUEST);
+    scimUtils.patchUser(lennon.getId(), replace, updates, HttpStatus.BAD_REQUEST)
+      .andExpect(jsonPath("$.detail", containsString("String contains invalid characters")));
   }
 
   @Test
@@ -504,7 +507,8 @@ public class ScimUserProvisioningPatchTests extends ScimUserTestSupport {
 
     ScimUser updates = ScimUser.builder().buildName(STRING_64, STRING_128).build();
 
-    scimUtils.patchUser(lennon.getId(), replace, updates, HttpStatus.BAD_REQUEST);
+    scimUtils.patchUser(lennon.getId(), replace, updates, HttpStatus.BAD_REQUEST)
+      .andExpect(jsonPath("$.detail", containsString("length must be between 0 and 64")));
   }
 
   @Test
@@ -516,7 +520,7 @@ public class ScimUserProvisioningPatchTests extends ScimUserTestSupport {
   }
 
   @Test
-  public void testReplaceWithNotTooLongGivenAndFamilyName() throws Exception {
+  public void testReplaceWithGivenAndFamilyNameWithMaxLength() throws Exception {
 
     ScimUser updates = ScimUser.builder().buildName(STRING_64, STRING_64).build();
 

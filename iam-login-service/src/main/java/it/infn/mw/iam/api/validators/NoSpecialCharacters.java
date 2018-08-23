@@ -29,7 +29,7 @@ import javax.validation.Payload;
 @Target({FIELD, METHOD})
 @Constraint(validatedBy = NoSpecialCharactersValidator.class)
 public @interface NoSpecialCharacters {
-  String message() default "String contains not allowed characters";
+  String message() default "String contains invalid characters";
 
   Class<?>[] groups() default {};
 
