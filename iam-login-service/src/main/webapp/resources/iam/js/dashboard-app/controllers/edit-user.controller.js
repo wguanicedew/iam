@@ -28,6 +28,8 @@
       $scope, $rootScope, $state, $uibModalInstance, Utils, scimFactory, user) {
     var editUserCtrl = this;
 
+    editUserCtrl.pattern = "^[^<>%$]*$";
+
     editUserCtrl.oUser = user;
     editUserCtrl.id = user.id;
 
