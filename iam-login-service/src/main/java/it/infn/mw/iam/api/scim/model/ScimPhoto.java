@@ -24,13 +24,14 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import it.infn.mw.iam.api.scim.model.ScimUser.NewUserValidation;
 import it.infn.mw.iam.api.validators.HtmlEscapeCheck;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ScimPhoto {
 
   @NotNull
-  @NotEmpty
+  @NotEmpty(groups = {NewUserValidation.class})
   @URL
   @HtmlEscapeCheck
   private final String value;
