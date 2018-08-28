@@ -89,7 +89,7 @@ oidc:
     client:
       clientId: ${IAM_GOOGLE_CLIENT_ID}
       clientSecret: ${IAM_GOOGLE_CLIENT_SECRET}
-      redirectUris: ${iam.baseUrl}/openid_connect_login}
+      redirectUris: ${iam.baseUrl}/openid_connect_login
       scope: openid,profile,email,address,phone
     loginButton:
       text: Sign in with Google
