@@ -67,7 +67,7 @@ public class WayfLoginButtonTests {
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.text", is("Sign in with EduGAIN")))
       .andExpect(jsonPath("$.image.url", is("https://example.org/test.png")))
-      .andExpect(jsonPath("$.image.size", is("small")))
+      .andExpect(jsonPath("$.image.size", is("SMALL")))
       .andExpect(jsonPath("$.visible", is(true)));
   }
 

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #iam-content {
     height: calc(100vh - 50px);
     overflow: auto;
@@ -301,17 +302,17 @@ body.skin-blue {
     background-color: white;
 }
 
-.login-image-size-small {
+.login-image-size-SMALL {
     margin-left: 5px;
     height: 22px;
 }
 
-.login-image-size-medium {
+.login-image-size-MEDIUM {
     margin-left: 5px;
     height: 44px;
 }
 
-.login-image-size-large {
+.login-image-size-LARGE {
     margin-left: 5px;
     height: 66px;
 }

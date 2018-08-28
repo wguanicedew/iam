@@ -15,7 +15,7 @@
  */
 package it.infn.mw.iam.config.login;
 
-import static it.infn.mw.iam.config.login.LoginButtonImage.Size.small;
+import static it.infn.mw.iam.config.login.LoginButtonImage.Size.SMALL;
 
 import org.hibernate.validator.constraints.URL;
 
@@ -27,15 +27,15 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 public class LoginButtonImage {
 
   enum Size {
-    small,
-    medium,
-    large;
+    SMALL,
+    MEDIUM,
+    LARGE;
   }
 
   @URL
   private String url;
 
-  private Size size = small;
+  private Size size = SMALL;
   
   private String faIcon;
 
