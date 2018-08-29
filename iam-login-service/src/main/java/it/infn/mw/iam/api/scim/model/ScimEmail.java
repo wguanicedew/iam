@@ -15,10 +15,13 @@
  */
 package it.infn.mw.iam.api.scim.model;
 
-import javax.validation.Valid;
+import static it.infn.mw.iam.api.scim.model.ScimEmail.ScimEmailType.work;
+
+import javax.annotation.Generated;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.Email;
+import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -30,15 +33,15 @@ public class ScimEmail {
     work, home, other;
   }
 
-  @NotNull
-  @Valid
+  @NotNull(message = "Please provide a value for email type")
   private final ScimEmailType type;
 
   @NotEmpty
-  @Email
+  @Email(message = "Please provide a valid email address")
+  @Length(max = 128, message = "length must be less than 128")
   private final String value;
 
-  @NotNull
+  @NotNull(message = "Please provide a value for email primary")
   private final Boolean primary;
 
   @JsonCreator
@@ -70,6 +73,7 @@ public class ScimEmail {
     return primary;
   }
 
+  @Generated("Eclipse")
   @Override
   public int hashCode() {
     final int prime = 31;
@@ -78,6 +82,7 @@ public class ScimEmail {
     return result;
   }
 
+  @Generated("Eclipse")
   @Override
   public boolean equals(Object obj) {
     if (this == obj)
@@ -106,14 +111,29 @@ public class ScimEmail {
     private String value;
     private Boolean primary;
 
-    public Builder() {
-      type = ScimEmailType.work;
-      primary = true;
-    }
-
     public Builder email(String value) {
 
+      value(value);
+      type(work);
+      primary(true);
+      return this;
+    }
+
+    public Builder value(String value) {
+
       this.value = value;
+      return this;
+    }
+
+    public Builder type(ScimEmailType type) {
+
+      this.type = type;
+      return this;
+    }
+
+    public Builder primary(Boolean primary) {
+
+      this.primary = primary;
       return this;
     }
 

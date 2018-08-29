@@ -17,11 +17,9 @@ package it.infn.mw.iam.test.scim.user;
 
 import static it.infn.mw.iam.api.scim.model.ScimPatchOperation.ScimPatchOperationType.add;
 import static it.infn.mw.iam.api.scim.model.ScimPatchOperation.ScimPatchOperationType.remove;
-import static it.infn.mw.iam.api.scim.model.ScimPatchOperation.ScimPatchOperationType.replace;
 import static it.infn.mw.iam.test.scim.ScimUtils.SCIM_CLIENT_ID;
 import static it.infn.mw.iam.test.scim.ScimUtils.SCIM_READ_SCOPE;
 import static it.infn.mw.iam.test.scim.ScimUtils.SCIM_WRITE_SCOPE;
-import static org.apache.commons.lang.RandomStringUtils.random;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
@@ -81,14 +79,6 @@ public class ScimUserProvisioningPatchTests extends ScimUserTestSupport {
   private MockOAuth2Filter mockOAuth2Filter;
 
   private final String PICTURE_URL = "http://iosicongallery.com/img/512/angry-birds-2-2016.png";
-  private final String PICTURE_INVALID_URL =
-      "https://iam.local.io/\"</script><script>alert(8);</script>";
-
-  private final String VALID_STRING = "This is a' vàlid strìng";
-  private final String INVALID_STRING = "</script><script>alert(8);</script>";
-
-  private final String STRING_128 = random(128, true, false);
-  private final String STRING_64 = random(64, true, false);
 
   private ScimUser lennon;
   private ScimUser lincoln;
@@ -464,66 +454,5 @@ public class ScimUserProvisioningPatchTests extends ScimUserTestSupport {
     ScimUser updatedUser = scimUtils.getUser(lennon.getId());
     assertThat(updatedUser.getPhotos(), hasSize(equalTo(1)));
     assertThat(updatedUser.getPhotos().get(0).getValue(), equalTo(PICTURE_URL));
-  }
-
-  @Test
-  public void testAddInvalidPicture() throws Exception {
-
-    ScimUser updates = ScimUser.builder().buildPhoto(PICTURE_INVALID_URL).build();
-
-    scimUtils.patchUser(lennon.getId(), add, updates, HttpStatus.BAD_REQUEST)
-      .andExpect(jsonPath("$.detail", containsString("String contains HTML tags")));
-  }
-
-  @Test
-  public void testReplaceWithTooLongGivenName() throws Exception {
-
-    ScimUser updates = ScimUser.builder().buildName(STRING_128, STRING_64).build();
-
-    scimUtils.patchUser(lennon.getId(), replace, updates, HttpStatus.BAD_REQUEST)
-      .andExpect(jsonPath("$.detail", containsString("length must be between 0 and 64")));
-  }
-
-  @Test
-  public void testReplaceWithInvalidGivenName() throws Exception {
-
-    ScimUser updates = ScimUser.builder().buildName(INVALID_STRING, VALID_STRING).build();
-
-    scimUtils.patchUser(lennon.getId(), replace, updates, HttpStatus.BAD_REQUEST)
-      .andExpect(jsonPath("$.detail", containsString("String contains invalid characters")));
-  }
-
-  @Test
-  public void testReplaceWithInvalidFamilyName() throws Exception {
-
-    ScimUser updates = ScimUser.builder().buildName(VALID_STRING, INVALID_STRING).build();
-
-    scimUtils.patchUser(lennon.getId(), replace, updates, HttpStatus.BAD_REQUEST)
-      .andExpect(jsonPath("$.detail", containsString("String contains invalid characters")));
-  }
-
-  @Test
-  public void testReplaceWithTooLongFamilyName() throws Exception {
-
-    ScimUser updates = ScimUser.builder().buildName(STRING_64, STRING_128).build();
-
-    scimUtils.patchUser(lennon.getId(), replace, updates, HttpStatus.BAD_REQUEST)
-      .andExpect(jsonPath("$.detail", containsString("length must be between 0 and 64")));
-  }
-
-  @Test
-  public void testReplaceWithValidGivenAndFamilyName() throws Exception {
-
-    ScimUser updates = ScimUser.builder().buildName(VALID_STRING, VALID_STRING).build();
-
-    scimUtils.patchUser(lennon.getId(), replace, updates);
-  }
-
-  @Test
-  public void testReplaceWithGivenAndFamilyNameWithMaxLength() throws Exception {
-
-    ScimUser updates = ScimUser.builder().buildName(STRING_64, STRING_64).build();
-
-    scimUtils.patchUser(lennon.getId(), replace, updates);
   }
 }

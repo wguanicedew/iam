@@ -29,7 +29,7 @@ import it.infn.mw.iam.api.scim.model.ScimX509Certificate;
 public class ScimMeEndpointUtils {
 
   protected final ScimName TESTUSER_NEWNAME =
-      ScimName.builder().givenName("A").familyName("B").build();
+      ScimName.builder().givenName("AAA").familyName("BBB").build();
 
   protected final ScimPhoto TESTUSER_NEWPHOTO =
       ScimPhoto.builder().value("http://fakesite.org/user.png").build();

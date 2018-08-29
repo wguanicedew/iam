@@ -15,6 +15,7 @@
  */
 package it.infn.mw.iam.api.scim.model;
 
+import javax.annotation.Generated;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotEmpty;
@@ -66,6 +67,7 @@ public class ScimPhoto {
     this.type = b.type;
   }
 
+  @Generated("Eclipse")
   @Override
   public int hashCode() {
     final int prime = 31;
@@ -74,6 +76,7 @@ public class ScimPhoto {
     return result;
   }
 
+  @Generated("Eclipse")
   @Override
   public boolean equals(Object obj) {
     if (this == obj)

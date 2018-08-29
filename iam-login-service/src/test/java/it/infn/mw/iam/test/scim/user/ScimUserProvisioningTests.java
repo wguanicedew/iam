@@ -170,7 +170,7 @@ public class ScimUserProvisioningTests extends ScimUserTestSupport {
     scimUtils.postUser(user, HttpStatus.BAD_REQUEST)
       .andExpect(jsonPath("$.status", equalTo("400")))
       .andExpect(jsonPath("$.detail",
-          containsString("scimUser.emails[0].value : not a well-formed email address")));
+          containsString("Please provide a valid email address")));
   }
 
   @Test

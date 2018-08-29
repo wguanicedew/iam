@@ -25,6 +25,7 @@ import java.util.Set;
 import javax.validation.Valid;
 import javax.validation.groups.Default;
 
+import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -48,6 +49,7 @@ public class ScimUser extends ScimResource {
   public static final String RESOURCE_TYPE = "User";
 
   @NotBlank(groups = {NewUserValidation.class})
+  @Length(max = 128)
   private final String userName;
 
   @JsonFilter("passwordFilter")
