@@ -28,7 +28,7 @@ import org.springframework.core.io.ResourceLoader;
 import com.nimbusds.jose.JWEAlgorithm;
 
 @Configuration
-public class CriptoConfig {
+public class JWTCriptoConfig {
 
   @Value("${iam.keyStoreLocation}")
   String keyStoreLocation;

@@ -17,11 +17,11 @@ package it.infn.mw.iam.persistence.repository;
 
 import java.util.List;
 import java.util.Optional;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
-
 import it.infn.mw.iam.persistence.model.IamGroup;
 
 public interface IamGroupRepository extends PagingAndSortingRepository<IamGroup, Long> {
@@ -43,4 +43,9 @@ public interface IamGroupRepository extends PagingAndSortingRepository<IamGroup,
   @Query("select g from IamGroup g where g.parentGroup = :parentGroup")
   List<IamGroup> findSubgroups(@Param("parentGroup") IamGroup parentGroup);
 
+  @Query("select g from IamGroup g where g.name LIKE :filter or g.uuid LIKE :filter")
+  Page<IamGroup> findByFilter(@Param("filter") String filter, Pageable op);
+
+  @Query("select count(g) from IamGroup g where g.name LIKE :filter or g.uuid LIKE :filter")
+  long countByFilter(@Param("filter") String filter);
 }

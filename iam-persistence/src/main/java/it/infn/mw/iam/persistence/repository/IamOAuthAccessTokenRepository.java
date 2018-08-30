@@ -59,24 +59,24 @@ public interface IamOAuthAccessTokenRepository
 
   @Query("select count(t) from OAuth2AccessTokenEntity t "
       + "where (t.expiration is NULL or t.expiration > :timestamp)")
-  int countValidAccessTokens(@Param("timestamp") Date timestamp);
+  long countValidAccessTokens(@Param("timestamp") Date timestamp);
 
   @Query("select count(t) from OAuth2AccessTokenEntity t "
       + "where (t.expiration is NULL or t.expiration > :timestamp) "
       + "and (t.authenticationHolder.userAuth.name = :userId)")
-  int countValidAccessTokensForUser(@Param("userId") String userId,
+  long countValidAccessTokensForUser(@Param("userId") String userId,
       @Param("timestamp") Date timestamp);
 
   @Query("select count(t) from OAuth2AccessTokenEntity t "
       + "where (t.expiration is NULL or t.expiration > :timestamp) "
       + "and (t.authenticationHolder.clientId = :clientId)")
-  int countValidAccessTokensForClient(@Param("clientId") String clientId,
+  long countValidAccessTokensForClient(@Param("clientId") String clientId,
       @Param("timestamp") Date timestamp);
 
   @Query("select count(t) from OAuth2AccessTokenEntity t "
       + "where (t.expiration is NULL or t.expiration > :timestamp) "
       + "and (t.authenticationHolder.userAuth.name = :userId) "
       + "and (t.authenticationHolder.clientId = :clientId)")
-  int countValidAccessTokensForUserAndClient(@Param("userId") String userId,
+  long countValidAccessTokensForUserAndClient(@Param("userId") String userId,
       @Param("clientId") String clientId, @Param("timestamp") Date timestamp);
 }

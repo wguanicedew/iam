@@ -54,7 +54,6 @@ public class TransientNotificationFactory implements NotificationFactory {
 
   private final VelocityEngine velocityEngine;
   private final NotificationProperties properties;
-  private final String dashboardRequestsUrl = String.format("%s/dashboard#/requests", baseUrl);
 
   @Autowired
   public TransientNotificationFactory(VelocityEngine ve, NotificationProperties np) {
@@ -129,7 +128,7 @@ public class TransientNotificationFactory implements NotificationFactory {
     model.put("name", name);
     model.put(USERNAME_FIELD, username);
     model.put("email", email);
-    model.put("indigoDashboardUrl", dashboardRequestsUrl);
+    model.put("indigoDashboardUrl", String.format("%s/dashboard#/requests", baseUrl));
     model.put(ORGANISATION_NAME, organisationName);
     model.put("notes", request.getNotes());
 
@@ -169,7 +168,7 @@ public class TransientNotificationFactory implements NotificationFactory {
     model.put(USERNAME_FIELD, groupRequest.getAccount().getUsername());
     model.put(GROUPNAME_FIELD, groupName);
     model.put("notes", groupRequest.getNotes());
-    model.put("indigoDashboardUrl", dashboardRequestsUrl);
+    model.put("indigoDashboardUrl", String.format("%s/dashboard#/requests", baseUrl));
     model.put(ORGANISATION_NAME, organisationName);
 
     String subject = String.format("New membership request for group %s", groupName);

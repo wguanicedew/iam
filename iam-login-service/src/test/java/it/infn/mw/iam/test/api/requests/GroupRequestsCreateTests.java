@@ -32,6 +32,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -60,6 +61,9 @@ import it.infn.mw.iam.test.util.WithAnonymousUser;
 public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
 
   private final static String CREATE_URL = "/iam/group_requests";
+
+  @Value("${iam.baseUrl}")
+  private String baseUrl;
 
   @Autowired
   private WebApplicationContext context;
@@ -121,6 +125,7 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
     assertThat(mails.get(0).getBody(), containsString(format("Username: %s", TEST_USERNAME)));
     assertThat(mails.get(0).getBody(), containsString(format("Group: %s", request.getGroupName())));
     assertThat(mails.get(0).getBody(), containsString(request.getNotes()));
+    assertThat(mails.get(0).getBody(), containsString(baseUrl));
   }
 
   @Test
