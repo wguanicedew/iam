@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.5.0 (TBD)
+
+- Real support for login hint on authorization requests: this feature allows a
+  relying party to specify a preference on which external SAML IdP should be
+  used for authentication (#230)
+
+
 ## 1.4.0 (2018-05-18)
 
 ### Added
