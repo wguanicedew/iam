@@ -108,7 +108,7 @@ public class ScimUserProvisioningPatchReplaceTests extends ScimUserTestSupport {
     ScimUser updates = ScimUser.builder().buildEmail("fakeEmail").build();
 
     scimUtils.patchUser(testUser.getId(), replace, updates, BAD_REQUEST)
-      .andExpect(jsonPath("$.detail", containsString(": not a well-formed email address")));
+      .andExpect(jsonPath("$.detail", containsString("Please provide a valid email address")));
   }
 
   @Test
