@@ -15,29 +15,31 @@
  */
 package it.infn.mw.iam.config.oidc;
 
-import org.mitre.oauth2.model.ClientDetailsEntity.AuthMethod;
-import org.mitre.oauth2.model.RegisteredClient;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import static java.util.stream.Collectors.toList;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Strings;
+
 @Component
-@ConfigurationProperties(prefix = "google")
-public class GoogleClientProperties extends RegisteredClient {
+public class OidcValidatedProviders {
 
-  String issuer;
+  final List<OidcProvider> validatedProviders;
 
-  public GoogleClientProperties() {
-    setTokenEndpointAuthMethod(AuthMethod.SECRET_BASIC);
+  @Autowired
+  public OidcValidatedProviders(OidcProviderProperties properties) {
+
+    validatedProviders = properties.getProviders()
+      .stream()
+      .filter(p -> !Strings.isNullOrEmpty(p.getClient().getClientId()))
+      .collect(toList());
   }
 
-  public String getIssuer() {
-
-    return issuer;
+  public List<OidcProvider> getValidatedProviders() {
+    return validatedProviders;
   }
-
-  public void setIssuer(String issuer) {
-
-    this.issuer = issuer;
-  }
-
+  
 }

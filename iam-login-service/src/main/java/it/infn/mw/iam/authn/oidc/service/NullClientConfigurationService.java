@@ -13,31 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.core.web;
+package it.infn.mw.iam.authn.oidc.service;
 
-import java.util.List;
-import java.util.Optional;
+import org.mitre.oauth2.model.RegisteredClient;
+import org.mitre.openid.connect.client.service.ClientConfigurationService;
+import org.mitre.openid.connect.config.ServerConfiguration;
 
-import it.infn.mw.iam.config.oidc.OidcProvider;
+public class NullClientConfigurationService implements ClientConfigurationService {
 
-public interface LoginPageConfiguration {
-
-  boolean isOidcEnabled();
-
-  boolean isGithubEnabled();
-
-  boolean isSamlEnabled();
-
-  boolean isRegistrationEnabled();
-
-  boolean isAccountLinkingEnabled();
-
-  Optional<String> getPrivacyPolicyUrl();
-
-  String getPrivacyPolicyText();
-
-  String getLoginButtonText();
-
-  List<OidcProvider> getOidcProviders();
+  @Override
+  public RegisteredClient getClientConfiguration(ServerConfiguration issuer) {
+    return null;
+  }
 
 }

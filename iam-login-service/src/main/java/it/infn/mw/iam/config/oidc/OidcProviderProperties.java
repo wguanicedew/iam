@@ -13,31 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.core.web;
+package it.infn.mw.iam.config.oidc;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
-import it.infn.mw.iam.config.oidc.OidcProvider;
+import javax.validation.Valid;
 
-public interface LoginPageConfiguration {
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.validation.annotation.Validated;
 
-  boolean isOidcEnabled();
+@Configuration
+@ConfigurationProperties(prefix = "oidc")
+@Validated
+public class OidcProviderProperties {
 
-  boolean isGithubEnabled();
+  @Valid
+  private List<OidcProvider> providers = new ArrayList<>();
 
-  boolean isSamlEnabled();
+  public List<OidcProvider> getProviders() {
+    return providers;
+  }
 
-  boolean isRegistrationEnabled();
-
-  boolean isAccountLinkingEnabled();
-
-  Optional<String> getPrivacyPolicyUrl();
-
-  String getPrivacyPolicyText();
-
-  String getLoginButtonText();
-
-  List<OidcProvider> getOidcProviders();
-
+  public void setProviders(List<OidcProvider> providers) {
+    this.providers = providers;
+  }
 }

@@ -58,6 +58,9 @@ services:
       IAM_GOOGLE_CLIENT_ID: ${IAM_GOOGLE_CLIENT_ID}
       IAM_GOOGLE_CLIENT_SECRET: ${IAM_GOOGLE_CLIENT_SECRET}
 
+      IAM_IAM_TEST_CLIENT_ID: ${IAM_IAM_TEST_CLIENT_ID}
+      IAM_IAM_TEST_CLIENT_SECRET: ${IAM_IAM_TEST_CLIENT_SECRET}
+
       # IAM_SAML_IDP_METADATA: file:///code/compose/metadata/test-idp.cloud.cnaf.infn.it.metadata.xml 
       # IAM_SAML_ENTITY_ID: urn:iam:iam-devel
       # IAM_SAML_ENTITY_ID: https://iam.local.io
@@ -71,6 +74,7 @@ services:
     volumes:
       - .:/code:ro
       - /dev/urandom:/dev/random
+      - ./compose/multiple-oidc-providers/application.yml:/indigo-iam/config/application.yml
 
   client:
     build:

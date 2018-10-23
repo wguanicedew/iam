@@ -32,14 +32,12 @@ import org.mitre.openid.connect.client.service.impl.DynamicServerConfigurationSe
 import org.mitre.openid.connect.client.service.impl.PlainAuthRequestUrlBuilder;
 import org.mitre.openid.connect.client.service.impl.StaticAuthRequestOptionsService;
 import org.mitre.openid.connect.client.service.impl.StaticClientConfigurationService;
-import org.mitre.openid.connect.client.service.impl.StaticSingleIssuerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.embedded.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
@@ -48,6 +46,8 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Strings;
+import com.google.common.collect.Sets;
 
 import it.infn.mw.iam.api.account.AccountUtils;
 import it.infn.mw.iam.api.aup.AUPSignatureCheckService;
@@ -64,18 +64,19 @@ import it.infn.mw.iam.authn.oidc.OidcExceptionMessageHelper;
 import it.infn.mw.iam.authn.oidc.OidcTokenRequestor;
 import it.infn.mw.iam.authn.oidc.RestTemplateFactory;
 import it.infn.mw.iam.authn.oidc.service.DefaultOidcUserDetailsService;
+import it.infn.mw.iam.authn.oidc.service.NullClientConfigurationService;
 import it.infn.mw.iam.authn.oidc.service.OidcUserDetailsService;
+import it.infn.mw.iam.core.IamThirdPartyIssuerService;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
 @Configuration
-@Profile("google")
-public class GoogleClient {
+public class OidcConfiguration {
 
   @Value("${iam.baseUrl}")
   private String iamBaseUrl;
 
   @Autowired
-  private GoogleClientProperties googleClientProperties;
+  private OidcProviderProperties oidcConfig;
 
   @Autowired
   private IamAccountRepository accountRepo;
@@ -85,6 +86,8 @@ public class GoogleClient {
 
   @Autowired
   private AccountUtils accountUtils;
+
+  public static final String DEFINE_ME_PLEASE = "define_me_please";
 
   @Bean
   public FilterRegistrationBean disabledAutomaticOidcFilterRegistration(OidcClientFilter f) {
@@ -123,7 +126,6 @@ public class GoogleClient {
   public RestTemplateFactory restTemplateFactory() {
 
     return new DefaultRestTemplateFactory(new HttpComponentsClientHttpRequestFactory());
-
   }
 
   @Bean(name = "OIDCExternalAuthenticationFailureHandler")
@@ -142,7 +144,6 @@ public class GoogleClient {
         aupSignatureCheckService, accountUtils, accountRepo);
 
     return new ExternalAuthenticationSuccessHandler(successHandler, "/");
-
   }
 
   @Bean(name = "OIDCAuthenticationManager")
@@ -162,12 +163,9 @@ public class GoogleClient {
   }
 
   @Bean
-  public IssuerService googleIssuerService() {
+  public IssuerService oidcIssuerService() {
 
-    StaticSingleIssuerService issuerService = new StaticSingleIssuerService();
-    issuerService.setIssuer(googleClientProperties.getIssuer());
-
-    return issuerService;
+    return new IamThirdPartyIssuerService();
   }
 
   @Bean
@@ -176,12 +174,29 @@ public class GoogleClient {
     return new DynamicServerConfigurationService();
   }
 
+  public boolean configuredProvider(OidcProvider provider) {
+    return !Strings.isNullOrEmpty(provider.getClient().getClientId());
+  }
+  
   @Bean
-  public ClientConfigurationService staticClientConfiguration() {
+  public ClientConfigurationService oidcClientConfiguration(OidcValidatedProviders providers) {
 
     Map<String, RegisteredClient> clients = new LinkedHashMap<>();
 
-    clients.put(googleClientProperties.getIssuer(), googleClientProperties);
+    providers.getValidatedProviders().forEach(provider -> {
+      RegisteredClient rc = new RegisteredClient();
+      rc.setClientId(provider.getClient().getClientId());
+      rc.setClientSecret(provider.getClient().getClientSecret());
+      rc.setRedirectUris(
+          Sets.newLinkedHashSet(Arrays.asList(provider.getClient().getRedirectUris())));
+      rc.setScope(Sets.newLinkedHashSet(Arrays.asList(provider.getClient().getScope().split(","))));
+      clients.put(provider.getIssuer(), rc);
+    });
+
+    if (clients.isEmpty()) {
+      return new NullClientConfigurationService();
+    }
+
 
     StaticClientConfigurationService config = new StaticClientConfigurationService();
     config.setClients(clients);
