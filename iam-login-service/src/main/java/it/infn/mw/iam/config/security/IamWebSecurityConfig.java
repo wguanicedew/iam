@@ -33,6 +33,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.provider.expression.OAuth2WebSecurityExpressionHandler;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.context.SecurityContextPersistenceFilter;
@@ -43,6 +44,8 @@ import org.springframework.web.filter.GenericFilterBean;
 import it.infn.mw.iam.api.account.AccountUtils;
 import it.infn.mw.iam.api.aup.AUPSignatureCheckService;
 import it.infn.mw.iam.authn.EnforceAupSignatureSuccessHandler;
+import it.infn.mw.iam.authn.ExternalAuthenticationHintService;
+import it.infn.mw.iam.authn.HintAwareAuthenticationEntryPoint;
 import it.infn.mw.iam.authn.RootIsDashboardSuccessHandler;
 import it.infn.mw.iam.authn.oidc.OidcAccessDeniedHandler;
 import it.infn.mw.iam.authn.oidc.OidcAuthenticationProvider;
@@ -94,6 +97,9 @@ public class IamWebSecurityConfig {
     private AccountUtils accountUtils;
 
     @Autowired
+    private ExternalAuthenticationHintService hintService;
+
+    @Autowired
     public void configureGlobal(final AuthenticationManagerBuilder auth) throws Exception {
       // @formatter:off
       auth
@@ -118,6 +124,14 @@ public class IamWebSecurityConfig {
       return new IamX509PreauthenticationProcessingFilter(x509CredentialExtractor,
           iamX509AuthenticationProvider(), successHandler());
     }
+
+    protected AuthenticationEntryPoint entryPoint() {
+      LoginUrlAuthenticationEntryPoint delegate = new LoginUrlAuthenticationEntryPoint("/login");
+      HintAwareAuthenticationEntryPoint ep =
+          new HintAwareAuthenticationEntryPoint(delegate, hintService);
+      return ep;
+    }
+
 
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
@@ -145,6 +159,7 @@ public class IamWebSecurityConfig {
         .and()
           .exceptionHandling()
             .accessDeniedHandler(new OidcAccessDeniedHandler())
+            .authenticationEntryPoint(entryPoint())
         .and()
           .addFilterBefore(authorizationRequestFilter, SecurityContextPersistenceFilter.class)
         .logout()
@@ -220,7 +235,7 @@ public class IamWebSecurityConfig {
       // @formatter:on
     }
   }
-  
+
   @Configuration
   @Order(Ordered.HIGHEST_PRECEDENCE)
   @Profile("dev")
