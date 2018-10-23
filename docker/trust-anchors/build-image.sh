@@ -1,4 +1,4 @@
 #!/bin/bash
 
-docker build --rm=true -t indigoiam/trustanchors .
+docker build --no-cache --rm=true -t indigoiam/trustanchors .
 
