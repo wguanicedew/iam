@@ -92,8 +92,10 @@ oidc:
       redirectUris: ${iam.baseUrl}/openid_connect_login
       scope: openid,profile,email,address,phone
     loginButton:
-      text: Sign in with Google
-      style: google
+      text: Google
+      style: btn-social btn-google
+      image:
+        fa-icon: google
 
 github:
   client:
