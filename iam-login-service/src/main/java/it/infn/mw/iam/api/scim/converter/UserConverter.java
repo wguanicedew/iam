@@ -141,7 +141,6 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
     userInfo.setEmail(scimUser.getEmails().get(0).getValue());
     userInfo.setGivenName(scimUser.getName().getGivenName());
     userInfo.setFamilyName(scimUser.getName().getFamilyName());
-    userInfo.setMiddleName(scimUser.getName().getMiddleName());
 
     if (scimUser.hasPhotos()) {
       userInfo.setPicture(scimUser.getPhotos().get(0).getValue());
@@ -206,7 +205,6 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
     return ScimName.builder()
       .givenName(entity.getUserInfo().getGivenName())
       .familyName(entity.getUserInfo().getFamilyName())
-      .middleName(entity.getUserInfo().getMiddleName())
       .build();
   }
 

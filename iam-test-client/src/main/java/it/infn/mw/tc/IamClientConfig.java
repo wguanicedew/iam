@@ -11,6 +11,8 @@ public class IamClientConfig extends RegisteredClient {
 
   String issuer;
 
+  String extAuthnHint;
+
   public IamClientConfig() {
     setTokenEndpointAuthMethod(AuthMethod.SECRET_BASIC);
   }
@@ -23,6 +25,14 @@ public class IamClientConfig extends RegisteredClient {
   public void setIssuer(String issuer) {
 
     this.issuer = issuer;
+  }
+
+  public String getExtAuthnHint() {
+    return extAuthnHint;
+  }
+
+  public void setExtAuthnHint(String extAuthnHint) {
+    this.extAuthnHint = extAuthnHint;
   }
 
 }

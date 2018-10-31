@@ -34,7 +34,8 @@ else
 fi
 
 GIT_COMMIT_SHA=$(git rev-parse --short HEAD)
-GIT_BRANCH_NAME=${BRANCH_NAME-$(git rev-parse --abbrev-ref HEAD | sed 's#/#_#g')}
+
+GIT_BRANCH_NAME=$(echo ${BRANCH_NAME-$(git rev-parse --abbrev-ref HEAD)}|sed 's#/#_#g')
 
 POM_VERSION_TAG=${IAM_LOGIN_SERVICE_IMAGE}:${POM_VERSION}-${GIT_COMMIT_SHA}
 POM_VERSION_LATEST_TAG=${IAM_LOGIN_SERVICE_IMAGE}:${POM_VERSION}-latest

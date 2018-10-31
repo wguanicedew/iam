@@ -96,6 +96,7 @@ public class IamApiSecurityConfig {
             .antMatchers(HttpMethod.DELETE, AUP_PATH).authenticated()
             .antMatchers(GROUP_REQUEST_PATH+"**", GROUP_REQUEST_PATH+"/**" ).authenticated()
             .antMatchers(HttpMethod.GET, "/iam/account/search", "/iam/group/search").permitAll()
+            .antMatchers(HttpMethod.GET, "/iam/config/**").permitAll()
         .and()
           .csrf().disable();
       // @formatter:on

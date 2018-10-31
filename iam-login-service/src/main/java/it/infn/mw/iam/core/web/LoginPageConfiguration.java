@@ -15,24 +15,29 @@
  */
 package it.infn.mw.iam.core.web;
 
+import java.util.List;
 import java.util.Optional;
+
+import it.infn.mw.iam.config.oidc.OidcProvider;
 
 public interface LoginPageConfiguration {
 
-  boolean isGoogleEnabled();
+  boolean isOidcEnabled();
 
   boolean isGithubEnabled();
 
   boolean isSamlEnabled();
 
   boolean isRegistrationEnabled();
-  
+
   boolean isAccountLinkingEnabled();
-  
+
   Optional<String> getPrivacyPolicyUrl();
-  
+
   String getPrivacyPolicyText();
-  
+
   String getLoginButtonText();
-  
+
+  List<OidcProvider> getOidcProviders();
+
 }

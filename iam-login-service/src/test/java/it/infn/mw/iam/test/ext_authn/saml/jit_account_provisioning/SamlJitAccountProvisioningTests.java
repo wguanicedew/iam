@@ -280,5 +280,103 @@ public class SamlJitAccountProvisioningTests extends SamlAuthenticationTestSuppo
       .andExpect(jsonPath("$.name", equalTo(format("%s %s", JIT1_GIVEN_NAME, JIT1_FAMILY_NAME))))
       .andExpect(jsonPath("$.external_authn.type", equalTo("saml")));
   }
+  
+  
+  @Test
+  public void testAuthzCodeFlowWithExtAuthnHintWorksForJitProvisionedAccount() throws Throwable {
+
+    UriComponents authorizationEndpointUri = UriComponentsBuilder.fromHttpUrl(AUTHORIZE_URL)
+      .queryParam("response_type", RESPONSE_TYPE_CODE)
+      .queryParam("client_id", TEST_CLIENT_ID)
+      .queryParam("redirect_uri", TEST_CLIENT_REDIRECT_URI)
+      .queryParam("scope", SCOPE)
+      .queryParam("nonce", "1")
+      .queryParam("state", "1")
+      .queryParam("ext_authn_hint", "saml:"+DEFAULT_IDP_ID)
+      .build();
+
+    MockHttpSession session =
+        (MockHttpSession) mvc.perform(get(authorizationEndpointUri.toUriString()))
+          .andExpect(status().is3xxRedirection())
+          .andExpect(redirectedUrl("http://localhost:8080/saml/login?idp="+DEFAULT_IDP_ID))
+          .andReturn()
+          .getRequest()
+          .getSession();
+
+    session = (MockHttpSession) mvc.perform(get(samlLoginUrl()).session(session))
+      .andExpect(status().isOk())
+      .andReturn()
+      .getRequest()
+      .getSession();
+
+    AuthnRequest authnRequest = getAuthnRequestFromSession(session);
+
+    assertThat(authnRequest.getAssertionConsumerServiceURL(),
+        equalTo("http://localhost:8080/saml/SSO"));
+
+    Response r = buildJitTest1Response(authnRequest);
+
+    session = (MockHttpSession) mvc
+      .perform(post(authnRequest.getAssertionConsumerServiceURL())
+        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+        .param("SAMLResponse", SamlUtils.signAndSerializeToBase64(r))
+        .session(session))
+      .andExpect(status().isFound())
+      .andExpect(redirectedUrl(authorizationEndpointUri.encode().toUriString()))
+      .andReturn()
+      .getRequest()
+      .getSession();
+
+    assertThat(accountCreatedEventListener.getCount(), equalTo(1L));
+
+    session =
+        (MockHttpSession) mvc.perform(get(authorizationEndpointUri.toUriString()).session(session))
+          .andExpect(status().isOk())
+          .andExpect(forwardedUrl(CONSENT_ENDPOINT))
+          .andReturn()
+          .getRequest()
+          .getSession();
+
+    // Give consent
+    MvcResult result = mvc
+      .perform(post("/authorize").session(session)
+        .param("user_oauth_approval", "true")
+        .param("scope_openid", "openid")
+        .param("scope_profile", "profile")
+        .param("authorize", "Authorize")
+        .param("remember", "none")
+        .with(csrf()))
+      .andExpect(status().is3xxRedirection())
+      .andReturn();
+
+    String redirectUrl = result.getResponse().getRedirectedUrl();
+    session = (MockHttpSession) result.getRequest().getSession();
+
+    assertThat(redirectUrl, startsWith(TEST_CLIENT_REDIRECT_URI));
+    UriComponents redirectUri = UriComponentsBuilder.fromUri(new URI(redirectUrl)).build();
+    String code = redirectUri.getQueryParams().getFirst("code");
+
+    String tokenResponse =
+        mvc
+          .perform(
+              post("/token").param("grant_type", "authorization_code")
+                .param("code", code)
+                .param("redirect_uri", TEST_CLIENT_REDIRECT_URI)
+                .with(SecurityMockMvcRequestPostProcessors.httpBasic(TEST_CLIENT_ID,
+                    TEST_CLIENT_SECRET)))
+          .andExpect(status().isOk())
+          .andReturn()
+          .getResponse()
+          .getContentAsString();
+
+    TokenResponse response = objectMapper.readValue(tokenResponse, TokenResponse.class);
+
+    String accessToken = response.getAccessToken();
+
+    mvc.perform(get("/userinfo").header("Authorization", format("Bearer %s", accessToken)))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.name", equalTo(format("%s %s", JIT1_GIVEN_NAME, JIT1_FAMILY_NAME))))
+      .andExpect(jsonPath("$.external_authn.type", equalTo("saml")));
+  }
 
 }

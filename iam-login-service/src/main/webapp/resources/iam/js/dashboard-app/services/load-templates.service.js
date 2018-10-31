@@ -48,7 +48,6 @@
     '/resources/iam/js/dashboard-app/components/user/detail/user.detail.component.html',
     '/resources/iam/js/dashboard-app/components/user/edit/user.edit.component.html',
     '/resources/iam/js/dashboard-app/components/user/groups/user.groups.component.html',
-    '/resources/iam/js/dashboard-app/components/user/oidc/user.oidc.component.html',
     '/resources/iam/js/dashboard-app/components/user/password/user.password.component.html',
     '/resources/iam/js/dashboard-app/components/user/privileges/user.privileges.component.html',
     '/resources/iam/js/dashboard-app/components/user/saml/user.saml.component.html',

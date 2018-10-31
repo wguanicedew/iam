@@ -19,6 +19,8 @@ pipeline {
     buildDiscarder(logRotator(numToKeepStr: '5'))
   }
 
+  triggers { cron('@daily') }
+
   parameters {
     choice(name: 'RUN_SONAR', choices: 'yes\nno', description: 'Run Sonar static analysis')
   }

@@ -16,27 +16,33 @@
 
 -->
 <div class="modal-header">
-    <h3 class="modal-title">Remove OpenID Connect account from <strong>{{$ctrl.user.name.formatted}}</strong>?</h3>
+    <h3 class="modal-title">Unlink external account?</h3>
 </div>
+
 <div class="modal-body">
     <p>
-        The following OpenID Connect account will be removed from <strong>{{$ctrl.user.name.formatted}}</strong> account:
+        The following SAML account will be unlinked from your <strong>{{$root.loggedUser.info.organisation_name}}</strong> account:
     </p>
 
     <dl>
-        <dt>OpenID provider issuer</dt>
-        <dd>{{$ctrl.account.issuer}}</dd>
-        <dt>OpenID provider subject</dt>
-        <dd>{{$ctrl.account.subject}}</dd>
+        <dt>IDP entity ID</dt>
+        <dd>{{$ctrl.account.idpId}}</dd>
+        <dt>SAML attribute ID</dt>
+        <dd>{{$ctrl.account.attributeId}}</dd>
+        <dt>SAML attribute value</dt>
+        <dd>{{$ctrl.account.userId}}</dd>
     </dl>
     <p>
-        Login with the above linked OpenID Connect account will not be possible for user <strong>{{$ctrl.user.name.formatted}}</strong> if you proceed.
+        Login with the above linked account will <strong>NOT</strong> be possible if you proceed.
     </p>
-</div>
 
+    <div ng-if="$ctrl.error">
+        {{$ctrl.error.statusText}}
+    </div>
 </div>
 
 <div class="modal-footer">
-    <button class="btn btn-primary" type="button" id="modal-btn-confirm" ng-disabled="!$ctrl.enabled" ng-click="$ctrl.doRemove()">Remove OpenID Connect account</button>
+    <button class="btn btn-primary" type="button" id="modal-btn-confirm" ng-disabled="!$ctrl.enabled" ng-click="$ctrl.doUnlink()">Unlink external account</button>
+
     <button class="btn btn-danger" type="button" id="modal-btn-cancel" ng-click="$ctrl.cancel()">Cancel</button>
 </div>
