@@ -76,9 +76,6 @@ public class OidcConfiguration {
   private String iamBaseUrl;
 
   @Autowired
-  private OidcProviderProperties oidcConfig;
-
-  @Autowired
   private IamAccountRepository accountRepo;
 
   @Autowired

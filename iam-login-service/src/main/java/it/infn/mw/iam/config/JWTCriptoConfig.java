@@ -22,12 +22,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 
 import com.nimbusds.jose.JWEAlgorithm;
 
 import it.infn.mw.iam.config.error.IAMJWTKeystoreError;
+import it.infn.mw.iam.util.JWKKeystoreLoader;
 
 @Configuration
 public class JWTCriptoConfig {
@@ -38,22 +38,21 @@ public class JWTCriptoConfig {
   @Autowired
   ResourceLoader resourceLoader;
 
+  @Bean
+  public JWKKeystoreLoader loader() {
+    return new JWKKeystoreLoader(resourceLoader);
+  }
+
   @Bean(name = "defaultKeyStore")
-  public JWKSetKeyStore defaultKeyStore() {
-
-    Resource keyStoreResource = resourceLoader.getResource(keyStoreLocation);
-
-    JWKSetKeyStore keyStore = new JWKSetKeyStore();
-    keyStore.setLocation(keyStoreResource);
-
-    return keyStore;
+  public JWKSetKeyStore defaultKeyStore(JWKKeystoreLoader loader) {
+    return loader.loadKeystoreFromLocation(keyStoreLocation);
   }
 
   @Bean(name = "defaultsignerService")
-  public DefaultJWTSigningAndValidationService defaultSignerService() {
+  public DefaultJWTSigningAndValidationService defaultSignerService(JWKSetKeyStore keystore) {
     try {
       DefaultJWTSigningAndValidationService signerService =
-          new DefaultJWTSigningAndValidationService(defaultKeyStore());
+          new DefaultJWTSigningAndValidationService(keystore);
       signerService.setDefaultSignerKeyId("rsa1");
       signerService.setDefaultSigningAlgorithmName("RS256");
       return signerService;
@@ -63,11 +62,12 @@ public class JWTCriptoConfig {
   }
 
   @Bean(name = "defaultEncryptionService")
-  public DefaultJWTEncryptionAndDecryptionService defaultEncryptionService() {
+  public DefaultJWTEncryptionAndDecryptionService defaultEncryptionService(
+      JWKSetKeyStore keystore) {
 
     try {
       DefaultJWTEncryptionAndDecryptionService encryptionService =
-          new DefaultJWTEncryptionAndDecryptionService(defaultKeyStore());
+          new DefaultJWTEncryptionAndDecryptionService(keystore);
       encryptionService.setDefaultAlgorithm(JWEAlgorithm.RSA1_5);
       encryptionService.setDefaultDecryptionKeyId("rsa1");
       encryptionService.setDefaultEncryptionKeyId("rsa1");
