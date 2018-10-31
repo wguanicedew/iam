@@ -92,19 +92,4 @@ public class IamConfig {
     WebServlet h2Servlet = new WebServlet();
     return new ServletRegistrationBean(h2Servlet, "/h2-console/*");
   }
-
-//  @Bean
-//  @Profile("dev")
-//  FilterRegistrationBean requestLoggingFilter() {
-//
-//    DumpHeadersFilter dhf = new DumpHeadersFilter();
-//
-//    dhf.setIncludeClientInfo(true);
-//    dhf.setIncludePayload(true);
-//    dhf.setIncludeQueryString(true);
-//
-//    FilterRegistrationBean frb = new FilterRegistrationBean(dhf);
-//    frb.setOrder(0);
-//    return frb;
-//  }
 }

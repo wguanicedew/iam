@@ -120,7 +120,7 @@ public class IamWebSecurityConfig {
       return provider;
     }
 
-    public IamX509PreauthenticationProcessingFilter iamX509Filter() throws Exception {
+    public IamX509PreauthenticationProcessingFilter iamX509Filter() {
       return new IamX509PreauthenticationProcessingFilter(x509CredentialExtractor,
           iamX509AuthenticationProvider(), successHandler());
     }

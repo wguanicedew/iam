@@ -27,6 +27,8 @@ import org.springframework.core.io.ResourceLoader;
 
 import com.nimbusds.jose.JWEAlgorithm;
 
+import it.infn.mw.iam.config.error.IAMJWTKeystoreError;
+
 @Configuration
 public class JWTCriptoConfig {
 
@@ -48,27 +50,31 @@ public class JWTCriptoConfig {
   }
 
   @Bean(name = "defaultsignerService")
-  public DefaultJWTSigningAndValidationService defaultSignerService() throws Exception {
-
-    DefaultJWTSigningAndValidationService signerService = null;
-
-    signerService = new DefaultJWTSigningAndValidationService(defaultKeyStore());
-    signerService.setDefaultSignerKeyId("rsa1");
-    signerService.setDefaultSigningAlgorithmName("RS256");
-
-    return signerService;
+  public DefaultJWTSigningAndValidationService defaultSignerService() {
+    try {
+      DefaultJWTSigningAndValidationService signerService =
+          new DefaultJWTSigningAndValidationService(defaultKeyStore());
+      signerService.setDefaultSignerKeyId("rsa1");
+      signerService.setDefaultSigningAlgorithmName("RS256");
+      return signerService;
+    } catch (Exception e) {
+      throw new IAMJWTKeystoreError("Error creating JWT signing and validation service", e);
+    }
   }
 
   @Bean(name = "defaultEncryptionService")
-  public DefaultJWTEncryptionAndDecryptionService defaultEncryptionService() throws Exception {
+  public DefaultJWTEncryptionAndDecryptionService defaultEncryptionService() {
 
-    DefaultJWTEncryptionAndDecryptionService encryptionService = null;
-    encryptionService = new DefaultJWTEncryptionAndDecryptionService(defaultKeyStore());
-    encryptionService.setDefaultAlgorithm(JWEAlgorithm.RSA1_5);
-    encryptionService.setDefaultDecryptionKeyId("rsa1");
-    encryptionService.setDefaultEncryptionKeyId("rsa1");
-
-    return encryptionService;
+    try {
+      DefaultJWTEncryptionAndDecryptionService encryptionService =
+          new DefaultJWTEncryptionAndDecryptionService(defaultKeyStore());
+      encryptionService.setDefaultAlgorithm(JWEAlgorithm.RSA1_5);
+      encryptionService.setDefaultDecryptionKeyId("rsa1");
+      encryptionService.setDefaultEncryptionKeyId("rsa1");
+      return encryptionService;
+    } catch (Exception e) {
+      throw new IAMJWTKeystoreError("Error creating JWT encryption/decription service", e);
+    }
   }
 
 }
