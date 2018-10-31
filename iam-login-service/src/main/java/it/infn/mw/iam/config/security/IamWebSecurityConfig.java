@@ -127,9 +127,7 @@ public class IamWebSecurityConfig {
 
     protected AuthenticationEntryPoint entryPoint() {
       LoginUrlAuthenticationEntryPoint delegate = new LoginUrlAuthenticationEntryPoint("/login");
-      HintAwareAuthenticationEntryPoint ep =
-          new HintAwareAuthenticationEntryPoint(delegate, hintService);
-      return ep;
+      return new HintAwareAuthenticationEntryPoint(delegate, hintService);
     }
 
 

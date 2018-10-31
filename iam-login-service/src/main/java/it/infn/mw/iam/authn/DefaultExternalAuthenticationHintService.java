@@ -28,6 +28,8 @@ import it.infn.mw.iam.authn.error.InvalidExternalAuthenticationHintError;
 @Service
 public class DefaultExternalAuthenticationHintService implements ExternalAuthenticationHintService {
 
+  private static final String SAML_COLON="saml:";
+  
   private String baseUrl;
   
   @Autowired
@@ -48,8 +50,8 @@ public class DefaultExternalAuthenticationHintService implements ExternalAuthent
   @Override
   public String resolve(String externalAuthnHint) {
     hintSanityChecks(externalAuthnHint);
-    if (externalAuthnHint.startsWith("saml:")) {
-      if (externalAuthnHint.equals("saml:")) {
+    if (externalAuthnHint.startsWith(SAML_COLON)) {
+      if (SAML_COLON.equals(externalAuthnHint)) {
         return String.format("%s/saml/login", baseUrl); 
       }
       return String.format("%s/saml/login?idp=%s", baseUrl, externalAuthnHint.substring(5));

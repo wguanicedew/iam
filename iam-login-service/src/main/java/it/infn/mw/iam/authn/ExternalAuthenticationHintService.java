@@ -15,6 +15,7 @@
  */
 package it.infn.mw.iam.authn;
 
+@FunctionalInterface
 public interface ExternalAuthenticationHintService {
 
   public String resolve(String externalAuthnHint);
