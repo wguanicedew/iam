@@ -1,4 +1,21 @@
+/**
+ * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2018
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package it.infn.mw.iam.api.scim.model;
+
+import javax.annotation.Generated;
 
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotBlank;
@@ -7,29 +24,26 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import it.infn.mw.iam.api.scim.model.ScimUser.NewUserValidation;
+import it.infn.mw.iam.api.validators.NoSpecialCharacters;
 import it.infn.mw.iam.core.NameUtils;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ScimName {
 
-  interface NewUserValidation {
-  }
-
-  interface UpdateUserValidation {
-  }
-
   private final String formatted;
 
-  @Length(groups = {NewUserValidation.class, UpdateUserValidation.class}, max = 64)
+  @NotBlank(groups = {NewUserValidation.class})
+  @Length(min = 3, max = 64)
+  @NoSpecialCharacters
   private final String familyName;
 
   @NotBlank(groups = {NewUserValidation.class})
-  @Length(groups = {NewUserValidation.class, UpdateUserValidation.class}, max = 64)
+  @Length(min = 3, max = 64)
+  @NoSpecialCharacters
   private final String givenName;
 
-  @Length(groups = {NewUserValidation.class, UpdateUserValidation.class}, max = 64)
   private final String middleName;
-
   private final String honorificPrefix;
   private final String honorificSuffix;
 
@@ -87,6 +101,7 @@ public class ScimName {
     return honorificSuffix;
   }
 
+  @Generated("Eclipse")
   @Override
   public int hashCode() {
     final int prime = 31;
@@ -99,6 +114,7 @@ public class ScimName {
     return result;
   }
 
+  @Generated("Eclipse")
   @Override
   public boolean equals(Object obj) {
     if (this == obj)

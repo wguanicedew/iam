@@ -1,3 +1,18 @@
+/**
+ * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2018
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package it.infn.mw.iam.test.util.oidc;
 
 import java.util.UUID;
@@ -34,12 +49,13 @@ public class MockOIDCProvider implements OidcTokenRequestor {
   }
 
   public String buildIdToken(String clientId, String sub, String nonce) throws JOSEException {
+    return buildIdToken(OidcTestConfig.TEST_OIDC_ISSUER, clientId, sub, nonce);
+  }
+
+  public String buildIdToken(String issuer, String clientId, String sub, String nonce)
+      throws JOSEException {
     IdTokenBuilder builder = new IdTokenBuilder(keyStore, signingAlgo);
-    return builder.issuer(OidcTestConfig.TEST_OIDC_ISSUER)
-      .sub(sub)
-      .audience(clientId)
-      .nonce(nonce)
-      .build();
+    return builder.issuer(issuer).sub(sub).audience(clientId).nonce(nonce).build();
   }
 
   public String prepareErrorResponse(String error, String errorDescription)
@@ -60,10 +76,15 @@ public class MockOIDCProvider implements OidcTokenRequestor {
 
   public String prepareTokenResponse(String clientId, String sub, String nonce)
       throws JOSEException, JsonProcessingException {
+    return prepareTokenResponse(OidcTestConfig.TEST_OIDC_ISSUER, clientId, sub, nonce);
+  }
+
+  public String prepareTokenResponse(String issuer, String clientId, String sub, String nonce)
+      throws JOSEException, JsonProcessingException {
 
     TokenResponse tokenResponse = new TokenResponse();
     tokenResponse.setAccessToken(UUID.randomUUID().toString());
-    tokenResponse.setIdToken(buildIdToken(clientId, sub, nonce));
+    tokenResponse.setIdToken(buildIdToken(issuer, clientId, sub, nonce));
 
     lastTokenResponse = mapper.writeValueAsString(tokenResponse);
 

@@ -1,5 +1,15 @@
 #!/usr/bin/env groovy
 
+def readProperty(filename, prop) {
+  def value = sh script: "cat ${filename} | grep ${prop} | cut -d'=' -f2-", returnStdout: true
+  return value.trim()
+}
+
+def jsonParse(url, basicAuth, field) {
+  def value =  sh script: "curl -s -u '${basicAuth}' '${url}' | jq -r '${field}'", returnStdout: true
+  return value.trim()
+}
+
 pipeline {
 
   agent { label 'maven' }
@@ -8,6 +18,8 @@ pipeline {
     timeout(time: 1, unit: 'HOURS')
     buildDiscarder(logRotator(numToKeepStr: '5'))
   }
+
+  triggers { cron('@daily') }
 
   parameters {
     choice(name: 'RUN_SONAR', choices: 'yes\nno', description: 'Run Sonar static analysis')
@@ -96,19 +108,55 @@ pipeline {
             script{
               def cobertura_opts = 'cobertura:cobertura -Dmaven.test.failure.ignore -DfailIfNoTests=false -Dcobertura.report.format=xml'
               def checkstyle_opts = 'checkstyle:check -Dcheckstyle.config.location=google_checks.xml'
+              def sonarBasicAuth
 
               withSonarQubeEnv{
+                sonarBasicAuth  = "${SONAR_AUTH_TOKEN}:"
+
                 sh "mvn clean -U ${cobertura_opts} ${checkstyle_opts} ${SONAR_MAVEN_GOAL} -Dsonar.host.url=${SONAR_HOST_URL} -Dsonar.login=${SONAR_AUTH_TOKEN}"
+              }
+
+              def sonarServerUrl = readProperty('target/sonar/report-task.txt', 'serverUrl')
+              def ceTaskUrl = readProperty('target/sonar/report-task.txt', 'ceTaskUrl')
+
+              timeout(time: 5, unit: 'MINUTES') {
+                waitUntil {
+                  def result = jsonParse(ceTaskUrl, sonarBasicAuth, '.task.status')
+                  echo "Current CeTask status: ${result}"
+                  return "SUCCESS" == "${result}"
+                }
+              }
+
+              def analysisId = jsonParse(ceTaskUrl, sonarBasicAuth, '.task.analysisId')
+              echo "Analysis ID: ${analysisId}"
+
+              def url = "${sonarServerUrl}/api/qualitygates/project_status?analysisId=${analysisId}"
+              def qualityGate =  jsonParse(url, sonarBasicAuth, '')
+              echo "${qualityGate}"
+
+              def status =  jsonParse(url, sonarBasicAuth, '.projectStatus.status')
+
+              if ("ERROR" == "${status}") {
+                currentBuild.result = 'FAILURE'
+                error 'Quality Gate failure'
               }
             }
           }
         }
     }
+    
+    stage('license-check') {
+      steps {
+        container('maven-runner') {
+          sh 'mvn license:check'
+        }
+      }
+    }
 
     stage('package') {
       steps {
         container('maven-runner') {
-          sh 'mvn -B -DskipTests=true clean package'
+          sh 'mvn -B -DskipTests=true clean package' 
           archive 'iam-login-service/target/iam-login-service.war'
           archive 'iam-login-service/target/classes/iam.version.properties'
           archive 'iam-test-client/target/iam-test-client.jar'
@@ -134,6 +182,18 @@ pipeline {
           /bin/bash iam-test-client/docker/build-prod-image.sh
           /bin/bash iam-test-client/docker/push-prod-image.sh
           '''
+          script {
+            if (env.BRANCH_NAME == 'master') {
+              sh '''
+              sed -i -e 's#iam\\.version#IAM_VERSION#' iam-login-service/target/classes/iam.version.properties
+              source iam-login-service/target/classes/iam.version.properties
+              export IAM_LOGIN_SERVICE_VERSION="v${IAM_VERSION}"
+              unset DOCKER_REGISTRY_HOST
+              /bin/bash iam-login-service/docker/push-prod-image.sh
+              /bin/bash iam-test-client/docker/push-prod-image.sh
+              '''
+            }
+          }
         }
       }
     }

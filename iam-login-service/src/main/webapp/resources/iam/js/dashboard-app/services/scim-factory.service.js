@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2018
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 angular.module('dashboardApp').factory("scimFactory", ['$q', '$http', '$httpParamSerializer', function ($q, $http, $httpParamSerializer) {
 
 	var urlBase = '/scim';
@@ -47,21 +62,25 @@ angular.module('dashboardApp').factory("scimFactory", ['$q', '$http', '$httpPara
 		return $http.get(url);
 	};
 
-	function getAllUsers() {
+	function getAllUsers(chunkRequestSize = 100) {
 
 	  console.info("Getting all users");
 
+	  var deferred = $q.defer();
+
 	  var promises = [];
-	  var chunkRequestSize = 100;
 	  var users = [];
 	  var handleResponse = function(response){
 	    angular.forEach(response.data.Resources, function(user){
 	      users.push(user);
 	    });
 	  };
-	  var handleError = function(error) { return error; };
+	  var handleError = function(error) {
+		  deferred.reject(error)
+	  };
 
 	  var handleFirstResponse = function(response){
+
 	    var totalResults = response.data.totalResults;
 	    var lastLoaded = chunkRequestSize;
 
@@ -84,7 +103,8 @@ angular.module('dashboardApp').factory("scimFactory", ['$q', '$http', '$httpPara
 	    return users;
 	  };
 
-	  return getUsers(1, chunkRequestSize).then(handleFirstResponse, handleError);
+	  deferred.resolve(getUsers(1, chunkRequestSize).then(handleFirstResponse, handleError));
+	  return deferred.promise;
 	};
 
 	function getGroups(startIndex, count) {

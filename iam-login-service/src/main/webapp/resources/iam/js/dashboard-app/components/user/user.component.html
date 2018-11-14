@@ -1,3 +1,20 @@
+<!--
+
+    Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2018
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
 <!-- Content Header (Page header) -->
 <div ng-if="$ctrl.loaded">
     <section class="content-header" ng-cloak>
@@ -43,8 +60,11 @@
             </section>
             <section id="user-profile-right" class="col-sm-12 col-md-7 col-lg-8" ng-cloak>
                 <user-groups user="$ctrl.user"></user-groups>
-                <user-oidc user="$ctrl.user"></user-oidc>
-                <user-saml user="$ctrl.user"></user-saml>
+                <!--
+                <user-oidc user="$ctrl.user" ng-if="$root.isOidcEnabled"></user-oidc>
+                <user-saml user="$ctrl.user" ng-if="$root.isSamlEnabled"></user-saml>
+                -->
+                <user-linked-accounts user="$ctrl.user"></user-linked-accounts>
                 <user-x509 user="$ctrl.user"></user-x509>
             </section>
         </div>

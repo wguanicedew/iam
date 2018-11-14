@@ -1,24 +1,35 @@
+/**
+ * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2018
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package it.infn.mw.iam.api.scim.provisioning;
 
 import static java.lang.String.format;
-
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-
 import com.google.common.base.Strings;
-
+import it.infn.mw.iam.api.common.OffsetPageable;
 import it.infn.mw.iam.api.scim.converter.GroupConverter;
 import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
 import it.infn.mw.iam.api.scim.exception.ScimException;
@@ -27,9 +38,9 @@ import it.infn.mw.iam.api.scim.exception.ScimResourceExistsException;
 import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
 import it.infn.mw.iam.api.scim.model.ScimGroup;
 import it.infn.mw.iam.api.scim.model.ScimListResponse;
+import it.infn.mw.iam.api.scim.model.ScimListResponse.ScimListResponseBuilder;
 import it.infn.mw.iam.api.scim.model.ScimMemberRef;
 import it.infn.mw.iam.api.scim.model.ScimPatchOperation;
-import it.infn.mw.iam.api.scim.provisioning.paging.OffsetPageable;
 import it.infn.mw.iam.api.scim.provisioning.paging.ScimPageRequest;
 import it.infn.mw.iam.api.scim.updater.AccountUpdater;
 import it.infn.mw.iam.api.scim.updater.factory.DefaultGroupMembershipUpdaterFactory;
@@ -51,9 +62,7 @@ public class ScimGroupProvisioning
   private static final int GROUP_FULLNAME_MAX_LENGTH = 512;
 
   private final IamGroupRepository groupRepository;
-
   private final IamAccountRepository accountRepository;
-
   private final GroupConverter converter;
 
   private final DefaultGroupMembershipUpdaterFactory groupUpdaterFactory;
@@ -69,8 +78,8 @@ public class ScimGroupProvisioning
       IamAccountRepository accountRepository, GroupConverter converter,
       IamAuthoritiesRepository authoritiesRepo, IamAccountRepository accountRepo) {
 
-    this.accountRepository = accountRepository;
     this.groupRepository = groupRepository;
+    this.accountRepository = accountRepository;
     this.converter = converter;
     this.groupUpdaterFactory = new DefaultGroupMembershipUpdaterFactory(accountRepository);
     this.authoritiesRepo = authoritiesRepo;
@@ -93,13 +102,16 @@ public class ScimGroupProvisioning
     }
   }
 
+  private ScimResourceNotFoundException noGroupMappedToId(String id) {
+    return new ScimResourceNotFoundException(String.format("No group mapped to id '%s'", id));
+  }
+
   @Override
   public ScimGroup getById(String id) {
 
     idSanityChecks(id);
 
-    IamGroup group = groupRepository.findByUuid(id)
-      .orElseThrow(() -> new ScimResourceNotFoundException("No group mapped to id '" + id + "'"));
+    IamGroup group = groupRepository.findByUuid(id).orElseThrow(() -> noGroupMappedToId(id));
 
     return converter.dtoFromEntity(group);
   }
@@ -154,8 +166,8 @@ public class ScimGroupProvisioning
       String parentGroupName = group.getIndigoGroup().getParentGroup().getDisplay();
 
       iamParentGroup = groupRepository.findByUuid(parentGroupUuid)
-        .orElseThrow(() -> new ScimResourceNotFoundException(
-            String.format("Parent group '%s' not found", parentGroupUuid)));
+          .orElseThrow(() -> new ScimResourceNotFoundException(
+              String.format("Parent group '%s' not found", parentGroupUuid)));
 
       String fullName = String.format("%s/%s", parentGroupName, group.getDisplayName());
       fullNameSanityChecks(fullName);
@@ -185,8 +197,7 @@ public class ScimGroupProvisioning
 
     idSanityChecks(id);
 
-    IamGroup group = groupRepository.findByUuid(id)
-      .orElseThrow(() -> new ScimResourceNotFoundException("No group mapped to id '" + id + "'"));
+    IamGroup group = groupRepository.findByUuid(id).orElseThrow(() -> noGroupMappedToId(id));
 
     if (!(group.getAccounts().isEmpty() && group.getChildrenGroups().isEmpty())) {
 
@@ -211,8 +222,8 @@ public class ScimGroupProvisioning
   @Override
   public ScimGroup replace(String id, ScimGroup scimItemToBeReplaced) {
 
-    IamGroup existingGroup = groupRepository.findByUuid(id)
-      .orElseThrow(() -> new ScimResourceNotFoundException("No group mapped to id '" + id + "'"));
+    IamGroup existingGroup =
+        groupRepository.findByUuid(id).orElseThrow(() -> noGroupMappedToId(id));
 
     /* displayname is required */
     String displayName = scimItemToBeReplaced.getDisplayName();
@@ -237,9 +248,9 @@ public class ScimGroupProvisioning
 
     groupRepository.save(updatedGroup);
 
-    eventPublisher
-      .publishEvent(new GroupReplacedEvent(this, updatedGroup, existingGroup, String.format(
-          "Replaced group %s with new group %s", existingGroup.getName(), updatedGroup.getName())));
+    eventPublisher.publishEvent(new GroupReplacedEvent(this, updatedGroup, existingGroup,
+        String.format("Replaced group %s with new group %s", existingGroup.getName(),
+            updatedGroup.getName())));
 
     return converter.dtoFromEntity(updatedGroup);
   }
@@ -252,28 +263,35 @@ public class ScimGroupProvisioning
   @Override
   public ScimListResponse<ScimGroup> list(ScimPageRequest params) {
 
+    ScimListResponseBuilder<ScimGroup> builder = ScimListResponse.builder();
+
     if (params.getCount() == 0) {
-      int groupCount = groupRepository.countAllGroups();
-      return new ScimListResponse<>(Collections.emptyList(), groupCount, 0, 1);
+
+      long totalResults = groupRepository.countAllGroups();
+      builder.totalResults(totalResults);
+
+    } else {
+
+      OffsetPageable op = new OffsetPageable(params.getStartIndex(), params.getCount());
+
+      Page<IamGroup> results = groupRepository.findAll(op);
+
+      List<ScimGroup> resources = new ArrayList<>();
+
+      results.getContent().forEach(g -> resources.add(converter.dtoFromEntity(g)));
+
+      builder.resources(resources);
+      builder.fromPage(results, op);
+
     }
 
-    OffsetPageable op = new OffsetPageable(params.getStartIndex(), params.getCount());
-
-    Page<IamGroup> results = groupRepository.findAll(op);
-
-    List<ScimGroup> resources = new ArrayList<>();
-
-    results.getContent().forEach(g -> resources.add(converter.dtoFromEntity(g)));
-
-    return new ScimListResponse<>(resources, results.getTotalElements(), resources.size(),
-        op.getOffset() + 1);
+    return builder.build();
   }
 
   @Override
   public void update(String id, List<ScimPatchOperation<List<ScimMemberRef>>> operations) {
 
-    IamGroup iamGroup = groupRepository.findByUuid(id)
-      .orElseThrow(() -> new ScimResourceNotFoundException("No group mapped to id '" + id + "'"));
+    IamGroup iamGroup = groupRepository.findByUuid(id).orElseThrow(() -> noGroupMappedToId(id));
 
     operations.forEach(op -> executePatchOperation(iamGroup, op));
   }

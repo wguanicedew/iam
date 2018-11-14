@@ -1,16 +1,31 @@
+/**
+ * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2018
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package it.infn.mw.iam.api.scim.model;
 
-import javax.validation.Valid;
+import static it.infn.mw.iam.api.scim.model.ScimEmail.ScimEmailType.work;
+
+import javax.annotation.Generated;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.Email;
+import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import it.infn.mw.iam.api.scim.model.ScimUser.NewUserValidation;
-import it.infn.mw.iam.api.scim.model.ScimUser.UpdateUserValidation;
 
 public class ScimEmail {
 
@@ -18,15 +33,15 @@ public class ScimEmail {
     work, home, other;
   }
 
-  @NotNull
-  @Valid
+  @NotNull(message = "Please provide a value for email type")
   private final ScimEmailType type;
 
-  @NotEmpty(groups = {NewUserValidation.class, UpdateUserValidation.class})
-  @Email(groups = {NewUserValidation.class, UpdateUserValidation.class})
+  @NotEmpty
+  @Email(message = "Please provide a valid email address")
+  @Length(max = 128, message = "length must be less than 128")
   private final String value;
 
-  @NotNull(groups = {NewUserValidation.class, UpdateUserValidation.class})
+  @NotNull(message = "Please provide a value for email primary")
   private final Boolean primary;
 
   @JsonCreator
@@ -58,6 +73,7 @@ public class ScimEmail {
     return primary;
   }
 
+  @Generated("Eclipse")
   @Override
   public int hashCode() {
     final int prime = 31;
@@ -66,6 +82,7 @@ public class ScimEmail {
     return result;
   }
 
+  @Generated("Eclipse")
   @Override
   public boolean equals(Object obj) {
     if (this == obj)
@@ -94,14 +111,29 @@ public class ScimEmail {
     private String value;
     private Boolean primary;
 
-    public Builder() {
-      type = ScimEmailType.work;
-      primary = true;
-    }
-
     public Builder email(String value) {
 
+      value(value);
+      type(work);
+      primary(true);
+      return this;
+    }
+
+    public Builder value(String value) {
+
       this.value = value;
+      return this;
+    }
+
+    public Builder type(ScimEmailType type) {
+
+      this.type = type;
+      return this;
+    }
+
+    public Builder primary(Boolean primary) {
+
+      this.primary = primary;
       return this;
     }
 

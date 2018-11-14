@@ -1,3 +1,18 @@
+/**
+ * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2018
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package it.infn.mw.iam.authn;
 
 import static it.infn.mw.iam.authn.x509.IamX509PreauthenticationProcessingFilter.X509_CREDENTIAL_SESSION_KEY;
@@ -22,7 +37,7 @@ import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
 import it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo.ExternalAuthenticationType;
 import it.infn.mw.iam.authn.x509.IamX509AuthenticationCredential;
 
-public class ExternalAuthenticationHandlerSupport implements AccountLinkingConstants{
+public class ExternalAuthenticationHandlerSupport implements AccountLinkingConstants {
 
   public static final String ACCCOUNT_LINKING_BASE_RESOURCE = "/iam/account-linking";
 
@@ -150,17 +165,11 @@ public class ExternalAuthenticationHandlerSupport implements AccountLinkingConst
 
     switch (type) {
       case OIDC:
-        redirectUrl = "/openid_connect_login";
+        redirectUrl = buildRedirectUrl("/openid_connect_login", "iss", externalIdpId);
         break;
 
       case SAML:
-        redirectUrl = "/saml/login";
-        if (!Strings.isNullOrEmpty(externalIdpId)) {
-          redirectUrl = UriComponentsBuilder.fromUriString("/saml/login")
-            .queryParam("idpId", externalIdpId)
-            .build()
-            .toString();
-        }
+        redirectUrl = buildRedirectUrl("/saml/login", "idpId", externalIdpId);
         break;
 
       default:
@@ -168,8 +177,6 @@ public class ExternalAuthenticationHandlerSupport implements AccountLinkingConst
     }
 
     return redirectUrl;
-
-
   }
 
   protected String getAccountLinkingForwardTarget(HttpServletRequest request) {
@@ -186,6 +193,12 @@ public class ExternalAuthenticationHandlerSupport implements AccountLinkingConst
       .setAuthentication(getAccountLinkingSavedAuthentication(session));
   }
 
-
-
+  private String buildRedirectUrl(String baseUrl, String param, String value) {
+    String retval = baseUrl;
+    if (!Strings.isNullOrEmpty(value)) {
+      retval =
+          UriComponentsBuilder.fromUriString(baseUrl).queryParam(param, value).build().toString();
+    }
+    return retval;
+  }
 }

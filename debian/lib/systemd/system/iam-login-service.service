@@ -5,7 +5,7 @@ After=syslog.target network.target
 [Service]
 EnvironmentFile=/etc/default/iam-login-service
 WorkingDirectory=/var/lib/indigo/iam-login-service
-ExecStart=/usr/bin/java ${IAM_JAVA_OPTS} -jar iam-login-service.war
+ExecStart=/usr/bin/java $IAM_JAVA_OPTS -jar iam-login-service.war
 KillMode=process
 User=iam
 

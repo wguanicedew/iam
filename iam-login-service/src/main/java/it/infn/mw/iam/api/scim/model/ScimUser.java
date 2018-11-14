@@ -1,3 +1,18 @@
+/**
+ * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2018
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package it.infn.mw.iam.api.scim.model;
 
 import static it.infn.mw.iam.api.scim.model.ScimConstants.INDIGO_USER_SCHEMA;
@@ -8,7 +23,9 @@ import java.util.List;
 import java.util.Set;
 
 import javax.validation.Valid;
+import javax.validation.groups.Default;
 
+import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -22,16 +39,17 @@ import com.google.common.base.Preconditions;
 @JsonFilter("attributeFilter")
 public class ScimUser extends ScimResource {
 
-  public interface NewUserValidation {
+  public interface NewUserValidation extends Default {
   }
 
-  public interface UpdateUserValidation {
+  public interface UpdateUserValidation extends Default {
   }
 
   public static final String USER_SCHEMA = "urn:ietf:params:scim:schemas:core:2.0:User";
   public static final String RESOURCE_TYPE = "User";
 
   @NotBlank(groups = {NewUserValidation.class})
+  @Length(max = 128)
   private final String userName;
 
   @JsonFilter("passwordFilter")
@@ -55,6 +73,8 @@ public class ScimUser extends ScimResource {
   private final List<ScimEmail> emails;
 
   private final List<ScimAddress> addresses;
+
+  @Valid
   private final List<ScimPhoto> photos;
 
   private final Set<ScimGroupRef> groups;

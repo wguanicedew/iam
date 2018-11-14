@@ -1,3 +1,19 @@
+#
+# Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2018
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
 security:
   filter-order: 1
 
@@ -55,18 +71,31 @@ iam:
 
   enableScopeAuthz: ${IAM_ENABLE_SCOPE_AUTHZ:true}
 
+  access_token:
+    include_authn_info: ${IAM_ACCESS_TOKEN_INCLUDE_AUTHN_INFO:false}
+    
+  superuser:
+    username: ${IAM_SUPERUSER_USERNAME:superuser}
+    password: ${IAM_SUPERUSER_PASSWORD:superpassword}
+
 x509:
   trustAnchorsDir: ${IAM_X509_TRUST_ANCHORS_DIR:/etc/grid-security/certificates}
   trustAnchorsRefreshMsec: ${IAM_X509_TRUST_ANCHORS_REFRESH:14400}
 
-google:
+oidc:
+  providers:
+  - name: google
     issuer: https://accounts.google.com
-
     client:
-      clientId: ${IAM_GOOGLE_CLIENT_ID:define_me_please}
-      clientSecret: ${IAM_GOOGLE_CLIENT_SECRET:define_me_please}
-      redirectUris: ${IAM_GOOGLE_CLIENT_REDIRECT_URIS:${iam.baseUrl}/openid_connect_login}
+      clientId: ${IAM_GOOGLE_CLIENT_ID}
+      clientSecret: ${IAM_GOOGLE_CLIENT_SECRET}
+      redirectUris: ${iam.baseUrl}/openid_connect_login
       scope: openid,profile,email,address,phone
+    loginButton:
+      text: Google
+      style: btn-social btn-google
+      image:
+        fa-icon: google
 
 github:
   client:
@@ -111,3 +140,12 @@ health:
     
 accountLinking:
   disable: ${IAM_ACCOUNT_LINKING_DISABLE:false}
+  
+endpoints:
+  enabled: false
+  info:
+    enabled: true
+  health:
+    enabled: true
+  metrics:
+    enabled: true

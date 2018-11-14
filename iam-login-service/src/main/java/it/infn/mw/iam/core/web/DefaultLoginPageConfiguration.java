@@ -1,8 +1,24 @@
+/**
+ * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2018
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package it.infn.mw.iam.core.web;
 
 import static it.infn.mw.iam.api.account_linking.AccountLinkingConstants.ACCOUNT_LINKING_DISABLE_PROPERTY;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.PostConstruct;
@@ -15,17 +31,18 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
 
-import it.infn.mw.iam.config.oidc.GoogleClientProperties;
+import it.infn.mw.iam.config.oidc.OidcProvider;
+import it.infn.mw.iam.config.oidc.OidcValidatedProviders;
 
 @Component
 public class DefaultLoginPageConfiguration implements LoginPageConfiguration, EnvironmentAware {
 
   public static final String DEFAULT_PRIVACY_POLICY_TEXT = "Privacy policy";
   public static final String DEFAULT_LOGIN_BUTTON_TEXT = "Sign in";
-  
+
   private Environment env;
 
-  private boolean googleEnabled;
+  private boolean oidcEnabled;
   private boolean githubEnabled;
   private boolean samlEnabled;
   private boolean registrationEnabled;
@@ -43,13 +60,12 @@ public class DefaultLoginPageConfiguration implements LoginPageConfiguration, En
   private String loginButtonText;
 
   @Autowired
-  GoogleClientProperties googleClientConfiguration;
-
+  private OidcValidatedProviders providers;
   
   @PostConstruct
   public void init() {
 
-    googleEnabled = activeProfilesContains("google");
+    oidcEnabled = !providers.getValidatedProviders().isEmpty();
     githubEnabled = activeProfilesContains("github");
     samlEnabled = activeProfilesContains("saml");
     registrationEnabled = activeProfilesContains("registration");
@@ -61,9 +77,9 @@ public class DefaultLoginPageConfiguration implements LoginPageConfiguration, En
   }
 
   @Override
-  public boolean isGoogleEnabled() {
+  public boolean isOidcEnabled() {
 
-    return googleEnabled;
+    return oidcEnabled;
   }
 
   @Override
@@ -119,6 +135,11 @@ public class DefaultLoginPageConfiguration implements LoginPageConfiguration, En
       return DEFAULT_LOGIN_BUTTON_TEXT;
     }
     return loginButtonText;
+  }
+
+  @Override
+  public List<OidcProvider> getOidcProviders() {
+    return providers.getValidatedProviders();
   }
 
 }

@@ -1,3 +1,18 @@
+/**
+ * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2018
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package it.infn.mw.iam.test.api.aup;
 
 import static org.hamcrest.Matchers.equalTo;
@@ -15,8 +30,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import javax.transaction.Transactional;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,6 +42,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -71,11 +85,11 @@ public class AupIntegrationTests extends AupTestSupport {
 
   @Autowired
   private MockTimeProvider mockTimeProvider;
-  
+
   private MockMvc mvc;
 
-  
-  
+
+
   @Before
   public void setup() {
     mvc = MockMvcBuilders.webAppContextSetup(context)
@@ -83,7 +97,7 @@ public class AupIntegrationTests extends AupTestSupport {
       .apply(springSecurity())
       .build();
     mockOAuth2Filter.cleanupSecurityContext();
-    }
+  }
 
   @After
   public void cleanupOAuthUser() {
@@ -128,7 +142,8 @@ public class AupIntegrationTests extends AupTestSupport {
     mvc
       .perform(
           post("/iam/aup").contentType(APPLICATION_JSON).content(mapper.writeValueAsString(aup)))
-      .andExpect(status().isForbidden());
+      .andExpect(status().isForbidden())
+      .andExpect(jsonPath("$.error", equalTo("Access is denied")));
 
   }
 
@@ -163,11 +178,42 @@ public class AupIntegrationTests extends AupTestSupport {
 
   }
 
+
+  @Test
+  @WithMockUser(username = "admin", roles = {"ADMIN", "USER"})
+  public void aupCreationRequiresSignatureValidityDays() throws JsonProcessingException, Exception {
+    AupDTO aup = new AupDTO("Text", null, null, null, null);
+    
+    Date now = new Date();
+    mockTimeProvider.setTime(now.getTime());
+
+    mvc
+      .perform(
+          post("/iam/aup").contentType(APPLICATION_JSON).content(mapper.writeValueAsString(aup)))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.error").value("Invalid AUP: signatureValidityInDays is required"));
+  }
+
+  @Test
+  @WithMockUser(username = "admin", roles = {"ADMIN", "USER"})
+  public void aupCreationRequiresPositiveSignatureValidityDays()
+      throws JsonProcessingException, Exception {
+    AupDTO aup = new AupDTO("Text", null, -1L, null, null);
+    Date now = new Date();
+    mockTimeProvider.setTime(now.getTime());
+
+    mvc
+      .perform(
+          post("/iam/aup").contentType(APPLICATION_JSON).content(mapper.writeValueAsString(aup)))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.error").value("Invalid AUP: signatureValidityInDays must be >= 0"));
+  }
+
   @Test
   @WithMockUser(username = "admin", roles = {"ADMIN", "USER"})
   public void aupCreationWorks() throws JsonProcessingException, Exception {
     AupDTO aup = converter.dtoFromEntity(buildDefaultAup());
-    
+
     Date now = new Date();
     mockTimeProvider.setTime(now.getTime());
 
@@ -185,7 +231,7 @@ public class AupIntegrationTests extends AupTestSupport {
 
     AupDTO createdAup = mapper.readValue(aupJson, AupDTO.class);
 
-    DateEqualModulo1Second creationAndLastUpdateTimeMatcher = new DateEqualModulo1Second(now); 
+    DateEqualModulo1Second creationAndLastUpdateTimeMatcher = new DateEqualModulo1Second(now);
     assertThat(createdAup.getText(), equalTo(aup.getText()));
     assertThat(createdAup.getDescription(), equalTo(aup.getDescription()));
     assertThat(createdAup.getSignatureValidityInDays(), equalTo(aup.getSignatureValidityInDays()));
@@ -275,13 +321,14 @@ public class AupIntegrationTests extends AupTestSupport {
 
   }
 
+
   @Test
   @WithMockUser(username = "admin", roles = {"ADMIN", "USER"})
   public void aupUpdateWorks() throws JsonProcessingException, Exception {
 
     Date now = new Date();
     mockTimeProvider.setTime(now.getTime());
-    
+
     AupDTO aup = converter.dtoFromEntity(buildDefaultAup());
 
     mvc
@@ -303,9 +350,9 @@ public class AupIntegrationTests extends AupTestSupport {
     aup.setSignatureValidityInDays(18L);
 
     // Time travel 1 minute in the future
-    Date then = new Date(now.getTime()+TimeUnit.MINUTES.toMillis(1));
+    Date then = new Date(now.getTime() + TimeUnit.MINUTES.toMillis(1));
     mockTimeProvider.setTime(then.getTime());
-    
+
     String updatedAupString = mvc
       .perform(
           patch("/iam/aup").contentType(APPLICATION_JSON).content(mapper.writeValueAsString(aup)))

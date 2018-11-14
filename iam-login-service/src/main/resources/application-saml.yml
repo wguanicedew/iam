@@ -1,3 +1,19 @@
+#
+# Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2018
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
 saml:
   entity-id: ${IAM_SAML_ENTITY_ID:urn:iam:iam-devel}
   keystore: ${IAM_SAML_KEYSTORE:classpath:/saml/samlKeystore.jks}
@@ -8,7 +24,10 @@ saml:
   max-authentication-age-sec: ${IAM_SAML_MAX_AUTHENTICATION_AGE:86400}
   id-resolvers: ${IAM_SAML_ID_RESOLVERS:eduPersonUniqueId,eduPersonTargetedId,eduPersonPrincipalName}
   metadata-lookup-service-refresh-period-sec: ${IAM_SAML_METADATA_LOOKUP_SERVICE_REFRESH_PERIOD_SEC:600}
-  login-button-text: ${IAM_SAML_LOGIN_BUTTON_TEXT:Sign in with SAML}
+  
+  wayf-login-button:
+    text: ${IAM_SAML_LOGIN_BUTTON_TEXT:Your institutional account}
+    
   idp-entity-id-whilelist: ${IAM_SAML_IDP_ENTITY_ID_WHITELIST}
   
   jit-account-provisioning:

@@ -1,3 +1,18 @@
+/**
+ * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2018
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package it.infn.mw.iam.test.oauth;
 
 
@@ -12,8 +27,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import javax.transaction.Transactional;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,6 +36,7 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import it.infn.mw.iam.IamLoginService;
@@ -64,9 +78,10 @@ public class IntrospectionEndpointTests extends EndpointsTestUtils {
         .param("token", accessToken))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.active", equalTo(true)))
-      .andExpect(jsonPath("$.iss", equalTo(issuer)))
+      .andExpect(jsonPath("$.iss", equalTo(issuer+"/")))
       .andExpect(jsonPath("$.groups", hasSize(equalTo(2))))
       .andExpect(jsonPath("$.groups", containsInAnyOrder("Production", "Analysis")))
+      .andExpect(jsonPath("$.name", equalTo("Test User")))
       .andExpect(jsonPath("$.preferred_username", equalTo("test")))
       .andExpect(jsonPath("$.organisation_name", equalTo(organisationName)))
       .andExpect(jsonPath("$.email", equalTo("test@iam.test")));
@@ -84,6 +99,7 @@ public class IntrospectionEndpointTests extends EndpointsTestUtils {
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.active", equalTo(true)))
       .andExpect(jsonPath("$.groups").doesNotExist())
+      .andExpect(jsonPath("$.name").doesNotExist())
       .andExpect(jsonPath("$.preferred_username").doesNotExist())
       .andExpect(jsonPath("$.organisation_name").doesNotExist())
       .andExpect(jsonPath("$.email").doesNotExist());
@@ -101,6 +117,7 @@ public class IntrospectionEndpointTests extends EndpointsTestUtils {
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.active", equalTo(true)))
       .andExpect(jsonPath("$.groups").doesNotExist())
+      .andExpect(jsonPath("$.name").doesNotExist())
       .andExpect(jsonPath("$.preferred_username").doesNotExist())
       .andExpect(jsonPath("$.organisation_name").doesNotExist())
       .andExpect(jsonPath("$.email", equalTo("test@iam.test")));

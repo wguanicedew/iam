@@ -28,7 +28,7 @@ services:
       - "3306:3306"
 
   trust:
-    image: italiangrid/trustanchors
+    image: indigoiam/trustanchors
     # build:
     #  context: ./docker/trust-anchors
     command: /bin/true
@@ -58,6 +58,9 @@ services:
       IAM_GOOGLE_CLIENT_ID: ${IAM_GOOGLE_CLIENT_ID}
       IAM_GOOGLE_CLIENT_SECRET: ${IAM_GOOGLE_CLIENT_SECRET}
 
+      IAM_IAM_TEST_CLIENT_ID: ${IAM_IAM_TEST_CLIENT_ID}
+      IAM_IAM_TEST_CLIENT_SECRET: ${IAM_IAM_TEST_CLIENT_SECRET}
+
       # IAM_SAML_IDP_METADATA: file:///code/compose/metadata/test-idp.cloud.cnaf.infn.it.metadata.xml 
       # IAM_SAML_ENTITY_ID: urn:iam:iam-devel
       # IAM_SAML_ENTITY_ID: https://iam.local.io
@@ -71,6 +74,7 @@ services:
     volumes:
       - .:/code:ro
       - /dev/urandom:/dev/random
+      - ./compose/multiple-oidc-providers/application.yml:/indigo-iam/config/application.yml
 
   client:
     build:
@@ -88,6 +92,7 @@ services:
       IAM_CLIENT_ISSUER: https://iam.local.io/
       IAM_CLIENT_REDIRECT_URIS: https://iam.local.io/iam-test-client/openid_connect_login
       IAM_CLIENT_USE_FORWARD_HEADERS: "true"
+      #IAM_CLIENT_EXT_AUTHN_HINT: saml:exampleIdp
       IAM_CLIENT_JAR: /code/iam-test-client/target/iam-test-client.jar
 
     ports:

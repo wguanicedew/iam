@@ -1,4 +1,20 @@
 #!/bin/bash
+#
+# Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2018
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
 set -ex
 
 # The current script directory
@@ -40,10 +56,13 @@ else
 fi
 
 GIT_COMMIT_SHA=$(git rev-parse --short HEAD)
-GIT_BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD | sed 's#/#_#g')
+GIT_BRANCH_NAME=$(echo ${BRANCH_NAME-$(git rev-parse --abbrev-ref HEAD)}|sed 's#/#_#g')
 
 docker tag ${IAM_LOGIN_SERVICE_IMAGE} ${IAM_LOGIN_SERVICE_IMAGE}:${POM_VERSION}-${GIT_COMMIT_SHA}
 docker tag ${IAM_LOGIN_SERVICE_IMAGE} ${IAM_LOGIN_SERVICE_IMAGE}:${POM_VERSION}-latest
-docker tag ${IAM_LOGIN_SERVICE_IMAGE} ${IAM_LOGIN_SERVICE_IMAGE}:${GIT_BRANCH_NAME}-latest
+
+if [[ -n ${GIT_BRANCH_NAME} ]] && [[ "${GIT_BRANCH_NAME}" != "HEAD" ]]; then
+  docker tag ${IAM_LOGIN_SERVICE_IMAGE} ${IAM_LOGIN_SERVICE_IMAGE}:${GIT_BRANCH_NAME}-latest
+fi
 
 rm iam-login-service.war

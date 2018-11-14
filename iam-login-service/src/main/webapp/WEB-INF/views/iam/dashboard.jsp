@@ -1,3 +1,20 @@
+<%--
+
+    Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2018
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+--%>
 <%@ taglib prefix="authz" uri="http://www.springframework.org/security/tags"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="o" tagdir="/WEB-INF/tags"%>
@@ -5,20 +22,20 @@
 <o:iamHeader title="INDIGO IAM | Dashboard" />
 <body id="body" class="skin-blue" ng-app="dashboardApp" ng-cloak style="display: none">
   <script type="text/ng-template" id="noConnectionTemplate.html">
-  <div class="modal-header">
-    <h3 class="modal-title">Lost connection to the IAM server</h3>
-  /div>
-  <div class="modal-body">
-    <p>The connection was interrupted while the page was loading.</p>
-    <ul>
-      <li>The site could be temporarily unavailable or too busy. Try again in a few moments.</li>
-    </ul>
-  </div>
+                            <div class="modal-header">
+                                <h3 class="modal-title">Lost connection to the IAM server</h3>
+                                /div>
+                                <div class="modal-body">
+                                    <p>The connection was interrupted while the page was loading.</p>
+                                    <ul>
+                                        <li>The site could be temporarily unavailable or too busy. Try again in a few moments.</li>
+                                    </ul>
+                                </div>
 
-  <div class="modal-footer" class="text-center">
-    <button class="btn btn-primary" data-dismiss="modal" type="button" data-ng-click="$root.refresh()">Retry</button>
-  </div>
-  </script>
+                                <div class="modal-footer" class="text-center">
+                                    <button class="btn btn-primary" data-dismiss="modal" type="button" data-ng-click="$root.refresh()">Retry</button>
+                                </div>
+                        </script>
   <div class="wrapper">
     <toaster-container
       toaster-options="{'close-button': true, 'time-out':{ 'toast-error': 5000, 'toast-success': 5000, 'toast-warning': 5000 }, 'position-class': 'toast-top-center'}">
@@ -58,6 +75,7 @@
   <script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/registration.directive.js"></script>
   <script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/operation-result.directive.js"></script>
   <script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/userinfo-box.directive.js"></script>
+  <script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/isimage.directive.js"></script>
   <!-- Interceptors -->
   <script type="text/javascript" src="/resources/iam/js/dashboard-app/factory/gatewayerror.interceptor.js"></script>
   <script type="text/javascript" src="/resources/iam/js/dashboard-app/factory/sessionexpired.interceptor.js"></script>
@@ -101,8 +119,8 @@
   <script type="text/javascript"
     src="/resources/iam/js/dashboard-app/components/user/password/user.password.component.js"></script>
   <script type="text/javascript" src="/resources/iam/js/dashboard-app/components/user/groups/user.groups.component.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/components/user/oidc/user.oidc.component.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/components/user/saml/user.saml.component.js"></script>
+  <script type="text/javascript"
+    src="/resources/iam/js/dashboard-app/components/user/linked-accounts/user.linked-accounts.component.js"></script>
   <script type="text/javascript" src="/resources/iam/js/dashboard-app/components/user/x509/user.x509.component.js"></script>
   <script type="text/javascript" src="/resources/iam/js/dashboard-app/components/user/user.component.js"></script>
   <!-- Tokens component -->

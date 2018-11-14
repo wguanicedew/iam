@@ -1,4 +1,20 @@
 #!/bin/bash
+#
+# Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2018
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
 set -ex
 
 # The current script directory
@@ -18,7 +34,8 @@ else
 fi
 
 GIT_COMMIT_SHA=$(git rev-parse --short HEAD)
-GIT_BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD | sed 's#/#_#g')
+
+GIT_BRANCH_NAME=$(echo ${BRANCH_NAME-$(git rev-parse --abbrev-ref HEAD)}|sed 's#/#_#g')
 
 POM_VERSION_TAG=${IAM_LOGIN_SERVICE_IMAGE}:${POM_VERSION}-${GIT_COMMIT_SHA}
 POM_VERSION_LATEST_TAG=${IAM_LOGIN_SERVICE_IMAGE}:${POM_VERSION}-latest
@@ -31,6 +48,7 @@ if [[ -n ${DOCKER_REGISTRY_HOST} ]]; then
   docker push ${DOCKER_REGISTRY_HOST}/${POM_VERSION_TAG}
   docker push ${DOCKER_REGISTRY_HOST}/${POM_VERSION_LATEST_TAG}
   if [ "${GIT_BRANCH_NAME}" != "HEAD" ]; then
+    docker tag ${BRANCH_LATEST_TAG} ${DOCKER_REGISTRY_HOST}/${BRANCH_LATEST_TAG}
     docker push ${DOCKER_REGISTRY_HOST}/${BRANCH_LATEST_TAG}
   fi
 else

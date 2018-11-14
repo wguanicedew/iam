@@ -1,15 +1,95 @@
 # Changelog
 
-## 1.2.0 (2018-01-29)
+## 1.5.0 (TBD)
+
+- Real support for login hint on authorization requests: this feature allows a
+  relying party to specify a preference on which external SAML IdP should be
+  used for authentication (#230)
+
+
+## 1.4.0 (2018-05-18)
 
 ### Added
 
+- New paginated user and group search API (#217)
+
+- Support for login hint on authorization requests: this feature allows a
+  relying party to specify a preference on which external SAML IdP should be
+  used for authentication (#230)
+
+- Doc: documentation for the IAM group request API (#228)
+
+### Fixed
+
+- A problem that caused the device code expiration time setting to 0 seconds
+  for dynamically registered clients has been fixed (#236)
+
+- Dashboard: the tokens management section now shows a loading modal when
+  loading information (#234)
+
+- Notification: a problem that caused the sending of a "null" string instead of
+  the IAM URL in notification has been fixed (#232)
+
+## 1.3.0 (2018-04-12)
+
+### Added
+
+- New group membership requests API: this API allows user to submit requests
+  for membership in groups, and provide administrators the ability to
+  approve/reject such requests. Support for the API will be included in the IAM
+  dashboard in a future release (#200)
+
+- IAM now includes additional claims in the issued ID token:
+  `preferred_username`, `email`, `organisation_name`, `groups` (#202)
+
+- IAM now can be configured to include additional claims in the issued access
+  tokens: `preferred_username`, `email`, `organisation_name`, `groups`. This
+  behaviour is controlled with the `IAM_ACCESS_TOKEN_INCLUDE_AUTHN_INFO`
+  environment variable (#208)
+
+### Fixed
+
+- Dashboard: a problem that prevented the correct setting of the token exchange grant for
+  clients has been fixed (#223)
+
+- Dashboard: protection against double clicks has been added to approve/reject requests
+  buttons (#222)
+
+- Dashboard: a broken import has been removed from the IAM main page (#215)
+
+- A problem in the tokens API that prevented the filtering of expired tokens
+  has been fixed (#213)
+
+- Dashboard: token pagination is now correctly leveraged by the IAM dashboard
+  in the token management page (#211)
+
+- Dashboard: OpenID connect account manangement panel is now hidden when Google
+  authentication is disabled (#206)
+
+- Dashboard: SAML account management panel is now hidden when SAML
+  authentication is disabled (#203)
+
+## 1.2.1 (2018-03-01)
+
+### Changed
+
+The token management section in the dashboard introduced in 1.2.0 has been
+disabled due to performance issues in the token pagination code. We will add
+the interface back as soon as these issues are resolved (#211). 
+
+## 1.2.0 (2018-03-01)
+
+### Added
+
+- IAM documentation has been migrate from Gitbook to its [own dedicated
+  site][iam-docs] on Github pages
+
 - IAM now provides a token management section in the dashboard that can be used
-  by administrators to view active tokens in the system, filter tokens by user
-  and client and revoke tokens (#161)
+  by administrators to view active tokens in the system, filter tokens (by user
+  and client) and revoke tokens (#161)
 
 - IAM now provides an Acceptable Usage Policy (AUP) API that can be used to require
-  that users accept the AUP terms at registration time (#86)
+  that users accept the AUP terms at registration time or later (#86)
 
 - IAM now exposes the 'iss' claim in the response retuned by the token
   introspection endpoint (#58)
@@ -17,15 +97,19 @@
 ### Fixed
 
 - IAM now provides user-friendlier X.509 authentication support. When a client
-  certificate is found linked to the TLS session, the IAM now displays
-  certificate information and displays a button that can be used to sign in
+  certificate is found linked to the TLS session, IAM  displays
+  certificate information and a button that can be used to sign in
   with the certificate (#193)
 - Admin-targeted email notifications that result from membership requests now
-  include the contents of the Notes field (#190)
+  include the contents of the _Notes_ field (#190)
+- Tokens linked to an account are now removed when the account is removed
+  (#204)
 
 ### Changed
 
 - IAM now depends on MitreID connect v. 1.3.2.cnaf.rc0 (#180)
+
+[iam-docs]: https://indigo-iam.github.io/docs
 
 ## 1.1.0 (2017-9-29)
 

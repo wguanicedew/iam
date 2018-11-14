@@ -7,6 +7,6 @@ RUN yum -y install epel-release && yum -y update
 RUN yum -y install rsync igi-test-ca ca-policy-egi-core fetch-crl && fetch-crl || true
 RUN chmod +x /update-trust-anchors.sh 
 
-ENTRYPOINT ["/update-trust-anchors.sh"]
+RUN FORCE_TRUST_ANCHORS_UPDATE=1 /update-trust-anchors.sh
 
-VOLUME /etc/grid-security/certificates
+ENTRYPOINT ["/update-trust-anchors.sh"]
