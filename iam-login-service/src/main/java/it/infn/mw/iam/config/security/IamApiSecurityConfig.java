@@ -69,7 +69,8 @@ public class IamApiSecurityConfig {
             "/iam/aup/**",
             GROUP_REQUEST_PATH+"**", GROUP_REQUEST_PATH+"/**",
             "/iam/account/search**", 
-            "/iam/group/search**")
+            "/iam/group/search**",
+            "/iam/group/**")
         .and()
           .exceptionHandling()
             .authenticationEntryPoint(authenticationEntryPoint)
@@ -95,6 +96,7 @@ public class IamApiSecurityConfig {
             .antMatchers(HttpMethod.POST, AUP_PATH).authenticated()
             .antMatchers(HttpMethod.DELETE, AUP_PATH).authenticated()
             .antMatchers(GROUP_REQUEST_PATH+"**", GROUP_REQUEST_PATH+"/**" ).authenticated()
+            .antMatchers("/iam/group/**").authenticated()
             .antMatchers(HttpMethod.GET, "/iam/account/search", "/iam/group/search").permitAll()
             .antMatchers(HttpMethod.GET, "/iam/config/**").permitAll()
         .and()

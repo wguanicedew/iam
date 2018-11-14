@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.test.api.account;
+package it.infn.mw.iam.test.api.account.password;
 
 import static org.mockito.Matchers.anyString;
 

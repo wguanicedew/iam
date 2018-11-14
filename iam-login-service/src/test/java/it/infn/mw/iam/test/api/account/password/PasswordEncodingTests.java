@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.test.account;
+package it.infn.mw.iam.test.api.account.password;
 
 import static it.infn.mw.iam.test.util.AuthenticationUtils.adminAuthentication;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
