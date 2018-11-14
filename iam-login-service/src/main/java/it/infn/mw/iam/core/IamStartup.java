@@ -46,7 +46,7 @@ public class IamStartup implements ApplicationListener<ApplicationReadyEvent> {
   @Transactional
   public void createGroupManagerAuthorities() {
 
-    LOG.info("Starting Group manager authority check");
+    LOG.debug("Starting Group manager authority check");
     
     for (IamGroup g : groupRepo.findAll()) {
 
@@ -60,11 +60,16 @@ public class IamStartup implements ApplicationListener<ApplicationReadyEvent> {
       }
     }
   }
+  
+  @Transactional
+  public void dropOrphanedTokens() {
+    
+  }
 
   @Override
   public void onApplicationEvent(ApplicationReadyEvent event) {
 
-    createGroupManagerAuthorities();
+    // createGroupManagerAuthorities();
   }
 
 }

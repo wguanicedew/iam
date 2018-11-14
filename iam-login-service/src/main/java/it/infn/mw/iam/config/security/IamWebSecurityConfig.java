@@ -236,7 +236,7 @@ public class IamWebSecurityConfig {
 
   @Configuration
   @Order(Ordered.HIGHEST_PRECEDENCE)
-  @Profile("dev")
+  @Profile("h2-console")
   public static class H2ConsoleEndpointAuthorizationConfig extends WebSecurityConfigurerAdapter {
 
     @Override
