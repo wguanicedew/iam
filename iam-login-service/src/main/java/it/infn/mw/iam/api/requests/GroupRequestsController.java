@@ -47,13 +47,13 @@ public class GroupRequestsController {
   private GroupRequestsService groupRequestService;
 
   @RequestMapping(method = RequestMethod.POST, value = {"", "/"})
-  @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
+  @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
   public GroupRequestDto createGroupRequest(@RequestBody @Valid GroupRequestDto groupRequest) {
     return groupRequestService.createGroupRequest(groupRequest);
   }
 
-  @RequestMapping(method = RequestMethod.GET, value = "/")
-  @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
+  @RequestMapping(method = RequestMethod.GET, value = {"", "/"})
+  @PreAuthorize("hasAnyRole('ADMIN','USER')")
   public ListResponseDTO<GroupRequestDto> listGroupRequest(
       @RequestParam(required = false) String username,
       @RequestParam(required = false) String groupName,
@@ -66,7 +66,7 @@ public class GroupRequestsController {
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "/{requestId}")
-  @PreAuthorize("hasRole('ADMIN') or #iam.userOwnsGroupRequest(#requestId)")
+  @PreAuthorize("hasRole('ADMIN') or #iam.canAccessGroupRequest(#requestId)")
   public GroupRequestDto getGroupRequestDetails(
       @Valid @PathVariable("requestId") String requestId) {
     return groupRequestService.getGroupRequestDetails(requestId);
@@ -80,14 +80,14 @@ public class GroupRequestsController {
   }
 
   @RequestMapping(method = RequestMethod.POST, value = "/{requestId}/approve")
-  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("hasRole('ADMIN') or #iam.canManageGroupRequest(#requestId)")
   @ResponseStatus(HttpStatus.OK)
   public GroupRequestDto approveGroupRequest(@Valid @PathVariable("requestId") String requestId) {
     return groupRequestService.approveGroupRequest(requestId);
   }
 
   @RequestMapping(method = RequestMethod.POST, value = "/{requestId}/reject")
-  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("hasRole('ADMIN') or #iam.canManageGroupRequest(#requestId)")
   @ResponseStatus(HttpStatus.OK)
   public GroupRequestDto rejectGroupRequest(@Valid @PathVariable("requestId") String requestId,
       @RequestParam @NotEmpty String motivation) {

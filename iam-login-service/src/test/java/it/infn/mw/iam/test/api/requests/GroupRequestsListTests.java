@@ -59,10 +59,10 @@ public class GroupRequestsListTests extends GroupRequestsTestUtils {
 
   private MockMvc mvc;
 
-  private final static String USER_100 = TEST_USERNAME;
+  private final static String USER_100 = TEST_100_USERNAME;
   private final static String USER_101 = "test_101";
 
-  private final static String GROUP_01 = TEST_GROUPNAME;
+  private final static String GROUP_01 = TEST_001_GROUPNAME;
   private final static String GROUP_02 = "Test-002";
   private final static String GROUP_03 = "Test-003";
 
@@ -72,7 +72,7 @@ public class GroupRequestsListTests extends GroupRequestsTestUtils {
       .apply(springSecurity())
       .alwaysDo(print())
       .build();
-
+    
     savePendingGroupRequest(USER_100, GROUP_01);
     savePendingGroupRequest(USER_101, GROUP_01);
 
@@ -86,6 +86,7 @@ public class GroupRequestsListTests extends GroupRequestsTestUtils {
   @Test
   @WithMockUser(roles = {"ADMIN"}, username = TEST_ADMIN)
   public void listGroupRequestAsAdmin() throws Exception {
+    
     // @formatter:off
     mvc.perform(get(LIST_REQUESTS_URL)
         .contentType(MediaType.APPLICATION_JSON))

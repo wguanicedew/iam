@@ -70,7 +70,6 @@ public class GroupRequestsApproveTests extends GroupRequestsTestUtils {
   private IamEmailNotificationRepository emailRepository;
 
   private MockMvc mvc;
-  private GroupRequestDto request;
 
   @Before
   public void setup() {
@@ -79,18 +78,19 @@ public class GroupRequestsApproveTests extends GroupRequestsTestUtils {
       .alwaysDo(print())
       .build();
 
-    request = savePendingGroupRequest(TEST_USERNAME, TEST_GROUPNAME);
+
   }
 
   @Test
   @WithMockUser(roles = {"ADMIN"})
   public void approveGroupRequestAsAdmin() throws Exception {
+    GroupRequestDto request = savePendingGroupRequest(TEST_100_USERNAME, TEST_001_GROUPNAME);
     // @formatter:off
     String response = mvc.perform(post(APPROVE_URL, request.getUuid()))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.status", equalTo(IamGroupRequestStatus.APPROVED.name())))
-      .andExpect(jsonPath("$.username", equalTo(TEST_USERNAME)))
-      .andExpect(jsonPath("$.groupName", equalTo(TEST_GROUPNAME)))
+      .andExpect(jsonPath("$.username", equalTo(TEST_100_USERNAME)))
+      .andExpect(jsonPath("$.groupName", equalTo(TEST_001_GROUPNAME)))
       .andExpect(jsonPath("$.uuid", equalTo(request.getUuid())))
       .andExpect(jsonPath("$.lastUpdateTime").exists())
       .andExpect(jsonPath("$.lastUpdateTime").isNotEmpty())
@@ -116,6 +116,7 @@ public class GroupRequestsApproveTests extends GroupRequestsTestUtils {
   @Test
   @WithMockUser(roles = {"USER"})
   public void approveGroupRequestAsUser() throws Exception {
+    GroupRequestDto request = savePendingGroupRequest(TEST_100_USERNAME, TEST_001_GROUPNAME);
     // @formatter:off
     mvc.perform(post(APPROVE_URL, request.getUuid()))
       .andExpect(status().isForbidden());
@@ -125,6 +126,7 @@ public class GroupRequestsApproveTests extends GroupRequestsTestUtils {
   @Test
   @WithAnonymousUser
   public void approveGroupRequestAsAnonymous() throws Exception {
+    GroupRequestDto request = savePendingGroupRequest(TEST_100_USERNAME, TEST_001_GROUPNAME);
     // @formatter:off
     mvc.perform(post(APPROVE_URL, request.getUuid()))
       .andExpect(status().isUnauthorized())
@@ -136,6 +138,7 @@ public class GroupRequestsApproveTests extends GroupRequestsTestUtils {
   @Test
   @WithMockUser(roles = {"ADMIN"})
   public void approveNotExitingGroupRequest() throws Exception {
+
     String fakeRequestUuid = UUID.randomUUID().toString();
     // @formatter:off
     mvc.perform(post(APPROVE_URL, fakeRequestUuid))
@@ -147,7 +150,7 @@ public class GroupRequestsApproveTests extends GroupRequestsTestUtils {
   @Test
   @WithMockUser(roles = {"ADMIN"})
   public void approveAlreadyApprovedRequest() throws Exception {
-    request = saveApprovedGroupRequest(TEST_USERNAME, TEST_GROUPNAME);
+    GroupRequestDto request = saveApprovedGroupRequest(TEST_100_USERNAME, TEST_001_GROUPNAME);
     // @formatter:off
     mvc.perform(post(APPROVE_URL, request.getUuid()))
     .andExpect(status().isBadRequest())
@@ -158,7 +161,7 @@ public class GroupRequestsApproveTests extends GroupRequestsTestUtils {
   @Test
   @WithMockUser(roles = {"ADMIN"})
   public void approveRejectedRequest() throws Exception {
-    request = saveRejectedGroupRequest(TEST_USERNAME, TEST_GROUPNAME);
+    GroupRequestDto request = saveRejectedGroupRequest(TEST_100_USERNAME, TEST_001_GROUPNAME);
     // @formatter:off
     mvc.perform(post(APPROVE_URL, request.getUuid()))
     .andExpect(status().isBadRequest())
@@ -169,16 +172,16 @@ public class GroupRequestsApproveTests extends GroupRequestsTestUtils {
   @Test
   @WithMockUser(roles = {"ADMIN", "USER"})
   public void approveGroupRequestAsUserWithBothRoles() throws Exception {
+    GroupRequestDto request = savePendingGroupRequest(TEST_100_USERNAME, TEST_001_GROUPNAME);
     // @formatter:off
     mvc.perform(post(APPROVE_URL, request.getUuid()))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.status", equalTo(IamGroupRequestStatus.APPROVED.name())))
-      .andExpect(jsonPath("$.username", equalTo(TEST_USERNAME)))
-      .andExpect(jsonPath("$.groupName", equalTo(TEST_GROUPNAME)))
+      .andExpect(jsonPath("$.username", equalTo(TEST_100_USERNAME)))
+      .andExpect(jsonPath("$.groupName", equalTo(TEST_001_GROUPNAME)))
       .andExpect(jsonPath("$.uuid", equalTo(request.getUuid())))
       .andExpect(jsonPath("$.lastUpdateTime").exists())
       .andExpect(jsonPath("$.lastUpdateTime").isNotEmpty());
     // @formatter:on
   }
-
 }

@@ -32,8 +32,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import org.springframework.transaction.annotation.Transactional;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,6 +42,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -254,7 +253,7 @@ public class ScimNestedGroupTests {
     mvc.perform(post("/scim/Groups").contentType(SCIM_CONTENT_TYPE)
         .content(objectMapper.writeValueAsString(group)))
       .andExpect(status().isBadRequest())
-      .andExpect(jsonPath("$.detail", equalTo("Group displayName length cannot be higher than 512 characters")));
+      .andExpect(jsonPath("$.detail", equalTo("Group displayName length cannot exceed 512 characters")));
     // @formatter:on
   }
 
@@ -270,7 +269,7 @@ public class ScimNestedGroupTests {
     mvc.perform(post("/scim/Groups").contentType(SCIM_CONTENT_TYPE)
         .content(objectMapper.writeValueAsString(group)))
       .andExpect(status().isBadRequest())
-      .andExpect(jsonPath("$.detail", equalTo("Group name length cannot be higher than 50 characters")));
+      .andExpect(jsonPath("$.detail", equalTo("Group name length cannot exceed 50 characters")));
     // @formatter:on
   }
 

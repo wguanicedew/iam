@@ -16,6 +16,7 @@
 package it.infn.mw.iam.persistence.model;
 
 import java.io.Serializable;
+import java.time.Clock;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -171,8 +172,8 @@ public class IamGroup implements Serializable {
     this.groupRequests = groupRequests;
   }
 
-  public void touch() {
-    setLastUpdateTime(new Date());
+  public void touch(Clock c) {
+    setLastUpdateTime(Date.from(c.instant()));
   }
 
   @Override

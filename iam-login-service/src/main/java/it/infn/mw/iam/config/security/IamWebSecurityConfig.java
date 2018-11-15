@@ -32,6 +32,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.data.repository.query.SecurityEvaluationContextExtension;
 import org.springframework.security.oauth2.provider.expression.OAuth2WebSecurityExpressionHandler;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -59,6 +60,11 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 @Configuration
 @EnableWebSecurity
 public class IamWebSecurityConfig {
+  
+  @Bean
+  public SecurityEvaluationContextExtension contextExtension() {
+    return new SecurityEvaluationContextExtension();
+  }
 
   @Configuration
   @Order(100)

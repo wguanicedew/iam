@@ -33,6 +33,7 @@ import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
 import it.infn.mw.iam.api.scim.exception.ScimValidationException;
 import it.infn.mw.iam.api.scim.model.ScimErrorResponse;
 import it.infn.mw.iam.authn.x509.CertificateParsingError;
+import it.infn.mw.iam.core.group.exception.InvalidGroupOperationException;
 import it.infn.mw.iam.util.ssh.InvalidSshKeyException;
 
 @ControllerAdvice
@@ -103,6 +104,13 @@ public class ScimExceptionHandler extends ResponseEntityExceptionHandler {
     return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
   }
 
+  @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(InvalidGroupOperationException.class)
+  @ResponseBody
+  public ScimErrorResponse handleInvalidGroupOperationException(InvalidGroupOperationException e) {
+    return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
+  }
+  
   @ResponseStatus(code = HttpStatus.BAD_REQUEST)
   @ExceptionHandler(ScimException.class)
   @ResponseBody

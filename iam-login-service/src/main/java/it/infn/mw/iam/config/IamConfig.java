@@ -15,6 +15,8 @@
  */
 package it.infn.mw.iam.config;
 
+import java.time.Clock;
+
 import org.h2.server.web.WebServlet;
 import org.mitre.oauth2.service.IntrospectionResultAssembler;
 import org.mitre.oauth2.service.impl.DefaultOAuth2AuthorizationCodeService;
@@ -44,6 +46,11 @@ public class IamConfig {
 
   @Value("${iam.organisation.name}")
   private String iamOrganisationName;
+  
+  @Bean
+  Clock defaultClock() {
+    return Clock.systemDefaultZone();
+  }
 
   @Bean
   AuthorizationCodeServices authorizationCodeServices() {

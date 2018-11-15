@@ -78,7 +78,6 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
   private IamEmailNotificationRepository emailRepository;
 
   private MockMvc mvc;
-  private GroupRequestDto request;
 
   @Before
   public void setup() {
@@ -87,33 +86,38 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
       .alwaysDo(print())
       .build();
 
-    request = buildGroupRequest(TEST_GROUPNAME);
+    
   }
 
   @Test
   @WithMockUser(roles = {"ADMIN"}, username = TEST_ADMIN)
   public void createGroupRequestAsAdmin() throws Exception {
+    GroupRequestDto request = buildGroupRequest(TEST_001_GROUPNAME);
+    
     // @formatter:off
     mvc.perform(post(CREATE_URL)
         .contentType(MediaType.APPLICATION_JSON)
         .content(mapper.writeValueAsString(request)))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.username", equalTo(TEST_ADMIN)))
-      .andExpect(jsonPath("$.groupName", equalTo(TEST_GROUPNAME)))
+      .andExpect(jsonPath("$.groupName", equalTo(TEST_001_GROUPNAME)))
       .andExpect(jsonPath("$.status", equalTo(IamGroupRequestStatus.PENDING.name())));
     // @formatter:on
   }
 
   @Test
-  @WithMockUser(roles = {"USER"}, username = TEST_USERNAME)
+  @WithMockUser(roles = {"USER"}, username = TEST_100_USERNAME)
   public void createGroupRequestAsUser() throws Exception {
+    
+    GroupRequestDto request = buildGroupRequest(TEST_001_GROUPNAME);
+    
     // @formatter:off
     mvc.perform(post(CREATE_URL)
         .contentType(MediaType.APPLICATION_JSON)
         .content(mapper.writeValueAsString(request)))
       .andExpect(status().isOk())
-      .andExpect(jsonPath("$.username", equalTo(TEST_USERNAME)))
-      .andExpect(jsonPath("$.groupName", equalTo(TEST_GROUPNAME)))
+      .andExpect(jsonPath("$.username", equalTo(TEST_100_USERNAME)))
+      .andExpect(jsonPath("$.groupName", equalTo(TEST_001_GROUPNAME)))
       .andExpect(jsonPath("$.status", equalTo(IamGroupRequestStatus.PENDING.name())));
     // @formatter:on
     int mailCount = notificationService.countPendingNotifications();
@@ -122,7 +126,7 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
     List<IamEmailNotification> mails =
         emailRepository.findByNotificationType(IamNotificationType.GROUP_MEMBERSHIP);
     assertThat(mails, hasSize(1));
-    assertThat(mails.get(0).getBody(), containsString(format("Username: %s", TEST_USERNAME)));
+    assertThat(mails.get(0).getBody(), containsString(format("Username: %s", TEST_100_USERNAME)));
     assertThat(mails.get(0).getBody(), containsString(format("Group: %s", request.getGroupName())));
     assertThat(mails.get(0).getBody(), containsString(request.getNotes()));
     assertThat(mails.get(0).getBody(), containsString(baseUrl));
@@ -131,6 +135,8 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
   @Test
   @WithAnonymousUser
   public void createGroupRequestAsAnonymous() throws Exception {
+    GroupRequestDto request = buildGroupRequest(TEST_001_GROUPNAME);
+    
     // @formatter:off
     mvc.perform(post(CREATE_URL)
         .contentType(MediaType.APPLICATION_JSON)
@@ -140,8 +146,9 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
   }
 
   @Test
-  @WithMockUser(roles = {"USER"}, username = TEST_USERNAME)
+  @WithMockUser(roles = {"USER"}, username = TEST_100_USERNAME)
   public void createGroupRequestWitInvalidNotes() throws Exception {
+    GroupRequestDto request = buildGroupRequest(TEST_001_GROUPNAME);
     request.setNotes(null);
     // @formatter:off
     mvc.perform(post(CREATE_URL)
@@ -168,8 +175,9 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
   }
 
   @Test
-  @WithMockUser(roles = {"USER"}, username = TEST_USERNAME)
+  @WithMockUser(roles = {"USER"}, username = TEST_100_USERNAME)
   public void createGroupRequestWithInvalidGroup() throws Exception {
+    GroupRequestDto request = buildGroupRequest(TEST_001_GROUPNAME);
     request.setGroupName("");
     // @formatter:off
     mvc.perform(post(CREATE_URL)
@@ -188,9 +196,10 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
   }
 
   @Test
-  @WithMockUser(roles = {"USER"}, username = TEST_USERNAME)
+  @WithMockUser(roles = {"USER"}, username = TEST_100_USERNAME)
   public void createGroupRequestAlreadyExists() throws Exception {
-    savePendingGroupRequest(TEST_USERNAME, TEST_GROUPNAME);
+    GroupRequestDto request = buildGroupRequest(TEST_001_GROUPNAME);
+    savePendingGroupRequest(TEST_100_USERNAME, TEST_001_GROUPNAME);
     // @formatter:off
     mvc.perform(post(CREATE_URL)
         .contentType(MediaType.APPLICATION_JSON)
@@ -203,7 +212,7 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
   @Test
   @WithMockUser(roles = {"USER"}, username = "test")
   public void createGroupRequestUserAlreadyMember() throws Exception {
-    request = buildGroupRequest("Analysis");
+    GroupRequestDto request = buildGroupRequest("Analysis");
     // @formatter:off
     mvc.perform(post(CREATE_URL)
         .contentType(MediaType.APPLICATION_JSON)
@@ -214,15 +223,17 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
   }
 
   @Test
-  @WithMockUser(roles = {"ADMIN", "USER"}, username = TEST_USERNAME)
+  @WithMockUser(roles = {"ADMIN", "USER"}, username = TEST_100_USERNAME)
   public void createGroupRequestAsUserWithBothRoles() throws Exception {
+    
+    GroupRequestDto request = buildGroupRequest(TEST_001_GROUPNAME);
     // @formatter:off
     mvc.perform(post(CREATE_URL)
         .contentType(MediaType.APPLICATION_JSON)
         .content(mapper.writeValueAsString(request)))
       .andExpect(status().isOk())
-      .andExpect(jsonPath("$.username", equalTo(TEST_USERNAME)))
-      .andExpect(jsonPath("$.groupName", equalTo(TEST_GROUPNAME)))
+      .andExpect(jsonPath("$.username", equalTo(TEST_100_USERNAME)))
+      .andExpect(jsonPath("$.groupName", equalTo(TEST_001_GROUPNAME)))
       .andExpect(jsonPath("$.status", equalTo(IamGroupRequestStatus.PENDING.name())));
     // @formatter:on
   }

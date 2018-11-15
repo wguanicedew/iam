@@ -51,7 +51,7 @@ public class GroupRequestsDeleteTests extends GroupRequestsTestUtils {
   private WebApplicationContext context;
 
   private MockMvc mvc;
-  private GroupRequestDto request;
+
 
   @Before
   public void setup() {
@@ -59,13 +59,14 @@ public class GroupRequestsDeleteTests extends GroupRequestsTestUtils {
       .apply(springSecurity())
       .alwaysDo(print())
       .build();
-
-    request = savePendingGroupRequest(TEST_USERNAME, TEST_GROUPNAME);
   }
 
   @Test
   @WithMockUser(roles = {"ADMIN"})
   public void deletePendingGroupRequestAsAdmin() throws Exception {
+
+    GroupRequestDto request = savePendingGroupRequest(TEST_100_USERNAME, TEST_001_GROUPNAME);
+
     // @formatter:off
     mvc.perform(delete(DELETE_URL, request.getUuid()))
       .andExpect(status().isNoContent());
@@ -75,7 +76,7 @@ public class GroupRequestsDeleteTests extends GroupRequestsTestUtils {
   @Test
   @WithMockUser(roles = {"ADMIN"})
   public void deleteApprovedGroupRequestAsAdmin() throws Exception {
-    request = saveApprovedGroupRequest(TEST_USERNAME, TEST_GROUPNAME);
+    GroupRequestDto request = saveApprovedGroupRequest(TEST_100_USERNAME, TEST_001_GROUPNAME);
     // @formatter:off
     mvc.perform(delete(DELETE_URL, request.getUuid()))
       .andExpect(status().isNoContent());
@@ -83,8 +84,11 @@ public class GroupRequestsDeleteTests extends GroupRequestsTestUtils {
   }
 
   @Test
-  @WithMockUser(roles = {"USER"}, username = TEST_USERNAME)
+  @WithMockUser(roles = {"USER"}, username = TEST_100_USERNAME)
   public void deletePendingGroupRequestAsUser() throws Exception {
+
+    GroupRequestDto request = savePendingGroupRequest(TEST_100_USERNAME, TEST_001_GROUPNAME);
+
     // @formatter:off
     mvc.perform(delete(DELETE_URL, request.getUuid()))
       .andExpect(status().isNoContent());
@@ -92,10 +96,9 @@ public class GroupRequestsDeleteTests extends GroupRequestsTestUtils {
   }
 
   @Test
-  @WithMockUser(roles = {"USER"}, username = TEST_USERNAME)
+  @WithMockUser(roles = {"USER"}, username = TEST_100_USERNAME)
   public void deleteApprovedGroupRequestAsUser() throws Exception {
-
-    request = saveApprovedGroupRequest(TEST_USERNAME, TEST_GROUPNAME);
+    GroupRequestDto request = saveApprovedGroupRequest(TEST_100_USERNAME, TEST_001_GROUPNAME);
 
     // @formatter:off
     mvc.perform(delete(DELETE_URL, request.getUuid()))
@@ -104,10 +107,10 @@ public class GroupRequestsDeleteTests extends GroupRequestsTestUtils {
   }
 
   @Test
-  @WithMockUser(roles = {"USER"}, username = TEST_USERNAME)
+  @WithMockUser(roles = {"USER"}, username = TEST_100_USERNAME)
   public void deleteGroupRequestOfAnotherUser() throws Exception {
 
-    request = savePendingGroupRequest("test_101", TEST_GROUPNAME);
+    GroupRequestDto request = savePendingGroupRequest("test_101", TEST_001_GROUPNAME);
 
     // @formatter:off
     mvc.perform(delete(DELETE_URL, request.getUuid()))
@@ -118,6 +121,9 @@ public class GroupRequestsDeleteTests extends GroupRequestsTestUtils {
   @Test
   @WithAnonymousUser
   public void deleteGroupRequestAsAnonymous() throws Exception {
+    
+    GroupRequestDto request = savePendingGroupRequest(TEST_100_USERNAME, TEST_001_GROUPNAME);
+
     // @formatter:off
     mvc.perform(delete(DELETE_URL, request.getUuid()))
       .andExpect(status().isUnauthorized());
@@ -139,6 +145,9 @@ public class GroupRequestsDeleteTests extends GroupRequestsTestUtils {
   @Test
   @WithMockUser(roles = {"ADMIN", "USER"})
   public void deletePendingGroupRequestAsUserWithBothRoles() throws Exception {
+    
+    GroupRequestDto request = savePendingGroupRequest(TEST_100_USERNAME, TEST_001_GROUPNAME);
+    
     // @formatter:off
     mvc.perform(delete(DELETE_URL, request.getUuid()))
       .andExpect(status().isNoContent());

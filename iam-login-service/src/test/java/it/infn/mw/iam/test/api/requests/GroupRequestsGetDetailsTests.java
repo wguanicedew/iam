@@ -54,7 +54,6 @@ public class GroupRequestsGetDetailsTests extends GroupRequestsTestUtils {
   private WebApplicationContext context;
 
   private MockMvc mvc;
-  private GroupRequestDto request;
 
   @Before
   public void setup() {
@@ -63,12 +62,15 @@ public class GroupRequestsGetDetailsTests extends GroupRequestsTestUtils {
       .alwaysDo(print())
       .build();
 
-    request = savePendingGroupRequest(TEST_USERNAME, TEST_GROUPNAME);
+    
   }
 
   @Test
   @WithMockUser(roles = {"ADMIN"})
   public void getGroupRequestDetailsAsAdmin() throws Exception {
+    
+    GroupRequestDto request = savePendingGroupRequest(TEST_100_USERNAME, TEST_001_GROUPNAME);
+    
     // @formatter:off
     mvc.perform(get(GET_DETAILS_URL, request.getUuid()))
       .andExpect(status().isOk())
@@ -81,8 +83,10 @@ public class GroupRequestsGetDetailsTests extends GroupRequestsTestUtils {
   }
 
   @Test
-  @WithMockUser(roles = {"USER"}, username = TEST_USERNAME)
+  @WithMockUser(roles = {"USER"}, username = TEST_100_USERNAME)
   public void getGroupRequestDetailsAsUser() throws Exception {
+    GroupRequestDto request = savePendingGroupRequest(TEST_100_USERNAME, TEST_001_GROUPNAME);
+    
     // @formatter:off
     mvc.perform(get(GET_DETAILS_URL, request.getUuid()))
       .andExpect(status().isOk())
@@ -94,9 +98,9 @@ public class GroupRequestsGetDetailsTests extends GroupRequestsTestUtils {
   }
 
   @Test
-  @WithMockUser(roles = {"USER"}, username = TEST_USERNAME)
+  @WithMockUser(roles = {"USER"}, username = TEST_100_USERNAME)
   public void getGroupRequestDetailsOfAnotherUser() throws Exception {
-    request = savePendingGroupRequest("test_101", TEST_GROUPNAME);
+    GroupRequestDto request = savePendingGroupRequest("test_101", TEST_001_GROUPNAME);
     // @formatter:off
     mvc.perform(get(GET_DETAILS_URL, request.getUuid()))
       .andExpect(status().isForbidden());
@@ -106,6 +110,7 @@ public class GroupRequestsGetDetailsTests extends GroupRequestsTestUtils {
   @Test
   @WithAnonymousUser
   public void getGroupRequestDetailsAsAnonymous() throws Exception {
+    GroupRequestDto request = savePendingGroupRequest(TEST_100_USERNAME, TEST_001_GROUPNAME);
     // @formatter:off
     mvc.perform(get(GET_DETAILS_URL, request.getUuid()))
       .andExpect(status().isUnauthorized())
@@ -129,6 +134,7 @@ public class GroupRequestsGetDetailsTests extends GroupRequestsTestUtils {
   @Test
   @WithMockUser(roles = {"ADMIN", "USER"})
   public void getGroupRequestDetailsAsUserWithBothRoles() throws Exception {
+    GroupRequestDto request = savePendingGroupRequest(TEST_100_USERNAME, TEST_001_GROUPNAME);
     // @formatter:off
     mvc.perform(get(GET_DETAILS_URL, request.getUuid()))
       .andExpect(status().isOk())

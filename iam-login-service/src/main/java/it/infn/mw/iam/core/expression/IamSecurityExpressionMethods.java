@@ -53,19 +53,28 @@ public class IamSecurityExpressionMethods {
     return account.isPresent() && account.get().getUuid().equals(userUuid);
   }
 
-  public boolean userOwnsGroupRequest(String requestId) {
-    Optional<IamGroupRequest> groupRequest = groupRequestUtils.getGroupRequestUuid(requestId);
+  public boolean canManageGroupRequest(String requestId) {
+    Optional<IamGroupRequest> groupRequest = groupRequestUtils.getOptionalGroupRequest(requestId);
+
+    return groupRequest.isPresent() && isGroupManager(groupRequest.get().getGroup().getUuid());
+  }
+
+  public boolean canAccessGroupRequest(String requestId) {
+    Optional<IamGroupRequest> groupRequest = groupRequestUtils.getOptionalGroupRequest(requestId);
     Optional<IamAccount> userAccount = accountUtils.getAuthenticatedUserAccount();
 
+
     return userAccount.isPresent() && groupRequest.isPresent()
-        && groupRequest.get().getAccount().getUuid().equals(userAccount.get().getUuid());
+        && (groupRequest.get().getAccount().getUuid().equals(userAccount.get().getUuid())
+            || isGroupManager(groupRequest.get().getGroup().getUuid()));
   }
 
   public boolean userCanDeleteGroupRequest(String requestId) {
-    Optional<IamGroupRequest> groupRequest = groupRequestUtils.getGroupRequestUuid(requestId);
+    Optional<IamGroupRequest> groupRequest = groupRequestUtils.getOptionalGroupRequest(requestId);
 
-    return groupRequest.isPresent() && userOwnsGroupRequest(requestId)
-        && IamGroupRequestStatus.PENDING.equals(groupRequest.get().getStatus());
+    return groupRequest.isPresent() && ((canAccessGroupRequest(requestId)
+        && IamGroupRequestStatus.PENDING.equals(groupRequest.get().getStatus()))
+        || canManageGroupRequest(requestId));
   }
 
 }
