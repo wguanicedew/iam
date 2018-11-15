@@ -15,8 +15,7 @@
  */
 package it.infn.mw.iam.test.api.account.search.service;
 
-import static it.infn.mw.iam.api.account.search.AccountSearchController.getSortByEmail;
-import static it.infn.mw.iam.api.account.search.AccountSearchController.getSortByName;
+import static it.infn.mw.iam.api.account.search.GroupSearchController.getSortByName;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
@@ -32,27 +31,27 @@ import org.springframework.transaction.annotation.Transactional;
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.common.OffsetPageable;
 import it.infn.mw.iam.api.common.PagedResourceService;
-import it.infn.mw.iam.persistence.model.IamAccount;
+import it.infn.mw.iam.persistence.model.IamGroup;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {IamLoginService.class})
 @Transactional
-public class DefaultPagedAccountsServiceTests extends AccountServiceUtils {
+public class DefaultPagedGroupsServiceTests extends GroupServiceUtils {
 
   public final int ITEMS_PER_PAGE = 10;
-  public final long TOTAL_TEST_ACCOUNTS = 253L;
-  private final int LAST_PAGE_NUMBER = (int) Math.ceil(TOTAL_TEST_ACCOUNTS / ITEMS_PER_PAGE);
-  private final int LAST_PAGE_SIZE = (int) (long) TOTAL_TEST_ACCOUNTS % ITEMS_PER_PAGE;
-  private final int LAST_PAGE_OFFSET = (int) (long) Math.floorDiv(TOTAL_TEST_ACCOUNTS, ITEMS_PER_PAGE) * ITEMS_PER_PAGE;
+  public final long TOTAL_TEST_GROUPS = 22L;
+  private final int LAST_PAGE_NUMBER = (int) Math.ceil(TOTAL_TEST_GROUPS / ITEMS_PER_PAGE);
+  private final int LAST_PAGE_SIZE = (int) (long) TOTAL_TEST_GROUPS % ITEMS_PER_PAGE;
+  private final int LAST_PAGE_OFFSET = (int) (long) Math.floorDiv(TOTAL_TEST_GROUPS, ITEMS_PER_PAGE) * ITEMS_PER_PAGE;
 
   @Autowired
-  private PagedResourceService<IamAccount> accountService;
+  private PagedResourceService<IamGroup> groupService;
 
-  private Page<IamAccount> getPage(Pageable p) {
+  private Page<IamGroup> getPage(Pageable p) {
 
-    Page<IamAccount> page = accountService.getPage(p);
-    assertThat(page.getTotalElements(), equalTo(TOTAL_TEST_ACCOUNTS));
+    Page<IamGroup> page = groupService.getPage(p);
+    assertThat(page.getTotalElements(), equalTo(TOTAL_TEST_GROUPS));
     assertThat(page.getNumber(), equalTo(p.getPageNumber()));
     int expectedSize = isLast(p) ? LAST_PAGE_SIZE : ITEMS_PER_PAGE;
     assertThat(page.getNumberOfElements(), equalTo(expectedSize));
@@ -70,8 +69,8 @@ public class DefaultPagedAccountsServiceTests extends AccountServiceUtils {
     Pageable op = new OffsetPageable(ITEMS_PER_PAGE, getSortByName(Sort.Direction.ASC));
     Pageable current = op.first();
 
-    while (current.getOffset() <= TOTAL_TEST_ACCOUNTS) {
-      Page<IamAccount> page = getPage(current);
+    while (current.getOffset() <= TOTAL_TEST_GROUPS) {
+      Page<IamGroup> page = getPage(current);
       assertSortIsByNameAsc(page.getContent());
       current = current.next();
     }
@@ -83,35 +82,9 @@ public class DefaultPagedAccountsServiceTests extends AccountServiceUtils {
     Pageable op = new OffsetPageable(ITEMS_PER_PAGE, getSortByName(Sort.Direction.DESC));
     Pageable current = op.first();
 
-    while (current.getOffset() <= TOTAL_TEST_ACCOUNTS) {
-      Page<IamAccount> page = getPage(current);
+    while (current.getOffset() <= TOTAL_TEST_GROUPS) {
+      Page<IamGroup> page = getPage(current);
       assertSortIsByNameDesc(page.getContent());
-      current = current.next();
-    }
-  }
-
-  @Test
-  public void getAllPagesSortedByEmailAsc() {
-
-    Pageable op = new OffsetPageable(ITEMS_PER_PAGE, getSortByEmail(Sort.Direction.ASC));
-    Pageable current = op.first();
-
-    while (current.getOffset() <= TOTAL_TEST_ACCOUNTS) {
-      Page<IamAccount> page = getPage(current);
-      assertSortIsByEmailAsc(page.getContent());
-      current = current.next();
-    }
-  }
-
-  @Test
-  public void getAllPagesSortedByEmailDesc() {
-
-    Pageable op = new OffsetPageable(ITEMS_PER_PAGE, getSortByEmail(Sort.Direction.DESC));
-    Pageable current = op.first();
-
-    while (current.getOffset() <= TOTAL_TEST_ACCOUNTS) {
-      Page<IamAccount> page = getPage(current);
-      assertSortIsByEmailDesc(page.getContent());
       current = current.next();
     }
   }
@@ -120,7 +93,7 @@ public class DefaultPagedAccountsServiceTests extends AccountServiceUtils {
   public void testGetFirstPageSortByNameAsc() {
 
     OffsetPageable op = new OffsetPageable(0, ITEMS_PER_PAGE, getSortByName(Sort.Direction.ASC));
-    Page<IamAccount> page = accountService.getPage(op);
+    Page<IamGroup> page = groupService.getPage(op);
     assertSortIsByNameAsc(page.getContent());
   }
 
@@ -128,7 +101,7 @@ public class DefaultPagedAccountsServiceTests extends AccountServiceUtils {
   public void testGetFirstPageSortByNameDesc() {
 
     OffsetPageable op = new OffsetPageable(0, ITEMS_PER_PAGE, getSortByName(Sort.Direction.DESC));
-    Page<IamAccount> page = accountService.getPage(op);
+    Page<IamGroup> page = groupService.getPage(op);
     assertSortIsByNameDesc(page.getContent());
   }
 
@@ -136,7 +109,7 @@ public class DefaultPagedAccountsServiceTests extends AccountServiceUtils {
   public void testGetLastPageSortByNameAsc() {
 
     OffsetPageable op = new OffsetPageable(LAST_PAGE_OFFSET, ITEMS_PER_PAGE, getSortByName(Sort.Direction.ASC));
-    Page<IamAccount> page = accountService.getPage(op);
+    Page<IamGroup> page = groupService.getPage(op);
     assertSortIsByNameAsc(page.getContent());
   }
 
@@ -145,26 +118,26 @@ public class DefaultPagedAccountsServiceTests extends AccountServiceUtils {
   public void testGetLastPageSortByNameDesc() {
 
     OffsetPageable op = new OffsetPageable(LAST_PAGE_OFFSET, ITEMS_PER_PAGE, getSortByName(Sort.Direction.DESC));
-    Page<IamAccount> page = accountService.getPage(op);
+    Page<IamGroup> page = groupService.getPage(op);
     assertSortIsByNameDesc(page.getContent());
   }
 
   @Test
-  public void testFilterWithFullName() {
+  public void testFilter() {
 
     OffsetPageable op = new OffsetPageable(0, ITEMS_PER_PAGE, getSortByName(Sort.Direction.ASC));
-    Page<IamAccount> page = accountService.getPage(op, "Admin User");
+    Page<IamGroup> page = groupService.getPage(op, "Production");
     assertThat(page.getTotalElements(), equalTo(1L));
     assertThat(page.getNumber(), equalTo(0));
     assertThat(page.getNumberOfElements(), equalTo(1));
     assertThat(page.getContent(), hasSize(1));
-    assertThat(page.getContent().get(0).getUsername(), equalTo("admin"));
+    assertThat(page.getContent().get(0).getName(), equalTo("Production"));
   }
 
   @Test
-  public void testFilterCountWithFullName() {
+  public void testFilterCount() {
 
-    long totalResults = accountService.count("Admin User");
+    long totalResults = groupService.count("Production");
     assertThat(totalResults, equalTo(1L));
   }
 }

@@ -24,7 +24,7 @@ import it.infn.mw.iam.persistence.model.IamGroup;
 
 public interface IamGroupService {
   
-  int countAllGroups();
+  long countAllGroups();
   Page<IamGroup> findAll(Pageable page);
   
   Optional<IamGroup> findByNameWithDifferentId(String name, String uuid);

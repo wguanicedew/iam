@@ -22,13 +22,13 @@ import db.migration.tasks.CreateGroupManagerAuthorities;
 
 /**
  * 
- * This is included just for consistency among H2 and MySQL. When this migration is execute there
+ * This is included just for consistency among H2 and MySQL. When this migration is executed there
  * will never be groups to migrate. See the test folder for the actual migration
  *
  */
-public class V22___CreateGroupManagerAuthorities implements SpringJdbcMigration {
+public class V23___CreateGroupManagerAuthorities implements SpringJdbcMigration {
 
-  public V22___CreateGroupManagerAuthorities() {}
+  public V23___CreateGroupManagerAuthorities() {}
 
   @Override
   public void migrate(JdbcTemplate jdbcTemplate) throws Exception {

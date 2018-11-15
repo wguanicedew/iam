@@ -21,13 +21,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
-public class V22___CreateGroupManagerAuthorities implements SpringJdbcMigration {
+public class V23___CreateGroupManagerAuthorities implements SpringJdbcMigration {
 
 
   public static final Logger LOG =
-      LoggerFactory.getLogger(V22___CreateGroupManagerAuthorities.class);
+      LoggerFactory.getLogger(V23___CreateGroupManagerAuthorities.class);
 
-  public V22___CreateGroupManagerAuthorities() {}
+  public V23___CreateGroupManagerAuthorities() {}
   
   @Override
   public void migrate(JdbcTemplate jdbcTemplate) throws Exception {

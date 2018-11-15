@@ -44,8 +44,8 @@
             <a id="nav-users" ui-sref="users" ui-sref-opts="{reload: true}">
                 <i class="fa fa-user"></i>
                 <span>Users</span>
-                <span class="pull-right-container" ng-show="$root.loggedUser.totUsers>0">
-                <small class="label pull-right bg-blue">{{$root.loggedUser.totUsers}}</small>
+                <span class="pull-right-container" ng-show="$root.usersCount>0">
+                <small class="label pull-right bg-blue">{{$root.usersCount}}</small>
             </span>
             </a>
         </li>
@@ -53,8 +53,8 @@
             <a id="nav-groups" ui-sref="groups" ui-sref-opts="{reload: true}">
                 <i class="fa fa-users"></i>
                 <span>Groups</span>
-                <span class="pull-right-container" ng-show="$root.loggedUser.totGroups>0">
-                <small class="label pull-right bg-green">{{$root.loggedUser.totGroups}}</small>
+                <span class="pull-right-container" ng-show="$root.groupsCount>0">
+                <small class="label pull-right bg-green">{{$root.groupsCount}}</small>
             </span>
             </a>
         </li>

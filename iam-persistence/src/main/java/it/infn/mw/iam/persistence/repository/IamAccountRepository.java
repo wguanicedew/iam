@@ -29,9 +29,6 @@ import it.infn.mw.iam.persistence.model.IamAccount;
 public interface IamAccountRepository
     extends PagingAndSortingRepository<IamAccount, Long>, IamAccountRepositoryCustom {
 
-  @Query("select count(a) from IamAccount a")
-  int countAllUsers();
-
   Optional<IamAccount> findByUuid(@Param("uuid") String uuid);
 
   Optional<IamAccount> findByUsername(@Param("username") String username);
@@ -85,9 +82,9 @@ public interface IamAccountRepository
   List<IamAccount> findProvisionedAccountsWithLastLoginTimeBeforeTimestamp(
       @Param("timestamp") Date timestamp);
 
-  @Query("select a from IamAccount a join a.userInfo ui where ui.email LIKE :filter or a.username LIKE :filter or a.uuid LIKE :filter or ui.givenName LIKE :filter or ui.familyName LIKE :filter")
+  @Query("select a from IamAccount a join a.userInfo ui where lower(ui.email) LIKE lower(concat('%', :filter, '%')) or lower(a.username) LIKE lower(concat('%', :filter, '%')) or lower(a.uuid) LIKE lower(concat('%', :filter, '%')) or lower(concat(ui.givenName, ' ', ui.familyName)) LIKE lower(concat('%', :filter, '%'))")
   Page<IamAccount> findByFilter(@Param("filter") String filter, Pageable op);
 
-  @Query("select count(a) from IamAccount a join a.userInfo ui where ui.email LIKE :filter or a.username LIKE :filter or a.uuid LIKE :filter or ui.givenName LIKE :filter or ui.familyName LIKE :filter")
+  @Query("select count(a) from IamAccount a join a.userInfo ui where lower(ui.email) LIKE lower(concat('%', :filter, '%')) or lower(a.username) LIKE lower(concat('%', :filter, '%')) or lower(a.uuid) LIKE lower(concat('%', :filter, '%')) or lower(concat(ui.givenName, ' ', ui.familyName)) LIKE lower(concat('%', :filter, '%'))")
   long countByFilter(@Param("filter") String filter);
 }

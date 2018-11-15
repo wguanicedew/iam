@@ -225,8 +225,8 @@ public class DefaultIamGroupService implements IamGroupService, ApplicationEvent
   }
 
   @Override
-  public int countAllGroups() {
-    return groupRepo.countAllGroups();
+  public long countAllGroups() {
+    return groupRepo.count();
   }
 
   @Override

@@ -171,7 +171,7 @@ public class ScimUserProvisioning
 
     if (params.getCount() == 0) {
 
-      long totalResults = accountRepository.countAllUsers();
+      long totalResults = accountRepository.count();
       builder.totalResults(totalResults);
 
     } else {
