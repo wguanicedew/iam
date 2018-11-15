@@ -47,7 +47,7 @@ import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.requests.model.GroupRequestDto;
 import it.infn.mw.iam.core.IamGroupRequestStatus;
 import it.infn.mw.iam.core.IamNotificationType;
-import it.infn.mw.iam.notification.NotificationStoreService;
+import it.infn.mw.iam.notification.service.NotificationStoreService;
 import it.infn.mw.iam.persistence.model.IamEmailNotification;
 import it.infn.mw.iam.persistence.repository.IamEmailNotificationRepository;
 import it.infn.mw.iam.test.util.WithAnonymousUser;

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.notification;
+package it.infn.mw.iam.notification.service;
 
 import java.util.Date;
 import java.util.stream.Collectors;
@@ -26,6 +26,8 @@ import org.springframework.stereotype.Service;
 
 import it.infn.mw.iam.core.IamDeliveryStatus;
 import it.infn.mw.iam.core.time.TimeProvider;
+import it.infn.mw.iam.notification.NotificationDelivery;
+import it.infn.mw.iam.notification.NotificationProperties;
 import it.infn.mw.iam.persistence.model.IamEmailNotification;
 import it.infn.mw.iam.persistence.model.IamNotificationReceiver;
 import it.infn.mw.iam.persistence.repository.IamEmailNotificationRepository;

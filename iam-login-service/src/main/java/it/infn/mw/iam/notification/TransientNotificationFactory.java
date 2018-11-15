@@ -15,12 +15,14 @@
  */
 package it.infn.mw.iam.notification;
 
-import java.util.ArrayList;
+import static java.util.Arrays.asList;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.apache.velocity.app.VelocityEngine;
 import org.slf4j.Logger;
@@ -32,6 +34,8 @@ import org.springframework.ui.velocity.VelocityEngineUtils;
 import it.infn.mw.iam.api.account.password_reset.PasswordResetController;
 import it.infn.mw.iam.core.IamDeliveryStatus;
 import it.infn.mw.iam.core.IamNotificationType;
+import it.infn.mw.iam.notification.service.resolver.AdminNotificationDeliveryStrategy;
+import it.infn.mw.iam.notification.service.resolver.GroupManagerNotificationDeliveryStrategy;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamEmailNotification;
 import it.infn.mw.iam.persistence.model.IamGroupRequest;
@@ -54,11 +58,16 @@ public class TransientNotificationFactory implements NotificationFactory {
 
   private final VelocityEngine velocityEngine;
   private final NotificationProperties properties;
+  private final AdminNotificationDeliveryStrategy adminNotificationDeliveryStrategy;
+  private final GroupManagerNotificationDeliveryStrategy groupManagerDeliveryStrategy;
 
   @Autowired
-  public TransientNotificationFactory(VelocityEngine ve, NotificationProperties np) {
+  public TransientNotificationFactory(VelocityEngine ve, NotificationProperties np,
+      AdminNotificationDeliveryStrategy ands, GroupManagerNotificationDeliveryStrategy gmds) {
     this.velocityEngine = ve;
     this.properties = np;
+    this.adminNotificationDeliveryStrategy = ands;
+    this.groupManagerDeliveryStrategy = gmds;
   }
 
   @Override
@@ -75,7 +84,7 @@ public class TransientNotificationFactory implements NotificationFactory {
 
     IamEmailNotification notification = createMessage("confirmRegistration.vm", model,
         IamNotificationType.CONFIRMATION, properties.getSubject().get("confirmation"),
-        request.getAccount().getUserInfo().getEmail());
+        asList(request.getAccount().getUserInfo().getEmail()));
 
     LOG.debug("Created confirmation message for registration request {}. Confirmation URL: {}",
         request.getUuid(), confirmURL);
@@ -97,7 +106,7 @@ public class TransientNotificationFactory implements NotificationFactory {
 
     IamEmailNotification notification = createMessage("accountActivated.vm", model,
         IamNotificationType.ACTIVATED, properties.getSubject().get("activated"),
-        request.getAccount().getUserInfo().getEmail());
+        asList(request.getAccount().getUserInfo().getEmail()));
 
     LOG.debug(
         "Create account activated message for registration request {}. Reset password URL: {}",
@@ -115,7 +124,8 @@ public class TransientNotificationFactory implements NotificationFactory {
     model.put(ORGANISATION_NAME, organisationName);
 
     return createMessage("requestRejected.vm", model, IamNotificationType.REJECTED,
-        properties.getSubject().get("rejected"), request.getAccount().getUserInfo().getEmail());
+        properties.getSubject().get("rejected"),
+        asList(request.getAccount().getUserInfo().getEmail()));
   }
 
   @Override
@@ -133,7 +143,8 @@ public class TransientNotificationFactory implements NotificationFactory {
     model.put("notes", request.getNotes());
 
     return createMessage("adminHandleRequest.vm", model, IamNotificationType.CONFIRMATION,
-        properties.getSubject().get("adminHandleRequest"), properties.getAdminAddress());
+        properties.getSubject().get("adminHandleRequest"),
+        adminNotificationDeliveryStrategy.resolveAdminEmailAddresses());
   }
 
   @Override
@@ -151,7 +162,7 @@ public class TransientNotificationFactory implements NotificationFactory {
 
     IamEmailNotification notification =
         createMessage("resetPassword.vm", model, IamNotificationType.RESETPASSWD,
-            properties.getSubject().get("resetPassword"), account.getUserInfo().getEmail());
+            properties.getSubject().get("resetPassword"), asList(account.getUserInfo().getEmail()));
 
     LOG.debug("Created reset password message for account {}. Reset password URL: {}",
         account.getUsername(), resetPasswordUrl);
@@ -175,7 +186,7 @@ public class TransientNotificationFactory implements NotificationFactory {
 
     LOG.debug("Create group membership admin notification for request {}", groupRequest.getUuid());
     return createMessage("adminHandleGroupRequest.vm", model, IamNotificationType.GROUP_MEMBERSHIP,
-        subject, properties.getAdminAddress());
+        subject, groupManagerDeliveryStrategy.resolveGroupManagersEmailAddresses(groupRequest.getGroup()));
   }
 
   @Override
@@ -195,7 +206,7 @@ public class TransientNotificationFactory implements NotificationFactory {
 
     IamEmailNotification notification =
         createMessage("groupMembershipApproved.vm", model, IamNotificationType.GROUP_MEMBERSHIP,
-            subject, groupRequest.getAccount().getUserInfo().getEmail());
+            subject, asList(groupRequest.getAccount().getUserInfo().getEmail()));
 
     LOG.debug("Create group membership approved message for request {}", groupRequest.getUuid());
     return notification;
@@ -219,34 +230,30 @@ public class TransientNotificationFactory implements NotificationFactory {
 
     IamEmailNotification notification =
         createMessage("groupMembershipRejected.vm", model, IamNotificationType.GROUP_MEMBERSHIP,
-            subject, groupRequest.getAccount().getUserInfo().getEmail());
+            subject, asList(groupRequest.getAccount().getUserInfo().getEmail()));
 
     LOG.debug("Create group membership approved message for request {}", groupRequest.getUuid());
     return notification;
   }
 
-
   protected IamEmailNotification createMessage(String template, Map<String, Object> model,
-      IamNotificationType messageType, String subject, String receiverAddress) {
+      IamNotificationType messageType, String subject, List<String> receiverAddress) {
 
     String body =
         VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, template, "UTF-8", model);
 
     IamEmailNotification message = new IamEmailNotification();
+
     message.setUuid(UUID.randomUUID().toString());
     message.setType(messageType);
     message.setSubject(subject);
     message.setBody(body);
     message.setCreationTime(new Date());
     message.setDeliveryStatus(IamDeliveryStatus.PENDING);
+    message.setReceivers(receiverAddress.stream()
+      .map(a -> IamNotificationReceiver.forAddress(message, a))
+      .collect(Collectors.toList()));
 
-    List<IamNotificationReceiver> receivers = new ArrayList<>();
-    IamNotificationReceiver rcv = new IamNotificationReceiver();
-    rcv.setIamEmailNotification(message);
-    rcv.setEmailAddress(receiverAddress);
-    receivers.add(rcv);
-
-    message.setReceivers(receivers);
     return message;
   }
 }

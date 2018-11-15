@@ -13,13 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.notification;
+package it.infn.mw.iam.notification.service.resolver;
 
-public interface NotificationStoreService {
+import static it.infn.mw.iam.notification.service.resolver.DefaultAddressResolutionService.VO_ADMINS;
 
-  public void clearExpiredNotifications();
+import java.util.List;
 
-  public int countPendingNotifications();
+import org.springframework.beans.factory.annotation.Autowired;
 
-  public void clearAllNotifications();
+public class NotifyAdminsStrategy implements AdminNotificationDeliveryStrategy {
+
+  final AddressResolutionService service;
+  
+  @Autowired
+  public NotifyAdminsStrategy(AddressResolutionService service) {
+    this.service = service;
+  }
+  @Override
+  public List<String> resolveAdminEmailAddresses() {
+    return service.resolveAddressesForAudience(VO_ADMINS);
+  }
+
 }

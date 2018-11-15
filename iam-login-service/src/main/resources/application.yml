@@ -96,19 +96,6 @@ oidc:
       style: btn-social btn-google
       image:
         fa-icon: google
-
-github:
-  client:
-    clientId: ${IAM_GITHUB_CLIENT_ID:define_me_please}
-    clientSecret: ${IAM_GITHUB_CLIENT_SECRET:define_me_please}
-    accessTokenUri: https://github.com/login/oauth/access_token
-    userAuthorizationUri: https://github.com/login/oauth/authorize
-    clientAuthenticationScheme: form
-    preEstablishedRedirectUri: http://${iam.baseUrl}/gh_login
-    useCurrentUri: false
-    scope: user:email
-  resource:
-    userInfoUri: https://api.github.com/user
     
 notification:
   disable: ${IAM_NOTIFICATION_DISABLE:false}
@@ -116,6 +103,9 @@ notification:
   taskDelay: ${IAM_NOTIFICATION_TASK_DELAY:5000}
   cleanupAge: ${IAM_NOTIFICATION_CLEANUP_AGE:30}
   adminAddress: ${IAM_NOTIFICATION_ADMIN_ADDRESS:indigo-alerts@localhost}
+  admin-notification-policy: ${IAM_NOTIFICATION_ADMIN_NOTIFICATION_POLICY:notify-address}
+  group-manager-notification-policy: ${IAM_NOTIFICATION_GROUP_MANAGER_NOTIFICATION_POLICY:notify-gms-and-admins}
+  
   subject:
     confirmation: Confirm your ${iam.organisation.name} registration request
     activated: Your ${iam.organisation.name} account is now active

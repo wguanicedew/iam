@@ -48,7 +48,7 @@ import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.requests.model.GroupRequestDto;
 import it.infn.mw.iam.core.IamGroupRequestStatus;
 import it.infn.mw.iam.core.IamNotificationType;
-import it.infn.mw.iam.notification.NotificationStoreService;
+import it.infn.mw.iam.notification.service.NotificationStoreService;
 import it.infn.mw.iam.persistence.model.IamEmailNotification;
 import it.infn.mw.iam.persistence.repository.IamEmailNotificationRepository;
 import it.infn.mw.iam.test.util.WithAnonymousUser;
@@ -148,7 +148,7 @@ public class GroupRequestsRejectTests extends GroupRequestsTestUtils {
   @Test
   @WithMockUser(roles = {"ADMIN"})
   public void rejectNotExitingGroupRequest() throws Exception {
-    GroupRequestDto request = savePendingGroupRequest(TEST_100_USERNAME, TEST_001_GROUPNAME);
+    savePendingGroupRequest(TEST_100_USERNAME, TEST_001_GROUPNAME);
 
     String fakeRequestUuid = UUID.randomUUID().toString();
 

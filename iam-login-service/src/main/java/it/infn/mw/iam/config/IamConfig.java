@@ -16,6 +16,7 @@
 package it.infn.mw.iam.config;
 
 import java.time.Clock;
+import java.util.Arrays;
 
 import org.h2.server.web.WebServlet;
 import org.mitre.oauth2.service.IntrospectionResultAssembler;
@@ -39,6 +40,15 @@ import it.infn.mw.iam.authn.oidc.OidcTokenEnhancer;
 import it.infn.mw.iam.core.IamIntrospectionResultAssembler;
 import it.infn.mw.iam.core.IamProperties;
 import it.infn.mw.iam.core.web.EnforceAupFilter;
+import it.infn.mw.iam.notification.NotificationProperties;
+import it.infn.mw.iam.notification.service.resolver.AddressResolutionService;
+import it.infn.mw.iam.notification.service.resolver.AdminNotificationDeliveryStrategy;
+import it.infn.mw.iam.notification.service.resolver.CompositeAdminsNotificationDelivery;
+import it.infn.mw.iam.notification.service.resolver.GroupManagerNotificationDeliveryStrategy;
+import it.infn.mw.iam.notification.service.resolver.NotifyGmStrategy;
+import it.infn.mw.iam.notification.service.resolver.NotifyGmsAndAdminsStrategy;
+import it.infn.mw.iam.notification.service.resolver.NotifyAdminsStrategy;
+import it.infn.mw.iam.notification.service.resolver.NotifyAdminAddressStrategy;
 import it.infn.mw.iam.persistence.repository.IamAupRepository;
 
 @Configuration
@@ -46,7 +56,42 @@ public class IamConfig {
 
   @Value("${iam.organisation.name}")
   private String iamOrganisationName;
-  
+
+  @Bean
+  GroupManagerNotificationDeliveryStrategy gmDeliveryStrategy(
+      AdminNotificationDeliveryStrategy ands, AddressResolutionService ars,
+      NotificationProperties props) {
+    switch (props.getGroupManagerNotificationPolicy()) {
+      case NOTIFY_GMS:
+        return new NotifyGmStrategy(ars);
+      case NOTIFY_GMS_AND_ADMINS:
+        return new NotifyGmsAndAdminsStrategy(ands, ars);
+      default:
+        throw new IllegalArgumentException("Unhandled group manager notification policy: "
+            + props.getGroupManagerNotificationPolicy());
+    }
+  }
+
+  @Bean
+  AdminNotificationDeliveryStrategy adminNotificationDeliveryStrategy(AddressResolutionService ars,
+      NotificationProperties props) {
+
+    switch (props.getAdminNotificationPolicy()) {
+      case NOTIFY_ADDRESS:
+        return new NotifyAdminAddressStrategy(props);
+      case NOTIFY_ADMINS:
+        return new NotifyAdminsStrategy(ars);
+      case NOTIFY_ADDRESS_AND_ADMINS:
+        return new CompositeAdminsNotificationDelivery(
+            Arrays.asList(new NotifyAdminsStrategy(ars),
+                new NotifyAdminsStrategy(ars)));
+
+      default:
+        throw new IllegalArgumentException(
+            "Unhandled admin notification policy: " + props.getAdminNotificationPolicy());
+    }
+  }
+
   @Bean
   Clock defaultClock() {
     return Clock.systemDefaultZone();

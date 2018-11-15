@@ -21,8 +21,8 @@ import java.util.List;
 
 import it.infn.mw.iam.core.IamDeliveryStatus;
 import it.infn.mw.iam.core.time.TimeProvider;
-import it.infn.mw.iam.notification.LoggingNotificationDelivery;
 import it.infn.mw.iam.notification.NotificationProperties;
+import it.infn.mw.iam.notification.service.LoggingNotificationDelivery;
 import it.infn.mw.iam.persistence.model.IamEmailNotification;
 import it.infn.mw.iam.persistence.repository.IamEmailNotificationRepository;
 

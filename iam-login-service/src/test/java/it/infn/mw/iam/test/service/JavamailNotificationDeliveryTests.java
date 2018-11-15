@@ -46,8 +46,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 
 import it.infn.mw.iam.core.IamDeliveryStatus;
 import it.infn.mw.iam.core.time.TimeProvider;
-import it.infn.mw.iam.notification.JavaMailNotificationDelivery;
 import it.infn.mw.iam.notification.NotificationProperties;
+import it.infn.mw.iam.notification.service.JavaMailNotificationDelivery;
 import it.infn.mw.iam.persistence.model.IamEmailNotification;
 import it.infn.mw.iam.persistence.model.IamNotificationReceiver;
 import it.infn.mw.iam.persistence.repository.IamEmailNotificationRepository;

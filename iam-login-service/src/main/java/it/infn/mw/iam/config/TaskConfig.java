@@ -36,7 +36,7 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import it.infn.mw.iam.core.user.IamAccountService;
 import it.infn.mw.iam.notification.NotificationDelivery;
 import it.infn.mw.iam.notification.NotificationDeliveryTask;
-import it.infn.mw.iam.notification.NotificationStoreService;
+import it.infn.mw.iam.notification.service.NotificationStoreService;
 
 @Configuration
 @EnableScheduling

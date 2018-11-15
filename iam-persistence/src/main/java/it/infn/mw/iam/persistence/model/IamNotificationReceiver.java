@@ -99,6 +99,13 @@ public class IamNotificationReceiver implements Serializable {
     return true;
   }
 
+  public static IamNotificationReceiver forAddress(IamEmailNotification n, String emailAddress) {
+    IamNotificationReceiver r = new IamNotificationReceiver();
+    r.setEmailAddress(emailAddress);
+    r.setIamEmailNotification(n);
+    return r;
+  }
+
   @Override
   public String toString() {
     return "IamNotificationReceiver [id=" + id + ", iamEmailNotification=" + iamEmailNotification
