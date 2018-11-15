@@ -40,6 +40,14 @@ pipeline {
       }
     }
 
+    stage('license-check') {
+      steps {
+        container('maven-runner') {
+          sh 'mvn license:check'
+        }
+      }
+    }
+
     stage('build') {
       steps {
         container('maven-runner') {
@@ -145,14 +153,6 @@ pipeline {
         }
     }
     
-    stage('license-check') {
-      steps {
-        container('maven-runner') {
-          sh 'mvn license:check'
-        }
-      }
-    }
-
     stage('package') {
       steps {
         container('maven-runner') {
