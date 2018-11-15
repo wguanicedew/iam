@@ -26,9 +26,6 @@ import it.infn.mw.iam.persistence.model.IamGroup;
 
 public interface IamGroupRepository extends PagingAndSortingRepository<IamGroup, Long> {
 
-  @Query("select count(g) from IamGroup g")
-  int countAllGroups();
-
   Optional<IamGroup> findByUuid(@Param("uuid") String uuid);
 
   Optional<IamGroup> findByName(@Param("name") String name);
@@ -43,9 +40,9 @@ public interface IamGroupRepository extends PagingAndSortingRepository<IamGroup,
   @Query("select g from IamGroup g where g.parentGroup = :parentGroup")
   List<IamGroup> findSubgroups(@Param("parentGroup") IamGroup parentGroup);
 
-  @Query("select g from IamGroup g where g.name LIKE :filter or g.uuid LIKE :filter")
-  Page<IamGroup> findByFilter(@Param("filter") String filter, Pageable op);
+  Page<IamGroup> findByNameIgnoreCaseContainingOrUuidIgnoreCaseContaining(
+      @Param("name") String name, @Param("uuid") String uuid, Pageable op);
 
-  @Query("select count(g) from IamGroup g where g.name LIKE :filter or g.uuid LIKE :filter")
-  long countByFilter(@Param("filter") String filter);
+  long countByNameIgnoreCaseContainingOrUuidIgnoreCaseContaining(@Param("name") String name,
+      @Param("uuid") String uuid);
 }

@@ -16,14 +16,15 @@
 package it.infn.mw.iam.api.common;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface PagedResourceService<T> {
 
-  Page<T> getPage(OffsetPageable op);
+  Page<T> getPage(Pageable op);
 
   long count();
 
-  Page<T> getPage(OffsetPageable op, String filter);
+  Page<T> getPage(Pageable op, String filter);
 
   long count(String filter);
 

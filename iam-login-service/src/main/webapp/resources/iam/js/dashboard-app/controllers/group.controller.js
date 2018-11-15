@@ -157,7 +157,7 @@ function GroupController($scope, $rootScope, $state, $filter, scimFactory, $uibM
 				scimFactory.deleteGroup(member.value)
 					.then(function(response) {
 						removeSubgroupFromList(member);
-						$rootScope.loggedUser.totGroups = $rootScope.loggedUser.totGroups -1;
+						$rootScope.groupsCount = $rootScope.groupsCount -1;
 						toaster.pop({
 					          type: 'success',
 					          body:

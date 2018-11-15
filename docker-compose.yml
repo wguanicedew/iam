@@ -32,6 +32,8 @@ services:
     # build:
     #  context: ./docker/trust-anchors
     command: /bin/true
+    volumes:
+      - /etc/grid-security/certificates
 
   iam-be:
     container_name: iam-be

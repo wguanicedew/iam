@@ -68,9 +68,7 @@ angular
                         url: '/users',
                         views: {
                             content: {
-                                templateUrl: '/resources/iam/template/dashboard/users/users.html',
-                                controller: 'UsersController',
-                                controllerAs: 'users'
+                                component: 'users'
                             }
                         }
                     })
@@ -79,9 +77,7 @@ angular
                         url: '/groups',
                         views: {
                             content: {
-                                templateUrl: '/resources/iam/template/dashboard/groups/groups.html',
-                                controller: 'GroupsController',
-                                controllerAs: 'gc'
+                                component: 'groups'
                             }
                         }
                     })
