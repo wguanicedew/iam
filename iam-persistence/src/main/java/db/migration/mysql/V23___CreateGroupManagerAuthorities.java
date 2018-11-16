@@ -19,29 +19,18 @@ import org.flywaydb.core.api.migration.spring.SpringJdbcMigration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
+
+import db.migration.tasks.CreateGroupManagerAuthorities;
 
 public class V23___CreateGroupManagerAuthorities implements SpringJdbcMigration {
-
 
   public static final Logger LOG =
       LoggerFactory.getLogger(V23___CreateGroupManagerAuthorities.class);
 
-  public V23___CreateGroupManagerAuthorities() {}
-  
   @Override
   public void migrate(JdbcTemplate jdbcTemplate) throws Exception {
-    SqlRowSet rowSet = jdbcTemplate.queryForRowSet("SELECT id,uuid,name from iam_group");
-
-    while (rowSet.next()) {
-      String authority = String.format("ROLE_GM:%s", rowSet.getString("uuid"));
-      int updateResult =
-          jdbcTemplate.update("insert into iam_authority(auth) values (?)", authority);
-      if (updateResult == 1) {
-        LOG.warn("Created group manager authority '{}' for group '{}'", authority,
-            rowSet.getString("name"));
-      }
-    }
+    CreateGroupManagerAuthorities task = new CreateGroupManagerAuthorities();
+    task.migrate(jdbcTemplate);
   }
 
 }

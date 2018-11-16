@@ -28,8 +28,6 @@ import db.migration.tasks.CreateGroupManagerAuthorities;
  */
 public class V23___CreateGroupManagerAuthorities implements SpringJdbcMigration {
 
-  public V23___CreateGroupManagerAuthorities() {}
-
   @Override
   public void migrate(JdbcTemplate jdbcTemplate) throws Exception {
     CreateGroupManagerAuthorities task = new CreateGroupManagerAuthorities();

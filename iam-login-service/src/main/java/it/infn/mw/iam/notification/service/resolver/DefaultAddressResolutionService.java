@@ -43,7 +43,7 @@ public class DefaultAddressResolutionService implements AddressResolutionService
   public List<String> resolveAddressesForAudience(String name) {
     checkNotNull(name);
     if (VO_ADMINS.equals(name)) {
-      return resolver.resolveEmailAddressForContext("ROLE_ADMIN");
+      return resolver.resolveEmailAddressForContext(ROLE_ADMIN);
     } else if (name.startsWith(GROUP_MANAGERS)) {
       return resolver
         .resolveEmailAddressForContext(String.format(ROLE_GM_TEMPLATE, name.substring(3)));

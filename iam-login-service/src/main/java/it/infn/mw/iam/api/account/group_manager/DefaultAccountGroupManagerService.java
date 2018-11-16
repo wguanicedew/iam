@@ -39,6 +39,8 @@ import it.infn.mw.iam.persistence.repository.IamGroupRepository;
 @Service
 public class DefaultAccountGroupManagerService implements AccountGroupManagerService {
 
+  public static final String ROLE_GM_TEMPLATE = "ROLE_GM:%s";
+  
   final IamAccountRepository accountRepo;
   final IamGroupRepository groupRepo;
   final AccountAuthorityService authorityService;
@@ -65,14 +67,14 @@ public class DefaultAccountGroupManagerService implements AccountGroupManagerSer
   @Override
   public void addManagedGroupForAccount(IamAccount account, IamGroup group) {
 
-    authorityService.addAuthorityToAccount(account, format("ROLE_GM:%s", group.getUuid()));
+    authorityService.addAuthorityToAccount(account, format(ROLE_GM_TEMPLATE, group.getUuid()));
 
   }
 
   @Override
   public void removeManagedGroupForAccount(IamAccount account, IamGroup group) {
 
-    authorityService.removeAuthorityFromAccount(account, format("ROLE_GM:%s", group.getUuid()));
+    authorityService.removeAuthorityFromAccount(account, format(ROLE_GM_TEMPLATE, group.getUuid()));
   }
 
 
@@ -107,7 +109,7 @@ public class DefaultAccountGroupManagerService implements AccountGroupManagerSer
 
   @Override
   public List<IamAccount> getGroupManagersForGroup(IamGroup group) {
-    return accountRepo.findByAuthority(format("ROLE_GM:%s", group.getUuid()));
+    return accountRepo.findByAuthority(format(ROLE_GM_TEMPLATE, group.getUuid()));
   }
 
 }

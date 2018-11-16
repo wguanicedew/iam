@@ -28,13 +28,13 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "notification")
 public class NotificationProperties {
 
-  public static enum AdminNotificationPolicy {
+  public enum AdminNotificationPolicy {
     NOTIFY_ADDRESS,
     NOTIFY_ADMINS,
     NOTIFY_ADDRESS_AND_ADMINS
   }
 
-  public static enum GroupManagerNotificationPolicy {
+  public enum GroupManagerNotificationPolicy {
     NOTIFY_GMS,
     NOTIFY_GMS_AND_ADMINS
   }

@@ -24,12 +24,10 @@ public class NoSuchGroupException extends IamGroupException {
 
   public NoSuchGroupException(String message) {
     super(message);
-    // TODO Auto-generated constructor stub
   }
 
   public NoSuchGroupException(String message, Throwable cause) {
     super(message, cause);
-    // TODO Auto-generated constructor stub
   }
 
 }

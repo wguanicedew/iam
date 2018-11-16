@@ -15,6 +15,31 @@
  */
 package it.infn.mw.iam.core.userinfo;
 
+import static it.infn.mw.iam.core.userinfo.UserInfoClaim.ADDRESS;
+import static it.infn.mw.iam.core.userinfo.UserInfoClaim.BIRTHDATE;
+import static it.infn.mw.iam.core.userinfo.UserInfoClaim.EMAIL;
+import static it.infn.mw.iam.core.userinfo.UserInfoClaim.EMAIL_VERIFIED;
+import static it.infn.mw.iam.core.userinfo.UserInfoClaim.EXTERNAL_AUTHN;
+import static it.infn.mw.iam.core.userinfo.UserInfoClaim.FAMILY_NAME;
+import static it.infn.mw.iam.core.userinfo.UserInfoClaim.GENDER;
+import static it.infn.mw.iam.core.userinfo.UserInfoClaim.GIVEN_NAME;
+import static it.infn.mw.iam.core.userinfo.UserInfoClaim.GROUPS;
+import static it.infn.mw.iam.core.userinfo.UserInfoClaim.LOCALE;
+import static it.infn.mw.iam.core.userinfo.UserInfoClaim.MIDDLE_NAME;
+import static it.infn.mw.iam.core.userinfo.UserInfoClaim.NAME;
+import static it.infn.mw.iam.core.userinfo.UserInfoClaim.NICKNAME;
+import static it.infn.mw.iam.core.userinfo.UserInfoClaim.ORGANISATION_NAME;
+import static it.infn.mw.iam.core.userinfo.UserInfoClaim.PHONE_NUMBER;
+import static it.infn.mw.iam.core.userinfo.UserInfoClaim.PHONE_NUMBER_VERIFIED;
+import static it.infn.mw.iam.core.userinfo.UserInfoClaim.PICTURE;
+import static it.infn.mw.iam.core.userinfo.UserInfoClaim.PREFERRED_USERNAME;
+import static it.infn.mw.iam.core.userinfo.UserInfoClaim.PROFILE;
+import static it.infn.mw.iam.core.userinfo.UserInfoClaim.SUB;
+import static it.infn.mw.iam.core.userinfo.UserInfoClaim.UPDATED_AT;
+import static it.infn.mw.iam.core.userinfo.UserInfoClaim.WEBSITE;
+import static it.infn.mw.iam.core.userinfo.UserInfoClaim.ZONEINFO;
+
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -24,6 +49,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
+import com.google.common.collect.Sets;
 
 @Service
 @Primary
@@ -36,39 +62,30 @@ public class IamScopeClaimTranslationService implements ScopeClaimTranslationSer
   public static final String EMAIL_SCOPE = "email";
   public static final String PHONE_SCOPE = "phone";
   public static final String ADDRESS_SCOPE = "address";
-  
+
+  protected static final Set<UserInfoClaim> PROFILE_CLAIMS = EnumSet.of(NAME, PREFERRED_USERNAME,
+      GIVEN_NAME, FAMILY_NAME, MIDDLE_NAME, NICKNAME, PROFILE, PICTURE, WEBSITE, GENDER, ZONEINFO,
+      LOCALE, UPDATED_AT, BIRTHDATE, ORGANISATION_NAME, GROUPS, EXTERNAL_AUTHN);
+
+  protected static final Set<UserInfoClaim> EMAIL_CLAIMS = EnumSet.of(EMAIL, EMAIL_VERIFIED);
+
+  protected static final Set<UserInfoClaim> PHONE_CLAIMS =
+      EnumSet.of(PHONE_NUMBER, PHONE_NUMBER_VERIFIED);
+
+  private void mapScopeToClaim(String scope, UserInfoClaim claim) {
+    scopesToClaims.put(scope, claim.name().toLowerCase());
+  }
+
+  private void mapScopeToClaim(String scope, Set<UserInfoClaim> claimSet) {
+    claimSet.forEach(c -> mapScopeToClaim(scope, c));
+  }
+
   public IamScopeClaimTranslationService() {
-    // Mitreid scope mappings
-    scopesToClaims.put(OPENID_SCOPE, "sub");
-
-    scopesToClaims.put(PROFILE_SCOPE, "name");
-    scopesToClaims.put(PROFILE_SCOPE, "preferred_username");
-    scopesToClaims.put(PROFILE_SCOPE, "given_name");
-    scopesToClaims.put(PROFILE_SCOPE, "family_name");
-    scopesToClaims.put(PROFILE_SCOPE, "middle_name");
-    scopesToClaims.put(PROFILE_SCOPE, "nickname");
-    scopesToClaims.put(PROFILE_SCOPE, "profile");
-    scopesToClaims.put(PROFILE_SCOPE, "picture");
-    scopesToClaims.put(PROFILE_SCOPE, "website");
-    scopesToClaims.put(PROFILE_SCOPE, "gender");
-    scopesToClaims.put(PROFILE_SCOPE, "zoneinfo");
-    scopesToClaims.put(PROFILE_SCOPE, "locale");
-    scopesToClaims.put(PROFILE_SCOPE, "updated_at");
-    scopesToClaims.put(PROFILE_SCOPE, "birthdate");
-
-    scopesToClaims.put(EMAIL_SCOPE, "email");
-    scopesToClaims.put(EMAIL_SCOPE, "email_verified");
-
-    scopesToClaims.put(PHONE_SCOPE, "phone_number");
-    scopesToClaims.put(PHONE_SCOPE, "phone_number_verified");
-
-    scopesToClaims.put(ADDRESS_SCOPE, "address");
-
-    // Iam scope mappings
-    scopesToClaims.put(PROFILE_SCOPE, "organisation_name");
-    scopesToClaims.put(PROFILE_SCOPE, "groups");
-    scopesToClaims.put(PROFILE_SCOPE, "external_authn");
-
+    mapScopeToClaim(OPENID_SCOPE, SUB);
+    mapScopeToClaim(PROFILE_SCOPE, PROFILE_CLAIMS);
+    mapScopeToClaim(EMAIL_SCOPE, EMAIL_CLAIMS);
+    mapScopeToClaim(PHONE_SCOPE, PHONE_CLAIMS);
+    mapScopeToClaim(ADDRESS_SCOPE, ADDRESS);
   }
 
   @Override
@@ -77,7 +94,7 @@ public class IamScopeClaimTranslationService implements ScopeClaimTranslationSer
     if (scopesToClaims.containsKey(scope)) {
       return scopesToClaims.get(scope);
     } else {
-      return new HashSet<>();
+      return Sets.newHashSet();
     }
   }
 
@@ -89,6 +106,5 @@ public class IamScopeClaimTranslationService implements ScopeClaimTranslationSer
       result.addAll(getClaimsForScope(scope));
     }
     return result;
-
   }
 }

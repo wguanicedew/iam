@@ -13,21 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.core.group.exception;
+package it.infn.mw.iam.core.userinfo;
 
-public class IamGroupException extends RuntimeException {
-
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
-  public IamGroupException(String message) {
-    super(message);
-  }
-
-  public IamGroupException(String message, Throwable cause) {
-    super(message, cause);
-  }
-
+public enum UserInfoClaim {
+  SUB,
+  NAME,
+  PREFERRED_USERNAME,
+  GIVEN_NAME,
+  FAMILY_NAME,
+  MIDDLE_NAME,
+  NICKNAME,
+  PROFILE,
+  PICTURE,
+  WEBSITE,
+  GENDER,
+  ZONEINFO,
+  LOCALE,
+  UPDATED_AT,
+  BIRTHDATE,
+  EMAIL,
+  EMAIL_VERIFIED,
+  PHONE_NUMBER,
+  PHONE_NUMBER_VERIFIED,
+  ADDRESS,
+  ORGANISATION_NAME,
+  GROUPS,
+  EXTERNAL_AUTHN;
 }
