@@ -20,7 +20,6 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.flyway.FlywayMigrationStrategy;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
@@ -97,31 +96,17 @@ public class JpaConfig extends JpaBaseConfiguration {
   @Profile("no-flyway")
   public FlywayMigrationStrategy flywayMigrationStrategy() {
 
-    return new FlywayMigrationStrategy() {
-
-      @Override
-      public void migrate(final Flyway flyway) {
-
-        return;
-
-      }
-    };
+    return f -> {}; 
+        
   }
 
   @Bean
   @Profile("flyway-repair")
   public FlywayMigrationStrategy flywayRepairStrategy() {
 
-    return new FlywayMigrationStrategy() {
-
-      @Override
-      public void migrate(final Flyway flyway) {
-
-        flyway.repair();
-        flyway.migrate();
-        return;
-
-      }
+    return f -> {
+      f.repair();
+      f.migrate();
     };
   }
 }

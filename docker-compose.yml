@@ -9,7 +9,7 @@ services:
 
   db:
     container_name: db
-    image: mariadb:latest
+    image: mysql:5.7
     volumes_from:
       - db_data
     # The setting below enables custom configuration
@@ -69,6 +69,9 @@ services:
 
     ports:
       - "1044:1044"
+
+    depends_on:
+      - db
 
     volumes_from:
       - trust
@@ -133,10 +136,3 @@ services:
       default:
         aliases:
           - iam.local.io
-
-# browser:
-#   image: jess/firefox
-#   container_name: browser
-#
-#   environment:
-#     DISPLAY: 172.17.8.1:0

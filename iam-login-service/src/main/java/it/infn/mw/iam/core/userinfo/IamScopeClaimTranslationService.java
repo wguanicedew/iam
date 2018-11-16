@@ -72,20 +72,20 @@ public class IamScopeClaimTranslationService implements ScopeClaimTranslationSer
   protected static final Set<UserInfoClaim> PHONE_CLAIMS =
       EnumSet.of(PHONE_NUMBER, PHONE_NUMBER_VERIFIED);
 
-  private void mapScopeToClaim(String scope, UserInfoClaim claim) {
-    scopesToClaims.put(scope, claim.name().toLowerCase());
-  }
-
-  private void mapScopeToClaim(String scope, Set<UserInfoClaim> claimSet) {
-    claimSet.forEach(c -> mapScopeToClaim(scope, c));
-  }
-
   public IamScopeClaimTranslationService() {
     mapScopeToClaim(OPENID_SCOPE, SUB);
     mapScopeToClaim(PROFILE_SCOPE, PROFILE_CLAIMS);
     mapScopeToClaim(EMAIL_SCOPE, EMAIL_CLAIMS);
     mapScopeToClaim(PHONE_SCOPE, PHONE_CLAIMS);
     mapScopeToClaim(ADDRESS_SCOPE, ADDRESS);
+  }
+
+  private void mapScopeToClaim(String scope, UserInfoClaim claim) {
+    scopesToClaims.put(scope, claim.name().toLowerCase());
+  }
+
+  private void mapScopeToClaim(String scope, Set<UserInfoClaim> claimSet) {
+    claimSet.forEach(c -> mapScopeToClaim(scope, c));
   }
 
   @Override
