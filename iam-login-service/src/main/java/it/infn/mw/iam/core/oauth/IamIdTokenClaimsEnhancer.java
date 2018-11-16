@@ -29,7 +29,7 @@ import org.springframework.stereotype.Service;
 import com.nimbusds.jwt.JWTClaimsSet;
 
 import it.infn.mw.iam.api.account.password_reset.error.UserNotFoundError;
-import it.infn.mw.iam.core.IamScopeClaimTranslationService;
+import it.infn.mw.iam.core.userinfo.IamScopeClaimTranslationService;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamUserInfo;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;

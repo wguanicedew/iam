@@ -81,6 +81,7 @@ iam:
 x509:
   trustAnchorsDir: ${IAM_X509_TRUST_ANCHORS_DIR:/etc/grid-security/certificates}
   trustAnchorsRefreshMsec: ${IAM_X509_TRUST_ANCHORS_REFRESH:14400}
+  tlsVersion: ${IAM_X509_TLS_VERSION:TLSv1}
 
 oidc:
   providers:

@@ -17,11 +17,11 @@ package it.infn.mw.iam.core.oauth;
 
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableSet;
 
-import it.infn.mw.iam.core.IamProperties;
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.model.IamUserInfo;
 
@@ -31,7 +31,8 @@ public class ClaimValueHelper {
   public static final Set<String> ADDITIONAL_CLAIMS =
       ImmutableSet.of("name", "email", "preferred_username", "organisation_name", "groups");
 
-  private String organisationName = IamProperties.INSTANCE.getOrganisationName();
+  @Value("${iam.organisation.name}")
+  String organisationName;
 
   public Object getClaimValueFromUserInfo(String claim, IamUserInfo info) {
 

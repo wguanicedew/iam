@@ -24,13 +24,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import it.infn.mw.iam.config.saml.IamSamlProperties;
-import it.infn.mw.iam.core.IamProperties;
 
 @Component
 public class IamViewInfoInterceptor extends HandlerInterceptorAdapter {
 
   public static final String LOGIN_PAGE_CONFIGURATION_KEY = "loginPageConfiguration";
-  public static final String IAM_PROPERTIES_KEY = "iamProperties";
+  public static final String ORGANISATION_NAME_KEY = "iamOrganisationName";
   public static final String IAM_SAML_PROPERTIES_KEY = "iamSamlProperties";
   public static final String IAM_OIDC_PROPERTIES_KEY = "iamOidcProperties";
 
@@ -40,11 +39,11 @@ public class IamViewInfoInterceptor extends HandlerInterceptorAdapter {
   @Value("${git.commit.id.abbrev}")
   String gitCommitId;
 
+  @Value("${iam.organisation.name}")
+  String organisationName;
+  
   @Autowired
   LoginPageConfiguration loginPageConfiguration;
-
-  @Autowired
-  IamProperties properties;
 
   @Autowired
   IamSamlProperties samlProperties;
@@ -56,8 +55,10 @@ public class IamViewInfoInterceptor extends HandlerInterceptorAdapter {
     request.setAttribute("iamVersion", iamVersion);
     request.setAttribute("gitCommitId", gitCommitId);
 
+    request.setAttribute(ORGANISATION_NAME_KEY, organisationName);
+    
     request.setAttribute(LOGIN_PAGE_CONFIGURATION_KEY, loginPageConfiguration);
-    request.setAttribute(IAM_PROPERTIES_KEY, properties);
+    
     request.setAttribute(IAM_SAML_PROPERTIES_KEY, samlProperties);
 
     return true;

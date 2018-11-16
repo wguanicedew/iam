@@ -44,9 +44,9 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTClaimsSet.Builder;
 import com.nimbusds.jwt.SignedJWT;
 
-import it.infn.mw.iam.core.IamScopeClaimTranslationService;
 import it.infn.mw.iam.core.oauth.ClaimValueHelper;
 import it.infn.mw.iam.core.oauth.scope.IamScopeFilter;
+import it.infn.mw.iam.core.userinfo.IamScopeClaimTranslationService;
 import it.infn.mw.iam.persistence.model.IamUserInfo;
 
 public class OidcTokenEnhancer extends ConnectTokenEnhancer {

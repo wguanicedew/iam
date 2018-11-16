@@ -35,8 +35,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
-import it.infn.mw.iam.core.IamProperties;
-
 @Entity
 @Table(name = "iam_user_info")
 public class IamUserInfo implements UserInfo, Serializable{
@@ -376,8 +374,6 @@ public class IamUserInfo implements UserInfo, Serializable{
 
         obj.add("groups", groups);
       }
-
-      obj.addProperty("organisation_name", IamProperties.INSTANCE.getOrganisationName());
 
       return obj;
     } else {

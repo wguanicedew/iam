@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.core;
+package it.infn.mw.iam.core.userinfo;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -67,6 +67,7 @@ public class IamScopeClaimTranslationService implements ScopeClaimTranslationSer
     // Iam scope mappings
     scopesToClaims.put(PROFILE_SCOPE, "organisation_name");
     scopesToClaims.put(PROFILE_SCOPE, "groups");
+    scopesToClaims.put(PROFILE_SCOPE, "external_authn");
 
   }
 

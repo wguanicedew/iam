@@ -86,7 +86,7 @@
 	}
 	
 	function getOrganisationName() {
-		return '${iamProperties.organisationName}';
+		return '${iamOrganisationName}';
 	}
 </script>
 

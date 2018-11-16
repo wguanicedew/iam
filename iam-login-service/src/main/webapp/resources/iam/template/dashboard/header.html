@@ -22,7 +22,7 @@
 
 
     <a href="" ng-click="$root.reload()" class="logo-sm">
-        <span class="hidden-xs">IAM for</span> <b>{{$root.loggedUser.info.organisation_name}}</b>
+        <span class="hidden-xs">IAM for</span> <b>{{$root.organisationName}}</b>
     </a>
 
 
@@ -56,7 +56,7 @@
                     <li class="user-header"><img ng-src="{{$root.loggedUser.me.photos ? $root.loggedUser.me.photos[0].value : 'resources/iam/img/default-avatar.png'}}" class="img-circle" alt="User Image" />
                         <p>
                             {{$root.loggedUser.me.name.formatted}}<br /> <small>{{$root.loggedUser.me.userName}}
-								@ {{$root.loggedUser.info.organisation_name}}</small>
+								@ {{$root.organisationName}}</small>
                         </p>
                     </li>
                     <!-- Menu Footer-->

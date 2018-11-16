@@ -15,12 +15,12 @@
  */
 package it.infn.mw.iam.test.oauth;
 
+import static org.hamcrest.Matchers.is;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import org.springframework.transaction.annotation.Transactional;
 
 import org.junit.After;
 import org.junit.Before;
@@ -32,9 +32,11 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import it.infn.mw.iam.IamLoginService;
+import it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo.ExternalAuthenticationType;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 import it.infn.mw.iam.test.util.WithMockOAuthUser;
 import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
@@ -52,8 +54,8 @@ public class UserInfoEndpointTests {
 
   @Autowired
   private MockOAuth2Filter mockOAuth2Filter;
-  
-  
+
+
   @Before
   public void setup() throws Exception {
     mvc = MockMvcBuilders.webAppContextSetup(context)
@@ -61,7 +63,7 @@ public class UserInfoEndpointTests {
       .alwaysDo(print())
       .build();
   }
-  
+
   @After
   public void teardown() {
     mockOAuth2Filter.cleanupSecurityContext();
@@ -83,7 +85,35 @@ public class UserInfoEndpointTests {
 
     // @formatter:off
     mvc.perform(get("/userinfo"))
-      .andExpect(status().isOk());
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.sub").exists())
+      .andExpect(jsonPath("$.organisation_name").doesNotExist());
     // @formatter:on
   }
+
+  @Test
+  @WithMockOAuthUser(clientId = "password-grant", user = "test", authorities = {"ROLE_USER"},
+      scopes = {"openid", "profile"})
+  public void testUserInfoEndpointRetursAllExpectedInfo() throws Exception {
+
+    // @formatter:off
+    mvc.perform(get("/userinfo"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.organisation_name", is("indigo-dc")));
+    // @formatter:on
+  }
+
+  @Test
+  @WithMockOAuthUser(clientId = "password-grant", user = "test", authorities = {"ROLE_USER"},
+      scopes = {"openid", "profile"}, externallyAuthenticated = true,
+      externalAuthenticationType = ExternalAuthenticationType.OIDC)
+  public void testUserInfoEndpointRetursExtAuthnClaim() throws Exception {
+
+    // @formatter:off
+    mvc.perform(get("/userinfo"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.external_authn").exists());
+    // @formatter:on
+  }
+
 }

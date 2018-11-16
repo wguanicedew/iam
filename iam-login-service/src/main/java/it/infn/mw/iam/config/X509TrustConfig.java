@@ -41,6 +41,7 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 
 import eu.emi.security.authn.x509.X509CertChainValidatorExt;
 import eu.emi.security.authn.x509.impl.SocketFactoryCreator;
+import it.infn.mw.iam.core.error.StartupError;
 
 @Configuration
 @Profile("canl")
@@ -51,6 +52,9 @@ public class X509TrustConfig {
 
   @Value("${x509.trustAnchorsRefreshMsec}")
   Long trustAnchorsRefreshInterval;
+  
+  @Value("${x509.tlsVersion}")
+  String tlsVersion;
 
   @Bean
   public X509CertChainValidatorExt certificateValidator() {
@@ -64,7 +68,7 @@ public class X509TrustConfig {
   public SSLContext sslContext() {
 
     try {
-      SSLContext context = SSLContext.getInstance("TLSv1");
+      SSLContext context = SSLContext.getInstance(tlsVersion);
 
       X509TrustManager tm = SocketFactoryCreator.getSSLTrustManager(certificateValidator());
       SecureRandom r = new SecureRandom();
@@ -73,7 +77,7 @@ public class X509TrustConfig {
       return context;
 
     } catch (NoSuchAlgorithmException | KeyManagementException e) {
-      throw new RuntimeException(e);
+      throw new StartupError("Error configuring TLS context", e);
     }
 
   }

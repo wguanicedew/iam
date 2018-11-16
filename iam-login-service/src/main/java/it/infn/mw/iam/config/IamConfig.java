@@ -38,17 +38,16 @@ import it.infn.mw.iam.api.account.AccountUtils;
 import it.infn.mw.iam.api.aup.AUPSignatureCheckService;
 import it.infn.mw.iam.authn.oidc.OidcTokenEnhancer;
 import it.infn.mw.iam.core.IamIntrospectionResultAssembler;
-import it.infn.mw.iam.core.IamProperties;
 import it.infn.mw.iam.core.web.EnforceAupFilter;
 import it.infn.mw.iam.notification.NotificationProperties;
 import it.infn.mw.iam.notification.service.resolver.AddressResolutionService;
 import it.infn.mw.iam.notification.service.resolver.AdminNotificationDeliveryStrategy;
 import it.infn.mw.iam.notification.service.resolver.CompositeAdminsNotificationDelivery;
 import it.infn.mw.iam.notification.service.resolver.GroupManagerNotificationDeliveryStrategy;
+import it.infn.mw.iam.notification.service.resolver.NotifyAdminAddressStrategy;
+import it.infn.mw.iam.notification.service.resolver.NotifyAdminsStrategy;
 import it.infn.mw.iam.notification.service.resolver.NotifyGmStrategy;
 import it.infn.mw.iam.notification.service.resolver.NotifyGmsAndAdminsStrategy;
-import it.infn.mw.iam.notification.service.resolver.NotifyAdminsStrategy;
-import it.infn.mw.iam.notification.service.resolver.NotifyAdminAddressStrategy;
 import it.infn.mw.iam.persistence.repository.IamAupRepository;
 
 @Configuration
@@ -108,13 +107,6 @@ public class IamConfig {
   TokenEnhancer iamTokenEnhancer() {
 
     return new OidcTokenEnhancer();
-  }
-
-  @Bean
-  IamProperties iamProperties() {
-
-    IamProperties.INSTANCE.setOrganisationName(iamOrganisationName);
-    return IamProperties.INSTANCE;
   }
 
   @Bean

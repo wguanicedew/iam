@@ -87,7 +87,7 @@ function getAccountLinkingEnabled() {
 }
 
 function getOrganisationName() {
- return '${iamProperties.organisationName}'; 
+ return '${iamOrganisationName}'; 
 }
 
 function getOidcEnabled() {

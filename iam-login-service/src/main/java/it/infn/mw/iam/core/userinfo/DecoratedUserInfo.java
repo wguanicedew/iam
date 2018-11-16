@@ -13,26 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.core;
+package it.infn.mw.iam.core.userinfo;
 
-public enum IamProperties {
+import java.util.Map;
 
-  INSTANCE;
+import org.mitre.openid.connect.model.UserInfo;
 
-  private String organisationName = "indigo-dc";
+public interface DecoratedUserInfo extends UserInfo {
 
-  private IamProperties() {
+  String getOrganisationName();
+  void setOrganisationName(String name);
 
-  }
-
-  public String getOrganisationName() {
-
-    return organisationName;
-  }
-
-  public void setOrganisationName(String organisationName) {
-
-    this.organisationName = organisationName;
-  }
+  Map<String, String> getAuthenticationInfo();
+  void setAuthenticationInfo(Map<String, String> info);
+  
 
 }

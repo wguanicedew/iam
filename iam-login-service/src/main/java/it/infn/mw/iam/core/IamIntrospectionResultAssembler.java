@@ -47,6 +47,9 @@ public class IamIntrospectionResultAssembler extends DefaultIntrospectionResultA
   
   @Value("${iam.issuer}")
   private String oidcIssuer;
+  
+  @Value("${iam.organisation.name}")
+  private String organisationName;
 
   @Override
   public Map<String, Object> assembleFrom(OAuth2AccessTokenEntity accessToken, UserInfo userInfo,
@@ -87,7 +90,7 @@ public class IamIntrospectionResultAssembler extends DefaultIntrospectionResultA
 
         result.put(NAME, iamUserInfo.getName());
         result.put(PREFERRED_USERNAME, iamUserInfo.getPreferredUsername());
-        result.put(ORGANISATION_NAME, IamProperties.INSTANCE.getOrganisationName());
+        result.put(ORGANISATION_NAME, organisationName);
       }
 
       if (scopes.contains("email")) {

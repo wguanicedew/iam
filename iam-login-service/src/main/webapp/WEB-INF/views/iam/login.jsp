@@ -66,14 +66,14 @@
         </div>
 
         <div style="text-align: center">
-            <h3>Welcome to <strong>${iamProperties.organisationName}</strong>
+            <h3>Welcome to <strong>${iamOrganisationName}</strong>
       </h3>
         </div>
         
         <form id="login-form" action="/login" method="post">
         
             <div class="signin-preamble text-muted">
-              Sign in with your ${iamProperties.organisationName} credentials
+              Sign in with your ${iamOrganisationName} credentials
             </div>
 
             <div class="form-group">

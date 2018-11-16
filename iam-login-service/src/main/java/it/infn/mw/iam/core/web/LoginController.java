@@ -27,19 +27,14 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import it.infn.mw.iam.config.saml.IamSamlProperties;
-import it.infn.mw.iam.core.IamProperties;
 
 @Controller
 public class LoginController {
 
   public static final String LOGIN_PAGE_CONFIGURATION_KEY = "loginPageConfiguration";
-  public static final String IAM_PROPERTIES_KEY = "iamProperties";
 
   @Autowired
   LoginPageConfiguration loginPageConfiguration;
-
-  @Autowired
-  IamProperties properties;
     
   @Autowired
   IamSamlProperties samlProperties;

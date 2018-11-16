@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.core.web;
+package it.infn.mw.iam.core.userinfo;
 
 import static it.infn.mw.iam.authn.util.AuthenticationUtils.isSupportedExternalAuthenticationToken;
 
@@ -27,6 +27,7 @@ import org.mitre.openid.connect.view.UserInfoView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -42,7 +43,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.google.common.base.Strings;
 
 import it.infn.mw.iam.authn.ExternalAuthenticationInfoProcessor;
-import it.infn.mw.iam.core.web.view.IamUserInfoView;
 
 @Controller
 @RequestMapping("/userinfo")
@@ -54,18 +54,19 @@ public class IamUserInfoEndpoint {
   @Autowired
   private ExternalAuthenticationInfoProcessor extAuthnInfoProcessor;
 
+  @Value("${iam.organisation.name}")
+  String organisationName;
+
   private static final Logger LOG = LoggerFactory.getLogger(IamUserInfoEndpoint.class);
 
-
-
-  private void processExternalAuthenticationInfo(OAuth2Authentication auth, Model model) {
+  private void processExternalAuthenticationInfo(OAuth2Authentication auth, DecoratedUserInfo dui) {
 
     if (isSupportedExternalAuthenticationToken(auth.getUserAuthentication())) {
 
       Map<String, String> processedAuthInfo = extAuthnInfoProcessor.process(auth);
 
       if (!processedAuthInfo.isEmpty()) {
-        model.addAttribute(IamUserInfoView.EXTN_AUTHN_INFO_KEY, processedAuthInfo);
+        dui.setAuthenticationInfo(processedAuthInfo);
       }
     }
   }
@@ -83,6 +84,7 @@ public class IamUserInfoEndpoint {
 
     String username = auth.getName();
 
+
     UserInfo userInfo =
         userInfoService.getByUsernameAndClientId(username, auth.getOAuth2Request().getClientId());
 
@@ -91,6 +93,9 @@ public class IamUserInfoEndpoint {
       model.addAttribute(HttpCodeView.CODE, HttpStatus.NOT_FOUND);
       return HttpCodeView.VIEWNAME;
     }
+
+    IamDecoratedUserInfo dui = IamDecoratedUserInfo.forUser(userInfo);
+    dui.setOrganisationName(organisationName);
 
     model.addAttribute(UserInfoView.SCOPE, auth.getOAuth2Request().getScope());
 
@@ -101,13 +106,11 @@ public class IamUserInfoEndpoint {
       model.addAttribute(UserInfoView.REQUESTED_CLAIMS, claimsRequestJsonString);
     }
 
-    model.addAttribute(UserInfoView.USER_INFO, userInfo);
-
-
-    processExternalAuthenticationInfo(auth, model);
-
-
-    return IamUserInfoView.VIEWNAME;
+    processExternalAuthenticationInfo(auth, dui);
+    
+    model.addAttribute(UserInfoView.USER_INFO, dui);
+    
+    return UserInfoView.VIEWNAME;
   }
 
 
