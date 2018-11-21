@@ -19,6 +19,7 @@ import javax.validation.Valid;
 
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -60,8 +61,11 @@ public class GroupRequestsController {
       @RequestParam(required = false) String status, @RequestParam(required = false) Integer count,
       @RequestParam(required = false) Integer startIndex) {
 
+    final Sort sort = new Sort("account.username", "group.name","creationTime");
+    
     OffsetPageable pageRequest =
-        PagingUtils.buildPageRequest(count, startIndex, GROUP_REQUEST_MAX_PAGE_SIZE);
+        PagingUtils.buildPageRequest(count, startIndex, GROUP_REQUEST_MAX_PAGE_SIZE, sort);
+    
     return groupRequestService.listGroupRequests(username, groupName, status, pageRequest);
   }
 

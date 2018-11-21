@@ -54,7 +54,7 @@ public class ScopePolicyDTO {
   private IamAccountRefDTO account;
 
   @Valid
-  private IamGroupRefDTO group;
+  private GroupRefDTO group;
 
   @EachSize(min=1, max=255, message="Invalid scope policy: scope length must be >= 1 and < 255 characters")
   private Set<String> scopes;
@@ -68,7 +68,7 @@ public class ScopePolicyDTO {
       @JsonProperty("lastUpdateTime") Date lastUpdateTime,
       @JsonProperty("rule") String rule, 
       @JsonProperty("account") IamAccountRefDTO account, 
-      @JsonProperty("group")IamGroupRefDTO group, 
+      @JsonProperty("group")GroupRefDTO group, 
       @JsonProperty("scopes")Set<String> scopes) {
     this.id = id;
     this.description = description;
@@ -128,11 +128,11 @@ public class ScopePolicyDTO {
     this.account = account;
   }
 
-  public IamGroupRefDTO getGroup() {
+  public GroupRefDTO getGroup() {
     return group;
   }
 
-  public void setGroup(IamGroupRefDTO group) {
+  public void setGroup(GroupRefDTO group) {
     this.group = group;
   }
 

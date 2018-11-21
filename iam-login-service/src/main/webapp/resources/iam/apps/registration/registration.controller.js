@@ -22,8 +22,7 @@ RegistrationController.$inject = ['$scope', '$q', '$window', '$cookies',
     'RegistrationRequestService', 'AuthnInfo', 'Aup'
 ];
 
-function RegistrationController($scope, $q, $window, $cookies,
-    RegistrationRequestService, AuthnInfo, Aup) {
+function RegistrationController($scope, $q, $window, $cookies, RegistrationRequestService, AuthnInfo, Aup) {
 
     var vm = this;
     var EXT_AUTHN_ROLE = 'ROLE_EXT_AUTH_UNREGISTERED';
@@ -88,13 +87,13 @@ function RegistrationController($scope, $q, $window, $cookies,
             angular.forEach($scope.registrationForm.$error.required, function(field) {
                 field.$setDirty();
             });
-        }
+        };
 
         var error = function(err) {
             $scope.operationResult = 'err';
             $scope.textAlert = err.data.error_description || err.data.detail;
             vm.submitDisabled = false;
-        }
+        };
 
         if (userIsExternallyAuthenticated()) {
             $scope.isExternallyAuthenticated = true;
@@ -107,13 +106,13 @@ function RegistrationController($scope, $q, $window, $cookies,
     function createRequest() {
         var success = function(res) {
             $window.location.href = "/registration/submitted";
-        }
+        };
 
         var error = function(err) {
             $scope.operationResult = 'err';
             $scope.textAlert = err.data.error_description || err.data.detail;
             vm.submitDisabled = false;
-        }
+        };
 
         RegistrationRequestService.createRequest($scope.request).then(success, error);
     }

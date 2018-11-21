@@ -15,9 +15,9 @@
  */
 package it.infn.mw.iam.api.requests;
 
-import static it.infn.mw.iam.core.IamGroupRequestStatus.APPROVED;
 import static it.infn.mw.iam.core.IamGroupRequestStatus.PENDING;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -65,13 +65,16 @@ public class GroupRequestUtils {
   }
 
   public void checkRequestAlreadyExist(GroupRequestDto request) {
-    Optional<IamGroupRequest> result = groupRequestRepository
+    
+    List<IamGroupRequest> results = groupRequestRepository
       .findByUsernameAndGroup(request.getUsername(), request.getGroupName());
-    if (result.isPresent()) {
-      IamGroupRequestStatus status = result.get().getStatus();
-      if (PENDING.equals(status) || APPROVED.equals(status)) {
+    
+    for (IamGroupRequest r: results) {
+      IamGroupRequestStatus status = r.getStatus();
+      
+      if (PENDING.equals(status)) {
         throw new GroupRequestValidationError(
-            String.format("Group membership request already exist for [%s, %s]",
+            String.format("Group request already exists for [%s, %s]",
                 request.getUsername(), request.getGroupName()));
       }
     }

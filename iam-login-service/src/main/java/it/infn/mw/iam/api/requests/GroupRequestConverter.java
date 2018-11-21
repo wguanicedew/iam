@@ -25,9 +25,13 @@ public class GroupRequestConverter {
 
   public GroupRequestDto fromEntity(IamGroupRequest iamGroupRequest) {
     GroupRequestDto groupRequest = new GroupRequestDto();
+    
     groupRequest.setUuid(iamGroupRequest.getUuid());
     groupRequest.setUsername(iamGroupRequest.getAccount().getUsername());
+    groupRequest.setUserUuid(iamGroupRequest.getAccount().getUuid());
+    groupRequest.setUserFullName(iamGroupRequest.getAccount().getUserInfo().getName());
     groupRequest.setGroupName(iamGroupRequest.getGroup().getName());
+    groupRequest.setGroupUuid(iamGroupRequest.getGroup().getUuid());
     groupRequest.setStatus(iamGroupRequest.getStatus().name());
     groupRequest.setNotes(iamGroupRequest.getNotes());
     groupRequest.setMotivation(iamGroupRequest.getMotivation());

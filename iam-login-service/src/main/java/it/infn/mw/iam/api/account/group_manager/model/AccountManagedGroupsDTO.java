@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import it.infn.mw.iam.api.common.GroupDTO;
+
 public class AccountManagedGroupsDTO {
 
   final String id;

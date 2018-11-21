@@ -30,10 +30,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import it.infn.mw.iam.api.account.authority.AccountNotFoundError;
+import it.infn.mw.iam.api.account.authority.AuthorityAlreadyBoundError;
 import it.infn.mw.iam.api.account.group_manager.error.InvalidManagedGroupError;
 import it.infn.mw.iam.api.account.group_manager.model.AccountManagedGroupsDTO;
 import it.infn.mw.iam.api.common.ErrorDTO;
+import it.infn.mw.iam.api.common.NoSuchAccountError;
 import it.infn.mw.iam.api.scim.converter.UserConverter;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.persistence.model.IamAccount;
@@ -66,7 +67,7 @@ public class AccountGroupManagerController {
   public AccountManagedGroupsDTO getAccountManagedGroupsInformation(
       @PathVariable String accountId) {
     IamAccount account = accountRepository.findByUuid(accountId)
-      .orElseThrow(() -> AccountNotFoundError.forUuid(accountId));
+      .orElseThrow(() -> NoSuchAccountError.forUuid(accountId));
 
     return service.getManagedGroupInfoForAccount(account);
   }
@@ -79,7 +80,7 @@ public class AccountGroupManagerController {
       @PathVariable String groupId) {
 
     IamAccount account = accountRepository.findByUuid(accountId)
-      .orElseThrow(() -> AccountNotFoundError.forUuid(accountId));
+      .orElseThrow(() -> NoSuchAccountError.forUuid(accountId));
 
     IamGroup group = groupRepository.findByUuid(groupId)
       .orElseThrow(() -> InvalidManagedGroupError.groupNotFoundException(groupId));
@@ -95,7 +96,7 @@ public class AccountGroupManagerController {
       @PathVariable String groupId) {
 
     IamAccount account = accountRepository.findByUuid(accountId)
-      .orElseThrow(() -> AccountNotFoundError.forUuid(accountId));
+      .orElseThrow(() -> NoSuchAccountError.forUuid(accountId));
 
     IamGroup group = groupRepository.findByUuid(groupId)
       .orElseThrow(() -> InvalidManagedGroupError.groupNotFoundException(groupId));
@@ -117,7 +118,7 @@ public class AccountGroupManagerController {
   }
 
   @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-  @ExceptionHandler(AccountNotFoundError.class)
+  @ExceptionHandler(NoSuchAccountError.class)
   public ErrorDTO accountNotFoundError(HttpServletRequest req, Exception ex) {
     return ErrorDTO.fromString(ex.getMessage());
   }
@@ -125,6 +126,12 @@ public class AccountGroupManagerController {
   @ResponseStatus(value = HttpStatus.BAD_REQUEST)
   @ExceptionHandler(InvalidManagedGroupError.class)
   public ErrorDTO invalidManagedGroupError(HttpServletRequest req, Exception ex) {
+    return ErrorDTO.fromString(ex.getMessage());
+  }
+  
+  @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(AuthorityAlreadyBoundError.class)
+  public ErrorDTO alreadyAManagerError(HttpServletRequest req, Exception ex) {
     return ErrorDTO.fromString(ex.getMessage());
   }
 

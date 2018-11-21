@@ -100,6 +100,8 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
         .content(mapper.writeValueAsString(request)))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.username", equalTo(TEST_ADMIN)))
+      .andExpect(jsonPath("$.userUuid", equalTo(TEST_ADMIN_UUID)))
+      .andExpect(jsonPath("$.userFullName", equalTo(TEST_ADMIN_FULL_NAME)))
       .andExpect(jsonPath("$.groupName", equalTo(TEST_001_GROUPNAME)))
       .andExpect(jsonPath("$.status", equalTo(IamGroupRequestStatus.PENDING.name())));
     // @formatter:on

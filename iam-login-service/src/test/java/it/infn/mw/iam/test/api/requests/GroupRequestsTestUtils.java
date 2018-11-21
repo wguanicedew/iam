@@ -37,6 +37,8 @@ import it.infn.mw.iam.persistence.repository.IamGroupRequestRepository;
 public class GroupRequestsTestUtils {
 
   protected final static String TEST_ADMIN = "admin";
+  protected final static String TEST_ADMIN_UUID = "73f16d93-2441-4a50-88ff-85360d78c6b5";
+  protected final static String TEST_ADMIN_FULL_NAME = "Admin User";
   protected final static String TEST_100_USERNAME = "test_100";
   protected final static String TEST_101_USERNAME = "test_101";
   protected final static String TEST_102_USERNAME = "test_102";

@@ -106,7 +106,7 @@ public class ScimGroupProvisioningPatchAddTests extends ScimGroupPatchUtils {
       .andExpect(jsonPath("$.id", equalTo(engineers.getId())))
       .andExpect(jsonPath("$.displayName", equalTo(engineers.getDisplayName())))
       .andExpect(jsonPath("$.members", hasSize(equalTo(1))))
-      .andExpect(jsonPath("$.members[0].display", equalTo(lennon.getDisplayName())))
+      .andExpect(jsonPath("$.members[0].display", equalTo("John Lennon")))
       .andExpect(jsonPath("$.members[0].value", equalTo(lennon.getId())))
       .andExpect(jsonPath("$.members[0].$ref", equalTo(lennon.getMeta().getLocation())));
   }

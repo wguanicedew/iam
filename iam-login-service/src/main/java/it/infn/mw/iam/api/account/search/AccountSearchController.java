@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
 import it.infn.mw.iam.api.common.PagedResourceService;
 import it.infn.mw.iam.api.scim.converter.Converter;
 import it.infn.mw.iam.api.scim.model.ScimUser;
@@ -36,7 +38,7 @@ import it.infn.mw.iam.persistence.model.IamAccount;
 
 @RestController
 @Transactional
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasRole('ADMIN') or #oauth2.hasScope('scim:read') or #iam.isAGroupManager()")
 @RequestMapping(AccountSearchController.ACCOUNT_SEARCH_ENDPOINT)
 public class AccountSearchController extends AbstractSearchController<ScimUser, IamAccount> {
 
@@ -44,8 +46,12 @@ public class AccountSearchController extends AbstractSearchController<ScimUser, 
   public static final String DEFAULT_SORT_BY = "name";
   public static final String DEFAULT_SORT_DIRECTION = "asc";
 
-  Set<String> filteredAttributes = Collections.unmodifiableSet(new HashSet<>(Arrays.asList("id",
-      "displayName", "meta", "name", "userName", "active", "emails", "photos", "groups")));
+  private static final String DEFAULT_START_INDEX_STRING = "" + DEFAULT_STARTINDEX;
+  private static final String DEFAULT_ITEMS_PER_PAGE_STRING = "" + DEFAULT_ITEMS_PER_PAGE;
+
+  private static final Set<String> INCLUDE_ATTRIBUTES =
+      Collections.unmodifiableSet(new HashSet<>(Arrays.asList("id", "displayName", "meta", "name",
+          "userName", "active", "emails", "photos", "groups")));
 
   @Autowired
   public AccountSearchController(PagedResourceService<IamAccount> service,
@@ -56,13 +62,13 @@ public class AccountSearchController extends AbstractSearchController<ScimUser, 
 
   @RequestMapping(method = RequestMethod.GET)
   public MappingJacksonValue getUsers(
-      @RequestParam(required = false, defaultValue = "" + DEFAULT_STARTINDEX) int startIndex,
-      @RequestParam(required = false, defaultValue = "" + DEFAULT_ITEMS_PER_PAGE) int count,
+      @RequestParam(required = false, defaultValue = DEFAULT_START_INDEX_STRING) int startIndex,
+      @RequestParam(required = false, defaultValue = DEFAULT_ITEMS_PER_PAGE_STRING) int count,
       @RequestParam(required = false) String filter,
       @RequestParam(required = false, defaultValue = DEFAULT_SORT_BY) String sortBy,
       @RequestParam(required = false, defaultValue = DEFAULT_SORT_DIRECTION) String sortDirection) {
 
-    return getResources(startIndex, count, filter, filteredAttributes, sortBy, sortDirection);
+    return getResources(startIndex, count, filter, INCLUDE_ATTRIBUTES, sortBy, sortDirection);
   }
 
   @Override

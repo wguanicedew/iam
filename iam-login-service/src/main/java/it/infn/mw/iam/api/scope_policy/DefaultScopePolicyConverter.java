@@ -69,7 +69,7 @@ public class DefaultScopePolicyConverter implements IamScopePolicyConverter {
     }
 
     if (sp.getGroup() != null) {
-      IamGroupRefDTO gr = new IamGroupRefDTO();
+      GroupRefDTO gr = new GroupRefDTO();
 
       gr.setLocation(resourceLocationProvider.groupLocation(sp.getGroup().getUuid()));
       gr.setName(sp.getGroup().getName());

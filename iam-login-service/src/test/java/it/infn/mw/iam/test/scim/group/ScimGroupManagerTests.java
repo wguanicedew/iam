@@ -133,7 +133,7 @@ public class ScimGroupManagerTests {
   }
 
   @Test
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
+  @WithMockUser(username = "admin", roles = {"ADMIN", "USER"})
   public void groupCreationCreatesGroupManagerAuthority() throws Exception {
     String name = "test-gm-creation";
     ScimGroup group = ScimGroup.builder(name).build();
@@ -154,7 +154,7 @@ public class ScimGroupManagerTests {
   }
 
   @Test
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
+  @WithMockUser(username = "admin", roles = {"ADMIN", "USER"})
   public void groupDeletionRemovesGroupManagerAuthority() throws Exception {
     String name = "test-gm-deletion";
 

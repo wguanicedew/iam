@@ -259,13 +259,27 @@ body.skin-blue {
     font-weight: bolder;
 }
 
-.iam-user-group-row {
+.iam-tab-row {
     padding-bottom: 10px;
     margin-bottom: 10px;
     border-bottom: 1px solid #f4f4f4;
 }
 
-.iam-user-group-row:last-of-type {
+.iam-tab-row:last-of-type {
+    padding-bottom: 0;
+    margin-bottom: 0;
+    border-bottom: 0;
+}
+
+.iam-user-group-row,
+.iam-div-row {
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #f4f4f4;
+}
+
+.iam-user-group-row:last-of-type,
+.iam-div-row:last-of-type {
     padding-bottom: 0;
     margin-bottom: 0;
     border-bottom: none;
@@ -332,4 +346,42 @@ body.skin-blue {
 
 .btn-social {
     padding-left: 0px;
+}
+
+.page-counter {
+    margin-left: 10px;
+    margin-top: 26px;
+    display: inline;
+    vertical-align: middle;
+}
+
+.table-msg {
+    margin-top: 30px;
+}
+
+.no-border-top {
+    border-top: none !important;
+}
+
+.first-no-border-top:first-child {
+    border-top: none !important;
+}
+
+.text-larger {
+    font-size: 115%;
+}
+
+.group-description {
+    margin-top: .5em;
+    float: left;
+}
+
+.missing {
+    color: #999999;
+}
+
+.group-description-edit {
+    float: left;
+    margin-top: .5em;
+    margin-left: 5px;
 }

@@ -1,0 +1,90 @@
+<!--
+
+    Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2018
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<div class="box box-solid no-padding no-shadow no-border" ngcloak ng-show="$ctrl.loaded">
+    <div class="box-header with-border" ng-show="$ctrl.requests.length > 0">
+        <div class="input-group">
+            <input placeholder="Filter registration requests..." ng-model="$ctrl.filter" class="form-control" />
+            <div class="input-group-btn">
+                <button type="button" class="btn btn-default" ng-click="$ctrl.resetFilter()">Show all</button>
+            </div>
+        </div>
+    </div>
+    <div class="box-body no-padding">
+        <table id="vo-reqs" class="table">
+            <thead ng-show="$ctrl.filtered.length > 0">
+                <tr>
+                    <td>
+                        <ul id="req_pagination_top" uib-pagination ng-model="$ctrl.currentPage" items-per-page="$ctrl.itemsPerPage" total-items="$ctrl.filtered.length" max-size="0" template-url="/resources/iam/apps/dashboard-app/components/common/pagination.template.html" ng-change="$ctrl.pageChanged()"
+                            class="pull-left">
+                        </ul>
+                        <div class="pull-left page-counter">{{$ctrl.pageLeft}} - {{$ctrl.pageRight}} / {{$ctrl.filtered.length}}</div>
+                    </td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-show="!$ctrl.requests.length">
+                    <td class="no-border-top">
+                        <div class="table-msg">
+                            No pending requests found.
+                        </div>
+                    </td>
+                </tr>
+                <tr ng-show="$ctrl.requests.length > 0 && $ctrl.filtered.length == 0">
+                    <td class="no-border-top">
+                        <div class="table-msg">
+                            No requests found matching the search filter.
+                        </div>
+                    </td>
+                </tr>
+                <tr ng-repeat="r in $ctrl.filtered | orderBy:'creationTime':true | startFrom:($ctrl.currentPage-1)*$ctrl.itemsPerPage | limitTo:$ctrl.itemsPerPage">
+                    <td>
+                        <p>
+                            <a href="mailto:{{r.email}}">{{r.givenname}} {{r.familyname}}</a> requested to join this organization {{r.creationTime | relativeDate}}.
+                            <span ng-if="r.status == 'NEW'" class="text-red"> (email address still not verified) </span>
+                        </p>
+                        <p>
+                            In support of this request, the user has provided the following motivation:
+                            <blockquote>
+                                {{r.notes}}
+                            </blockquote>
+                        </p>
+
+                        <div class="btn-group">
+                            <button class="btn btn-success btn-sm" ng-click="$ctrl.approve(r)" ng-disabled="$ctrl.busy">
+                                <i class="fa fa-check"></i> Approve
+                            </button>
+                            <button class="btn btn-danger btn-sm" ng-click="$ctrl.reject(r)" ng-disabled="$ctrl.busy">
+                                <i class="fa fa-times"></i> Reject
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+            <tfoot ng-show="$ctrl.filtered.length > 0">
+                <tr>
+                    <td>
+                        <ul id="req_pagination_bottom" uib-pagination ng-model="$ctrl.currentPage" items-per-page="$ctrl.itemsPerPage" total-items="$ctrl.filtered.length" max-size="0" template-url="/resources/iam/apps/dashboard-app/components/common/pagination.template.html" ng-change="$ctrl.pageChanged()"
+                            class="pull-left">
+                        </ul>
+                        <div class="pull-left page-counter">{{$ctrl.pageLeft}} - {{$ctrl.pageRight}} / {{$ctrl.filtered.length}}</div>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>

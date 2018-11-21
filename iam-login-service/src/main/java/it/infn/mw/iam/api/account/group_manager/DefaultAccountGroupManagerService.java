@@ -29,7 +29,7 @@ import com.google.common.collect.Lists;
 import it.infn.mw.iam.api.account.authority.AccountAuthorityService;
 import it.infn.mw.iam.api.account.group_manager.error.InvalidManagedGroupError;
 import it.infn.mw.iam.api.account.group_manager.model.AccountManagedGroupsDTO;
-import it.infn.mw.iam.api.account.group_manager.model.GroupDTO;
+import it.infn.mw.iam.api.common.GroupDTO;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamAuthority;
 import it.infn.mw.iam.persistence.model.IamGroup;

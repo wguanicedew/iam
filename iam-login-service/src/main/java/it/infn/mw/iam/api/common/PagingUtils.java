@@ -15,6 +15,8 @@
  */
 package it.infn.mw.iam.api.common;
 
+import org.springframework.data.domain.Sort;
+
 public class PagingUtils {
 
   private PagingUtils() {
@@ -23,6 +25,11 @@ public class PagingUtils {
 
   public static OffsetPageable buildPageRequest(Integer count, Integer startIndex,
       int maxPageSize) {
+    return buildPageRequest(count, startIndex, maxPageSize, null);
+  }
+  
+  public static OffsetPageable buildPageRequest(Integer count, Integer startIndex,
+      int maxPageSize, Sort sort) {
 
     int validCount = 0;
     int validStartIndex = 1;
@@ -48,7 +55,7 @@ public class PagingUtils {
         validStartIndex = 1;
       }
     }
-
-    return new OffsetPageable(validStartIndex - 1, validCount);
+    
+    return new OffsetPageable(validStartIndex - 1, validCount, sort);
   }
 }

@@ -39,13 +39,16 @@ public class IamSecurityExpressionMethods {
     this.groupRequestUtils = groupRequestUtils;
   }
 
-  public boolean isGroupManager(String groupUuid) {
-
+  public boolean isAGroupManager() {
     return authentication.getAuthorities()
       .stream()
-      .filter(a -> a.getAuthority().equals("ROLE_GM:" + groupUuid))
-      .findAny()
-      .isPresent();
+      .anyMatch(a -> a.getAuthority().startsWith("ROLE_GM:"));
+  }
+
+  public boolean isGroupManager(String groupUuid) {
+    return authentication.getAuthorities()
+      .stream()
+      .anyMatch(a -> a.getAuthority().equals("ROLE_GM:" + groupUuid));
   }
 
   public boolean isUser(String userUuid) {

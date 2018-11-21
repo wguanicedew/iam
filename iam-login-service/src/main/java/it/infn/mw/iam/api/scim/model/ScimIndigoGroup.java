@@ -18,32 +18,49 @@ package it.infn.mw.iam.api.scim.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+
 public class ScimIndigoGroup {
 
   private ScimGroupRef parentGroup;
+  
+  private String description;
 
   @JsonCreator
-  private ScimIndigoGroup(@JsonProperty("parentGroup") ScimGroupRef parentGroup) {
+  private ScimIndigoGroup(@JsonProperty("parentGroup") ScimGroupRef parentGroup,
+      @JsonProperty("description") String description) {
     this.parentGroup = parentGroup;
+    this.description = description;
   }
 
   private ScimIndigoGroup(Builder builder) {
     this.parentGroup = builder.parentGroup;
+    this.description = builder.description;
   }
 
   public ScimGroupRef getParentGroup() {
     return parentGroup;
   }
 
+  public String getDescription() {
+    return description;
+  }
+  
   public static Builder getBuilder() {
     return new Builder();
   }
 
   public static class Builder {
     private ScimGroupRef parentGroup = null;
+    
+    private String description;
 
     public Builder parentGroup(ScimGroupRef parentGroup) {
       this.parentGroup = parentGroup;
+      return this;
+    }
+    
+    public Builder description(String desc) {
+      this.description = desc;
       return this;
     }
 

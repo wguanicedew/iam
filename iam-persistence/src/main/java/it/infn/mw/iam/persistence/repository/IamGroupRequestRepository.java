@@ -15,6 +15,7 @@
  */
 package it.infn.mw.iam.persistence.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -30,7 +31,7 @@ public interface IamGroupRequestRepository
   Optional<IamGroupRequest> findByUuid(@Param("uuid") String uuid);
 
   @Query("select r from IamGroupRequest r join r.account a join r.group g where a.username= :username and g.name= :groupName")
-  Optional<IamGroupRequest> findByUsernameAndGroup(@Param("username") String username,
+  List<IamGroupRequest> findByUsernameAndGroup(@Param("username") String username,
       @Param("groupName") String groupName);
 
   

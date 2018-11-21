@@ -22,6 +22,7 @@ import static java.util.Objects.isNull;
 import java.time.Clock;
 import java.util.Date;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Supplier;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,8 +35,8 @@ import org.springframework.stereotype.Service;
 import it.infn.mw.iam.audit.events.group.GroupCreatedEvent;
 import it.infn.mw.iam.audit.events.group.GroupRemovedEvent;
 import it.infn.mw.iam.audit.events.group.GroupReplacedEvent;
-import it.infn.mw.iam.core.group.exception.InvalidGroupOperationException;
-import it.infn.mw.iam.core.group.exception.NoSuchGroupException;
+import it.infn.mw.iam.core.group.error.InvalidGroupOperationError;
+import it.infn.mw.iam.core.group.error.NoSuchGroupError;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamAuthority;
 import it.infn.mw.iam.persistence.model.IamGroup;
@@ -69,6 +70,10 @@ public class DefaultIamGroupService implements IamGroupService, ApplicationEvent
     checkNotNull(g, "Cannot create a null group");
     final Date creationTime = Date.from(clock.instant());
 
+    if (isNull(g.getUuid())) {
+      g.setUuid(UUID.randomUUID().toString());
+    }
+    
     g.setCreationTime(creationTime);
     g.setLastUpdateTime(creationTime);
 
@@ -101,7 +106,7 @@ public class DefaultIamGroupService implements IamGroupService, ApplicationEvent
     checkNotNull(g);
 
     if (!(g.getAccounts().isEmpty() && g.getChildrenGroups().isEmpty())) {
-      throw new InvalidGroupOperationException("Group is not empty");
+      throw new InvalidGroupOperationError("Group is not empty");
     }
 
     IamGroup parent = g.getParentGroup();
@@ -172,8 +177,8 @@ public class DefaultIamGroupService implements IamGroupService, ApplicationEvent
       .format("Replaced group %s with new group %s", oldGroup.getName(), newGroup.getName())));
   }
 
-  private Supplier<NoSuchGroupException> noSuchGroupException(String message) {
-    return () -> new NoSuchGroupException(message);
+  private Supplier<NoSuchGroupError> noSuchGroupException(String message) {
+    return () -> new NoSuchGroupError(message);
   }
 
   @Override
