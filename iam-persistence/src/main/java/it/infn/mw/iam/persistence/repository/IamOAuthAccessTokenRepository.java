@@ -79,4 +79,9 @@ public interface IamOAuthAccessTokenRepository
       + "and (t.authenticationHolder.clientId = :clientId)")
   long countValidAccessTokensForUserAndClient(@Param("userId") String userId,
       @Param("clientId") String clientId, @Param("timestamp") Date timestamp);
+
+  @Query("select t from OAuth2AccessTokenEntity t where t.authenticationHolder.id in ("
+      + "select sua.id from SavedUserAuthentication sua where sua.name not in ("
+      + "select a.username from IamAccount a))")
+  List<OAuth2AccessTokenEntity> findOrphanedTokens();
 }

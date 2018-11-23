@@ -15,14 +15,15 @@
  */
 package it.infn.mw.iam.persistence.repository;
 
+import java.util.Date;
+import java.util.List;
+
 import org.mitre.oauth2.model.OAuth2RefreshTokenEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
-import java.util.Date;
-import java.util.List;
 
 public interface IamOAuthRefreshTokenRepository
     extends PagingAndSortingRepository<OAuth2RefreshTokenEntity, Long> {
@@ -79,4 +80,9 @@ public interface IamOAuthRefreshTokenRepository
       + "and (t.authenticationHolder.clientId = :clientId)")
   long countValidRefreshTokensForUserAndClient(@Param("userId") String userId,
       @Param("clientId") String clientId, @Param("timestamp") Date timestamp);
+
+  @Query("select t from OAuth2RefreshTokenEntity t where t.authenticationHolder.id in ("
+      + "select sua.id from SavedUserAuthentication sua where sua.name not in ("
+      + "select a.username from IamAccount a))")
+  List<OAuth2RefreshTokenEntity> findOrphanedTokens();
 }
