@@ -96,7 +96,8 @@ public class JpaConfig extends JpaBaseConfiguration {
   @Profile("no-flyway")
   public FlywayMigrationStrategy flywayMigrationStrategy() {
     return f -> {
-    }; // empty on purpose
+      //  empty on purpose
+    }; 
   }
 
   @Bean
