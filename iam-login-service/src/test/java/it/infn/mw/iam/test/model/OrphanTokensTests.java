@@ -20,8 +20,6 @@ import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -39,8 +37,6 @@ import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 @WebAppConfiguration
 @Transactional
 public class OrphanTokensTests extends TestTokensUtils {
-
-  public static final Logger LOG = LoggerFactory.getLogger(OrphanTokensTests.class);
 
   @Autowired
   private IamOAuthAccessTokenRepository accessTokensRepo;
