@@ -16,15 +16,17 @@
 package it.infn.mw.iam.test.api.group;
 
 import static java.lang.String.format;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.containsString;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.UUID;
 import java.util.function.Supplier;
 
 import javax.transaction.Transactional;
@@ -257,7 +259,7 @@ public class GroupCreationTests {
 
   }
 
-  
+
   @Test
   @WithMockUser(username = "admin", roles = "ADMIN")
   public void adminCanUpdateDescription() throws Exception {
@@ -274,31 +276,39 @@ public class GroupCreationTests {
 
     GroupDTO desc = GroupDTO.builder().description(NEW_GROUP_DESC).build();
     mvc
-      .perform(MockMvcRequestBuilders.put("/iam/group/{id}", g.getUuid())
-        .content(mapper.writeValueAsBytes(desc))
+      .perform(put("/iam/group/{id}", g.getUuid()).content(mapper.writeValueAsBytes(desc))
         .contentType(APPLICATION_JSON_UTF8))
       .andExpect(status().isOk())
-      .andExpect(
-          jsonPath("$.description", is(NEW_GROUP_DESC)));
+      .andExpect(jsonPath("$.description", is(NEW_GROUP_DESC)));
 
   }
-  
-  
+
+
   @Test
   @WithMockUser(username = "test", roles = "USER")
   public void userCannotUpdateDescription() throws Exception {
 
-    IamGroup g = groupRepo.findByName("Production")
-      .orElseThrow(assertionError("Expected group not found"));
+    IamGroup g =
+        groupRepo.findByName("Production").orElseThrow(assertionError("Expected group not found"));
 
     GroupDTO desc = GroupDTO.builder().description(NEW_GROUP_DESC).build();
-    
-    mvc
-      .perform(MockMvcRequestBuilders.put("/iam/group/{id}", g.getUuid())
-        .content(mapper.writeValueAsBytes(desc))
-        .contentType(APPLICATION_JSON_UTF8))
-      .andExpect(status().isForbidden());
+
+    mvc.perform(put("/iam/group/{id}", g.getUuid()).content(mapper.writeValueAsBytes(desc))
+      .contentType(APPLICATION_JSON_UTF8)).andExpect(status().isForbidden());
   }
 
 
+  @Test
+  @WithMockUser(username = "admin", roles = "ADMIN")
+  public void nonExistingGroupCorrectlyHandled() throws Exception {
+
+    GroupDTO desc = GroupDTO.builder().description(NEW_GROUP_DESC).build();
+
+    mvc
+      .perform(put("/iam/group/{id}", UUID.randomUUID().toString())
+        .content(mapper.writeValueAsBytes(desc))
+        .contentType(APPLICATION_JSON_UTF8))
+      .andExpect(status().isNotFound())
+      .andExpect(jsonPath("$.error", containsString("Group not found")));
+  }
 }

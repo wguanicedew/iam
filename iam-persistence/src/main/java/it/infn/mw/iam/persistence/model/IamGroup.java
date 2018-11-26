@@ -22,11 +22,14 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
@@ -64,6 +67,9 @@ public class IamGroup implements Serializable {
   @Temporal(TemporalType.TIMESTAMP)
   @Column(nullable = false)
   Date lastUpdateTime;
+  
+  @Column(name="default_group", nullable = false)
+  boolean defaultGroup;
 
   @ManyToOne
   @JoinColumn(name = "parent_group_id", nullable = true)
@@ -77,6 +83,13 @@ public class IamGroup implements Serializable {
 
   @OneToMany(mappedBy = "group", cascade = CascadeType.REMOVE)
   private Set<IamGroupRequest> groupRequests;
+  
+  @ElementCollection
+  @CollectionTable(
+      indexes= {@Index(columnList="name"), @Index(columnList="name,val")},
+      name="iam_group_attrs",
+     joinColumns=@JoinColumn(name="group_id"))
+  private Set<IamAttribute> attributes;
 
   public IamGroup() {
     // empty constructor
@@ -171,11 +184,28 @@ public class IamGroup implements Serializable {
   public void setGroupRequests(Set<IamGroupRequest> groupRequests) {
     this.groupRequests = groupRequests;
   }
+  
+  public boolean isDefaultGroup() {
+    return defaultGroup;
+  }
+
+  public void setDefaultGroup(boolean defaultGroup) {
+    this.defaultGroup = defaultGroup;
+  }
+
+  public Set<IamAttribute> getAttributes() {
+    return attributes;
+  }
+
+  public void setAttributes(Set<IamAttribute> attributes) {
+    this.attributes = attributes;
+  }
 
   public void touch(Clock c) {
     setLastUpdateTime(Date.from(c.instant()));
   }
 
+  
   @Override
   public int hashCode() {
 

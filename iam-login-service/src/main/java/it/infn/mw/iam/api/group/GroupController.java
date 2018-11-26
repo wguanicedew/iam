@@ -15,9 +15,11 @@
  */
 package it.infn.mw.iam.api.group;
 
+import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,28 +36,38 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.google.common.collect.Lists;
+
+import it.infn.mw.iam.api.common.AttributeDTO;
 import it.infn.mw.iam.api.common.ErrorDTO;
 import it.infn.mw.iam.api.common.GroupDTO;
 import it.infn.mw.iam.api.common.GroupDTO.CreateGroup;
 import it.infn.mw.iam.api.common.GroupDTO.UpdateGroup;
 import it.infn.mw.iam.core.group.IamGroupService;
 import it.infn.mw.iam.core.group.error.NoSuchGroupError;
+import it.infn.mw.iam.persistence.model.IamAttribute;
 import it.infn.mw.iam.persistence.model.IamGroup;
 
 @RestController
 public class GroupController {
   
+  public static final String INVALID_GROUP = "Invalid group: ";
+  public static final String INVALID_ATTRIBUTE = "Invalid attribute: ";
+  
   final IamGroupService groupService;
   final GroupDTOConverter converter;
+  final AttributeDTOConverter attributeConverter;
   
   @Autowired
-  public GroupController(IamGroupService groupService, GroupDTOConverter converter) {
+  public GroupController(IamGroupService groupService, GroupDTOConverter converter, AttributeDTOConverter attrConverter) {
     this.groupService = groupService;
     this.converter = converter;
+    this.attributeConverter = attrConverter;
   }
   
-  private String buildValidationErrorMessage(BindingResult result) {
-    StringBuilder sb = new StringBuilder("Invalid group: ");
+  
+  private String buildValidationErrorMessage(String prefix, BindingResult result) {
+    StringBuilder sb = new StringBuilder(prefix);
     if (result.hasGlobalErrors()) {
       sb.append(result.getGlobalErrors().get(0).getDefaultMessage());
     } else {
@@ -64,9 +76,9 @@ public class GroupController {
     
     return sb.toString();
   }
-  private void handleValidationError(BindingResult result) {
+  private void handleValidationError(String prefix, BindingResult result) {
     if (result.hasErrors()) {
-      throw new InvalidGroupError(buildValidationErrorMessage(result));
+      throw new InvalidGroupError(buildValidationErrorMessage(prefix, result));
     }
   }
   
@@ -75,7 +87,7 @@ public class GroupController {
   @PreAuthorize("hasRole('ADMIN')")
   public GroupDTO createGroup(@RequestBody @Validated(CreateGroup.class) GroupDTO group, final BindingResult validationResult) {
     
-    handleValidationError(validationResult);
+    handleValidationError(INVALID_GROUP,validationResult);
     
     IamGroup entity = converter.entityFromDto(group);
     entity = groupService.createGroup(entity);
@@ -85,12 +97,45 @@ public class GroupController {
   @RequestMapping(value = "/iam/group/{id}", method = PUT)
   @PreAuthorize("hasRole('ADMIN') or #iam.isGroupManager(#id)")
   public GroupDTO updateGroup(@PathVariable String id, @RequestBody @Validated(UpdateGroup.class) GroupDTO group, final BindingResult validationResult) {
-    handleValidationError(validationResult);
+    handleValidationError(INVALID_GROUP, validationResult);
     
     IamGroup entity = groupService.findByUuid(id).orElseThrow(()->NoSuchGroupError.forUuid(id));
     entity.setDescription(group.getDescription());
     entity = groupService.save(entity);
     return converter.dtoFromEntity(entity);  
+  }
+  
+  @RequestMapping(value = "/iam/group/{id}/attributes")
+  @PreAuthorize("hasRole('ADMIN') or #iam.isGroupManager(#id)")
+  public List<AttributeDTO> getAttributes(@PathVariable String id){
+    
+    IamGroup entity = groupService.findByUuid(id).orElseThrow(()->NoSuchGroupError.forUuid(id));
+    
+    List<AttributeDTO> results = Lists.newArrayList();
+    entity.getAttributes().forEach(a -> results.add(attributeConverter.dtoFromEntity(a)));
+    
+    return results;
+  }
+  
+  @RequestMapping(value = "/iam/group/{id}/attributes", method= {PUT, POST})
+  @PreAuthorize("hasRole('ADMIN')")
+  public void setAttribute(@PathVariable String id, @RequestBody @Validated AttributeDTO attribute, final BindingResult validationResult) {
+    handleValidationError(INVALID_ATTRIBUTE,validationResult);
+    IamGroup entity = groupService.findByUuid(id).orElseThrow(()->NoSuchGroupError.forUuid(id));
+    
+    IamAttribute attr = attributeConverter.entityFromDto(attribute);
+    entity.getAttributes().remove(attr);
+    entity.getAttributes().add(attr);
+  }
+  
+  @RequestMapping(value = "/iam/group/{id}/attributes", method=DELETE)
+  @PreAuthorize("hasRole('ADMIN')")
+  @ResponseStatus(value = HttpStatus.NO_CONTENT)
+  public void deleteAttribute(@PathVariable String id, @Validated AttributeDTO attribute, final BindingResult validationResult) {
+    handleValidationError(INVALID_ATTRIBUTE, validationResult);
+    IamGroup entity = groupService.findByUuid(id).orElseThrow(()->NoSuchGroupError.forUuid(id));
+    
+    entity.getAttributes().remove(attributeConverter.entityFromDto(attribute));
   }
   
   @ResponseStatus(code = HttpStatus.BAD_REQUEST)
@@ -100,4 +145,10 @@ public class GroupController {
     return ErrorDTO.fromString(e.getMessage());
   }
   
+  @ResponseStatus(code = HttpStatus.NOT_FOUND)
+  @ExceptionHandler(NoSuchGroupError.class)
+  @ResponseBody
+  public ErrorDTO handleNotFoundError(NoSuchGroupError e) {
+    return ErrorDTO.fromString(e.getMessage());
+  }
 }

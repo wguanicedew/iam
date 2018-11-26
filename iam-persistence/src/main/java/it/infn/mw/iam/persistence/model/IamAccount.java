@@ -27,12 +27,15 @@ import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
@@ -132,6 +135,13 @@ public class IamAccount implements Serializable {
 
   @OneToMany(mappedBy = "account", cascade = CascadeType.REMOVE)
   private Set<IamGroupRequest> groupRequests;
+  
+  @ElementCollection
+  @CollectionTable(
+      indexes= {@Index(columnList="name"), @Index(columnList="name,val")},
+      name="iam_account_attrs",
+     joinColumns=@JoinColumn(name="account_id"))
+  private Set<IamAttribute> attributes;
 
   public IamAccount() {
     // empty constructor
@@ -533,6 +543,14 @@ public class IamAccount implements Serializable {
 
   public void setGroupRequest(Set<IamGroupRequest> groupRequests) {
     this.groupRequests = groupRequests;
+  }
+  
+  public Set<IamAttribute> getAttributes() {
+    return attributes;
+  }
+
+  public void setAttributes(Set<IamAttribute> attributes) {
+    this.attributes = attributes;
   }
 
   @Override
