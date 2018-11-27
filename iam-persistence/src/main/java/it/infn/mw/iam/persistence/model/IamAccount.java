@@ -142,6 +142,13 @@ public class IamAccount implements Serializable {
       name="iam_account_attrs",
      joinColumns=@JoinColumn(name="account_id"))
   private Set<IamAttribute> attributes;
+  
+  @ElementCollection
+  @CollectionTable(
+      indexes= {@Index(columnList="prefix,name,val"), @Index(columnList="prefix,name")},
+      name="iam_account_labels",
+     joinColumns=@JoinColumn(name="account_id"))
+  private Set<IamLabel> labels;
 
   public IamAccount() {
     // empty constructor
@@ -551,6 +558,14 @@ public class IamAccount implements Serializable {
 
   public void setAttributes(Set<IamAttribute> attributes) {
     this.attributes = attributes;
+  }
+  
+  public Set<IamLabel> getLabels() {
+    return labels;
+  }
+  
+  public void setLabels(Set<IamLabel> labels) {
+    this.labels = labels;
   }
 
   @Override

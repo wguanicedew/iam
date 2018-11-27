@@ -13,17 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.api.group.error;
+package it.infn.mw.iam.api.common.error;
 
-import it.infn.mw.iam.core.group.error.IamGroupError;
-
-public class NoSuchAttributeError extends IamGroupError {
-
-  private static final long serialVersionUID = 1L;
+public class InvalidLabelError extends RuntimeException {
   
-  public NoSuchAttributeError(String message) {
-    super(message);
+  private static final long serialVersionUID = 1L;
 
+  public InvalidLabelError(String message) {
+    super(message);
   }
 
 }

@@ -21,6 +21,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import it.infn.mw.iam.persistence.model.IamGroup;
+import it.infn.mw.iam.persistence.model.IamLabel;
 
 public interface IamGroupService {
   
@@ -41,6 +42,10 @@ public interface IamGroupService {
   IamGroup deleteGroupByUuid(String uuid);
   
   IamGroup deleteGroup(IamGroup g);
+  
+  IamGroup addLabel(IamGroup g, IamLabel l);
+  
+  IamGroup deleteLabel(IamGroup g, IamLabel l);
 
   void touchGroup(IamGroup g);
 }

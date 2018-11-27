@@ -17,14 +17,24 @@ package it.infn.mw.iam.core.user;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import it.infn.mw.iam.persistence.model.IamAccount;
+import it.infn.mw.iam.persistence.model.IamLabel;
 
 /**
  * This service provides basic functionality used to manage IAM accounts
  */
 public interface IamAccountService {
 
+  
+  /**
+   * Finds an account by UUID
+   * @param uuid 
+   * @return an {@link Optional} iam account
+   */
+  Optional<IamAccount> findByUuid(String uuid);
+  
   /**
    * Creates a new {@link IamAccount}, after some checks.
    * 
@@ -51,4 +61,23 @@ public interface IamAccountService {
    * @return the possibly empty {@link List} of {@link IamAccount} that have been removed
    */
   List<IamAccount> deleteInactiveProvisionedUsersSinceTime(Date timestamp);
+
+  /**
+   * Sets a label for a given account
+   * 
+   * @param account
+   * @param label
+   * @return the updated account
+   */
+  IamAccount setLabel(IamAccount account, IamLabel label);
+
+  /**
+   * Deletes a label for a given account
+   * 
+   * @param account
+   * @param label
+   * @return the updated account
+   */
+  IamAccount deleteLabel(IamAccount account, IamLabel label);
+
 }

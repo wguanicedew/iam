@@ -13,16 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.api.account.attributes;
+package it.infn.mw.iam.api.account.labels;
 
 import static it.infn.mw.iam.api.utils.ValidationErrorUtils.stringifyValidationError;
 import static java.lang.String.format;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -39,87 +41,83 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.google.common.collect.Lists;
 
-import it.infn.mw.iam.api.common.AttributeDTO;
-import it.infn.mw.iam.api.common.AttributeDTOConverter;
 import it.infn.mw.iam.api.common.ErrorDTO;
+import it.infn.mw.iam.api.common.LabelDTO;
+import it.infn.mw.iam.api.common.LabelDTOConverter;
 import it.infn.mw.iam.api.common.NoSuchAccountError;
-import it.infn.mw.iam.api.common.error.InvalidAttributeError;
+import it.infn.mw.iam.api.common.error.InvalidLabelError;
+import it.infn.mw.iam.core.user.IamAccountService;
 import it.infn.mw.iam.persistence.model.IamAccount;
-import it.infn.mw.iam.persistence.model.IamAttribute;
-import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
 @RestController
-public class AccountAttributesController {
+@PreAuthorize("hasRole('ADMIN')")
+@RequestMapping(AccountLabelsController.RESOURCE)
+public class AccountLabelsController {
 
-  public static final String INVALID_ATTRIBUTE_TEMPLATE = "Invalid attribute: %s";
+  public static final String RESOURCE = "/iam/account/{id}/labels";
+  public static final String INVALID_LABEL_TEMPLATE = "Invalid label: %s";
 
-  final IamAccountRepository repo;
-  final AttributeDTOConverter converter;
+  final IamAccountService service;
+  final LabelDTOConverter converter;
 
   @Autowired
-  public AccountAttributesController(IamAccountRepository repo, AttributeDTOConverter converter) {
-    this.repo = repo;
+  public AccountLabelsController(IamAccountService service, LabelDTOConverter converter) {
+    this.service = service;
     this.converter = converter;
   }
-  
+
+  private Supplier<NoSuchAccountError> noSuchAccountError(String uuid) {
+    return () -> NoSuchAccountError.forUuid(uuid);
+  }
+
   private void handleValidationError(BindingResult result) {
     if (result.hasErrors()) {
-      throw new InvalidAttributeError(
-          format(INVALID_ATTRIBUTE_TEMPLATE, stringifyValidationError(result)));
+      throw new InvalidLabelError(format(INVALID_LABEL_TEMPLATE, stringifyValidationError(result)));
     }
   }
 
-  @RequestMapping(value = "/iam/account/{id}/attributes")
+  @RequestMapping(method = GET)
   @PreAuthorize("hasRole('ADMIN')")
-  public List<AttributeDTO> getAttributes(@PathVariable String id) {
+  public List<LabelDTO> getLabels(@PathVariable String id) {
 
-    IamAccount account = repo.findByUuid(id).orElseThrow(() -> NoSuchAccountError.forUuid(id));
+    IamAccount account = service.findByUuid(id).orElseThrow(noSuchAccountError(id));
 
-    List<AttributeDTO> results = Lists.newArrayList();
-    account.getAttributes().forEach(a -> results.add(converter.dtoFromEntity(a)));
+    List<LabelDTO> results = Lists.newArrayList();
+
+    account.getLabels().forEach(l -> results.add(converter.dtoFromEntity(l)));
 
     return results;
   }
 
-  @RequestMapping(value = "/iam/account/{id}/attributes", method= {POST,PUT})
-  @PreAuthorize("hasRole('ADMIN')")
-  public void setAttribute(@PathVariable String id, @RequestBody @Validated AttributeDTO attribute,
-      final BindingResult validationResult) {
+  @RequestMapping(method = {PUT, POST})
+  public void setLabel(@PathVariable String id, @RequestBody @Validated LabelDTO label,
+      BindingResult validationResult) {
+    handleValidationError(validationResult);
+    IamAccount account = service.findByUuid(id).orElseThrow(noSuchAccountError(id));
 
-    handleValidationError(validationResult);
-    IamAccount account = repo.findByUuid(id).orElseThrow(() -> NoSuchAccountError.forUuid(id));
-    
-    IamAttribute attr = converter.entityFromDto(attribute);
-    
-    account.getAttributes().remove(attr);
-    account.getAttributes().add(attr);
+    service.setLabel(account, converter.entityFromDto(label));
   }
-  
-  @RequestMapping(value = "/iam/account/{id}/attributes", method= DELETE)
-  @PreAuthorize("hasRole('ADMIN')")
-  @ResponseStatus(value = NO_CONTENT)
-  public void deleteAttribute(@PathVariable String id, @Validated AttributeDTO attribute,
-      final BindingResult validationResult) {
-    
+
+  @RequestMapping(method = DELETE)
+  @ResponseStatus(NO_CONTENT)
+  public void deleteLabel(@PathVariable String id, @Validated LabelDTO label,
+      BindingResult validationResult) {
     handleValidationError(validationResult);
-    IamAccount account = repo.findByUuid(id).orElseThrow(() -> NoSuchAccountError.forUuid(id));
-    IamAttribute attr = converter.entityFromDto(attribute);
-    
-    account.getAttributes().remove(attr);
+    IamAccount account = service.findByUuid(id).orElseThrow(noSuchAccountError(id));
+    service.deleteLabel(account, converter.entityFromDto(label));
   }
 
   @ResponseStatus(code = HttpStatus.BAD_REQUEST)
-  @ExceptionHandler(InvalidAttributeError.class)
+  @ExceptionHandler(InvalidLabelError.class)
   @ResponseBody
-  public ErrorDTO handleValidationError(InvalidAttributeError e) {    
+  public ErrorDTO handleValidationError(InvalidLabelError e) {
     return ErrorDTO.fromString(e.getMessage());
   }
-  
+
   @ResponseStatus(code = HttpStatus.NOT_FOUND)
   @ExceptionHandler(NoSuchAccountError.class)
   @ResponseBody
-  public ErrorDTO handleNoSuchAccountError(NoSuchAccountError e) {    
+  public ErrorDTO handleNotFoundError(NoSuchAccountError e) {
     return ErrorDTO.fromString(e.getMessage());
   }
-  
 }

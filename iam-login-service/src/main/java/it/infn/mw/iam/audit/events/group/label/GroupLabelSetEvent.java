@@ -13,14 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.api.group.error;
+package it.infn.mw.iam.audit.events.group.label;
 
-public class InvalidAttributeError extends RuntimeException {
+import static java.lang.String.format;
 
-  private static final long serialVersionUID = 1L;
+import it.infn.mw.iam.persistence.model.IamGroup;
+import it.infn.mw.iam.persistence.model.IamLabel;
 
-  public InvalidAttributeError(String message) {
-    super(message);
+public class GroupLabelSetEvent extends GroupLabelEvent {
+
+  private static final long serialVersionUID = -7951684086863051775L;
+
+  public static final String MESSAGE = "Label '%s' set for group '%s'";
+
+  public GroupLabelSetEvent(Object source, IamGroup group, IamLabel label) {
+    super(source, group, label, format(MESSAGE, label.qualifiedName(), group.getName()));
   }
-  
+
 }

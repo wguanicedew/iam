@@ -35,11 +35,14 @@ import org.springframework.stereotype.Service;
 import it.infn.mw.iam.audit.events.group.GroupCreatedEvent;
 import it.infn.mw.iam.audit.events.group.GroupRemovedEvent;
 import it.infn.mw.iam.audit.events.group.GroupReplacedEvent;
+import it.infn.mw.iam.audit.events.group.label.GroupLabelRemovedEvent;
+import it.infn.mw.iam.audit.events.group.label.GroupLabelSetEvent;
 import it.infn.mw.iam.core.group.error.InvalidGroupOperationError;
 import it.infn.mw.iam.core.group.error.NoSuchGroupError;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamAuthority;
 import it.infn.mw.iam.persistence.model.IamGroup;
+import it.infn.mw.iam.persistence.model.IamLabel;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamAuthoritiesRepository;
 import it.infn.mw.iam.persistence.repository.IamGroupRepository;
@@ -177,6 +180,14 @@ public class DefaultIamGroupService implements IamGroupService, ApplicationEvent
       .format("Replaced group %s with new group %s", oldGroup.getName(), newGroup.getName())));
   }
 
+  private void labelSetEvent(IamGroup group, IamLabel label) {
+    eventPublisher.publishEvent(new GroupLabelSetEvent(this, group, label));
+  }
+  
+  private void labelRemovedEvent(IamGroup group, IamLabel label) {
+    eventPublisher.publishEvent(new GroupLabelRemovedEvent(this, group, label));
+  }
+  
   private Supplier<NoSuchGroupError> noSuchGroupException(String message) {
     return () -> new NoSuchGroupError(message);
   }
@@ -239,5 +250,23 @@ public class DefaultIamGroupService implements IamGroupService, ApplicationEvent
     return groupRepo.findAll(page);
   }
 
+  @Override
+  public IamGroup addLabel(IamGroup g, IamLabel l) {
+    
+    g.getLabels().remove(l);
+    g.getLabels().add(l);
+    
+    labelSetEvent(g, l);
+    
+    return g;
+  }
+
+  @Override
+  public IamGroup deleteLabel(IamGroup g, IamLabel l) {
+    g.getLabels().remove(l);
+    
+    labelRemovedEvent(g, l);
+    return g;
+  }
 
 }

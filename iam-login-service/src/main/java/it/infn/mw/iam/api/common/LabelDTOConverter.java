@@ -13,15 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.api.group.error;
+package it.infn.mw.iam.api.common;
 
-import it.infn.mw.iam.core.group.error.IamGroupError;
 
-public class AttributeAlreadyExistsError extends IamGroupError {
+import org.springframework.stereotype.Component;
 
-  private static final long serialVersionUID = 1L;
+import it.infn.mw.iam.api.scim.converter.Converter;
+import it.infn.mw.iam.persistence.model.IamLabel;
 
-  public AttributeAlreadyExistsError(String message) {
-    super(message);
+@Component
+public class LabelDTOConverter implements Converter<LabelDTO, IamLabel>{
+
+  @Override
+  public IamLabel entityFromDto(LabelDTO dto) {
+    return IamLabel.builder().prefix(dto.getPrefix()).name(dto.getName()).value(dto.getValue()).build();
   }
+
+  @Override
+  public LabelDTO dtoFromEntity(IamLabel entity) {
+    
+    return LabelDTO.builder().prefix(entity.getPrefix()).name(entity.getName()).value(entity.getValue()).build();
+  }
+
 }

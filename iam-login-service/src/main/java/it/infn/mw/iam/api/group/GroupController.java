@@ -39,6 +39,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.google.common.collect.Lists;
 
 import it.infn.mw.iam.api.common.AttributeDTO;
+import it.infn.mw.iam.api.common.AttributeDTOConverter;
 import it.infn.mw.iam.api.common.ErrorDTO;
 import it.infn.mw.iam.api.common.GroupDTO;
 import it.infn.mw.iam.api.common.GroupDTO.CreateGroup;

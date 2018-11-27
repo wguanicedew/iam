@@ -91,6 +91,13 @@ public class IamGroup implements Serializable {
      joinColumns=@JoinColumn(name="group_id"))
   private Set<IamAttribute> attributes;
 
+  @ElementCollection
+  @CollectionTable(
+      indexes= {@Index(columnList="prefix,name,val"), @Index(columnList="prefix,name")},
+      name="iam_group_labels",
+     joinColumns=@JoinColumn(name="group_id"))
+  private Set<IamLabel> labels;
+  
   public IamGroup() {
     // empty constructor
   }
@@ -199,6 +206,14 @@ public class IamGroup implements Serializable {
 
   public void setAttributes(Set<IamAttribute> attributes) {
     this.attributes = attributes;
+  }
+  
+  public Set<IamLabel> getLabels() {
+    return labels;
+  }
+  
+  public void setLabels(Set<IamLabel> labels) {
+    this.labels = labels;
   }
 
   public void touch(Clock c) {

@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.api.group;
+package it.infn.mw.iam.api.common;
 
 import org.springframework.stereotype.Component;
 
-import it.infn.mw.iam.api.common.AttributeDTO;
 import it.infn.mw.iam.api.scim.converter.Converter;
 import it.infn.mw.iam.persistence.model.IamAttribute;
 

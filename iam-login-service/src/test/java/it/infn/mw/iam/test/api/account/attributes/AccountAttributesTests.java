@@ -16,6 +16,7 @@
 package it.infn.mw.iam.test.api.account.attributes;
 
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
@@ -31,7 +32,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -316,7 +316,7 @@ public class AccountAttributesTests {
     }
 
 
-    for (String uuid : Arrays.asList(TEST_UUID, TEST_100_UUID)) {
+    for (String uuid : asList(TEST_UUID, TEST_100_UUID)) {
       String resultString = mvc.perform(get(ACCOUNT_ATTR_URL_TEMPLATE, uuid))
         .andExpect(OK)
         .andExpect(jsonPath("$").isArray())
