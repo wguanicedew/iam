@@ -22,8 +22,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -104,19 +102,19 @@ public class IamAccount implements Serializable {
 
   @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.EAGER,
       orphanRemoval = true)
-  private List<IamSamlId> samlIds = new LinkedList<>();
+  private Set<IamSamlId> samlIds = new HashSet<>();
 
   @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.EAGER,
       orphanRemoval = true)
-  private List<IamOidcId> oidcIds = new LinkedList<>();
+  private Set<IamOidcId> oidcIds = new HashSet<>();
 
   @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.EAGER,
       orphanRemoval = true)
-  private List<IamSshKey> sshKeys = new LinkedList<>();
+  private Set<IamSshKey> sshKeys = new HashSet<>();
 
   @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.EAGER,
       orphanRemoval = true)
-  private List<IamX509Certificate> x509Certificates = new LinkedList<>();
+  private Set<IamX509Certificate> x509Certificates = new HashSet<>();
 
   @Column(name = "confirmation_key", unique = true, length = 36)
   private String confirmationKey;
@@ -259,45 +257,45 @@ public class IamAccount implements Serializable {
     this.active = active;
   }
 
-  public List<IamSamlId> getSamlIds() {
+  public Set<IamSamlId> getSamlIds() {
 
     return samlIds;
   }
 
-  public void setSamlIds(List<IamSamlId> samlIds) {
+  public void setSamlIds(Set<IamSamlId> samlIds) {
 
     Preconditions.checkNotNull(samlIds);
     this.samlIds = samlIds;
   }
 
-  public List<IamOidcId> getOidcIds() {
+  public Set<IamOidcId> getOidcIds() {
 
     return oidcIds;
   }
 
-  public void setOidcIds(List<IamOidcId> oidcIds) {
+  public void setOidcIds(Set<IamOidcId> oidcIds) {
 
     Preconditions.checkNotNull(oidcIds);
     this.oidcIds = oidcIds;
   }
 
-  public List<IamSshKey> getSshKeys() {
+  public Set<IamSshKey> getSshKeys() {
 
     return sshKeys;
   }
 
-  public void setSshKeys(List<IamSshKey> sshKeys) {
+  public void setSshKeys(Set<IamSshKey> sshKeys) {
 
     Preconditions.checkNotNull(sshKeys);
     this.sshKeys = sshKeys;
   }
 
-  public List<IamX509Certificate> getX509Certificates() {
+  public Set<IamX509Certificate> getX509Certificates() {
 
     return x509Certificates;
   }
 
-  public void setX509Certificates(List<IamX509Certificate> x509Certificates) {
+  public void setX509Certificates(Set<IamX509Certificate> x509Certificates) {
 
     Preconditions.checkNotNull(x509Certificates);
     this.x509Certificates = x509Certificates;
