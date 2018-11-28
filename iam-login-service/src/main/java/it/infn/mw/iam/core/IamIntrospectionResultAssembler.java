@@ -33,6 +33,7 @@ import com.google.common.collect.Sets;
 
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.model.IamUserInfo;
+import it.infn.mw.iam.persistence.repository.UserInfoAdapter;
 
 public class IamIntrospectionResultAssembler extends DefaultIntrospectionResultAssembler {
   private static final Logger LOGGER =
@@ -80,7 +81,7 @@ public class IamIntrospectionResultAssembler extends DefaultIntrospectionResultA
     if (userInfo != null) {
       if (scopes.contains("profile")) {
 
-        IamUserInfo iamUserInfo = (IamUserInfo) userInfo;
+        IamUserInfo iamUserInfo = ((UserInfoAdapter) userInfo).getUserinfo();
 
         if (!iamUserInfo.getGroups().isEmpty()) {
 

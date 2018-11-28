@@ -20,16 +20,15 @@ import static it.infn.mw.iam.core.NameUtils.getFormatted;
 import java.io.Serializable;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-
-import org.mitre.openid.connect.model.Address;
-import org.mitre.openid.connect.model.UserInfo;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -37,7 +36,7 @@ import com.google.gson.JsonPrimitive;
 
 @Entity
 @Table(name = "iam_user_info")
-public class IamUserInfo implements UserInfo, Serializable{
+public class IamUserInfo implements Serializable {
 
   /**
    * 
@@ -79,14 +78,16 @@ public class IamUserInfo implements UserInfo, Serializable{
   private String phoneNumber;
 
   private Boolean phoneNumberVerified;
-  private Address address;
+  
+  @OneToOne(optional=true, cascade=CascadeType.ALL)
+  @JoinColumn(name="address_id")
+  private IamAddress address;
 
   private String birthdate;
 
   private transient JsonObject src;
 
-  @Override
-  public Address getAddress() {
+  public IamAddress getAddress() {
 
     return address;
   }
@@ -171,18 +172,15 @@ public class IamUserInfo implements UserInfo, Serializable{
     return profile;
   }
 
-  @Override
-  public JsonObject getSource() {
 
+  public JsonObject getSource() {
     return src;
   }
 
   public JsonObject getSrc() {
-
-    return src;
+    return getSource();
   }
 
-  @Override
   public String getSub() {
 
     return iamAccount.getUuid();
@@ -203,8 +201,8 @@ public class IamUserInfo implements UserInfo, Serializable{
     return zoneinfo;
   }
 
-  @Override
-  public void setAddress(Address address) {
+
+  public void setAddress(IamAddress address) {
 
     this.address = address;
   }
@@ -294,7 +292,7 @@ public class IamUserInfo implements UserInfo, Serializable{
     this.src = src;
   }
 
-  @Override
+
   public void setSub(String sub) {
 
     // NO-OP
@@ -321,7 +319,6 @@ public class IamUserInfo implements UserInfo, Serializable{
     return iamAccount.getGroups();
   }
 
-  @Override
   public JsonObject toJson() {
 
     if (src == null) {
@@ -381,14 +378,13 @@ public class IamUserInfo implements UserInfo, Serializable{
     }
 
   }
-
-  @Override
+  
+  
   public String getName() {
 
     return getFormatted(this.givenName, this.middleName, this.familyName);
   }
-
-  @Override
+  
   public void setName(String name) {
 
     // NO-OP

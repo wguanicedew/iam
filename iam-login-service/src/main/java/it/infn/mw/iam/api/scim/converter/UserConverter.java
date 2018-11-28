@@ -147,6 +147,7 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
     }
 
     if (scimUser.hasAddresses()) {
+      
       userInfo.setAddress(addressConverter.entityFromDto(scimUser.getAddresses().get(0)));
     }
 

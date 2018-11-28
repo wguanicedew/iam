@@ -35,7 +35,7 @@ public class IamUserinfoRepository implements UserInfoRepository {
     Optional<IamAccount> account = repo.findByUsername(username);
 
     if (account.isPresent()) {
-      return account.get().getUserInfo();
+      return UserInfoAdapter.forIamUserInfo(account.get().getUserInfo());
     }
 
     return null;
@@ -47,7 +47,7 @@ public class IamUserinfoRepository implements UserInfoRepository {
     Optional<IamAccount> account = repo.findByEmail(email);
 
     if (account.isPresent()) {
-      return account.get().getUserInfo();
+      return UserInfoAdapter.forIamUserInfo(account.get().getUserInfo());
     }
 
     return null;

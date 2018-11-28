@@ -47,7 +47,7 @@ import com.nimbusds.jwt.SignedJWT;
 import it.infn.mw.iam.core.oauth.ClaimValueHelper;
 import it.infn.mw.iam.core.oauth.scope.IamScopeFilter;
 import it.infn.mw.iam.core.userinfo.IamScopeClaimTranslationService;
-import it.infn.mw.iam.persistence.model.IamUserInfo;
+import it.infn.mw.iam.persistence.repository.UserInfoAdapter;
 
 public class OidcTokenEnhancer extends ConnectTokenEnhancer {
 
@@ -115,7 +115,7 @@ public class OidcTokenEnhancer extends ConnectTokenEnhancer {
     if (includeAuthnInfo && !isNull(userInfo)) {
       Set<String> requiredClaims = scopeClaimConverter.getClaimsForScopeSet(token.getScope());
       requiredClaims.stream().filter(ADDITIONAL_CLAIMS::contains).forEach(c -> builder.claim(c,
-          claimValueHelper.getClaimValueFromUserInfo(c, (IamUserInfo) userInfo)));
+          claimValueHelper.getClaimValueFromUserInfo(c, ((UserInfoAdapter) userInfo).getUserinfo())));
     }
 
     JWTClaimsSet claims = builder.build();

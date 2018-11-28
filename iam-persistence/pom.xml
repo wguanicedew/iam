@@ -24,7 +24,6 @@
     <artifactId>iam-parent</artifactId>
     <version>1.5.0.rc1</version>
   </parent>
-
   <artifactId>iam-persistence</artifactId>
   <packaging>jar</packaging>
 
@@ -41,6 +40,11 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-jpa</artifactId>
     </dependency>
+    
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-security</artifactId>
+    </dependency>
 
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -54,8 +58,15 @@
     </dependency>
 
     <dependency>
-      <groupId>org.mitre</groupId>
-      <artifactId>openid-connect-common</artifactId>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>20.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.8.5</version>
     </dependency>
 
     <!-- DB -->
