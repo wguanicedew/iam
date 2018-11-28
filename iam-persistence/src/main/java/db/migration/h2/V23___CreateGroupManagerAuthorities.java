@@ -18,7 +18,7 @@ package db.migration.h2;
 import org.flywaydb.core.api.migration.spring.SpringJdbcMigration;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import db.migration.tasks.CreateGroupManagerAuthorities;
+import it.infn.mw.iam.persistence.migrations.CreateGroupManagerAuthorities;
 
 /**
  * 
