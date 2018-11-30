@@ -85,6 +85,8 @@ public class IamSamlProperties {
 
   private int metadataLookupServiceRefreshPeriodSec = (int) TimeUnit.MINUTES.toSeconds(5);
 
+  private long metadataRefreshPeriodSec = TimeUnit.HOURS.toSeconds(12);
+  
   private String idpEntityIdWhilelist;
 
   private List<IamSamlIdpMetadataProperties> idpMetadata;
@@ -98,6 +100,7 @@ public class IamSamlProperties {
   
   private SSONameIDType nameidPolicy = SSONameIDType.PERSISTENT;
 
+  
   public List<IamSamlIdpMetadataProperties> getIdpMetadata() {
     return idpMetadata;
   }
@@ -219,4 +222,12 @@ public class IamSamlProperties {
     this.nameidPolicy = nameidPolicy;
   }
 
+  public long getMetadataRefreshPeriodSec() {
+    return metadataRefreshPeriodSec;
+  }
+
+  public void setMetadataRefreshPeriodSec(long metadataRefreshPeriodSec) {
+    this.metadataRefreshPeriodSec = metadataRefreshPeriodSec;
+  }
+  
 }

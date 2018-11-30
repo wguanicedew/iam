@@ -16,6 +16,7 @@
 package it.infn.mw.iam.authn;
 
 import java.io.Serializable;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -45,6 +46,8 @@ public class ExternalAuthenticationRegistrationInfo implements Serializable {
   
   private String suggestedUsername;
 
+  private Map<String, String> additionalAttributes;
+  
   public ExternalAuthenticationRegistrationInfo(ExternalAuthenticationType type) {
     this.type = type;
   }
@@ -131,5 +134,13 @@ public class ExternalAuthenticationRegistrationInfo implements Serializable {
     this.suggestedUsername = suggestedUsername;
   }
   
+  @JsonProperty("additional_attributes")
+  public Map<String, String> getAdditionalAttributes() {
+    return additionalAttributes;
+  }
+  
+  public void setAdditionalAttributes(Map<String, String> additionalAttributes) {
+    this.additionalAttributes = additionalAttributes;
+  }
   
 }

@@ -15,6 +15,7 @@
  */
 package it.infn.mw.iam.authn.saml;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.EPPN;
 import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.GIVEN_NAME;
 import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.MAIL;
@@ -27,8 +28,6 @@ import java.util.Map;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.providers.ExpiringUsernameAuthenticationToken;
 import org.springframework.security.saml.SAMLCredential;
-
-import com.google.common.base.Strings;
 
 import it.infn.mw.iam.authn.AbstractExternalAuthenticationToken;
 import it.infn.mw.iam.authn.ExternalAccountLinker;
@@ -70,19 +69,19 @@ public class SamlExternalAuthenticationToken
     ri.setSubject(samlId.getUserId());
     ri.setSubjectAttribute(samlId.getAttributeId());
 
-    if (!Strings.isNullOrEmpty(cred.getAttributeAsString(GIVEN_NAME.getAttributeName()))) {
+    if (!isNullOrEmpty(cred.getAttributeAsString(GIVEN_NAME.getAttributeName()))) {
       ri.setGivenName(cred.getAttributeAsString(GIVEN_NAME.getAttributeName()));
     }
 
-    if (!Strings.isNullOrEmpty(cred.getAttributeAsString(SN.getAttributeName()))) {
+    if (!isNullOrEmpty(cred.getAttributeAsString(SN.getAttributeName()))) {
       ri.setFamilyName(cred.getAttributeAsString(SN.getAttributeName()));
     }
 
-    if (!Strings.isNullOrEmpty(cred.getAttributeAsString(MAIL.getAttributeName()))) {
+    if (!isNullOrEmpty(cred.getAttributeAsString(MAIL.getAttributeName()))) {
       ri.setEmail(cred.getAttributeAsString(MAIL.getAttributeName()));
     }
     
-    if (!Strings.isNullOrEmpty(cred.getAttributeAsString(EPPN.getAttributeName()))) {
+    if (!isNullOrEmpty(cred.getAttributeAsString(EPPN.getAttributeName()))) {
       ri.setSuggestedUsername(cred.getAttributeAsString(EPPN.getAttributeName()));
     }
 

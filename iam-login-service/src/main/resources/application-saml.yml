@@ -24,6 +24,7 @@ saml:
   max-authentication-age-sec: ${IAM_SAML_MAX_AUTHENTICATION_AGE:86400}
   id-resolvers: ${IAM_SAML_ID_RESOLVERS:eduPersonUniqueId,eduPersonTargetedId,eduPersonPrincipalName}
   metadata-lookup-service-refresh-period-sec: ${IAM_SAML_METADATA_LOOKUP_SERVICE_REFRESH_PERIOD_SEC:600}
+  metadata-refresh-period-sec: ${IAM_SAML_METADATA_REFRESH_PERIOD_SEC:43200}
   
   wayf-login-button:
     text: ${IAM_SAML_LOGIN_BUTTON_TEXT:Your institutional account}

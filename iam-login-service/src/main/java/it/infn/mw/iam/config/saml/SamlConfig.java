@@ -19,6 +19,7 @@ import static com.google.common.collect.Sets.newHashSet;
 import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.EPPN;
 import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.EPTID;
 import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.EPUID;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 import java.io.File;
 import java.io.IOException;
@@ -132,7 +133,7 @@ import it.infn.mw.iam.authn.InactiveAccountAuthenticationHander;
 import it.infn.mw.iam.authn.RootIsDashboardSuccessHandler;
 import it.infn.mw.iam.authn.saml.CleanInactiveProvisionedAccounts;
 import it.infn.mw.iam.authn.saml.DefaultSAMLUserDetailsService;
-import it.infn.mw.iam.authn.saml.IamCachingMetadataManader;
+import it.infn.mw.iam.authn.saml.IamCachingMetadataManager;
 import it.infn.mw.iam.authn.saml.IamExtendedMetadataDelegate;
 import it.infn.mw.iam.authn.saml.IamSamlAuthenticationProvider;
 import it.infn.mw.iam.authn.saml.JustInTimeProvisioningSAMLUserDetailsService;
@@ -574,9 +575,11 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
   public CachingMetadataManager metadata()
       throws MetadataProviderException, IOException, ResourceException {
 
-    CachingMetadataManager manager = new IamCachingMetadataManader(metadataProviders());
+    CachingMetadataManager manager = new IamCachingMetadataManager(metadataProviders());
     manager.setKeyManager(keyManager());
+    manager.setRefreshCheckInterval(SECONDS.toMillis(samlProperties.getMetadataRefreshPeriodSec()));
     manager.refreshMetadata();
+    
     return manager;
   }
 

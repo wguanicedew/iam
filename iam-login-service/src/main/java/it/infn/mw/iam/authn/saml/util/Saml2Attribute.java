@@ -28,8 +28,15 @@ public enum Saml2Attribute {
   EMPLOYEE_NUMBER("employeeNumber", "urn:oid:2.16.840.1.113730.3.1.3"),
   SPID_CODE("spidCode", "spidCode"),
   SUBJECT_ID("subjectId", "urn:oasis:names:tc:SAML:profile:subject-id"),
-  PAIRWISE_ID("pairwiseId", "urn:oasis:names:tc:SAML:profile:pairwise-id");
-
+  PAIRWISE_ID("pairwiseId", "urn:oasis:names:tc:SAML:profile:pairwise-id"),
+  CERN_PERSON_ID("cernPersonId", "http://schemas.xmlsoap.org/claims/PersonID"),
+  CERN_EMAIL("cernEmail", "http://schemas.xmlsoap.org/claims/EmailAddress"),
+  CERN_FIRST_NAME("cernFirstName",  "http://schemas.xmlsoap.org/claims/Firstname"),
+  CERN_LAST_NAME("cernLastName", "http://schemas.xmlsoap.org/claims/Lastname"),
+  CERN_HOME_INSTITUTE("cernHomeInstitute", "http://schemas.xmlsoap.org/claims/HomeInstitute"),
+  CERN_AUTH_LEVEL("cernAuthLevel", "http://schemas.xmlsoap.org/claims/AuthLevel");
+  
+  
   private String alias;
   private String attributeName;
   

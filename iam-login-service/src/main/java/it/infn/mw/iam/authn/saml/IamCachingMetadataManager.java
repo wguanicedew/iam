@@ -29,11 +29,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.saml.metadata.CachingMetadataManager;
 import org.springframework.security.saml.metadata.ExtendedMetadataDelegate;
 
-public class IamCachingMetadataManader extends CachingMetadataManager {
+public class IamCachingMetadataManager extends CachingMetadataManager {
 
-  public static final Logger LOGGER = LoggerFactory.getLogger(IamCachingMetadataManader.class);
+  public static final Logger LOGGER = LoggerFactory.getLogger(IamCachingMetadataManager.class);
 
-  public IamCachingMetadataManader(List<MetadataProvider> providers)
+  public IamCachingMetadataManager(List<MetadataProvider> providers)
       throws MetadataProviderException {
     super(providers);
   }
