@@ -182,9 +182,6 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
   IamSamlJITAccountProvisioningProperties jitProperties;
 
   @Autowired
-  ServerProperties serverProperties;
-
-  @Autowired
   InactiveAccountAuthenticationHander inactiveAccountHandler;
 
   @Autowired
@@ -333,7 +330,7 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
 
 
   @Bean
-  public SAMLContextProvider contextProvider() {
+  public SAMLContextProvider contextProvider(ServerProperties serverProperties) {
 
     if (serverProperties.isUseForwardHeaders()) {
       SAMLContextProviderLB cp = new SAMLContextProviderLB();
@@ -424,7 +421,7 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
   @Bean
   public ProtocolSocketFactory socketFactory() {
 
-    return new TLSProtocolSocketFactory(keyManager(), null, "default");
+    return new TLSProtocolSocketFactory(keyManager(), null, samlProperties.getHostnameVerificationMode().mode());
   }
 
   @Bean

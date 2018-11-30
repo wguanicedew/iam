@@ -26,6 +26,23 @@ import it.infn.mw.iam.config.login.LoginButtonProperties;
 
 @ConfigurationProperties(prefix = "saml")
 public class IamSamlProperties {
+  
+  public enum HostnameVerificationMode {
+     DEFAULT("default"),
+     DEFAULT_AND_LOCALHOST("defaultAndLocalhost"),
+     STRICT("strict"),
+     ALLOW_ALL("allowAll");
+    
+    private String mode;
+    
+    private HostnameVerificationMode(String m) {
+      this.mode = m;
+    }
+    
+    public String mode() {
+      return mode;
+    }
+  }
 
   private String entityId;
 
@@ -53,6 +70,8 @@ public class IamSamlProperties {
   private List<IamSamlLoginShortcut> loginShortcuts;
   
   private LoginButtonProperties wayfLoginButton;
+  
+  private HostnameVerificationMode hostnameVerificationMode = HostnameVerificationMode.DEFAULT;
 
   public List<IamSamlIdpMetadataProperties> getIdpMetadata() {
     return idpMetadata;
@@ -157,6 +176,14 @@ public class IamSamlProperties {
 
   public void setWayfLoginButton(LoginButtonProperties wayfLoginButton) {
     this.wayfLoginButton = wayfLoginButton;
+  }
+
+  public HostnameVerificationMode getHostnameVerificationMode() {
+    return hostnameVerificationMode;
+  }
+
+  public void setHostnameVerificationMode(HostnameVerificationMode hostnameVerificationMode) {
+    this.hostnameVerificationMode = hostnameVerificationMode;
   }
 
 }
