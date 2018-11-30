@@ -36,7 +36,6 @@ import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.velocity.app.VelocityEngine;
-import org.opensaml.saml2.core.NameIDType;
 import org.opensaml.saml2.metadata.provider.FileBackedHTTPMetadataProvider;
 import org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider;
 import org.opensaml.saml2.metadata.provider.MetadataFilter;
@@ -437,7 +436,7 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
     WebSSOProfileOptions webSSOProfileOptions = new WebSSOProfileOptions();
     webSSOProfileOptions.setIncludeScoping(false);
 
-    webSSOProfileOptions.setNameID(NameIDType.PERSISTENT);
+    webSSOProfileOptions.setNameID(samlProperties.getNameidPolicy().type());
 
     return webSSOProfileOptions;
   }

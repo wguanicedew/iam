@@ -20,25 +20,48 @@ import java.util.concurrent.TimeUnit;
 
 import javax.validation.Valid;
 
+import org.opensaml.saml2.core.NameIDType;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import it.infn.mw.iam.config.login.LoginButtonProperties;
 
 @ConfigurationProperties(prefix = "saml")
 public class IamSamlProperties {
-  
+
+  public enum SSONameIDType {
+
+    UNSPECIFIED(NameIDType.UNSPECIFIED),
+    EMAIL(NameIDType.EMAIL),
+    X509_SUBJECT(NameIDType.X509_SUBJECT),
+    KERBEROS(NameIDType.KERBEROS),
+    ENTITY(NameIDType.ENTITY),
+    PERSISTENT(NameIDType.PERSISTENT),
+    TRANSIENT(NameIDType.TRANSIENT);
+    
+    private final String type;
+
+    private SSONameIDType(String t) {
+      type = t;
+    }
+
+    public String type() {
+      return type;
+    }
+
+  }
+
   public enum HostnameVerificationMode {
-     DEFAULT("default"),
-     DEFAULT_AND_LOCALHOST("defaultAndLocalhost"),
-     STRICT("strict"),
-     ALLOW_ALL("allowAll");
-    
+    DEFAULT("default"),
+    DEFAULT_AND_LOCALHOST("defaultAndLocalhost"),
+    STRICT("strict"),
+    ALLOW_ALL("allowAll");
+
     private String mode;
-    
+
     private HostnameVerificationMode(String m) {
       this.mode = m;
     }
-    
+
     public String mode() {
       return mode;
     }
@@ -68,10 +91,12 @@ public class IamSamlProperties {
 
   @Valid
   private List<IamSamlLoginShortcut> loginShortcuts;
-  
+
   private LoginButtonProperties wayfLoginButton;
-  
+
   private HostnameVerificationMode hostnameVerificationMode = HostnameVerificationMode.DEFAULT;
+  
+  private SSONameIDType nameidPolicy = SSONameIDType.PERSISTENT;
 
   public List<IamSamlIdpMetadataProperties> getIdpMetadata() {
     return idpMetadata;
@@ -184,6 +209,14 @@ public class IamSamlProperties {
 
   public void setHostnameVerificationMode(HostnameVerificationMode hostnameVerificationMode) {
     this.hostnameVerificationMode = hostnameVerificationMode;
+  }
+
+  public SSONameIDType getNameidPolicy() {
+    return nameidPolicy;
+  }
+  
+  public void setNameidPolicy(SSONameIDType nameidPolicy) {
+    this.nameidPolicy = nameidPolicy;
   }
 
 }
