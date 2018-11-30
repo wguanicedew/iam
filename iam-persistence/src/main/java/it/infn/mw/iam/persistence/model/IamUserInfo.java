@@ -50,13 +50,13 @@ public class IamUserInfo implements Serializable {
   @OneToOne(mappedBy = "userInfo")
   private IamAccount iamAccount;
 
-  @Column(nullable = false, length = 64)
+  @Column(name="givenname", nullable = false, length = 64)
   private String givenName;
 
-  @Column(nullable = false, length = 64)
+  @Column(name="familyname", nullable = false, length = 64)
   private String familyName;
 
-  @Column(length = 64)
+  @Column(name="middlename", length = 64)
   private String middleName;
 
   private String nickname;
@@ -70,13 +70,17 @@ public class IamUserInfo implements Serializable {
   @Column(nullable = false, length = 128)
   private String email;
 
+  @Column(name="emailverified")
   private Boolean emailVerified;
 
   private String gender;
   private String zoneinfo;
   private String locale;
+  
+  @Column(name="phonenumber")
   private String phoneNumber;
 
+  @Column(name="phonenumberverified")
   private Boolean phoneNumberVerified;
   
   @OneToOne(optional=true, cascade=CascadeType.ALL)

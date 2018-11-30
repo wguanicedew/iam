@@ -61,11 +61,11 @@ public class IamGroup implements Serializable {
   private Set<IamAccount> accounts = new HashSet<>();
 
   @Temporal(TemporalType.TIMESTAMP)
-  @Column(nullable = false)
+  @Column(name="creationtime", nullable = false)
   Date creationTime;
 
   @Temporal(TemporalType.TIMESTAMP)
-  @Column(nullable = false)
+  @Column(name="lastupdatetime", nullable = false)
   Date lastUpdateTime;
   
   @Column(name="default_group", nullable = false)

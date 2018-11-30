@@ -45,13 +45,13 @@ public class IamSamlId implements IamAccountRef, Serializable {
   @JoinColumn(name = "account_id")
   IamAccount account;
 
-  @Column(nullable = false, length = 256)
+  @Column(name="idpid", nullable = false, length = 256)
   String idpId;
 
   @Column(name = "attribute_id", nullable=false, length = 256)
   String attributeId;
 
-  @Column(nullable = false, length = 256)
+  @Column(name="userid", nullable = false, length = 256)
   String userId;
 
 

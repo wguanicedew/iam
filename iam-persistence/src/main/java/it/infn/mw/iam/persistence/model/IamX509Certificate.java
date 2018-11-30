@@ -72,7 +72,9 @@ public class IamX509Certificate implements IamAccountRef, Serializable {
   @JoinColumn(name = "account_id")
   private IamAccount account;
 
-  public IamX509Certificate() {}
+  public IamX509Certificate() {
+    // empty on purpose
+  }
   
   
   @Override

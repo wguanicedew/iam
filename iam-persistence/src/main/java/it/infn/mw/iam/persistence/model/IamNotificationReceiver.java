@@ -46,7 +46,9 @@ public class IamNotificationReceiver implements Serializable {
   @Column(name = "email_address", length = 254)
   private String emailAddress;
 
-  public IamNotificationReceiver() {}
+  public IamNotificationReceiver() {
+    // empty on purpose
+  }
 
   public Long getId() {
     return id;

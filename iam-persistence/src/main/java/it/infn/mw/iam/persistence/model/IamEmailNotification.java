@@ -77,7 +77,9 @@ public class IamEmailNotification implements Serializable{
   @Column(name = "last_update", nullable = true)
   private Date lastUpdate;
 
-  public IamEmailNotification() {}
+  public IamEmailNotification() {
+    // empty on purpose
+  }
 
   public Long getId() {
     return id;

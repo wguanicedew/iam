@@ -51,7 +51,7 @@ public class IamExternalAuthenticationAttribute implements Serializable {
   String value;
 
   public IamExternalAuthenticationAttribute() {
-
+    // empty on purpose
   }
 
   public Long getId() {

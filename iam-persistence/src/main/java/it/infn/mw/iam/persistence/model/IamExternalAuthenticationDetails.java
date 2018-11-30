@@ -62,7 +62,9 @@ public class IamExternalAuthenticationDetails implements Serializable{
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "details")
   List<IamExternalAuthenticationAttribute> attributes = new ArrayList<>();
 
-  public IamExternalAuthenticationDetails() {}
+  public IamExternalAuthenticationDetails() {
+    // empty on purpose
+  }
 
   public void addAttribute(String name, String value) {
     IamExternalAuthenticationAttribute attr = new IamExternalAuthenticationAttribute();

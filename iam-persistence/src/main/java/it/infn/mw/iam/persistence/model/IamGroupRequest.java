@@ -65,11 +65,11 @@ public class IamGroupRequest implements Serializable {
   private String motivation;
 
   @Temporal(TemporalType.TIMESTAMP)
-  @Column(nullable = false)
+  @Column(name="creationtime", nullable = false)
   private Date creationTime;
 
   @Temporal(TemporalType.TIMESTAMP)
-  @Column(nullable = true)
+  @Column(name="lastupdatetime", nullable = true)
   private Date lastUpdateTime;
 
 

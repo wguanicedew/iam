@@ -14,3 +14,17 @@
 # limitations under the License.
 #
 
+oidc:
+  providers:
+  - name: google
+    issuer: https://accounts.google.com
+    client:
+      clientId: ${IAM_GOOGLE_CLIENT_ID}
+      clientSecret: ${IAM_GOOGLE_CLIENT_SECRET}
+      redirectUris: ${iam.baseUrl}/openid_connect_login
+      scope: openid,profile,email,address,phone
+    loginButton:
+      text: Google
+      style: btn-social btn-google
+      image:
+        fa-icon: google

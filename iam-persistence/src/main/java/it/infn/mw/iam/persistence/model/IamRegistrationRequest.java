@@ -54,7 +54,7 @@ public class IamRegistrationRequest implements Serializable{
   private IamAccount account;
 
   @Temporal(TemporalType.TIMESTAMP)
-  @Column(nullable = false)
+  @Column(name="creationtime", nullable = false)
   private Date creationTime;
 
   @Enumerated(EnumType.STRING)
@@ -62,13 +62,15 @@ public class IamRegistrationRequest implements Serializable{
   private IamRegistrationRequestStatus status;
 
   @Temporal(TemporalType.TIMESTAMP)
-  @Column(nullable = true)
+  @Column(name="lastupdatetime",nullable = true)
   private Date lastUpdateTime;
 
   @Column(nullable = false)
   private String notes;
 
-  public IamRegistrationRequest() {}
+  public IamRegistrationRequest() {
+    // empty on purpose
+  }
 
   public Long getId() {
 

@@ -15,6 +15,8 @@
  */
 package it.infn.mw.iam.persistence.model;
 
+import java.io.Serializable;
+
 import javax.annotation.Generated;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -26,8 +28,10 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name="iam_address")
-public class IamAddress {
+public class IamAddress  implements Serializable{
   
+  private static final long serialVersionUID = 1L;
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -38,7 +42,7 @@ public class IamAddress {
   @Column(length = 128)
   private String formatted;
   
-  @Column(length = 128)
+  @Column(name="streetaddress", length = 128)
   private String streetAddress;
   
   @Column(length = 128)
@@ -47,7 +51,7 @@ public class IamAddress {
   @Column(length = 128)
   private String region;
   
-  @Column(length = 16)
+  @Column(name="postalcode", length = 16)
   private String postalCode;
   
   @Column(length = 2)

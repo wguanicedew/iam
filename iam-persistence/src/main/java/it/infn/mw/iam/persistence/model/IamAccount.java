@@ -70,11 +70,11 @@ public class IamAccount implements Serializable {
   private boolean active;
 
   @Temporal(TemporalType.TIMESTAMP)
-  @Column(nullable = false)
+  @Column(name="creationtime", nullable = false)
   private Date creationTime;
 
   @Temporal(TemporalType.TIMESTAMP)
-  @Column(nullable = false)
+  @Column(name="lastupdatetime", nullable = false)
   private Date lastUpdateTime;
 
   @Column(name = "provisioned", nullable = false)
