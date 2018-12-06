@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-(function() {
+(function () {
     'use strict';
 
     function RemoveSamlIdController($uibModalInstance, scimFactory, user, samlId) {
@@ -24,17 +24,17 @@
         self.samlId = samlId;
         self.enabled = true;
 
-        self.cancel = function() {
+        self.cancel = function () {
             $uibModalInstance.dismiss("Cancel");
         };
 
-        self.doRemove = function() {
+        self.doRemove = function () {
             self.enabled = false;
             self.error = undefined;
-            scimFactory.removeSamlId(self.user.id, self.samlId).then(function(response) {
+            scimFactory.removeSamlId(self.user.id, self.samlId).then(function (response) {
                 $uibModalInstance.close('External account removed');
                 self.enabled = true;
-            }).catch(function(error) {
+            }).catch(function (error) {
                 console.error(error);
                 self.error = error;
                 self.enabled = true;
@@ -50,20 +50,20 @@
         self.error = undefined;
         self.account = account;
 
-        self.doRemove = function() {
+        self.doRemove = function () {
             self.error = undefined;
             self.enabled = false;
-            scimFactory.removeOpenIDAccount(self.user.id, self.account).then(function(response) {
+            scimFactory.removeOpenIDAccount(self.user.id, self.account).then(function (response) {
                 $uibModalInstance.close('External account removed');
                 self.enabled = true;
-            }).catch(function(error) {
+            }).catch(function (error) {
                 console.error(error);
                 self.error = error;
                 self.enabled = true;
             });
         };
 
-        self.cancel = function() {
+        self.cancel = function () {
             $uibModalInstance.dismiss('Dismissed');
         };
     }
@@ -80,19 +80,26 @@
         self.samlActionUrl = '/iam/account-linking/SAML';
         self.oidcActionUrl = '/iam/account-linking/OIDC';
 
-        self.doLinkOidc = function(provider) {
+        self.doLinkOidc = function (provider) {
             self.enabled = false;
             var issuerElement = angular.element(document.querySelector('#oidc-issuer'));
             issuerElement.val(provider.issuer);
             document.getElementById("link-oidc-account-form").submit();
         };
 
-        self.doLinkSaml = function() {
+        self.doLinkSaml = function (provider) {
             self.enabled = false;
+            var idpIdElement = angular.element(document.querySelector('#idp-id'));
+
+            if (provider === undefined) {
+                idpIdElement.remove();
+            } else {
+                idpIdElement.val(provider.entityId);
+            }
             document.getElementById("link-saml-account-form").submit();
         };
 
-        self.cancel = function() {
+        self.cancel = function () {
             $uibModalInstance.dismiss('Dismissed');
         };
 
@@ -109,13 +116,13 @@
         self.account = account;
         self.error = undefined;
 
-        self.doLink = function() {
+        self.doLink = function () {
             self.enabled = false;
             document.getElementById("link-account-form").submit();
         };
 
 
-        self.doUnlink = function() {
+        self.doUnlink = function () {
             self.enabled = false;
             self.error = undefined;
 
@@ -123,9 +130,9 @@
                 iss: self.account.idpId,
                 attr: self.account.attributeId,
                 sub: self.account.userId
-            }).then(function(response) {
+            }).then(function (response) {
                 $uibModalInstance.close("External account unlinked");
-            }).catch(function(error) {
+            }).catch(function (error) {
                 console.error(error);
 
                 self.error = error;
@@ -133,7 +140,7 @@
             });
         };
 
-        self.cancel = function() {
+        self.cancel = function () {
             $uibModalInstance.dismiss('Dismissed');
         };
     }
@@ -151,21 +158,21 @@
 
         self.linkOidcAccount = linkOidcAccount;
 
-        self.doLink = function() {
+        self.doLink = function () {
             self.enabled = false;
             document.getElementById("link-account-form").submit();
         };
 
-        self.doUnlink = function() {
+        self.doUnlink = function () {
             self.enabled = false;
-            AccountLinkingService.unlinkOidcAccount(self.account).then(function(response) {
+            AccountLinkingService.unlinkOidcAccount(self.account).then(function (response) {
                 $uibModalInstance.close("External account unlinked");
-            }).catch(function(error) {
+            }).catch(function (error) {
                 console.error(error);
             });
         };
 
-        self.cancel = function() {
+        self.cancel = function () {
             $uibModalInstance.dismiss('Dismissed');
         };
 
@@ -180,16 +187,16 @@
     function UserLinkedAccountsController($uibModal, toaster, AccountLinkingService) {
         var self = this;
 
-        self.indigoUser = function() {
+        self.indigoUser = function () {
             return self.user['urn:indigo-dc:scim:schemas:IndigoUser'];
         };
 
-        self.$onInit = function() {
+        self.$onInit = function () {
             console.log('UserLinkedAccountsController onInit');
             self.enabled = true;
         };
 
-        self.hasOidcIds = function() {
+        self.hasOidcIds = function () {
             var oidcIds = self.getOidcIds();
 
             if (oidcIds) {
@@ -199,7 +206,7 @@
             return false;
         };
 
-        self.hasSamlIds = function() {
+        self.hasSamlIds = function () {
 
             var samlIds = self.getSamlIds();
 
@@ -210,7 +217,7 @@
             return false;
         };
 
-        self.getSamlIds = function() {
+        self.getSamlIds = function () {
             if (self.indigoUser()) {
                 return self.indigoUser().samlIds;
             }
@@ -218,7 +225,7 @@
             return undefined;
         };
 
-        self.getOidcIds = function() {
+        self.getOidcIds = function () {
             if (self.indigoUser()) {
                 return self.indigoUser().oidcIds;
             }
@@ -226,7 +233,7 @@
             return undefined;
         };
 
-        self.isGoogleAccount = function(oidcId) {
+        self.isGoogleAccount = function (oidcId) {
             if (!oidcId) {
                 return false;
             }
@@ -234,19 +241,20 @@
             return oidcId.issuer == "https://accounts.google.com";
         };
 
-        self.openLinkExternalAccountDialog = function() {
+        self.openLinkExternalAccountDialog = function () {
             var modalInstance = $uibModal.open({
                 templateUrl: '/resources/iam/apps/dashboard-app/components/user/linked-accounts/account.link.dialog.html',
                 controller: LinkAccountController,
                 controllerAs: '$ctrl',
+                size: 'lg',
                 resolve: {
-                    oidcProviders: function() {
+                    oidcProviders: function () {
                         return AccountLinkingService.getOidcProviders();
                     },
-                    wayfLoginButton: function() {
+                    wayfLoginButton: function () {
                         return AccountLinkingService.getWayfLoginButtonConfiguration();
                     },
-                    samlLoginShortcuts: function() {
+                    samlLoginShortcuts: function () {
                         return AccountLinkingService.getSamlLoginShortcuts();
                     }
                 }
@@ -255,14 +263,14 @@
             modalInstance.result.then(self.handleSuccess);
         };
 
-        self.openRemoveOidcAccountDialog = function(oidcId) {
+        self.openRemoveOidcAccountDialog = function (oidcId) {
 
             var modalInstance = $uibModal.open({
                 templateUrl: '/resources/iam/apps/dashboard-app/components/user/linked-accounts/oidc-id.remove.dialog.html',
                 controller: RemoveOidcController,
                 controllerAs: '$ctrl',
                 resolve: {
-                    user: function() {
+                    user: function () {
                         return self.user;
                     },
                     account: oidcId
@@ -272,17 +280,17 @@
             modalInstance.result.then(self.handleSuccess);
         };
 
-        self.openUnlinkOidcAccountDialog = function(oidcId) {
+        self.openUnlinkOidcAccountDialog = function (oidcId) {
 
             var modalInstance = $uibModal.open({
                 templateUrl: '/resources/iam/apps/dashboard-app/components/user/linked-accounts/oidc-id.unlink.dialog.html',
                 controller: LinkOidcController,
                 controllerAs: '$ctrl',
                 resolve: {
-                    action: function() {
+                    action: function () {
                         return 'unlink';
                     },
-                    account: function() {
+                    account: function () {
                         return {
                             iss: oidcId.issuer,
                             sub: oidcId.subject
@@ -294,13 +302,13 @@
             modalInstance.result.then(self.handleSuccess);
         };
 
-        self.openUnlinkSamlAccountDialog = function(samlId) {
+        self.openUnlinkSamlAccountDialog = function (samlId) {
             var modalInstance = $uibModal.open({
                 templateUrl: '/resources/iam/apps/dashboard-app/components/user/linked-accounts/saml-id.unlink.dialog.html',
                 controller: LinkSamlController,
                 controllerAs: '$ctrl',
                 resolve: {
-                    action: function() {
+                    action: function () {
                         return 'unlink';
                     },
                     account: samlId
@@ -311,9 +319,9 @@
 
         };
 
-        self.handleSuccess = function(msg) {
+        self.handleSuccess = function (msg) {
             self.enabled = true;
-            self.userCtrl.loadUser().then(function() {
+            self.userCtrl.loadUser().then(function () {
                 toaster.pop({
                     type: 'success',
                     body: msg
@@ -321,13 +329,13 @@
             });
         };
 
-        self.openRemoveSamlAccountDialog = function(samlId) {
+        self.openRemoveSamlAccountDialog = function (samlId) {
             var modalInstance = $uibModal.open({
                 templateUrl: '/resources/iam/apps/dashboard-app/components/user/linked-accounts/saml-id.remove.dialog.html',
                 controller: RemoveSamlIdController,
                 controllerAs: '$ctrl',
                 resolve: {
-                    user: function() {
+                    user: function () {
                         return self.user;
                     },
                     samlId: samlId

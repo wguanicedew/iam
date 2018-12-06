@@ -118,7 +118,7 @@
   
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/user/group-requests/join-group.component.js"></script>
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/user/group-requests/pending-requests.component.js"></script>
-  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/user/group-requests/user.group-requests.component.js"></script>
+  
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/user/detail/user.detail.component.js"></script>
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/user/edit/user.edit.component.js"></script>
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/user/status/user.status.component.js"></script>

@@ -34,7 +34,7 @@ public class CreateGroupManagerAuthorities implements SpringJdbcMigration {
       int updateResult =
           jdbcTemplate.update("insert into iam_authority(auth) values (?)", authority);
       if (updateResult == 1) {
-        LOG.warn("Created group manager authority '{}' for group '{}'", authority,
+        LOG.debug("Created group manager authority '{}' for group '{}'", authority,
             rowSet.getString("name"));
       }
     }

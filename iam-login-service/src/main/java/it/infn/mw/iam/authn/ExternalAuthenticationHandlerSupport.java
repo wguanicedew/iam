@@ -170,7 +170,7 @@ public class ExternalAuthenticationHandlerSupport implements AccountLinkingConst
         break;
 
       case SAML:
-        redirectUrl = buildRedirectUrl("/saml/login", "idpId", externalIdpId);
+        redirectUrl = buildRedirectUrl("/saml/login", "idp", externalIdpId);
         break;
 
       default:

@@ -26,15 +26,17 @@
     </div>
     <div class="box-body no-padding">
         <table id=" group-reqs " class="table ">
-            <thead ng-show="$ctrl.filtered.length> 0">
+            <thead ng-show="$ctrl.filtered.length > 0">
                 <tr>
                     <td>
                         <div>
-                            <ul id="greq_pagination_top" uib-pagination ng-model="$ctrl.currentPage" items-per-page="$ctrl.itemsPerPage" total-items="$ctrl.totalResults" max-size="0" template-url="/resources/iam/apps/dashboard-app/components/common/pagination.template.html" ng-change="$ctrl.pageChanged()"
-                                class="pull-left">
+                            <ul id="greq_pagination_top" uib-pagination ng-model="$ctrl.currentPage" items-per-page="$ctrl.itemsPerPage"
+                                template-url="resources/iam/apps/dashboard-app/components/common/pagination.template.html"
+                                total-items="$ctrl.totalResults" max-size="0" ng-change="$ctrl.pageChanged()" class="pull-left">
                             </ul>
                         </div>
-                        <div class="pull-left page-counter">{{$ctrl.pageLeft}} - {{$ctrl.pageRight}} / {{$ctrl.totalResults}}</div>
+                        <div class="pull-left page-counter">{{$ctrl.pageLeft}} - {{$ctrl.pageRight}} /
+                            {{$ctrl.totalResults}}</div>
                     </td>
                 </tr>
             </thead>
@@ -56,7 +58,8 @@
                 <tr ng-repeat="r in $ctrl.filtered | orderBy:'creationTime':true ">
                     <td>
                         <p>
-                            <a ui-sref="user({id: r.userUuid})">{{r.userFullName}}</a> requested to join the <a ui-sref="group({id: r.groupUuid})">{{r.groupName}}</a> group {{r.creationTime | relativeDate}}.
+                            <a ui-sref="user({id: r.userUuid})">{{r.userFullName}}</a> requested to join the <a ui-sref="group({id: r.groupUuid})">{{r.groupName}}</a>
+                            group {{r.creationTime | relativeDate}}.
                         </p>
                         <p>
                             In support of this request, the user has provided the following motivation:
@@ -66,11 +69,11 @@
                         </p>
                         <div class="btn-group">
                             <button class="btn btn-success btn-sm" ng-click="$ctrl.approve(r)" ng-disabled="$ctrl.busy">
-                                    <i class="fa fa-check"></i> Approve
-                                </button>
+                                <i class="fa fa-check"></i> Approve
+                            </button>
                             <button class="btn btn-danger btn-sm" ng-click="$ctrl.reject(r)" ng-disabled="$ctrl.busy">
-                                    <i class="fa fa-times"></i> Reject
-                                </button>
+                                <i class="fa fa-times"></i> Reject
+                            </button>
                         </div>
                     </td>
                 </tr>

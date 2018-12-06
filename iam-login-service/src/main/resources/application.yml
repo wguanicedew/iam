@@ -116,6 +116,9 @@ health:
     
 accountLinking:
   disable: ${IAM_ACCOUNT_LINKING_DISABLE:false}
+
+clientRegistration:
+  allow-for: ${IAM_CLIENT_REGISTRATION_ALLOW_FOR:ANYONE}
   
 endpoints:
   enabled: false

@@ -39,6 +39,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -88,7 +89,7 @@ public class IamAccount implements Serializable {
   @Column(name = "last_login_time", nullable = true)
   private Date lastLoginTime;
 
-  @ManyToMany
+  @ManyToMany(fetch=FetchType.EAGER)
   @JoinTable(name = "iam_account_authority",
       joinColumns = @JoinColumn(name = "account_id", referencedColumnName = "id"),
       inverseJoinColumns = @JoinColumn(name = "authority_id", referencedColumnName = "id"))
@@ -98,6 +99,7 @@ public class IamAccount implements Serializable {
   @JoinTable(name = "iam_account_group",
       joinColumns = @JoinColumn(name = "account_id", referencedColumnName = "id"),
       inverseJoinColumns = @JoinColumn(name = "group_id", referencedColumnName = "id"))
+  @OrderBy("name")
   private Set<IamGroup> groups = new HashSet<>();
 
   @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.EAGER,
@@ -132,21 +134,21 @@ public class IamAccount implements Serializable {
   private IamAupSignature aupSignature;
 
   @OneToMany(mappedBy = "account", cascade = CascadeType.REMOVE)
-  private Set<IamGroupRequest> groupRequests;
+  private Set<IamGroupRequest> groupRequests = new HashSet<>();
   
   @ElementCollection
   @CollectionTable(
       indexes= {@Index(columnList="name"), @Index(columnList="name,val")},
       name="iam_account_attrs",
      joinColumns=@JoinColumn(name="account_id"))
-  private Set<IamAttribute> attributes;
+  private Set<IamAttribute> attributes = new HashSet<>();
   
   @ElementCollection
   @CollectionTable(
       indexes= {@Index(columnList="prefix,name,val"), @Index(columnList="prefix,name")},
       name="iam_account_labels",
      joinColumns=@JoinColumn(name="account_id"))
-  private Set<IamLabel> labels;
+  private Set<IamLabel> labels = new HashSet<>();
 
   public IamAccount() {
     // empty constructor

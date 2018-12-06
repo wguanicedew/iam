@@ -79,7 +79,9 @@ services:
     volumes:
       - .:/code:ro
       - /dev/urandom:/dev/random
-      - ./compose/multiple-oidc-providers/application.yml:/indigo-iam/config/application.yml
+
+      # - ./compose/custom-saml/application-saml.yml:/indigo-iam/config/application-saml.yml:ro
+      #- ./compose/multiple-oidc-providers/application.yml:/indigo-iam/config/application.yml
 
   client:
     build:

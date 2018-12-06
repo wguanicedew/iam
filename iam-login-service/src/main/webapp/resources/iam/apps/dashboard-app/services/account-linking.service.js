@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-(function() {
+(function () {
     'use strict';
     angular.module('dashboardApp')
         .factory('AccountLinkingService', AccountLinkingService);
@@ -38,29 +38,44 @@
 
         function unlinkOidcAccount(account) {
             return $http.delete(
-                OIDC_RESOURCE, { params: account });
+                OIDC_RESOURCE, {
+                    params: account
+                });
         }
 
         function unlinkSamlAccount(account) {
             return $http.delete(
-                SAML_RESOURCE, { params: account });
+                SAML_RESOURCE, {
+                    params: account
+                });
         }
 
         function unlinkX509Certificate(cert) {
             return $http.delete(
-                X509_RESOURCE, { params: { certificateSubject: cert.subjectDn } });
+                X509_RESOURCE, {
+                    params: {
+                        certificateSubject: cert.subjectDn
+                    }
+                });
         }
 
         function getOidcProviders() {
-            return $http.get('/iam/config/oidc/providers', { cache: true });
+            return $http.get('/iam/config/oidc/providers', {
+                cache: true
+            });
         }
 
         function getWayfLoginButtonConfiguration() {
-            return $http.get("/iam/config/saml/wayf-login-button", { cache: true });
+            return $http.get("/iam/config/saml/wayf-login-button", {
+                cache: true
+            });
         }
 
         function getSamlLoginShortcuts() {
-            return $http.get("/iam/config/saml/shortcuts", { cache: true });
+
+            return $http.get("/iam/config/saml/shortcuts", {
+                cache: true
+            });
         }
     }
 })();

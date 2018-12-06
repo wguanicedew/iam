@@ -301,6 +301,8 @@ public class DefaultIamAccountService implements IamAccountService {
     account.getLabels().remove(label);
     account.getLabels().add(label);
     
+    accountRepo.save(account);
+    
     labelSetEvent(account, label);
     
     return account;
@@ -310,6 +312,7 @@ public class DefaultIamAccountService implements IamAccountService {
   public IamAccount deleteLabel(IamAccount account, IamLabel label) {
     account.getLabels().remove(label);
     
+    accountRepo.save(account);
     labelRemovedEvent(account, label);
     
     return account;

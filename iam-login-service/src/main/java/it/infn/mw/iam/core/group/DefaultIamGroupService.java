@@ -31,6 +31,7 @@ import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import it.infn.mw.iam.audit.events.group.GroupCreatedEvent;
 import it.infn.mw.iam.audit.events.group.GroupRemovedEvent;
@@ -48,6 +49,7 @@ import it.infn.mw.iam.persistence.repository.IamAuthoritiesRepository;
 import it.infn.mw.iam.persistence.repository.IamGroupRepository;
 
 @Service
+@Transactional
 public class DefaultIamGroupService implements IamGroupService, ApplicationEventPublisherAware {
 
   public static final String GROUP_MANAGER_AUTHORITY_TEMPLATE = "ROLE_GM:%s";
@@ -256,8 +258,9 @@ public class DefaultIamGroupService implements IamGroupService, ApplicationEvent
     g.getLabels().remove(l);
     g.getLabels().add(l);
     
-    labelSetEvent(g, l);
+    groupRepo.save(g);
     
+    labelSetEvent(g, l);
     return g;
   }
 
@@ -266,6 +269,7 @@ public class DefaultIamGroupService implements IamGroupService, ApplicationEvent
     g.getLabels().remove(l);
     
     labelRemovedEvent(g, l);
+    groupRepo.save(g);
     return g;
   }
 

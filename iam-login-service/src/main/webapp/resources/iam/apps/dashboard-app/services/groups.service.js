@@ -97,7 +97,7 @@
                 return res;
             };
 
-            return $http.put("/iam/group/"+group.id, group).then(handleSuccess).catch(handleError);
+            return $http.put("/iam/group/" + group.id, group).then(handleSuccess).catch(handleError);
         }
 
 
@@ -108,7 +108,7 @@
                 results = results.concat(res.data.Resources);
 
                 if (res.data.totalResults == res.data.itemsPerPage) {
-                    return res;
+                    return results;
                 } else {
                     var promises = [];
 

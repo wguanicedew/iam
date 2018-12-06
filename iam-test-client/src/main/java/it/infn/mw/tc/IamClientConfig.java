@@ -9,9 +9,34 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "iam")
 public class IamClientConfig extends RegisteredClient {
 
+  public static class TlsConfig{
+    String version = "TLSv1.2";
+    
+    boolean ignoreNamespaceChecks = false;
+    boolean useGridTrustAnchors = true;
+    public String getVersion() {
+      return version;
+    }
+    public void setVersion(String version) {
+      this.version = version;
+    }
+    public boolean isIgnoreNamespaceChecks() {
+      return ignoreNamespaceChecks;
+    }
+    public void setIgnoreNamespaceChecks(boolean ignoreNamespaceChecks) {
+      this.ignoreNamespaceChecks = ignoreNamespaceChecks;
+    }
+    public boolean isUseGridTrustAnchors() {
+      return useGridTrustAnchors;
+    }
+    public void setUseGridTrustAnchors(boolean useGridTrustAnchors) {
+      this.useGridTrustAnchors = useGridTrustAnchors;
+    }
+  }
+  
   String issuer;
-
   String extAuthnHint;
+  TlsConfig tls;
 
   public IamClientConfig() {
     setTokenEndpointAuthMethod(AuthMethod.SECRET_BASIC);
@@ -35,4 +60,11 @@ public class IamClientConfig extends RegisteredClient {
     this.extAuthnHint = extAuthnHint;
   }
 
+  public TlsConfig getTls() {
+    return tls;
+  }
+  
+  public void setTls(TlsConfig tls) {
+    this.tls = tls;
+  }
 }

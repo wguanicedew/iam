@@ -22,8 +22,8 @@
 </div>
 <div class="modal-body ng-cloak">
     <p>
-        Link an external account to your
-        <strong>{{$root.organisationName}}</strong> account:
+        Sign in with an external identity provider to link such
+        identity to your <strong>{{$root.organisationName}}</strong> account.
     </p>
 
     <div class="link-external-account">
@@ -32,37 +32,45 @@
         </form>
 
         <div ng-repeat="p in $ctrl.oidcProviders" ng-cloak>
-            <div id="oidc-login-{{p.name}}">
-                <button title="{{p.loginButton.title}}" class="btn btn-block btn-link-external-account {{p.loginButton.style}}" type="submit" data-ng-click="$ctrl.doLinkOidc(p)" ng-disabled="!$ctrl.enabled">
+            <div id="oidc-login-{{p.name}}" ng-show="p.loginButton.visible">
+                <button title="{{p.loginButton.title}}" class="btn btn-block btn-link-external-account {{p.loginButton.style}}"
+                    type="submit" data-ng-click="$ctrl.doLinkOidc(p)" ng-disabled="!$ctrl.enabled">
 
                     <i class="fa fa-{{p.loginButton.image.faIcon}}" ng-if="p.loginButton.image.faIcon"></i>
                     {{p.loginButton.text}}
-                    
-                    <img ng-src="{{p.loginButton.image.url}}" class="login-image-size-{{p.loginButton.image.size}}" ng-if="p.loginButton.image.url" ng-cloak/>
+
+                    <img ng-src="{{p.loginButton.image.url}}" class="login-image-size-{{p.loginButton.image.size}}"
+                        ng-if="p.loginButton.image.url" ng-cloak />
                 </button>
             </div>
         </div>
 
         <form id="link-saml-account-form" action="{{$ctrl.samlActionUrl}}" method="post" ng-cloak>
-            <div>
-                <button title="{{$ctrl.wayfLoginButton.title}}" class="btn btn-block btn-link-external-account {{$ctrl.wayfLoginButton.style}}" type="submit" ng-disabled="!$ctrl.enabled">
-                    {{$ctrl.wayfLoginButton.text}}
-                    
-                    <img ng-src="{{$ctrl.wayfLoginButton.image.url}}" class="login-image-size-{{$ctrl.wayfLoginButton.image.size}}" ng-if="$ctrl.wayfLoginButton.image.url" ng-cloak/>
-                    
-                </button>
-            </div>
-            <div ng-repeat="s in $ctrl.samlLoginShortcuts" ng-cloak>
-                <button title="{{s.loginButton.title}}" class="btn btn-block btn-link-external-account {{s.loginButton.style}}" type="submit" ng-disabled="!$ctrl.enabled">
-                            {{$s.loginButton.text}}
-                            
-                            <img ng-src="{{s.loginButton.image.url}}" class="login-image-size-{{s.loginButton.image.size}}" ng-if="s.loginButton.image.url"/>            
-                </button>
-            </div>
+            <input id="idp-id" name="id" type="hidden">
         </form>
+
+        <div ng-show="$ctrl.wayfLoginButton.visible">
+            <button title="{{$ctrl.wayfLoginButton.title}}" class="btn btn-block btn-link-external-account {{$ctrl.wayfLoginButton.style}}"
+                type="submit" ng-disabled="!$ctrl.enabled" data-ng-click="$ctrl.doLinkSaml()">
+                {{$ctrl.wayfLoginButton.text}}
+
+                <img ng-src="{{$ctrl.wayfLoginButton.image.url}}" class="login-image-size-{{$ctrl.wayfLoginButton.image.size}}"
+                    ng-if="$ctrl.wayfLoginButton.image.url" ng-cloak />
+
+            </button>
+        </div>
+        <div ng-repeat="s in $ctrl.samlLoginShortcuts" ng-cloak>
+            <button title="{{s.loginButton.title}}" class="btn btn-block btn-link-external-account {{s.loginButton.style}}"
+                type="submit" ng-click="$ctrl.doLinkSaml(s)" ng-disabled="!$ctrl.enabled" ng-if="s.loginButton.visible">
+                {{s.loginButton.text}}
+
+                <img ng-src="{{s.loginButton.image.url}}" class="login-image-size-{{s.loginButton.image.size}}" ng-if="s.loginButton.image.url" />
+            </button>
+        </div>
     </div>
 
 </div>
 <div class="modal-footer">
-    <button class="btn btn-danger" id="btn-cancel" data-dismiss="modal" type="button" ng-disabled="!$ctrl.enabled" data-ng-click="$ctrl.cancel()">Cancel</button>
+    <button class="btn btn-danger" id="btn-cancel" data-dismiss="modal" type="button" ng-disabled="!$ctrl.enabled"
+        data-ng-click="$ctrl.cancel()">Cancel</button>
 </div>

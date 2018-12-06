@@ -34,8 +34,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.List;
 import java.util.function.Supplier;
 
-import javax.transaction.Transactional;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,6 +46,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -59,6 +58,7 @@ import it.infn.mw.iam.persistence.repository.IamGroupRepository;
 import it.infn.mw.iam.test.api.TestSupport;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 import it.infn.mw.iam.test.util.WithAnonymousUser;
+import it.infn.mw.iam.test.util.WithMockOAuthUser;
 import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -139,6 +139,17 @@ public class GroupLabelTests extends TestSupport {
   @Test
   public void gettingLabelsWorksForAdminUser() throws Exception {
 
+    mvc.perform(get(RESOURCE, TEST_001_GROUP_UUID)).andExpect(OK);
+
+    mvc.perform(get(RESOURCE, TEST_001_GROUP_UUID))
+      .andExpect(OK)
+      .andExpect(jsonPath("$").isArray())
+      .andExpect(jsonPath("$").isEmpty());
+  }
+  
+  @Test
+  @WithMockOAuthUser(user="admin", authorities= {"ROLE_ADMIN", "ROLE_USER"})
+  public void gettingLabelsWorksForAdminOAuthUser() throws Exception {
     mvc.perform(get(RESOURCE, TEST_001_GROUP_UUID)).andExpect(OK);
 
     mvc.perform(get(RESOURCE, TEST_001_GROUP_UUID))

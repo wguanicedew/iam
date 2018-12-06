@@ -34,7 +34,7 @@
         function handleError(err) {
             var msg;
 
-            if (err.data) {
+            if (err.data && err.data.error) {
                 msg = err.data.error;
             } else {
                 msg = err.statusText;
@@ -61,7 +61,7 @@
         var self = this;
 
         self.groupRequests = [];
-        
+
         self.$onInit = $onInit;
         self.abortRequest = abortRequest;
 
@@ -72,10 +72,11 @@
         }
 
         function loadGroupCount() {
-            return GroupsService.getGroupsCount().then(function(res){
+            return GroupsService.getGroupsCount().then(function (res) {
                 self.groupsCount = res.data.totalResults;
             });
         }
+
         function loadGroupRequests() {
             return GroupRequestsService.getAllPendingGroupRequestsForAuthenticatedUser().then(function (reqs) {
                 self.groupRequests = reqs;
@@ -92,12 +93,14 @@
                 }
             });
 
-            modalInstance.result.then(function(r) {
+            modalInstance.result.then(function (r) {
                 loadGroupRequests();
                 toaster.pop({
                     type: 'success',
                     body: 'Request aborted'
                 });
+            }).catch(function (r) {
+                loadGroupRequests();
             });
         }
     }

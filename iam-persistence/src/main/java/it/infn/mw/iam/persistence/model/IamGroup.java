@@ -82,21 +82,21 @@ public class IamGroup implements Serializable {
   private Set<IamScopePolicy> scopePolicies = new HashSet<>();
 
   @OneToMany(mappedBy = "group", cascade = CascadeType.REMOVE)
-  private Set<IamGroupRequest> groupRequests;
+  private Set<IamGroupRequest> groupRequests = new HashSet<>();
   
   @ElementCollection
   @CollectionTable(
       indexes= {@Index(columnList="name"), @Index(columnList="name,val")},
       name="iam_group_attrs",
      joinColumns=@JoinColumn(name="group_id"))
-  private Set<IamAttribute> attributes;
+  private Set<IamAttribute> attributes = new HashSet<>();
 
   @ElementCollection
   @CollectionTable(
       indexes= {@Index(columnList="prefix,name,val"), @Index(columnList="prefix,name")},
       name="iam_group_labels",
      joinColumns=@JoinColumn(name="group_id"))
-  private Set<IamLabel> labels;
+  private Set<IamLabel> labels = new HashSet<>();
   
   public IamGroup() {
     // empty constructor
