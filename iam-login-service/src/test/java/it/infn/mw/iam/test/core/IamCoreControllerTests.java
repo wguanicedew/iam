@@ -77,8 +77,8 @@ public class IamCoreControllerTests {
   }
 
   @Test
-  public void registerRedirectsToRegisterPage() throws Exception {
-    mvc.perform(get("/register")).andExpect(status().isOk()).andExpect(view().name("iam/register"));
+  public void startRegistrationRedirectsToRegisterPage() throws Exception {
+    mvc.perform(get("/start-registration")).andExpect(status().isOk()).andExpect(view().name("iam/register"));
 
   }
 

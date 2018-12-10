@@ -54,8 +54,8 @@ public class LoginController {
 
   }
 
-  @RequestMapping("/register")
-  public String register() {
+  @RequestMapping("/start-registration")
+  public String startRegistration() {
     return "iam/register";
   }
 

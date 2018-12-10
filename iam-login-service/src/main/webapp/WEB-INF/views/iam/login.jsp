@@ -157,7 +157,7 @@
                 <div class="registration-preamble text-muted">
                    Not a member?
                 </div>
-                <a class="btn btn-success btn-block" href="/register">Register a new account</a>
+                <a class="btn btn-success btn-block" href="/start-registration">Register a new account</a>
             </div>
         </c:if>
 

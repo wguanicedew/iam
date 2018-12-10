@@ -142,7 +142,7 @@ public class IamWebSecurityConfig {
 
       // @formatter:off
       http.requestMatchers()
-        .antMatchers("/", "/login**", "/logout", "/authorize", "/manage/**", "/dashboard**", "/register",
+        .antMatchers("/", "/login**", "/logout", "/authorize", "/manage/**", "/dashboard**", "/start-registration",
             "/reset-session", "/device/**")
         .and()
         .sessionManagement()
@@ -150,7 +150,7 @@ public class IamWebSecurityConfig {
         .and()
           .authorizeRequests()
             .antMatchers("/login**", "/webjars/**").permitAll()
-            .antMatchers("/register").permitAll()
+            .antMatchers("/start-registration").permitAll()
             .antMatchers("/authorize**").permitAll()
             .antMatchers("/reset-session").permitAll()
             .antMatchers("/device/**").authenticated()
