@@ -52,20 +52,19 @@ public class X509TrustConfig {
 
   @Value("${x509.trustAnchorsRefreshMsec}")
   Long trustAnchorsRefreshInterval;
-  
+
   @Value("${x509.tlsVersion}")
   String tlsVersion;
 
-  @Bean
-  public X509CertChainValidatorExt certificateValidator() {
+  X509CertChainValidatorExt certificateValidator() {
 
     return new CertificateValidatorBuilder().lazyAnchorsLoading(false)
-        .trustAnchorsDir(trustAnchorsDir)
-        .trustAnchorsUpdateInterval(trustAnchorsRefreshInterval.longValue()).build();
+      .trustAnchorsDir(trustAnchorsDir)
+      .trustAnchorsUpdateInterval(trustAnchorsRefreshInterval.longValue())
+      .build();
   }
 
-  @Bean
-  public SSLContext sslContext() {
+  SSLContext sslContext() {
 
     try {
       SSLContext context = SSLContext.getInstance(tlsVersion);
@@ -82,22 +81,26 @@ public class X509TrustConfig {
 
   }
 
-  @Bean
+  @Bean(name="canlHttpClient")
   public HttpClient httpClient() {
 
     SSLConnectionSocketFactory sf = new SSLConnectionSocketFactory(sslContext());
 
     Registry<ConnectionSocketFactory> socketFactoryRegistry =
-        RegistryBuilder.<ConnectionSocketFactory>create().register("https", sf)
-            .register("http", PlainConnectionSocketFactory.getSocketFactory()).build();
+        RegistryBuilder.<ConnectionSocketFactory>create()
+          .register("https", sf)
+          .register("http", PlainConnectionSocketFactory.getSocketFactory())
+          .build();
 
     PoolingHttpClientConnectionManager connectionManager =
         new PoolingHttpClientConnectionManager(socketFactoryRegistry);
     connectionManager.setMaxTotal(10);
     connectionManager.setDefaultMaxPerRoute(10);
 
-    return HttpClientBuilder.create().setConnectionManager(connectionManager).disableAuthCaching()
-        .build();
+    return HttpClientBuilder.create()
+      .setConnectionManager(connectionManager)
+      .disableAuthCaching()
+      .build();
   }
 
   @Bean(name = "canlRequestFactory")

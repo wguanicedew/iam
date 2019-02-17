@@ -18,7 +18,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
     <java.version>1.8</java.version>
-    <voms.version>3.2.0</voms.version>
+    <voms.version>3.3.1-SNAPSHOT</voms.version>
     <eclipselink.version>2.5.2</eclipselink.version>
     <mitreid.version>1.3.5.cnaf-SNAPSHOT</mitreid.version>
     <spring-security-saml.version>1.0.1.RELEASE</spring-security-saml.version>
@@ -129,6 +129,12 @@
       <dependency>
         <groupId>org.italiangrid</groupId>
         <artifactId>voms-api-java</artifactId>
+        <version>${voms.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.italiangrid</groupId>
+        <artifactId>voms-clients</artifactId>
         <version>${voms.version}</version>
       </dependency>
 

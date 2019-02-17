@@ -49,6 +49,7 @@ import it.infn.mw.iam.core.IamBanner;
     "it.infn.mw.iam.notification",
     "it.infn.mw.iam.audit",
     "it.infn.mw.iam.actuator",
+    "it.infn.mw.iam.rcauth",
     "org.mitre.oauth2.web",
     "org.mitre.oauth2.view", 
     "org.mitre.openid.connect.web", 

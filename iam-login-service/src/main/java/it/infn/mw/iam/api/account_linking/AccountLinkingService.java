@@ -23,6 +23,9 @@ import it.infn.mw.iam.authn.x509.IamX509AuthenticationCredential;
 
 public interface AccountLinkingService {
 
+  void linkX509ProxyCertificate(Principal authenticatedUser, 
+      IamX509AuthenticationCredential x509Credential, String proxyCertificatePemString);
+  
   void linkX509Certificate(Principal authenticatedUser,
       IamX509AuthenticationCredential x509Credential);
 

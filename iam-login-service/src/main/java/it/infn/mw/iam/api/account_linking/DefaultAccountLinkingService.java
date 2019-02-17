@@ -42,6 +42,7 @@ import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamOidcId;
 import it.infn.mw.iam.persistence.model.IamSamlId;
 import it.infn.mw.iam.persistence.model.IamX509Certificate;
+import it.infn.mw.iam.persistence.model.IamX509ProxyCertificate;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
 @Service
@@ -210,6 +211,31 @@ public class DefaultAccountLinkingService
               userAccount.getUsername(), certificateSubject),
           certificateSubject));
     }
+  }
+
+  @Override
+  public void linkX509ProxyCertificate(Principal authenticatedUser,
+      IamX509AuthenticationCredential x509Credential, String proxyCertificatePemString) {
+
+    linkX509Certificate(authenticatedUser, x509Credential);
+    IamAccount userAccount = findAccount(authenticatedUser);
+
+    IamX509Certificate cert = userAccount.getX509Certificates()
+      .stream()
+      .filter(c -> c.getSubjectDn().equals(x509Credential.getSubject()))
+      .findAny()
+      .orElseThrow(() -> new IllegalStateException(
+          "Expected certificate not found: " + x509Credential.getSubject()));
+
+    IamX509ProxyCertificate proxy = new IamX509ProxyCertificate();
+    proxy.setChain(proxyCertificatePemString);
+    proxy.setCertificate(cert);
+    proxy.setExpirationTime(x509Credential.getCertificateChain()[0].getNotAfter());
+    cert.setProxy(proxy);
+
+    userAccount.touch();
+    iamAccountRepository.save(userAccount);
+
   }
 
 }

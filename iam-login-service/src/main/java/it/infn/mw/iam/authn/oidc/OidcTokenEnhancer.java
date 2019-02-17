@@ -16,7 +16,6 @@
 package it.infn.mw.iam.authn.oidc;
 
 import static it.infn.mw.iam.core.oauth.ClaimValueHelper.ADDITIONAL_CLAIMS;
-import static java.util.Objects.isNull;
 
 import java.util.Date;
 import java.util.Set;
@@ -112,7 +111,7 @@ public class OidcTokenEnhancer extends ConnectTokenEnhancer {
       builder.audience(Lists.newArrayList(audience));
     }
 
-    if (includeAuthnInfo && !isNull(userInfo)) {
+    if (includeAuthnInfo && userInfo != null) {
       Set<String> requiredClaims = scopeClaimConverter.getClaimsForScopeSet(token.getScope());
       requiredClaims.stream().filter(ADDITIONAL_CLAIMS::contains).forEach(c -> builder.claim(c,
           claimValueHelper.getClaimValueFromUserInfo(c, ((UserInfoAdapter) userInfo).getUserinfo())));

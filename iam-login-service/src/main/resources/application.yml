@@ -128,3 +128,10 @@ endpoints:
     enabled: true
   metrics:
     enabled: true
+
+rcauth:
+  enabled: ${IAM_RCAUTH_ENABLED:false}
+  issuer: ${IAM_RCAUTH_ISSUER}
+  client-id: ${IAM_RCAUTH_CLIENT_ID}
+  client-secret: ${IAM_RCAUTH_CLIENT_SECRET}
+  

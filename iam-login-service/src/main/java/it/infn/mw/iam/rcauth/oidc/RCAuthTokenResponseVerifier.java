@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.test.util.oidc;
+package it.infn.mw.iam.rcauth.oidc;
 
-import org.springframework.http.HttpEntity;
-import org.springframework.util.MultiValueMap;
+import org.mitre.openid.connect.config.ServerConfiguration;
 
-public class CodeRequestUtil {
+import it.infn.mw.iam.rcauth.RCAuthTokenResponse;
 
-  public String nonce;
-  public HttpEntity<MultiValueMap<String, String>> requestEntity;
+public interface RCAuthTokenResponseVerifier {
+  
+  public void verify(ServerConfiguration configuration, RCAuthTokenResponse tokenResponse);
 
 }

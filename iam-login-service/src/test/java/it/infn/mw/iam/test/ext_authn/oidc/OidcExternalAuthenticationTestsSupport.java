@@ -45,7 +45,7 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import it.infn.mw.iam.authn.oidc.RestTemplateFactory;
-import it.infn.mw.iam.test.util.oidc.CodeRequestUtil;
+import it.infn.mw.iam.test.util.oidc.CodeRequestHolder;
 import it.infn.mw.iam.test.util.oidc.MockOIDCProvider;
 import it.infn.mw.iam.test.util.oidc.MockRestTemplateFactory;
 
@@ -123,9 +123,9 @@ public class OidcExternalAuthenticationTestsSupport {
 
   }
 
-  CodeRequestUtil buildCodeRequest(String sessionCookie, ResponseEntity<String> response) {
+  CodeRequestHolder buildCodeRequest(String sessionCookie, ResponseEntity<String> response) {
 
-    CodeRequestUtil result = new CodeRequestUtil();
+    CodeRequestHolder result = new CodeRequestHolder();
 
     HttpHeaders requestHeaders = new HttpHeaders();
     UriComponents locationUri =
