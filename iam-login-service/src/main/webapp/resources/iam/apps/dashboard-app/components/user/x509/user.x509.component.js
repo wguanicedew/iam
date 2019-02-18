@@ -16,7 +16,25 @@
 (function () {
     'use strict';
 
-    function AddRemoveCertificateController($scope, scimFactory, $uibModalInstance, action, cert, user, successHandler) {
+    function RequestCertificateController($window, $uibModalInstance, user) {
+
+        var RCAUTH_PATH = '/rcauth/getcert';
+
+        var self = this;
+        self.user = user;
+
+        self.doRequest = function () {
+            $window.location.href = RCAUTH_PATH;
+        };
+
+        self.cancel = function () {
+            $uibModalInstance.dismiss('Dismissed');
+        };
+    }
+
+    function AddRemoveCertificateController(
+        $scope, scimFactory, $uibModalInstance, action, cert, user,
+        successHandler) {
         var self = this;
         self.enabled = true;
         self.action = action;
@@ -30,16 +48,17 @@
         self.doAdd = function () {
             self.error = undefined;
             self.enabled = false;
-            scimFactory.addX509Certificate(self.user.id, self.certVal).then(
-                function (response) {
+            scimFactory.addX509Certificate(self.user.id, self.certVal)
+                .then(function (response) {
                     $uibModalInstance.close(response.data);
                     self.successHandler(`Certificate added`);
                     self.enabled = true;
-                }).catch(function (error) {
+                })
+                .catch(function (error) {
                     console.error(error);
                     self.error = error;
                     self.enabled = true;
-            });
+                });
         };
 
         self.doRemove = function () {
@@ -50,7 +69,8 @@
                     $uibModalInstance.close(response.data);
                     self.successHandler(`Certificate ${self.cert.subjectDn} removed`);
                     self.enabled = true;
-                }).catch(function (error) {
+                })
+                .catch(function (error) {
                     console.error(error);
                     self.enabled = true;
                     self.error = error;
@@ -63,20 +83,20 @@
 
         self.reset = function () {
             self.certVal = {
-                label: "",
+                label: '',
                 primary: false,
-                pemEncodedCertificate: "",
+                pemEncodedCertificate: '',
             };
             self.error = undefined;
         };
 
-        self.certLabelValid = function() {
+        self.certLabelValid = function () {
             return $scope.certLabel.$dirty && $scope.certLabel.$valid;
         };
     }
 
-    function LinkCertificateController(AccountLinkingService, $uibModalInstance, action, cert) {
-
+    function LinkCertificateController(
+        AccountLinkingService, $uibModalInstance, action, cert) {
         var self = this;
 
         self.enabled = true;
@@ -86,18 +106,21 @@
 
         self.doLink = function () {
             self.enabled = false;
-            document.getElementById("link-certificate-form").submit();
+            document.getElementById('link-certificate-form').submit();
         };
 
         self.doUnlink = function () {
             self.enabled = false;
-            AccountLinkingService.unlinkX509Certificate(self.cert).then(function (response) {
-                $uibModalInstance.close(`Certificate '${self.cert.subjectDn}' unlinked succesfully`);
-            }).catch(function (error) {
-                console.error(error);
-                self.error = error;
-                self.enabled = true;
-            });
+            AccountLinkingService.unlinkX509Certificate(self.cert)
+                .then(function (response) {
+                    $uibModalInstance.close(
+                        `Certificate '${self.cert.subjectDn}' unlinked succesfully`);
+                })
+                .catch(function (error) {
+                    console.error(error);
+                    self.error = error;
+                    self.enabled = true;
+                });
         };
 
         self.cancel = function () {
@@ -109,6 +132,7 @@
         var self = this;
 
         self.accountLinkingEnabled = getAccountLinkingEnabled();
+        self.rcauthEnabled = getRcauthEnabled();
 
         self.indigoUser = function () {
             return self.user['urn:indigo-dc:scim:schemas:IndigoUser'];
@@ -151,6 +175,22 @@
                     type: 'success',
                     body: msg
                 });
+            });
+        };
+
+        self.openRequestCertificateDialog = function () {
+            var modalInstance = $uibModal.open({
+                templateUrl: '/resources/iam/apps/dashboard-app/components/user/x509/cert.req.dialog.html',
+                controller: RequestCertificateController,
+                controllerAs: '$ctrl',
+                resolve: {
+                    user: function () {
+                        return self.user;
+                    },
+                    successHandler: function () {
+                        return self.handleSuccess;
+                    }
+                }
             });
         };
 

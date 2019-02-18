@@ -27,42 +27,51 @@
 
         <div class="table-responsive" ng-if="$ctrl.hasCertificates()">
             <table class="table no-margin" id="x509_cert_list">
-                <thead>
-                    <tr>
-                        <th>Subject &amp; Issuer</th>
-                        <th>Last modified</th>
-                        <th class="text-right"></th>
-                    </tr>
-                </thead>
                 <tbody>
 
                     <tr ng-repeat="cert in $ctrl.getCertificates()">
                         <td>
-                            <div class="subjectDn">{{ cert.subjectDn }}</div>
-                            <div class="issuerDn">{{ cert.issuerDn }}</div>
+                            <dl>
+                                <dt>Subject</dt>
+                                <dd>{{ cert.subjectDn }}</dd>
+                                <dt>Issuer</dt>
+                                <dd>{{ cert.issuerDn }}</dd>
+                                <dt>Last modified</dt>
+                                <dd>{{ cert.lastModified | relativeDate }}</dd>
+                                <dt ng-if="cert.hasProxyCertificate">Has managed proxy certificate</dt>
+                                <dd ng-if="cert.hasProxyCertificate">true</dd>
+                                <dt ng-if="cert.hasProxyCertificate">Proxy expiration time</dt>
+                                <dd ng-if="cert.hasProxyCertificate">{{cert.proxyExpirationTime | relativeDate}}</dd>
+                            </dl>
                         </td>
-                        <td>{{ cert.lastModified | relativeDate }}</td>
 
                         <td class="text-right">
                             <div class="btn-group">
-                                <button class="btn btn-xs btn-danger" ng-click="$ctrl.openRemoveCertificateDialog(cert)" ng-if="$ctrl.userCtrl.canManageLinkedAccounts()">
-                                        <i class="fa fa-times"></i> Remove
-                                    </button>
-                                <button id="unlink-{{cert.display}}" class="btn btn-xs btn-danger" ng-click="$ctrl.openUnlinkCertificateDialog(cert)" ng-if="$ctrl.userCtrl.canLinkAccounts()">
-                                        <i class="fa fa-times"></i> Unlink
-                                    </button>
+                                <button class="btn btn-xs btn-danger" ng-click="$ctrl.openRemoveCertificateDialog(cert)"
+                                    ng-if="$ctrl.userCtrl.canManageLinkedAccounts()">
+                                    <i class="fa fa-times"></i> Remove
+                                </button>
+                                <button id="unlink-{{cert.display}}" class="btn btn-xs btn-danger" ng-click="$ctrl.openUnlinkCertificateDialog(cert)"
+                                    ng-if="$ctrl.userCtrl.canLinkAccounts()">
+                                    <i class="fa fa-times"></i> Unlink
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 </tbody>
             </table>
-            </div>
-        </div>
-        <div class="box-footer" ng-if="$ctrl.userCtrl.canManageLinkedAccounts() || $ctrl.userCtrl.canLinkAccounts() && $ctrl.getUserCertSubject()">
-            <button class="btn btn-success btn-sm" name="btn-add-cert" ng-click="$ctrl.openAddCertificateDialog()" ng-if="$ctrl.userCtrl.canManageLinkedAccounts()">
-                <i class="fa fa-plus"></i> Add certificate
-            </button>
-            <button class="btn btn-success btn-sm" name="btn-link-cert" ng-click="$ctrl.openLinkCertificateDialog()" ng-if="$ctrl.userCtrl.canLinkAccounts() && $ctrl.getUserCertSubject()">
-                <i class="fa fa-plus"></i> Link certificate
-            </button>
         </div>
     </div>
+    <div class="box-footer" ng-if="$ctrl.userCtrl.canManageLinkedAccounts() || $ctrl.userCtrl.canLinkAccounts()">
+        <button class="btn btn-success btn-sm" name="btn-add-cert" ng-click="$ctrl.openAddCertificateDialog()" ng-if="$ctrl.userCtrl.canManageLinkedAccounts()">
+            <i class="fa fa-plus"></i> Add certificate
+        </button>
+        <button class="btn btn-success btn-sm" name="btn-link-cert" ng-click="$ctrl.openLinkCertificateDialog()" ng-if="$ctrl.userCtrl.canLinkAccounts() && $ctrl.getUserCertSubject()">
+            <i class="fa fa-link"></i> Link certificate
+        </button>
+        <button class="btn btn-success btn-sm" name="btn-req-cert" ng-click="$ctrl.openRequestCertificateDialog()"
+            ng-if="$ctrl.rcauthEnabled">
+            <i class="fa fa-plus"></i> Request certificate
+        </button>
+    </div>
+</div>

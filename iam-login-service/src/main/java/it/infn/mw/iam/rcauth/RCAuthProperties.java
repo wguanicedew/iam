@@ -25,6 +25,8 @@ import org.springframework.context.annotation.Configuration;
 public class RCAuthProperties {
 
   boolean enabled = false;
+  
+  String label;
 
   String clientId;
   String clientSecret;
@@ -89,5 +91,13 @@ public class RCAuthProperties {
 
   public void setIdpHint(String idpHint) {
     this.idpHint = idpHint;
+  }
+
+  public String getLabel() {
+    return label;
+  }
+
+  public void setLabel(String label) {
+    this.label = label;
   }
 }

@@ -1,13 +1,31 @@
+/**
+ * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2018
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package it.infn.mw.iam.rcauth.x509;
 
 import static org.italiangrid.voms.util.CredentialsUtils.saveProxyCredentials;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.InvalidKeyException;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.SignatureException;
+import java.security.cert.CertificateException;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
 import java.time.Clock;
@@ -19,6 +37,7 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import eu.emi.security.authn.x509.impl.PEMCredential;
 import eu.emi.security.authn.x509.proxy.ProxyCertificate;
 import eu.emi.security.authn.x509.proxy.ProxyCertificateOptions;
 import eu.emi.security.authn.x509.proxy.ProxyGenerator;
@@ -66,6 +85,36 @@ public class DefaultProxyHelperService implements ProxyHelperService {
       return proxyOs.toString();
     } catch (IllegalStateException | IOException e) {
       throw new ProxyGenerationError("Error serializing proxy certificate: " + e.getMessage(), e);
+    }
+  }
+
+  @Override
+  public ProxyCertificate generateProxy(PEMCredential proxyCredential, long lifetimeInSecs) {
+
+    ProxyCertificateOptions options =
+        new ProxyCertificateOptions(proxyCredential.getCertificateChain());
+    
+    options.setKeyLength(DEFAULT_KEY_SIZE);
+    options.setType(ProxyType.RFC3820);
+    options.setLifetime(lifetimeInSecs, TimeUnit.SECONDS);
+
+    try {
+      return ProxyGenerator.generate(options, proxyCredential.getKey());
+    } catch (InvalidKeyException | CertificateParsingException | SignatureException
+        | NoSuchAlgorithmException | IOException e) {
+      throw new ProxyGenerationError(e);
+    }
+  }
+
+  @Override
+  public PEMCredential credentialFromPemString(String pemString) {
+
+    ByteArrayInputStream bais = new ByteArrayInputStream(pemString.getBytes());
+    try {
+      return new PEMCredential(bais, (char[]) null);
+    } catch (KeyStoreException | CertificateException | IOException e) {
+      throw new ProxyGenerationError(
+          "Error reading proxy certificate from string: " + e.getMessage(), e);
     }
   }
 

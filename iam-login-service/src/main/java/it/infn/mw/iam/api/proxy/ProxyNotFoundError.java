@@ -13,25 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.api.common;
+package it.infn.mw.iam.api.proxy;
 
-public class NoSuchAccountError extends RuntimeException {
+public class ProxyNotFoundError extends RuntimeException {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = -7259771093968890099L;
+  private static final long serialVersionUID = 1L;
 
-  public NoSuchAccountError(String message) {
+  public ProxyNotFoundError(String message, Throwable cause) {
+    super(message, cause);
+  }
+
+  public ProxyNotFoundError(String message) {
     super(message);
-
-  }
-  
-  public static final NoSuchAccountError forUuid(String uuid) {
-    return new NoSuchAccountError(String.format("Account not found for id '%s'", uuid));
-  }
-  
-  public static final NoSuchAccountError forUsername(String username) {
-    return new NoSuchAccountError(String.format("Account not found for username '%s'", username));
   }
 }

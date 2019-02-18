@@ -43,12 +43,12 @@ public class RCAuthController {
   public static final String GETCERT_PATH = "/rcauth/getcert";
   public static final String CALLBACK_PATH = "/rcauth/cb";
 
-  final RcAuthRequestService requestService;
+  final RCAuthRequestService requestService;
   final ProxyHelperService proxyHelper;
   final DefaultAccountLinkingService linkingService;
 
   @Autowired
-  public RCAuthController(RcAuthRequestService service, ProxyHelperService proxyHelper,
+  public RCAuthController(RCAuthRequestService service, ProxyHelperService proxyHelper,
       DefaultAccountLinkingService ls) {
     this.requestService = service;
     this.proxyHelper = proxyHelper;

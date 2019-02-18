@@ -15,6 +15,8 @@
  */
 package it.infn.mw.iam.persistence.model;
 
+import static java.util.Objects.isNull;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -205,6 +207,9 @@ public class IamX509Certificate implements IamAccountRef, Serializable {
   }
 
 
+  public boolean hasProxy() {
+    return !isNull(getProxy());
+  }
   @Override
   public String toString() {
     return "IamX509Certificate [label=" + label + ", subjectDn=" + subjectDn + ", issuerDn="

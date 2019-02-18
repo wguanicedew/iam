@@ -131,7 +131,11 @@ endpoints:
 
 rcauth:
   enabled: ${IAM_RCAUTH_ENABLED:false}
+  label: ${IAM_RCAUTH_LABEL:RCAuth.eu online CA}
   issuer: ${IAM_RCAUTH_ISSUER}
   client-id: ${IAM_RCAUTH_CLIENT_ID}
   client-secret: ${IAM_RCAUTH_CLIENT_SECRET}
+  idp-hint: ${IAM_RCAUTH_IDP_HINT}
+  key-size: ${IAM_RCAUTH_KEY_SIZE:2048}
+  cert-lifetime-seconds: ${IAM_RCAUTH_CERT_LIFETIME_SECONDS:259200}
   

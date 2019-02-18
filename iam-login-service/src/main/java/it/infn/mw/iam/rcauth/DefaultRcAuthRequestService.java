@@ -47,7 +47,7 @@ import it.infn.mw.iam.config.saml.SamlConfig.IamProperties;
 
 @Service
 @ConditionalOnProperty(name = "rcauth.enabled", havingValue = "true")
-public class DefaultRcAuthRequestService implements RcAuthRequestService {
+public class DefaultRcAuthRequestService implements RCAuthRequestService {
   public static final Logger LOG = LoggerFactory.getLogger(DefaultRcAuthRequestService.class);
 
   public static final String HTTPS_SCHEME = "https";

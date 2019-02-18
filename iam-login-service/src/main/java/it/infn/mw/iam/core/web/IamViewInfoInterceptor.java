@@ -24,6 +24,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import it.infn.mw.iam.config.saml.IamSamlProperties;
+import it.infn.mw.iam.rcauth.RCAuthProperties;
 
 @Component
 public class IamViewInfoInterceptor extends HandlerInterceptorAdapter {
@@ -32,6 +33,7 @@ public class IamViewInfoInterceptor extends HandlerInterceptorAdapter {
   public static final String ORGANISATION_NAME_KEY = "iamOrganisationName";
   public static final String IAM_SAML_PROPERTIES_KEY = "iamSamlProperties";
   public static final String IAM_OIDC_PROPERTIES_KEY = "iamOidcProperties";
+  public static final String RCAUTH_ENABLED_KEY = "iamRcauthEnabled";
 
   @Value("${iam.version}")
   String iamVersion;
@@ -47,6 +49,9 @@ public class IamViewInfoInterceptor extends HandlerInterceptorAdapter {
 
   @Autowired
   IamSamlProperties samlProperties;
+  
+  @Autowired
+  RCAuthProperties rcAuthProperties;
 
   @Override
   public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
@@ -60,7 +65,8 @@ public class IamViewInfoInterceptor extends HandlerInterceptorAdapter {
     request.setAttribute(LOGIN_PAGE_CONFIGURATION_KEY, loginPageConfiguration);
     
     request.setAttribute(IAM_SAML_PROPERTIES_KEY, samlProperties);
-
+    
+    request.setAttribute(RCAUTH_ENABLED_KEY, rcAuthProperties.isEnabled());
     return true;
   }
 

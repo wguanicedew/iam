@@ -13,15 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.rcauth;
+package it.infn.mw.iam.api.proxy;
 
-import javax.servlet.http.HttpSession;
+import java.security.Principal;
+import java.util.List;
 
-public interface RcAuthRequestService {
+public interface ProxyCertificateService {
 
-  String buildAuthorizationRequest(HttpSession session);
+  ProxyCertificateDTO generateProxy(Principal principal, ProxyCertificateRequestDTO request);
 
-  RCAuthExchangeContext handleAuthorizationCodeResponse(HttpSession session,
-      RCAuthAuthorizationResponse response);
-
+  List<ProxyCertificateDTO> listProxies(Principal principal);
 }

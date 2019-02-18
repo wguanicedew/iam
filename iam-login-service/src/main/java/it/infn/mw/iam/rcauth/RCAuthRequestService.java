@@ -13,25 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.api.common;
+package it.infn.mw.iam.rcauth;
 
-public class NoSuchAccountError extends RuntimeException {
+import javax.servlet.http.HttpSession;
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = -7259771093968890099L;
+public interface RCAuthRequestService {
 
-  public NoSuchAccountError(String message) {
-    super(message);
+  String buildAuthorizationRequest(HttpSession session);
 
-  }
-  
-  public static final NoSuchAccountError forUuid(String uuid) {
-    return new NoSuchAccountError(String.format("Account not found for id '%s'", uuid));
-  }
-  
-  public static final NoSuchAccountError forUsername(String username) {
-    return new NoSuchAccountError(String.format("Account not found for username '%s'", username));
-  }
+  RCAuthExchangeContext handleAuthorizationCodeResponse(HttpSession session,
+      RCAuthAuthorizationResponse response);
+
 }

@@ -97,4 +97,8 @@ function getOidcEnabled() {
 function getSamlEnabled() {
   return ${loginPageConfiguration.samlEnabled};
 }
+
+function getRcauthEnabled() {
+  return ${iamRcauthEnabled};
+}
 </script>
