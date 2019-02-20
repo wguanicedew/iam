@@ -124,7 +124,7 @@ public class ClientRegistrationTests extends ClientRegistrationTestSupport {
   @Test
   public void testCreateClientWithRegistrationReservedScopes() throws Exception {
 
-    String[] scopes = {"registration:read", "registration:write", "scim:read", "scim:write"};
+    String[] scopes = {"registration:read", "registration:write", "scim:read", "scim:write", "proxy:generate"};
 
     String jsonInString = ClientJsonStringBuilder.builder().scopes(scopes).build();
 
