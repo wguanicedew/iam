@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
@@ -41,6 +42,7 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.rcauth.x509.ProxyHelperService;
 
 @Service
+@ConditionalOnProperty(name="rcauth.enabled", havingValue="true")
 public class DefaultProxyCertificateService implements ProxyCertificateService {
 
   final Clock clock;
@@ -95,10 +97,10 @@ public class DefaultProxyCertificateService implements ProxyCertificateService {
   }
 
   private long computeProxyLifetime(ProxyCertificateRequestDTO request) {
-    long proxyLifetime = properties.getMaxLifetimeInSeconds();
+    long proxyLifetime = properties.getMaxLifetimeSeconds();
 
-    if (!isNull(request.getLifetimeSecs())
-        && request.getLifetimeSecs() < properties.getMaxLifetimeInSeconds()) {
+    if (!isNull(request.getLifetimeSecs()) && request.getLifetimeSecs() > 0
+        && request.getLifetimeSecs() < properties.getMaxLifetimeSeconds()) {
       proxyLifetime = request.getLifetimeSecs();
     }
 
@@ -110,6 +112,7 @@ public class DefaultProxyCertificateService implements ProxyCertificateService {
     dto.setSubject(proxy.getCertificate().getSubjectDn());
     dto.setIssuer(proxy.getCertificate().getIssuerDn());
     dto.setNotAfter(proxy.getExpirationTime());
+    dto.setIdentity(proxy.getCertificate().getSubjectDn());
     return dto;
   }
 
@@ -147,6 +150,7 @@ public class DefaultProxyCertificateService implements ProxyCertificateService {
 
 
     ProxyCertificateDTO dto = proxyToDto(proxyCert);
+    dto.setIdentity(proxy.getCertificate().getSubjectDn());
     dto.setCertificateChain(proxyHelper.proxyCertificateToPemString(proxyCert));
     return dto;
   }

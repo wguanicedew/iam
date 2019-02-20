@@ -28,6 +28,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.KeyStoreException;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
@@ -41,6 +43,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
+import eu.emi.security.authn.x509.impl.PEMCredential;
 import it.infn.mw.iam.authn.x509.DefaultX509AuthenticationCredentialExtractor;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamX509Certificate;
@@ -48,6 +51,8 @@ import it.infn.mw.iam.persistence.model.IamX509Certificate;
 public class X509TestSupport {
 
   public static final String TEST_0_CERT_PATH = "src/test/resources/x509/test0.cert.pem";
+  public static final String TEST_0_KEY_PATH = "src/test/resources/x509/test0.key.pem";
+  
   public static final String TEST_0_SUBJECT = "CN=test0,O=IGI,C=IT";
   public static final String TEST_0_ISSUER = "CN=Test CA,O=IGI,C=IT";
   public static final String TEST_0_SERIAL = "09";
@@ -71,6 +76,8 @@ public class X509TestSupport {
   
   protected IamX509Certificate TEST_0_IAM_X509_CERT;
   protected IamX509Certificate TEST_1_IAM_X509_CERT;
+  
+  protected PEMCredential TEST_0_PEM_CREDENTIAL;
 
   protected String TEST_0_CERT_LABEL = "TEST 0 cert label";
   protected String TEST_1_CERT_LABEL = "TEST 1 cert label";
@@ -109,8 +116,10 @@ public class X509TestSupport {
       // This is how NGINX encodes certficate in the header
       TEST_0_CERT_STRING_NGINX = TEST_0_CERT_STRING.replace('\n', '\t');
       TEST_1_CERT_STRING_NGINX = TEST_1_CERT_STRING.replace('\n', '\t');
+      
+      TEST_0_PEM_CREDENTIAL = new PEMCredential(TEST_0_KEY_PATH, TEST_0_CERT_PATH, "pass".toCharArray());
 
-    } catch (IOException e) {
+    } catch (IOException | KeyStoreException | CertificateException e) {
       throw new AssertionError(e.getMessage(), e);
     }
   }

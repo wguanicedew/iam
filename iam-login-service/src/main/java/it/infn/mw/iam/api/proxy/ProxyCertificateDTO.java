@@ -25,6 +25,8 @@ public class ProxyCertificateDTO {
 
   private String subject;
   private String issuer;
+  
+  private String identity;
  
   private Date notAfter;
 
@@ -45,8 +47,16 @@ public class ProxyCertificateDTO {
   public void setIssuer(String issuer) {
     this.issuer = issuer;
   }
+  
+  public String getIdentity() {
+    return identity;
+  }
 
-  @JsonProperty("not_before")
+  public void setIdentity(String identity) {
+    this.identity = identity;
+  }
+
+  @JsonProperty("not_after")
   public Date getNotAfter() {
     return notAfter;
   }

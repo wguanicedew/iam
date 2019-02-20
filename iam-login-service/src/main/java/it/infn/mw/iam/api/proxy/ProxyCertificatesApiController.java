@@ -15,34 +15,66 @@
  */
 package it.infn.mw.iam.api.proxy;
 
+import static it.infn.mw.iam.api.utils.ValidationErrorUtils.stringifyValidationError;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
+
 import java.security.Principal;
-import java.util.List;
+
+import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import it.infn.mw.iam.api.common.ErrorDTO;
+
 @RestController
+@ConditionalOnProperty(name="rcauth.enabled", havingValue="true")
 public class ProxyCertificatesApiController {
 
+  public static final String PROXY_API_PATH = "/iam/proxycert";
+  
   final ProxyCertificateService service;
 
   @Autowired
   public ProxyCertificatesApiController(ProxyCertificateService service) {
     this.service = service;
   }
+  
+  private void handleValidationErrors(BindingResult bindingResult) {
+    if (bindingResult.hasErrors()) {
+      throw new InvalidProxyRequestError(stringifyValidationError(bindingResult));
+    }
+  }
 
+  @RequestMapping(method=POST, value=PROXY_API_PATH)
   @PreAuthorize("#oauth2.hasScope('proxy:generate') and hasRole('USER')")
   public ProxyCertificateDTO generateProxy(Principal authenticatedUser,
-      ProxyCertificateRequestDTO request) {
+      @Valid ProxyCertificateRequestDTO request, BindingResult bindingResult) {
+
+    handleValidationErrors(bindingResult);
+    
     return service.generateProxy(authenticatedUser, request);
   }
-
-
-
-  @PreAuthorize("#oauth2.hasScope('proxy:read') and hasRole('USER')")
-  public List<ProxyCertificateDTO> listProxies(Principal authenticatedUser) {
-    return service.listProxies(authenticatedUser);
+  
+  @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(InvalidProxyRequestError.class)
+  @ResponseBody
+  public ErrorDTO handleError(InvalidProxyRequestError e) {    
+    return ErrorDTO.fromString(e.getMessage());
   }
-
+  
+  @ResponseStatus(code = HttpStatus.PRECONDITION_FAILED)
+  @ExceptionHandler(ProxyNotFoundError.class)
+  @ResponseBody
+  public ErrorDTO handleError(ProxyNotFoundError e) {    
+    return ErrorDTO.fromString(e.getMessage());
+  }
 }

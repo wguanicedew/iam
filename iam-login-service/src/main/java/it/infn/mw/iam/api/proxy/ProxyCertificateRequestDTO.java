@@ -15,8 +15,15 @@
  */
 package it.infn.mw.iam.api.proxy;
 
+import javax.validation.constraints.Min;
+
+import org.hibernate.validator.constraints.Length;
+
 public class ProxyCertificateRequestDTO {
+  @Length(max=128, message="invalid issuer: max length exceeded (128 characters)")
   String issuer;
+  
+  @Min(value=120, message="invalid lifetime: minimum is 120 seconds")
   Long lifetimeSecs;
 
   
@@ -35,5 +42,4 @@ public class ProxyCertificateRequestDTO {
   public void setIssuer(String issuer) {
     this.issuer = issuer;
   }
-  
 }

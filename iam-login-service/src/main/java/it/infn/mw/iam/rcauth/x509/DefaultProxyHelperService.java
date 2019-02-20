@@ -28,11 +28,9 @@ import java.security.SignatureException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
+import java.sql.Date;
 import java.time.Clock;
-import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -61,11 +59,7 @@ public class DefaultProxyHelperService implements ProxyHelperService {
     options.setKeyLength(DEFAULT_KEY_SIZE);
     options.setType(ProxyType.RFC3820);
 
-    Instant now = clock.instant();
-    Instant certNotAfter = cert.getNotAfter().toInstant();
-
-    long lifeTimeInSeconds = Duration.between(now, certNotAfter).get(ChronoUnit.SECONDS);
-    options.setLifetime(lifeTimeInSeconds, TimeUnit.SECONDS);
+    options.setValidityBounds(Date.from(clock.instant()), cert.getNotAfter());
 
     try {
       return ProxyGenerator.generate(options, key);
@@ -93,10 +87,14 @@ public class DefaultProxyHelperService implements ProxyHelperService {
 
     ProxyCertificateOptions options =
         new ProxyCertificateOptions(proxyCredential.getCertificateChain());
-    
+
     options.setKeyLength(DEFAULT_KEY_SIZE);
     options.setType(ProxyType.RFC3820);
-    options.setLifetime(lifetimeInSecs, TimeUnit.SECONDS);
+
+    final Instant now = clock.instant();
+    final Instant eol = now.plusSeconds(lifetimeInSecs);
+
+    options.setValidityBounds(Date.from(now), Date.from(eol));
 
     try {
       return ProxyGenerator.generate(options, proxyCredential.getKey());

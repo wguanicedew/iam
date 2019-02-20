@@ -20,6 +20,7 @@ import static org.springframework.http.HttpMethod.POST;
 
 import org.mitre.oauth2.web.CorsFilter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -28,12 +29,15 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationProcessingFilter;
+import org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler;
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandlerImpl;
 import org.springframework.security.web.context.SecurityContextPersistenceFilter;
 import org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter;
 
+import it.infn.mw.iam.api.proxy.ProxyCertificatesApiController;
 import it.infn.mw.iam.config.CustomAuthenticationEntryPoint;
 
 @Configuration
@@ -42,6 +46,52 @@ public class IamApiSecurityConfig {
 
   @Configuration
   @Order(20)
+  public static class IamProxyCertificateApiConfig extends WebSecurityConfigurerAdapter {
+    private static final String PROXY_API_PATH = ProxyCertificatesApiController.PROXY_API_PATH+"/**";
+    
+    @Autowired
+    private OAuth2AuthenticationProcessingFilter resourceFilter;
+
+    @Autowired
+    @Qualifier("clientUserDetailsService")
+    private UserDetailsService userDetailsService;
+    
+    @Autowired
+    private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
+    
+    @Autowired
+    private CorsFilter corsFilter;
+    
+    @Override
+    protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
+      auth.userDetailsService(userDetailsService);
+    }
+    
+    @Override
+    protected void configure(final HttpSecurity http) throws Exception {
+      // @formatter:off
+      http.requestMatchers()
+        .antMatchers(PROXY_API_PATH)
+        .and()
+          .exceptionHandling()
+            .authenticationEntryPoint(authenticationEntryPoint)
+            .accessDeniedHandler(new OAuth2AccessDeniedHandler())
+        .and()
+          .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
+          .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
+        .sessionManagement()
+          .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        .and()
+          .authorizeRequests()
+            .anyRequest().fullyAuthenticated()            
+        .and()
+          .csrf().disable();
+      // @formatter:on
+    }
+  }
+  
+  @Configuration
+  @Order(21)
   public static class IamApiConfig extends WebSecurityConfigurerAdapter {
 
     private static final String AUP_PATH = "/iam/aup";

@@ -15,31 +15,12 @@
  */
 package it.infn.mw.iam.api.proxy;
 
-import java.util.concurrent.TimeUnit;
+public class InvalidProxyRequestError extends RuntimeException {
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+  private static final long serialVersionUID = 1L;
 
-@ConfigurationProperties("proxycert")
-@Configuration
-public class ProxyCertificateProperties {
-
-  private int keySize = 2048;
-  private long maxLifetimeSeconds = TimeUnit.HOURS.toSeconds(12);
-
-  public long getMaxLifetimeSeconds() {
-    return maxLifetimeSeconds;
+  public InvalidProxyRequestError(String message) {
+    super(message);
   }
 
-  public void setMaxLifetimeSeconds(long maxLifetimeSeconds) {
-    this.maxLifetimeSeconds = maxLifetimeSeconds;
-  }
-
-  public int getKeySize() {
-    return keySize;
-  }
-
-  public void setKeySize(int keySize) {
-    this.keySize = keySize;
-  }
 }

@@ -19,10 +19,6 @@ public class ProxyNotFoundError extends RuntimeException {
 
   private static final long serialVersionUID = 1L;
 
-  public ProxyNotFoundError(String message, Throwable cause) {
-    super(message, cause);
-  }
-
   public ProxyNotFoundError(String message) {
     super(message);
   }

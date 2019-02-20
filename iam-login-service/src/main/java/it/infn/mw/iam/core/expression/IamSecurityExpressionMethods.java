@@ -79,5 +79,4 @@ public class IamSecurityExpressionMethods {
         && IamGroupRequestStatus.PENDING.equals(groupRequest.get().getStatus()))
         || canManageGroupRequest(requestId));
   }
-
 }
