@@ -22,11 +22,11 @@ public class SessionUtils {
   /**
    * Get the named stored session variable as a string. Return null if not found or not a string.
    *
-   * @param session
+   * @param session the session
    *
-   * @param key
+   * @param key the key
    *
-   * @return
+   * @return the named stored session variable
    */
   public static String getStoredSessionString(HttpSession session, String key) {
 

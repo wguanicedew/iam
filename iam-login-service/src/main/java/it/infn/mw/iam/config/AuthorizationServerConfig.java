@@ -179,13 +179,16 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
   public void configure(final ClientDetailsServiceConfigurer clients) throws Exception {
 
     clients.withClientDetails(clientDetailsService);
+  
   }
 
   @Override
   public void configure(final AuthorizationServerSecurityConfigurer security) throws Exception {
 
     security.allowFormAuthenticationForClients();
+    
 
   }
 
+  
 }

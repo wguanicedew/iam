@@ -19,8 +19,11 @@ package it.infn.mw.iam.api.scim.converter;
  * 
  * Converts IAM entities to DTO objects. Design shamelessly inspired by
  * https://github.com/osiam/osiam.
+ * 
+ * @param <D> The DTO object type 
+ * @param <E> The entity object type
  *
- * @param <D> the DTO type @param <E> The Entity type
+ * 
  */
 public interface Converter<D, E> {
 

@@ -26,7 +26,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -39,44 +38,51 @@ import org.springframework.security.web.context.request.async.WebAsyncManagerInt
 
 import it.infn.mw.iam.api.proxy.ProxyCertificatesApiController;
 import it.infn.mw.iam.config.CustomAuthenticationEntryPoint;
+import it.infn.mw.iam.core.oauth.FormClientCredentialsAuthenticationFilter;
 
 @Configuration
-@EnableWebSecurity
 public class IamApiSecurityConfig {
 
   @Configuration
   @Order(20)
   public static class IamProxyCertificateApiConfig extends WebSecurityConfigurerAdapter {
-    private static final String PROXY_API_PATH = ProxyCertificatesApiController.PROXY_API_PATH+"/**";
-    
+    private static final String PROXY_API_MATCHER =
+        ProxyCertificatesApiController.PROXY_API_PATH + "/**";
+
     @Autowired
     private OAuth2AuthenticationProcessingFilter resourceFilter;
 
     @Autowired
     @Qualifier("clientUserDetailsService")
     private UserDetailsService userDetailsService;
-    
+
     @Autowired
     private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
-    
+
     @Autowired
     private CorsFilter corsFilter;
-    
+
     @Override
     protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
       auth.userDetailsService(userDetailsService);
     }
-    
+
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
+
+      FormClientCredentialsAuthenticationFilter ccFilter =
+          new FormClientCredentialsAuthenticationFilter(PROXY_API_MATCHER,
+              authenticationEntryPoint);
+      
+      ccFilter.setAuthenticationManager(authenticationManager());
+      
       // @formatter:off
-      http.requestMatchers()
-        .antMatchers(PROXY_API_PATH)
-        .and()
+      http.antMatcher(PROXY_API_MATCHER)
           .exceptionHandling()
             .authenticationEntryPoint(authenticationEntryPoint)
             .accessDeniedHandler(new OAuth2AccessDeniedHandler())
         .and()
+          .addFilterBefore(ccFilter, SecurityContextPersistenceFilter.class)
           .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
           .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
         .sessionManagement()
@@ -89,7 +95,7 @@ public class IamApiSecurityConfig {
       // @formatter:on
     }
   }
-  
+
   @Configuration
   @Order(21)
   public static class IamApiConfig extends WebSecurityConfigurerAdapter {

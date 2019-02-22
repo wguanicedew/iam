@@ -15,9 +15,10 @@
  */
 package it.infn.mw.iam.test.api.proxy;
 
-import static it.infn.mw.iam.api.proxy.ProxyCertificatesApiController.PROXY_API_PATH;
+import static java.lang.String.format;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.startsWith;
+import static org.hamcrest.Matchers.equalTo;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -27,8 +28,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.sql.Date;
 import java.time.Clock;
 
-import org.apache.commons.lang3.RandomStringUtils;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,7 +35,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -53,31 +51,25 @@ import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamX509Certificate;
 import it.infn.mw.iam.persistence.model.IamX509ProxyCertificate;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
-import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 import it.infn.mw.iam.test.rcauth.RCAuthTestSupport;
-import it.infn.mw.iam.test.util.WithAnonymousUser;
-import it.infn.mw.iam.test.util.WithMockOAuthUser;
-import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
+import it.infn.mw.iam.test.util.oidc.TokenResponse;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = {IamLoginService.class, RCAuthTestSupport.class,
-    CoreControllerTestSupport.class, ProxyServiceIntegrationTests.class})
+@SpringApplicationConfiguration(
+    classes = {IamLoginService.class, RCAuthTestSupport.class, ProxyOAuthIntegrationTests.class})
 @WebAppConfiguration
 @Transactional
 @TestPropertySource(
     properties = {"rcauth.enabled=true", "rcauth.client-id=" + RCAuthTestSupport.CLIENT_ID,
         "rcauth.client-secret=" + RCAuthTestSupport.CLIENT_SECRET,
         "rcauth.issuer=" + RCAuthTestSupport.ISSUER})
-public class ProxyServiceIntegrationTests extends ProxyCertificateTestSupport {
+public class ProxyOAuthIntegrationTests extends ProxyCertificateTestSupport {
 
   @Autowired
   private WebApplicationContext context;
 
   @Autowired
   IamProperties iamProperties;
-
-  @Autowired
-  private MockOAuth2Filter mockOAuth2Filter;
 
   @Autowired
   private IamAccountRepository accountRepo;
@@ -101,11 +93,6 @@ public class ProxyServiceIntegrationTests extends ProxyCertificateTestSupport {
       .build();
   }
 
-  @After
-  public void cleanupOAuthUser() {
-    mockOAuth2Filter.cleanupSecurityContext();
-  }
-
   private void linkProxyToTestAccount() throws Exception {
     IamAccount testAccount = accountRepo.findByUsername("test")
       .orElseThrow(() -> new AssertionError("Expected test account not found"));
@@ -122,71 +109,53 @@ public class ProxyServiceIntegrationTests extends ProxyCertificateTestSupport {
     accountRepo.save(testAccount);
   }
 
-  @WithAnonymousUser
   @Test
-  public void proxyApiRequiresAuthentication() throws Exception {
-    mvc.perform(post(PROXY_API_PATH)).andExpect(status().isUnauthorized());
-  }
+  public void clientAuthReallyRequired() throws Exception {
 
-  @WithMockUser
-  @Test
-  public void proxyApiRequiresClientAuthentication() throws Exception {
-    mvc.perform(post(PROXY_API_PATH)).andExpect(status().isUnauthorized());
-  }
-
-  @WithMockOAuthUser(user = "test", authorities = {"ROLE_USER", "ROLE_CLIENT"})
-  @Test
-  public void proxyApiRequiresProxyGenScope() throws Exception {
-    mvc.perform(post(PROXY_API_PATH))
-      .andExpect(status().isForbidden())
-      .andExpect(jsonPath("$.error").value("insufficient_scope"));
-  }
-
-  @WithMockOAuthUser(user = "test", authorities = {"ROLE_USER", "ROLE_CLIENT"},
-      scopes = {"proxy:generate"})
-  @Test
-  public void proxyApiRequiresRegisteredProxy() throws Exception {
-    mvc.perform(post(PROXY_API_PATH))
-      .andExpect(status().isPreconditionFailed())
-      .andExpect(jsonPath("$.error", startsWith("No proxy found")));
-  }
-
-  @WithMockOAuthUser(user = "test", authorities = {"ROLE_USER", "ROLE_CLIENT"},
-      scopes = {"proxy:generate"})
-  @Test
-  public void proxyRequestIsValidated() throws Exception {
     linkProxyToTestAccount();
 
-    mvc.perform(post(PROXY_API_PATH).param("lifetimeSecs", "60"))
-      .andExpect(status().isBadRequest())
-      .andExpect(jsonPath("$.error", startsWith("invalid lifetime")));
-  }
+    String clientId = "password-grant";
+    String clientSecret = "secret";
 
-  @WithMockOAuthUser(user = "test", authorities = {"ROLE_USER", "ROLE_CLIENT"},
-      scopes = {"proxy:generate"})
-  @Test
-  public void proxyRequestIssuerIsValidated() throws Exception {
+    String responseString = mvc
+      .perform(post("/token").with(httpBasic(clientId, clientSecret))
+        .param("grant_type", "password")
+        .param("username", "test")
+        .param("password", "password")
+        .param("scope", "openid proxy:generate"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.scope", equalTo("openid proxy:generate")))
+      .andReturn()
+      .getResponse()
+      .getContentAsString();
 
-    String longIssuerString = RandomStringUtils.random(129);
+    TokenResponse tr = mapper.readValue(responseString, TokenResponse.class);
 
-    mvc.perform(post(PROXY_API_PATH).param("issuer", longIssuerString))
-      .andExpect(status().isBadRequest())
-      .andExpect(jsonPath("$.error", startsWith("invalid issuer")));
-  }
+    mvc
+      .perform(
+          post("/iam/proxycert").header("Authorization", format("Bearer %s", tr.getAccessToken())))
+      .andExpect(status().isUnauthorized())
+      .andExpect(jsonPath("$.error").value("unauthorized"))
+      .andExpect(jsonPath("$.error_description").value("No client credentials found in request"));
 
-  @WithMockOAuthUser(user = "test", authorities = {"ROLE_USER", "ROLE_CLIENT"},
-      scopes = {"proxy:generate"})
-  @Test
-  public void proxyGenerationWorks() throws Exception {
-    linkProxyToTestAccount();
 
-    mvc.perform(post(PROXY_API_PATH))
+    mvc
+      .perform(post("/iam/proxycert").param("client_id", clientId)
+        .param("client_secret", "wrongsecret")
+        .header("Authorization", format("Bearer %s", tr.getAccessToken())))
+      .andExpect(status().isUnauthorized())
+      .andExpect(jsonPath("$.error").value("unauthorized"))
+      .andExpect(jsonPath("$.error_description").value("Bad credentials"));
+
+    mvc
+      .perform(post("/iam/proxycert").param("client_id", clientId)
+        .param("client_secret", clientSecret)
+        .header("Authorization", format("Bearer %s", tr.getAccessToken())))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.not_after").exists())
       .andExpect(jsonPath("$.subject").exists())
       .andExpect(jsonPath("$.issuer").exists())
       .andExpect(jsonPath("$.identity", is(TEST_0_SUBJECT)))
       .andExpect(jsonPath("$.certificate_chain").exists());
-
-  } 
+  }
 }

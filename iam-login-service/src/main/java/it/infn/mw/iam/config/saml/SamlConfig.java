@@ -744,6 +744,7 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
    * Define the security filter chain in order to support SSO Auth by using SAML 2.0
    * 
    * @return Filter chain proxy @throws Exception
+   * @throws Exception when there are problems
    */
   @Bean
   public FilterChainProxy samlFilter() throws Exception {

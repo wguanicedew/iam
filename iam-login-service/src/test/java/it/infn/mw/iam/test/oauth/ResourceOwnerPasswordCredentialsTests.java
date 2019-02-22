@@ -85,10 +85,10 @@ public class ResourceOwnerPasswordCredentialsTests {
 
   @Autowired
   private OAuth2TokenEntityService tokenService;
-  
+
   @Autowired
   private IamOAuthAccessTokenRepository accessTokenRepo;
-  
+
   @Autowired
   private IamOAuthRefreshTokenRepository refreshTokenRepo;
 
@@ -100,7 +100,7 @@ public class ResourceOwnerPasswordCredentialsTests {
       .apply(springSecurity())
       .alwaysDo(print())
       .build();
-    
+
     accessTokenRepo.deleteAll();
     refreshTokenRepo.deleteAll();
   }
@@ -197,8 +197,8 @@ public class ResourceOwnerPasswordCredentialsTests {
         .param("password", PASSWORD)
         .param("scope", SCOPE))
       .andExpect(status().isUnauthorized())
-//      .andExpect(jsonPath("$.error", equalTo("Unauthorized")))
-//      .andExpect(jsonPath("$.message", equalTo("Bad credentials")))
+      .andExpect(jsonPath("$.error", equalTo("unauthorized")))
+      .andExpect(jsonPath("$.error_description", equalTo("Bad credentials")))
       ;
     // @formatter:on
   }
@@ -218,8 +218,8 @@ public class ResourceOwnerPasswordCredentialsTests {
         .param("scope", SCOPE)
         .contentType(MediaType.APPLICATION_FORM_URLENCODED))
       .andExpect(status().isUnauthorized())
-//      .andExpect(jsonPath("$.error", equalTo("Unauthorized")))
-//      .andExpect(jsonPath("$.message", equalTo("Client with id unknown was not found")))
+      .andExpect(jsonPath("$.error", equalTo("unauthorized")))
+      .andExpect(jsonPath("$.error_description", equalTo("Bad credentials")))
       ;
     // @formatter:on
   }
@@ -273,11 +273,11 @@ public class ResourceOwnerPasswordCredentialsTests {
 
     IamAccount testAccount = accountRepo.findByUsername(USERNAME)
       .orElseThrow(() -> new AssertionError(String.format("Expected %s user not found", USERNAME)));
-    
+
     accountService.deleteAccount(testAccount);
 
     assertThat(tokenService.getAllAccessTokensForUser(USERNAME), hasSize(0));
     assertThat(tokenService.getAllRefreshTokensForUser(USERNAME), hasSize(0));
-    
+
   }
 }

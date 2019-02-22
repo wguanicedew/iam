@@ -15,6 +15,10 @@
  */
 package it.infn.mw.iam.api.account.password_reset;
 
+import it.infn.mw.iam.api.account.password_reset.error.BadUserPasswordError;
+import it.infn.mw.iam.api.account.password_reset.error.InvalidPasswordResetTokenError;
+import it.infn.mw.iam.api.account.password_reset.error.UserNotActiveOrNotVerified;
+
 /**
  * 
  * The IAM password reset service

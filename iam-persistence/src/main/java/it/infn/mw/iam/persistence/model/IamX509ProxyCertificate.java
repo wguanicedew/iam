@@ -15,6 +15,7 @@
  */
 package it.infn.mw.iam.persistence.model;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -32,7 +33,7 @@ import javax.persistence.TemporalType;
 @Entity
 @Table(name = "iam_x509_proxy",
     indexes = {@Index(columnList = "exp_time", name = "IDX_IAM_X509_PXY_EXP_T")})
-public class IamX509ProxyCertificate {
+public class IamX509ProxyCertificate implements Serializable{
 
   private static final long serialVersionUID = 1L;
 
