@@ -22,12 +22,12 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import org.hamcrest.Matchers;
 import org.junit.Test;
@@ -76,7 +76,7 @@ public class SamlExternalAuthenticationTests extends SamlAuthenticationTestSuppo
 
     mvc.perform(get("/").session(session))
       .andExpect(status().isOk())
-      .andExpect(view().name("iam/register"));
+      .andExpect(forwardedUrl("/start-registration"));
 
     mvc.perform(get(EXT_AUTHN_URL).session(session))
       .andExpect(status().isOk())

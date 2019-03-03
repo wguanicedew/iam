@@ -46,6 +46,12 @@ public @interface WithMockSAMLUser {
   String eppn() default "test-saml-user@" + DEFAULT_IDP_ID;
 
   String[] authorities() default {EXT_AUTHN_UNREGISTERED_USER_ROLE};
+  
+  String cernPersonId() default "";
+  String cernEmail() default "";
+  String cernFirstName() default "";
+  String cerLastName() default "";
+  String cernHomeInstitute() default "";
 
   long expirationTime() default -1;
 }

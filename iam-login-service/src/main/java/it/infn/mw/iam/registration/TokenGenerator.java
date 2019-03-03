@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 package it.infn.mw.iam.registration;
+
 @FunctionalInterface
 public interface TokenGenerator {
 

@@ -46,7 +46,7 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import it.infn.mw.iam.IamLoginService;
-import it.infn.mw.iam.config.saml.SamlConfig.IamProperties;
+import it.infn.mw.iam.config.saml.IamProperties;
 import it.infn.mw.iam.test.util.WithAnonymousUser;
 
 @RunWith(SpringJUnit4ClassRunner.class)

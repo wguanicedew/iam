@@ -48,7 +48,7 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import it.infn.mw.iam.authn.oidc.OidcTokenRequestor;
-import it.infn.mw.iam.config.saml.SamlConfig.IamProperties;
+import it.infn.mw.iam.config.saml.IamProperties;
 import it.infn.mw.iam.rcauth.DefaultRcAuthRequestService;
 import it.infn.mw.iam.rcauth.RCAuthProperties;
 

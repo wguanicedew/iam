@@ -25,17 +25,19 @@ import org.mitre.jwt.signer.service.JWTSigningAndValidationService;
 import org.mitre.jwt.signer.service.impl.JWKSetCacheService;
 import org.mitre.openid.connect.config.ServerConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 
-import it.infn.mw.iam.config.saml.SamlConfig.IamProperties;
+import it.infn.mw.iam.config.saml.IamProperties;
 import it.infn.mw.iam.rcauth.RCAuthError;
 import it.infn.mw.iam.rcauth.RCAuthProperties;
 import it.infn.mw.iam.rcauth.RCAuthTokenResponse;
 
 @Component
+@ConditionalOnProperty(name="rcauth.enabled", havingValue="true")
 public class DefaultRCAuthTokenResponseVerifier implements RCAuthTokenResponseVerifier {
 
   final JWKSetCacheService jwkService;

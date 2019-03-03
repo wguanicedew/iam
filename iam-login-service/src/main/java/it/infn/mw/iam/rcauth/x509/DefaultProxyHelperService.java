@@ -33,6 +33,7 @@ import java.time.Clock;
 import java.time.Instant;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import eu.emi.security.authn.x509.impl.PEMCredential;
@@ -42,6 +43,7 @@ import eu.emi.security.authn.x509.proxy.ProxyGenerator;
 import eu.emi.security.authn.x509.proxy.ProxyType;
 
 @Service
+@ConditionalOnProperty(name = "rcauth.enabled", havingValue = "true")
 public class DefaultProxyHelperService implements ProxyHelperService {
   public static final int DEFAULT_KEY_SIZE = 2048;
 

@@ -27,10 +27,9 @@ server:
 
   use-forward-headers: ${IAM_USE_FORWARDED_HEADERS:false}
 
-spring:
+spring: 
   profiles:
     active: h2-test
-
   application:
     name: INDIGO IAM
     

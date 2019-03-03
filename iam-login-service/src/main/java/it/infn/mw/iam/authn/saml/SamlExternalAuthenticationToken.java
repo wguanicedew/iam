@@ -20,6 +20,7 @@ import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.EPPN;
 import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.GIVEN_NAME;
 import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.MAIL;
 import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.SN;
+import static java.util.Objects.isNull;
 
 import java.util.Collection;
 import java.util.Date;
@@ -29,11 +30,14 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.providers.ExpiringUsernameAuthenticationToken;
 import org.springframework.security.saml.SAMLCredential;
 
+import com.google.common.collect.Maps;
+
 import it.infn.mw.iam.authn.AbstractExternalAuthenticationToken;
 import it.infn.mw.iam.authn.ExternalAccountLinker;
 import it.infn.mw.iam.authn.ExternalAuthenticationInfoBuilder;
 import it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo;
 import it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo.ExternalAuthenticationType;
+import it.infn.mw.iam.authn.saml.util.Saml2Attribute;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamSamlId;
 
@@ -41,12 +45,12 @@ public class SamlExternalAuthenticationToken
     extends AbstractExternalAuthenticationToken<ExpiringUsernameAuthenticationToken> {
 
   private static final long serialVersionUID = -7854473523011856692L;
-  
+
   private final IamSamlId samlId;
-  
-  public SamlExternalAuthenticationToken(IamSamlId samlId, ExpiringUsernameAuthenticationToken authn,
-      Date tokenExpiration, Object principal, Object credentials,
-      Collection<? extends GrantedAuthority> authorities) {
+
+  public SamlExternalAuthenticationToken(IamSamlId samlId,
+      ExpiringUsernameAuthenticationToken authn, Date tokenExpiration, Object principal,
+      Object credentials, Collection<? extends GrantedAuthority> authorities) {
     super(authn, tokenExpiration, principal, credentials, authorities);
     this.samlId = samlId;
   }
@@ -61,7 +65,7 @@ public class SamlExternalAuthenticationToken
   public ExternalAuthenticationRegistrationInfo toExernalAuthenticationRegistrationInfo() {
 
     ExternalAuthenticationRegistrationInfo ri =
-	new ExternalAuthenticationRegistrationInfo(ExternalAuthenticationType.SAML);
+        new ExternalAuthenticationRegistrationInfo(ExternalAuthenticationType.SAML);
 
     SAMLCredential cred = (SAMLCredential) getExternalAuthentication().getCredentials();
 
@@ -80,11 +84,21 @@ public class SamlExternalAuthenticationToken
     if (!isNullOrEmpty(cred.getAttributeAsString(MAIL.getAttributeName()))) {
       ri.setEmail(cred.getAttributeAsString(MAIL.getAttributeName()));
     }
-    
+
     if (!isNullOrEmpty(cred.getAttributeAsString(EPPN.getAttributeName()))) {
       ri.setSuggestedUsername(cred.getAttributeAsString(EPPN.getAttributeName()));
     }
 
+    Map<String, String> additionalAttrs = Maps.newHashMap();
+    
+    for (Saml2Attribute attr: Saml2Attribute.values()) {
+      String attrVal = cred.getAttributeAsString(attr.getAttributeName()); 
+      if (!isNull(attrVal)) {
+        additionalAttrs.put(attr.getAlias(), attrVal);
+      }
+    }
+    
+    ri.setAdditionalAttributes(additionalAttrs);
     return ri;
   }
 

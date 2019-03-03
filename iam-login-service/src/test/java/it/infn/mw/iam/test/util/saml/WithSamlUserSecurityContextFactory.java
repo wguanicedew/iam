@@ -19,6 +19,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.test.context.support.WithSecurityContextFactory;
 
 import it.infn.mw.iam.test.util.WithMockSAMLUser;
+import it.infn.mw.iam.util.test.saml.SamlSecurityContextBuilder;
 
 public class WithSamlUserSecurityContextFactory
     implements WithSecurityContextFactory<WithMockSAMLUser> {
@@ -35,7 +36,14 @@ public class WithSamlUserSecurityContextFactory
       .username(annotation.username())
       .name(annotation.givenName(), annotation.familyName())
       .expirationTime(annotation.expirationTime());
-
+    
+    // CERN registration details
+    builder.cernPersonId(annotation.cernPersonId())
+      .cernFirstName(annotation.cernFirstName())
+      .cernLastName(annotation.cerLastName())
+      .cernEmail(annotation.cernEmail())
+      .cernHomeInstitute(annotation.cernHomeInstitute());
+     
     return builder.buildSecurityContext();
   }
 

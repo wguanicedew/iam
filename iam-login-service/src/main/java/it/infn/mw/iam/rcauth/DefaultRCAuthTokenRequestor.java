@@ -28,6 +28,7 @@ import org.mitre.openid.connect.config.ServerConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
@@ -41,11 +42,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import it.infn.mw.iam.authn.oidc.RestTemplateFactory;
 import it.infn.mw.iam.authn.oidc.model.TokenEndpointErrorResponse;
-import it.infn.mw.iam.config.saml.SamlConfig.IamProperties;
+import it.infn.mw.iam.config.saml.IamProperties;
 import it.infn.mw.iam.rcauth.oidc.RCAuthTokenResponseVerifier;
 import it.infn.mw.iam.rcauth.util.AddContentTypeInterceptor;
 
 @Component
+@ConditionalOnProperty(name = "rcauth.enabled", havingValue = "true")
 public class DefaultRCAuthTokenRequestor implements RCAuthTokenRequestor {
   public static final Logger LOG = LoggerFactory.getLogger(DefaultRCAuthTokenRequestor.class);
 

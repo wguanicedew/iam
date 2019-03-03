@@ -26,7 +26,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -37,6 +39,7 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 
+import it.infn.mw.iam.api.common.LabelDTOConverter;
 import it.infn.mw.iam.api.scim.converter.UserConverter;
 import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
 import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
@@ -53,6 +56,7 @@ import it.infn.mw.iam.core.IamRegistrationRequestStatus;
 import it.infn.mw.iam.core.user.IamAccountService;
 import it.infn.mw.iam.notification.NotificationFactory;
 import it.infn.mw.iam.persistence.model.IamAccount;
+import it.infn.mw.iam.persistence.model.IamLabel;
 import it.infn.mw.iam.persistence.model.IamRegistrationRequest;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamAupRepository;
@@ -89,6 +93,9 @@ public class DefaultRegistrationRequestService
   
   @Autowired
   private IamAupSignatureRepository iamAupSignatureRepo;
+  
+  @Autowired
+  private LabelDTOConverter labelConverter;
 
   private ApplicationEventPublisher eventPublisher;
 
@@ -132,44 +139,49 @@ public class DefaultRegistrationRequestService
   }
   
   @Override
-  public RegistrationRequestDto createRequest(RegistrationRequestDto request,
+  public RegistrationRequestDto createRequest(RegistrationRequestDto dto,
       Optional<ExternalAuthenticationRegistrationInfo> extAuthnInfo) {
 
-    notesSanityChecks(request.getNotes());
+    notesSanityChecks(dto.getNotes());
 
     ScimUser.Builder userBuilder = ScimUser.builder()
-      .buildName(request.getGivenname(), request.getFamilyname())
-      .buildEmail(request.getEmail())
-      .userName(request.getUsername())
-      .password(request.getPassword());
+      .buildName(dto.getGivenname(), dto.getFamilyname())
+      .buildEmail(dto.getEmail())
+      .userName(dto.getUsername())
+      .password(dto.getPassword());
 
     extAuthnInfo.ifPresent(i -> addExternalAuthnInfo(userBuilder, i));
 
-    IamAccount newAccount =
+    IamAccount accountEntity =
         accountService.createAccount(userConverter.entityFromDto(userBuilder.build()));
-    newAccount.setConfirmationKey(tokenGenerator.generateToken());
-    newAccount.setActive(false);
+    accountEntity.setConfirmationKey(tokenGenerator.generateToken());
+    accountEntity.setActive(false);
 
-    createAupSignatureForAccountIfNeeded(newAccount);
+    createAupSignatureForAccountIfNeeded(accountEntity);
     
-    IamRegistrationRequest regRequest = new IamRegistrationRequest();
-    regRequest.setUuid(UUID.randomUUID().toString());
-    regRequest.setCreationTime(new Date());
+    IamRegistrationRequest requestEntity = new IamRegistrationRequest();
+    requestEntity.setUuid(UUID.randomUUID().toString());
+    requestEntity.setCreationTime(new Date());
 
-    regRequest.setStatus(NEW);
-    regRequest.setNotes(request.getNotes());
+    requestEntity.setStatus(NEW);
+    requestEntity.setNotes(dto.getNotes());
 
-    regRequest.setAccount(newAccount);
-    newAccount.setRegistrationRequest(regRequest);
+    requestEntity.setAccount(accountEntity);
+    accountEntity.setRegistrationRequest(requestEntity);
+    
+    Set<IamLabel> labels = dto.getLabels().stream().map(labelConverter::entityFromDto)
+        .collect(Collectors.toSet());
+    
+    requestEntity.setLabels(labels);
+    
+    requestRepository.save(requestEntity);
 
-    requestRepository.save(regRequest);
+    eventPublisher.publishEvent(new RegistrationRequestEvent(this, requestEntity,
+        "New registration request from user " + accountEntity.getUsername()));
 
-    eventPublisher.publishEvent(new RegistrationRequestEvent(this, regRequest,
-        "New registration request from user " + newAccount.getUsername()));
+    notificationFactory.createConfirmationMessage(requestEntity);
 
-    notificationFactory.createConfirmationMessage(regRequest);
-
-    return converter.fromEntity(regRequest);
+    return converter.fromEntity(requestEntity);
   }
 
   @Override
@@ -274,7 +286,8 @@ public class DefaultRegistrationRequestService
     account.setActive(true);
     account.setResetKey(tokenGenerator.generateToken());
     account.setLastUpdateTime(new Date());
-
+    account.setLabels(request.getLabels());
+    
     notificationFactory.createAccountActivatedMessage(request);
 
     request.setStatus(APPROVED);

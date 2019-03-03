@@ -25,6 +25,7 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
@@ -40,6 +41,7 @@ import it.infn.mw.iam.rcauth.x509.CertifcateRequestUtil;
 import it.infn.mw.iam.rcauth.x509.CertificateRequestHolder;
 
 @Component
+@ConditionalOnProperty(name = "rcauth.enabled", havingValue = "true")
 public class DefaultRCAuthCertificateRequestor implements RCAuthCertificateRequestor {
 
   public static final Logger LOG = LoggerFactory.getLogger(DefaultRCAuthCertificateRequestor.class);

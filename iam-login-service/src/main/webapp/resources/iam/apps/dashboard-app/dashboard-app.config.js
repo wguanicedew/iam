@@ -18,12 +18,12 @@ angular.module('dashboardApp').value('getUserInfo', getUserInfo);
 angular
     .module('dashboardApp')
     .config(
-        function($stateProvider, $urlRouterProvider, $httpProvider) {
+        function ($stateProvider, $urlRouterProvider, $httpProvider) {
 
             $httpProvider.interceptors.push('gatewayErrorInterceptor');
             $httpProvider.interceptors.push('sessionExpiredInterceptor');
 
-            $urlRouterProvider.otherwise(function($injector, $location) {
+            $urlRouterProvider.otherwise(function ($injector, $location) {
                 return '/home';
             });
 
@@ -32,7 +32,8 @@ angular
                     url: '/home',
                     resolve: {
                         user: loadLoggedUser,
-                        aup: loadAup
+                        aup: loadAup,
+                        labels: loadAccountLabelsAuthUser
                     },
                     views: {
                         content: {
@@ -44,7 +45,8 @@ angular
                     url: '/user/:id',
                     resolve: {
                         user: loadUser,
-                        aup: loadAup
+                        aup: loadAup,
+                        labels: loadAccountLabels
                     },
                     views: {
                         content: {
@@ -127,5 +129,13 @@ angular
 
             function loadAup(AupService) {
                 return AupService.getAup();
+            }
+
+            function loadAccountLabels(AccountLabelsService, $stateParams) {
+                return AccountLabelsService.getAccountLabels($stateParams.id);
+            }
+
+            function loadAccountLabelsAuthUser(AccountLabelsService) {
+                return AccountLabelsService.getAccountLabelsForAuthenticatedUser();
             }
         });

@@ -47,9 +47,9 @@ import it.infn.mw.iam.core.IamRegistrationRequestStatus;
 @RestController
 @Transactional
 @Profile("registration")
-public class RegistrationController {
+public class RegistrationApiController {
 
-  public static final Logger LOG = LoggerFactory.getLogger(RegistrationController.class);
+  public static final Logger LOG = LoggerFactory.getLogger(RegistrationApiController.class);
   private RegistrationRequestService service;
 
   private Optional<ExternalAuthenticationRegistrationInfo> getExternalAuthenticationInfo() {
@@ -70,7 +70,7 @@ public class RegistrationController {
   }
 
   @Autowired
-  public RegistrationController(RegistrationRequestService registrationService) {
+  public RegistrationApiController(RegistrationRequestService registrationService) {
     service = registrationService;
   }
 

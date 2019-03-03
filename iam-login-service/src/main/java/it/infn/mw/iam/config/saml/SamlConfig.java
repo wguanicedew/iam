@@ -144,7 +144,6 @@ import it.infn.mw.iam.authn.saml.util.SamlIdResolvers;
 import it.infn.mw.iam.authn.saml.util.SamlUserIdentifierResolver;
 import it.infn.mw.iam.authn.saml.util.metadata.ResearchAndScholarshipMetadataFilter;
 import it.infn.mw.iam.authn.saml.util.metadata.SirtfiAttributeMetadataFilter;
-import it.infn.mw.iam.config.saml.SamlConfig.IamProperties;
 import it.infn.mw.iam.config.saml.SamlConfig.ServerProperties;
 import it.infn.mw.iam.core.time.SystemTimeProvider;
 import it.infn.mw.iam.core.user.IamAccountService;
@@ -199,20 +198,6 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
   Timer metadataFetchTimer = new Timer();
 
   BasicParserPool basicParserPool = new BasicParserPool();
-
-  @ConfigurationProperties(prefix = "iam")
-  public static class IamProperties {
-
-    private String baseUrl;
-
-    public String getBaseUrl() {
-      return baseUrl;
-    }
-
-    public void setBaseUrl(String baseUrl) {
-      this.baseUrl = baseUrl;
-    }
-  }
 
   @ConfigurationProperties(prefix = "server")
   public static class ServerProperties {

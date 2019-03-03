@@ -15,12 +15,15 @@
  */
 package it.infn.mw.iam.core.expression;
 
+import static it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport.EXT_AUTHN_UNREGISTERED_USER_AUTH;
+
 import java.util.Optional;
 
 import org.springframework.security.core.Authentication;
 
 import it.infn.mw.iam.api.account.AccountUtils;
 import it.infn.mw.iam.api.requests.GroupRequestUtils;
+import it.infn.mw.iam.authn.AbstractExternalAuthenticationToken;
 import it.infn.mw.iam.core.IamGroupRequestStatus;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamGroupRequest;
@@ -37,6 +40,17 @@ public class IamSecurityExpressionMethods {
     this.authentication = authentication;
     this.accountUtils = accountUtils;
     this.groupRequestUtils = groupRequestUtils;
+  }
+
+  public boolean isExternallyAuthenticatedWithIssuer(String issuer) {
+    if (authentication.getAuthorities().contains(EXT_AUTHN_UNREGISTERED_USER_AUTH)) {
+
+      AbstractExternalAuthenticationToken token =
+          (AbstractExternalAuthenticationToken) authentication;
+      return token.toExernalAuthenticationRegistrationInfo().getIssuer().equals(issuer);
+    }
+
+    return false;
   }
 
   public boolean isAGroupManager() {

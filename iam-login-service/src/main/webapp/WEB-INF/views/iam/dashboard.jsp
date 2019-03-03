@@ -100,6 +100,7 @@
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/services/groups.service.js"></script>
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/services/group.service.js"></script>
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/services/group-requests.service.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/services/account-labels.service.js"></script>
   
   
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/controllers/registration.controller.js"></script>
@@ -130,6 +131,7 @@
   <script type="text/javascript"
     src="/resources/iam/apps/dashboard-app/components/user/linked-accounts/user.linked-accounts.component.js"></script>
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/user/x509/user.x509.component.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/user/labels/user.labels.component.js"></script>
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/user/user.component.js"></script>
   
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/users/userslist/users.userslist.component.js"></script>

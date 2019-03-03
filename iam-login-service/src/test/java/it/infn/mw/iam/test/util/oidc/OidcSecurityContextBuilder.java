@@ -29,7 +29,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import com.google.common.base.Strings;
 
 import it.infn.mw.iam.authn.oidc.OidcExternalAuthenticationToken;
-import it.infn.mw.iam.test.util.SecurityContextBuilderSupport;
+import it.infn.mw.iam.util.test.SecurityContextBuilderSupport;
 
 public class OidcSecurityContextBuilder extends SecurityContextBuilderSupport {
 

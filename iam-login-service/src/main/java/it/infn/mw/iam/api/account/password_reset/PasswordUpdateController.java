@@ -20,6 +20,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -40,7 +41,6 @@ import it.infn.mw.iam.api.account.password_reset.error.UserNotActiveOrNotVerifie
 import it.infn.mw.iam.api.scim.controller.utils.ValidationErrorMessageHelper;
 
 @RestController
-@RequestMapping(value = PasswordUpdateController.BASE_URL)
 @Transactional
 public class PasswordUpdateController {
 
@@ -52,7 +52,7 @@ public class PasswordUpdateController {
   private PasswordResetService service;
 
   @PreAuthorize("hasRole('USER')")
-  @RequestMapping(method = RequestMethod.POST)
+  @RequestMapping(method = RequestMethod.POST, path=BASE_URL)
   @ResponseBody
   public void updatePassword(@ModelAttribute @Valid PasswordDTO password,
       BindingResult validationResults) {
@@ -95,6 +95,12 @@ public class PasswordUpdateController {
   @ExceptionHandler(UserNotActiveOrNotVerified.class)
   @ResponseBody
   public String userNotActiveOrNotVerifiedError(HttpServletRequest req, Exception ex) {
+    return ex.getMessage();
+  }
+  
+  @ResponseStatus(value=HttpStatus.FORBIDDEN)
+  @ExceptionHandler(AccessDeniedException.class)
+  public String accessDeniedError(HttpServletRequest req, Exception ex) {
     return ex.getMessage();
   }
 }

@@ -40,6 +40,9 @@
                 <div class="box box-primary">
                     <div class="box-body">
                         <user-detail user="$ctrl.user" aup="$ctrl.aup"></user-detail>
+                        <div ng-if="$ctrl.isVoAdmin()">
+                            <user-labels user="$ctrl.user" labels="$ctrl.labels"></user-labels>
+                        </div>
                     </div>
                     <div class="box-footer">
                         <!-- Edit details button -->
@@ -48,6 +51,7 @@
                         <div ng-if="$ctrl.isVoAdmin()">
                             <!-- Enable/disable user buttons -->
                             <user-status user="$ctrl.user"></user-status>
+
                             <!-- Assign/Revoke VO admin privileges -->
                             <user-privileges user="$ctrl.user"></user-privileges>
                         </div>

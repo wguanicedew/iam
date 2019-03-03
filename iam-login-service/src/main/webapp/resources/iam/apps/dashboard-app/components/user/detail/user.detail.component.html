@@ -17,10 +17,12 @@
 -->
 <!-- Profile image -->
 <div ng-if="$ctrl.user.photos[0].value">
-    <img class="profile-user-img big-profile-user-img light-bordered-profile-img img-responsive img-circle" ng-src="{{$ctrl.user.photos[0].value}}" alt="User profile picture" />
+    <img class="profile-user-img big-profile-user-img light-bordered-profile-img img-responsive img-circle" ng-src="{{$ctrl.user.photos[0].value}}"
+        alt="User profile picture" />
 </div>
 <div ng-if="!$ctrl.user.photos">
-    <img class="profile-user-img big-profile-user-img light-bordered-profile-img img-responsive img-circle" ng-src="resources/iam/img/default-avatar.png" alt="User profile picture" />
+    <img class="profile-user-img big-profile-user-img light-bordered-profile-img img-responsive img-circle" ng-src="resources/iam/img/default-avatar.png"
+        alt="User profile picture" />
 </div>
 <!-- Full name -->
 <h3 class="profile-username text-center">{{$ctrl.user.name.formatted}}</h3>
@@ -45,11 +47,11 @@
                 </td>
                 <td class="text-right">
                     <span class="label label-success" ng-show="$ctrl.user.active">
-            <i class="fa fa-check"></i> Active
-          </span>
+                        <i class="fa fa-check"></i> Active
+                    </span>
                     <span class="label label-warning" ng-show="!$ctrl.user.active">
-            <i class="fa fa-check"></i> Disabled
-          </span>
+                        <i class="fa fa-check"></i> Disabled
+                    </span>
                 </td>
             </tr>
             <tr>
@@ -57,7 +59,7 @@
                     Created
                 </td>
                 <td class="text-right">
-                    <a>{{$ctrl.user.meta.created | relativeDate }}</a>
+                    {{$ctrl.user.meta.created | relativeDate }}
                 </td>
             </tr>
             <tr>
@@ -65,7 +67,7 @@
                     Updated
                 </td>
                 <td class="text-right">
-                    <a>{{$ctrl.user.meta.lastModified | relativeDate }}</a>
+                    {{$ctrl.user.meta.lastModified | relativeDate }}
                 </td>
             </tr>
             <tr ng-if="$ctrl.aupIsEnabled()">
