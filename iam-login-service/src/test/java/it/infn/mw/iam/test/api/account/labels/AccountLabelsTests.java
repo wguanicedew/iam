@@ -122,6 +122,12 @@ public class AccountLabelsTests extends TestSupport {
 
   @Test
   @WithMockUser(username = "test", roles = "USER")
+  public void aUserCanListHisLabels() throws Exception {
+    mvc.perform(get(RESOURCE, TEST_USER_UUID)).andExpect(OK);
+  }
+  
+  @Test
+  @WithMockUser(username = "test", roles = "USER")
   public void managingLabelsRequiresPrivilegedUser() throws Exception {
 
     mvc.perform(get(RESOURCE, TEST_100_USER_UUID)).andExpect(FORBIDDEN);

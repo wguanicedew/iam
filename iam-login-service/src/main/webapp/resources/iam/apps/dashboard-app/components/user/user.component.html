@@ -40,9 +40,7 @@
                 <div class="box box-primary">
                     <div class="box-body">
                         <user-detail user="$ctrl.user" aup="$ctrl.aup"></user-detail>
-                        <div ng-if="$ctrl.isVoAdmin()">
-                            <user-labels user="$ctrl.user" labels="$ctrl.labels"></user-labels>
-                        </div>
+                        <user-labels user="$ctrl.user" labels="$ctrl.labels"></user-labels>
                     </div>
                     <div class="box-footer">
                         <!-- Edit details button -->

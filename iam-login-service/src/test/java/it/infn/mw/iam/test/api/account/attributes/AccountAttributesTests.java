@@ -154,9 +154,18 @@ public class AccountAttributesTests {
 
   @Test
   @WithMockUser(username = "test", roles = "USER")
-  public void managingAttributesRequiresPrivilegedUser() throws Exception {
+  public void aUserCanListHisAttributes() throws Exception {
     IamAccount testAccount =
         repo.findByUsername(TEST_USER).orElseThrow(assertionError(EXPECTED_USER_NOT_FOUND));
+
+    mvc.perform(get(ACCOUNT_ATTR_URL_TEMPLATE, testAccount.getUuid())).andExpect(OK);
+  }
+  
+  @Test
+  @WithMockUser(username = "test", roles = "USER")
+  public void managingAttributesRequiresPrivilegedUser() throws Exception {
+    IamAccount testAccount =
+        repo.findByUsername(TEST_100_USER).orElseThrow(assertionError(EXPECTED_USER_NOT_FOUND));
 
 
     final String UUID = testAccount.getUuid();

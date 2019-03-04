@@ -15,6 +15,7 @@
  */
 package it.infn.mw.iam.core.web;
 
+import static it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport.EXT_AUTHN_UNREGISTERED_USER_AUTH;
 import static java.util.Objects.isNull;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +52,8 @@ public class DefaultStartRegistrationController {
   @RequestMapping(method = RequestMethod.GET, path = "/start-registration")
   public String startRegistration(Authentication authentication) {
 
-    if (!isNull(authentication) && authentication.isAuthenticated()) {
+    if (!isNull(authentication) && authentication.isAuthenticated()
+        && !authentication.getAuthorities().contains(EXT_AUTHN_UNREGISTERED_USER_AUTH)) {
       return "iam/dashboard";
     }
 
