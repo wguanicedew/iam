@@ -112,7 +112,10 @@
             bindings: {
                 user: "<"
             },
-            controller: PendingRequestsController,
+            controller: [
+                'Utils', 'GroupsService', 'GroupRequestsService', 'toaster', '$uibModal',
+                PendingRequestsController
+            ],
             controllerAs: '$ctrl'
         };
     }

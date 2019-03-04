@@ -388,3 +388,65 @@ body.skin-blue {
     margin-top: .5em;
     margin-left: 5px;
 }
+
+.label-pair {
+    margin-bottom: 2px;
+    max-width: 100%;
+    margin-right: .5em;
+}
+
+#group-labels-container {
+    margin-top: 5px;
+}
+
+.label-pair .label:first-child {
+    border-radius: 2px 0 0 2px;
+}
+
+.label-pair .label-value {
+    border-radius: 0 0 0 0;
+}
+
+.label-pair .label:last-child {
+    border-radius: 0 2px 2px 0;
+}
+
+.label-pair .label-key {
+    background-color: #bee1f4;
+    color: #00659c;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    margin-left: 0;
+    font-size: 12px;
+}
+
+.label-pair .label-value {
+    background-color: #7dc3e8;
+    color: #FFF;
+    margin-left: 0;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    font-size: 12px;
+}
+
+.label-pair .label-op {
+    padding-top: 4px;
+    padding-bottom: 4px;
+    margin-left: 0;
+    font-size: 12px;
+    display: none;
+}
+
+.label-pair:hover .label-op {
+    display: inline;
+}
+
+.label-pair .iam-label {
+    min-width: 50px;
+}
+
+[ng-click],
+[data-ng-click],
+[x-ng-click] {
+    cursor: pointer;
+}

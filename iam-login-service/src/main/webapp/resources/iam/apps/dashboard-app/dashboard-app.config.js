@@ -58,7 +58,8 @@ angular
                     'group', {
                         url: '/group/:id',
                         resolve: {
-                            group: loadGroup
+                            group: loadGroup,
+                            labels: loadGroupLabels
                         },
                         views: {
                             content: {
@@ -131,11 +132,15 @@ angular
                 return AupService.getAup();
             }
 
-            function loadAccountLabels(AccountLabelsService, $stateParams) {
-                return AccountLabelsService.getAccountLabels($stateParams.id);
+            function loadGroupLabels(LabelsService, $stateParams) {
+                return LabelsService.getGroupLabels($stateParams.id);
             }
 
-            function loadAccountLabelsAuthUser(AccountLabelsService) {
-                return AccountLabelsService.getAccountLabelsForAuthenticatedUser();
+            function loadAccountLabels(LabelsService, $stateParams) {
+                return LabelsService.getAccountLabels($stateParams.id);
+            }
+
+            function loadAccountLabelsAuthUser(LabelsService) {
+                return LabelsService.getAccountLabelsForAuthenticatedUser();
             }
         });

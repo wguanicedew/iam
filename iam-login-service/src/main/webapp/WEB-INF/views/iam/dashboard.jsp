@@ -100,7 +100,7 @@
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/services/groups.service.js"></script>
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/services/group.service.js"></script>
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/services/group-requests.service.js"></script>
-  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/services/account-labels.service.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/services/labels.service.js"></script>
   
   
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/controllers/registration.controller.js"></script>
@@ -154,5 +154,6 @@
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/group/subgroups/group.subgroups.component.js"></script>
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/group/members/group.members.component.js"></script>
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/group/managers/group.managers.component.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/group/labels/group.labels.component.js"></script>
 
 </body>

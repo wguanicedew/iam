@@ -1,0 +1,16 @@
+<div id="group-labels-container">
+    <p>
+        <a ng-click="$ctrl.setLabel()" ng-if="$ctrl.isAdmin()">Add label</a>
+    </p>
+    <span class="label-pair" ng-repeat="l in $ctrl.labels">
+        <span class="label-key label">
+            {{$ctrl.labelName(l)}}
+        </span>
+        <span class="label-value label" ng-if="l.value">
+            {{l.value}}
+        </span>
+        <span class="label-op label label-danger btn-sm btn" ng-click="$ctrl.deleteLabel(l)" ng-if="$ctrl.isAdmin()">
+            <i class="fa fa-times"></i>
+        </span>
+    </span>
+</div>

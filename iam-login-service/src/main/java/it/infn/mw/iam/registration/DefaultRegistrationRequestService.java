@@ -21,6 +21,7 @@ import static it.infn.mw.iam.core.IamRegistrationRequestStatus.APPROVED;
 import static it.infn.mw.iam.core.IamRegistrationRequestStatus.CONFIRMED;
 import static it.infn.mw.iam.core.IamRegistrationRequestStatus.NEW;
 import static it.infn.mw.iam.core.IamRegistrationRequestStatus.REJECTED;
+import static java.util.Objects.isNull;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -169,10 +170,12 @@ public class DefaultRegistrationRequestService
     requestEntity.setAccount(accountEntity);
     accountEntity.setRegistrationRequest(requestEntity);
     
-    Set<IamLabel> labels = dto.getLabels().stream().map(labelConverter::entityFromDto)
-        .collect(Collectors.toSet());
-    
-    requestEntity.setLabels(labels);
+    if (!isNull(dto.getLabels())) {
+      Set<IamLabel> labels = dto.getLabels().stream().map(labelConverter::entityFromDto)
+          .collect(Collectors.toSet());
+      
+      requestEntity.setLabels(labels);
+    }
     
     requestRepository.save(requestEntity);
 

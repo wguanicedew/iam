@@ -29,6 +29,11 @@
             <group-description group="$ctrl.group" />
         </div>
     </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <group-labels group="$ctrl.group" labels="$ctrl.labels" />
+        </div>
+    </div>
 </section>
 
 <!-- Main content -->
@@ -42,7 +47,8 @@
                             Subgroups
                         </div>
                     </uib-tab-heading>
-                    <group-subgroups group="$ctrl.group" load-group="$ctrl.loadGroup()" vo-admin="$ctrl.voAdmin" group-manager="$ctrl.groupManager" />
+                    <group-subgroups group="$ctrl.group" load-group="$ctrl.loadGroup()" vo-admin="$ctrl.voAdmin"
+                        group-manager="$ctrl.groupManager" />
                 </uib-tab>
                 <uib-tab index="2">
                     <uib-tab-heading>
@@ -50,7 +56,8 @@
                             Managers
                         </div>
                     </uib-tab-heading>
-                    <group-managers group="$ctrl.group" load-group="$ctrl.loadGroup()" vo-admin="$ctrl.voAdmin" group-manager="$ctrl.groupManager" />
+                    <group-managers group="$ctrl.group" load-group="$ctrl.loadGroup()" vo-admin="$ctrl.voAdmin"
+                        group-manager="$ctrl.groupManager" />
                 </uib-tab>
                 <uib-tab index="3">
                     <uib-tab-heading>
@@ -58,7 +65,8 @@
                             Members
                         </div>
                     </uib-tab-heading>
-                    <group-members group="$ctrl.group" load-group="$ctrl.loadGroup()" vo-admin="$ctrl.voAdmin" group-manager="$ctrl.groupManager" />
+                    <group-members group="$ctrl.group" load-group="$ctrl.loadGroup()" vo-admin="$ctrl.voAdmin"
+                        group-manager="$ctrl.groupManager" />
                 </uib-tab>
             </uib-tabset>
         </div>

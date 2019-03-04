@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-(function() {
+(function () {
     'use strict';
 
     function GroupController($state, Utils, GroupService) {
@@ -24,13 +24,13 @@
         self.voAdmin = false;
         self.groupManager = false;
 
-        self.$onInit = function() {
+        self.$onInit = function () {
             self.groupManager = Utils.isGroupManagerForGroup(self.group.id);
             self.voAdmin = Utils.isAdmin();
         };
 
         function loadGroup() {
-            return GroupService.getGroup(self.id).then(function(result) {
+            return GroupService.getGroup(self.id).then(function (result) {
                 self.group = result;
                 return result;
             });
@@ -39,7 +39,10 @@
 
     angular.module('dashboardApp').component('group', {
         templateUrl: '/resources/iam/apps/dashboard-app/components/group/group.component.html',
-        bindings: { group: '<' },
+        bindings: {
+            group: '<',
+            labels: '<'
+        },
         controller: [
             '$state', 'Utils', 'GroupService', GroupController
         ]
