@@ -144,7 +144,6 @@ public class AupIntegrationTests extends AupTestSupport {
           post("/iam/aup").contentType(APPLICATION_JSON).content(mapper.writeValueAsString(aup)))
       .andExpect(status().isForbidden())
       .andExpect(jsonPath("$.error", equalTo("Access is denied")));
-
   }
 
   @Test
@@ -320,8 +319,7 @@ public class AupIntegrationTests extends AupTestSupport {
       .andExpect(jsonPath("$.error", equalTo("Invalid AUP: the AUP text cannot be blank")));
 
   }
-
-
+  
   @Test
   @WithMockUser(username = "admin", roles = {"ADMIN", "USER"})
   public void aupUpdateWorks() throws JsonProcessingException, Exception {

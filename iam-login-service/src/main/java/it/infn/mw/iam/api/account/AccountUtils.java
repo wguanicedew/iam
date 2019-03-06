@@ -75,4 +75,8 @@ public class AccountUtils {
  
     return getAuthenticatedUserAccount(auth);
   }
+  
+  public Optional<IamAccount> getByAccountId(String accountId){
+    return accountRepo.findByUuid(accountId);
+  }
 }
