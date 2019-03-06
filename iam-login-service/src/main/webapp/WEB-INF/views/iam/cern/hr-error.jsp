@@ -15,16 +15,13 @@
     limitations under the License.
 
 --%>
-<%@ taglib prefix="authz" uri="http://www.springframework.org/security/tags"%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags/iam"%>
-<%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
-<t:page title="Register">
-  <h2 class="text-center">No HR record found</h2>
-  <p class="text-center"> 
-    No valid ${experiment} membership record found for user ${user.CERN_FIRST_NAME} ${user.CERN_LAST_NAME} 
-    (PersonID: ${user.CERN_PERSON_ID}).
-  </p>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<t:page title="HR DB API error">
+  <h2 class="text-center text-danger">${hrError.message}</h2>
+  <div class="text-center" id="exception-message">
+    <p>${hrError.message}</p>
+  </div>
   <div id="register-confirm-back-btn" class="row text-center">
     <a class="btn btn-primary" href='/reset-session'>Back to Login Page</a>
   </div>

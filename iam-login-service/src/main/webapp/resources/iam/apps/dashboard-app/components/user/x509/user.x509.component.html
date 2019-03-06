@@ -70,7 +70,7 @@
             <i class="fa fa-link"></i> Link certificate
         </button>
         <button class="btn btn-success btn-sm" name="btn-req-cert" ng-click="$ctrl.openRequestCertificateDialog()"
-            ng-if="$ctrl.rcauthEnabled">
+            ng-if="$ctrl.rcauthEnabled && $ctrl.isLoggedUser()">
             <i class="fa fa-plus"></i> Request certificate
         </button>
     </div>

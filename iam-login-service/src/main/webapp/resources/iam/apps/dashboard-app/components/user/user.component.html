@@ -22,7 +22,14 @@
             {{$ctrl.user.name.formatted}}
         </h1>
         <ol class="breadcrumb hidden-xs">
-            <li><a ui-sref="users"><i class="fa fa-user"></i> Users</a></li>
+            <li>
+                <a ui-sref="users" ng-if="$ctrl.isVoAdmin()">
+                    <i class="fa fa-user"></i> Users
+                </a>
+                <span ng-if="!$ctrl.isVoAdmin()">
+                    <i class="fa fa-user"></i> Users
+                </span>
+            </li>
             <li class="active"><a ui-sref="user({id: user.id})">{{$ctrl.user.name.formatted}}</a></li>
         </ol>
     </section>

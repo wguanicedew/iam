@@ -18,6 +18,8 @@ package it.infn.mw.iam.api.registration.cern;
 import static java.util.Objects.isNull;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
@@ -97,8 +99,11 @@ public class CernRegistrationController {
       if (hrService.hasValidExperimentParticipation(resolvePersonId(authentication))) {
         mav.setViewName("iam/cern/register");
       } else {
-        mav.addObject("cernHrUser",
-            ((SamlExternalAuthenticationToken) authentication).buildAuthnInfoMap(infoBuilder));
+        Map<String, String> userInfoMap =
+            ((SamlExternalAuthenticationToken) authentication).buildAuthnInfoMap(infoBuilder);
+        
+        mav.addObject("experiment", cernProperties.getExperimentName());
+        mav.addObject("user", userInfoMap);
         mav.setViewName("iam/cern/not-a-vo-member");
       }
     } else {

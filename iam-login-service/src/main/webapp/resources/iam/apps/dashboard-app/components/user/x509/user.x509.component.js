@@ -128,11 +128,17 @@
         };
     }
 
-    function UserX509Controller(toaster, $uibModal, ModalService, scimFactory) {
+    function UserX509Controller(toaster, $uibModal, Utils) {
         var self = this;
 
         self.accountLinkingEnabled = getAccountLinkingEnabled();
         self.rcauthEnabled = getRcauthEnabled();
+
+        self.isLoggedUser = isLoggedUser;
+
+        function isLoggedUser() {
+            return Utils.isMe(self.user.id);
+        }
 
         self.indigoUser = function () {
             return self.user['urn:indigo-dc:scim:schemas:IndigoUser'];
@@ -283,7 +289,7 @@
         },
         templateUrl: '/resources/iam/apps/dashboard-app/components/user/x509/user.x509.component.html',
         controller: [
-            'toaster', '$uibModal', 'ModalService', 'scimFactory', UserX509Controller
+            'toaster', '$uibModal', 'Utils', UserX509Controller
         ]
     });
 })();
