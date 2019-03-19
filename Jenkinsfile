@@ -67,7 +67,9 @@ pipeline {
                     -Dsonar.github.oauth=${GITHUB_ACCESS_TOKEN} \\
                     -Dsonar.host.url=${SONAR_HOST_URL} \\
                     -Dsonar.login=${SONAR_AUTH_TOKEN} \\
-                    -Dsonar.branch.name=${BRANCH_NAME}
+                    -Dsonar.branch.name=${BRANCH_NAME} \\
+                    -Dsonar.projectKey=indigo-iam_iam \\
+                    -Dsonar.organization=indigo-iam
                 """
               }
             }
@@ -102,7 +104,9 @@ pipeline {
                   install sonar:sonar \\
                   -Dsonar.host.url=${SONAR_HOST_URL} \\
                   -Dsonar.login=${SONAR_AUTH_TOKEN} \\
-                  -Dsonar.branch.name=${BRANCH_NAME}
+                  -Dsonar.branch.name=${BRANCH_NAME} \\
+                  -Dsonar.projectKey=indigo-iam_iam \\
+                  -Dsonar.organization=indigo-iam
                 """
               }
           }
