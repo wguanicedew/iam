@@ -44,31 +44,6 @@ pipeline {
       }
     }
 
-    stage('build') {
-      steps {
-        container('maven-runner') {
-          sh 'mvn -B clean compile'
-        }
-      }
-    }
-
-    stage('test') {
-      steps {
-        container('maven-runner') {
-          sh 'mvn -B clean test'
-        }
-      }
-
-      post {
-        always {
-          container('maven-runner') {
-            junit '**/target/surefire-reports/TEST-*.xml'
-            step( [ $class: 'JacocoPublisher' ] )
-          }
-        }
-      }
-    }
-
     stage('PR analysis'){
       when{
         not {
@@ -85,7 +60,7 @@ pipeline {
             withCredentials([string(credentialsId: '630f8e6c-0d31-4f96-8d82-a1ef536ef059', variable: 'GITHUB_ACCESS_TOKEN')]) {
               withSonarQubeEnv('sonarcloud.io'){
                 sh """
-                  mvn -B -U sonar:sonar \\
+                  mvn -B -U install sonar:sonar \\
                     -Dsonar.analysis.mode=preview \\
                     -Dsonar.github.pullRequest=${env.CHANGE_ID} \\
                     -Dsonar.github.repository=${organization}/${repo} \\
@@ -99,29 +74,49 @@ pipeline {
           }
         }
       }
+
+      post {
+        always {
+          container('maven-runner') {
+            junit '**/target/surefire-reports/TEST-*.xml'
+            step( [ $class: 'JacocoPublisher' ] )
+          }
+        }
+      }
     }
 
     stage('analysis'){
+
       when{
         environment name: 'CHANGE_URL', value: ''
       }
+
       steps {
-          container('maven-runner') {
-            script{
-              def checkstyle_opts = 'checkstyle:check -Dcheckstyle.config.location=google_checks.xml'
+        container('maven-runner') {
+          script{
+            def checkstyle_opts = 'checkstyle:check -Dcheckstyle.config.location=google_checks.xml'
 
               withSonarQubeEnv('sonarcloud.io'){
                 sh """
                   mvn -U ${checkstyle_opts} \\
-                  sonar:sonar \\
+                  install sonar:sonar \\
                   -Dsonar.host.url=${SONAR_HOST_URL} \\
                   -Dsonar.login=${SONAR_AUTH_TOKEN} \\
                   -Dsonar.branch.name=${BRANCH_NAME}
                 """
               }
-            }
           }
         }
+      }
+
+      post {
+        always {
+          container('maven-runner') {
+            junit '**/target/surefire-reports/TEST-*.xml'
+              step( [ $class: 'JacocoPublisher' ] )
+          }
+        }
+      }
     }
     
     stage('quality-gate') {
