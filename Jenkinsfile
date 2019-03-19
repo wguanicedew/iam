@@ -63,7 +63,7 @@ pipeline {
         always {
           container('maven-runner') {
             junit '**/target/surefire-reports/TEST-*.xml'
-            jacoco
+            step( [ $class: 'JacocoPublisher' ] )
           }
         }
       }
