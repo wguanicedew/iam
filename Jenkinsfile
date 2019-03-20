@@ -1,15 +1,4 @@
 #!/usr/bin/env groovy
-
-def readProperty(filename, prop) {
-  def value = sh script: "cat ${filename} | grep ${prop} | cut -d'=' -f2-", returnStdout: true
-  return value.trim()
-}
-
-def jsonParse(url, basicAuth, field) {
-  def value =  sh script: "curl -s -u '${basicAuth}' '${url}' | jq -r '${field}'", returnStdout: true
-  return value.trim()
-}
-
 pipeline {
 
   agent { label 'maven' }
@@ -21,10 +10,6 @@ pipeline {
 
   triggers { cron('@daily') }
 
-  parameters {
-    choice(name: 'RUN_SONAR', choices: 'yes\nno', description: 'Run Sonar static analysis')
-  }
-  
   environment {
     DOCKER_REGISTRY_HOST = "${env.DOCKER_REGISTRY_HOST}"
   }
@@ -48,30 +33,6 @@ pipeline {
       }
     }
 
-    stage('build') {
-      steps {
-        container('maven-runner') {
-          sh 'mvn -B clean compile'
-        }
-      }
-    }
-
-    stage('test') {
-      steps {
-        container('maven-runner') {
-          sh 'mvn -B clean test'
-        }
-      }
-
-      post {
-        always {
-          container('maven-runner') {
-            junit '**/target/surefire-reports/TEST-*.xml'
-          }
-        }
-      }
-    }
-
     stage('PR analysis'){
       when{
         not {
@@ -86,73 +47,79 @@ pipeline {
             def repo = tokens[tokens.size()-3]
 
             withCredentials([string(credentialsId: '630f8e6c-0d31-4f96-8d82-a1ef536ef059', variable: 'GITHUB_ACCESS_TOKEN')]) {
-              withSonarQubeEnv{
+              withSonarQubeEnv('sonarcloud.io'){
                 sh """
-                  mvn -B -U clean compile sonar:sonar \\
+                  mvn -B -U install sonar:sonar \\
                     -Dsonar.analysis.mode=preview \\
                     -Dsonar.github.pullRequest=${env.CHANGE_ID} \\
                     -Dsonar.github.repository=${organization}/${repo} \\
                     -Dsonar.github.oauth=${GITHUB_ACCESS_TOKEN} \\
                     -Dsonar.host.url=${SONAR_HOST_URL} \\
-                    -Dsonar.login=${SONAR_AUTH_TOKEN}
+                    -Dsonar.login=${SONAR_AUTH_TOKEN} \\
+                    -Dsonar.branch.name=${BRANCH_NAME} \\
+                    -Dsonar.projectKey=indigo-iam_iam \\
+                    -Dsonar.organization=indigo-iam
                 """
               }
             }
           }
         }
       }
+
+      post {
+        always {
+          container('maven-runner') {
+            junit '**/target/surefire-reports/TEST-*.xml'
+            step( [ $class: 'JacocoPublisher' ] )
+          }
+        }
+      }
     }
 
     stage('analysis'){
+
       when{
-        expression {
-          return "yes" == "${params.RUN_SONAR}"
-        }
-        anyOf { branch 'master'; branch 'develop' }
         environment name: 'CHANGE_URL', value: ''
       }
+
       steps {
-          container('maven-runner') {
-            script{
-              def cobertura_opts = 'cobertura:cobertura -Dmaven.test.failure.ignore -DfailIfNoTests=false -Dcobertura.report.format=xml'
-              def checkstyle_opts = 'checkstyle:check -Dcheckstyle.config.location=google_checks.xml'
-              def sonarBasicAuth
+        container('maven-runner') {
+          script{
+            def checkstyle_opts = 'checkstyle:check -Dcheckstyle.config.location=google_checks.xml'
 
-              withSonarQubeEnv{
-                sonarBasicAuth  = "${SONAR_AUTH_TOKEN}:"
-
-                sh "mvn clean -U ${cobertura_opts} ${checkstyle_opts} ${SONAR_MAVEN_GOAL} -Dsonar.host.url=${SONAR_HOST_URL} -Dsonar.login=${SONAR_AUTH_TOKEN}"
+              withSonarQubeEnv('sonarcloud.io'){
+                sh """
+                  mvn -U ${checkstyle_opts} \\
+                  install sonar:sonar \\
+                  -Dsonar.host.url=${SONAR_HOST_URL} \\
+                  -Dsonar.login=${SONAR_AUTH_TOKEN} \\
+                  -Dsonar.branch.name=${BRANCH_NAME} \\
+                  -Dsonar.projectKey=indigo-iam_iam \\
+                  -Dsonar.organization=indigo-iam
+                """
               }
-
-              def sonarServerUrl = readProperty('target/sonar/report-task.txt', 'serverUrl')
-              def ceTaskUrl = readProperty('target/sonar/report-task.txt', 'ceTaskUrl')
-
-              timeout(time: 5, unit: 'MINUTES') {
-                waitUntil {
-                  def result = jsonParse(ceTaskUrl, sonarBasicAuth, '.task.status')
-                  echo "Current CeTask status: ${result}"
-                  return "SUCCESS" == "${result}"
-                }
-              }
-
-              def analysisId = jsonParse(ceTaskUrl, sonarBasicAuth, '.task.analysisId')
-              echo "Analysis ID: ${analysisId}"
-
-              def url = "${sonarServerUrl}/api/qualitygates/project_status?analysisId=${analysisId}"
-              def qualityGate =  jsonParse(url, sonarBasicAuth, '')
-              echo "${qualityGate}"
-
-              def status =  jsonParse(url, sonarBasicAuth, '.projectStatus.status')
-
-              if ("ERROR" == "${status}") {
-                currentBuild.result = 'FAILURE'
-                error 'Quality Gate failure'
-              }
-            }
           }
         }
+      }
+
+      post {
+        always {
+          container('maven-runner') {
+            junit '**/target/surefire-reports/TEST-*.xml'
+              step( [ $class: 'JacocoPublisher' ] )
+          }
+        }
+      }
     }
     
+    stage('quality-gate') {
+      steps {
+        timeout(time: 5, unit: 'MINUTES') {
+          waitForQualityGate abortPipeline: true
+        }
+      }
+    }
+
     stage('package') {
       steps {
         container('maven-runner') {
