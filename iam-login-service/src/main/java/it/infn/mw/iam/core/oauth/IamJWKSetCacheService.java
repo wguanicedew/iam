@@ -38,6 +38,7 @@ import it.infn.mw.iam.authn.oidc.RestTemplateFactory;
 
 public class IamJWKSetCacheService extends JWKSetCacheService {
 
+  public static final String KEY_MATERIAL_ERROR_TEMPLATE = "Could not retrieve key material from {}";
   public static final Logger LOG = LoggerFactory.getLogger(IamJWKSetCacheService.class);
 
   private LoadingCache<String, JWTSigningAndValidationService> validators;
@@ -48,12 +49,12 @@ public class IamJWKSetCacheService extends JWKSetCacheService {
 
     this.validators = CacheBuilder.newBuilder()
       .expireAfterWrite(expirationTime, timeUnit)
-      .maximumSize(100)
+      .maximumSize(maxCacheSize)
       .build(new JWKSetVerifierFetcher(rtf));
 
     this.encrypters = CacheBuilder.newBuilder()
       .expireAfterWrite(expirationTime, timeUnit)
-      .maximumSize(100)
+      .maximumSize(maxCacheSize)
       .build(new JWKSetEncryptorFetcher(rtf));
   }
 
@@ -64,9 +65,9 @@ public class IamJWKSetCacheService extends JWKSetCacheService {
     try {
       return validators.get(jwksUri);
     } catch (UncheckedExecutionException | ExecutionException e) {
-      LOG.error("Could not retrieve key material from {}", jwksUri);
+      LOG.error(KEY_MATERIAL_ERROR_TEMPLATE, jwksUri);
       if (LOG.isDebugEnabled()) {
-        LOG.debug("Could not retrieve key material from {}", jwksUri, e);
+        LOG.debug(KEY_MATERIAL_ERROR_TEMPLATE, jwksUri, e);
       }
       return null;
     }
@@ -77,9 +78,9 @@ public class IamJWKSetCacheService extends JWKSetCacheService {
     try {
       return encrypters.get(jwksUri);
     } catch (UncheckedExecutionException | ExecutionException e) {
-      LOG.error("Could not retrieve key material from {}", jwksUri);
+      LOG.error(KEY_MATERIAL_ERROR_TEMPLATE, jwksUri);
       if (LOG.isDebugEnabled()) {
-        LOG.debug("Could not retrieve key material from {}", jwksUri, e);
+        LOG.debug(KEY_MATERIAL_ERROR_TEMPLATE, jwksUri, e);
       }
       return null;
     }

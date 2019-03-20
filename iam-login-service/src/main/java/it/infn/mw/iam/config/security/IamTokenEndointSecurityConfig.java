@@ -38,6 +38,8 @@ import org.springframework.security.web.context.SecurityContextPersistenceFilter
 @Order(-1)
 public class IamTokenEndointSecurityConfig extends WebSecurityConfigurerAdapter {
 
+  public static final String TOKEN_ENDPOINT = "/token";
+  
   @Autowired
   private CorsFilter corsFilter;
 
@@ -56,7 +58,7 @@ public class IamTokenEndointSecurityConfig extends WebSecurityConfigurerAdapter 
   @Bean
   public ClientCredentialsTokenEndpointFilter ccFilter() throws Exception {
     ClientCredentialsTokenEndpointFilter filter =
-        new ClientCredentialsTokenEndpointFilter("/token");
+        new ClientCredentialsTokenEndpointFilter(TOKEN_ENDPOINT);
     filter.setAuthenticationManager(authenticationManager());
     return filter;
   }
@@ -67,14 +69,14 @@ public class IamTokenEndointSecurityConfig extends WebSecurityConfigurerAdapter 
     // @formatter:off
     http
         .requestMatchers()
-            .antMatchers("/token")
+            .antMatchers(TOKEN_ENDPOINT)
             .and()
         .httpBasic()
             .authenticationEntryPoint(authenticationEntryPoint)
             .and()
         .authorizeRequests()
-            .antMatchers(OPTIONS, "/token").permitAll()
-            .antMatchers("/token").authenticated()
+            .antMatchers(OPTIONS, TOKEN_ENDPOINT).permitAll()
+            .antMatchers(TOKEN_ENDPOINT).authenticated()
             .and()
         .addFilterBefore(ccFilter(), AbstractPreAuthenticatedProcessingFilter.class)   
         .addFilterBefore(corsFilter, SecurityContextPersistenceFilter.class)
@@ -90,6 +92,4 @@ public class IamTokenEndointSecurityConfig extends WebSecurityConfigurerAdapter 
     // @formatter:on
 
   }
-
-
 }

@@ -54,7 +54,7 @@ public class DefaultRCAuthTokenResponseVerifier implements RCAuthTokenResponseVe
     this.iamProperties = iamProperties;
   }
 
-  protected void checkIssuer(ServerConfiguration serverConfiguration, JWTClaimsSet idTokenClaims) {
+  protected void checkIssuer(JWTClaimsSet idTokenClaims) {
     String issuer = idTokenClaims.getIssuer();
     if (isNull(issuer)) {
       throw new RCAuthError("Required claim not found in token: iss");
@@ -87,9 +87,6 @@ public class DefaultRCAuthTokenResponseVerifier implements RCAuthTokenResponseVe
     }
   }
 
-  private void checkAudience(JWTClaimsSet idTokenClaims) {
-    // TODO: implement me
-  }
 
   @Override
   public void verify(ServerConfiguration serverConfiguration, RCAuthTokenResponse tokenResponse) {
@@ -101,9 +98,8 @@ public class DefaultRCAuthTokenResponseVerifier implements RCAuthTokenResponseVe
       SignedJWT idTokenJwt = SignedJWT.parse(idTokenString);
       JWTClaimsSet idTokenClaims = idTokenJwt.getJWTClaimsSet();
 
-      checkIssuer(serverConfiguration, idTokenClaims);
+      checkIssuer(idTokenClaims);
       checkTemporalValidity(idTokenClaims);
-      checkAudience(idTokenClaims);
       validateTokenSignature(serverConfiguration, idTokenJwt);
 
     } catch (ParseException e) {

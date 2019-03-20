@@ -39,8 +39,7 @@ public class FormClientCredentialsAuthenticationFilter
   public FormClientCredentialsAuthenticationFilter(String pattern, AuthenticationEntryPoint aep) {
     super(new AntPathRequestMatcher(pattern));
     this.authenticationEntryPoint = aep;
-    setAuthenticationFailureHandler(
-        (req, res, e) -> authenticationEntryPoint.commence(req, res, e));
+    setAuthenticationFailureHandler(authenticationEntryPoint::commence);
     setContinueChainBeforeSuccessfulAuthentication(true);
     setAuthenticationSuccessHandler((req, res, a) -> {
     });

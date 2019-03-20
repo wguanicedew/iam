@@ -38,9 +38,6 @@ public class RCAuthTokenResponse implements Serializable{
 
   String scope;
 
-  public RCAuthTokenResponse() {
-  }
-
   @JsonProperty("access_token")
   public String getAccessToken() {
     return accessToken;

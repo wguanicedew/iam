@@ -17,6 +17,7 @@ package it.infn.mw.iam.persistence.model;
 
 import java.io.Serializable;
 
+import javax.annotation.Generated;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
@@ -52,6 +53,7 @@ public class IamAttribute implements Serializable{
   }
 
   @Override
+  @Generated("eclipse")
   public int hashCode() {
     final int prime = 31;
     int result = 1;
@@ -60,6 +62,7 @@ public class IamAttribute implements Serializable{
   }
 
   @Override
+  @Generated("eclipse")
   public boolean equals(Object obj) {
     if (this == obj)
       return true;

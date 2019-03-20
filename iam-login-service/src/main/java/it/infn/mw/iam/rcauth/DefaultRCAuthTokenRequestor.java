@@ -108,7 +108,7 @@ public class DefaultRCAuthTokenRequestor implements RCAuthTokenRequestor {
     tokenRequestParams.add("client_secret", rcAuthProperties.getClientSecret());
     tokenRequestParams.add("code", code);
 
-    return new HttpEntity<MultiValueMap<String, String>>(tokenRequestParams, headers);
+    return new HttpEntity<>(tokenRequestParams, headers);
   }
 
 

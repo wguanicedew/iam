@@ -30,7 +30,8 @@ public class CertificateRequestHolder implements Serializable{
   
   
   final KeyPair keyPair;
-  final PKCS10CertificationRequest request;
+  
+  final transient PKCS10CertificationRequest request;
 
   private CertificateRequestHolder(KeyPair keyPair, PKCS10CertificationRequest request) {
     this.keyPair = keyPair;

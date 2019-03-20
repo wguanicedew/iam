@@ -15,6 +15,8 @@
  */
 package it.infn.mw.iam.test.api.account.password;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyString;
 
 import java.util.Optional;
@@ -143,6 +145,8 @@ public class PasswordUpdateServiceTests {
     Mockito.when(accountRepository.findByUsername(USERNAME)).thenReturn(Optional.of(account));
 
     updateService.updatePassword(USERNAME, OLD_PASSWORD, NEW_PASSWORD);
+
+    assertThat(encoder.matches(NEW_PASSWORD, account.getPassword()), is(true));
 
   }
 }
