@@ -50,7 +50,6 @@ pipeline {
               withSonarQubeEnv('sonarcloud.io'){
                 sh """
                   mvn -B -U install sonar:sonar \\
-                    -Dsonar.analysis.mode=preview \\
                     -Dsonar.github.pullRequest=${env.CHANGE_ID} \\
                     -Dsonar.github.repository=${organization}/${repo} \\
                     -Dsonar.github.oauth=${GITHUB_ACCESS_TOKEN} \\
