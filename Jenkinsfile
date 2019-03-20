@@ -57,6 +57,7 @@ pipeline {
                     -Dsonar.host.url=${SONAR_HOST_URL} \\
                     -Dsonar.login=${SONAR_AUTH_TOKEN} \\
                     -Dsonar.branch.name=${BRANCH_NAME} \\
+                    -Dsonar.branch.target=develop \\
                     -Dsonar.projectKey=indigo-iam_iam \\
                     -Dsonar.organization=indigo-iam
                 """
@@ -94,6 +95,7 @@ pipeline {
                   -Dsonar.host.url=${SONAR_HOST_URL} \\
                   -Dsonar.login=${SONAR_AUTH_TOKEN} \\
                   -Dsonar.branch.name=${BRANCH_NAME} \\
+                  -Dsonar.branch.target=develop \\
                   -Dsonar.projectKey=indigo-iam_iam \\
                   -Dsonar.organization=indigo-iam
                 """
