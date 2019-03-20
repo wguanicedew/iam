@@ -39,12 +39,12 @@ import org.bouncycastle.util.io.pem.PemWriter;
 
 import eu.emi.security.authn.x509.helpers.proxy.ProxyGeneratorHelper;
 
-public class CertifcateRequestUtil {
+public class CertificateRequestUtil {
   
   public static final String BEGIN_CERT_REQ = "-----BEGIN CERTIFICATE REQUEST-----";
   public static final String END_CERT_REQ = "-----END CERTIFICATE REQUEST-----";
 
-  private CertifcateRequestUtil() {
+  private CertificateRequestUtil() {
     // prevent instantiation
   }
 

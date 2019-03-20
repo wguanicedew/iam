@@ -16,7 +16,7 @@
 package it.infn.mw.iam.rcauth;
 
 import static it.infn.mw.iam.rcauth.RCAuthController.CALLBACK_PATH;
-import static it.infn.mw.iam.rcauth.x509.CertifcateRequestUtil.buildCertificateRequest;
+import static it.infn.mw.iam.rcauth.x509.CertificateRequestUtil.buildCertificateRequest;
 import static java.lang.String.format;
 import static java.util.Objects.isNull;
 
@@ -63,6 +63,8 @@ public class DefaultRcAuthRequestService implements RCAuthRequestService {
   public static final String REDIRECT_URI_PARAM = "redirect_uri";
   public static final String IDP_HINT_PARAM = "idphint";
 
+  public static final String CERT_SUBJECT_CLAIM_NOT_FOUND_ERROR =
+      "Certificate subject claim not found in id token!";
   public static final String CTXT_NOT_FOUND_ERROR = "RCAuth context not found in session!";
   public static final String STATE_MISMATCH_ERROR = "Invalid response: state parameter mismatch";
   public static final String DEFAULT_SCOPE = "openid profile email edu.uiuc.ncsa.myproxy.getcert";
@@ -88,6 +90,10 @@ public class DefaultRcAuthRequestService implements RCAuthRequestService {
     this.tokenRequestor = requestor;
     this.certRequestor = certRequestor;
     rng = new SecureRandom();
+  }
+
+  private Supplier<RCAuthError> certSubjectClaimNotFoundError() {
+    return () -> new RCAuthError(CERT_SUBJECT_CLAIM_NOT_FOUND_ERROR);
   }
 
   private Supplier<RCAuthError> contextNotFoundError() {
@@ -147,12 +153,12 @@ public class DefaultRcAuthRequestService implements RCAuthRequestService {
 
   }
 
-  protected String getCertificateSubject(RCAuthTokenResponse tokenResponse) {
+  protected Optional<String> getCertificateSubject(RCAuthTokenResponse tokenResponse) {
     SignedJWT idToken;
 
     try {
       idToken = SignedJWT.parse(tokenResponse.getIdToken());
-      return idToken.getJWTClaimsSet().getStringClaim(CERT_SUBJECT_CLAIM);
+      return Optional.ofNullable(idToken.getJWTClaimsSet().getStringClaim(CERT_SUBJECT_CLAIM));
     } catch (ParseException e) {
       throw new RCAuthError("Error parsing id token", e);
     }
@@ -175,7 +181,8 @@ public class DefaultRcAuthRequestService implements RCAuthRequestService {
 
     ctxt.setTokenResponse(tokenRequestor.getAccessToken(response.getCode()));
 
-    String certSubject = getCertificateSubject(ctxt.getTokenResponse());
+    String certSubject =
+        getCertificateSubject(ctxt.getTokenResponse()).orElseThrow(certSubjectClaimNotFoundError());
 
     try {
 

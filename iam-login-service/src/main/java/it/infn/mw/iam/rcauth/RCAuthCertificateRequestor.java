@@ -19,6 +19,7 @@ import java.security.cert.X509Certificate;
 
 import it.infn.mw.iam.rcauth.x509.CertificateRequestHolder;
 
+@FunctionalInterface
 public interface RCAuthCertificateRequestor {
   
   X509Certificate getCertificate(String accessToken, CertificateRequestHolder holder);

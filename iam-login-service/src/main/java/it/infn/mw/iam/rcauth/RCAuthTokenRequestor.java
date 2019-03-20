@@ -15,6 +15,7 @@
  */
 package it.infn.mw.iam.rcauth;
 
+@FunctionalInterface
 public interface RCAuthTokenRequestor {
 
   RCAuthTokenResponse getAccessToken(String code);

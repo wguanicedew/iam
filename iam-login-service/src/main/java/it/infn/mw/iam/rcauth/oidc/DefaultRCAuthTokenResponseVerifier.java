@@ -107,7 +107,4 @@ public class DefaultRCAuthTokenResponseVerifier implements RCAuthTokenResponseVe
     }
 
   }
-
-
-
 }

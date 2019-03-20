@@ -33,7 +33,10 @@ import org.springframework.core.io.ClassPathResource;
 
 import com.nimbusds.jose.JWSAlgorithm;
 
-public class RCAuthTestSupport {
+import it.infn.mw.iam.test.ext_authn.x509.X509TestSupport;
+import it.infn.mw.iam.test.util.oidc.IdTokenBuilder;
+
+public class RCAuthTestSupport extends X509TestSupport {
 
   public static final String IAM_BASE_URL = "https://iam.example";
 
@@ -48,9 +51,12 @@ public class RCAuthTestSupport {
 
   public static final String AUTHORIZATION_URI = "https://rcauth.example/oauth2/authorize";
   public static final String TOKEN_URI = "https://rcauth.example/oauth2/token";
+  public static final String GET_CERT_URI = "https://rcauth.example/oauth2/getcert";
+  
   public static final String JWK_URI = "https://rcauth.example/oauth2/jwk";
   
   public static final String RANDOM_AUTHZ_CODE = "123";
+  public static final String RANDOM_ACCESS_TOKEN = "i_am_an_access_token";
   
   public static final String SUB = "sub-123";
   
@@ -60,9 +66,14 @@ public class RCAuthTestSupport {
   
   public static final String NONCE = "LolaNonce";
   
+  public static final String IAM_ENTITY_ID = "iam-entity-id";
+  
+  
   
   protected JWKSetKeyStore rcAuthKeyStore = rcAuthKeyStore();
   protected JWSAlgorithm jwsAlgo = JWSAlgorithm.RS256;
+  
+  protected IdTokenBuilder tokenBuilder = new IdTokenBuilder(rcAuthKeyStore, jwsAlgo);
   
   public RCAuthTestSupport() {
     // TODO Auto-generated constructor stub
@@ -101,4 +112,6 @@ public class RCAuthTestSupport {
     ks.setLocation(new ClassPathResource("/oidc/mock_op_keys.jks"));
     return ks;
   }
+  
+  
 }

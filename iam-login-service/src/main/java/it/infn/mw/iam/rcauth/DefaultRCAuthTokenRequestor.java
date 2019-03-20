@@ -156,7 +156,7 @@ public class DefaultRCAuthTokenRequestor implements RCAuthTokenRequestor {
 
       LOG.debug(e.getMessage(), e);
 
-      if (e.getStatusCode() != null && e.getStatusCode().equals(BAD_REQUEST)) {
+      if (e.getStatusCode().equals(BAD_REQUEST)) {
         parseErrorResponse(e).ifPresent(er -> {
 
           String errorMessage = String.format("Token request error: %s '%s'", er.getError(),

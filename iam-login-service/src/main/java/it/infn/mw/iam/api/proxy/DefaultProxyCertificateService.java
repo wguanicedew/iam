@@ -73,9 +73,9 @@ public class DefaultProxyCertificateService implements ProxyCertificateService {
         IamX509ProxyCertificate proxy = c.getProxy();
 
         if (!isNull(request.getIssuer())) {
-          if (!request.getIssuer().equals(c.getIssuerDn())) {
-            continue;
-          }
+          if (request.getIssuer().equals(c.getIssuerDn())) {
+            return Optional.of(proxy);
+          }  
         } else {
           return Optional.of(proxy);
         }

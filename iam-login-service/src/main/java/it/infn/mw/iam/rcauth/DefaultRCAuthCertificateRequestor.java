@@ -37,8 +37,8 @@ import org.springframework.web.client.RestTemplate;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 import it.infn.mw.iam.authn.oidc.RestTemplateFactory;
-import it.infn.mw.iam.rcauth.x509.CertifcateRequestUtil;
 import it.infn.mw.iam.rcauth.x509.CertificateRequestHolder;
+import it.infn.mw.iam.rcauth.x509.CertificateRequestUtil;
 
 @Component
 @ConditionalOnProperty(name = "rcauth.enabled", havingValue = "true")
@@ -60,6 +60,7 @@ public class DefaultRCAuthCertificateRequestor implements RCAuthCertificateReque
     HttpHeaders headers = new HttpHeaders();
 
     headers.add("Authorization", format("Bearer %s", accessToken));
+    
 
     MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
 
@@ -82,7 +83,7 @@ public class DefaultRCAuthCertificateRequestor implements RCAuthCertificateReque
 
     try {
 
-      String certRequest = CertifcateRequestUtil.certRequestToBase64String(holder.getRequest());
+      String certRequest = CertificateRequestUtil.certRequestToBase64String(holder.getRequest());
 
       String responseBody = rt.postForObject(rcauthGetCertUrl(),
           prepareCertificateRequest(accessToken, certRequest), String.class);

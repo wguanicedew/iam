@@ -94,7 +94,6 @@ public class RCAuthIntegrationTests extends RCAuthTestSupport {
         UriComponentsBuilder.fromHttpUrl(result.getResponse().getRedirectedUrl()).build();
 
     assertThat(uc.getHost(), is(RCAUTH_HOST));
-
-
   }
+  
 }
