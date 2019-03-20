@@ -37,7 +37,7 @@ public class RCAuthSecurityConfig extends WebSecurityConfigurerAdapter {
     // @formatter:off
     http
       .requestMatchers()
-        .antMatchers("/rcauth**", "/rcauth/**")
+        .antMatchers("/rcauth/**", "/rcauth**")
       .and()
         .exceptionHandling()
           .authenticationEntryPoint(authenticationEntryPoint())

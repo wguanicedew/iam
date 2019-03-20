@@ -104,7 +104,7 @@ public class AccountGroupManagerController {
     service.removeManagedGroupForAccount(account, group);
   }
 
-  @RequestMapping(value = "/iam/group/{groupId}/group-managers")
+  @RequestMapping(value = "/iam/group/{groupId}/group-managers", method=RequestMethod.GET)
   @PreAuthorize("hasRole('ADMIN') or #iam.isGroupManager(#groupId)")
   public List<ScimUser> getGroupManagersForGroup(@PathVariable String groupId) {
     IamGroup group = groupRepository.findByUuid(groupId)

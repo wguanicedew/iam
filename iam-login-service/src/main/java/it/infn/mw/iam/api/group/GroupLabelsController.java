@@ -20,7 +20,6 @@ import static java.lang.String.format;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
 import java.util.List;
@@ -52,67 +51,68 @@ import it.infn.mw.iam.persistence.model.IamGroup;
 @PreAuthorize("hasRole('ADMIN')")
 @RequestMapping(GroupLabelsController.RESOURCE)
 public class GroupLabelsController {
-  
+
   public static final String RESOURCE = "/iam/group/{id}/labels";
   public static final String INVALID_LABEL_TEMPLATE = "Invalid label: %s";
-  
+
   final IamGroupService service;
   final LabelDTOConverter converter;
-  
+
   @Autowired
   public GroupLabelsController(IamGroupService service, LabelDTOConverter converter) {
     this.service = service;
     this.converter = converter;
   }
-  
+
   private void handleValidationError(BindingResult result) {
     if (result.hasErrors()) {
-      throw new InvalidLabelError(
-          format(INVALID_LABEL_TEMPLATE, stringifyValidationError(result)));
+      throw new InvalidLabelError(format(INVALID_LABEL_TEMPLATE, stringifyValidationError(result)));
     }
   }
-  
-  @RequestMapping(method=GET)
+
+  @RequestMapping(method = GET)
   @PreAuthorize("hasRole('ADMIN') or #iam.isGroupManager(#id)")
-  public List<LabelDTO> getLabels(@PathVariable String id){
-    
-    IamGroup group = service.findByUuid(id).orElseThrow(()->NoSuchGroupError.forUuid(id));
-    
+  public List<LabelDTO> getLabels(@PathVariable String id) {
+
+    IamGroup group = service.findByUuid(id).orElseThrow(() -> NoSuchGroupError.forUuid(id));
+
     List<LabelDTO> results = Lists.newArrayList();
-    
+
     group.getLabels().forEach(l -> results.add(converter.dtoFromEntity(l)));
-    
+
     return results;
   }
-  
-  @RequestMapping(method= {PUT,POST})
-  public void setLabel(@PathVariable String id, @RequestBody @Validated LabelDTO label, BindingResult validationResult) {
+
+  @RequestMapping(method = PUT)
+  public void setLabel(@PathVariable String id, @RequestBody @Validated LabelDTO label,
+      BindingResult validationResult) {
     handleValidationError(validationResult);
-    IamGroup group = service.findByUuid(id).orElseThrow(()->NoSuchGroupError.forUuid(id));
-    
+    IamGroup group = service.findByUuid(id).orElseThrow(() -> NoSuchGroupError.forUuid(id));
+
     service.addLabel(group, converter.entityFromDto(label));
   }
-  
-  @RequestMapping(method= DELETE)
+
+  @RequestMapping(method = DELETE)
   @ResponseStatus(NO_CONTENT)
-  public void deleteLabel(@PathVariable String id, @Validated LabelDTO label, BindingResult validationResult) {
+  public void deleteLabel(@PathVariable String id, @Validated LabelDTO label,
+      BindingResult validationResult) {
     handleValidationError(validationResult);
-    IamGroup group = service.findByUuid(id).orElseThrow(()->NoSuchGroupError.forUuid(id));
+    IamGroup group = service.findByUuid(id).orElseThrow(() -> NoSuchGroupError.forUuid(id));
     service.deleteLabel(group, converter.entityFromDto(label));
   }
-  
+
   @ResponseStatus(code = HttpStatus.BAD_REQUEST)
   @ExceptionHandler(InvalidLabelError.class)
   @ResponseBody
-  public ErrorDTO handleValidationError(InvalidLabelError e) {    
+  public ErrorDTO handleValidationError(InvalidLabelError e) {
     return ErrorDTO.fromString(e.getMessage());
   }
-  
+
   @ResponseStatus(code = HttpStatus.NOT_FOUND)
   @ExceptionHandler(NoSuchGroupError.class)
   @ResponseBody
   public ErrorDTO handleNotFoundError(NoSuchGroupError e) {
     return ErrorDTO.fromString(e.getMessage());
   }
-  
+
 }

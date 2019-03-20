@@ -74,7 +74,7 @@ public class IamUserInfoEndpoint {
 
   @PreAuthorize("hasRole('ROLE_USER') and #oauth2.hasScope('" + SystemScopeService.OPENID_SCOPE
       + "')")
-  @RequestMapping(method = {RequestMethod.GET, RequestMethod.POST},
+  @RequestMapping(method = RequestMethod.GET,
       produces = {MediaType.APPLICATION_JSON_VALUE})
   public String getInfo(
       @RequestParam(value = "claims", required = false) String claimsRequestJsonString,

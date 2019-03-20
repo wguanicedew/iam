@@ -19,7 +19,6 @@ import static it.infn.mw.iam.api.utils.ValidationErrorUtils.stringifyValidationE
 import static java.lang.String.format;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
 import java.util.List;
@@ -33,6 +32,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -69,7 +69,7 @@ public class AccountAttributesController {
     }
   }
 
-  @RequestMapping(value = "/iam/account/{id}/attributes")
+  @RequestMapping(value = "/iam/account/{id}/attributes", method=RequestMethod.GET)
   @PreAuthorize("hasRole('ADMIN') or #iam.isUser(#id)")
   public List<AttributeDTO> getAttributes(@PathVariable String id) {
 
@@ -81,7 +81,7 @@ public class AccountAttributesController {
     return results;
   }
 
-  @RequestMapping(value = "/iam/account/{id}/attributes", method= {POST,PUT})
+  @RequestMapping(value = "/iam/account/{id}/attributes", method= PUT)
   @PreAuthorize("hasRole('ADMIN')")
   public void setAttribute(@PathVariable String id, @RequestBody @Validated AttributeDTO attribute,
       final BindingResult validationResult) {

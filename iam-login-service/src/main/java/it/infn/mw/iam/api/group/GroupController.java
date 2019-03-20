@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -106,7 +107,7 @@ public class GroupController {
     return converter.dtoFromEntity(entity);  
   }
   
-  @RequestMapping(value = "/iam/group/{id}/attributes")
+  @RequestMapping(value = "/iam/group/{id}/attributes", method=RequestMethod.GET)
   @PreAuthorize("hasRole('ADMIN') or #iam.isGroupManager(#id)")
   public List<AttributeDTO> getAttributes(@PathVariable String id){
     
@@ -118,7 +119,7 @@ public class GroupController {
     return results;
   }
   
-  @RequestMapping(value = "/iam/group/{id}/attributes", method= {PUT, POST})
+  @RequestMapping(value = "/iam/group/{id}/attributes", method= PUT)
   @PreAuthorize("hasRole('ADMIN')")
   public void setAttribute(@PathVariable String id, @RequestBody @Validated AttributeDTO attribute, final BindingResult validationResult) {
     handleValidationError(INVALID_ATTRIBUTE,validationResult);
