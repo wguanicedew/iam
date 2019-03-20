@@ -3,10 +3,6 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <prerequisites>
-    <maven>3.3.0</maven>
-  </prerequisites>
-
   <groupId>it.infn.mw</groupId>
   <artifactId>iam-parent</artifactId>
   <version>1.5.0.rc0</version>
@@ -46,6 +42,7 @@
     <license-maven-plugin.version>3.0</license-maven-plugin.version>
     <jacoco-plugin.version>0.8.3</jacoco-plugin.version>
 
+    <maven-enforcer-plugin.version>3.0.0-M2</maven-enforcer-plugin.version>
     <resource.delimiter>@</resource.delimiter>
     <sonar.coverage.exclusions>iam-persistence/**/*,iam-test-client/**/*,iam-test-protected-resource/**/*</sonar.coverage.exclusions>
   </properties>
@@ -242,6 +239,29 @@
     </pluginManagement>
 
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>${maven-enforcer-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>enforce-maven</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireJavaVersion>
+                  <version>1.8.0</version>
+                </requireJavaVersion>
+                <requireMavenVersion>
+                  <version>3.3.0</version>
+                </requireMavenVersion>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
