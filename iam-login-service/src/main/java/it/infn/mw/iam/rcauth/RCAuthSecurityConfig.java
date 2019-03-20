@@ -43,7 +43,7 @@ public class RCAuthSecurityConfig extends WebSecurityConfigurerAdapter {
           .authenticationEntryPoint(authenticationEntryPoint())
       .and()
         .authorizeRequests()
-          .antMatchers("/rcauth**", "/rcauth/**")
+          .antMatchers("/rcauth/**","/rcauth**")
             .hasRole("USER");
     // @formatter:on
   }
