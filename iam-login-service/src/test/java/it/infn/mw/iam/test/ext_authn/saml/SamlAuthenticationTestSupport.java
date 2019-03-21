@@ -16,7 +16,7 @@
 package it.infn.mw.iam.test.ext_authn.saml;
 
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -100,7 +100,7 @@ public class SamlAuthenticationTestSupport {
   public void setup() {
     mvc = MockMvcBuilders.webAppContextSetup(context)
       .apply(springSecurity())
-      .alwaysDo(print())
+      .alwaysDo(log())
       .build();
   }
 

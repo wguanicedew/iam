@@ -24,7 +24,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.After;
@@ -100,7 +100,7 @@ public class RegistrationFlowNotificationTests {
   @Before
   public void setUp() throws InterruptedException {
     mvc = MockMvcBuilders.webAppContextSetup(context)
-      .alwaysDo(print())
+      .alwaysDo(log())
       .apply(springSecurity())
       .build();
   }
