@@ -355,6 +355,7 @@
           <excludes>
             <exclude>it/infn/mw/iam/github/**/*.class</exclude>
             <exclude>it/infn/mw/iam/config/github/**/*.class</exclude>
+            <exclude>it/infn/mw/iam/api/registration/cern/mock/*.class</exclude>
           </excludes>
         </configuration>
         <executions>

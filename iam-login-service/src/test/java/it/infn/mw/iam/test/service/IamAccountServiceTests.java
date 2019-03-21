@@ -680,10 +680,10 @@ public class IamAccountServiceTests extends IamAccountServiceTestSupport {
     accountService.createAccount(account);
 
     for (IamSshKey key: account.getSshKeys()) {
-      if (key.getValue().equals(TEST_SSH_KEY_1)) {
+      if (key.getValue().equals(TEST_SSH_KEY_1.getValue())) {
         assertTrue(key.isPrimary());
       }
-      if (key.getValue().equals(TEST_SSH_KEY_2)) {
+      if (key.getValue().equals(TEST_SSH_KEY_2.getValue())) {
         assertFalse(key.isPrimary());
       }
     }
@@ -697,10 +697,10 @@ public class IamAccountServiceTests extends IamAccountServiceTestSupport {
     accountService.createAccount(account);
 
     for (IamSshKey key: account.getSshKeys()) {
-      if (key.getValue().equals(TEST_SSH_KEY_1)) {
+      if (key.getValue().equals(TEST_SSH_KEY_1.getValue())) {
         assertFalse(key.isPrimary());
       }
-      if (key.getValue().equals(TEST_SSH_KEY_2)) {
+      if (key.getValue().equals(TEST_SSH_KEY_2.getValue())) {
         assertTrue(key.isPrimary());
       }
     }

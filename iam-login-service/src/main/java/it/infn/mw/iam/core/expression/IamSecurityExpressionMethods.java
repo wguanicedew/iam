@@ -45,6 +45,7 @@ public class IamSecurityExpressionMethods {
   public boolean isExternallyAuthenticatedWithIssuer(String issuer) {
     if (authentication.getAuthorities().contains(EXT_AUTHN_UNREGISTERED_USER_AUTH)) {
 
+      @SuppressWarnings("rawtypes")
       AbstractExternalAuthenticationToken token =
           (AbstractExternalAuthenticationToken) authentication;
       return token.toExernalAuthenticationRegistrationInfo().getIssuer().equals(issuer);

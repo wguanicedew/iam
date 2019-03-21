@@ -52,12 +52,9 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.registration.cern.CernHrDBApiService;
 import it.infn.mw.iam.api.registration.cern.CernHrDbApiError;
-import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.test.util.WithAnonymousUser;
 import it.infn.mw.iam.test.util.WithMockSAMLUser;
 
@@ -69,13 +66,7 @@ import it.infn.mw.iam.test.util.WithMockSAMLUser;
 public class CernRegistrationTests {
 
   @Autowired
-  private IamAccountRepository accountRepository;
-
-  @Autowired
   private WebApplicationContext context;
-
-  @Autowired
-  private ObjectMapper objectMapper;
 
   @Autowired
   private CernHrDBApiService mockService;

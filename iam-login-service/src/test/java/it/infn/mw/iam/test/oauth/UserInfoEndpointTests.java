@@ -58,10 +58,8 @@ public class UserInfoEndpointTests {
 
   @Before
   public void setup() throws Exception {
-    mvc = MockMvcBuilders.webAppContextSetup(context)
-      .apply(springSecurity())
-      .alwaysDo(log())
-      .build();
+    mvc =
+        MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).alwaysDo(log()).build();
   }
 
   @After
@@ -72,10 +70,7 @@ public class UserInfoEndpointTests {
   @Test
   @WithMockOAuthUser(clientId = "client-cred", scopes = {"openid"})
   public void testUserInfoEndpointReturs404ForClientCredentialsToken() throws Exception {
-    // @formatter:off
-    mvc.perform(get("/userinfo"))
-      .andExpect(status().isForbidden());
-    // @formatter:on
+    mvc.perform(get("/userinfo")).andExpect(status().isForbidden());
   }
 
   @Test
@@ -99,6 +94,7 @@ public class UserInfoEndpointTests {
     // @formatter:off
     mvc.perform(get("/userinfo"))
       .andExpect(status().isOk())
+      .andExpect(jsonPath("$.sub").exists())
       .andExpect(jsonPath("$.organisation_name", is("indigo-dc")));
     // @formatter:on
   }

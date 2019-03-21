@@ -45,8 +45,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.config.saml.IamProperties;
 import it.infn.mw.iam.persistence.model.IamAccount;
@@ -82,8 +80,6 @@ public class ProxyServiceIntegrationTests extends ProxyCertificateTestSupport {
   @Autowired
   private IamAccountRepository accountRepo;
 
-  @Autowired
-  private ObjectMapper mapper;
 
   private MockMvc mvc;
 

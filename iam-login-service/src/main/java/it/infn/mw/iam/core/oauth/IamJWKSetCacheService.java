@@ -38,7 +38,8 @@ import it.infn.mw.iam.authn.oidc.RestTemplateFactory;
 
 public class IamJWKSetCacheService extends JWKSetCacheService {
 
-  public static final String KEY_MATERIAL_ERROR_TEMPLATE = "Could not retrieve key material from {}";
+  public static final String KEY_MATERIAL_ERROR_TEMPLATE =
+      "Could not retrieve key material from {}";
   public static final Logger LOG = LoggerFactory.getLogger(IamJWKSetCacheService.class);
 
   private LoadingCache<String, JWTSigningAndValidationService> validators;
@@ -89,14 +90,17 @@ public class IamJWKSetCacheService extends JWKSetCacheService {
   public static class JWKSetEncryptorFetcher
       extends CacheLoader<String, JWTEncryptionAndDecryptionService> {
 
-    final RestTemplate rt;
+    final RestTemplateFactory rtf;
 
     public JWKSetEncryptorFetcher(RestTemplateFactory rtf) {
-      rt = rtf.newRestTemplate();
+      this.rtf = rtf;
     }
 
     @Override
     public JWTEncryptionAndDecryptionService load(String key) throws Exception {
+      
+      RestTemplate rt = rtf.newRestTemplate();
+      
       String jsonString = rt.getForObject(key, String.class);
       JWKSet jwkSet = JWKSet.parse(jsonString);
 
@@ -109,14 +113,17 @@ public class IamJWKSetCacheService extends JWKSetCacheService {
   public static class JWKSetVerifierFetcher
       extends CacheLoader<String, JWTSigningAndValidationService> {
 
-    final RestTemplate rt;
+    final RestTemplateFactory rtf;
 
     public JWKSetVerifierFetcher(RestTemplateFactory rtf) {
-      rt = rtf.newRestTemplate();
+      this.rtf = rtf;
     }
 
     @Override
     public JWTSigningAndValidationService load(String key) throws Exception {
+      
+      RestTemplate rt = rtf.newRestTemplate();
+      
       String jsonString = rt.getForObject(key, String.class);
       JWKSet jwkSet = JWKSet.parse(jsonString);
 
