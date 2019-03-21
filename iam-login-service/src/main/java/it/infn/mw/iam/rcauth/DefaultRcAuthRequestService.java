@@ -68,7 +68,7 @@ public class DefaultRcAuthRequestService implements RCAuthRequestService {
   public static final String CTXT_NOT_FOUND_ERROR = "RCAuth context not found in session!";
   public static final String STATE_MISMATCH_ERROR = "Invalid response: state parameter mismatch";
   public static final String DEFAULT_SCOPE = "openid profile email edu.uiuc.ncsa.myproxy.getcert";
-  public static final String CODE = "code";
+  public static final String CODE_RESPONSE_TYPE = "code";
 
   public static final String CERT_SUBJECT_CLAIM = "cert_subject_dn";
 
@@ -134,7 +134,7 @@ public class DefaultRcAuthRequestService implements RCAuthRequestService {
     ctxt.setState(new BigInteger(50, rng).toString(16));
     ctxt.setNonce(new BigInteger(50, rng).toString(16));
 
-    uriBuilder.queryParam(RESPONSE_TYPE_PARAM, CODE);
+    uriBuilder.queryParam(RESPONSE_TYPE_PARAM, CODE_RESPONSE_TYPE);
     uriBuilder.queryParam(STATE_PARAM, ctxt.getState());
     uriBuilder.queryParam(NONCE_PARAM, ctxt.getNonce());
     uriBuilder.queryParam(CLIENT_ID_PARAM, properties.getClientId());

@@ -17,7 +17,7 @@ package it.infn.mw.iam.test.rcauth;
 
 import static it.infn.mw.iam.rcauth.DefaultRcAuthRequestService.CERT_SUBJECT_CLAIM;
 import static it.infn.mw.iam.rcauth.DefaultRcAuthRequestService.CLIENT_ID_PARAM;
-import static it.infn.mw.iam.rcauth.DefaultRcAuthRequestService.CODE;
+import static it.infn.mw.iam.rcauth.DefaultRcAuthRequestService.CODE_RESPONSE_TYPE;
 import static it.infn.mw.iam.rcauth.DefaultRcAuthRequestService.DEFAULT_SCOPE;
 import static it.infn.mw.iam.rcauth.DefaultRcAuthRequestService.IDP_HINT_PARAM;
 import static it.infn.mw.iam.rcauth.DefaultRcAuthRequestService.NONCE_PARAM;
@@ -126,7 +126,7 @@ public class RequestServiceTests extends RCAuthTestSupport {
     assertThat(uri.getQueryParams().getFirst(NONCE_PARAM), notNullValue());
     assertThat(uri.getQueryParams().getFirst(SCOPE_PARAM),
         is(URLEncoder.encode(DEFAULT_SCOPE, "UTF-8")));
-    assertThat(uri.getQueryParams().getFirst(RESPONSE_TYPE_PARAM), is(CODE));
+    assertThat(uri.getQueryParams().getFirst(RESPONSE_TYPE_PARAM), is(CODE_RESPONSE_TYPE));
     assertThat(uri.getQueryParams().getFirst(CLIENT_ID_PARAM), is(CLIENT_ID));
     assertThat(uri.getQueryParams().getFirst(REDIRECT_URI_PARAM),
         is(URLEncoder.encode(format("%s%s", IAM_BASE_URL, CALLBACK_PATH), "UTF-8")));
@@ -145,7 +145,7 @@ public class RequestServiceTests extends RCAuthTestSupport {
     assertThat(uri.getQueryParams().getFirst(NONCE_PARAM), notNullValue());
     assertThat(uri.getQueryParams().getFirst(SCOPE_PARAM),
         is(URLEncoder.encode(DEFAULT_SCOPE, "UTF-8")));
-    assertThat(uri.getQueryParams().getFirst(RESPONSE_TYPE_PARAM), is(CODE));
+    assertThat(uri.getQueryParams().getFirst(RESPONSE_TYPE_PARAM), is(CODE_RESPONSE_TYPE));
     assertThat(uri.getQueryParams().getFirst(CLIENT_ID_PARAM), is(CLIENT_ID));
     assertThat(uri.getQueryParams().getFirst(IDP_HINT_PARAM), is(IAM_ENTITY_ID));
     assertThat(uri.getQueryParams().getFirst(REDIRECT_URI_PARAM),

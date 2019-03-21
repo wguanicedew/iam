@@ -16,23 +16,40 @@
 package it.infn.mw.iam.test.rcauth;
 
 
+import static it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport.ACCOUNT_LINKING_DASHBOARD_ERROR_KEY;
+import static it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport.ACCOUNT_LINKING_DASHBOARD_MESSAGE_KEY;
 import static it.infn.mw.iam.rcauth.DefaultRcAuthRequestService.RCAUTH_CTXT_SESSION_KEY;
+import static it.infn.mw.iam.rcauth.RCAuthController.CALLBACK_PATH;
 import static it.infn.mw.iam.rcauth.RCAuthController.GETCERT_PATH;
+import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.springframework.http.MediaType.TEXT_PLAIN;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -45,12 +62,22 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nimbusds.jose.JOSEException;
+
 import it.infn.mw.iam.IamLoginService;
+import it.infn.mw.iam.authn.oidc.RestTemplateFactory;
 import it.infn.mw.iam.config.saml.IamProperties;
+import it.infn.mw.iam.rcauth.RCAuthExchangeContext;
 import it.infn.mw.iam.test.util.WithAnonymousUser;
+import it.infn.mw.iam.test.util.oidc.IdTokenBuilder;
+import it.infn.mw.iam.test.util.oidc.MockRestTemplateFactory;
+import it.infn.mw.iam.test.util.oidc.TokenResponse;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = {IamLoginService.class, RCAuthTestSupport.class})
+@SpringApplicationConfiguration(
+    classes = {IamLoginService.class, RCAuthTestSupport.class, RCAuthIntegrationTests.class})
 @WebAppConfiguration
 @Transactional
 @TestPropertySource(
@@ -59,17 +86,33 @@ import it.infn.mw.iam.test.util.WithAnonymousUser;
         "rcauth.issuer=" + RCAuthTestSupport.ISSUER})
 public class RCAuthIntegrationTests extends RCAuthTestSupport {
 
+  @Bean
+  @Primary
+  public RestTemplateFactory mockRestTemplateFactory() {
+    return new MockRestTemplateFactory();
+  }
+
   @Autowired
   private WebApplicationContext context;
 
   @Autowired
   IamProperties iamProperties;
 
+  @Autowired
+  RestTemplateFactory rtf;
+
+  @Autowired
+  ObjectMapper mapper;
+
+  MockRestTemplateFactory mockRtf;
+
   private MockMvc mvc;
 
   @Before
   public void setup() {
     mvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
+    mockRtf = (MockRestTemplateFactory) rtf;
+    mockRtf.resetTemplate();
   }
 
   @Test
@@ -86,8 +129,7 @@ public class RCAuthIntegrationTests extends RCAuthTestSupport {
 
     MvcResult result = mvc.perform(get(GETCERT_PATH).with(csrf().asHeader()))
       .andExpect(status().isFound())
-      .andExpect(request().sessionAttribute(RCAUTH_CTXT_SESSION_KEY,
-          notNullValue()))
+      .andExpect(request().sessionAttribute(RCAUTH_CTXT_SESSION_KEY, notNullValue()))
       .andReturn();
 
     UriComponents uc =
@@ -95,5 +137,100 @@ public class RCAuthIntegrationTests extends RCAuthTestSupport {
 
     assertThat(uc.getHost(), is(RCAUTH_HOST));
   }
-  
+
+  @Test
+  @WithMockUser(username = "test")
+  public void rcAuthAuthorizationResponseValidation() throws Exception {
+
+    mvc.perform(get(CALLBACK_PATH).with(csrf().asHeader()))
+      .andExpect(status().isFound())
+      .andExpect(redirectedUrl("/dashboard"))
+      .andExpect(flash().attribute(ACCOUNT_LINKING_DASHBOARD_ERROR_KEY,
+          startsWith("Invalid RCAuth authorization response")));
+
+    mvc.perform(get(CALLBACK_PATH).param("code", "a-code").with(csrf().asHeader()))
+      .andExpect(status().isFound())
+      .andExpect(redirectedUrl("/dashboard"))
+      .andExpect(flash().attribute(ACCOUNT_LINKING_DASHBOARD_ERROR_KEY,
+          startsWith("Invalid RCAuth authorization response")));
+
+    mvc.perform(get(CALLBACK_PATH).param("state", "a-state").with(csrf().asHeader()))
+      .andExpect(status().isFound())
+      .andExpect(redirectedUrl("/dashboard"))
+      .andExpect(flash().attribute(ACCOUNT_LINKING_DASHBOARD_ERROR_KEY,
+          startsWith("Invalid RCAuth authorization response")));
+  }
+
+  @Test
+  @WithMockUser(username = "test")
+  public void rcAuthAuthorizationResponseInvalidContext() throws Exception {
+
+    mvc
+      .perform(get(CALLBACK_PATH).param("code", "a-code")
+        .param("state", "a-state")
+        .with(csrf().asHeader()))
+      .andExpect(status().isFound())
+      .andExpect(redirectedUrl("/dashboard"))
+      .andExpect(flash().attribute(ACCOUNT_LINKING_DASHBOARD_ERROR_KEY,
+          startsWith("RCAuth error: RCAuth context not found in session")));
+  }
+
+  @Test
+  @WithMockUser(username = "test")
+  public void rcAuthFullLinking() throws Exception {
+    MvcResult result = mvc.perform(get(GETCERT_PATH).with(csrf().asHeader()))
+      .andExpect(status().isFound())
+      .andExpect(request().sessionAttribute(RCAUTH_CTXT_SESSION_KEY, notNullValue()))
+      .andReturn();
+
+    MockHttpSession session = (MockHttpSession) result.getRequest().getSession();
+
+
+    RCAuthExchangeContext context =
+        ((RCAuthExchangeContext) session.getAttribute(RCAUTH_CTXT_SESSION_KEY));
+    
+    prepareTokenResponse(NONCE);
+    prepareCertificateResponse();
+    
+    mvc
+      .perform(get(CALLBACK_PATH).session(session)
+        .param("code", CODE_VALUE)
+        .param("state", context.getState())
+        .with(csrf().asHeader()))
+      .andExpect(status().isFound())
+      .andExpect(redirectedUrl("/dashboard"))
+      .andExpect(flash().attribute(ACCOUNT_LINKING_DASHBOARD_MESSAGE_KEY,
+          startsWith("Proxy certificate with subject")));
+
+  }
+
+  void prepareTokenResponse(String nonce) throws JsonProcessingException, JOSEException {
+    IdTokenBuilder builder = new IdTokenBuilder(rcAuthKeyStore, jwsAlgo);
+
+    String idToken = builder.sub(SUB).issuer(ISSUER).customClaim(CERT_SUBJECT_DN_CLAIM, DN).build();
+
+    TokenResponse tr = new TokenResponse();
+    tr.setAccessToken(UUID.randomUUID().toString());
+    tr.setExpiresIn(3600);
+    tr.setIdToken(idToken);
+
+    mockRtf.getMockServer()
+      .expect(requestTo(TOKEN_URI))
+      .andExpect(method(HttpMethod.POST))
+      .andExpect(content().contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE))
+      .andRespond(withSuccess(mapper.writeValueAsString(tr), MediaType.APPLICATION_JSON));
+  }
+
+  public void prepareCertificateResponse() {
+    mockRtf.getMockServer()
+      .expect(requestTo(GET_CERT_URI))
+      .andExpect(method(HttpMethod.POST))
+      .andExpect(content().contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE))
+      .andRespond(withSuccess(TEST_0_CERT_STRING, TEXT_PLAIN));
+  }
+
+  void verifyMockServerCalls() {
+    mockRtf.getMockServer().verify();
+    mockRtf.resetTemplate();
+  }
 }

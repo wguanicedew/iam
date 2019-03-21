@@ -67,6 +67,7 @@ public class RCAuthTestSupport extends X509TestSupport {
   public static final String NONCE = "LolaNonce";
   
   public static final String IAM_ENTITY_ID = "iam-entity-id";
+  public static final String CODE_VALUE = "diablocode";
   
   
   
