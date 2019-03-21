@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -112,7 +113,7 @@ public class IamAccount implements Serializable {
 
   @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.EAGER,
       orphanRemoval = true)
-  private Set<IamSshKey> sshKeys = new HashSet<>();
+  private Set<IamSshKey> sshKeys = new LinkedHashSet<>();
 
   @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.EAGER,
       orphanRemoval = true)
