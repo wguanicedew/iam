@@ -17,33 +17,43 @@ package it.infn.mw.iam.test.oauth;
 
 import static org.mockito.Mockito.verify;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mitre.openid.connect.model.UserInfo;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import it.infn.mw.iam.core.userinfo.DelegateUserInfoAdapter;
 import it.infn.mw.iam.persistence.model.IamAddress;
+import it.infn.mw.iam.persistence.model.IamUserInfo;
 import it.infn.mw.iam.persistence.repository.AddressAdapter;
+import it.infn.mw.iam.persistence.repository.UserInfoAdapter;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DelegateUserInfoTests {
 
   @Mock
-  UserInfo delegate;
+  IamUserInfo iamUserInfo;
+  
+  @Spy
+  @InjectMocks
+  UserInfoAdapter delegate;
 
   @Mock
   IamAddress addressDelegate;
   
   @InjectMocks
-  DelegateUserInfoAdapter adapter;
-  
-  @InjectMocks
   AddressAdapter addressAdapter;
+  
+  DelegateUserInfoAdapter adapter;
 
-
+  @Before
+  public void setup() {
+    adapter = new DelegateUserInfoAdapter(delegate);
+  }
+  
   @Test
   public void testDelegateCalls() {
 
@@ -167,5 +177,8 @@ public class DelegateUserInfoTests {
     verify(addressDelegate).setPostalCode(null);
     verify(addressDelegate).setRegion(null);
     verify(addressDelegate).setStreetAddress(null);
+    
+    
+    
   }
 }
