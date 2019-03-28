@@ -1,6 +1,7 @@
 version: '2'
 
 services:
+
   db_data:
     image: busybox
     volumes:
@@ -8,15 +9,16 @@ services:
     command: /bin/true
 
   db:
-    container_name: db
-    image: mysql:5.7
+    container_name: mariadb
+    image: mariadb
     volumes_from:
       - db_data
+
     # The setting below enables custom configuration
     # that turns on the MySQL query log
     # volumes:
     #   - ./compose/mariadb:/etc/mysql/conf.d
-
+    
     environment:
       TZ: Europe/Rome
       MYSQL_ROOT_PASSWORD: pwd
@@ -43,7 +45,7 @@ services:
 
     environment:
       TZ: Europe/Rome
-      IAM_JAVA_OPTS: -Djava.security.egd=file:/dev/./urandom -Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n,address=1044 -Dspring.profiles.active=mysql-tests
+      IAM_JAVA_OPTS: -Djava.security.egd=file:/dev/./urandom -Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n,address=1044 -Dspring.profiles.active=mysql-test
       IAM_JAR: /code/iam-login-service/target/iam-login-service.war
       IAM_HOST: iam.local.io
       IAM_BASE_URL: https://iam.local.io
@@ -65,7 +67,7 @@ services:
       # IAM_SAML_ENTITY_ID: urn:iam:iam-devel
       # IAM_SAML_ENTITY_ID: https://iam.local.io
       
-      IAM_RCAUTH_ENABLED: "true"
+      IAM_RCAUTH_ENABLED: "false"
       IAM_RCAUTH_CLIENT_ID: ${IAM_RCAUTH_CLIENT_ID}
       IAM_RCAUTH_CLIENT_SECRET: ${IAM_RCAUTH_CLIENT_SECRET}
       IAM_RCAUTH_ISSUER: ${IAM_RCAUTH_ISSUER}
@@ -118,9 +120,9 @@ services:
     build:
       context: ./docker/nginx/
 
-    #depends_on:
-    #  - iam-be
-    #  - client
+    depends_on:
+      - iam-be
+      - client
 
     dns_search: local.io
 
@@ -136,8 +138,7 @@ services:
 
     volumes:
       - /dev/urandom:/dev/random
-      - ./compose/custom-nginx/iam.conf:/etc/nginx/conf.d/default.conf:ro
-
+      # - ./compose/custom-nginx/iam.conf:/etc/nginx/conf.d/default.conf:ro
 
     networks:
       default:
