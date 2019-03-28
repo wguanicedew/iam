@@ -117,8 +117,11 @@ public class DefaultGroupRequestsService implements GroupRequestsService {
       iamGroupRequest.setGroup(group.get());
       iamGroupRequest.setNotes(groupRequest.getNotes());
       iamGroupRequest.setStatus(PENDING);
-      iamGroupRequest.setCreationTime(new Date(timeProvider.currentTimeMillis()));
-
+      
+      Date creationTime = new Date(timeProvider.currentTimeMillis());
+      iamGroupRequest.setCreationTime(creationTime);
+      iamGroupRequest.setLastUpdateTime(creationTime);
+      
       result = groupRequestRepository.save(iamGroupRequest);
       notificationFactory.createAdminHandleGroupRequestMessage(iamGroupRequest);
       eventPublisher.publishEvent(new GroupRequestCreatedEvent(this, result));
