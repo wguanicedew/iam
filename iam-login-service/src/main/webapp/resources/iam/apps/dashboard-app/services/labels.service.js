@@ -46,7 +46,7 @@
         }
 
         function setGroupLabel(uuid, label) {
-            return $http.post("/iam/group/" + uuid + "/labels", label).then(function (res) {
+            return $http.put("/iam/group/" + uuid + "/labels", label).then(function (res) {
                 return res.data;
             }).catch(function (res) {
                 return $q.reject(res);

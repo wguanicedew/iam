@@ -16,75 +16,115 @@
 
 -->
 <div class="box box-solid no-padding no-shadow no-border" ngcloak ng-show="$ctrl.loaded">
-    <div class="box-header with-border" ng-show="$ctrl.requests.length > 0">
-        <div class="input-group">
-            <input placeholder="Filter registration requests..." ng-model="$ctrl.filter" class="form-control" />
-            <div class="input-group-btn">
-                <button type="button" class="btn btn-default" ng-click="$ctrl.resetFilter()">Show all</button>
-            </div>
-        </div>
-    </div>
     <div class="box-body no-padding">
         <table id="vo-reqs" class="table">
-            <thead ng-show="$ctrl.filtered.length > 0">
+            <thead class="table-requests-head" ng-if="$ctrl.requests.length > 0">
                 <tr>
-                    <td>
-                        <ul id="req_pagination_top" uib-pagination ng-model="$ctrl.currentPage" items-per-page="$ctrl.itemsPerPage" total-items="$ctrl.filtered.length" max-size="0" template-url="/resources/iam/apps/dashboard-app/components/common/pagination.template.html" ng-change="$ctrl.pageChanged()"
-                            class="pull-left">
-                        </ul>
-                        <div class="pull-left page-counter">{{$ctrl.pageLeft}} - {{$ctrl.pageRight}} / {{$ctrl.filtered.length}}</div>
+                    <td style="vertical-align: middle" class="col-xs-6 col-md-4">
+                        <div class="form-inline">
+                            <div class="form-group table-selector">
+                                <input type="checkbox" ng-model="$ctrl.masterCheckbox"
+                                    ng-change="$ctrl.toggleSelectionForPageRequests()">
+                            </div>
+                            <div class="form-group">
+                                <div class="btn-group">
+                                    <button class="btn btn-success btn-sm" ng-click="$ctrl.bulkApprove()"
+                                        ng-disabled="$ctrl.busy || $ctrl.numSelected() == 0">
+                                        <i class="fa fa-check"></i>
+                                    </button>
+                                    <button class="btn btn-danger btn-sm" ng-click="$ctrl.bulkReject()"
+                                        ng-disabled="$ctrl.busy || $ctrl.numSelected() == 0">
+                                        <i class="fa fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-group" ng-show="$ctrl.numSelected() > 0">
+                                <span class="badge">
+                                    {{ $ctrl.numSelected() }} selected
+                                </span>
+                            </div>
+                        </div>
+                    </td>
+
+                    <td style="vertical-align: middle" class="col-xs-3 col-md-4">
+                        <input placeholder="Filter requests..." ng-model="$ctrl.filter" class="form-control" />
+                    </td>
+
+                    <td class="col-xs-3 col-md-4">
+                        <div ng-show="$ctrl.filtered.length > 0 && $ctrl.requests.length > $ctrl.itemsPerPage">
+                            <div class="form-inline text-right">
+
+                                <div class="form-group">
+                                    <ul id="req_pagination_top" uib-pagination ng-model="$ctrl.currentPage"
+                                        items-per-page="$ctrl.itemsPerPage" total-items="$ctrl.filtered.length"
+                                        max-size="0"
+                                        template-url="/resources/iam/apps/dashboard-app/components/common/pagination.template.html"
+                                        ng-change="$ctrl.pageChanged()">
+                                    </ul>
+                                </div>
+                                <div class="form-group">
+                                    <div class="page-counter">{{$ctrl.pageLeft}} - {{$ctrl.pageRight}} /
+                                        {{$ctrl.filtered.length}}</div>
+                                </div>
+                            </div>
+                            <!-- 
+                            <div class="page-counter pull-right">{{$ctrl.pageLeft}} - {{$ctrl.pageRight}} /
+                                {{$ctrl.filtered.length}}</div>
+                            <ul id="req_pagination_top" uib-pagination ng-model="$ctrl.currentPage"
+                                items-per-page="$ctrl.itemsPerPage" total-items="$ctrl.filtered.length" max-size="0"
+                                template-url="/resources/iam/apps/dashboard-app/components/common/pagination.template.html"
+                                ng-change="$ctrl.pageChanged()" class="pull-right">
+                            </ul>
+                            -->
+                        </div>
                     </td>
                 </tr>
             </thead>
             <tbody>
                 <tr ng-show="!$ctrl.requests.length">
-                    <td class="no-border-top">
+                    <td colspan="3" class="no-border-top">
                         <div class="table-msg">
                             No pending requests found.
                         </div>
                     </td>
                 </tr>
                 <tr ng-show="$ctrl.requests.length > 0 && $ctrl.filtered.length == 0">
-                    <td class="no-border-top">
+                    <td colspan="3">
                         <div class="table-msg">
                             No requests found matching the search filter.
                         </div>
                     </td>
                 </tr>
-                <tr ng-repeat="r in $ctrl.filtered | orderBy:'creationTime':true | startFrom:($ctrl.currentPage-1)*$ctrl.itemsPerPage | limitTo:$ctrl.itemsPerPage">
-                    <td>
-                        <p>
-                            <a href="mailto:{{r.email}}">{{r.givenname}} {{r.familyname}}</a> requested to join this organization {{r.creationTime | relativeDate}}.
-                            <span ng-if="r.status == 'NEW'" class="text-red"> (email address still not verified) </span>
-                        </p>
-                        <p>
-                            In support of this request, the user has provided the following motivation:
-                            <blockquote>
-                                {{r.notes}}
-                            </blockquote>
-                        </p>
+                <tr
+                    ng-repeat="r in $ctrl.filtered | orderBy:'creationTime':true | startFrom:($ctrl.currentPage-1)*$ctrl.itemsPerPage | limitTo:$ctrl.itemsPerPage">
+                    <td colspan="3">
+                        <div class="pull-left table-selector">
+                            <input type="checkbox" ng-model="$ctrl.selectedRequests[r.uuid]">
+                        </div>
+                        <div class="pull-left">
+                            <p><i class="fa fa-user-plus request-icon"></i> <a href="mailto:{{r.email}}">{{r.givenname}}
+                                    {{r.familyname}}</a> requested to join this
+                                organization {{r.creationTime | relativeDate}}.
+                            </p>
 
-                        <div class="btn-group">
-                            <button class="btn btn-success btn-sm" ng-click="$ctrl.approve(r)" ng-disabled="$ctrl.busy">
-                                <i class="fa fa-check"></i> Approve
-                            </button>
-                            <button class="btn btn-danger btn-sm" ng-click="$ctrl.reject(r)" ng-disabled="$ctrl.busy">
-                                <i class="fa fa-times"></i> Reject
-                            </button>
+                            <p ng-show="r.notes">
+                                In support of this request, the user has provided the following motivation:
+                                <blockquote>
+                                    {{r.notes}}
+                                </blockquote>
+                            </p>
+
+                            <p ng-if="r.status == 'NEW'" class="text-red">
+                                <i class="fa fa-exclamation-triangle"></i> User has not yet verified the ownership of
+                                his/her email address
+                            </p>
                         </div>
                     </td>
                 </tr>
             </tbody>
-            <tfoot ng-show="$ctrl.filtered.length > 0">
-                <tr>
-                    <td>
-                        <ul id="req_pagination_bottom" uib-pagination ng-model="$ctrl.currentPage" items-per-page="$ctrl.itemsPerPage" total-items="$ctrl.filtered.length" max-size="0" template-url="/resources/iam/apps/dashboard-app/components/common/pagination.template.html" ng-change="$ctrl.pageChanged()"
-                            class="pull-left">
-                        </ul>
-                        <div class="pull-left page-counter">{{$ctrl.pageLeft}} - {{$ctrl.pageRight}} / {{$ctrl.filtered.length}}</div>
-                    </td>
-                </tr>
-            </tfoot>
         </table>
+    </div>
+    <div class="overlay" ng-if="$ctrl.busy">
+        <i class="fa fa-refresh fa-spin"></i>
     </div>
 </div>

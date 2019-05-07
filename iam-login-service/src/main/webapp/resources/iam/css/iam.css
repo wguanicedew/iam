@@ -450,3 +450,11 @@ body.skin-blue {
 [x-ng-click] {
     cursor: pointer;
 }
+
+.request-icon {
+    color: #999;
+}
+
+.table-selector {
+    width: 40px;
+}

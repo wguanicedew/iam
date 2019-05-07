@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict'
+'use strict';
 
 angular.module('dashboardApp').factory('UsersService', UsersService);
 
@@ -43,7 +43,7 @@ function UsersService($q, $rootScope, $http, $httpParamSerializer) {
             'startIndex': startIndex,
             'count': count,
             'filter': filter,
-            'sortBy' : sortBy,
+            'sortBy': sortBy,
             'sortDirection': sortDir
         }));
     }
@@ -62,7 +62,7 @@ function UsersService($q, $rootScope, $http, $httpParamSerializer) {
         return doGet($httpParamSerializer({
             'startIndex': startIndex,
             'count': count,
-            'sortBy' : sortBy,
+            'sortBy': sortBy,
             'sortDirection': sortDir
         }));
     }

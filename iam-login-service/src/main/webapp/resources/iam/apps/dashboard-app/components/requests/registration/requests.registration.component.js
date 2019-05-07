@@ -13,23 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-(function() {
+(function () {
     'use strict';
 
-    function RejectRequest($uibModalInstance, RegistrationRequestService, request, userFullName) {
+    function RejectRequest($uibModalInstance, RegistrationRequestService, requests) {
         var self = this;
 
-        self.request = request;
-        self.userFullName = userFullName;
+        self.requests = requests;
 
-        self.cancel = function() {
+        self.cancel = function () {
             $uibModalInstance.dismiss('Dismissed');
         };
 
-        self.reject = function() {
-            RegistrationRequestService.rejectRequest(self.request).then(function(r) {
+        self.reject = function () {
+            RegistrationRequestService.rejectRequest(self.request).then(function (r) {
                 $uibModalInstance.close(r);
-            }).catch(function(r) {
+            }).catch(function (r) {
                 toaster.pop({
                     type: 'error',
                     body: r.statusText
@@ -39,7 +38,7 @@
 
     }
 
-    function RegistrationRequests(Utils, $scope, $rootScope, $uibModal, RegistrationRequestService, filterFilter, toaster) {
+    function RegistrationRequests(Utils, $scope, $rootScope, $uibModal, $filter, RegistrationRequestService, filterFilter, toaster) {
         var self = this;
 
         self.loaded = false;
@@ -49,32 +48,111 @@
         self.itemsPerPage = 10;
         self.currentPage = 1;
 
-        self.$onInit = function() {
-            self.api = {};
-            self.api.load = loadPendingRequests;
-            self.parentCb({ $API: self.api });
+        self.bulkApprove = bulkApprove;
+        self.bulkReject = bulkReject;
+        self.toggleSelectionForPageRequests = toggleSelectionForPageRequests;
+        self.numSelected = numSelected;
 
-            if (Utils.isAdmin()){
-                loadPendingRequests();
+        self.selectedRequests = {};
+
+        function numSelected() {
+            var selected = Object.keys(self.selectedRequests).filter(k => self.selectedRequests[k]);
+            return selected.length;
+        }
+
+        function toggleSelectionForPageRequests() {
+            if (self.filtered.length == 0) {
+                return;
             }
 
+            // Keep the order here in sync with what you have in the template
+            var ordered = $filter('orderBy')(self.filtered, 'creationTime', true);
+            for (var i = self.pageLeft; i <= self.pageRight; i++) {
+                var reqId = ordered[i - 1].uuid; // pages are 1-based
+                self.selectedRequests[reqId] = self.masterCheckbox;
+            }
+        }
+
+        function bulkReject() {
+
+            var modal = $uibModal.open({
+                templateUrl: '/resources/iam/apps/dashboard-app/components/requests/reject-request.dialog.html',
+                controller: RejectRequest,
+                controllerAs: '$ctrl',
+                resolve: {
+                    request: req,
+                    userFullName: function () {
+                        return `${req.givenname} ${req.familyname}`;
+                    }
+                }
+            });
+
+            modal.result.then(rejectSuccess, decisionErrorHandler);
+        }
+
+        function bulkApproveSuccess(r) {
+            console.log(r);
+            loadPendingRequests().then(function () {
+                toaster.pop({
+                    type: 'success',
+                    body: `${r.length} requests approved`
+                });
+            });
+        }
+
+        function bulkApproveError(r) {
+            console.log(r);
+            loadPendingRequests().then(function () {
+                toaster.pop({
+                    type: 'error',
+                    body: `Approval failed for ${r.length} requests`
+                });
+            });
+        }
+
+        function selectedRequests() {
+            var reqKeys = Object.keys(self.selectedRequests).filter(k => self.selectedRequests[k]);
+            var requests = self.requests.filter(r => reqKeys.includes(r.uuid));
+            return requests;
+        }
+
+        function bulkApprove() {
+            self.busy = true;
+            RegistrationRequestService.bulkApprove(selectedRequests())
+                .then(bulkApproveSuccess)
+                .catch(bulkApproveError);
+        }
+
+        self.$onInit = function () {
+            self.api = {};
+            self.api.load = loadPendingRequests;
+            self.parentCb({
+                $API: self.api
+            });
+
+            if (Utils.isAdmin()) {
+                loadPendingRequests();
+            }
         };
 
-        self.resetFilter = function() {
+        self.resetFilter = function () {
             self.filter = "";
-        }
+        };
 
         function errorHandler(res) {
 
         }
 
         function listRequestSuccess(res) {
+            self.resetFilter();
             self.filtered = self.requests = res.data;
             updatePageCounters();
             updateRootScopeCounters(res);
             self.busy = false;
             self.loaded = true;
             self.reqCount = self.filtered.length;
+            self.selectedRequests = {};
+            self.masterCheckbox = undefined;
         }
 
         function updateRootScopeCounters(res) {
@@ -88,7 +166,7 @@
 
         }
 
-        $scope.$watch('$ctrl.filter', function() {
+        $scope.$watch('$ctrl.filter', function () {
             filterRequests();
         });
 
@@ -97,7 +175,7 @@
         }
 
         function filterRequests() {
-            self.filtered = filterFilter(self.requests, function(request) {
+            self.filtered = filterFilter(self.requests, function (request) {
 
                 if (!self.filter) {
                     return true;
@@ -128,27 +206,10 @@
             }
         }
 
-        self.pageChanged = function() {
+        self.pageChanged = function () {
             updatePageCounters();
         };
 
-        function approveSuccess(res) {
-            loadPendingRequests().then(function(res) {
-                toaster.pop({
-                    type: 'success',
-                    body: "Request approved"
-                });
-            });
-        }
-
-        function rejectSuccess(res) {
-            loadPendingRequests().then(function(res) {
-                toaster.pop({
-                    type: 'success',
-                    body: "Request rejected"
-                });
-            });
-        }
 
         function decisionErrorHandler(res) {
             toaster.pop({
@@ -158,19 +219,14 @@
             self.busy = false;
         }
 
-        self.approve = function(req) {
-            self.busy = true;
-            RegistrationRequestService.approveRequest(req).then(approveSuccess, decisionErrorHandler);
-        };
-
-        self.reject = function(req) {
+        self.reject = function (req) {
             var modal = $uibModal.open({
                 templateUrl: '/resources/iam/apps/dashboard-app/components/requests/reject-request.dialog.html',
                 controller: RejectRequest,
                 controllerAs: '$ctrl',
                 resolve: {
                     request: req,
-                    userFullName: function() {
+                    userFullName: function () {
                         return `${req.givenname} ${req.familyname}`;
                     }
                 }
@@ -190,7 +246,7 @@
                 parentCb: '&'
             },
             templateUrl: "/resources/iam/apps/dashboard-app/components/requests/registration/requests.registration.component.html",
-            controller: RegistrationRequests,
+            controller: ['Utils', '$scope', '$rootScope', '$uibModal', '$filter', 'RegistrationRequestService', 'filterFilter', 'toaster', RegistrationRequests],
             controllerAs: '$ctrl'
         };
     }

@@ -28,12 +28,15 @@
 
     <section class="content" ng-cloak>
         <div class="row">
-            <div class="col-xs-12">
+            <section class="col-xs-12">
                 <uib-tabset active="$ctrl.activeTab" class="nav-tabs-custom" ng-show="$ctrl.privileged">
                     <uib-tab index="1" ng-show="$ctrl.voAdmin" select="$ctrl.load0()">
                         <uib-tab-heading>
-                            <div class="text-larger">Registration requests
-                                <span ng-show="$root.pendingRegistrationRequests().length > 0" class="badge bg-blue-gradient">{{$root.pendingRegistrationRequests().length}}</span></div>
+                            <div class="text-larger"><i class="fa fa-user-plus requets-icon"></i> Registration
+                                requests
+                                <span ng-show="$root.pendingRegistrationRequests().length > 0"
+                                    class="badge">{{$root.pendingRegistrationRequests().length}}</span>
+                            </div>
                         </uib-tab-heading>
 
                         <registration-requests parent-cb="$ctrl.load0=$API.load" />
@@ -41,13 +44,15 @@
                     <uib-tab index="2" ng-show="$ctrl.privileged" select="$ctrl.load1()">
                         <uib-tab-heading>
                             <div class="text-larger">
-                                Group requests <span ng-show="$root.pendingGroupMembershipRequests().totalResults > 0" class="badge bg-blue-gradient">{{$root.pendingGroupMembershipRequests().totalResults}}</span>
+                                <i class="fa fa-users"></i> Group requests <span
+                                    ng-show="$root.pendingGroupMembershipRequests().totalResults > 0"
+                                    class="badge bg-blue-gradient">{{$root.pendingGroupMembershipRequests().totalResults}}</span>
                             </div>
                         </uib-tab-heading>
                         <group-requests parent-cb="$ctrl.load1=$API.load" />
                     </uib-tab>
                 </uib-tabset>
-            </div>
+            </section>
         </div>
     </section>
 </div>

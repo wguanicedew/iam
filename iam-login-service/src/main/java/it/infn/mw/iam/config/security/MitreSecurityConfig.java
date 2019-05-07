@@ -15,6 +15,7 @@
  */
 package it.infn.mw.iam.config.security;
 
+import static org.springframework.security.config.http.SessionCreationPolicy.NEVER;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 import org.mitre.oauth2.web.CorsFilter;
@@ -143,7 +144,8 @@ public class MitreSecurityConfig {
       } else {
         registerEndpoint.authorizeRequests()
           .antMatchers(REGISTER_ENDPOINT_PATTERN)
-          .hasAnyRole("USER", "ADMIN");
+          .hasAnyRole("USER", "ADMIN")
+          .and().sessionManagement().sessionCreationPolicy(NEVER);
       }
       
       registerEndpoint.csrf().disable();
