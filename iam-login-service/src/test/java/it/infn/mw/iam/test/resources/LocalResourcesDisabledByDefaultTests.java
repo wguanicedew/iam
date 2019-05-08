@@ -13,7 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.test.oauth;
+package it.infn.mw.iam.test.resources;
+
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -22,31 +26,33 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.web.context.WebApplicationContext;
 
 import it.infn.mw.iam.IamLoginService;
-import it.infn.mw.iam.test.MockMvcTestSupport;
-import it.infn.mw.iam.test.core.CoreControllerTestSupport;
+import it.infn.mw.iam.test.util.WithAnonymousUser;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class})
+@SpringApplicationConfiguration(classes = {IamLoginService.class})
 @WebAppConfiguration
 @Transactional
-public class ParametricScopeTests extends MockMvcTestSupport {
+public class LocalResourcesDisabledByDefaultTests {
 
   @Autowired
-  ObjectMapper objectMapper;
+  private WebApplicationContext context;
+
+  private MockMvc mvc;
 
   @Before
-  public void setup() throws Exception {
-    initMockMvc();
+  public void setup() {
+    mvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
   }
-
+  
   @Test
-  public void emptyTest() {
-    // TODO: fill me
+  @WithAnonymousUser
+  public void getLocalResources() throws Exception {
+    mvc.perform(get("/local-resources/index.html")).andExpect(status().isNotFound());
   }
-
 }

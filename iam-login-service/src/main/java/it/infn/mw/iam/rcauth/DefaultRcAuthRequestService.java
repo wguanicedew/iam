@@ -43,7 +43,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.nimbusds.jwt.SignedJWT;
 
-import it.infn.mw.iam.config.saml.IamProperties;
+import it.infn.mw.iam.config.IamProperties;
 
 @Service
 @ConditionalOnProperty(name = "rcauth.enabled", havingValue = "true")

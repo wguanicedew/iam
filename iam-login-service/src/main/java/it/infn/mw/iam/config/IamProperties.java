@@ -13,14 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.config.saml;
+package it.infn.mw.iam.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "iam")
 public class IamProperties {
 
+  public static class LocalResources {
+    
+    private boolean enable = false;
+    private String location;
+    
+    public boolean isEnable() {
+      return enable;
+    }
+
+    public void setEnable(boolean enable) {
+      this.enable = enable;
+    }
+    
+    public String getLocation() {
+      return location;
+    }
+    
+    public void setLocation(String location) {
+      this.location = location;
+    }
+  }
+  
   private String baseUrl;
+  
+  private LocalResources localResources = new LocalResources();
 
   public String getBaseUrl() {
     return baseUrl;
@@ -28,5 +52,13 @@ public class IamProperties {
 
   public void setBaseUrl(String baseUrl) {
     this.baseUrl = baseUrl;
+  }
+  
+  public LocalResources getLocalResources() {
+    return localResources;
+  }
+  
+  public void setLocalResources(LocalResources localResources) {
+    this.localResources = localResources;
   }
 }

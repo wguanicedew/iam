@@ -84,6 +84,7 @@ import org.springframework.security.saml.key.KeyManager;
 import org.springframework.security.saml.log.SAMLDefaultLogger;
 import org.springframework.security.saml.metadata.CachingMetadataManager;
 import org.springframework.security.saml.metadata.ExtendedMetadata;
+import org.springframework.security.saml.metadata.ExtendedMetadataDelegate;
 import org.springframework.security.saml.metadata.MetadataDisplayFilter;
 import org.springframework.security.saml.metadata.MetadataGenerator;
 import org.springframework.security.saml.metadata.MetadataGeneratorFilter;
@@ -144,6 +145,7 @@ import it.infn.mw.iam.authn.saml.util.SamlIdResolvers;
 import it.infn.mw.iam.authn.saml.util.SamlUserIdentifierResolver;
 import it.infn.mw.iam.authn.saml.util.metadata.ResearchAndScholarshipMetadataFilter;
 import it.infn.mw.iam.authn.saml.util.metadata.SirtfiAttributeMetadataFilter;
+import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.config.saml.SamlConfig.ServerProperties;
 import it.infn.mw.iam.core.time.SystemTimeProvider;
 import it.infn.mw.iam.core.user.IamAccountService;
@@ -406,7 +408,8 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
   @Bean
   public ProtocolSocketFactory socketFactory() {
 
-    return new TLSProtocolSocketFactory(keyManager(), null, samlProperties.getHostnameVerificationMode().mode());
+    return new TLSProtocolSocketFactory(keyManager(), null,
+        samlProperties.getHostnameVerificationMode().mode());
   }
 
   @Bean
@@ -495,10 +498,38 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
     return extendedMetadataDelegate;
   }
 
+  private void configureLocalIamMetadata(List<MetadataProvider> providers)
+      throws MetadataProviderException, IOException {
+    if (!samlProperties.getLocalMetadata().isGenerated()) {
+
+      if (Strings.isNullOrEmpty(samlProperties.getLocalMetadata().getLocationUrl())) {
+        LOG.warn(
+            "Local metadata automatic generation is disabled but metadata location URL is not set!");
+      } else {
+        
+        String trimmedMetadataUrl = samlProperties.getLocalMetadata().getLocationUrl().trim();
+        LOG.info("Adding local metadata provider for URL: {}", trimmedMetadataUrl);
+        
+        Resource metadataResource = resourceLoader.getResource(trimmedMetadataUrl);
+
+        FilesystemMetadataProvider metadataProvider =
+            new FilesystemMetadataProvider(metadataResource.getFile());
+
+        metadataProvider.setParserPool(basicParserPool);
+        ExtendedMetadata md = extendedMetadata();
+        md.setLocal(true);
+        ExtendedMetadataDelegate dlg = new ExtendedMetadataDelegate(metadataProvider, md);
+        providers.add(dlg);
+      }
+    }
+  }
+
   private List<MetadataProvider> metadataProviders()
       throws MetadataProviderException, IOException, ResourceException {
 
     List<MetadataProvider> providers = new ArrayList<>();
+
+    configureLocalIamMetadata(providers);
 
     for (IamSamlIdpMetadataProperties p : samlProperties.getIdpMetadata()) {
       String trimmedMedataUrl = p.getMetadataUrl().trim();
@@ -564,7 +595,7 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
     manager.setKeyManager(keyManager());
     manager.setRefreshCheckInterval(SECONDS.toMillis(samlProperties.getMetadataRefreshPeriodSec()));
     manager.refreshMetadata();
-    
+
     return manager;
   }
 

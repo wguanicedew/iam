@@ -68,7 +68,7 @@ import com.nimbusds.jose.JOSEException;
 
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.authn.oidc.RestTemplateFactory;
-import it.infn.mw.iam.config.saml.IamProperties;
+import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.rcauth.RCAuthExchangeContext;
 import it.infn.mw.iam.test.util.WithAnonymousUser;
 import it.infn.mw.iam.test.util.oidc.IdTokenBuilder;

@@ -15,8 +15,12 @@
  */
 package it.infn.mw.iam.config;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 import java.util.Locale;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
@@ -41,6 +45,8 @@ import it.infn.mw.iam.core.util.PoliteJsonMessageSource;
 @Configuration
 public class MvcConfig extends WebMvcConfigurerAdapter {
 
+  public static final Logger LOG = LoggerFactory.getLogger(MvcConfig.class);
+
   @Autowired
   @Qualifier("mitreUserInfoInterceptor")
   AsyncHandlerInterceptor userInfoInterceptor;
@@ -51,6 +57,9 @@ public class MvcConfig extends WebMvcConfigurerAdapter {
 
   @Autowired
   AsyncHandlerInterceptor iamViewInfoInterceptor;
+
+  @Autowired
+  IamProperties iamProperties;
 
   @Override
   public void addInterceptors(final InterceptorRegistry registry) {
@@ -66,6 +75,16 @@ public class MvcConfig extends WebMvcConfigurerAdapter {
 
     registry.addResourceHandler("/resources/**").addResourceLocations("/resources/");
 
+    if (iamProperties.getLocalResources().isEnable()) {
+      if (isNullOrEmpty(iamProperties.getLocalResources().getLocation())) {
+        LOG.warn("Local resource serving enabled but path is null or empty!");
+      } else {
+       
+        LOG.info("Serving local resources from {}", iamProperties.getLocalResources().getLocation());
+        registry.addResourceHandler("/local-resources/**")
+          .addResourceLocations(iamProperties.getLocalResources().getLocation());
+      }
+    }
   }
 
   @Override

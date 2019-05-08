@@ -55,7 +55,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.nimbusds.jose.JOSEException;
 
-import it.infn.mw.iam.config.saml.IamProperties;
+import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.rcauth.DefaultRcAuthRequestService;
 import it.infn.mw.iam.rcauth.RCAuthAuthorizationResponse;
 import it.infn.mw.iam.rcauth.RCAuthCertificateRequestor;

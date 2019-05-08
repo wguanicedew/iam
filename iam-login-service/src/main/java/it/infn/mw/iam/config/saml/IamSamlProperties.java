@@ -28,6 +28,28 @@ import it.infn.mw.iam.config.login.LoginButtonProperties;
 @ConfigurationProperties(prefix = "saml")
 public class IamSamlProperties {
 
+  public static class LocalMetadata {
+    private boolean generated = true;
+
+    private String locationUrl;
+
+    public boolean isGenerated() {
+      return generated;
+    }
+
+    public void setGenerated(boolean generated) {
+      this.generated = generated;
+    }
+
+    public String getLocationUrl() {
+      return locationUrl;
+    }
+
+    public void setLocationUrl(String locationUrl) {
+      this.locationUrl = locationUrl;
+    }
+  }
+  
   public enum SSONameIDType {
 
     UNSPECIFIED(NameIDType.UNSPECIFIED),
@@ -100,6 +122,7 @@ public class IamSamlProperties {
   
   private SSONameIDType nameidPolicy = SSONameIDType.PERSISTENT;
 
+  private LocalMetadata localMetadata = new LocalMetadata();
   
   public List<IamSamlIdpMetadataProperties> getIdpMetadata() {
     return idpMetadata;
@@ -228,6 +251,14 @@ public class IamSamlProperties {
 
   public void setMetadataRefreshPeriodSec(long metadataRefreshPeriodSec) {
     this.metadataRefreshPeriodSec = metadataRefreshPeriodSec;
+  }
+  
+  public LocalMetadata getLocalMetadata() {
+    return localMetadata;
+  }
+  
+  public void setLocalMetadata(LocalMetadata localMetadata) {
+    this.localMetadata = localMetadata;
   }
   
 }

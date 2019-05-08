@@ -42,7 +42,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import it.infn.mw.iam.authn.oidc.RestTemplateFactory;
 import it.infn.mw.iam.authn.oidc.model.TokenEndpointErrorResponse;
-import it.infn.mw.iam.config.saml.IamProperties;
+import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.rcauth.oidc.RCAuthTokenResponseVerifier;
 import it.infn.mw.iam.rcauth.util.AddContentTypeInterceptor;
 
