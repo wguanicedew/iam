@@ -54,7 +54,7 @@ public class SamlExternalAuthenticationTests extends SamlAuthenticationTestSuppo
   public void testSuccessfulExternalUnregisteredUserAuthentication() throws Throwable {
 
     MockHttpSession session =
-        (MockHttpSession) mvc.perform(get(samlLoginUrl()))
+        (MockHttpSession) mvc.perform(get(samlDefaultIdpLoginUrl()))
           .andExpect(status().isOk())
           .andReturn()
           .getRequest()
@@ -94,7 +94,7 @@ public class SamlExternalAuthenticationTests extends SamlAuthenticationTestSuppo
   public void testExternalAuthenticationFailureRedirectsToLoginPage() throws Throwable {
 
     MockHttpSession session =
-        (MockHttpSession) mvc.perform(MockMvcRequestBuilders.get(samlLoginUrl()))
+        (MockHttpSession) mvc.perform(MockMvcRequestBuilders.get(samlDefaultIdpLoginUrl()))
           .andExpect(MockMvcResultMatchers.status().isOk())
           .andReturn()
           .getRequest()

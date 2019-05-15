@@ -21,12 +21,88 @@ import java.util.concurrent.TimeUnit;
 import javax.validation.Valid;
 
 import org.opensaml.saml2.core.NameIDType;
+import org.opensaml.xml.signature.SignatureConstants;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import com.google.common.collect.Lists;
+
+import it.infn.mw.iam.authn.saml.profile.IamSSOProfileOptions;
 import it.infn.mw.iam.config.login.LoginButtonProperties;
+import it.infn.mw.iam.config.saml.IamSamlJITAccountProvisioningProperties.AttributeMappingProperties;
 
 @ConfigurationProperties(prefix = "saml")
 public class IamSamlProperties {
+  
+  public static class RegistrationMappingProperties {
+    
+    String entityIds;
+    
+    AttributeMappingProperties mapping;
+
+    public String getEntityIds() {
+      return entityIds;
+    }
+
+    public void setEntityIds(String entityIds) {
+      this.entityIds = entityIds;
+    }
+
+    public AttributeMappingProperties getMapping() {
+      return mapping;
+    }
+
+    public void setMapping(AttributeMappingProperties mapping) {
+      this.mapping = mapping;
+    }
+  }
+  
+  public static class ProfileProperties {
+    
+    String entityIds;
+    
+    IamSSOProfileOptions options = new IamSSOProfileOptions();
+    
+    public String getEntityIds() {
+      return entityIds;
+    }
+
+    public void setEntityIds(String entityIds) {
+      this.entityIds = entityIds;
+    }
+
+    public IamSSOProfileOptions getOptions() {
+      return options;
+    }
+    
+    public void setOptions(IamSSOProfileOptions options) {
+      this.options = options;
+    }
+  }
+  
+  public static class SignatureProperties {
+    String algorithmName = "RSA";
+    String algorithmUri = SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA1;
+    String digestUri = SignatureConstants.ALGO_ID_DIGEST_SHA1;
+    
+    public String getAlgorithmName() {
+      return algorithmName;
+    }
+    public void setAlgorithmName(String algorithmName) {
+      this.algorithmName = algorithmName;
+    }
+    public String getAlgorithmUri() {
+      return algorithmUri;
+    }
+    public void setAlgorithmUri(String algorithmUri) {
+      this.algorithmUri = algorithmUri;
+    }
+    public String getDigestUri() {
+      return digestUri;
+    }
+    public void setDigestUri(String digestUri) {
+      this.digestUri = digestUri;
+    }
+  }
 
   public static class LocalMetadata {
     private boolean generated = true;
@@ -123,6 +199,12 @@ public class IamSamlProperties {
   private SSONameIDType nameidPolicy = SSONameIDType.PERSISTENT;
 
   private LocalMetadata localMetadata = new LocalMetadata();
+  
+  private SignatureProperties signature = new SignatureProperties();
+  
+  private List<ProfileProperties> customProfile = Lists.newArrayList();
+ 
+  private List<RegistrationMappingProperties> customMapping = Lists.newArrayList();
   
   public List<IamSamlIdpMetadataProperties> getIdpMetadata() {
     return idpMetadata;
@@ -261,4 +343,27 @@ public class IamSamlProperties {
     this.localMetadata = localMetadata;
   }
   
+  public SignatureProperties getSignature() {
+    return signature;
+  }
+  
+  public void setSignature(SignatureProperties signature) {
+    this.signature = signature;
+  }
+
+  public List<ProfileProperties> getCustomProfile() {
+    return customProfile;
+  }
+
+  public void setCustomProfile(List<ProfileProperties> customProfile) {
+    this.customProfile = customProfile;
+  }
+
+  public List<RegistrationMappingProperties> getCustomMapping() {
+    return customMapping;
+  }
+
+  public void setCustomMapping(List<RegistrationMappingProperties> customMapping) {
+    this.customMapping = customMapping;
+  }
 }

@@ -89,7 +89,7 @@ public class SamlAccountLinkingTests extends SamlAuthenticationTestSupport {
       .getRequest()
       .getSession();
 
-    session = (MockHttpSession) mvc.perform(get(samlLoginUrl()).session(session))
+    session = (MockHttpSession) mvc.perform(get(samlDefaultIdpLoginUrl()).session(session))
       .andExpect(status().isOk())
       .andReturn()
       .getRequest()
@@ -156,7 +156,7 @@ public class SamlAccountLinkingTests extends SamlAuthenticationTestSupport {
       .getRequest()
       .getSession();
 
-    session = (MockHttpSession) mvc.perform(get(samlLoginUrl()).session(session))
+    session = (MockHttpSession) mvc.perform(get(samlDefaultIdpLoginUrl()).session(session))
       .andExpect(status().isOk())
       .andReturn()
       .getRequest()
@@ -219,7 +219,7 @@ public class SamlAccountLinkingTests extends SamlAuthenticationTestSupport {
       .getRequest()
       .getSession();
 
-    session = (MockHttpSession) mvc.perform(get(samlLoginUrl()).session(session))
+    session = (MockHttpSession) mvc.perform(get(samlDefaultIdpLoginUrl()).session(session))
       .andExpect(status().isOk())
       .andReturn()
       .getRequest()
@@ -281,7 +281,7 @@ public class SamlAccountLinkingTests extends SamlAuthenticationTestSupport {
       .getRequest()
       .getSession();
 
-    session = (MockHttpSession) mvc.perform(get(samlLoginUrl()).session(session))
+    session = (MockHttpSession) mvc.perform(get(samlDefaultIdpLoginUrl()).session(session))
       .andExpect(status().isOk())
       .andReturn()
       .getRequest()

@@ -49,6 +49,7 @@ import org.opensaml.util.resource.ResourceException;
 import org.opensaml.xml.parse.BasicParserPool;
 import org.opensaml.xml.parse.ParserPool;
 import org.opensaml.xml.parse.StaticBasicParserPool;
+import org.opensaml.xml.signature.SignatureConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -108,8 +109,6 @@ import org.springframework.security.saml.websso.WebSSOProfile;
 import org.springframework.security.saml.websso.WebSSOProfileConsumer;
 import org.springframework.security.saml.websso.WebSSOProfileConsumerHoKImpl;
 import org.springframework.security.saml.websso.WebSSOProfileConsumerImpl;
-import org.springframework.security.saml.websso.WebSSOProfileImpl;
-import org.springframework.security.saml.websso.WebSSOProfileOptions;
 import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.FilterChainProxy;
 import org.springframework.security.web.SecurityFilterChain;
@@ -133,14 +132,22 @@ import it.infn.mw.iam.authn.ExternalAuthenticationSuccessHandler;
 import it.infn.mw.iam.authn.InactiveAccountAuthenticationHander;
 import it.infn.mw.iam.authn.RootIsDashboardSuccessHandler;
 import it.infn.mw.iam.authn.saml.CleanInactiveProvisionedAccounts;
+import it.infn.mw.iam.authn.saml.DefaultMappingPropertiesResolver;
 import it.infn.mw.iam.authn.saml.DefaultSAMLUserDetailsService;
 import it.infn.mw.iam.authn.saml.IamCachingMetadataManager;
 import it.infn.mw.iam.authn.saml.IamExtendedMetadataDelegate;
 import it.infn.mw.iam.authn.saml.IamSamlAuthenticationProvider;
 import it.infn.mw.iam.authn.saml.JustInTimeProvisioningSAMLUserDetailsService;
+import it.infn.mw.iam.authn.saml.MappingPropertiesResolver;
 import it.infn.mw.iam.authn.saml.MetadataLookupService;
 import it.infn.mw.iam.authn.saml.SamlExceptionMessageHelper;
+import it.infn.mw.iam.authn.saml.profile.DefaultSSOProfileOptionsResolver;
+import it.infn.mw.iam.authn.saml.profile.IamSSOProfile;
+import it.infn.mw.iam.authn.saml.profile.IamSSOProfileOptions;
+import it.infn.mw.iam.authn.saml.profile.SSOProfileOptionsResolver;
 import it.infn.mw.iam.authn.saml.util.FirstApplicableChainedSamlIdResolver;
+import it.infn.mw.iam.authn.saml.util.IamSamlBootstrap;
+import it.infn.mw.iam.authn.saml.util.IamSamlEntryPoint;
 import it.infn.mw.iam.authn.saml.util.SamlIdResolvers;
 import it.infn.mw.iam.authn.saml.util.SamlUserIdentifierResolver;
 import it.infn.mw.iam.authn.saml.util.metadata.ResearchAndScholarshipMetadataFilter;
@@ -166,6 +173,9 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
 
   @Autowired
   SamlUserIdentifierResolver resolver;
+
+  @Autowired
+  MappingPropertiesResolver mappingResolver;
 
   @Autowired
   IamAccountRepository repo;
@@ -197,6 +207,12 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
   @Autowired
   private AccountUtils accountUtils;
 
+  @Autowired
+  SSOProfileOptionsResolver optionsResolver;
+
+  @Autowired
+  IamSSOProfileOptions defaultOptions;
+
   Timer metadataFetchTimer = new Timer();
 
   BasicParserPool basicParserPool = new BasicParserPool();
@@ -216,7 +232,8 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
   }
 
   @Configuration
-  @EnableConfigurationProperties({IamSamlProperties.class})
+  @EnableConfigurationProperties({IamSamlProperties.class,
+      IamSamlJITAccountProvisioningProperties.class})
   public static class IamSamlConfig {
 
 
@@ -233,6 +250,13 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
       }
 
       return samlProperties.getIdResolvers().split(",");
+    }
+
+    @Bean
+    public MappingPropertiesResolver mappingPropertiesResolver(
+        IamSamlJITAccountProvisioningProperties jitProperties) {
+      return new DefaultMappingPropertiesResolver(jitProperties.getDefaultMapping(),
+          jitProperties.getEntityMapping());
     }
 
     @Bean
@@ -260,16 +284,57 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
       return new FirstApplicableChainedSamlIdResolver(resolvers);
     }
 
+    @Bean
+    public WebSSOProfile webSSOprofile() {
+      return new IamSSOProfile();
+    }
+
+
+    @Bean
+    public IamSSOProfileOptions defaultWebSSOProfileOptions() {
+
+      IamSSOProfileOptions options = new IamSSOProfileOptions();
+      options.setIncludeScoping(false);
+      options.setNameID(samlProperties.getNameidPolicy().type());
+
+      return options;
+    }
+
+    @Bean
+    public SSOProfileOptionsResolver optionsResolver() {
+      return new DefaultSSOProfileOptionsResolver(samlProperties, defaultWebSSOProfileOptions());
+    }
+
+
+
+    @Bean
+    public static SAMLBootstrap sAMLBootstrap() {
+
+      return new IamSamlBootstrap("RSA", SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256,
+          SignatureConstants.ALGO_ID_DIGEST_SHA256);
+    }
+
   }
+
+
+  @Bean
+  public SAMLEntryPoint samlEntryPoint() {
+    IamSamlEntryPoint ep = new IamSamlEntryPoint(optionsResolver);
+    ep.setDefaultProfileOptions(defaultOptions);
+    return ep;
+  }
+
+
 
   @Bean
   public SAMLUserDetailsService samlUserDetailsService(SamlUserIdentifierResolver resolver,
-      IamAccountRepository accountRepo, InactiveAccountAuthenticationHander handler) {
+      IamAccountRepository accountRepo, InactiveAccountAuthenticationHander handler,
+      MappingPropertiesResolver mpResolver) {
 
     if (jitProperties.getEnabled()) {
 
       return new JustInTimeProvisioningSAMLUserDetailsService(resolver, accountService, handler,
-          accountRepo, jitProperties.getTrustedIdpsAsOptionalSet());
+          accountRepo, jitProperties.getTrustedIdpsAsOptionalSet(), mpResolver);
     }
 
     return new DefaultSAMLUserDetailsService(resolver, accountRepo, handler);
@@ -304,13 +369,14 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
 
   @Bean
   public SAMLAuthenticationProvider samlAuthenticationProvider(SamlUserIdentifierResolver resolver,
-      IamAccountRepository accountRepo, InactiveAccountAuthenticationHander handler) {
+      IamAccountRepository accountRepo, InactiveAccountAuthenticationHander handler,
+      MappingPropertiesResolver mpResolver) {
 
     IamSamlAuthenticationProvider samlAuthenticationProvider =
         new IamSamlAuthenticationProvider(resolver);
 
     samlAuthenticationProvider
-      .setUserDetails(samlUserDetailsService(resolver, accountRepo, handler));
+      .setUserDetails(samlUserDetailsService(resolver, accountRepo, handler, mpResolver));
     samlAuthenticationProvider.setForcePrincipalAsString(false);
     return samlAuthenticationProvider;
   }
@@ -337,17 +403,11 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
     return new SAMLContextProviderImpl();
   }
 
-  // Initialization of OpenSAML library
-  @Bean
-  public static SAMLBootstrap sAMLBootstrap() {
 
-    return new SAMLBootstrap();
-  }
 
   // Logger for SAML messages and events
   @Bean
   public SAMLDefaultLogger samlLogger() {
-
     return new SAMLDefaultLogger();
   }
 
@@ -369,13 +429,6 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
   public WebSSOProfileConsumer hokWebSSOprofileConsumer() {
 
     return setAssertionTimeChecks(new WebSSOProfileConsumerHoKImpl());
-  }
-
-  // SAML 2.0 Web SSO profile
-  @Bean
-  public WebSSOProfile webSSOprofile() {
-
-    return new WebSSOProfileImpl();
   }
 
   @Bean
@@ -416,28 +469,6 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
   public Protocol socketFactoryProtocol() {
 
     return new Protocol("https", socketFactory(), 443);
-  }
-
-
-  @Bean
-  public WebSSOProfileOptions defaultWebSSOProfileOptions() {
-
-    WebSSOProfileOptions webSSOProfileOptions = new WebSSOProfileOptions();
-    webSSOProfileOptions.setIncludeScoping(false);
-
-    webSSOProfileOptions.setNameID(samlProperties.getNameidPolicy().type());
-
-    return webSSOProfileOptions;
-  }
-
-  // Entry point to initialize authentication, default values taken from
-  // properties file
-  @Bean
-  public SAMLEntryPoint samlEntryPoint() {
-
-    SAMLEntryPoint samlEntryPoint = new SAMLEntryPoint();
-    samlEntryPoint.setDefaultProfileOptions(defaultWebSSOProfileOptions());
-    return samlEntryPoint;
   }
 
   @Bean
@@ -506,10 +537,10 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
         LOG.warn(
             "Local metadata automatic generation is disabled but metadata location URL is not set!");
       } else {
-        
+
         String trimmedMetadataUrl = samlProperties.getLocalMetadata().getLocationUrl().trim();
         LOG.info("Adding local metadata provider for URL: {}", trimmedMetadataUrl);
-        
+
         Resource metadataResource = resourceLoader.getResource(trimmedMetadataUrl);
 
         FilesystemMetadataProvider metadataProvider =
@@ -610,7 +641,7 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
     metadataGenerator.setKeyManager(keyManager());
 
     metadataGenerator.setEntityBaseURL(iamProperties.getBaseUrl());
-
+    metadataGenerator.setSamlEntryPoint(samlEntryPoint());
     return metadataGenerator;
   }
 
@@ -756,12 +787,6 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
   }
 
 
-  /**
-   * Define the security filter chain in order to support SSO Auth by using SAML 2.0
-   * 
-   * @return Filter chain proxy @throws Exception
-   * @throws Exception when there are problems
-   */
   @Bean
   public FilterChainProxy samlFilter() throws Exception {
 
@@ -798,8 +823,8 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
 
   @Override
   protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-
-    auth.authenticationProvider(samlAuthenticationProvider(resolver, repo, inactiveAccountHandler));
+    auth.authenticationProvider(
+        samlAuthenticationProvider(resolver, repo, inactiveAccountHandler, mappingResolver));
   }
 
   private void scheduleMetadataLookupServiceRefresh(ScheduledTaskRegistrar taskRegistrar) {

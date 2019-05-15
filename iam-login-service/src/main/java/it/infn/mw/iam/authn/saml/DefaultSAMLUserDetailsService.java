@@ -43,7 +43,7 @@ public class DefaultSAMLUserDetailsService extends SAMLUserDetailsServiceSupport
   @Override
   public Object loadUserBySAML(SAMLCredential credential) throws UsernameNotFoundException {
 
-    IamSamlId samlId = resolverSamlId(credential);
+    IamSamlId samlId = resolveSamlId(credential);
 
     Optional<IamAccount> account = repo.findBySamlId(samlId);
 

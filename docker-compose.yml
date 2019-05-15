@@ -84,8 +84,9 @@ services:
     volumes:
       - .:/code:ro
       - /dev/urandom:/dev/random
-
-      # - ./compose/custom-saml/application-saml.yml:/indigo-iam/config/application-saml.yml:ro
+      - ./compose/metadata/iam.local.io.metadata.xml:/indigo-iam/iam.local.io.metadata.xml:ro
+      - ./compose/metadata/spid-idp.example.metadata.xml:/indigo-iam/spid-idp.example.metadata.xml:ro
+      - ./compose/custom-saml/application-saml.yml:/indigo-iam/config/application-saml.yml:ro
       #- ./compose/multiple-oidc-providers/application.yml:/indigo-iam/config/application.yml
 
   client:
@@ -120,9 +121,9 @@ services:
     build:
       context: ./docker/nginx/
 
-    depends_on:
-      - iam-be
-      - client
+    # depends_on:
+      # - iam-be
+      # - client
 
     dns_search: local.io
 
@@ -138,7 +139,7 @@ services:
 
     volumes:
       - /dev/urandom:/dev/random
-      # - ./compose/custom-nginx/iam.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./compose/custom-nginx/iam.conf:/etc/nginx/conf.d/default.conf:ro
 
     networks:
       default:

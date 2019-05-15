@@ -104,7 +104,7 @@ public class SamlAuthenticationTestSupport {
       .build();
   }
 
-  public String samlLoginUrl() throws UnsupportedEncodingException {
+  public String samlDefaultIdpLoginUrl() throws UnsupportedEncodingException {
 
     String defaultIdpUrl = String.format("/saml/login?idp=%s", DEFAULT_IDP_ID);
 

@@ -91,7 +91,7 @@ public class SamlExtAuthRegistrationTests extends SamlAuthenticationTestSupport 
 
     // If the user tries to authenticate with his external account, he's redirected to the
     // login page with an account disabled error
-    MockHttpSession session = (MockHttpSession) mvc.perform(get(samlLoginUrl()))
+    MockHttpSession session = (MockHttpSession) mvc.perform(get(samlDefaultIdpLoginUrl()))
       .andExpect(status().isOk())
       .andReturn()
       .getRequest()
@@ -121,7 +121,7 @@ public class SamlExtAuthRegistrationTests extends SamlAuthenticationTestSupport 
     // the same happens after having confirmed the request
     mvc.perform(get("/registration/confirm/{token}", token)).andExpect(status().isOk());
 
-    session = (MockHttpSession) mvc.perform(get(samlLoginUrl()))
+    session = (MockHttpSession) mvc.perform(get(samlDefaultIdpLoginUrl()))
       .andExpect(status().isOk())
       .andReturn()
       .getRequest()

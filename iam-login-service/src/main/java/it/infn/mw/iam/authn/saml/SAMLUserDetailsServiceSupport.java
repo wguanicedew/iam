@@ -63,7 +63,7 @@ public class SAMLUserDetailsServiceSupport {
         Arrays.asList(ExternalAuthenticationHandlerSupport.EXT_AUTHN_UNREGISTERED_USER_AUTH));
   }
 
-  protected IamSamlId resolverSamlId(SAMLCredential credential) {
+  protected IamSamlId resolveSamlId(SAMLCredential credential) {
     return resolver.resolveSamlUserIdentifier(credential).getResolvedId()
       .orElseThrow(() -> new UsernameNotFoundException(
           "Could not extract a user identifier from the SAML assertion"));
