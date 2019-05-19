@@ -17,4 +17,5 @@ mvn \
   -Dsonar.organization=${SONAR_ORGANIZATION} \
   -Dsonar.host.url=${SONAR_HOST_URL} \
   -Dsonar.login=${SONAR_AUTH_TOKEN} \
-  -Dsonar.branch.name=${GIT_BRANCH_NAME}
+  -Dsonar.branch.name=${GIT_BRANCH_NAME} \
+  clean package sonar:sonar
