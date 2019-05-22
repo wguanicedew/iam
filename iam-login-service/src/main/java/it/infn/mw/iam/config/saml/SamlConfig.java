@@ -253,6 +253,7 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
     }
 
     @Bean
+    @Profile("saml")
     public MappingPropertiesResolver mappingPropertiesResolver(
         IamSamlJITAccountProvisioningProperties jitProperties) {
       return new DefaultMappingPropertiesResolver(jitProperties.getDefaultMapping(),
@@ -285,12 +286,14 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
     }
 
     @Bean
+    @Profile("saml")
     public WebSSOProfile webSSOprofile() {
       return new IamSSOProfile();
     }
 
 
     @Bean
+    @Profile("saml")
     public IamSSOProfileOptions defaultWebSSOProfileOptions() {
 
       IamSSOProfileOptions options = new IamSSOProfileOptions();
@@ -301,6 +304,7 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
     }
 
     @Bean
+    @Profile("saml")
     public SSOProfileOptionsResolver optionsResolver() {
       return new DefaultSSOProfileOptionsResolver(samlProperties, defaultWebSSOProfileOptions());
     }
@@ -308,6 +312,7 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
 
 
     @Bean
+    @Profile("saml")
     public static SAMLBootstrap sAMLBootstrap() {
 
       return new IamSamlBootstrap("RSA", SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256,
@@ -323,7 +328,6 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
     ep.setDefaultProfileOptions(defaultOptions);
     return ep;
   }
-
 
 
   @Bean
