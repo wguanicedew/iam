@@ -53,9 +53,9 @@ iam:
   
   logo:
     url: ${IAM_LOGO_URL:resources/images/indigo-logo.png}
-    dimension: 200
-    height: 150
-    width: 200
+    dimension: ${IAM_LOGO_DIMENSION:200}
+    height: ${IAM_LOGO_HEIGHT:150}
+    width: ${IAM_LOGO_WIDTH:200}
   
   token:
     # This is the registration access token lifetime
