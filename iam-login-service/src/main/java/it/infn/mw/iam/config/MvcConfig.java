@@ -23,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -44,7 +43,7 @@ import org.springframework.web.servlet.view.JstlView;
 import it.infn.mw.iam.core.util.PoliteJsonMessageSource;
 
 @Configuration
-@EnableConfigurationProperties({IamProperties.class})
+// @EnableConfigurationProperties({IamProperties.class})
 public class MvcConfig extends WebMvcConfigurerAdapter {
 
   public static final Logger LOG = LoggerFactory.getLogger(MvcConfig.class);

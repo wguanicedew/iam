@@ -16,10 +16,52 @@
 package it.infn.mw.iam.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
+@Component
 @ConfigurationProperties(prefix = "iam")
 public class IamProperties {
 
+  public static class Logo {
+    private String url = "resources/images/indigo-logo.png";
+    private int dimension = 200;
+    private int height = 200;
+    private int width = 200;
+    
+    public String getUrl() {
+      return url;
+    }
+    
+    public void setUrl(String url) {
+      this.url = url;
+    }
+    
+    public int getDimension() {
+      return dimension;
+    }
+    
+    public void setDimension(int dimension) {
+      this.dimension = dimension;
+    }
+
+    public int getHeight() {
+      return height;
+    }
+
+    public void setHeight(int height) {
+      this.height = height;
+    }
+
+    public int getWidth() {
+      return width;
+    }
+
+    public void setWidth(int width) {
+      this.width = width;
+    }
+    
+  }
+  
   public static class LocalResources {
     
     private boolean enable = false;
@@ -45,6 +87,8 @@ public class IamProperties {
   private String baseUrl;
   
   private LocalResources localResources = new LocalResources();
+  
+  private Logo logo = new Logo();
 
   public String getBaseUrl() {
     return baseUrl;
@@ -60,5 +104,13 @@ public class IamProperties {
   
   public void setLocalResources(LocalResources localResources) {
     this.localResources = localResources;
+  }
+  
+  public Logo getLogo() {
+    return logo;
+  }
+  
+  public void setLogo(Logo logo) {
+    this.logo = logo;
   }
 }

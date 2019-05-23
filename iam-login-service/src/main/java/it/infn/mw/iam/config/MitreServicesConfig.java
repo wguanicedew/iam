@@ -101,18 +101,15 @@ public class MitreServicesConfig {
   @Value("${iam.token.lifetime}")
   private Long tokenLifeTime;
 
-  @Value("${iam.logoImageUrl}")
-  private String logoImageUrl;
-
   @Value("${iam.topbarTitle}")
   private String topbarTitle;
 
   @Bean
-  public ConfigurationPropertiesBean config() {
+  public ConfigurationPropertiesBean config(IamProperties properties) {
 
     ConfigurationPropertiesBean config = new ConfigurationPropertiesBean();
 
-    config.setLogoImageUrl(logoImageUrl);
+    config.setLogoImageUrl(properties.getLogo().getUrl());
     config.setTopbarTitle(topbarTitle);
 
     if (!issuer.endsWith("/")) {

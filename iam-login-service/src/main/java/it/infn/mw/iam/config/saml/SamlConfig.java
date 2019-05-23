@@ -162,7 +162,7 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 @Order(value = Ordered.LOWEST_PRECEDENCE)
 @Profile("saml")
 @EnableConfigurationProperties({IamSamlProperties.class,
-    IamSamlJITAccountProvisioningProperties.class, IamProperties.class, ServerProperties.class})
+    IamSamlJITAccountProvisioningProperties.class, ServerProperties.class})
 @EnableScheduling
 public class SamlConfig extends WebSecurityConfigurerAdapter implements SchedulingConfigurer {
 

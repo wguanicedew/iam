@@ -36,6 +36,7 @@
     padding: 40px;
 }
 
+/*
 #logo-container {
     margin: auto;
     margin-top: 10px;
@@ -45,6 +46,7 @@
     background-image: url("/resources/images/indigo-logo.png");
     background-repeat: no-repeat;
 }
+*/
 
 #logo-container a {
     display: block;
