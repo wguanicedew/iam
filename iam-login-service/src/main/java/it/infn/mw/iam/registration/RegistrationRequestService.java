@@ -30,9 +30,11 @@ public interface RegistrationRequestService {
 
   List<RegistrationRequestDto> listPendingRequests();
 
-  RegistrationRequestDto updateStatus(String uuid, IamRegistrationRequestStatus status);
-
   RegistrationRequestDto confirmRequest(String confirmationKey);
+  
+  RegistrationRequestDto rejectRequest(String requestUuid, Optional<String> motivation);
+  
+  RegistrationRequestDto approveRequest(String requestUuid);
 
   Boolean usernameAvailable(String username);
 

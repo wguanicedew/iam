@@ -42,7 +42,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import it.infn.mw.iam.IamLoginService;
-import it.infn.mw.iam.core.IamRegistrationRequestStatus;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamOidcId;
 import it.infn.mw.iam.persistence.model.IamSamlId;
@@ -104,8 +103,7 @@ public class ExternalAuthenticationRegistrationTests {
     mvc.perform(get("/registration/confirm/{token}", token)).andExpect(status().isOk());
 
     mvc
-      .perform(post("/registration/{uuid}/{decision}", request.getUuid(),
-          IamRegistrationRequestStatus.APPROVED)
+      .perform(post("/registration/approve/{uuid}", request.getUuid())
             .with(SecurityMockMvcRequestPostProcessors.user("admin").roles("ADMIN", "USER")))
       .andExpect(status().isOk());
 
@@ -150,8 +148,7 @@ public class ExternalAuthenticationRegistrationTests {
     mvc.perform(get("/registration/confirm/{token}", token)).andExpect(status().isOk());
 
     mvc
-      .perform(post("/registration/{uuid}/{decision}", request.getUuid(),
-          IamRegistrationRequestStatus.APPROVED)
+      .perform(post("/registration/approve/{uuid}", request.getUuid())
             .with(SecurityMockMvcRequestPostProcessors.user("admin").roles("ADMIN", "USER")))
       .andExpect(status().isOk());
 

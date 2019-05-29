@@ -1,0 +1,32 @@
+<div class="modal-header">
+    <h3 class="modal-title">
+        <ng-pluralize count="$ctrl.requests.length"
+            when="{'1': 'Approve registration request?', 'other': 'Approve {} registration requests?'}">
+        </ng-pluralize>
+    </h3>
+</div>
+<div class="modal-body">
+    <p>
+        Do you confirm the approval of the registration
+        <ng-pluralize count="$ctrl.requests.length" when="{'1': 'request', 'other': 'requests'}">
+        </ng-pluralize> from the following
+        <ng-pluralize count="$ctrl.requests.length" when="{'1': 'user', 'other': 'users'}">
+        </ng-pluralize>?
+    </p>
+    <ul>
+        <li ng-repeat=" r in $ctrl.requests">
+            {{r.givenname}} {{r.familyname}}, submitted {{r.creationTime | relativeDate}}.
+        </li>
+    </ul>
+    <div class="overlay" ng-if="$ctrl.busy">
+        <i class="fa fa-refresh fa-spin"></i>
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-primary" type="button" id="modal-btn-confirm" ng-click="$ctrl.approve()"
+        ng-disabled="$ctrl.busy">
+        <ng-pluralize count="$ctrl.requests.length" when="{'1': 'Approve request', 'other': 'Approve {} requests'}">
+        </ng-pluralize>
+    </button>
+    <button class="btn btn-warning" type="button" id="modal-btn-cancel" ng-click="$ctrl.cancel()">Cancel</button>
+</div>

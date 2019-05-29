@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -49,6 +50,7 @@ public class TransientNotificationFactory implements NotificationFactory {
   private static final String ORGANISATION_NAME = "organisationName";
   private static final String USERNAME_FIELD = "username";
   private static final String GROUPNAME_FIELD = "groupName";
+  private static final String MOTIVATION_FIELD = "motivation";
 
   @Value("${iam.baseUrl}")
   private String baseUrl;
@@ -116,12 +118,16 @@ public class TransientNotificationFactory implements NotificationFactory {
   }
 
   @Override
-  public IamEmailNotification createRequestRejectedMessage(IamRegistrationRequest request) {
+  public IamEmailNotification createRequestRejectedMessage(IamRegistrationRequest request, Optional<String> motivation) {
     String recipient = request.getAccount().getUserInfo().getName();
 
     Map<String, Object> model = new HashMap<>();
     model.put(RECIPIENT_FIELD, recipient);
     model.put(ORGANISATION_NAME, organisationName);
+    
+    if (motivation.isPresent()) {
+      model.put(MOTIVATION_FIELD, motivation.get());
+    }
 
     return createMessage("requestRejected.vm", model, IamNotificationType.REJECTED,
         properties.getSubject().get("rejected"),

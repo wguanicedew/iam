@@ -16,6 +16,33 @@
 (function () {
     'use strict';
 
+    function DialogController($uibModalInstance, RegistrationRequestService, requests) {
+        var self = this;
+
+        self.motivation = "";
+        self.busy = false;
+        self.requests = requests;
+        self.cancel = cancel;
+        self.approve = approve;
+        self.reject = reject;
+
+        function cancel() {
+            $uibModalInstance.dismiss('Dismissed');
+        }
+
+        function approve() {
+            self.busy = true;
+            var result = RegistrationRequestService.bulkApprove(self.requests);
+            $uibModalInstance.close(result);
+        }
+
+        function reject() {
+            self.busy = true;
+            var result = RegistrationRequestService.bulkReject(self.requests, self.motivation);
+            $uibModalInstance.close(result);
+        }
+    }
+
     function RejectRequest($uibModalInstance, RegistrationRequestService, requests) {
         var self = this;
 
@@ -73,21 +100,27 @@
             }
         }
 
-        function bulkReject() {
 
-            var modal = $uibModal.open({
-                templateUrl: '/resources/iam/apps/dashboard-app/components/requests/reject-request.dialog.html',
-                controller: RejectRequest,
-                controllerAs: '$ctrl',
-                resolve: {
-                    request: req,
-                    userFullName: function () {
-                        return `${req.givenname} ${req.familyname}`;
-                    }
+        function bulkRejectSuccess(r) {
+            console.log(r);
+            loadPendingRequests().then(function () {
+                toaster.pop({
+                    type: 'success',
+                    body: `${r.length} requests rejected`
+                });
+            });
+        }
+
+        function bulkRejectError(r) {
+            console.log(r);
+            loadPendingRequests().then(function () {
+                if (r != "Dismissed") {
+                    toaster.pop({
+                        type: 'error',
+                        body: `Rejection failed for ${r.length} requests`
+                    });
                 }
             });
-
-            modal.result.then(rejectSuccess, decisionErrorHandler);
         }
 
         function bulkApproveSuccess(r) {
@@ -103,10 +136,12 @@
         function bulkApproveError(r) {
             console.log(r);
             loadPendingRequests().then(function () {
-                toaster.pop({
-                    type: 'error',
-                    body: `Approval failed for ${r.length} requests`
-                });
+                if (r != "Dismissed") {
+                    toaster.pop({
+                        type: 'error',
+                        body: `Approval failed for ${r.length} requests`
+                    });
+                }
             });
         }
 
@@ -116,11 +151,38 @@
             return requests;
         }
 
+
         function bulkApprove() {
             self.busy = true;
-            RegistrationRequestService.bulkApprove(selectedRequests())
-                .then(bulkApproveSuccess)
-                .catch(bulkApproveError);
+
+            var modal = $uibModal.open({
+                templateUrl: '/resources/iam/apps/dashboard-app/components/requests/registration/bulk-approve.dialog.html',
+                controller: DialogController,
+                controllerAs: '$ctrl',
+                resolve: {
+                    requests: function () {
+                        return selectedRequests();
+                    }
+                }
+            });
+
+            modal.result.then(bulkApproveSuccess, bulkApproveError);
+        }
+
+        function bulkReject() {
+
+            var modal = $uibModal.open({
+                templateUrl: '/resources/iam/apps/dashboard-app/components/requests/registration/bulk-reject.dialog.html',
+                controller: DialogController,
+                controllerAs: '$ctrl',
+                resolve: {
+                    requests: function () {
+                        return selectedRequests();
+                    }
+                }
+            });
+
+            modal.result.then(bulkRejectSuccess, bulkRejectError);
         }
 
         self.$onInit = function () {

@@ -229,41 +229,20 @@ public class DefaultRegistrationRequestService
     return requests;
   }
 
-  @Override
-  public RegistrationRequestDto updateStatus(String uuid, IamRegistrationRequestStatus status) {
-
-    IamRegistrationRequest request =
-        requestRepository.findByUuid(uuid).orElseThrow(() -> new ScimResourceNotFoundException(
-            String.format("No request mapped to uuid [%s]", uuid)));
-
-    if (!checkStateTransition(request.getStatus(), status)) {
-      throw new IllegalArgumentException(
-          String.format("Bad status transition from [%s] to [%s]", request.getStatus(), status));
-    }
-
-    RegistrationRequestDto retval = null;
-
-    if (APPROVED.equals(status)) {
-      retval = handleApprove(request);
-
-    } else if (CONFIRMED.equals(status)) {
-      retval = handleConfirm(request);
-
-    } else if (REJECTED.equals(status)) {
-      retval = handleReject(request);
-    }
-
-    return retval;
-  }
 
   @Override
   public RegistrationRequestDto confirmRequest(String confirmationKey) {
 
-    IamRegistrationRequest reg = requestRepository.findByAccountConfirmationKey(confirmationKey)
+    IamRegistrationRequest request = requestRepository.findByAccountConfirmationKey(confirmationKey)
       .orElseThrow(() -> new ScimResourceNotFoundException(String
         .format("No registration request found for registration_key [%s]", confirmationKey)));
 
-    return updateStatus(reg.getUuid(), CONFIRMED);
+    if (!checkStateTransition(request.getStatus(), CONFIRMED)) {
+      throw new IllegalArgumentException(
+          String.format("Bad status transition from [%s] to [%s]", request.getStatus(), CONFIRMED));
+    }
+    
+    return handleConfirm(request);
   }
 
   @Override
@@ -321,9 +300,9 @@ public class DefaultRegistrationRequestService
     return converter.fromEntity(request);
   }
 
-  private RegistrationRequestDto handleReject(IamRegistrationRequest request) {
+  private RegistrationRequestDto handleReject(IamRegistrationRequest request, Optional<String> motivation) {
     request.setStatus(REJECTED);
-    notificationFactory.createRequestRejectedMessage(request);
+    notificationFactory.createRequestRejectedMessage(request, motivation);
     RegistrationRequestDto retval = converter.fromEntity(request);
 
     accountService.deleteAccount(request.getAccount());
@@ -347,6 +326,35 @@ public class DefaultRegistrationRequestService
 
   public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
     this.eventPublisher = publisher;
+  }
+
+  @Override
+  public RegistrationRequestDto rejectRequest(String requestUuid, Optional<String> motivation) {
+    
+    IamRegistrationRequest request =
+        requestRepository.findByUuid(requestUuid).orElseThrow(() -> new ScimResourceNotFoundException(
+            String.format("No request mapped to uuid [%s]", requestUuid)));
+    
+    if (!checkStateTransition(request.getStatus(), REJECTED)) {
+      throw new IllegalArgumentException(
+          String.format("Bad status transition from [%s] to [%s]", request.getStatus(), APPROVED));
+    }
+    
+    return handleReject(request, motivation);
+  }
+
+  @Override
+  public RegistrationRequestDto approveRequest(String requestUuid) {
+    IamRegistrationRequest request =
+        requestRepository.findByUuid(requestUuid).orElseThrow(() -> new ScimResourceNotFoundException(
+            String.format("No request mapped to uuid [%s]", requestUuid)));
+
+    if (!checkStateTransition(request.getStatus(), APPROVED)) {
+      throw new IllegalArgumentException(
+          String.format("Bad status transition from [%s] to [%s]", request.getStatus(), APPROVED));
+    }
+    
+    return handleApprove(request);
   }
 
 }

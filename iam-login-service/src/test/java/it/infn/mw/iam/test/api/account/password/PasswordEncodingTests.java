@@ -122,7 +122,7 @@ public class PasswordEncodingTests {
         .contentType(APPLICATION_JSON))
       .andExpect(status().isOk());
 
-    mvc.perform(post("/registration/{uuid}/APPROVED", request.getUuid())
+    mvc.perform(post("/registration/approve/{uuid}", request.getUuid())
       .with(authentication(adminAuthentication()))
       .contentType(APPLICATION_JSON)).andExpect(status().isOk());
 

@@ -15,8 +15,6 @@
  */
 package it.infn.mw.iam.registration;
 
-import static java.lang.String.format;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -38,7 +36,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
-import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
 import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
 import it.infn.mw.iam.authn.AbstractExternalAuthenticationToken;
 import it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo;
@@ -62,8 +59,8 @@ public class RegistrationApiController {
 
     if (authn instanceof AbstractExternalAuthenticationToken<?>) {
 
-      return Optional
-        .of(((AbstractExternalAuthenticationToken<?>) authn).toExernalAuthenticationRegistrationInfo());
+      return Optional.of(((AbstractExternalAuthenticationToken<?>) authn)
+        .toExernalAuthenticationRegistrationInfo());
     }
 
     return Optional.empty();
@@ -112,22 +109,22 @@ public class RegistrationApiController {
   }
 
   @PreAuthorize("#oauth2.hasScope('registration:write') or hasRole('ADMIN')")
-  @RequestMapping(value = "/registration/{uuid}/{decision}", method = RequestMethod.POST)
-  public RegistrationRequestDto changeStatus(@PathVariable("uuid") String uuid,
-      @PathVariable("decision") String decision) {
-
-    IamRegistrationRequestStatus status = null;
-    try {
-      status = IamRegistrationRequestStatus.valueOf(decision);
-    } catch (Exception e) {
-      throw new IllegalArgumentException(format("Operation [%s] not found", decision),e);
-    }
-
-    return service.updateStatus(uuid, status);
+  @RequestMapping(value = "/registration/approve/{uuid}", method = RequestMethod.POST)
+  public RegistrationRequestDto approveRequest(@PathVariable("uuid") String uuid) {
+    return service.approveRequest(uuid);
   }
 
+  @PreAuthorize("#oauth2.hasScope('registration:write') or hasRole('ADMIN')")
+  @RequestMapping(value = "/registration/reject/{uuid}", method = RequestMethod.POST)
+  public RegistrationRequestDto rejectRequest(@PathVariable("uuid") String uuid,
+      @RequestParam(required = false) String motivation) {
+
+    return service.rejectRequest(uuid, Optional.ofNullable(motivation));
+  }
+
+
   @RequestMapping(value = "/registration/confirm/{token}", method = RequestMethod.GET)
-  public RegistrationRequestDto confirmEmail(@PathVariable("token") String token) {
+  public RegistrationRequestDto confirmRequest(@PathVariable("token") String token) {
 
     return service.confirmRequest(token);
   }
@@ -139,7 +136,7 @@ public class RegistrationApiController {
       model.addAttribute("verificationSuccess", true);
       SecurityContextHolder.clearContext();
     } catch (ScimResourceNotFoundException e) {
-      LOG.warn(e.getMessage(),e);
+      LOG.warn(e.getMessage(), e);
       String message = "Activation failed: " + e.getMessage();
       model.addAttribute("verificationMessage", message);
       model.addAttribute("verificationFailure", true);

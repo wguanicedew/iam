@@ -48,7 +48,6 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import it.infn.mw.iam.IamLoginService;
-import it.infn.mw.iam.core.IamRegistrationRequestStatus;
 import it.infn.mw.iam.registration.PersistentUUIDTokenGenerator;
 import it.infn.mw.iam.registration.RegistrationRequestDto;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
@@ -157,7 +156,7 @@ public class RegistrationPrivilegedTests {
 
     // approve it
     // @formatter:off
-    mvc.perform(post("/registration/{uuid}/{decision}", reg.getUuid(), APPROVED.name()))
+    mvc.perform(post("/registration/approve/{uuid}", reg.getUuid()))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.status", equalTo(APPROVED.name())))
       .andExpect(jsonPath("$.uuid", equalTo(reg.getUuid())));
@@ -179,7 +178,7 @@ public class RegistrationPrivilegedTests {
 
     // @formatter:off
     // reject it
-    mvc.perform(post("/registration/{uuid}/{decision}", reg.getUuid(), REJECTED.name()))
+    mvc.perform(post("/registration/reject/{uuid}", reg.getUuid()))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.status", equalTo(REJECTED.name())))
       .andExpect(jsonPath("$.uuid", equalTo(reg.getUuid())));
@@ -203,26 +202,8 @@ public class RegistrationPrivilegedTests {
 
     // @formatter:off
     // approve it without confirm
-    mvc.perform(post("/registration/{uuid}/{decision}", reg.getUuid(), APPROVED.name()))
+    mvc.perform(post("/registration/approve/{uuid}", reg.getUuid(), APPROVED.name()))
       .andExpect(status().isOk());
-    // @formatter:on
-  }
-
-  @Test
-  @WithMockOAuthUser(clientId = "registration-client", scopes = {"registration:write"})
-  public void testWrongDecisionFailure() throws Exception {
-
-    RegistrationRequestDto reg = createRegistrationRequest("test_wrong_decision");
-    assertNotNull(reg);
-
-    String token = generator.getLastToken();
-    assertNotNull(token);
-
-    confirmRegistrationRequest(token);
-
-    // @formatter:off
-    mvc.perform(post("/registration/{uuid}/{decision}", reg.getUuid(), "wrong"))
-      .andExpect(status().isBadRequest());
     // @formatter:on
   }
 
@@ -276,14 +257,8 @@ public class RegistrationPrivilegedTests {
   }
 
   protected RegistrationRequestDto approveRequest(String uuid) throws Exception {
-    return requestDecision(uuid, APPROVED);
-  }
-
-  private RegistrationRequestDto requestDecision(String uuid, IamRegistrationRequestStatus decision)
-      throws Exception {
-    // @formatter:off
     String response = mvc
-        .perform(post("/registration/{uuid}/{decision}", uuid, decision.name())
+        .perform(post("/registration/approve/{uuid}", uuid)
           .with(SecurityMockMvcRequestPostProcessors.user("admin").roles("ADMIN", "USER")))
         .andExpect(status().isOk())
         .andReturn()

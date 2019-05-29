@@ -18,9 +18,9 @@
 
     angular.module('dashboardApp').factory('RegistrationRequestService', RegistrationRequestService);
 
-    RegistrationRequestService.$inject = ['$http', '$q'];
+    RegistrationRequestService.$inject = ['$http', '$q', '$httpParamSerializerJQLike'];
 
-    function RegistrationRequestService($http, $q) {
+    function RegistrationRequestService($http, $q, $httpParamSerializerJQLike) {
 
         var service = {
             createRequest: createRequest,
@@ -57,11 +57,23 @@
         }
 
         function approveRequest(req) {
-            return $http.post('/registration/' + req.uuid + '/APPROVED');
+            return $http.post('/registration/approve/' + req.uuid);
         }
 
-        function rejectRequest(req) {
-            return $http.post('/registration/' + req.uuid + '/REJECTED');
+        function rejectRequest(req, motivation) {
+
+            var d = {
+                motivation: motivation
+            };
+
+            return $http({
+                url: '/registration/reject/' + req.uuid,
+                method: 'POST',
+                data: $httpParamSerializerJQLike(d),
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            });
         }
 
         function bulkApprove(requests) {
@@ -70,9 +82,9 @@
             return $q.all(promises);
         }
 
-        function bulkReject(requests) {
+        function bulkReject(requests, motivation) {
             var promises = [];
-            angular.forEach(requests, r => promises.push(rejectRequest(r)));
+            angular.forEach(requests, r => promises.push(rejectRequest(r, motivation)));
             return $q.all(promises);
         }
     }

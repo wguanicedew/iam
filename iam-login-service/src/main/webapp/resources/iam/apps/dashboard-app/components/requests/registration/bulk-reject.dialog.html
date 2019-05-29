@@ -1,0 +1,40 @@
+<div class="modal-header">
+    <h3 class="modal-title">
+        <ng-pluralize count="$ctrl.requests.length"
+            when="{'1': 'Reject registration request?', 'other': 'Reject {} registration requests?'}">
+        </ng-pluralize>
+    </h3>
+</div>
+<div class="modal-body">
+    <p>
+        Do you confirm the rejection of the registration
+        <ng-pluralize count="$ctrl.requests.length" when="{'1': 'request', 'other': 'requests'}">
+        </ng-pluralize> from the following
+        <ng-pluralize count="$ctrl.requests.length" when="{'1': 'user', 'other': 'users'}">
+        </ng-pluralize>?
+    </p>
+    <ul>
+        <li ng-repeat=" r in $ctrl.requests">
+            {{r.givenname}} {{r.familyname}}, submitted {{r.creationTime | relativeDate}}.
+        </li>
+    </ul>
+    <p>To proceed provide a motivation that will be sent to the rejected users:</p>
+    <form name="rejReq">
+        <div
+            ng-class="{'has-error': rejReq.motivation.$dirty && rejReq.motivation.$invalid, 'has-success': rejReq.motivation.$dirty && rejReq.motivation.$valid}">
+            <input id="rej-req" name="motivation" class="form-control" type="text" required ng-minlength="5"
+                ng-maxlength="50" placeholder="Motivate your decision..." ng-model="$ctrl.motivation">
+            <span class="help-block" ng-show="rejReq.motivation.$dirty && rejReq.motivation.$error.minlength">Please
+                provide a motivation that is at least
+                5 characters long</span>
+            <span class="help-block" ng-show="rejReq.motivation.$dirty && rejReq.motivation.$error.maxlength">The
+                motivation cannot exceed
+                50 characters</span>
+        </div>
+    </form>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-primary" type="button" id="modal-btn-confirm" ng-disabled="!$ctrl.motivation"
+        ng-click="$ctrl.reject()">Reject request</button>
+    <button class="btn btn-warning" type="button" id="modal-btn-cancel" ng-click="$ctrl.cancel()">Cancel</button>
+</div>
