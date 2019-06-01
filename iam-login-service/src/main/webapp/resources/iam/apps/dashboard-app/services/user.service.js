@@ -20,12 +20,16 @@ angular.module('dashboardApp').factory('UserService', UserService);
 UserService.$inject = ['$q', '$rootScope', 'scimFactory', 'Authorities', 'Utils', 'AupService', 'UsersService', 'GroupsService'];
 
 function UserService($q, $rootScope, scimFactory, Authorities, Utils, AupService, UsersService, GroupsService) {
-    var service = { getUser: getUser, getMe: getMe, updateLoggedUserInfo: updateLoggedUserInfo };
+    var service = {
+        getUser: getUser,
+        getMe: getMe,
+        updateLoggedUserInfo: updateLoggedUserInfo
+    };
 
     return service;
 
     function getMeAndAuthorities() {
-        return scimFactory.getMe().then(function(r) {
+        return scimFactory.getMe().then(function (r) {
             var user = r.data;
             user.authorities = getUserAuthorities();
             return user;
@@ -36,7 +40,7 @@ function UserService($q, $rootScope, scimFactory, Authorities, Utils, AupService
         return $q.all([getMeAndAuthorities(),
             AupService.getAupSignature()
         ]).then(
-            function(result) {
+            function (result) {
                 var user = result[0];
                 if (result[1] !== null) {
                     user.aupSignature = result[1].data;
@@ -45,7 +49,7 @@ function UserService($q, $rootScope, scimFactory, Authorities, Utils, AupService
                 }
 
                 return user;
-            }).catch(function(error) {
+            }).catch(function (error) {
             console.error('Error loading authenticated user information: ', error);
             return $q.reject(error);
         });
@@ -58,7 +62,7 @@ function UserService($q, $rootScope, scimFactory, Authorities, Utils, AupService
     function getUser(userId) {
         return $q
             .all([scimFactory.getUser(userId), Authorities.getAuthorities(userId), AupService.getAupSignatureForUser(userId)])
-            .then(function(result) {
+            .then(function (result) {
                 var user = result[0].data;
                 user.authorities = result[1].data.authorities;
                 if (result[2] !== null) {
@@ -68,39 +72,40 @@ function UserService($q, $rootScope, scimFactory, Authorities, Utils, AupService
                 }
                 return user;
             })
-            .catch(function(error) {
+            .catch(function (error) {
                 console.error('Error loading user information: ', error);
                 return $q.reject(error);
             });
     }
 
     function updateLoggedUserInfo() {
-        $rootScope.loggedUser = Utils.getLoggedUser();
+
         $rootScope.isRegistrationEnabled = Utils.isRegistrationEnabled();
         $rootScope.isOidcEnabled = Utils.isOidcEnabled();
         $rootScope.isSamlEnabled = Utils.isSamlEnabled();
 
         var promises = [];
 
-        promises.push(scimFactory.getMe().then(function(r) {
+        promises.push(scimFactory.getMe().then(function (r) {
+            $rootScope.loggedUser = Utils.getLoggedUser();
             $rootScope.loggedUser.me = r.data;
         }));
 
         if (Utils.isAdmin()) {
             promises.push(
-                UsersService.getUsersCount().then(function(r) {
+                UsersService.getUsersCount().then(function (r) {
                     $rootScope.usersCount = r.data.totalResults;
                 }),
-                GroupsService.getGroupsCount().then(function(r) {
+                GroupsService.getGroupsCount().then(function (r) {
                     $rootScope.groupsCount = r.data.totalResults;
                 }));
         }
 
         return $q.all(promises)
-            .then(function(data) {
+            .then(function (data) {
                 console.debug('Logged user info loaded succesfully');
             })
-            .catch(function(error) {
+            .catch(function (error) {
                 console.error('Error loading logged user info ' + error);
             });
     }

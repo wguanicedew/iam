@@ -70,15 +70,13 @@
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/dashboard-app.module.js"></script>
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/dashboard-app.config.js"></script>
 
-  
-  
-  
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/directives/registration.directive.js"></script>
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/directives/operation-result.directive.js"></script>
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/directives/isimage.directive.js"></script>
   
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/factory/gatewayerror.interceptor.js"></script>
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/factory/sessionexpired.interceptor.js"></script>
+  
   
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/filters/start-from.filter.js"></script>
   

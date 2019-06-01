@@ -19,6 +19,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +28,7 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
 @Service
 public class DefaultAddressResolutionService implements AddressResolutionService {
+  public static final Logger LOG = LoggerFactory.getLogger(DefaultAddressResolutionService.class);
 
   public static final String VO_ADMINS = "admins";
   public static final String GROUP_MANAGERS = "gm:";
@@ -42,13 +45,21 @@ public class DefaultAddressResolutionService implements AddressResolutionService
   @Override
   public List<String> resolveAddressesForAudience(String name) {
     checkNotNull(name);
+    List<String> result;
+    
     if (VO_ADMINS.equals(name)) {
-      return resolver.resolveEmailAddressForContext(ROLE_ADMIN);
+      result = resolver.resolveEmailAddressForContext(ROLE_ADMIN);
+      LOG.debug("Resolved VO admins email addressess to: {}", result);
     } else if (name.startsWith(GROUP_MANAGERS)) {
-      return resolver
-        .resolveEmailAddressForContext(String.format(ROLE_GM_TEMPLATE, name.substring(3)));
+      final String groupName = name.substring(3);
+      result = resolver
+        .resolveEmailAddressForContext(String.format(ROLE_GM_TEMPLATE, groupName));
+      LOG.debug("Resolved group managers email addressess for group {} to: {}", groupName, result);
     } else {
       throw new InvalidAudience(name);
     }
+    
+    return result;
+    
   }
 }

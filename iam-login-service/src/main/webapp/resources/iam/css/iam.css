@@ -459,3 +459,22 @@ body.skin-blue {
 .table-selector {
     width: 40px;
 }
+
+
+.table .username {
+    position: relative;
+}
+
+.table .username a {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    width: 100%;
+    position: absolute;
+
+}
+
+.username:before {
+    content: '';
+    display: inline-block;
+}

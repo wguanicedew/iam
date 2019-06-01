@@ -33,6 +33,9 @@ public class IamViewInfoInterceptor extends HandlerInterceptorAdapter {
   public static final String ORGANISATION_NAME_KEY = "iamOrganisationName";
   public static final String IAM_SAML_PROPERTIES_KEY = "iamSamlProperties";
   public static final String IAM_OIDC_PROPERTIES_KEY = "iamOidcProperties";
+  public static final String IAM_VERSION_KEY = "iamVersion";
+  public static final String GIT_COMMIT_ID_KEY = "gitCommitId";
+  public static final String SIMULATE_NETWORK_LATENCY_KEY = "simulateNetworkLatency";
   public static final String RCAUTH_ENABLED_KEY = "iamRcauthEnabled";
 
   @Value("${iam.version}")
@@ -56,9 +59,9 @@ public class IamViewInfoInterceptor extends HandlerInterceptorAdapter {
   @Override
   public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
       throws Exception {
-
-    request.setAttribute("iamVersion", iamVersion);
-    request.setAttribute("gitCommitId", gitCommitId);
+    
+    request.setAttribute(IAM_VERSION_KEY, iamVersion);
+    request.setAttribute(GIT_COMMIT_ID_KEY, gitCommitId);
 
     request.setAttribute(ORGANISATION_NAME_KEY, organisationName);
     
@@ -67,6 +70,7 @@ public class IamViewInfoInterceptor extends HandlerInterceptorAdapter {
     request.setAttribute(IAM_SAML_PROPERTIES_KEY, samlProperties);
     
     request.setAttribute(RCAUTH_ENABLED_KEY, rcAuthProperties.isEnabled());
+    
     return true;
   }
 

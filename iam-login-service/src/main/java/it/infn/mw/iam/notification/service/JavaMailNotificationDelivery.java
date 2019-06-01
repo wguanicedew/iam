@@ -28,11 +28,14 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.collect.Lists;
+
 import it.infn.mw.iam.core.IamDeliveryStatus;
 import it.infn.mw.iam.core.time.TimeProvider;
 import it.infn.mw.iam.notification.NotificationDelivery;
 import it.infn.mw.iam.notification.NotificationProperties;
 import it.infn.mw.iam.persistence.model.IamEmailNotification;
+import it.infn.mw.iam.persistence.model.IamNotificationReceiver;
 import it.infn.mw.iam.persistence.repository.IamEmailNotificationRepository;
 
 @Service
@@ -63,7 +66,14 @@ public class JavaMailNotificationDelivery implements NotificationDelivery {
     message.setFrom(properties.getMailFrom());
     message.setSubject(notification.getSubject());
     message.setText(notification.getBody());
-    notification.getReceivers().forEach(r -> message.setTo(r.getEmailAddress()));
+    
+    List<String> emailAddresses = Lists.newArrayList();
+    
+    for (IamNotificationReceiver r: notification.getReceivers()) {
+      emailAddresses.add(r.getEmailAddress());
+    }
+    
+    message.setTo(emailAddresses.stream().toArray(String[]::new));
     return message;
   }
 

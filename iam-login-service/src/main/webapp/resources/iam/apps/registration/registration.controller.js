@@ -33,7 +33,7 @@ function RegistrationController($scope, $q, $window, $cookies, RegistrationReque
     $scope.textAlert = undefined;
     $scope.operationResult = undefined;
 
-    $scope.submitDisabled = false;
+    $scope.busy = false;
 
     vm.createRequest = createRequest;
     vm.populateRequest = populateRequest;
@@ -51,11 +51,11 @@ function RegistrationController($scope, $q, $window, $cookies, RegistrationReque
     function activate() {
         vm.resetRequest();
         vm.populateRequest();
-        Aup.getAup().then(function(res) {
+        Aup.getAup().then(function (res) {
             if (res != null) {
                 $scope.aup = res.data.text;
             }
-        }).catch(function(res) {
+        }).catch(function (res) {
             console.error("Error getting AUP : " +
                 res.status + " " + res.statusText);
         });
@@ -67,7 +67,7 @@ function RegistrationController($scope, $q, $window, $cookies, RegistrationReque
 
     function populateRequest() {
 
-        var success = function(res) {
+        var success = function (res) {
             var info = res.data;
             $scope.extAuthInfo = info;
             $scope.request = {
@@ -84,15 +84,15 @@ function RegistrationController($scope, $q, $window, $cookies, RegistrationReque
                 $scope.extAuthProviderName = 'a SAML identity provider';
             }
 
-            angular.forEach($scope.registrationForm.$error.required, function(field) {
+            angular.forEach($scope.registrationForm.$error.required, function (field) {
                 field.$setDirty();
             });
         };
 
-        var error = function(err) {
+        var error = function (err) {
             $scope.operationResult = 'err';
             $scope.textAlert = err.data.error_description || err.data.detail;
-            vm.submitDisabled = false;
+            $scope.busy = false;
         };
 
         if (userIsExternallyAuthenticated()) {
@@ -104,21 +104,21 @@ function RegistrationController($scope, $q, $window, $cookies, RegistrationReque
     }
 
     function createRequest() {
-        var success = function(res) {
+        var success = function (res) {
             $window.location.href = "/registration/submitted";
         };
 
-        var error = function(err) {
+        var error = function (err) {
             $scope.operationResult = 'err';
             $scope.textAlert = err.data.error_description || err.data.detail;
-            vm.submitDisabled = false;
+            $scope.busy = false;
         };
 
         RegistrationRequestService.createRequest($scope.request).then(success, error);
     }
 
     function submit() {
-        vm.submitDisabled = true;
+        $scope.busy = true;
         vm.createRequest();
     }
 

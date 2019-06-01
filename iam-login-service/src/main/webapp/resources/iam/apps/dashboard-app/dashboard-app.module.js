@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-(function() {
+(function () {
     'use strict';
 
     angular.module('dashboardApp', [
@@ -24,17 +24,24 @@
 
 
     angular.module('dashboardApp')
-        .run(function(
+        .run(function (
             $window, $rootScope, $state, $stateParams, $q, $uibModal, $trace, Utils,
-            scimFactory, UserService, RegistrationRequestService,
-            LoadTemplatesService, TokensService, GroupRequestsService, toaster) {
+            UserService, RegistrationRequestService, TokensService, GroupRequestsService, toaster) {
 
-            $state.defaultErrorHandler(function(response) {
-                console.error(response.status, response.statusText);
-                toaster.pop({
-                    type: 'error',
-                    body: response.statusText
-                });
+            $state.defaultErrorHandler(function (response) {
+                if (response.status) {
+                    console.error(response.status, response.statusText);
+                    toaster.pop({
+                        type: 'error',
+                        body: response.statusText
+                    });
+                } else {
+                    console.error(response);
+                    toaster.pop({
+                        type: 'error',
+                        body: 'An unexpected error occurred!'
+                    });
+                }
             });
 
             $rootScope.iamVersion = getIamVersion();
@@ -42,12 +49,10 @@
             $rootScope.accountLinkingEnabled = getAccountLinkingEnabled();
             $rootScope.organisationName = getOrganisationName();
 
-            // LoadTemplatesService.loadTemplates();
-
             $trace.enable('TRANSITION');
 
             // Offline dialog
-            $rootScope.closeOfflineDialog = function() {
+            $rootScope.closeOfflineDialog = function () {
 
                 console.log('into: closeOfflineDialog');
 
@@ -58,7 +63,7 @@
                 }
             };
 
-            $rootScope.openOfflineDialog = function() {
+            $rootScope.openOfflineDialog = function () {
 
                 if (!$rootScope.offlineDialog) {
                     console.log('Opening offline dialog');
@@ -73,27 +78,29 @@
 
             $rootScope.pendingRequests = {};
 
-            $rootScope.reloadInfo = function() {
+            $rootScope.reloadInfo = function () {
 
                 var promises = [];
                 promises.push(UserService.updateLoggedUserInfo());
 
                 if ($rootScope.isRegistrationEnabled && Utils.isAdmin()) {
-                    promises.push(RegistrationRequestService.listPending().then(function(r) {
+                    promises.push(RegistrationRequestService.listPending().then(function (r) {
                         $rootScope.pendingRegistrationRequests(r.data);
                     }));
-                    promises.push(GroupRequestsService.getGroupRequests({ status: 'PENDING' }).then(function(r) {
+                    promises.push(GroupRequestsService.getGroupRequests({
+                        status: 'PENDING'
+                    }).then(function (r) {
                         $rootScope.pendingGroupMembershipRequests(r);
                     }));
-                    promises.push(TokensService.getAccessTokensCount().then(function(r) {
+                    promises.push(TokensService.getAccessTokensCount().then(function (r) {
                         $rootScope.accessTokensCount = r.data.totalResults;
                     }));
-                    promises.push(TokensService.getRefreshTokensCount().then(function(r) {
+                    promises.push(TokensService.getRefreshTokensCount().then(function (r) {
                         $rootScope.refreshTokensCount = r.data.totalResults;
                     }));
                 }
 
-                return $q.all(promises).catch(function(error) {
+                return $q.all(promises).catch(function (error) {
                     console.error("Error loading logged user info" + error);
                 });
             };
@@ -101,33 +108,39 @@
             $rootScope.reloadInfo();
 
             // ctrl+R refresh
-            $rootScope.reload = function() { $window.location.reload(); };
+            $rootScope.reload = function () {
+                $window.location.reload();
+            };
 
             // refresh last state loaded
-            $rootScope.refresh = function() {
+            $rootScope.refresh = function () {
 
                 $rootScope.closeOfflineDialog();
                 $state.transitionTo(
-                    $state.current, $stateParams, { reload: true, inherit: false, notify: true });
+                    $state.current, $stateParams, {
+                        reload: true,
+                        inherit: false,
+                        notify: true
+                    });
             };
 
-            $rootScope.pendingRegistrationRequests = function(val) {
+            $rootScope.pendingRegistrationRequests = function (val) {
                 if (val) {
                     $rootScope.pendingRequests.reg = val;
                 }
                 return $rootScope.pendingRequests.reg;
             };
 
-            $rootScope.pendingGroupMembershipRequests = function(val) {
+            $rootScope.pendingGroupMembershipRequests = function (val) {
                 if (val) {
                     $rootScope.pendingRequests.gm = val;
                 }
                 return $rootScope.pendingRequests.gm;
             };
 
-            $rootScope.pendingRequestsCount = function() {
+            $rootScope.pendingRequestsCount = function () {
 
-                var groupRequestsCount = function(){
+                var groupRequestsCount = function () {
                     var grCount = 0;
                     if ($rootScope.pendingRequests.gm) {
                         grCount = $rootScope.pendingRequests.gm.totalResults;
@@ -136,8 +149,8 @@
                 };
 
                 if (Utils.isAdmin()) {
-                    var rrCount =  0;
-                    if ($rootScope.pendingRequests.reg){
+                    var rrCount = 0;
+                    if ($rootScope.pendingRequests.reg) {
                         rrCount = $rootScope.pendingRequests.reg.length;
                     }
 
@@ -147,10 +160,10 @@
 
                 } else if (Utils.isGroupManager()) {
                     return groupRequestsCount();
-                } 
+                }
 
                 return 0;
-                
+
             };
 
             $('#body').show();

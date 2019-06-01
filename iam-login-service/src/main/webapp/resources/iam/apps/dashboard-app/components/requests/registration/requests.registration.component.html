@@ -15,9 +15,9 @@
     limitations under the License.
 
 -->
-<div class="box box-solid no-padding no-shadow no-border" ngcloak ng-show="$ctrl.loaded">
+<div class="box box-solid no-padding no-shadow no-border" ngcloak>
     <div class="box-body no-padding">
-        <table id="vo-reqs" class="table">
+        <table id="vo-reqs" class="table table-responsive">
             <thead class="table-requests-head" ng-if="$ctrl.requests.length > 0">
                 <tr>
                     <td style="vertical-align: middle" class="col-xs-6 col-md-4">
@@ -29,11 +29,13 @@
                             <div class="form-group">
                                 <div class="btn-group">
                                     <button class="btn btn-success btn-sm" ng-click="$ctrl.bulkApprove()"
-                                        ng-disabled="$ctrl.busy || $ctrl.numSelected() == 0">
+                                        ng-disabled="$ctrl.busy || $ctrl.numSelected() == 0"
+                                        tooltip-append-to-body="true" uib-tooltip="Approve request(s)">
                                         <i class="fa fa-check"></i>
                                     </button>
                                     <button class="btn btn-danger btn-sm" ng-click="$ctrl.bulkReject()"
-                                        ng-disabled="$ctrl.busy || $ctrl.numSelected() == 0">
+                                        ng-disabled="$ctrl.busy || $ctrl.numSelected() == 0"
+                                        tooltip-append-to-body="true" uib-tooltip="Reject request(s)">
                                         <i class="fa fa-times"></i>
                                     </button>
                                 </div>
@@ -115,7 +117,10 @@
             </tbody>
         </table>
     </div>
-    <div class="overlay" ng-if="$ctrl.busy">
+    <div class="overlay" ng-if="$ctrl.busy || !$ctrl.loaded">
+        <div style="text-align: center" ng-if="$ctrl.refreshing">
+            Refreshing requests...
+        </div>
         <i class="fa fa-refresh fa-spin"></i>
     </div>
 </div>
