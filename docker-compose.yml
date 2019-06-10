@@ -121,9 +121,9 @@ services:
     build:
       context: ./docker/nginx/
 
-    # depends_on:
-      # - iam-be
-      # - client
+    depends_on:
+      - iam-be
+      - client
 
     dns_search: local.io
 
@@ -139,7 +139,6 @@ services:
 
     volumes:
       - /dev/urandom:/dev/random
-      - ./compose/custom-nginx/iam.conf:/etc/nginx/conf.d/default.conf:ro
 
     networks:
       default:
