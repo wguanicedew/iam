@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package db.migration.h2;
+package db.migration.mysql;
 
 import org.flywaydb.core.api.migration.spring.SpringJdbcMigration;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import db.migration.tasks.RemoveOrphanTokens;
 
-public class V24___RemoveOrphanTokens implements SpringJdbcMigration {
+public class V34_2___RemoveOrphanTokens implements SpringJdbcMigration {
 
   @Override
   public void migrate(JdbcTemplate jdbcTemplate) throws Exception {
