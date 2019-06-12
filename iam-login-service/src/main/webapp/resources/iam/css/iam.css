@@ -353,7 +353,7 @@ body.skin-blue {
 }
 
 .page-counter {
-    margin-left: 10px;
+    margin-right: 10px;
     margin-top: 26px;
     display: inline;
     vertical-align: middle;
@@ -461,6 +461,7 @@ body.skin-blue {
 }
 
 
+
 .table .username {
     position: relative;
 }
@@ -471,10 +472,65 @@ body.skin-blue {
     text-overflow: ellipsis;
     width: 100%;
     position: absolute;
-
 }
 
 .username:before {
     content: '';
     display: inline-block;
+}
+
+#req_pagination_top {
+    display: inline !important;
+    padding-left: inherit;
+    margin: inherit;
+}
+
+.request-notes {
+    margin-top: 1em;
+}
+
+.req-approve {
+    width: 90px;
+}
+
+#vo-reqs {
+    table-layout: fixed;
+    word-wrap: break-word;
+}
+
+
+
+
+@media (max-width: 767px) {
+    #vo-reqs .form-inline .form-control {
+        display: inline-block;
+        width: auto;
+        vertical-align: middle;
+    }
+
+    #vo-reqs .form-inline .form-group {
+        display: inline-block;
+        margin-bottom: 0;
+        vertical-align: middle;
+    }
+
+    #vo-reqs {
+        border: 0;
+    }
+
+    .request-detail {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        max-width: 200px;
+    }
+}
+
+@media (max-width: 567px) {
+    .request-detail {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        max-width: 120px;
+    }
 }

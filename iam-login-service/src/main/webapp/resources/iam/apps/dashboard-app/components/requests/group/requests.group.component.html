@@ -30,12 +30,14 @@
                 <tr>
                     <td>
                         <div>
-                            <ul id="greq_pagination_top" uib-pagination ng-model="$ctrl.currentPage" items-per-page="$ctrl.itemsPerPage"
+                            <ul id="greq_pagination_top" uib-pagination ng-model="$ctrl.currentPage"
+                                items-per-page="$ctrl.itemsPerPage"
                                 template-url="resources/iam/apps/dashboard-app/components/common/pagination.template.html"
-                                total-items="$ctrl.totalResults" max-size="0" ng-change="$ctrl.pageChanged()" class="pull-left">
+                                total-items="$ctrl.totalResults" max-size="0" ng-change="$ctrl.pageChanged()"
+                                class="pull-left">
                             </ul>
                         </div>
-                        <div class="pull-left page-counter">{{$ctrl.pageLeft}} - {{$ctrl.pageRight}} /
+                        <div class="pull-left page-counter">{{$ctrl.pageLeft}} - {{$ctrl.pageRight}} of
                             {{$ctrl.totalResults}}</div>
                     </td>
                 </tr>
@@ -58,7 +60,8 @@
                 <tr ng-repeat="r in $ctrl.filtered | orderBy:'creationTime':true ">
                     <td>
                         <p>
-                            <a ui-sref="user({id: r.userUuid})">{{r.userFullName}}</a> requested to join the <a ui-sref="group({id: r.groupUuid})">{{r.groupName}}</a>
+                            <a ui-sref="user({id: r.userUuid})">{{r.userFullName}}</a> requested to join the <a
+                                ui-sref="group({id: r.groupUuid})">{{r.groupName}}</a>
                             group {{r.creationTime | relativeDate}}.
                         </p>
                         <p>
