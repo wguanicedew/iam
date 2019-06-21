@@ -1,7 +1,14 @@
 #!/usr/bin/env groovy
 pipeline {
 
-  agent { label 'maven' }
+  agent {
+      kubernetes {
+          label "iam-${env.JOB_BASE_NAME}-${env.BUILD_NUMBER}"
+          cloud 'Kube mwdevel'
+          defaultContainer 'jnlp'
+          inheritFrom 'ci-template'
+      }
+  }
 
   options {
     timeout(time: 1, unit: 'HOURS')
@@ -17,7 +24,7 @@ pipeline {
   stages {
     stage('checkout') {
       steps {
-        container('maven-runner'){
+        container('runner'){
           deleteDir()
           checkout scm
           stash name: 'code', useDefaultExcludes: false
@@ -27,7 +34,7 @@ pipeline {
 
     stage('license-check') {
       steps {
-        container('maven-runner') {
+        container('runner') {
           sh 'mvn license:check'
         }
       }
@@ -40,7 +47,7 @@ pipeline {
         }
       }
       steps {
-        container('maven-runner') {
+        container('runner') {
           script{
             def tokens = "${env.CHANGE_URL}".tokenize('/')
             def organization = tokens[tokens.size()-4]
@@ -68,7 +75,7 @@ pipeline {
 
       post {
         always {
-          container('maven-runner') {
+          container('runner') {
             junit '**/target/surefire-reports/TEST-*.xml'
             step( [ $class: 'JacocoPublisher' ] )
           }
@@ -83,7 +90,7 @@ pipeline {
       }
 
       steps {
-        container('maven-runner') {
+        container('runner') {
           script{
             def checkstyle_opts = 'checkstyle:check -Dcheckstyle.config.location=google_checks.xml'
 
@@ -105,7 +112,7 @@ pipeline {
 
       post {
         always {
-          container('maven-runner') {
+          container('runner') {
             junit '**/target/surefire-reports/TEST-*.xml'
               step( [ $class: 'JacocoPublisher' ] )
           }
@@ -123,7 +130,7 @@ pipeline {
 
     stage('package') {
       steps {
-        container('maven-runner') {
+        container('runner') {
           sh 'mvn -B -DskipTests=true clean package' 
           archive 'iam-login-service/target/iam-login-service.war'
           archive 'iam-login-service/target/classes/iam.version.properties'
@@ -134,9 +141,8 @@ pipeline {
     }
 
     stage('docker-images') {
-      agent { label 'docker' }
       steps {
-        container('docker-runner') {
+        container('runner') {
           deleteDir()
           unstash 'code'
           unstash 'iam-artifacts'
