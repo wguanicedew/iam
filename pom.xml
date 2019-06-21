@@ -327,6 +327,7 @@
         <version>2.19.1</version>
         <configuration>
           <runOrder>random</runOrder> <!-- explicitly randomize test ordering -->
+          <useSystemClassLoader>false</useSystemClassLoader>
           <includes>
             <include>**/*Tests.java</include>
           </includes>
