@@ -1,11 +1,13 @@
 #!/usr/bin/env groovy
-pipeline {
+@Library('sd')_
+def kubeLabel = getKubeLabel()
 
+pipeline {
   agent {
       kubernetes {
-          label "iam-${env.JOB_BASE_NAME}-${env.BUILD_NUMBER}"
+          label "${kubeLabel}"
           cloud 'Kube mwdevel'
-          defaultContainer 'jnlp'
+          defaultContainer 'runner'
           inheritFrom 'ci-template'
       }
   }
@@ -24,19 +26,15 @@ pipeline {
   stages {
     stage('checkout') {
       steps {
-        container('runner'){
           deleteDir()
           checkout scm
           stash name: 'code', useDefaultExcludes: false
-        }
       }
     }
 
     stage('license-check') {
       steps {
-        container('runner') {
           sh 'mvn license:check'
-        }
       }
     }
 
@@ -47,27 +45,25 @@ pipeline {
         }
       }
       steps {
-        container('runner') {
-          script{
-            def tokens = "${env.CHANGE_URL}".tokenize('/')
-            def organization = tokens[tokens.size()-4]
-            def repo = tokens[tokens.size()-3]
+        script{
+          def tokens = "${env.CHANGE_URL}".tokenize('/')
+          def organization = tokens[tokens.size()-4]
+          def repo = tokens[tokens.size()-3]
 
-            withCredentials([string(credentialsId: '630f8e6c-0d31-4f96-8d82-a1ef536ef059', variable: 'GITHUB_ACCESS_TOKEN')]) {
-              withSonarQubeEnv('sonarcloud.io'){
-                sh """
-                  mvn -B -U install sonar:sonar \\
-                    -Dsonar.github.pullRequest=${env.CHANGE_ID} \\
-                    -Dsonar.github.repository=${organization}/${repo} \\
-                    -Dsonar.github.oauth=${GITHUB_ACCESS_TOKEN} \\
-                    -Dsonar.host.url=${SONAR_HOST_URL} \\
-                    -Dsonar.login=${SONAR_AUTH_TOKEN} \\
-                    -Dsonar.branch.name=${BRANCH_NAME} \\
-                    -Dsonar.branch.target=develop \\
-                    -Dsonar.projectKey=indigo-iam_iam \\
-                    -Dsonar.organization=indigo-iam
-                """
-              }
+          withCredentials([string(credentialsId: '630f8e6c-0d31-4f96-8d82-a1ef536ef059', variable: 'GITHUB_ACCESS_TOKEN')]) {
+            withSonarQubeEnv('sonarcloud.io'){
+              sh """
+                mvn -B -U install sonar:sonar \\
+                  -Dsonar.github.pullRequest=${env.CHANGE_ID} \\
+                  -Dsonar.github.repository=${organization}/${repo} \\
+                  -Dsonar.github.oauth=${GITHUB_ACCESS_TOKEN} \\
+                  -Dsonar.host.url=${SONAR_HOST_URL} \\
+                  -Dsonar.login=${SONAR_AUTH_TOKEN} \\
+                  -Dsonar.branch.name=${BRANCH_NAME} \\
+                  -Dsonar.branch.target=develop \\
+                  -Dsonar.projectKey=indigo-iam_iam \\
+                  -Dsonar.organization=indigo-iam
+              """
             }
           }
         }
@@ -75,10 +71,8 @@ pipeline {
 
       post {
         always {
-          container('runner') {
-            junit '**/target/surefire-reports/TEST-*.xml'
-            step( [ $class: 'JacocoPublisher' ] )
-          }
+          junit '**/target/surefire-reports/TEST-*.xml'
+          step( [ $class: 'JacocoPublisher' ] )
         }
       }
     }
@@ -90,32 +84,28 @@ pipeline {
       }
 
       steps {
-        container('runner') {
-          script{
-            def checkstyle_opts = 'checkstyle:check -Dcheckstyle.config.location=google_checks.xml'
+        script{
+          def checkstyle_opts = 'checkstyle:check -Dcheckstyle.config.location=google_checks.xml'
 
-              withSonarQubeEnv('sonarcloud.io'){
-                sh """
-                  mvn -U ${checkstyle_opts} \\
-                  install sonar:sonar \\
-                  -Dsonar.host.url=${SONAR_HOST_URL} \\
-                  -Dsonar.login=${SONAR_AUTH_TOKEN} \\
-                  -Dsonar.branch.name=${BRANCH_NAME} \\
-                  -Dsonar.branch.target=develop \\
-                  -Dsonar.projectKey=indigo-iam_iam \\
-                  -Dsonar.organization=indigo-iam
-                """
-              }
-          }
+            withSonarQubeEnv('sonarcloud.io'){
+              sh """
+                mvn -U ${checkstyle_opts} \\
+                install sonar:sonar \\
+                -Dsonar.host.url=${SONAR_HOST_URL} \\
+                -Dsonar.login=${SONAR_AUTH_TOKEN} \\
+                -Dsonar.branch.name=${BRANCH_NAME} \\
+                -Dsonar.branch.target=develop \\
+                -Dsonar.projectKey=indigo-iam_iam \\
+                -Dsonar.organization=indigo-iam
+              """
+            }
         }
       }
 
       post {
         always {
-          container('runner') {
-            junit '**/target/surefire-reports/TEST-*.xml'
-              step( [ $class: 'JacocoPublisher' ] )
-          }
+          junit '**/target/surefire-reports/TEST-*.xml'
+            step( [ $class: 'JacocoPublisher' ] )
         }
       }
     }
@@ -130,43 +120,39 @@ pipeline {
 
     stage('package') {
       steps {
-        container('runner') {
-          sh 'mvn -B -DskipTests=true clean package' 
-          archive 'iam-login-service/target/iam-login-service.war'
-          archive 'iam-login-service/target/classes/iam.version.properties'
-          archive 'iam-test-client/target/iam-test-client.jar'
-          stash includes: 'iam-login-service/target/iam-login-service.war,iam-login-service/target/classes/iam.version.properties,iam-test-client/target/iam-test-client.jar', name: 'iam-artifacts'
-        }
+        sh 'mvn -B -DskipTests=true clean package' 
+        archive 'iam-login-service/target/iam-login-service.war'
+        archive 'iam-login-service/target/classes/iam.version.properties'
+        archive 'iam-test-client/target/iam-test-client.jar'
+        stash includes: 'iam-login-service/target/iam-login-service.war,iam-login-service/target/classes/iam.version.properties,iam-test-client/target/iam-test-client.jar', name: 'iam-artifacts'
       }
     }
 
     stage('docker-images') {
       steps {
-        container('runner') {
-          deleteDir()
-          unstash 'code'
-          unstash 'iam-artifacts'
-          sh '''
-          sed -i -e 's#iam\\.version#IAM_VERSION#' iam-login-service/target/classes/iam.version.properties
-          source iam-login-service/target/classes/iam.version.properties
-          export IAM_LOGIN_SERVICE_VERSION="v${IAM_VERSION}"
+        deleteDir()
+        unstash 'code'
+        unstash 'iam-artifacts'
+        sh '''
+        sed -i -e 's#iam\\.version#IAM_VERSION#' iam-login-service/target/classes/iam.version.properties
+        source iam-login-service/target/classes/iam.version.properties
+        export IAM_LOGIN_SERVICE_VERSION="v${IAM_VERSION}"
 
-          /bin/bash iam-login-service/docker/build-prod-image.sh
-          /bin/bash iam-login-service/docker/push-prod-image.sh
-          /bin/bash iam-test-client/docker/build-prod-image.sh
-          /bin/bash iam-test-client/docker/push-prod-image.sh
-          '''
-          script {
-            if (env.BRANCH_NAME == 'master') {
-              sh '''
-              sed -i -e 's#iam\\.version#IAM_VERSION#' iam-login-service/target/classes/iam.version.properties
-              source iam-login-service/target/classes/iam.version.properties
-              export IAM_LOGIN_SERVICE_VERSION="v${IAM_VERSION}"
-              unset DOCKER_REGISTRY_HOST
-              /bin/bash iam-login-service/docker/push-prod-image.sh
-              /bin/bash iam-test-client/docker/push-prod-image.sh
-              '''
-            }
+        /bin/bash iam-login-service/docker/build-prod-image.sh
+        /bin/bash iam-login-service/docker/push-prod-image.sh
+        /bin/bash iam-test-client/docker/build-prod-image.sh
+        /bin/bash iam-test-client/docker/push-prod-image.sh
+        '''
+        script {
+          if (env.BRANCH_NAME == 'master') {
+            sh '''
+            sed -i -e 's#iam\\.version#IAM_VERSION#' iam-login-service/target/classes/iam.version.properties
+            source iam-login-service/target/classes/iam.version.properties
+            export IAM_LOGIN_SERVICE_VERSION="v${IAM_VERSION}"
+            unset DOCKER_REGISTRY_HOST
+            /bin/bash iam-login-service/docker/push-prod-image.sh
+            /bin/bash iam-test-client/docker/push-prod-image.sh
+            '''
           }
         }
       }
