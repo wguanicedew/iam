@@ -333,8 +333,8 @@
           <!-- Jacoco prepare-agent builds some command-line params without -->
           <!-- which jacoco will not instrument. Hence it is important to add -->
           <!-- those command-line params here (${argLine} holds those params) -->
-          <argLine>${argLine} -Xms256m -Xmx2048m</argLine>
           <forkCount>1</forkCount>
+          <argLine>${argLine} -Xms256m -Xmx1024m</argLine>
           <runOrder>random</runOrder>
         </configuration>
       </plugin>
