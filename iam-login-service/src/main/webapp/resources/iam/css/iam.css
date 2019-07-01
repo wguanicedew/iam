@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2018
+ * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2019
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #iam-content {
     height: calc(100vh - 50px);
     overflow: auto;
@@ -37,15 +36,17 @@
     padding: 40px;
 }
 
+/*
 #logo-container {
     margin: auto;
     margin-top: 10px;
     width: 200px;
-    height: 150px;
+    height: 200px;
     background-size: 200px;
     background-image: url("/resources/images/indigo-logo.png");
     background-repeat: no-repeat;
 }
+*/
 
 #logo-container a {
     display: block;
@@ -259,13 +260,27 @@ body.skin-blue {
     font-weight: bolder;
 }
 
-.iam-user-group-row {
+.iam-tab-row {
     padding-bottom: 10px;
     margin-bottom: 10px;
     border-bottom: 1px solid #f4f4f4;
 }
 
-.iam-user-group-row:last-of-type {
+.iam-tab-row:last-of-type {
+    padding-bottom: 0;
+    margin-bottom: 0;
+    border-bottom: 0;
+}
+
+.iam-user-group-row,
+.iam-div-row {
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #f4f4f4;
+}
+
+.iam-user-group-row:last-of-type,
+.iam-div-row:last-of-type {
     padding-bottom: 0;
     margin-bottom: 0;
     border-bottom: none;
@@ -274,6 +289,9 @@ body.skin-blue {
 .link-external-account {
     width: 300px;
     margin-top: 10px;
+    float: none;
+
+    margin: 2em auto;
 }
 
 .btn-link-external-account {
@@ -332,4 +350,187 @@ body.skin-blue {
 
 .btn-social {
     padding-left: 0px;
+}
+
+.page-counter {
+    margin-right: 10px;
+    margin-top: 26px;
+    display: inline;
+    vertical-align: middle;
+}
+
+.table-msg {
+    margin-top: 30px;
+}
+
+.no-border-top {
+    border-top: none !important;
+}
+
+.first-no-border-top:first-child {
+    border-top: none !important;
+}
+
+.text-larger {
+    font-size: 115%;
+}
+
+.group-description {
+    margin-top: .5em;
+    float: left;
+}
+
+.missing {
+    color: #999999;
+}
+
+.group-description-edit {
+    float: left;
+    margin-top: .5em;
+    margin-left: 5px;
+}
+
+.label-pair {
+    margin-bottom: 2px;
+    max-width: 100%;
+    margin-right: .5em;
+}
+
+#group-labels-container {
+    margin-top: 5px;
+}
+
+.label-pair .label:first-child {
+    border-radius: 2px 0 0 2px;
+}
+
+.label-pair .label-value {
+    border-radius: 0 0 0 0;
+}
+
+.label-pair .label:last-child {
+    border-radius: 0 2px 2px 0;
+}
+
+.label-pair .label-key {
+    background-color: #bee1f4;
+    color: #00659c;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    margin-left: 0;
+    font-size: 12px;
+}
+
+.label-pair .label-value {
+    background-color: #7dc3e8;
+    color: #FFF;
+    margin-left: 0;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    font-size: 12px;
+}
+
+.label-pair .label-op {
+    padding-top: 4px;
+    padding-bottom: 4px;
+    margin-left: 0;
+    font-size: 12px;
+    display: none;
+}
+
+.label-pair:hover .label-op {
+    display: inline;
+}
+
+.label-pair .iam-label {
+    min-width: 50px;
+}
+
+[ng-click],
+[data-ng-click],
+[x-ng-click] {
+    cursor: pointer;
+}
+
+.request-icon {
+    color: #999;
+}
+
+.table-selector {
+    width: 40px;
+}
+
+
+
+.table .username {
+    position: relative;
+}
+
+.table .username a {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    width: 100%;
+    position: absolute;
+}
+
+.username:before {
+    content: '';
+    display: inline-block;
+}
+
+#req_pagination_top {
+    display: inline !important;
+    padding-left: inherit;
+    margin: inherit;
+}
+
+.request-notes {
+    margin-top: 1em;
+}
+
+.req-approve {
+    width: 90px;
+}
+
+#vo-reqs {
+    table-layout: fixed;
+    word-wrap: break-word;
+}
+
+
+
+
+@media (max-width: 767px) {
+    #vo-reqs .form-inline .form-control {
+        display: inline-block;
+        width: auto;
+        vertical-align: middle;
+    }
+
+    #vo-reqs .form-inline .form-group {
+        display: inline-block;
+        margin-bottom: 0;
+        vertical-align: middle;
+    }
+
+    #vo-reqs {
+        border: 0;
+    }
+
+    .request-detail {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        max-width: 200px;
+    }
+}
+
+@media (max-width: 567px) {
+    .request-detail {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        max-width: 120px;
+    }
 }

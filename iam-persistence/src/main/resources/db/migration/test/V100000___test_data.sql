@@ -54,6 +54,7 @@ INSERT INTO client_scope (owner_id, scope) VALUES
   (5, 'offline_access'),
   (5, 'scim:read'),
   (5, 'scim:write'),
+  (5, 'proxy:generate'),
   (6, 'openid'),
   (6, 'profile'),
   (6, 'email'),

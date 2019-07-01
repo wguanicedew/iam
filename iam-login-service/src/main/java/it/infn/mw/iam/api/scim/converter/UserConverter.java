@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2018
+ * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2019
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -147,6 +147,7 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
     }
 
     if (scimUser.hasAddresses()) {
+      
       userInfo.setAddress(addressConverter.entityFromDto(scimUser.getAddresses().get(0)));
     }
 

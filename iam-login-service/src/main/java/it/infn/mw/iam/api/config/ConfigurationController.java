@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2018
+ * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2019
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,12 @@
  */
 package it.infn.mw.iam.api.config;
 
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import it.infn.mw.iam.config.login.LoginButtonProperties;
@@ -44,19 +45,21 @@ public class ConfigurationController {
     this.wayfLoginButton = samlProps.getWayfLoginButton();
   }
 
-  @RequestMapping(method = RequestMethod.GET, value = "/oidc/providers")
+  @RequestMapping(method = GET, value = "/oidc/providers")
   public List<OidcProvider> listProviders() {
     return providers.getValidatedProviders();
   }
   
-  @RequestMapping(method = RequestMethod.GET, value = "/saml/shortcuts")
+  @RequestMapping(method = GET, value = "/saml/shortcuts")
   public List<IamSamlLoginShortcut> listSamlLoginShortcuts() {
     return loginShortcuts;
   }
   
-  @RequestMapping(method = RequestMethod.GET, value = "/saml/wayf-login-button")
+  @RequestMapping(method = GET, value = "/saml/wayf-login-button")
   public LoginButtonProperties listWayfLoginButton() {
     return wayfLoginButton;
   }
+  
+  
   
 }

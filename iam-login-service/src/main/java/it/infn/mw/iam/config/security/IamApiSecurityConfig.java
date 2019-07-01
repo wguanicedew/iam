@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2018
+ * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2019
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,38 +15,92 @@
  */
 package it.infn.mw.iam.config.security;
 
-import static it.infn.mw.iam.api.tokens.Constants.ACCESS_TOKENS_ENDPOINT;
-import static it.infn.mw.iam.api.tokens.Constants.REFRESH_TOKENS_ENDPOINT;
+import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.POST;
 
 import org.mitre.oauth2.web.CorsFilter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationProcessingFilter;
+import org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler;
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandlerImpl;
 import org.springframework.security.web.context.SecurityContextPersistenceFilter;
 import org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter;
 
+import it.infn.mw.iam.api.proxy.ProxyCertificatesApiController;
 import it.infn.mw.iam.config.CustomAuthenticationEntryPoint;
+import it.infn.mw.iam.core.oauth.FormClientCredentialsAuthenticationFilter;
 
 @Configuration
-@EnableWebSecurity
 public class IamApiSecurityConfig {
 
   @Configuration
   @Order(20)
+  public static class IamProxyCertificateApiConfig extends WebSecurityConfigurerAdapter {
+    private static final String PROXY_API_MATCHER =
+        ProxyCertificatesApiController.PROXY_API_PATH + "/**";
+
+    @Autowired
+    private OAuth2AuthenticationProcessingFilter resourceFilter;
+
+    @Autowired
+    @Qualifier("clientUserDetailsService")
+    private UserDetailsService userDetailsService;
+
+    @Autowired
+    private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
+
+    @Autowired
+    private CorsFilter corsFilter;
+
+    @Override
+    protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
+      auth.userDetailsService(userDetailsService);
+    }
+
+    @Override
+    protected void configure(final HttpSecurity http) throws Exception {
+
+      FormClientCredentialsAuthenticationFilter ccFilter =
+          new FormClientCredentialsAuthenticationFilter(PROXY_API_MATCHER,
+              authenticationEntryPoint);
+      
+      ccFilter.setAuthenticationManager(authenticationManager());
+      
+      // @formatter:off
+      http.antMatcher(PROXY_API_MATCHER)
+          .exceptionHandling()
+            .authenticationEntryPoint(authenticationEntryPoint)
+            .accessDeniedHandler(new OAuth2AccessDeniedHandler())
+        .and()
+          .addFilterBefore(ccFilter, SecurityContextPersistenceFilter.class)
+          .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
+          .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
+        .sessionManagement()
+          .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        .and()
+          .authorizeRequests()
+            .anyRequest().fullyAuthenticated()            
+        .and()
+          .csrf().disable();
+      // @formatter:on
+    }
+  }
+
+  @Configuration
+  @Order(21)
   public static class IamApiConfig extends WebSecurityConfigurerAdapter {
 
     private static final String AUP_PATH = "/iam/aup";
-    private static final String GROUP_REQUEST_PATH = "/iam/group_requests";
 
     @Autowired
     private OAuth2AuthenticationProcessingFilter resourceFilter;
@@ -63,13 +117,7 @@ public class IamApiSecurityConfig {
       http.requestMatchers()
         .antMatchers("/scim/**", 
             "/registration/**", 
-            "/iam/password-update", 
-            "/iam/scope_policies/**",
-            ACCESS_TOKENS_ENDPOINT + "/**", REFRESH_TOKENS_ENDPOINT + "/**",
-            "/iam/aup/**",
-            GROUP_REQUEST_PATH+"**", GROUP_REQUEST_PATH+"/**",
-            "/iam/account/search**", 
-            "/iam/group/search**")
+            "/iam/**")
         .and()
           .exceptionHandling()
             .authenticationEntryPoint(authenticationEntryPoint)
@@ -80,23 +128,16 @@ public class IamApiSecurityConfig {
           .sessionCreationPolicy(SessionCreationPolicy.NEVER)
         .and()
           .authorizeRequests()
-            .antMatchers("/scim/**").authenticated()
-            .antMatchers(HttpMethod.POST, "/registration/create").permitAll()
-            .antMatchers(HttpMethod.GET, "/registration/username-available/**").permitAll()
-            .antMatchers(HttpMethod.GET, "/registration/email-available/**").permitAll()
-            .antMatchers(HttpMethod.GET, "/registration/confirm/**").permitAll()
-            .antMatchers(HttpMethod.GET, "/registration/verify/**").permitAll()
-            .antMatchers(HttpMethod.GET, "/registration/submitted").permitAll()
-            .antMatchers("/registration/**").authenticated()
-            .antMatchers("/iam/password-update").authenticated()
-            .antMatchers("/iam/scope_policies/**").authenticated()
-            .antMatchers(ACCESS_TOKENS_ENDPOINT + "/**", REFRESH_TOKENS_ENDPOINT + "/**").authenticated()
-            .antMatchers(HttpMethod.GET, AUP_PATH).permitAll()
-            .antMatchers(HttpMethod.POST, AUP_PATH).authenticated()
-            .antMatchers(HttpMethod.DELETE, AUP_PATH).authenticated()
-            .antMatchers(GROUP_REQUEST_PATH+"**", GROUP_REQUEST_PATH+"/**" ).authenticated()
-            .antMatchers(HttpMethod.GET, "/iam/account/search", "/iam/group/search").permitAll()
-            .antMatchers(HttpMethod.GET, "/iam/config/**").permitAll()
+            .antMatchers("/iam/password-reset/**").permitAll()
+            .antMatchers(POST, "/registration/create").permitAll()
+            .antMatchers(GET, "/registration/username-available/**").permitAll()
+            .antMatchers(GET, "/registration/email-available/**").permitAll()
+            .antMatchers(GET, "/registration/confirm/**").permitAll()
+            .antMatchers(GET, "/registration/verify/**").permitAll()
+            .antMatchers(GET, "/registration/submitted").permitAll()
+            .antMatchers(GET, "/iam/config/**").permitAll()
+            .antMatchers(GET, AUP_PATH).permitAll()
+            .anyRequest().authenticated()            
         .and()
           .csrf().disable();
       // @formatter:on
@@ -104,81 +145,7 @@ public class IamApiSecurityConfig {
   }
 
   @Configuration
-  @Order(21)
-  public static class AuthnInfoEndpointConfig extends WebSecurityConfigurerAdapter {
-
-    @Autowired
-    private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
-
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-      //@formatter:off
-      http.antMatcher("/iam/authn-info/**")
-        .exceptionHandling()
-          .authenticationEntryPoint(authenticationEntryPoint)
-        .and()
-          .sessionManagement()
-            .sessionCreationPolicy(SessionCreationPolicy.NEVER)
-        .and()
-          .authorizeRequests()
-            .antMatchers("/iam/authn-info/**").authenticated();
-      //@formatter:on
-    }
-  }
-
-  @Configuration
-  @Order(22)
-  public static class AccountLinkingEndpointConfig extends WebSecurityConfigurerAdapter {
-
-    @Autowired
-    private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
-
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-      //@formatter:off
-      http.antMatcher("/iam/account-linking/**")
-        .exceptionHandling()
-          .authenticationEntryPoint(authenticationEntryPoint)
-        .and()
-          .sessionManagement()
-            .sessionCreationPolicy(SessionCreationPolicy.NEVER)
-        .and()
-          .csrf().disable()
-        .authorizeRequests()
-          .antMatchers("/iam/account-linking/**").authenticated();
-      //@formatter:on
-    }
-  }
-
-  @Configuration
-  @Order(23)
-  public static class AccountAuthorityEndpointConfig extends WebSecurityConfigurerAdapter {
-
-    @Autowired
-    private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
-
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-      //@formatter:off
-      http.requestMatchers()
-        .antMatchers("/iam/account/**", "/iam/me/**")
-        .and()
-          .exceptionHandling()
-            .authenticationEntryPoint(authenticationEntryPoint)
-        .and()
-          .sessionManagement()
-            .sessionCreationPolicy(SessionCreationPolicy.NEVER)
-        .and()
-          .authorizeRequests()
-            .antMatchers("/iam/account/**", "/iam/me/**").authenticated()
-        .and()
-          .csrf().disable();
-      //@formatter:on
-    }
-  }
-
-  @Configuration
-  @Order(24)
+  @Order(25)
   public static class ActuatorEndpointsConfig extends WebSecurityConfigurerAdapter {
 
     @Value("${iam.superuser.username}")
@@ -221,9 +188,10 @@ public class IamApiSecurityConfig {
           .sessionCreationPolicy(SessionCreationPolicy.NEVER)
         .and()
           .authorizeRequests()
-            .antMatchers(HttpMethod.GET, "/info", "/health", "/health/mail", "/health/external").permitAll()
-            .antMatchers(HttpMethod.GET, "/metrics").hasRole("ADMIN")
-            .antMatchers(HttpMethod.GET, "/configprops", "/env", "/mappings", "/flyway", "/autoconfig", "/beans", "/dump", "/trace").hasRole("SUPERUSER");
+            .antMatchers(GET, "/info", "/health", "/health/mail", "/health/external").permitAll()
+            .antMatchers(GET, "/metrics").hasRole("ADMIN")
+            .antMatchers(GET, "/configprops", "/env", "/mappings", 
+                "/flyway", "/autoconfig", "/beans", "/dump", "/trace").hasRole("SUPERUSER");
       // @formatter:on
     }
   }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2018
+ * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2019
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package it.infn.mw.iam.persistence.repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -39,6 +40,10 @@ public interface IamGroupRepository extends PagingAndSortingRepository<IamGroup,
 
   @Query("select g from IamGroup g where g.parentGroup = :parentGroup")
   List<IamGroup> findSubgroups(@Param("parentGroup") IamGroup parentGroup);
+  
+  List<IamGroup> findByNameIgnoreCaseContaining(String name);
+  
+  List<IamGroup> findByUuidNotIn(Set<String> uuids);
 
   Page<IamGroup> findByNameIgnoreCaseContainingOrUuidIgnoreCaseContaining(
       @Param("name") String name, @Param("uuid") String uuid, Pageable op);

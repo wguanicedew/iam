@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2018
+ * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2019
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.apache.http.client.HttpClient;
 import org.mitre.jwt.signer.service.impl.JWKSetCacheService;
 import org.mitre.oauth2.model.RegisteredClient;
 import org.mitre.openid.connect.client.OIDCAuthenticationProvider;
@@ -38,6 +39,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.embedded.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
@@ -120,9 +123,18 @@ public class OidcConfiguration {
   }
 
   @Bean
+  @Profile("!canl")
   public RestTemplateFactory restTemplateFactory() {
 
     return new DefaultRestTemplateFactory(new HttpComponentsClientHttpRequestFactory());
+  }
+
+  @Bean
+  @Profile("canl")
+  public RestTemplateFactory canlRestTemplateFactory(
+      @Qualifier("canlRequestFactory") ClientHttpRequestFactory rf) {
+
+    return new DefaultRestTemplateFactory(rf);
   }
 
   @Bean(name = "OIDCExternalAuthenticationFailureHandler")
@@ -166,15 +178,24 @@ public class OidcConfiguration {
   }
 
   @Bean
+  @Profile("!canl")
   public ServerConfigurationService dynamicServerConfiguration() {
 
     return new DynamicServerConfigurationService();
   }
 
+  @Bean
+  @Profile("canl")
+  public ServerConfigurationService canlDynamicServerConfiguration(
+      @Qualifier("canlHttpClient") HttpClient client) {
+
+    return new DynamicServerConfigurationService(client);
+  }
+
   public boolean configuredProvider(OidcProvider provider) {
     return !Strings.isNullOrEmpty(provider.getClient().getClientId());
   }
-  
+
   @Bean
   public ClientConfigurationService oidcClientConfiguration(OidcValidatedProviders providers) {
 

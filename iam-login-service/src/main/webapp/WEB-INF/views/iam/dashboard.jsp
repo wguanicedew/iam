@@ -1,6 +1,6 @@
 <%--
 
-    Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2018
+    Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2019
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@
     </toaster-container>
     <header class="main-header" ng-cloak></header>
     <aside class="main-sidebar" ng-cloak>
-      <mainsidebar />
+      <sidebar />
     </aside>
     <!-- Content Wrapper. Contains page content -->
     <div class="content-wrapper" ng-cloak>
@@ -64,74 +64,94 @@
   <script type="text/javascript" src="/resources/iam/js/adminLTE.js"></script>
   <script type="text/javascript" src="/resources/iam/js/toaster/toaster.min.js"></script>
   <script type="text/javascript" src="/resources/iam/js/directive/angular-relative-date.min.js"></script>
+  
+  
   <!-- Dashboard app -->
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/dashboard-app.module.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/dashboard-app.config.js"></script>
-  <!-- Directives -->
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/box.directive.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/header.directive.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/mainsidebar.directive.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/sidebar.directive.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/registration.directive.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/operation-result.directive.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/userinfo-box.directive.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/directives/isimage.directive.js"></script>
-  <!-- Interceptors -->
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/factory/gatewayerror.interceptor.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/factory/sessionexpired.interceptor.js"></script>
-  <!-- Filters -->
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/filters/start-from.filter.js"></script>
-  <!-- Services -->
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/services/scim-factory.service.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/services/modal.service.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/services/passwordreset.service.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/services/registration.service.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/services/utils.service.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/services/authorities.service.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/services/user.service.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/services/load-templates.service.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/services/account-linking.service.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/services/tokens.service.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/services/clients.service.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/services/clipboard.service.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/services/aup.service.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/services/users.service.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/services/groups.service.js"></script>
-  <!-- Controllers -->
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/group.controller.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/registration.controller.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/add-subgroup.controller.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/account-privileges.controller.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/edit-user.controller.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/add-user-group.controller.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/controllers/edit-password.controller.js"></script>
-  <!-- Components -->
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/components/common/result.component.js"></script>
-  <!-- User components -->
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/components/user/detail/user.detail.component.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/components/user/edit/user.edit.component.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/components/user/status/user.status.component.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/dashboard-app.module.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/dashboard-app.config.js"></script>
+
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/directives/registration.directive.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/directives/operation-result.directive.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/directives/isimage.directive.js"></script>
+  
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/factory/gatewayerror.interceptor.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/factory/sessionexpired.interceptor.js"></script>
+  
+  
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/filters/start-from.filter.js"></script>
+  
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/services/scim-factory.service.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/services/modal.service.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/services/passwordreset.service.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/services/registration.service.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/services/utils.service.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/services/authorities.service.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/services/user.service.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/services/load-templates.service.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/services/account-linking.service.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/services/tokens.service.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/services/clients.service.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/services/clipboard.service.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/services/aup.service.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/services/account-group-manager.service.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/services/users.service.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/services/groups.service.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/services/group.service.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/services/group-requests.service.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/services/labels.service.js"></script>
+  
+  
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/controllers/registration.controller.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/controllers/account-privileges.controller.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/controllers/edit-user.controller.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/controllers/add-user-group.controller.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/controllers/edit-password.controller.js"></script>
+  
+
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/header/header.directive.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/common/result.component.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/sidebar/sidebar.component.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/requests/requests.component.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/requests/registration/requests.registration.component.js"></script>
+   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/requests/group/requests.group.component.js"></script>
+  
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/user/group-requests/join-group.component.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/user/group-requests/pending-requests.component.js"></script>
+  
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/user/detail/user.detail.component.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/user/edit/user.edit.component.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/user/status/user.status.component.js"></script>
   <script type="text/javascript"
-    src="/resources/iam/js/dashboard-app/components/user/privileges/user.privileges.component.js"></script>
+    src="/resources/iam/apps/dashboard-app/components/user/privileges/user.privileges.component.js"></script>
   <script type="text/javascript"
-    src="/resources/iam/js/dashboard-app/components/user/password/user.password.component.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/components/user/groups/user.groups.component.js"></script>
+    src="/resources/iam/apps/dashboard-app/components/user/password/user.password.component.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/user/groups/user.groups.component.js"></script>
   <script type="text/javascript"
-    src="/resources/iam/js/dashboard-app/components/user/linked-accounts/user.linked-accounts.component.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/components/user/x509/user.x509.component.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/components/user/user.component.js"></script>
-  <!-- Users component -->
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/components/users/userslist/users.userslist.component.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/components/users/users.component.js"></script>
-  <!-- Groups component -->
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/components/groups/groupslist/groups.groupslist.component.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/components/groups/groups.component.js"></script>
-  <!-- Tokens component -->
+    src="/resources/iam/apps/dashboard-app/components/user/linked-accounts/user.linked-accounts.component.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/user/x509/user.x509.component.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/user/labels/user.labels.component.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/user/user.component.js"></script>
+  
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/users/userslist/users.userslist.component.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/users/users.component.js"></script>
+  
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/groups/search/groups.search.component.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/groups/groupslist/groups.groupslist.component.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/groups/groups.component.js"></script>
+  
   <script type="text/javascript"
-    src="/resources/iam/js/dashboard-app/components/tokens/refreshlist/tokens.refreshlist.component.js"></script>
+    src="/resources/iam/apps/dashboard-app/components/tokens/refreshlist/tokens.refreshlist.component.js"></script>
   <script type="text/javascript"
-    src="/resources/iam/js/dashboard-app/components/tokens/accesslist/tokens.accesslist.component.js"></script>
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/components/tokens/tokens.component.js"></script>
-  <!-- AUP component -->
-  <script type="text/javascript" src="/resources/iam/js/dashboard-app/components/aup/aup.component.js"></script>
+    src="/resources/iam/apps/dashboard-app/components/tokens/accesslist/tokens.accesslist.component.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/tokens/tokens.component.js"></script>
+  
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/aup/aup.component.js"></script>
+  
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/group/group.description.component.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/group/group.component.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/group/subgroups/group.subgroups.component.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/group/members/group.members.component.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/group/managers/group.managers.component.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/group/labels/group.labels.component.js"></script>
+
 </body>

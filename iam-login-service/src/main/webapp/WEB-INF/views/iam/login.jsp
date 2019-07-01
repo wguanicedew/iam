@@ -1,6 +1,6 @@
 <%--
 
-    Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2018
+    Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2019
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -66,14 +66,14 @@
         </div>
 
         <div style="text-align: center">
-            <h3>Welcome to <strong>${iamProperties.organisationName}</strong>
+            <h3>Welcome to <strong>${iamOrganisationName}</strong>
       </h3>
         </div>
         
         <form id="login-form" action="/login" method="post">
         
             <div class="signin-preamble text-muted">
-              Sign in with your ${iamProperties.organisationName} credentials
+              Sign in with your ${iamOrganisationName} credentials
             </div>
 
             <div class="form-group">
@@ -157,7 +157,7 @@
                 <div class="registration-preamble text-muted">
                    Not a member?
                 </div>
-                <a class="btn btn-success btn-block" href="/register">Register a new account</a>
+                <a class="btn btn-success btn-block" href="/start-registration">Register a new account</a>
             </div>
         </c:if>
 

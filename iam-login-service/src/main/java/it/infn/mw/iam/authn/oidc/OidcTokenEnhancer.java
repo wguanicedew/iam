@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2018
+ * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2019
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 package it.infn.mw.iam.authn.oidc;
 
 import static it.infn.mw.iam.core.oauth.ClaimValueHelper.ADDITIONAL_CLAIMS;
-import static java.util.Objects.isNull;
 
 import java.util.Date;
 import java.util.Set;
@@ -44,10 +43,10 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTClaimsSet.Builder;
 import com.nimbusds.jwt.SignedJWT;
 
-import it.infn.mw.iam.core.IamScopeClaimTranslationService;
 import it.infn.mw.iam.core.oauth.ClaimValueHelper;
 import it.infn.mw.iam.core.oauth.scope.IamScopeFilter;
-import it.infn.mw.iam.persistence.model.IamUserInfo;
+import it.infn.mw.iam.core.userinfo.IamScopeClaimTranslationService;
+import it.infn.mw.iam.persistence.repository.UserInfoAdapter;
 
 public class OidcTokenEnhancer extends ConnectTokenEnhancer {
 
@@ -112,10 +111,10 @@ public class OidcTokenEnhancer extends ConnectTokenEnhancer {
       builder.audience(Lists.newArrayList(audience));
     }
 
-    if (includeAuthnInfo && !isNull(userInfo)) {
+    if (includeAuthnInfo && userInfo != null) {
       Set<String> requiredClaims = scopeClaimConverter.getClaimsForScopeSet(token.getScope());
       requiredClaims.stream().filter(ADDITIONAL_CLAIMS::contains).forEach(c -> builder.claim(c,
-          claimValueHelper.getClaimValueFromUserInfo(c, (IamUserInfo) userInfo)));
+          claimValueHelper.getClaimValueFromUserInfo(c, ((UserInfoAdapter) userInfo).getUserinfo())));
     }
 
     JWTClaimsSet claims = builder.build();

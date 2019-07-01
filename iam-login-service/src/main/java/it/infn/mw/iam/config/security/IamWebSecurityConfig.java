@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2018
+ * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2019
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.data.repository.query.SecurityEvaluationContextExtension;
 import org.springframework.security.oauth2.provider.expression.OAuth2WebSecurityExpressionHandler;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -59,6 +60,11 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 @Configuration
 @EnableWebSecurity
 public class IamWebSecurityConfig {
+  
+  @Bean
+  public SecurityEvaluationContextExtension contextExtension() {
+    return new SecurityEvaluationContextExtension();
+  }
 
   @Configuration
   @Order(100)
@@ -136,7 +142,7 @@ public class IamWebSecurityConfig {
 
       // @formatter:off
       http.requestMatchers()
-        .antMatchers("/", "/login**", "/logout", "/authorize", "/manage/**", "/dashboard**", "/register",
+        .antMatchers("/", "/login**", "/logout", "/authorize", "/manage/**", "/dashboard**", "/start-registration",
             "/reset-session", "/device/**")
         .and()
         .sessionManagement()
@@ -144,7 +150,7 @@ public class IamWebSecurityConfig {
         .and()
           .authorizeRequests()
             .antMatchers("/login**", "/webjars/**").permitAll()
-            .antMatchers("/register").permitAll()
+            .antMatchers("/start-registration").permitAll()
             .antMatchers("/authorize**").permitAll()
             .antMatchers("/reset-session").permitAll()
             .antMatchers("/device/**").authenticated()
@@ -236,7 +242,7 @@ public class IamWebSecurityConfig {
 
   @Configuration
   @Order(Ordered.HIGHEST_PRECEDENCE)
-  @Profile("dev")
+  @Profile("h2-console")
   public static class H2ConsoleEndpointAuthorizationConfig extends WebSecurityConfigurerAdapter {
 
     @Override

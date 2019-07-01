@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2018
+ * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2019
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,9 @@
  */
 package it.infn.mw.iam.config.security;
 
+import static org.springframework.security.config.http.SessionCreationPolicy.NEVER;
+import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
+
 import org.mitre.oauth2.web.CorsFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -22,7 +25,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -34,8 +36,9 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 import org.springframework.security.web.context.SecurityContextPersistenceFilter;
 import org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter;
 
+import it.infn.mw.iam.config.client_registration.ClientRegistrationProperties;
+
 @Configuration
-@EnableWebSecurity
 public class MitreSecurityConfig {
 
   @Configuration
@@ -95,7 +98,7 @@ public class MitreSecurityConfig {
         .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
         .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
         .sessionManagement()
-          .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+          .sessionCreationPolicy(STATELESS)
         .and()
           .authorizeRequests()
             .antMatchers("/resource/**").permitAll()
@@ -109,6 +112,8 @@ public class MitreSecurityConfig {
   @Order(12)
   public static class RegisterEndpointAuthorizationConfig extends WebSecurityConfigurerAdapter {
 
+    public static final String REGISTER_ENDPOINT_PATTERN = "/register/**";
+    
     @Autowired
     private OAuth2AuthenticationProcessingFilter resourceFilter;
 
@@ -118,24 +123,32 @@ public class MitreSecurityConfig {
     @Autowired
     private CorsFilter corsFilter;
 
+    @Autowired
+    private ClientRegistrationProperties clientRegProps;
+
     @Override
     public void configure(final HttpSecurity http) throws Exception {
 
-      // @formatter:off
-      http.antMatcher("/register/**")
-        .exceptionHandling()
-          .authenticationEntryPoint(authenticationEntryPoint)
+      HttpSecurity registerEndpoint = http.antMatcher(REGISTER_ENDPOINT_PATTERN);
+
+      registerEndpoint.exceptionHandling()
+        .authenticationEntryPoint(authenticationEntryPoint)
         .and()
-          .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
-          .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
+        .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
+        .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
         .sessionManagement()
-          .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-        .and()
-          .authorizeRequests()
-            .antMatchers("/register/**").permitAll()
-          .and()
-            .csrf().disable();
-      // @formatter:on
+        .sessionCreationPolicy(STATELESS);
+
+      if (ClientRegistrationProperties.AccessPolicy.ANYONE.equals(clientRegProps.getAllowFor())) {
+        registerEndpoint.authorizeRequests().antMatchers(REGISTER_ENDPOINT_PATTERN).permitAll();
+      } else {
+        registerEndpoint.authorizeRequests()
+          .antMatchers(REGISTER_ENDPOINT_PATTERN)
+          .hasAnyRole("USER", "ADMIN")
+          .and().sessionManagement().sessionCreationPolicy(NEVER);
+      }
+      
+      registerEndpoint.csrf().disable();
     }
   }
 
@@ -163,7 +176,7 @@ public class MitreSecurityConfig {
           .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
           .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
         .sessionManagement()
-          .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+          .sessionCreationPolicy(STATELESS)
         .and()
           .csrf().disable();
       // @formatter:on
@@ -203,7 +216,7 @@ public class MitreSecurityConfig {
           .authenticationEntryPoint(authenticationEntryPoint)
         .and()
           .sessionManagement()
-            .sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+            .sessionCreationPolicy(STATELESS).and()
         .csrf()
           .disable()
         .authorizeRequests()
@@ -256,7 +269,7 @@ public class MitreSecurityConfig {
           .authenticationEntryPoint(authenticationEntryPoint)
         .and()
           .csrf().disable()
-          .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+          .sessionManagement().sessionCreationPolicy(STATELESS);
       // @formatter:on
     }
   }
@@ -277,7 +290,7 @@ public class MitreSecurityConfig {
           .authenticationEntryPoint(http403ForbiddenEntryPoint)
         .and()
           .sessionManagement()
-          .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+          .sessionCreationPolicy(STATELESS)
         .and()
           .authorizeRequests()
             .antMatchers("/**").permitAll();
@@ -315,7 +328,7 @@ public class MitreSecurityConfig {
         .and()
           .addFilterBefore(corsFilter, SecurityContextPersistenceFilter.class)
           .sessionManagement()
-            .sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+            .sessionCreationPolicy(STATELESS).and()
         .csrf()
           .disable()
         .authorizeRequests()

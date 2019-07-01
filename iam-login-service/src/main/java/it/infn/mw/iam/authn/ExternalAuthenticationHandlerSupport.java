@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2018
+ * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2019
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import com.google.common.base.Strings;
 import it.infn.mw.iam.api.account_linking.AccountLinkingConstants;
 import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
 import it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo.ExternalAuthenticationType;
+import it.infn.mw.iam.authn.error.InvalidExternalAuthenticationTokenError;
 import it.infn.mw.iam.authn.x509.IamX509AuthenticationCredential;
 
 public class ExternalAuthenticationHandlerSupport implements AccountLinkingConstants {
@@ -57,9 +58,11 @@ public class ExternalAuthenticationHandlerSupport implements AccountLinkingConst
       ExternalAuthenticationHandlerSupport.class.getName() + ".DONE";
 
   public static final String EXT_AUTHN_UNREGISTERED_USER_ROLE = "EXT_AUTH_UNREGISTERED";
+  
+  public static final String EXT_AUTHN_UNREGISTERED_USER_AUTH_STRING = "ROLE_" + EXT_AUTHN_UNREGISTERED_USER_ROLE;
 
   public static final GrantedAuthority EXT_AUTHN_UNREGISTERED_USER_AUTH =
-      new SimpleGrantedAuthority("ROLE_" + EXT_AUTHN_UNREGISTERED_USER_ROLE);
+      new SimpleGrantedAuthority(EXT_AUTHN_UNREGISTERED_USER_AUTH_STRING);
 
   public static final String EXT_AUTH_ERROR_KEY =
       ExternalAuthenticationHandlerSupport.class.getName() + ".ERROR";
@@ -84,7 +87,7 @@ public class ExternalAuthenticationHandlerSupport implements AccountLinkingConst
   protected boolean isExternalUnregisteredUser(Authentication authentication) {
 
     if (!(authentication instanceof AbstractExternalAuthenticationToken<?>)) {
-      throw new RuntimeException("Invalid token type: " + authentication);
+      throw new InvalidExternalAuthenticationTokenError("Invalid token type: " + authentication);
     }
 
     return authentication.getAuthorities().contains(EXT_AUTHN_UNREGISTERED_USER_AUTH);
@@ -169,7 +172,7 @@ public class ExternalAuthenticationHandlerSupport implements AccountLinkingConst
         break;
 
       case SAML:
-        redirectUrl = buildRedirectUrl("/saml/login", "idpId", externalIdpId);
+        redirectUrl = buildRedirectUrl("/saml/login", "idp", externalIdpId);
         break;
 
       default:

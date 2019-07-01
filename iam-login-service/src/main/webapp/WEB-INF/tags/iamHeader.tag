@@ -87,7 +87,7 @@ function getAccountLinkingEnabled() {
 }
 
 function getOrganisationName() {
- return '${iamProperties.organisationName}'; 
+ return '${iamOrganisationName}'; 
 }
 
 function getOidcEnabled() {
@@ -96,5 +96,9 @@ function getOidcEnabled() {
 	
 function getSamlEnabled() {
   return ${loginPageConfiguration.samlEnabled};
+}
+
+function getRcauthEnabled() {
+  return ${iamRcauthEnabled};
 }
 </script>

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2018
+ * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2019
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import it.infn.mw.iam.authn.oidc.RestTemplateFactory;
-import it.infn.mw.iam.test.util.oidc.CodeRequestUtil;
+import it.infn.mw.iam.test.util.oidc.CodeRequestHolder;
 import it.infn.mw.iam.test.util.oidc.MockOIDCProvider;
 import it.infn.mw.iam.test.util.oidc.MockRestTemplateFactory;
 
@@ -123,9 +123,9 @@ public class OidcExternalAuthenticationTestsSupport {
 
   }
 
-  CodeRequestUtil buildCodeRequest(String sessionCookie, ResponseEntity<String> response) {
+  CodeRequestHolder buildCodeRequest(String sessionCookie, ResponseEntity<String> response) {
 
-    CodeRequestUtil result = new CodeRequestUtil();
+    CodeRequestHolder result = new CodeRequestHolder();
 
     HttpHeaders requestHeaders = new HttpHeaders();
     UriComponents locationUri =

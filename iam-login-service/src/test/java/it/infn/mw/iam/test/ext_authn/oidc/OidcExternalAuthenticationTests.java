@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2018
+ * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2019
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ import com.nimbusds.jose.JOSEException;
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo;
 import it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo.ExternalAuthenticationType;
-import it.infn.mw.iam.test.util.oidc.CodeRequestUtil;
+import it.infn.mw.iam.test.util.oidc.CodeRequestHolder;
 import it.infn.mw.iam.test.util.oidc.MockRestTemplateFactory;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -76,7 +76,7 @@ public class OidcExternalAuthenticationTests extends OidcExternalAuthenticationT
     String sessionCookie = extractSessionCookie(response);
     requestHeaders.add("Cookie", sessionCookie);
 
-    CodeRequestUtil ru = buildCodeRequest(sessionCookie, response);
+    CodeRequestHolder ru = buildCodeRequest(sessionCookie, response);
 
     String tokenResponse = mockOidcProvider.prepareTokenResponse(OidcTestConfig.TEST_OIDC_CLIENT_ID,
         "unregistered", ru.nonce);
@@ -126,7 +126,7 @@ public class OidcExternalAuthenticationTests extends OidcExternalAuthenticationT
     String sessionCookie = extractSessionCookie(response);
     requestHeaders.add("Cookie", sessionCookie);
 
-    CodeRequestUtil ru = buildCodeRequest(sessionCookie, response);
+    CodeRequestHolder ru = buildCodeRequest(sessionCookie, response);
 
     String tokenResponse = mockOidcProvider.prepareTokenResponse(OidcTestConfig.TEST_OIDC_CLIENT_ID,
         "test-user", ru.nonce);
@@ -155,7 +155,7 @@ public class OidcExternalAuthenticationTests extends OidcExternalAuthenticationT
     String sessionCookie = extractSessionCookie(response);
     requestHeaders.add("Cookie", sessionCookie);
 
-    CodeRequestUtil ru = buildCodeRequest(sessionCookie, response);
+    CodeRequestHolder ru = buildCodeRequest(sessionCookie, response);
 
     String errorResponse =
         mockOidcProvider.prepareErrorResponse("invalid_request", "malformed request");

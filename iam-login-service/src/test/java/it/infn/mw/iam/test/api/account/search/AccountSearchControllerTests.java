@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2018
+ * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2019
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,13 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,17 +35,20 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.data.domain.Page;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
+
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.common.ListResponseDTO;
 import it.infn.mw.iam.api.common.OffsetPageable;
@@ -83,7 +88,7 @@ public class AccountSearchControllerTests {
   public void setup() {
     mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     mockOAuth2Filter.cleanupSecurityContext();
-    mvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).alwaysDo(print())
+    mvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).alwaysDo(log())
         .build();
   }
 
@@ -209,9 +214,16 @@ public class AccountSearchControllerTests {
   }
 
   @Test
-  public void getUsersAsNoAuthenticatedUser() throws Exception {
+  public void getUsersAsAnonymousUser() throws Exception {
     mvc.perform(get(ACCOUNT_SEARCH_ENDPOINT).contentType(APPLICATION_JSON_CONTENT_TYPE))
         .andExpect(status().isUnauthorized());
+  }
+  
+  @Test
+  @WithMockUser(username="test", roles= {"USER", "GM:c617d586-54e6-411d-8e38-649677980001"})
+  public void getUsersAsGroupManager() throws Exception {
+    mvc.perform(get(ACCOUNT_SEARCH_ENDPOINT).contentType(APPLICATION_JSON_CONTENT_TYPE))
+    .andExpect(status().isOk());
   }
 
   @Test

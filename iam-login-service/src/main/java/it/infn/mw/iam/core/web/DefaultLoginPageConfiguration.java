@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2018
+ * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2019
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,8 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
 
+import it.infn.mw.iam.config.IamProperties;
+import it.infn.mw.iam.config.IamProperties.Logo;
 import it.infn.mw.iam.config.oidc.OidcProvider;
 import it.infn.mw.iam.config.oidc.OidcValidatedProviders;
 
@@ -58,9 +60,16 @@ public class DefaultLoginPageConfiguration implements LoginPageConfiguration, En
 
   @Value("${iam.loginButton.text}")
   private String loginButtonText;
-
-  @Autowired
+  
   private OidcValidatedProviders providers;
+  private final IamProperties iamProperties;
+  
+  @Autowired
+  public DefaultLoginPageConfiguration(OidcValidatedProviders providers, IamProperties properties) {
+    this.providers = providers;
+    this.iamProperties = properties;
+  }
+  
   
   @PostConstruct
   public void init() {
@@ -140,6 +149,11 @@ public class DefaultLoginPageConfiguration implements LoginPageConfiguration, En
   @Override
   public List<OidcProvider> getOidcProviders() {
     return providers.getValidatedProviders();
+  }
+
+  @Override
+  public Logo getLogo() {
+    return iamProperties.getLogo();
   }
 
 }

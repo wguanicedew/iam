@@ -14,8 +14,9 @@ iam:
     
     tls:
       version: ${IAM_CLIENT_TLS_VERSION:TLSv1.2}
-      ignoreNamespaceChecks: ${IAM_CLIENT_TLS_IGNORE_NAMESPACE_CHECKS:false}
-    
+      ignore-namespace-checks: ${IAM_CLIENT_TLS_IGNORE_NAMESPACE_CHECKS:false} 
+      use-grid-trust-anchors: ${IAM_CLIENT_TLS_USE_GRID_TRUST_ANCHORS:true}
+      
     client:
       clientId: ${IAM_CLIENT_ID:client}
       clientSecret: ${IAM_CLIENT_SECRET:secret}

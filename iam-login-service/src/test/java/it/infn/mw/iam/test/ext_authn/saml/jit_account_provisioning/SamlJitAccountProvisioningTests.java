@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2018
+ * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2019
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,12 +107,12 @@ public class SamlJitAccountProvisioningTests extends SamlAuthenticationTestSuppo
   public void before() {
     accountCreatedEventListener.resetCount();
   }
-  
+
   @Test
   public void testJITAccountProvisionAccountOnlyOnce() throws Throwable {
 
     MockHttpSession session =
-        (MockHttpSession) mvc.perform(MockMvcRequestBuilders.get(samlLoginUrl()))
+        (MockHttpSession) mvc.perform(MockMvcRequestBuilders.get(samlDefaultIdpLoginUrl()))
           .andExpect(MockMvcResultMatchers.status().isOk())
           .andReturn()
           .getRequest()
@@ -137,8 +137,9 @@ public class SamlJitAccountProvisioningTests extends SamlAuthenticationTestSuppo
 
     assertThat(accountCreatedEventListener.getCount(), equalTo(1L));
 
-    mvc.perform(get("/dashboard").session(session)).andExpect(status().isOk()).andExpect(
-        view().name("iam/dashboard"));
+    mvc.perform(get("/dashboard").session(session))
+      .andExpect(status().isOk())
+      .andExpect(view().name("iam/dashboard"));
 
     IamAccount provisionedAccount = accountRepo
       .findBySamlId(DEFAULT_IDP_ID, Saml2Attribute.EPUID.getAttributeName(), JIT1_EPUID)
@@ -152,7 +153,7 @@ public class SamlJitAccountProvisioningTests extends SamlAuthenticationTestSuppo
     assertThat(provisionedAccount.getUserInfo().getGivenName(), equalTo(JIT1_GIVEN_NAME));
     assertThat(provisionedAccount.getUserInfo().getFamilyName(), equalTo(JIT1_FAMILY_NAME));
 
-    session = (MockHttpSession) mvc.perform(MockMvcRequestBuilders.get(samlLoginUrl()))
+    session = (MockHttpSession) mvc.perform(MockMvcRequestBuilders.get(samlDefaultIdpLoginUrl()))
       .andExpect(MockMvcResultMatchers.status().isOk())
       .andReturn()
       .getRequest()
@@ -205,7 +206,7 @@ public class SamlJitAccountProvisioningTests extends SamlAuthenticationTestSuppo
           .getRequest()
           .getSession();
 
-    session = (MockHttpSession) mvc.perform(get(samlLoginUrl()).session(session))
+    session = (MockHttpSession) mvc.perform(get(samlDefaultIdpLoginUrl()).session(session))
       .andExpect(status().isOk())
       .andReturn()
       .getRequest()
@@ -280,8 +281,8 @@ public class SamlJitAccountProvisioningTests extends SamlAuthenticationTestSuppo
       .andExpect(jsonPath("$.name", equalTo(format("%s %s", JIT1_GIVEN_NAME, JIT1_FAMILY_NAME))))
       .andExpect(jsonPath("$.external_authn.type", equalTo("saml")));
   }
-  
-  
+
+
   @Test
   public void testAuthzCodeFlowWithExtAuthnHintWorksForJitProvisionedAccount() throws Throwable {
 
@@ -292,18 +293,18 @@ public class SamlJitAccountProvisioningTests extends SamlAuthenticationTestSuppo
       .queryParam("scope", SCOPE)
       .queryParam("nonce", "1")
       .queryParam("state", "1")
-      .queryParam("ext_authn_hint", "saml:"+DEFAULT_IDP_ID)
+      .queryParam("ext_authn_hint", "saml:" + DEFAULT_IDP_ID)
       .build();
 
     MockHttpSession session =
         (MockHttpSession) mvc.perform(get(authorizationEndpointUri.toUriString()))
           .andExpect(status().is3xxRedirection())
-          .andExpect(redirectedUrl("http://localhost:8080/saml/login?idp="+DEFAULT_IDP_ID))
+          .andExpect(redirectedUrl("http://localhost:8080/saml/login?idp=" + DEFAULT_IDP_ID))
           .andReturn()
           .getRequest()
           .getSession();
 
-    session = (MockHttpSession) mvc.perform(get(samlLoginUrl()).session(session))
+    session = (MockHttpSession) mvc.perform(get(samlDefaultIdpLoginUrl()).session(session))
       .andExpect(status().isOk())
       .andReturn()
       .getRequest()
