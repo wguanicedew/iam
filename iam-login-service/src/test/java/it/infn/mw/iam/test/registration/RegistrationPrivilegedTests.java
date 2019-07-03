@@ -48,8 +48,10 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import it.infn.mw.iam.IamLoginService;
+import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
 import it.infn.mw.iam.registration.PersistentUUIDTokenGenerator;
 import it.infn.mw.iam.registration.RegistrationRequestDto;
+import it.infn.mw.iam.registration.RegistrationRequestService;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 import it.infn.mw.iam.test.util.WithMockOAuthUser;
 import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
@@ -73,6 +75,53 @@ public class RegistrationPrivilegedTests {
   private MockOAuth2Filter mockOAuth2Filter;
   
   private MockMvc mvc;
+  
+  @Autowired
+  private RegistrationRequestService registrationService; 
+  
+  private RegistrationRequestDto createRegistrationRequest(String username) throws Exception {
+
+    String email = username + "@example.org";
+    RegistrationRequestDto request = new RegistrationRequestDto();
+    request.setGivenname("Test");
+    request.setFamilyname("User");
+    request.setEmail(email);
+    request.setUsername(username);
+    request.setNotes("Some short notes...");
+    request.setPassword("password");
+
+    // @formatter:off
+    String response = mvc
+      .perform(post("/registration/create").contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(request)))
+      .andExpect(status().isOk())
+      .andReturn()
+      .getResponse()
+      .getContentAsString();
+    // @formatter:on
+
+    return objectMapper.readValue(response, RegistrationRequestDto.class);
+  }
+  
+  private void confirmRegistrationRequest(String confirmationKey) throws Exception {
+    // @formatter:off
+    mvc.perform(get("/registration/confirm/{token}", confirmationKey))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.status", equalTo(CONFIRMED.name())));
+    // @formatter:on
+  }
+
+  protected RegistrationRequestDto approveRequest(String uuid) throws Exception {
+    String response = mvc
+        .perform(post("/registration/approve/{uuid}", uuid)
+          .with(SecurityMockMvcRequestPostProcessors.user("admin").roles("ADMIN", "USER")))
+        .andExpect(status().isOk())
+        .andReturn()
+        .getResponse()
+        .getContentAsString();
+    // @formatter:on
+    return objectMapper.readValue(response, RegistrationRequestDto.class);
+  }
 
   @Before
   public void setup() {
@@ -223,48 +272,38 @@ public class RegistrationPrivilegedTests {
       .andExpect(jsonPath("$.status", equalTo(APPROVED.name())));
     // @formatter:on
   }
-
-  private RegistrationRequestDto createRegistrationRequest(String username) throws Exception {
-
-    String email = username + "@example.org";
-    RegistrationRequestDto request = new RegistrationRequestDto();
-    request.setGivenname("Test");
-    request.setFamilyname("User");
-    request.setEmail(email);
-    request.setUsername(username);
-    request.setNotes("Some short notes...");
-    request.setPassword("password");
-
-    // @formatter:off
-    String response = mvc
-      .perform(post("/registration/create").contentType(MediaType.APPLICATION_JSON)
-        .content(objectMapper.writeValueAsString(request)))
-      .andExpect(status().isOk())
-      .andReturn()
-      .getResponse()
-      .getContentAsString();
-    // @formatter:on
-
-    return objectMapper.readValue(response, RegistrationRequestDto.class);
-  }
-
-  private void confirmRegistrationRequest(String confirmationKey) throws Exception {
-    // @formatter:off
+  
+  @Test
+  @WithMockOAuthUser(clientId = "registration-client", scopes = {"registration:write"})
+  public void confirmAlreadyConfirmedRequest() throws Exception {
+    // create new request
+    RegistrationRequestDto reg = createRegistrationRequest("test_multiple_confirm");
+    assertNotNull(reg);
+    
+    String confirmationKey = generator.getLastToken();
+    approveRequest(reg.getUuid());
+    
     mvc.perform(get("/registration/confirm/{token}", confirmationKey))
       .andExpect(status().isOk())
-      .andExpect(jsonPath("$.status", equalTo(CONFIRMED.name())));
-    // @formatter:on
+      .andExpect(jsonPath("$.status", equalTo(APPROVED.name())));
+    
+    mvc.perform(get("/registration/confirm/{token}", confirmationKey))
+    .andExpect(status().isNotFound());
+    
   }
-
-  protected RegistrationRequestDto approveRequest(String uuid) throws Exception {
-    String response = mvc
-        .perform(post("/registration/approve/{uuid}", uuid)
-          .with(SecurityMockMvcRequestPostProcessors.user("admin").roles("ADMIN", "USER")))
-        .andExpect(status().isOk())
-        .andReturn()
-        .getResponse()
-        .getContentAsString();
-    // @formatter:on
-    return objectMapper.readValue(response, RegistrationRequestDto.class);
+  
+  @Test(expected = IllegalArgumentException.class)
+  @WithMockOAuthUser(clientId = "registration-client", scopes = {"registration:write"})
+  public void approveAlreadyManagedRequest() throws Exception {
+    
+    // create new request
+    RegistrationRequestDto reg = createRegistrationRequest("test_multiple_confirm");
+    assertNotNull(reg);
+    
+    // first approval works fine
+    registrationService.approveRequest(reg.getUuid());
+    
+    // second one raises exception, due to unallowed transition
+    registrationService.approveRequest(reg.getUuid()); 
   }
 }

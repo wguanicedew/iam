@@ -99,6 +99,12 @@ public class DefaultRegistrationRequestService
   private LabelDTOConverter labelConverter;
 
   private ApplicationEventPublisher eventPublisher;
+  
+  private IamRegistrationRequest findRequestById(String requestUuid) {
+    return
+        requestRepository.findByUuid(requestUuid).orElseThrow(() -> new ScimResourceNotFoundException(
+            String.format("No request mapped to uuid [%s]", requestUuid)));
+  }
 
   private static final Table<IamRegistrationRequestStatus, IamRegistrationRequestStatus, Boolean> allowedStateTransitions =
       new ImmutableTable.Builder<IamRegistrationRequestStatus, IamRegistrationRequestStatus, Boolean>()
@@ -331,9 +337,7 @@ public class DefaultRegistrationRequestService
   @Override
   public RegistrationRequestDto rejectRequest(String requestUuid, Optional<String> motivation) {
     
-    IamRegistrationRequest request =
-        requestRepository.findByUuid(requestUuid).orElseThrow(() -> new ScimResourceNotFoundException(
-            String.format("No request mapped to uuid [%s]", requestUuid)));
+    IamRegistrationRequest request = findRequestById(requestUuid);
     
     if (!checkStateTransition(request.getStatus(), REJECTED)) {
       throw new IllegalArgumentException(
@@ -342,12 +346,11 @@ public class DefaultRegistrationRequestService
     
     return handleReject(request, motivation);
   }
-
+  
   @Override
   public RegistrationRequestDto approveRequest(String requestUuid) {
-    IamRegistrationRequest request =
-        requestRepository.findByUuid(requestUuid).orElseThrow(() -> new ScimResourceNotFoundException(
-            String.format("No request mapped to uuid [%s]", requestUuid)));
+    
+    IamRegistrationRequest request = findRequestById(requestUuid);
 
     if (!checkStateTransition(request.getStatus(), APPROVED)) {
       throw new IllegalArgumentException(
