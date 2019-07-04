@@ -112,4 +112,13 @@ public class UserInfoEndpointTests {
     // @formatter:on
   }
 
+  @Test
+  @WithMockOAuthUser(clientId = "password-grant", user = "test", authorities = {"ROLE_USER"},
+      scopes = {"openid", "profile"})
+  public void userinfoEndpointReturnsUpdatedAtClaimAsANumber() throws Exception {
+
+    mvc.perform(get("/userinfo"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.updated_at").isNumber());
+  }
 }

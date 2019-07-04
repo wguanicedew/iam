@@ -190,9 +190,8 @@ public class IamUserInfo implements Serializable {
     return iamAccount.getUuid();
   }
 
-  public String getUpdatedTime() {
-
-    return getIamAccount().getLastUpdateTime().toString();
+  public long getUpdatedTime() {
+    return getIamAccount().getLastUpdateTime().toInstant().getEpochSecond();
   }
 
   public String getWebsite() {
