@@ -75,7 +75,9 @@ pipeline {
           step( [ $class: 'JacocoPublisher' ] )
         }
         unsuccessful {
-          archiveArtifacts artifacts:'**/target/surefire/surefire*'
+          archiveArtifacts artifacts:'**/**/surefire_*'
+          archiveArtifacts artifacts:'**/**/*.dump'
+          archiveArtifacts artifacts:'**/**/*.dumpstream'
         }
       }
     }
@@ -103,7 +105,6 @@ pipeline {
             }
         }
       }
-
       post {
         always {
           junit '**/target/surefire-reports/TEST-*.xml'
@@ -111,6 +112,8 @@ pipeline {
         }
         unsuccessful {
           archiveArtifacts artifacts:'**/**/surefire_*'
+          archiveArtifacts artifacts:'**/**/*.dump'
+          archiveArtifacts artifacts:'**/**/*.dumpstream'
         }
       }
     }
