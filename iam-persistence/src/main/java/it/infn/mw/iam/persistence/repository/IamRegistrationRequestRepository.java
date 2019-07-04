@@ -33,7 +33,7 @@ public interface IamRegistrationRequestRepository
 
   Optional<IamRegistrationRequest> findByUuid(@Param("uuid") String uuid);
 
-  @Query("select r from IamRegistrationRequest r join r.account a where a.confirmationKey = :confirmationKey")
+  @Query("select r from IamRegistrationRequest r join r.account a where a.confirmationKey = :confirmationKey and r.status = it.infn.mw.iam.core.IamRegistrationRequestStatus.NEW")
   Optional<IamRegistrationRequest> findByAccountConfirmationKey(
       @Param("confirmationKey") String confirmationKey);
 

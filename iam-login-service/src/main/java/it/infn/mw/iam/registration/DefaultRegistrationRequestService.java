@@ -242,11 +242,6 @@ public class DefaultRegistrationRequestService
     IamRegistrationRequest request = requestRepository.findByAccountConfirmationKey(confirmationKey)
       .orElseThrow(() -> new ScimResourceNotFoundException(String
         .format("No registration request found for registration_key [%s]", confirmationKey)));
-
-    if (!checkStateTransition(request.getStatus(), CONFIRMED)) {
-      throw new IllegalArgumentException(
-          String.format("Bad status transition from [%s] to [%s]", request.getStatus(), CONFIRMED));
-    }
     
     return handleConfirm(request);
   }
@@ -263,7 +258,7 @@ public class DefaultRegistrationRequestService
     return !iamAccountRepo.findByEmail(emailAddress).isPresent();
   }
 
-  private boolean checkStateTransition(IamRegistrationRequestStatus currentStatus,
+  private boolean checkStatusTransition(IamRegistrationRequestStatus currentStatus,
       final IamRegistrationRequestStatus newStatus) {
 
     return allowedStateTransitions.contains(currentStatus, newStatus);
@@ -289,19 +284,16 @@ public class DefaultRegistrationRequestService
   }
 
   private RegistrationRequestDto handleConfirm(IamRegistrationRequest request) {
+    request.setStatus(CONFIRMED);
+    request.setLastUpdateTime(new Date());
     request.getAccount().getUserInfo().setEmailVerified(true);
     request.getAccount().setConfirmationKey(null);
-
-    if (request.getStatus().equals(NEW)) {
-      request.setStatus(CONFIRMED);
-      notificationFactory.createAdminHandleRequestMessage(request);
-    }
-
-    request.setLastUpdateTime(new Date());
     requestRepository.save(request);
 
+    notificationFactory.createAdminHandleRequestMessage(request);
+    
     eventPublisher.publishEvent(new RegistrationConfirmEvent(this, request,
-        String.format("User %s confirm registration request", request.getAccount().getUsername())));
+        String.format("User %s confirmed registration request", request.getAccount().getUsername())));
 
     return converter.fromEntity(request);
   }
@@ -339,7 +331,7 @@ public class DefaultRegistrationRequestService
     
     IamRegistrationRequest request = findRequestById(requestUuid);
     
-    if (!checkStateTransition(request.getStatus(), REJECTED)) {
+    if (!checkStatusTransition(request.getStatus(), REJECTED)) {
       throw new IllegalArgumentException(
           String.format("Bad status transition from [%s] to [%s]", request.getStatus(), APPROVED));
     }
@@ -352,7 +344,7 @@ public class DefaultRegistrationRequestService
     
     IamRegistrationRequest request = findRequestById(requestUuid);
 
-    if (!checkStateTransition(request.getStatus(), APPROVED)) {
+    if (!checkStatusTransition(request.getStatus(), APPROVED)) {
       throw new IllegalArgumentException(
           String.format("Bad status transition from [%s] to [%s]", request.getStatus(), APPROVED));
     }

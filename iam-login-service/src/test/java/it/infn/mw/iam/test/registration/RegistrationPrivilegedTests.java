@@ -268,8 +268,7 @@ public class RegistrationPrivilegedTests {
 
     // @formatter:off
     mvc.perform(get("/registration/confirm/{token}", confirmationKey))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$.status", equalTo(APPROVED.name())));
+      .andExpect(status().isNotFound());
     // @formatter:on
   }
   
@@ -284,10 +283,6 @@ public class RegistrationPrivilegedTests {
     approveRequest(reg.getUuid());
     
     mvc.perform(get("/registration/confirm/{token}", confirmationKey))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$.status", equalTo(APPROVED.name())));
-    
-    mvc.perform(get("/registration/confirm/{token}", confirmationKey))
     .andExpect(status().isNotFound());
     
   }
@@ -297,7 +292,7 @@ public class RegistrationPrivilegedTests {
   public void approveAlreadyManagedRequest() throws Exception {
     
     // create new request
-    RegistrationRequestDto reg = createRegistrationRequest("test_multiple_confirm");
+    RegistrationRequestDto reg = createRegistrationRequest("test_multiple_approve");
     assertNotNull(reg);
     
     // first approval works fine
