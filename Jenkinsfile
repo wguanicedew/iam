@@ -74,6 +74,9 @@ pipeline {
           junit '**/target/surefire-reports/TEST-*.xml'
           step( [ $class: 'JacocoPublisher' ] )
         }
+        unsuccessful {
+          archiveArtifacts artifacts:'**/target/surefire/surefire*'
+        }
       }
     }
 
@@ -105,6 +108,9 @@ pipeline {
         always {
           junit '**/target/surefire-reports/TEST-*.xml'
             step( [ $class: 'JacocoPublisher' ] )
+        }
+        unsuccessful {
+          archiveArtifacts artifacts:'**/**/surefire_*'
         }
       }
     }
