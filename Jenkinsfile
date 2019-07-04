@@ -53,7 +53,7 @@ pipeline {
           withCredentials([string(credentialsId: '630f8e6c-0d31-4f96-8d82-a1ef536ef059', variable: 'GITHUB_ACCESS_TOKEN')]) {
             withSonarQubeEnv('sonarcloud.io'){
               sh """
-                mvn -X -B -U install sonar:sonar \\
+                mvn -B -U install sonar:sonar \\
                   -Dsonar.github.pullRequest=${env.CHANGE_ID} \\
                   -Dsonar.github.repository=${organization}/${repo} \\
                   -Dsonar.github.oauth=${GITHUB_ACCESS_TOKEN} \\
@@ -75,7 +75,6 @@ pipeline {
           step( [ $class: 'JacocoPublisher' ] )
         }
         unsuccessful {
-          archiveArtifacts artifacts:'**/**/surefire_*'
           archiveArtifacts artifacts:'**/**/*.dump'
           archiveArtifacts artifacts:'**/**/*.dumpstream'
         }
@@ -94,7 +93,7 @@ pipeline {
 
             withSonarQubeEnv('sonarcloud.io'){
               sh """
-                mvn -X -U ${checkstyle_opts} \\
+                mvn -U ${checkstyle_opts} \\
                 install sonar:sonar \\
                 -Dsonar.host.url=${SONAR_HOST_URL} \\
                 -Dsonar.login=${SONAR_AUTH_TOKEN} \\
@@ -111,7 +110,6 @@ pipeline {
             step( [ $class: 'JacocoPublisher' ] )
         }
         unsuccessful {
-          archiveArtifacts artifacts:'**/**/surefire_*'
           archiveArtifacts artifacts:'**/**/*.dump'
           archiveArtifacts artifacts:'**/**/*.dumpstream'
         }
