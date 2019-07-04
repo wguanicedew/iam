@@ -75,7 +75,6 @@ pipeline {
           step( [ $class: 'JacocoPublisher' ] )
         }
         unsuccessful {
-          archiveArtifacts artifacts:'**/**/surefire_*'
           archiveArtifacts artifacts:'**/**/*.dump'
           archiveArtifacts artifacts:'**/**/*.dumpstream'
         }
@@ -111,7 +110,6 @@ pipeline {
             step( [ $class: 'JacocoPublisher' ] )
         }
         unsuccessful {
-          archiveArtifacts artifacts:'**/**/surefire_*'
           archiveArtifacts artifacts:'**/**/*.dump'
           archiveArtifacts artifacts:'**/**/*.dumpstream'
         }

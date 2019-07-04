@@ -15,6 +15,8 @@
  */
 package it.infn.mw.iam.persistence.repository;
 
+import static java.lang.String.format;
+
 import org.mitre.openid.connect.model.Address;
 import org.mitre.openid.connect.model.UserInfo;
 
@@ -211,7 +213,7 @@ public class UserInfoAdapter implements UserInfo {
 
   @Override
   public String getUpdatedTime() {
-    return userinfo.getUpdatedTime();
+    return format("%d", userinfo.getUpdatedTime());
   }
 
 
