@@ -67,7 +67,7 @@ public class AupSignaturePageController {
   }
 
   @PreAuthorize("hasRole('USER')")
-  @RequestMapping("/iam/aup/sign")
+  @RequestMapping(value = "/iam/aup/sign", method = {RequestMethod.GET})
   public ModelAndView signAupPage() {
     ModelAndView view;
 

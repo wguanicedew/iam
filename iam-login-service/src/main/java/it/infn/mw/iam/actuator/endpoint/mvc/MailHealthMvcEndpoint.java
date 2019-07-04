@@ -30,6 +30,7 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.google.common.collect.Maps;
@@ -48,7 +49,7 @@ public class MailHealthMvcEndpoint extends AbstractEndpointMvcAdapter<MailHealth
     statusMapping.put("DOWN", HttpStatus.SERVICE_UNAVAILABLE);
   }
 
-  @RequestMapping(produces = APPLICATION_JSON_VALUE)
+  @RequestMapping(produces = APPLICATION_JSON_VALUE, method = RequestMethod.GET)
   @ResponseBody
   public Object getMailHealth(AbstractAuthenticationToken auth) {
     if (!getDelegate().isEnabled()) {
