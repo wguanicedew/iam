@@ -298,7 +298,8 @@ public class IamDiscoveryEndpoint {
         "password", 
         "urn:ietf:params:oauth:grant-type:jwt-bearer",
         "urn:ietf:params:oauth:grant_type:redelegate",
-        "urn:ietf:params:oauth:grant-type:token-exchange");
+        "urn:ietf:params:oauth:grant-type:token-exchange",
+        "urn:ietf:params:oauth:grant-type:device_code");
     // @formatter:on
 
     Map<String, Object> m = new HashMap<>();
