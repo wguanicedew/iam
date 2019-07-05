@@ -85,8 +85,7 @@ public class GroupRequestsCreateTests extends GroupRequestsTestUtils {
       .apply(springSecurity())
       .alwaysDo(log())
       .build();
-
-    
+    notificationService.clearAllNotifications();
   }
 
   @Test
