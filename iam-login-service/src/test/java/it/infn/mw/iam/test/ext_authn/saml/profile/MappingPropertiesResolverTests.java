@@ -56,8 +56,7 @@ public class MappingPropertiesResolverTests {
   public void testNullProperties() {
 
     try {
-      DefaultMappingPropertiesResolver resolver =
-          new DefaultMappingPropertiesResolver(null, entityProperties);
+      new DefaultMappingPropertiesResolver(null, entityProperties);
     } catch (NullPointerException e) {
       assertThat(e.getMessage(), is("default properties cannot be null"));
       throw e;
@@ -68,42 +67,41 @@ public class MappingPropertiesResolverTests {
   public void testNullProperties2() {
 
     try {
-      DefaultMappingPropertiesResolver resolver =
-          new DefaultMappingPropertiesResolver(defaultProperties, null);
+      new DefaultMappingPropertiesResolver(defaultProperties, null);
     } catch (NullPointerException e) {
       assertThat(e.getMessage(), is("entity properties cannot be null"));
       throw e;
     }
   }
-  
+
   @Test
   public void testEntityMapping() {
     AttributeMappingProperties customMp = new AttributeMappingProperties();
     EntityAttributeMappingProperties entityMp = new EntityAttributeMappingProperties();
     entityMp.setEntityIds(ENTITY_ID_1);
     entityMp.setMapping(customMp);
-    
+
     entityProperties.add(entityMp);
-    
+
     DefaultMappingPropertiesResolver resolver =
         new DefaultMappingPropertiesResolver(defaultProperties, entityProperties);
-    
+
     assertThat(resolver.resolveMappingProperties(ENTITY_ID_1), is(customMp));
     assertThat(resolver.resolveMappingProperties(ENTITY_ID_2), is(defaultProperties));
   }
-  
+
   @Test
   public void testMultipleEntityMapping() {
     AttributeMappingProperties customMp = new AttributeMappingProperties();
     EntityAttributeMappingProperties entityMp = new EntityAttributeMappingProperties();
     entityMp.setEntityIds(Joiner.on(',').join(ENTITY_ID_1, ENTITY_ID_2));
     entityMp.setMapping(customMp);
-    
+
     entityProperties.add(entityMp);
-    
+
     DefaultMappingPropertiesResolver resolver =
         new DefaultMappingPropertiesResolver(defaultProperties, entityProperties);
-    
+
     assertThat(resolver.resolveMappingProperties(ENTITY_ID_1), is(customMp));
     assertThat(resolver.resolveMappingProperties(ENTITY_ID_2), is(customMp));
     assertThat(resolver.resolveMappingProperties(ENTITY_ID_3), is(defaultProperties));

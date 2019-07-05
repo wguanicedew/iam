@@ -52,7 +52,6 @@ public class OptionsProfileResolverTests {
   public void testNullChecks1() {
     
     try {
-    DefaultSSOProfileOptionsResolver resolver =
         new DefaultSSOProfileOptionsResolver(null, defaultOptions);
     }catch(NullPointerException e) {
       assertThat(e.getMessage(), is("samlProperties cannot be null"));
@@ -64,8 +63,7 @@ public class OptionsProfileResolverTests {
   public void testNullChecks2() {
     
     try {
-    DefaultSSOProfileOptionsResolver resolver =
-        new DefaultSSOProfileOptionsResolver(properties, null);
+      new DefaultSSOProfileOptionsResolver(properties, null);
     }catch(NullPointerException e) {
       assertThat(e.getMessage(), is("defaultOptions cannot be null"));
       throw e;
