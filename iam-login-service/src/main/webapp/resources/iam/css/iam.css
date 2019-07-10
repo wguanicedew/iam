@@ -83,9 +83,9 @@
 }
 
 #sign-aup-form {
-    padding-top: 2em;
-    margin: 0 auto;
-    max-width: 400px;
+  padding-top: 2em;
+  margin: 0 auto;
+  width: 90%;
 }
 
 #sign-aup-form p {
@@ -102,6 +102,10 @@
     margin-top: 2em;
     font-size: x-large;
     text-align: center;
+}
+
+#sign-aup-form #sign-aup-subtitle {
+  text-align: center;
 }
 
 #login-error {
