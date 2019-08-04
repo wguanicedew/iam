@@ -16,8 +16,8 @@ pipeline {
                 command 'cat'
                 resourceRequestCpu '2'
                 resourceLimitCpu '4'
-                resourceRequestMemory '2Gi'
-                resourceLimitMemory '3Gi'
+                resourceRequestMemory '2500Mi'
+                resourceLimitMemory '2500Mi'
             }
       }
   }
@@ -31,6 +31,7 @@ pipeline {
 
   environment {
     DOCKER_REGISTRY_HOST = "${env.DOCKER_REGISTRY_HOST}"
+    SONAR_USER_HOME = "${env.WORKSPACE}/.sonar"
   }
 
   stages {
