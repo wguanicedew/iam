@@ -15,9 +15,9 @@ pipeline {
                 ttyEnabled true
                 command 'cat'
                 resourceRequestCpu '2'
-                resourceLimitCpu '4'
-                resourceRequestMemory '2500Mi'
-                resourceLimitMemory '2500Mi'
+                resourceLimitCpu '2'
+                resourceRequestMemory '1500Mi'
+                resourceLimitMemory '1500Mi'
             }
       }
   }
