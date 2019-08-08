@@ -40,8 +40,11 @@ public class IamScopePolicySerializer extends JsonSerializer<IamScopePolicy>{
     
     gen.writeStringField("description", value.getDescription());
     gen.writeStringField("rule", value.getRule().name());
-    gen.writeObjectField("account", value.getAccount());
-    gen.writeObjectField("group", value.getGroup());
+    
+    final String accountValue = isNull(value.getAccount()) ? null : value.getAccount().getUuid(); 
+    gen.writeObjectField("account", accountValue);
+    final String groupValue = isNull(value.getGroup()) ? null: value.getGroup().getUuid();
+    gen.writeObjectField("group", groupValue);
     
     gen.writeArrayFieldStart("scopes");
     for (String s: value.getScopes()){
