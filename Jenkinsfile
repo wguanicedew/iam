@@ -16,8 +16,8 @@ pipeline {
                 command 'cat'
                 resourceRequestCpu '2'
                 resourceLimitCpu '2'
-                resourceRequestMemory '1500Mi'
-                resourceLimitMemory '1500Mi'
+                resourceRequestMemory '2500Mi'
+                resourceLimitMemory '2500Mi'
             }
       }
   }
