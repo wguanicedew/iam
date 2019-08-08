@@ -15,6 +15,7 @@
  */
 package it.infn.mw.iam.test.oauth;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
@@ -118,9 +119,12 @@ public class EndpointsTestUtils {
     public String performTokenRequest() throws Exception {
       MockHttpServletRequestBuilder req = post("/token").param("grant_type", grantType)
         .param("client_id", clientId)
-        .param("client_secret", clientSecret)
-        .param("scope", scope);
-
+        .param("client_secret", clientSecret);
+      
+      if (!isNullOrEmpty(scope)) {
+        req.param("scope", scope);
+      }
+        
       if ("password".equals(grantType)) {
         req.param("username", username).param("password", password);
       }

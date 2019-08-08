@@ -16,6 +16,7 @@
 package it.infn.mw.iam.authn.oidc;
 
 import static it.infn.mw.iam.core.oauth.ClaimValueHelper.ADDITIONAL_CLAIMS;
+import static java.util.stream.Collectors.joining;
 
 import java.util.Date;
 import java.util.Set;
@@ -67,8 +68,13 @@ public class OidcTokenEnhancer extends ConnectTokenEnhancer {
 
   @Value("${iam.access_token.include_authn_info}")
   private Boolean includeAuthnInfo;
+  
+  @Value("${iam.access_token.include_scope}")
+  private Boolean includeScope;
 
   private static final String AUD_KEY = "aud";
+  private static final String SCOPE_CLAIM_NAME = "scope";
+  private static final String SPACE = " ";
 
   private SignedJWT signClaims(JWTClaimsSet claims) {
     JWSAlgorithm signingAlg = getJwtService().getDefaultSigningAlgorithm();
@@ -115,6 +121,11 @@ public class OidcTokenEnhancer extends ConnectTokenEnhancer {
       Set<String> requiredClaims = scopeClaimConverter.getClaimsForScopeSet(token.getScope());
       requiredClaims.stream().filter(ADDITIONAL_CLAIMS::contains).forEach(c -> builder.claim(c,
           claimValueHelper.getClaimValueFromUserInfo(c, ((UserInfoAdapter) userInfo).getUserinfo())));
+    }
+    
+    if (includeScope && !accessToken.getScope().isEmpty()) {
+      final String scopeString = accessToken.getScope().stream().collect(joining(SPACE));
+      builder.claim(SCOPE_CLAIM_NAME, scopeString);
     }
 
     JWTClaimsSet claims = builder.build();
