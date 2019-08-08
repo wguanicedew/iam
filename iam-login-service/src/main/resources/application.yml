@@ -77,7 +77,8 @@ iam:
 
   access_token:
     include_authn_info: ${IAM_ACCESS_TOKEN_INCLUDE_AUTHN_INFO:false}
-    
+    include_scope: ${IAM_ACCESS_TOKEN_INCLUDE_SCOPE:false}
+
   superuser:
     username: ${IAM_SUPERUSER_USERNAME:superuser}
     password: ${IAM_SUPERUSER_PASSWORD:superpassword}
