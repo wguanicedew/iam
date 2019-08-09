@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import it.infn.mw.iam.persistence.model.IamScopePolicy;
 
 public class IamScopePolicySerializer extends JsonSerializer<IamScopePolicy>{
+  
 
   @Override
   public void serialize(IamScopePolicy value, JsonGenerator gen, SerializerProvider serializers)
@@ -41,10 +42,24 @@ public class IamScopePolicySerializer extends JsonSerializer<IamScopePolicy>{
     gen.writeStringField("description", value.getDescription());
     gen.writeStringField("rule", value.getRule().name());
     
-    final String accountValue = isNull(value.getAccount()) ? null : value.getAccount().getUuid(); 
-    gen.writeObjectField("account", accountValue);
-    final String groupValue = isNull(value.getGroup()) ? null: value.getGroup().getUuid();
-    gen.writeObjectField("group", groupValue);
+    
+    if (isNull(value.getAccount())) {
+      gen.writeNullField("account");
+    } else {
+      gen.writeObjectFieldStart("account");
+      gen.writeStringField("uuid", value.getAccount().getUuid());
+      gen.writeStringField("name", value.getAccount().getUsername());
+      gen.writeEndObject();
+    }
+    
+    if (isNull(value.getGroup())) {
+      gen.writeNullField("group");
+    } else {
+      gen.writeObjectFieldStart("grop");
+      gen.writeStringField("uuid", value.getGroup().getUuid());
+      gen.writeStringField("name", value.getGroup().getName());
+      gen.writeEndObject();
+    }
     
     gen.writeArrayFieldStart("scopes");
     for (String s: value.getScopes()){
