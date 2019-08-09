@@ -4,27 +4,31 @@ def kubeLabel = getKubeLabel()
 
 pipeline {
   agent {
-      kubernetes {
-          label "${kubeLabel}"
-          cloud 'Kube mwdevel'
-          defaultContainer 'runner'
-          inheritFrom 'ci-template'
-          containerTemplate {
-                name 'runner'
-                image 'cloud-vm114.cloud.cnaf.infn.it/cnafsd/centos7-jenkins-slave:latest'
-                ttyEnabled true
-                command 'cat'
-                resourceRequestCpu '2'
-                resourceLimitCpu '2'
-                resourceRequestMemory '2500Mi'
-                resourceLimitMemory '2500Mi'
-            }
+    kubernetes {
+      label "${kubeLabel}"
+      cloud 'Kube mwdevel'
+      defaultContainer 'runner'
+      inheritFrom 'ci-template'
+      containerTemplate {
+            name 'runner'
+            image 'cloud-vm114.cloud.cnaf.infn.it/cnafsd/centos7-jenkins-slave:latest'
+            ttyEnabled true
+            command 'cat'
+            resourceRequestCpu '2'
+            resourceLimitCpu '2'
+            resourceRequestMemory '2500Mi'
+            resourceLimitMemory '2500Mi'
       }
+    }
   }
 
   options {
     timeout(time: 1, unit: 'HOURS')
     buildDiscarder(logRotator(numToKeepStr: '5'))
+  }
+
+  parameters {
+    booleanParam(name: 'SONAR_ANALYSIS', defaultValue: false, description: 'Run Sonar Analsysis')
   }
 
   triggers { cron('@daily') }
@@ -49,10 +53,40 @@ pipeline {
       }
     }
 
-    stage('PR analysis'){
+    stage('compile') {
+      steps {
+        sh 'mvn compile'
+      }
+    }
+
+    stage('test') {
       when{
         not {
-          environment name: 'CHANGE_URL', value: ''
+          expression{ return params.SONAR_ANALYSIS }
+        }
+      }
+
+      steps {
+        sh 'mvn test'
+      }
+
+      post {
+        always {
+          junit '**/target/surefire-reports/TEST-*.xml'
+          step( [ $class: 'JacocoPublisher' ] )
+        }
+        unsuccessful {
+          archiveArtifacts artifacts:'**/**/*.dump'
+          archiveArtifacts artifacts:'**/**/*.dumpstream'
+        }
+      }
+    }
+
+    stage('PR analysis'){
+      when{
+        allOf{
+          expression{ env.CHANGE_URL != ''}
+          expression{ return params.SONAR_ANALYSIS }
         }
       }
       steps {
@@ -95,7 +129,10 @@ pipeline {
     stage('analysis'){
 
       when{
-        environment name: 'CHANGE_URL', value: ''
+        allOf{
+          expression{ env.CHANGE_URL == ''}
+          expression{ return params.SONAR_ANALYSIS }
+        }
       }
 
       steps {
@@ -128,6 +165,11 @@ pipeline {
     }
     
     stage('quality-gate') {
+
+      when{
+        expression{ return params.SONAR_ANALYSIS }
+      }
+
       steps {
         timeout(time: 5, unit: 'MINUTES') {
           waitForQualityGate abortPipeline: true
