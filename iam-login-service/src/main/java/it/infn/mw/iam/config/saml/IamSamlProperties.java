@@ -196,7 +196,7 @@ public class IamSamlProperties {
 
   private HostnameVerificationMode hostnameVerificationMode = HostnameVerificationMode.DEFAULT;
   
-  private SSONameIDType nameidPolicy = SSONameIDType.PERSISTENT;
+  private SSONameIDType nameidPolicy = SSONameIDType.TRANSIENT;
 
   private LocalMetadata localMetadata = new LocalMetadata();
   

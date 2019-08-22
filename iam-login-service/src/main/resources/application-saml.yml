@@ -25,6 +25,7 @@ saml:
   id-resolvers: ${IAM_SAML_ID_RESOLVERS:eduPersonUniqueId,eduPersonTargetedId,eduPersonPrincipalName}
   metadata-lookup-service-refresh-period-sec: ${IAM_SAML_METADATA_LOOKUP_SERVICE_REFRESH_PERIOD_SEC:600}
   metadata-refresh-period-sec: ${IAM_SAML_METADATA_REFRESH_PERIOD_SEC:43200}
+  nameid-policy: ${IAM_SAML_NAMEID_POLICY:transient}
   
   wayf-login-button:
     text: ${IAM_SAML_LOGIN_BUTTON_TEXT:Your institutional account}
