@@ -6,7 +6,6 @@ pipeline {
 
   agent any
 
-
   options {
     timeout(time: 1, unit: 'HOURS')
     buildDiscarder(logRotator(numToKeepStr: '5'))
@@ -15,6 +14,7 @@ pipeline {
   parameters {
     booleanParam(name: 'SONAR_ANALYSIS', defaultValue: false, description: 'Run Sonar Analsysis')
     booleanParam(name: 'SKIP_TESTS', defaultValue: false, description: 'Skip tests')
+    booleanParam(name: 'SKIP_DOCKER', defaultValue: false, description: 'Skip docker image creation')
   }
 
   triggers { cron('@daily') }
@@ -194,9 +194,9 @@ pipeline {
         stage('package') {
           steps {
             sh 'mvn -B -DskipTests=true clean package' 
-            archive 'iam-login-service/target/iam-login-service.war'
-            archive 'iam-login-service/target/classes/iam.version.properties'
-            archive 'iam-test-client/target/iam-test-client.jar'
+            archiveArtifacts 'iam-login-service/target/iam-login-service.war'
+            archiveArtifacts 'iam-login-service/target/classes/iam.version.properties'
+            archiveArtifacts 'iam-test-client/target/iam-test-client.jar'
             stash includes: 'iam-login-service/target/iam-login-service.war,iam-login-service/target/classes/iam.version.properties,iam-test-client/target/iam-test-client.jar', name: 'iam-artifacts'
           }
         }
@@ -204,6 +204,11 @@ pipeline {
     }
 
     stage('docker-images') {
+      when{
+        not {
+          expression { return params.SKIP_DOCKER }
+        }
+      }
 
       agent {
         label "docker"
