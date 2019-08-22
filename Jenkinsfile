@@ -7,14 +7,18 @@ pipeline {
   agent any
 
   options {
-    timeout(time: 1, unit: 'HOURS')
+    ansiColor('xterm')
     buildDiscarder(logRotator(numToKeepStr: '5'))
+    skipDefaultCheckout()
+    timeout(time: 1, unit: 'HOURS')
+    timestamps()
   }
 
   parameters {
     booleanParam(name: 'SONAR_ANALYSIS', defaultValue: false, description: 'Run Sonar Analsysis')
     booleanParam(name: 'SKIP_TESTS', defaultValue: false, description: 'Skip tests')
     booleanParam(name: 'SKIP_DOCKER', defaultValue: false, description: 'Skip docker image creation')
+    booleanParam(name: 'PUSH_TO_DOCKERHUB', defaultValue: false, description: 'Push to Dockerhub')
   }
 
   triggers { cron('@daily') }
@@ -229,7 +233,7 @@ pipeline {
         /bin/bash iam-test-client/docker/push-prod-image.sh
         '''
         script {
-          if (env.BRANCH_NAME == 'master') {
+          if (env.BRANCH_NAME == 'master' || params.PUSH_TO_DOCKERHUB ) {
             sh '''
             sed -i -e 's#iam\\.version#IAM_VERSION#' iam-login-service/target/classes/iam.version.properties
             source iam-login-service/target/classes/iam.version.properties
