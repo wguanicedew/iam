@@ -1,10 +1,57 @@
 # Changelog
 
-## 1.5.0 (TBD)
+## 1.5.0 (???)
+
+### Added
+
+- It is now possible to configure multiple external OpenID Connect providers
+  (#229)
+
+- IAM now supports group managers (#231). Group managers can approve group
+  membership requests.
 
 - Real support for login hint on authorization requests: this feature allows a
   relying party to specify a preference on which external SAML IdP should be
   used for authentication (#230)
+
+- Improved scalability on user and group search APIs (#250)
+
+- IAM supports serving static local resources (#288); this support can be used,
+  for instance, to locally serve custom logo images (#275)
+
+- Actuator endpoints can now be secured more effectively, by having dedicated
+  credentials for IAM service deployers (#244)
+
+- It is now possible to configure IAM to include the scope claim in issued
+  access tokens (#289)
+
+- Support for custom local SAML metadata configuration (#273)
+
+- Improved SAML configuration flexibility (#292)
+
+### Fixed
+
+- Stronger validation logic on user-editable account information (#243)
+
+- EduPersonTargetedID SAML attribute is now correctly resolved (#253)
+
+- The token management API now supports sorting (#255)
+
+- Orphaned tokens are now cleanup up from the database (#263)
+
+- A bug that prevented the deployment of the IAM DB on MySQL 5.7 has been
+  resolved (#265)
+
+- Support for the OAuth Device Code flow is now advertised in the IAM OpenID
+  Connect discovery document (#268)
+
+- The device code default expiration is correctly set for dynamically
+  registered clients (#267)
+
+- The `updated_at` user info claim is now correctly encoded as an epoch second
+  (#272)
+
+- IAM now defaults to transient NameID (#291)
 
 
 ## 1.4.0 (2018-05-18)
