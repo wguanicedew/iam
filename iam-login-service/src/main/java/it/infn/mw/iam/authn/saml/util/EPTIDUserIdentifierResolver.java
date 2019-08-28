@@ -96,7 +96,8 @@ public class EPTIDUserIdentifierResolver extends AttributeUserIdentifierResolver
     }
 
     NameID nameId = (NameID) maybeNameId;
-    if (!nameId.getFormat().equals(NameIDType.PERSISTENT)) {
+    
+    if (!isNull(nameId.getFormat()) && !nameId.getFormat().equals(NameIDType.PERSISTENT)) {
       return resolutionFailure(
           format("Attribute '%s:%s' is malformed: resolved NameID is not persistent: %s",
               attribute.getAlias(), attribute.getAttributeName(), nameId.getFormat()));

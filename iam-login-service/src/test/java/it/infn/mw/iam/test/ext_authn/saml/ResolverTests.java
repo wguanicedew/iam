@@ -409,5 +409,31 @@ public class ResolverTests {
     assertThat(result.getResolvedId().get().getUserId(), is("nameid"));
     assertThat(result.getResolvedId().get().getIdpId(), is("entityId"));
   }
+  
+  @Test
+  public void eptidResolutionSuccessNameidWithoutFormatAttribute() {
+    Attribute attribute = mock(Attribute.class);
+    SAMLCredential cred = mock(SAMLCredential.class);
+    XSAny attributeValue = mock(XSAny.class);
+    NameID nameid = mock(NameID.class);
+
+    when(cred.getRemoteEntityID()).thenReturn("entityId");
+    when(cred.getAttribute(Saml2Attribute.EPTID.getAttributeName())).thenReturn(attribute);
+    when(attribute.getAttributeValues()).thenReturn(asList(attributeValue));
+    when(attributeValue.hasChildren()).thenReturn(true);
+    when(attributeValue.getOrderedChildren()).thenReturn(asList(nameid));
+    
+    when(nameid.getValue()).thenReturn("nameid");
+    when(nameid.getNameQualifier()).thenReturn("nameIdNameQualifier");
+    when(nameid.getSPNameQualifier()).thenReturn("nameIdSPNameQualifier");
+
+    SamlUserIdentifierResolver resolver = new EPTIDUserIdentifierResolver();
+    SamlUserIdentifierResolutionResult result = resolver.resolveSamlUserIdentifier(cred);
+
+    assertThat(result.getResolvedId().isPresent(), is(true));
+    assertThat(result.getErrorMessages().isPresent(), is(false));
+    assertThat(result.getResolvedId().get().getUserId(), is("nameid"));
+    assertThat(result.getResolvedId().get().getIdpId(), is("entityId"));
+  }
 
 }
