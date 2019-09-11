@@ -140,5 +140,10 @@ public class AccessTokenEnhancerTests extends EndpointsTestUtils {
     assertThat(token.getJWTClaimsSet().getClaim("organisation_name"), is(nullValue()));
     assertThat(token.getJWTClaimsSet().getClaim("groups"), is(nullValue()));
   }
+  
+  public void accessTokenDoesNotIncludeNbfByDefault() throws Exception {
+    JWT token = JWTParser.parse(getAccessTokenForUser("openid"));
+    assertThat(token.getJWTClaimsSet().getNotBeforeTime(), nullValue());
+  }
 
 }

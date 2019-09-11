@@ -71,6 +71,9 @@ public class OidcTokenEnhancer extends ConnectTokenEnhancer {
   
   @Value("${iam.access_token.include_scope}")
   private Boolean includeScope;
+  
+  @Value("${iam.access_token.include_nbf}")
+  private Boolean includeNbf;
 
   private static final String AUD_KEY = "aud";
   private static final String SCOPE_CLAIM_NAME = "scope";
@@ -126,6 +129,10 @@ public class OidcTokenEnhancer extends ConnectTokenEnhancer {
     if (includeScope && !accessToken.getScope().isEmpty()) {
       final String scopeString = accessToken.getScope().stream().collect(joining(SPACE));
       builder.claim(SCOPE_CLAIM_NAME, scopeString);
+    }
+    
+    if (includeNbf) {
+      builder.notBeforeTime(issueTime);
     }
 
     JWTClaimsSet claims = builder.build();
