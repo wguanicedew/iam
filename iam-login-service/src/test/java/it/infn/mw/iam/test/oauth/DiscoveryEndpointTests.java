@@ -15,6 +15,7 @@
  */
 package it.infn.mw.iam.test.oauth;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -54,7 +55,8 @@ public class DiscoveryEndpointTests {
   private Set<String> iamSupportedGrants = Sets.newLinkedHashSet(Arrays.asList("authorization_code",
       "implicit", "refresh_token", "client_credentials", "password",
       "urn:ietf:params:oauth:grant-type:jwt-bearer", "urn:ietf:params:oauth:grant_type:redelegate",
-      "urn:ietf:params:oauth:grant-type:token-exchange", "urn:ietf:params:oauth:grant-type:device_code"));
+      "urn:ietf:params:oauth:grant-type:token-exchange",
+      "urn:ietf:params:oauth:grant-type:device_code"));
 
   private static final String IAM_ORGANISATION_NAME_CLAIM = "organisation_name";
   private static final String IAM_GROUPS_CLAIM = "groups";
@@ -67,10 +69,8 @@ public class DiscoveryEndpointTests {
 
   @Before
   public void setup() throws Exception {
-    mvc = MockMvcBuilders.webAppContextSetup(context)
-      .apply(springSecurity())
-      .alwaysDo(log())
-      .build();
+    mvc =
+        MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).alwaysDo(log()).build();
   }
 
   @Test
@@ -98,4 +98,14 @@ public class DiscoveryEndpointTests {
         .andExpect(jsonPath("$.claims_supported", hasItem(IAM_EXTERNAL_AUTHN_CLAIM)));
     // @formatter:on
   }
+
+  @Test
+  public void testDeviceCodeEndpoint() throws Exception {
+    // @formatter:off
+    mvc.perform(post(endpoint))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.device_authorization_endpoint", is("http://localhost:8080/devicecode")));
+    // @formatter:on
+  }
+
 }

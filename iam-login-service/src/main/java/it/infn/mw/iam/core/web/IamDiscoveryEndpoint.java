@@ -25,6 +25,7 @@ import org.mitre.discovery.util.WebfingerURLNormalizer;
 import org.mitre.jwt.encryption.service.JWTEncryptionAndDecryptionService;
 import org.mitre.oauth2.model.PKCEAlgorithm;
 import org.mitre.oauth2.service.SystemScopeService;
+import org.mitre.oauth2.web.DeviceEndpoint;
 import org.mitre.oauth2.web.IntrospectionEndpoint;
 import org.mitre.oauth2.web.RevocationEndpoint;
 import org.mitre.openid.connect.config.ConfigurationPropertiesBean;
@@ -392,6 +393,7 @@ public class IamDiscoveryEndpoint {
     m.put("code_challenge_methods_supported",
         Lists.newArrayList(PKCEAlgorithm.plain.getName(), PKCEAlgorithm.S256.getName()));
 
+    m.put("device_authorization_endpoint", baseUrl + DeviceEndpoint.URL);
     model.addAttribute(JsonEntityView.ENTITY, m);
 
     return JsonEntityView.VIEWNAME;
