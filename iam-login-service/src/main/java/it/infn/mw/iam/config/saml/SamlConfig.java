@@ -70,6 +70,7 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.providers.ExpiringUsernameAuthenticationToken;
 import org.springframework.security.saml.SAMLAuthenticationProvider;
 import org.springframework.security.saml.SAMLBootstrap;
 import org.springframework.security.saml.SAMLEntryPoint;
@@ -131,6 +132,7 @@ import it.infn.mw.iam.authn.ExternalAuthenticationFailureHandler;
 import it.infn.mw.iam.authn.ExternalAuthenticationSuccessHandler;
 import it.infn.mw.iam.authn.InactiveAccountAuthenticationHander;
 import it.infn.mw.iam.authn.RootIsDashboardSuccessHandler;
+import it.infn.mw.iam.authn.common.config.AuthenticationValidator;
 import it.infn.mw.iam.authn.saml.CleanInactiveProvisionedAccounts;
 import it.infn.mw.iam.authn.saml.DefaultMappingPropertiesResolver;
 import it.infn.mw.iam.authn.saml.DefaultSAMLUserDetailsService;
@@ -176,6 +178,9 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
 
   @Autowired
   MappingPropertiesResolver mappingResolver;
+
+  @Autowired
+  AuthenticationValidator<ExpiringUsernameAuthenticationToken> validator;
 
   @Autowired
   IamAccountRepository repo;
@@ -374,10 +379,11 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
   @Bean
   public SAMLAuthenticationProvider samlAuthenticationProvider(SamlUserIdentifierResolver resolver,
       IamAccountRepository accountRepo, InactiveAccountAuthenticationHander handler,
-      MappingPropertiesResolver mpResolver) {
+      MappingPropertiesResolver mpResolver,
+      AuthenticationValidator<ExpiringUsernameAuthenticationToken> validator) {
 
     IamSamlAuthenticationProvider samlAuthenticationProvider =
-        new IamSamlAuthenticationProvider(resolver);
+        new IamSamlAuthenticationProvider(resolver, validator);
 
     samlAuthenticationProvider
       .setUserDetails(samlUserDetailsService(resolver, accountRepo, handler, mpResolver));
@@ -827,8 +833,8 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
 
   @Override
   protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-    auth.authenticationProvider(
-        samlAuthenticationProvider(resolver, repo, inactiveAccountHandler, mappingResolver));
+    auth.authenticationProvider(samlAuthenticationProvider(resolver, repo, inactiveAccountHandler,
+        mappingResolver, validator));
   }
 
   private void scheduleMetadataLookupServiceRefresh(ScheduledTaskRegistrar taskRegistrar) {

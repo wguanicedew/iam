@@ -20,18 +20,45 @@ import java.util.concurrent.TimeUnit;
 
 import javax.validation.Valid;
 
+import org.hibernate.validator.constraints.NotBlank;
 import org.opensaml.saml2.core.NameIDType;
 import org.opensaml.xml.signature.SignatureConstants;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import com.google.common.collect.Lists;
 
+import it.infn.mw.iam.authn.common.config.ValidatorProperties;
 import it.infn.mw.iam.authn.saml.profile.IamSSOProfileOptions;
 import it.infn.mw.iam.config.login.LoginButtonProperties;
 import it.infn.mw.iam.config.saml.IamSamlJITAccountProvisioningProperties.AttributeMappingProperties;
 
 @ConfigurationProperties(prefix = "saml")
 public class IamSamlProperties {
+  
+  public static class IssuerValidationProperties {
+    
+    @NotBlank
+    String entityId;
+    
+    ValidatorProperties validator;
+
+    public String getEntityId() {
+      return entityId;
+    }
+
+    public void setEntityId(String entityId) {
+      this.entityId = entityId;
+    }
+
+    public ValidatorProperties getValidator() {
+      return validator;
+    }
+
+    public void setValidator(ValidatorProperties validator) {
+      this.validator = validator;
+    }
+  }
+  
   
   public static class RegistrationMappingProperties {
     
@@ -206,6 +233,11 @@ public class IamSamlProperties {
  
   private List<RegistrationMappingProperties> customMapping = Lists.newArrayList();
   
+  private ValidatorProperties defaultValidator;
+  
+  private List<IssuerValidationProperties> validators = Lists.newArrayList();
+  
+  
   public List<IamSamlIdpMetadataProperties> getIdpMetadata() {
     return idpMetadata;
   }
@@ -365,5 +397,21 @@ public class IamSamlProperties {
 
   public void setCustomMapping(List<RegistrationMappingProperties> customMapping) {
     this.customMapping = customMapping;
+  }
+
+  public ValidatorProperties getDefaultValidator() {
+    return defaultValidator;
+  }
+
+  public void setDefaultValidator(ValidatorProperties defaultValidator) {
+    this.defaultValidator = defaultValidator;
+  }
+
+  public List<IssuerValidationProperties> getValidators() {
+    return validators;
+  }
+
+  public void setValidators(List<IssuerValidationProperties> validators) {
+    this.validators = validators;
   }
 }

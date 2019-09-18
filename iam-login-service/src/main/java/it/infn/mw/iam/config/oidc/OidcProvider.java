@@ -23,6 +23,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
+import it.infn.mw.iam.authn.common.config.ValidatorProperties;
 import it.infn.mw.iam.config.login.LoginButtonProperties;
 
 @JsonInclude(Include.NON_EMPTY)
@@ -42,6 +43,9 @@ public class OidcProvider {
   private LoginButtonProperties loginButton;
 
   private boolean enabled = true;
+  
+  @Valid
+  private ValidatorProperties validator;
   
   public String getName() {
     return name;
@@ -81,6 +85,14 @@ public class OidcProvider {
 
   public void setEnabled(boolean enabled) {
     this.enabled = enabled;
+  }
+
+  public ValidatorProperties getValidator() {
+    return validator;
+  }
+
+  public void setValidator(ValidatorProperties validator) {
+    this.validator = validator;
   }
   
 }

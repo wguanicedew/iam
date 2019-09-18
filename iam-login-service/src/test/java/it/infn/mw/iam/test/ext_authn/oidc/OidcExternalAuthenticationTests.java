@@ -22,8 +22,6 @@ import static org.junit.Assert.assertThat;
 
 import java.io.UnsupportedEncodingException;
 
-import org.springframework.transaction.annotation.Transactional;
-
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,6 +34,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
@@ -56,13 +55,12 @@ import it.infn.mw.iam.test.util.oidc.MockRestTemplateFactory;
 @Transactional
 public class OidcExternalAuthenticationTests extends OidcExternalAuthenticationTestsSupport {
 
-
   @Before
   public void setup() {
     MockRestTemplateFactory tf = (MockRestTemplateFactory) restTemplateFactory;
     tf.resetTemplate();
   }
-
+  
   @Test
   public void testOidcUnregisteredUserRedirectedToRegisterPage() throws JOSEException,
       JsonProcessingException, RestClientException, UnsupportedEncodingException {
@@ -167,9 +165,6 @@ public class OidcExternalAuthenticationTests extends OidcExternalAuthenticationT
     assertThat(response.getStatusCode(), equalTo(HttpStatus.FOUND));
     assertNotNull(response.getHeaders().getLocation());
     assertThat(response.getHeaders().getLocation().toString(), Matchers.startsWith(loginPageURL()));
-
-
-
   }
 
 }
