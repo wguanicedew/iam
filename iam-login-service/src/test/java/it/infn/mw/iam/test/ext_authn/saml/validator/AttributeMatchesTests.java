@@ -17,6 +17,7 @@ package it.infn.mw.iam.test.ext_authn.saml.validator;
 
 import static it.infn.mw.iam.authn.saml.validator.check.SamlAttributeValueRegexpMatch.attrValueMatches;
 import static java.lang.String.format;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
@@ -36,7 +37,7 @@ public class AttributeMatchesTests extends SamlValidatorTestSupport {
     ValidatorResult result = attrValueMatches(ENTITLEMENT_ATTR_NAME, ".*").validate(credential);
     assertThat(result.isFailure(), is(true));
     assertThat(result.hasMessage(), is(true));
-    assertThat(result.getMessage(), is(format("Attribute '%s' not found", ENTITLEMENT_ATTR_NAME)));
+    assertThat(result.getMessage(), containsString((format("Attribute '%s' not found", ENTITLEMENT_ATTR_NAME))));
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -91,7 +92,7 @@ public class AttributeMatchesTests extends SamlValidatorTestSupport {
 
     assertThat(result.isFailure(), is(true));
     assertThat(result.hasMessage(), is(true));
-    assertThat(result.getMessage(), is(format("No attribute '%s' value found matching regexp: '%s'",
+    assertThat(result.getMessage(), containsString(format("No attribute '%s' value found matching regexp: '%s'",
         ENTITLEMENT_ATTR_NAME, "wont_match")));
   }
 

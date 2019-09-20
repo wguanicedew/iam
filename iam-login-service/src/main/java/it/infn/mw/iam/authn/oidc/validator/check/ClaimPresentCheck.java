@@ -27,37 +27,42 @@ import java.text.ParseException;
 
 import com.nimbusds.jwt.JWT;
 
-import it.infn.mw.iam.authn.common.ValidatorCheck;
+import it.infn.mw.iam.authn.common.BaseValidatorCheck;
 import it.infn.mw.iam.authn.common.ValidatorResult;
 
-public class ClaimPresentCheck implements ValidatorCheck<JWT>{
+public class ClaimPresentCheck extends BaseValidatorCheck<JWT> {
 
   final String claimName;
-  
-  private ClaimPresentCheck(String claimName) {
+
+  private ClaimPresentCheck(String claimName, String message) {
+    super(message);
     this.claimName = claimName;
   }
 
   @Override
   public ValidatorResult validate(JWT jwt) {
-    
+
     try {
       Object claimValue = jwt.getJWTClaimsSet().getClaim(claimName);
-      
+
       if (isNull(claimValue)) {
-        return failure(format("Claim '%s' not found", claimName));
+        return handleFailure(failure(format("Claim '%s' not found", claimName)));
       }
-      
+
       return success();
-      
+
     } catch (ParseException e) {
       return error(format("JWT parse error: %s", e.getMessage()));
     }
   }
-  
+
   public static ClaimPresentCheck hasClaim(String claimName) {
+    return hasClaim(claimName, null);
+  }
+
+  public static ClaimPresentCheck hasClaim(String claimName, String message) {
     checkArgument(!isNullOrEmpty(claimName), "claimName must not be null or empty");
-    return new ClaimPresentCheck(claimName);
+    return new ClaimPresentCheck(claimName, message);
   }
 
 }

@@ -15,9 +15,12 @@
  */
 package it.infn.mw.iam.authn.common;
 
-public class Fail<T> implements ValidatorCheck<T> {
-  
+public class Fail<T> extends BaseValidatorCheck<T> {
   public static final String FAILURE_MSG = "always fails";
+  
+  public Fail() {
+    super(FAILURE_MSG);
+  }  
 
   @Override
   public ValidatorResult validate(T credential) {

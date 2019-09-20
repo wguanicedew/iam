@@ -25,14 +25,16 @@ import static java.util.Objects.isNull;
 import org.opensaml.saml2.core.Attribute;
 import org.springframework.security.saml.SAMLCredential;
 
+import it.infn.mw.iam.authn.common.BaseValidatorCheck;
 import it.infn.mw.iam.authn.common.ValidatorCheck;
 import it.infn.mw.iam.authn.common.ValidatorResult;
 
-public class SamlHasAttributeCheck implements ValidatorCheck<SAMLCredential> {
+public class SamlHasAttributeCheck extends BaseValidatorCheck<SAMLCredential> {
 
   private final String attributeName;
 
-  private SamlHasAttributeCheck(String attributeOid) {
+  private SamlHasAttributeCheck(String attributeOid, String message) {
+    super(message);
     this.attributeName = attributeOid;
   }
 
@@ -40,14 +42,18 @@ public class SamlHasAttributeCheck implements ValidatorCheck<SAMLCredential> {
   public ValidatorResult validate(SAMLCredential credential) {
     Attribute attribute = credential.getAttribute(attributeName);
     if (isNull(attribute)) {
-      return failure(format("Attribute '%s' not found", attributeName));
+      return handleFailure(failure(format("Attribute '%s' not found", attributeName)));
     }
     return success();
   }
 
-  public static ValidatorCheck<SAMLCredential> hasAttribute(String attributeName) {
+  public static ValidatorCheck<SAMLCredential> hasAttribute(String attributeName, String message) {
     checkArgument(!isNullOrEmpty(attributeName), "attributeName must be non-null and not empty");
-    return new SamlHasAttributeCheck(attributeName);
+    return new SamlHasAttributeCheck(attributeName, message);
+  }
+  
+  public static ValidatorCheck<SAMLCredential> hasAttribute(String attributeName) {
+    return hasAttribute(attributeName, null);
   }
 
 }

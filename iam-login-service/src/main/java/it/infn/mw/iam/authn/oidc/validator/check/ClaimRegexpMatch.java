@@ -31,17 +31,18 @@ import org.slf4j.LoggerFactory;
 
 import com.nimbusds.jwt.JWT;
 
-import it.infn.mw.iam.authn.common.ValidatorCheck;
+import it.infn.mw.iam.authn.common.BaseValidatorCheck;
 import it.infn.mw.iam.authn.common.ValidatorResult;
 
-public class ClaimRegexpMatch implements ValidatorCheck<JWT> {
+public class ClaimRegexpMatch extends BaseValidatorCheck<JWT> {
   public static final Logger LOG = LoggerFactory.getLogger(ClaimRegexpMatch.class);
 
   private final String claimName;
   private final String regexp;
   private final Pattern pattern;
 
-  private ClaimRegexpMatch(String claimName, String regexp) {
+  private ClaimRegexpMatch(String claimName, String regexp, String message) {
+    super(message);
     this.claimName = claimName;
     this.regexp = regexp;
     this.pattern = Pattern.compile(regexp);
@@ -54,7 +55,7 @@ public class ClaimRegexpMatch implements ValidatorCheck<JWT> {
     } else {
       final String noMatchMessage =
           format("Claim '%s' value '%s' does not match regexp: '%s'", claimName, claimValue, regexp);
-      return failure(noMatchMessage);
+      return handleFailure(failure(noMatchMessage));
     }
   }
 
@@ -65,7 +66,7 @@ public class ClaimRegexpMatch implements ValidatorCheck<JWT> {
       }
     }
 
-    return failure(format("No claim '%s' value found matching regexp: '%s'", claimName, regexp));
+    return handleFailure(failure(format("No claim '%s' value found matching regexp: '%s'", claimName, regexp)));
   }
 
   @Override
@@ -75,7 +76,7 @@ public class ClaimRegexpMatch implements ValidatorCheck<JWT> {
       Object claimValue = idToken.getJWTClaimsSet().getClaim(claimName);
 
       if (isNull(claimValue)) {
-        return failure(format("Claim '%s' not found", claimName));
+        return handleFailure(failure(format("Claim '%s' not found", claimName)));
       }
 
       if (claimValue instanceof String) {
@@ -83,8 +84,8 @@ public class ClaimRegexpMatch implements ValidatorCheck<JWT> {
       } else if (claimValue instanceof String[]) {
         return handleStringArrayValue((String[]) claimValue);
       } else {
-        return failure(
-            format("Claim '%s' cannot be extracted as a string or string array", claimName));
+        return handleFailure(failure(
+            format("Claim '%s' cannot be extracted as a string or string array", claimName)));
       }
     } catch (ParseException e) {
       return error(format("JWT parse error: %s", e.getMessage()));
@@ -93,8 +94,11 @@ public class ClaimRegexpMatch implements ValidatorCheck<JWT> {
   }
 
   public static ClaimRegexpMatch claimMatches(String claimName, String regexp) {
+    return claimMatches(claimName, regexp, null);
+  }
+  public static ClaimRegexpMatch claimMatches(String claimName, String regexp, String message) {
     checkArgument(!isNullOrEmpty(claimName), "claimName must not be null or empty");
     checkArgument(!isNullOrEmpty(regexp), "regexp must not be null or empty");
-    return new ClaimRegexpMatch(claimName, regexp);
+    return new ClaimRegexpMatch(claimName, regexp, message);
   }
 }

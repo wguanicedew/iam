@@ -15,8 +15,8 @@
  */
 package it.infn.mw.iam.test.ext_authn.oidc.validator;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -46,7 +46,7 @@ public class ClaimRegexpMatchTests extends JWTTestSupport {
 
     ValidatorResult result = check.validate(jwt);
     assertThat(result.isFailure(), is(true));
-    assertThat(result.getMessage(), startsWith("Claim 'entitlement' not found"));
+    assertThat(result.getMessage(), containsString("Claim 'entitlement' not found"));
   }
 
   @Test
@@ -74,7 +74,7 @@ public class ClaimRegexpMatchTests extends JWTTestSupport {
     ValidatorResult result = check.validate(jwt);
     assertThat(result.isFailure(), is(true));
     assertThat(result.getMessage(),
-        is("Claim 'entitlement' value 'sheriff' does not match regexp: 'general|president'"));
+        containsString("Claim 'entitlement' value 'sheriff' does not match regexp: 'general|president'"));
   }
 
   @Test
@@ -118,7 +118,7 @@ public class ClaimRegexpMatchTests extends JWTTestSupport {
     ValidatorResult result = check.validate(jwt);
     assertThat(result.isFailure(), is(true));
     assertThat(result.getMessage(),
-        is("No claim 'array_claim' value found matching regexp: 'ciccio'"));
+        containsString("No claim 'array_claim' value found matching regexp: 'ciccio'"));
 
   }
   

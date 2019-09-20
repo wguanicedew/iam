@@ -15,42 +15,18 @@
  */
 package it.infn.mw.iam.authn.common;
 
-import static it.infn.mw.iam.authn.common.ValidatorResult.failure;
-import static java.lang.String.format;
-import static java.util.Objects.nonNull;
-
 import java.util.List;
 
-public abstract class CompositeValidatorCheck<T> implements ValidatorCheck<T> {
+public abstract class CompositeValidatorCheck<T> extends BaseValidatorCheck<T> {
 
   private final List<ValidatorCheck<T>> checks;
-  private final String message;
 
   protected CompositeValidatorCheck(List<ValidatorCheck<T>> checks, String message) {
+    super(message);
     this.checks = checks;
-    this.message = message;
-  }
-
-  protected ValidatorResult handleFailure(ValidatorResult result) {
-    if (result.isError()) {
-      return result;
-    }
-    if (hasMessage()) {
-      return failure(message);
-    } else {
-      return ValidatorResult.failure(format("Validation error: %s", result.getMessage()));
-    }
-  }
-
-  public boolean hasMessage() {
-    return nonNull(message);
   }
 
   public List<ValidatorCheck<T>> getChecks() {
     return checks;
-  }
-  
-  public String getMessage() {
-    return message;
   }
 }

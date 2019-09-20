@@ -72,23 +72,26 @@ public class DefaultValidatorConfigParser implements ValidatorConfigParser {
   }
 
   protected ValidatorCheck<?> hasAttr(ValidatorProperties p) {
-    return hasAttribute(p.getRequiredNonEmptyParam("attributeName"));
+    return hasAttribute(p.getRequiredNonEmptyParam("attributeName"), p.getOptionalParam("message"));
   }
-  
+
   protected ValidatorCheck<?> hasClaim(ValidatorProperties p) {
-    return ClaimPresentCheck.hasClaim(p.getRequiredNonEmptyParam("claimName"));
+    return ClaimPresentCheck.hasClaim(p.getRequiredNonEmptyParam("claimName"),
+        p.getOptionalParam("message"));
   }
-  
-  protected ValidatorCheck<?> claimValueMatches(ValidatorProperties p){
-    return ClaimRegexpMatch.claimMatches(p.getRequiredNonEmptyParam("claimName"), 
-        p.getRequiredNonEmptyParam("regexp"));
+
+  protected ValidatorCheck<?> claimValueMatches(ValidatorProperties p) {
+    return ClaimRegexpMatch.claimMatches(p.getRequiredNonEmptyParam("claimName"),
+        p.getRequiredNonEmptyParam("regexp"), p.getOptionalParam("message"));
   }
 
   protected ValidatorCheck<?> attrValueMatches(ValidatorProperties p) {
     return SamlAttributeValueRegexpMatch.attrValueMatches(
-        p.getRequiredNonEmptyParam("attributeName"), p.getRequiredNonEmptyParam("regexp"));
+        p.getRequiredNonEmptyParam("attributeName"), p.getRequiredNonEmptyParam("regexp"),
+        p.getOptionalParam("message"));
   }
-  
+
+  @SuppressWarnings("unchecked")
   @Override
   public ValidatorCheck<?> parseValidatorProperties(ValidatorProperties p) {
     try {
@@ -117,7 +120,7 @@ public class DefaultValidatorConfigParser implements ValidatorConfigParser {
       } else if ("false".equals(p.getKind())) {
         return new Fail<>();
       }
-      
+
       throw new IllegalArgumentException("Known but unsupported kind: " + p.getKind());
 
     } catch (IllegalArgumentException e) {

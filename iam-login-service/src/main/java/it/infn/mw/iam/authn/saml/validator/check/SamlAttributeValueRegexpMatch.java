@@ -27,17 +27,19 @@ import java.util.regex.Pattern;
 import org.opensaml.saml2.core.Attribute;
 import org.springframework.security.saml.SAMLCredential;
 
+import it.infn.mw.iam.authn.common.BaseValidatorCheck;
 import it.infn.mw.iam.authn.common.ValidatorCheck;
 import it.infn.mw.iam.authn.common.ValidatorResult;
 
-public class SamlAttributeValueRegexpMatch implements ValidatorCheck<SAMLCredential> {
+public class SamlAttributeValueRegexpMatch extends BaseValidatorCheck<SAMLCredential> {
 
   private final String attributeName;
   private final String regexp;
   private final Pattern pattern;
 
 
-  private SamlAttributeValueRegexpMatch(String attributeName, String regexp) {
+  private SamlAttributeValueRegexpMatch(String attributeName, String regexp, String message) {
+    super(message);
     this.attributeName = attributeName;
     this.regexp = regexp;
     this.pattern = compile(regexp);
@@ -48,7 +50,7 @@ public class SamlAttributeValueRegexpMatch implements ValidatorCheck<SAMLCredent
     Attribute attr = credential.getAttribute(attributeName);
 
     if (isNull(attr)) {
-      return failure(format("Attribute '%s' not found", attributeName));
+      return handleFailure(failure(format("Attribute '%s' not found", attributeName)));
     }
 
     String[] values = credential.getAttributeAsStringArray(attributeName);
@@ -59,16 +61,21 @@ public class SamlAttributeValueRegexpMatch implements ValidatorCheck<SAMLCredent
       }
     }
 
-    return failure(
-        format("No attribute '%s' value found matching regexp: '%s'", attributeName, regexp));
+    return handleFailure(failure(
+        format("No attribute '%s' value found matching regexp: '%s'", attributeName, regexp)));
 
   }
 
   public static ValidatorCheck<SAMLCredential> attrValueMatches(String attributeName,
       String regexp) {
+    return attrValueMatches(attributeName, regexp, null);
+  }
+  
+  public static ValidatorCheck<SAMLCredential> attrValueMatches(String attributeName,
+      String regexp, String message) {
     checkArgument(!isNullOrEmpty(attributeName), "attributeName must not be null or empty");
     checkArgument(!isNullOrEmpty(regexp), "regexp must not be null or empty");
-    return new SamlAttributeValueRegexpMatch(attributeName, regexp);
+    return new SamlAttributeValueRegexpMatch(attributeName, regexp, message);
   }
 
 
