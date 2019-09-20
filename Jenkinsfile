@@ -76,7 +76,10 @@ pipeline {
           when{
             allOf {
               not {
-                expression{ return params.SONAR_ANALYSIS }
+                anyOf {
+                  triggeredBy 'TimerTrigger'
+                  expression{ return params.SONAR_ANALYSIS }
+                }
               }
               not {
                 expression{ return params.SKIP_TESTS }
@@ -104,7 +107,10 @@ pipeline {
           when{
             allOf{
               expression{ env.CHANGE_URL != ''}
-              expression{ return params.SONAR_ANALYSIS }
+              anyOf {
+                triggeredBy 'TimerTrigger'
+                expression{ return params.SONAR_ANALYSIS }
+              }
             }
           }
           steps {
@@ -149,7 +155,10 @@ pipeline {
           when{
             allOf{
               expression{ env.CHANGE_URL == ''}
-              expression{ return params.SONAR_ANALYSIS }
+              anyOf {
+                triggeredBy 'TimerTrigger'
+                expression{ return params.SONAR_ANALYSIS }
+              }
             }
           }
 
@@ -185,7 +194,10 @@ pipeline {
         stage('quality-gate') {
 
           when{
-            expression{ return params.SONAR_ANALYSIS }
+            anyOf {
+              triggeredBy 'TimerTrigger'
+              expression{ return params.SONAR_ANALYSIS }
+            }
           }
 
           steps {
