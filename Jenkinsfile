@@ -103,7 +103,7 @@ pipeline {
           post {
             always {
               script {
-                maybeArchiveJUnitReports
+                maybeArchiveJUnitReports()
               }
             }
             unsuccessful {
@@ -151,7 +151,7 @@ pipeline {
           post {
             always {
               script {
-                maybeArchiveJUnitReports
+                maybeArchiveJUnitReports()
               }
             }
             unsuccessful {
@@ -193,7 +193,7 @@ pipeline {
           post {
             always {
               script {
-                maybeArchiveJUnitReports
+                maybeArchiveJUnitReports()
               }
             }
             unsuccessful {
