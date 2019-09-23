@@ -1,6 +1,15 @@
 #!/usr/bin/env groovy
 @Library('sd')_
+
 def kubeLabel = getKubeLabel()
+
+def maybeArchiveJUnitReports(){
+  def hasJunitReports = fileExists 'iam-login-service/target/surefire-reports'
+  if (hasJunitReports) {
+    junit '**/target/surefire-reports/TEST-*.xml'
+    step( [ $class: 'JacocoPublisher' ] )
+  }
+}
 
 pipeline {
 
@@ -94,11 +103,7 @@ pipeline {
           post {
             always {
               script {
-                def hasJunitReports = fileExists 'iam-login-service/target/surefire-reports'
-                if (hasJunitReports) {
-                  junit '**/target/surefire-reports/TEST-*.xml'
-                  step( [ $class: 'JacocoPublisher' ] )
-                }
+                maybeArchiveJUnitReports
               }
             }
             unsuccessful {
@@ -145,8 +150,9 @@ pipeline {
 
           post {
             always {
-              junit '**/target/surefire-reports/TEST-*.xml'
-              step( [ $class: 'JacocoPublisher' ] )
+              script {
+                maybeArchiveJUnitReports
+              }
             }
             unsuccessful {
               archiveArtifacts artifacts:'**/**/*.dump'
@@ -186,8 +192,9 @@ pipeline {
           }
           post {
             always {
-              junit '**/target/surefire-reports/TEST-*.xml'
-                step( [ $class: 'JacocoPublisher' ] )
+              script {
+                maybeArchiveJUnitReports
+              }
             }
             unsuccessful {
               archiveArtifacts artifacts:'**/**/*.dump'
