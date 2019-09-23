@@ -92,11 +92,13 @@ pipeline {
           }
 
           post {
-            always {
+            success {
               junit '**/target/surefire-reports/TEST-*.xml'
               step( [ $class: 'JacocoPublisher' ] )
             }
             unsuccessful {
+              junit '**/target/surefire-reports/TEST-*.xml'
+              step( [ $class: 'JacocoPublisher' ] )
               archiveArtifacts artifacts:'**/**/*.dump'
               archiveArtifacts artifacts:'**/**/*.dumpstream'
             }
