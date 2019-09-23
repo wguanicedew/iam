@@ -92,13 +92,16 @@ pipeline {
           }
 
           post {
-            success {
-              junit '**/target/surefire-reports/TEST-*.xml'
-              step( [ $class: 'JacocoPublisher' ] )
+            always {
+              script {
+                def hasJunitReports = fileExists 'iam-login-service/target/surefire-reports'
+                if (hasJunitReports) {
+                  junit '**/target/surefire-reports/TEST-*.xml'
+                  step( [ $class: 'JacocoPublisher' ] )
+                }
+              }
             }
             unsuccessful {
-              junit '**/target/surefire-reports/TEST-*.xml'
-              step( [ $class: 'JacocoPublisher' ] )
               archiveArtifacts artifacts:'**/**/*.dump'
               archiveArtifacts artifacts:'**/**/*.dumpstream'
             }
