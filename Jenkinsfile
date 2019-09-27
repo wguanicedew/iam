@@ -103,6 +103,7 @@ pipeline {
           post {
             always {
               script {
+                sh 'echo post test'
                 maybeArchiveJUnitReports()
               }
             }
@@ -151,6 +152,7 @@ pipeline {
           post {
             always {
               script {
+                sh 'echo post PR analysis'
                 maybeArchiveJUnitReports()
               }
             }
@@ -193,6 +195,7 @@ pipeline {
           post {
             always {
               script {
+                sh 'echo post analysis'
                 maybeArchiveJUnitReports()
               }
             }
