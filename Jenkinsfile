@@ -117,7 +117,7 @@ pipeline {
         stage('PR analysis'){
           when{
             allOf{
-              expression{ env.CHANGE_URL != ''}
+              expression{ env.CHANGE_URL }
               anyOf {
                 triggeredBy 'TimerTrigger'
                 expression{ return params.SONAR_ANALYSIS }
@@ -152,7 +152,6 @@ pipeline {
           post {
             always {
               script {
-                sh 'echo post PR analysis'
                 maybeArchiveJUnitReports()
               }
             }
@@ -167,7 +166,7 @@ pipeline {
 
           when{
             allOf{
-              expression{ env.CHANGE_URL == ''}
+              expression{ !env.CHANGE_URL }
               anyOf {
                 triggeredBy 'TimerTrigger'
                 expression{ return params.SONAR_ANALYSIS }
