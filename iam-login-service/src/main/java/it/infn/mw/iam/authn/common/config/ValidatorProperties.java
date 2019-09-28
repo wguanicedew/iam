@@ -39,8 +39,6 @@ public class ValidatorProperties {
 
   private List<ValidatorProperties> childrens = Lists.newArrayList();
 
-  public ValidatorProperties() {}
-
   public String getKind() {
     return kind;
   }

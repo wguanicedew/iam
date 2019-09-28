@@ -40,8 +40,13 @@ import it.infn.mw.iam.authn.saml.validator.check.SamlAttributeValueRegexpMatch;
 
 @Component
 public class DefaultValidatorConfigParser implements ValidatorConfigParser {
+  
+  public static final String MESSAGE_PARAM = "message";
+  public static final String ATTRIBUTE_NAME_PARAM = "attributeName";
+  public static final String CLAIM_NAME_PARAM = "claimName";
+  public static final String REGEXP_PARAM = "regexp";
 
-  private final Set<String> KIND = ImmutableSet.of("or", "and", "not", "hasAttr",
+  private static final Set<String> KIND = ImmutableSet.of("or", "and", "not", "hasAttr",
       "attrValueMatches", "hasClaim", "claimValueMatches", "true", "false");
 
   @SuppressWarnings({"unchecked", "rawtypes"})
@@ -49,7 +54,7 @@ public class DefaultValidatorConfigParser implements ValidatorConfigParser {
     p.requireChildren();
     List<ValidatorCheck<?>> checks =
         p.getChildrens().stream().map(this::parseValidatorProperties).collect(Collectors.toList());
-    return new Disjunction(checks, p.getOptionalParam("message"));
+    return new Disjunction(checks, p.getOptionalParam(MESSAGE_PARAM));
 
   }
 
@@ -59,7 +64,7 @@ public class DefaultValidatorConfigParser implements ValidatorConfigParser {
     List<ValidatorCheck<?>> checks =
         p.getChildrens().stream().map(this::parseValidatorProperties).collect(Collectors.toList());
 
-    return new Conjunction(checks, p.getOptionalParam("message"));
+    return new Conjunction(checks, p.getOptionalParam(MESSAGE_PARAM));
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
@@ -68,27 +73,27 @@ public class DefaultValidatorConfigParser implements ValidatorConfigParser {
     List<ValidatorCheck<?>> checks =
         p.getChildrens().stream().map(this::parseValidatorProperties).collect(Collectors.toList());
 
-    return new Negation(checks, p.getOptionalParam("message"));
+    return new Negation(checks, p.getOptionalParam(MESSAGE_PARAM));
   }
 
   protected ValidatorCheck<?> hasAttr(ValidatorProperties p) {
-    return hasAttribute(p.getRequiredNonEmptyParam("attributeName"), p.getOptionalParam("message"));
+    return hasAttribute(p.getRequiredNonEmptyParam(ATTRIBUTE_NAME_PARAM), p.getOptionalParam(MESSAGE_PARAM));
   }
 
   protected ValidatorCheck<?> hasClaim(ValidatorProperties p) {
-    return ClaimPresentCheck.hasClaim(p.getRequiredNonEmptyParam("claimName"),
-        p.getOptionalParam("message"));
+    return ClaimPresentCheck.hasClaim(p.getRequiredNonEmptyParam(CLAIM_NAME_PARAM),
+        p.getOptionalParam(MESSAGE_PARAM));
   }
 
   protected ValidatorCheck<?> claimValueMatches(ValidatorProperties p) {
-    return ClaimRegexpMatch.claimMatches(p.getRequiredNonEmptyParam("claimName"),
-        p.getRequiredNonEmptyParam("regexp"), p.getOptionalParam("message"));
+    return ClaimRegexpMatch.claimMatches(p.getRequiredNonEmptyParam(CLAIM_NAME_PARAM),
+        p.getRequiredNonEmptyParam(REGEXP_PARAM), p.getOptionalParam(MESSAGE_PARAM));
   }
 
   protected ValidatorCheck<?> attrValueMatches(ValidatorProperties p) {
     return SamlAttributeValueRegexpMatch.attrValueMatches(
-        p.getRequiredNonEmptyParam("attributeName"), p.getRequiredNonEmptyParam("regexp"),
-        p.getOptionalParam("message"));
+        p.getRequiredNonEmptyParam(ATTRIBUTE_NAME_PARAM), p.getRequiredNonEmptyParam(REGEXP_PARAM),
+        p.getOptionalParam(MESSAGE_PARAM));
   }
 
   @SuppressWarnings("unchecked")

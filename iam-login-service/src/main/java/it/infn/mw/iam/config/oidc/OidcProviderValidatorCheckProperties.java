@@ -25,13 +25,8 @@ public class OidcProviderValidatorCheckProperties {
 
   @NotBlank
   String kind;
-  
-  
+
   Map<String, String> params = Maps.newHashMap();
-  
-  public OidcProviderValidatorCheckProperties() {
-    
-  }
 
   public String getKind() {
     return kind;
