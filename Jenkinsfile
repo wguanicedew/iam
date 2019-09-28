@@ -24,7 +24,6 @@ pipeline {
   }
 
   parameters {
-    booleanParam(name: 'SONAR_ANALYSIS', defaultValue: false, description: 'Run Sonar Analsysis')
     booleanParam(name: 'SKIP_TESTS', defaultValue: false, description: 'Skip tests')
     booleanParam(name: 'SKIP_DOCKER', defaultValue: false, description: 'Skip docker image creation')
     booleanParam(name: 'PUSH_TO_DOCKERHUB', defaultValue: false, description: 'Push to Dockerhub')
@@ -81,46 +80,12 @@ pipeline {
           }
         }
 
-        stage('test') {
-          when{
-            allOf {
-              not {
-                anyOf {
-                  triggeredBy 'TimerTrigger'
-                  expression{ return params.SONAR_ANALYSIS }
-                }
-              }
-              not {
-                expression{ return params.SKIP_TESTS }
-              }
-            }
-          }
-
-          steps {
-            sh 'mvn test'
-          }
-
-          post {
-            always {
-              script {
-                sh 'echo post test'
-                maybeArchiveJUnitReports()
-              }
-            }
-            unsuccessful {
-              archiveArtifacts artifacts:'**/**/*.dump'
-              archiveArtifacts artifacts:'**/**/*.dumpstream'
-            }
-          }
-        }
-
         stage('PR analysis'){
           when{
             allOf{
               expression{ env.CHANGE_URL }
-              anyOf {
-                triggeredBy 'TimerTrigger'
-                expression{ return params.SONAR_ANALYSIS }
+              not {
+                expression { return params.SKIP_TESTS }
               }
             }
           }
@@ -167,9 +132,8 @@ pipeline {
           when{
             allOf{
               expression{ !env.CHANGE_URL }
-              anyOf {
-                triggeredBy 'TimerTrigger'
-                expression{ return params.SONAR_ANALYSIS }
+              not {
+                expression { return params.SKIP_TESTS }
               }
             }
           }
@@ -208,9 +172,8 @@ pipeline {
         stage('quality-gate') {
 
           when{
-            anyOf {
-              triggeredBy 'TimerTrigger'
-              expression{ return params.SONAR_ANALYSIS }
+            not {
+              expression { return params.SKIP_TESTS }
             }
           }
 
