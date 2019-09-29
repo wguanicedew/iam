@@ -51,6 +51,12 @@ iam:
   issuer: ${IAM_ISSUER:http://${iam.host}:8080}
   topbarTitle: ${IAM_TOPBAR_TITLE:INDIGO IAM for ${iam.organisation.name}}
   
+  jwk:
+    keystore-location: ${IAM_KEY_STORE_LOCATION:classpath:keystore.jwks}
+    
+  jwt-profile:
+    default-profile: ${IAM_JWT_DEFAULT_PROFILE:iam}
+  
   logo:
     url: ${IAM_LOGO_URL:resources/images/indigo-logo.png}
     dimension: ${IAM_LOGO_DIMENSION:200}
@@ -63,8 +69,6 @@ iam:
 
   organisation:
     name: ${IAM_ORGANISATION_NAME:indigo-dc}
-
-  keyStoreLocation: ${IAM_KEY_STORE_LOCATION:classpath:keystore.jwks}
   
   privacyPolicy:
     url: ${IAM_PRIVACY_POLICY_URL:}

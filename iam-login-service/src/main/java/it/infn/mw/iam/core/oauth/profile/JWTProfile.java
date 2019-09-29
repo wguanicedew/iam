@@ -17,6 +17,8 @@ package it.infn.mw.iam.core.oauth.profile;
 
 public interface JWTProfile {
   
+  String name();
+  
   JWTAccessTokenBuilder getAccessTokenBuilder();
   
   IDTokenCustomizer getIDTokenCustomizer();

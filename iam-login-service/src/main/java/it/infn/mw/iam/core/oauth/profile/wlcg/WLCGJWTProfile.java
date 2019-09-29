@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.core.oauth.profile.iam;
+package it.infn.mw.iam.core.oauth.profile.wlcg;
 
 import it.infn.mw.iam.core.oauth.profile.IDTokenCustomizer;
 import it.infn.mw.iam.core.oauth.profile.IntrospectionResultHelper;
@@ -21,46 +21,32 @@ import it.infn.mw.iam.core.oauth.profile.JWTAccessTokenBuilder;
 import it.infn.mw.iam.core.oauth.profile.JWTProfile;
 import it.infn.mw.iam.core.oauth.profile.UserInfoHelper;
 
-public class IamJWTProfile implements JWTProfile {
-
-  public static final String PROFILE_NAME = "IAM JWT profile";
+public class WLCGJWTProfile implements JWTProfile {
   
-  private final JWTAccessTokenBuilder accessTokenBuilder;
-  private final IDTokenCustomizer idTokenCustomizer;
-  private final UserInfoHelper userInfoHelper;
-  private final IntrospectionResultHelper introspectionHelper;
+  public static final String PROFILE_NAME = "WLCG JWT profile v1.0";
 
-  public IamJWTProfile(JWTAccessTokenBuilder accessTokenBuilder, IDTokenCustomizer idTokenBuilder,
-      UserInfoHelper userInfoHelper, IntrospectionResultHelper introspectionHelper) {
-    this.accessTokenBuilder = accessTokenBuilder;
-    this.idTokenCustomizer = idTokenBuilder;
-    this.userInfoHelper = userInfoHelper;
-    this.introspectionHelper = introspectionHelper;
+  public WLCGJWTProfile() {
   }
-
 
   @Override
   public JWTAccessTokenBuilder getAccessTokenBuilder() {
-    return accessTokenBuilder;
+    return null;
   }
 
   @Override
   public IDTokenCustomizer getIDTokenCustomizer() {
-    return idTokenCustomizer;
+    return null;
   }
-
 
   @Override
   public IntrospectionResultHelper getIntrospectionResultHelper() {
-    return introspectionHelper;
+    return null;
   }
-
 
   @Override
   public UserInfoHelper getUserinfoHelper() {
-    return userInfoHelper;
+    return null;
   }
-
 
   @Override
   public String name() {

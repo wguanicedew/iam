@@ -38,7 +38,7 @@ public class JWKKeystoreLoader {
 
       return keyStore;
     } catch (Exception e) {
-      throw new IAMJWTKeystoreError("Error initializing JWK keystore: " + e.getMessage(), e);
+      throw new IAMJWTKeystoreError("Error initializing JWKProperties keystore: " + e.getMessage(), e);
     }
   }
 

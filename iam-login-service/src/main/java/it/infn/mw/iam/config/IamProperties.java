@@ -24,6 +24,42 @@ import it.infn.mw.iam.config.login.LoginButtonProperties;
 @ConfigurationProperties(prefix = "iam")
 public class IamProperties {
 
+  public static class JWKProperties {
+    String keystoreLocation;
+    String defaultKeyId = "rsa1";   
+    
+    public String getKeystoreLocation() {
+      return keystoreLocation;
+    }
+    
+    public void setKeystoreLocation(String keystoreLocation) {
+      this.keystoreLocation = keystoreLocation;
+    }
+    
+    public String getDefaultKeyId() {
+      return defaultKeyId;
+    }
+  }
+  
+  public static class JWTProfile {
+
+    public enum Profile {
+      IAM,
+      WLCG
+    }
+
+    Profile defaultProfile = Profile.IAM;
+
+    public Profile getDefaultProfile() {
+      return defaultProfile;
+    }
+
+    public void setDefaultProfile(Profile defaultProfile) {
+      this.defaultProfile = defaultProfile;
+    }
+  }
+  
+  
   public static class SuperUser {
     String username;
     String password;
@@ -190,8 +226,6 @@ public class IamProperties {
 
   private String topbarTitle;
 
-  private String keyStoreLocation = "classpath:keystore.jwks";
-
   private boolean enableScopeAuthz = true;
 
   private LocalResources localResources = new LocalResources();
@@ -207,8 +241,12 @@ public class IamProperties {
   private RegistractionAccessToken token = new RegistractionAccessToken();
 
   private PrivacyPolicy privacyPolicy = new PrivacyPolicy();
-  
+
   private SuperUser superuser = new SuperUser();
+  
+  private JWTProfile jwtProfile = new JWTProfile();
+  
+  private JWKProperties jwk = new JWKProperties();
 
   public String getBaseUrl() {
     return baseUrl;
@@ -266,14 +304,6 @@ public class IamProperties {
     this.enableScopeAuthz = enableScopeAuthz;
   }
 
-  public String getKeyStoreLocation() {
-    return keyStoreLocation;
-  }
-
-  public void setKeyStoreLocation(String keyStoreLocation) {
-    this.keyStoreLocation = keyStoreLocation;
-  }
-
   public LoginButtonProperties getLoginButton() {
     return loginButton;
   }
@@ -313,12 +343,28 @@ public class IamProperties {
   public void setToken(RegistractionAccessToken token) {
     this.token = token;
   }
-  
+
   public SuperUser getSuperuser() {
     return superuser;
   }
-  
+
   public void setSuperuser(SuperUser superuser) {
     this.superuser = superuser;
+  }
+  
+  public JWTProfile getJwtProfile() {
+    return jwtProfile;
+  }
+  
+  public void setJwtProfile(JWTProfile jwtProfile) {
+    this.jwtProfile = jwtProfile;
+  }
+  
+  public void setJwk(JWKProperties jwk) {
+    this.jwk = jwk;
+  }
+  
+  public JWKProperties getJwk() {
+    return jwk;
   }
 }

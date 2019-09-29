@@ -66,6 +66,7 @@
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
+      <!-- We need this recent version for a reason I can't remember -->
       <version>2.8.5</version>
     </dependency>
 
