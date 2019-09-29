@@ -13,14 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.authn.oidc;
+package it.infn.mw.iam.core.oauth.profile;
 
-import static it.infn.mw.iam.core.oauth.ClaimValueHelper.ADDITIONAL_CLAIMS;
-import static java.util.stream.Collectors.joining;
-
+import java.time.Clock;
 import java.util.Date;
-import java.util.Set;
-import java.util.UUID;
 
 import org.mitre.oauth2.model.ClientDetailsEntity;
 import org.mitre.oauth2.model.OAuth2AccessTokenEntity;
@@ -30,26 +26,19 @@ import org.mitre.openid.connect.service.OIDCTokenService;
 import org.mitre.openid.connect.service.UserInfoService;
 import org.mitre.openid.connect.token.ConnectTokenEnhancer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.jwt.JWTClaimsSet.Builder;
 import com.nimbusds.jwt.SignedJWT;
 
-import it.infn.mw.iam.core.oauth.ClaimValueHelper;
 import it.infn.mw.iam.core.oauth.scope.IamScopeFilter;
-import it.infn.mw.iam.core.userinfo.IamScopeClaimTranslationService;
-import it.infn.mw.iam.persistence.repository.UserInfoAdapter;
 
-public class OidcTokenEnhancer extends ConnectTokenEnhancer {
+public class IamTokenEnhancer extends ConnectTokenEnhancer {
 
   @Autowired
   private UserInfoService userInfoService;
@@ -61,23 +50,10 @@ public class OidcTokenEnhancer extends ConnectTokenEnhancer {
   private IamScopeFilter scopeFilter;
 
   @Autowired
-  private IamScopeClaimTranslationService scopeClaimConverter;
+  private JWTProfileResolver profileResolver;
 
   @Autowired
-  private ClaimValueHelper claimValueHelper;
-
-  @Value("${iam.access_token.include_authn_info}")
-  private Boolean includeAuthnInfo;
-  
-  @Value("${iam.access_token.include_scope}")
-  private Boolean includeScope;
-  
-  @Value("${iam.access_token.include_nbf}")
-  private Boolean includeNbf;
-
-  private static final String AUD_KEY = "aud";
-  private static final String SCOPE_CLAIM_NAME = "scope";
-  private static final String SPACE = " ";
+  private Clock clock;
 
   private SignedJWT signClaims(JWTClaimsSet claims) {
     JWSAlgorithm signingAlg = getJwtService().getDefaultSigningAlgorithm();
@@ -90,58 +66,6 @@ public class OidcTokenEnhancer extends ConnectTokenEnhancer {
     return signedJWT;
 
   }
-
-  protected OAuth2AccessTokenEntity buildAccessToken(OAuth2AccessToken accessToken,
-      OAuth2Authentication authentication, UserInfo userInfo, Date issueTime) {
-
-    OAuth2AccessTokenEntity token = (OAuth2AccessTokenEntity) accessToken;
-
-    String subject = null;
-
-    if (userInfo == null) {
-      subject = authentication.getName();
-    } else {
-      subject = userInfo.getSub();
-    }
-
-    // @formatter:off
-    Builder builder = 
-        new JWTClaimsSet.Builder()
-          .issuer(getConfigBean().getIssuer())
-          .issueTime(issueTime)
-          .expirationTime(token.getExpiration())
-          .subject(subject)
-          .jwtID(UUID.randomUUID().toString());
-    // @formatter:on
-
-    String audience = (String) authentication.getOAuth2Request().getExtensions().get(AUD_KEY);
-
-    if (!Strings.isNullOrEmpty(audience)) {
-      builder.audience(Lists.newArrayList(audience));
-    }
-
-    if (includeAuthnInfo && userInfo != null) {
-      Set<String> requiredClaims = scopeClaimConverter.getClaimsForScopeSet(token.getScope());
-      requiredClaims.stream().filter(ADDITIONAL_CLAIMS::contains).forEach(c -> builder.claim(c,
-          claimValueHelper.getClaimValueFromUserInfo(c, ((UserInfoAdapter) userInfo).getUserinfo())));
-    }
-    
-    if (includeScope && !accessToken.getScope().isEmpty()) {
-      final String scopeString = accessToken.getScope().stream().collect(joining(SPACE));
-      builder.claim(SCOPE_CLAIM_NAME, scopeString);
-    }
-    
-    if (includeNbf) {
-      builder.notBeforeTime(issueTime);
-    }
-
-    JWTClaimsSet claims = builder.build();
-    token.setJwt(signClaims(claims));
-
-    return token;
-
-  }
-
 
   @Override
   public OAuth2AccessToken enhance(OAuth2AccessToken accessToken,
@@ -157,8 +81,15 @@ public class OidcTokenEnhancer extends ConnectTokenEnhancer {
     scopeFilter.filterScopes(accessToken.getScope(), authentication);
 
     Date issueTime = new Date();
-    OAuth2AccessTokenEntity accessTokenEntity =
-        buildAccessToken(accessToken, authentication, userInfo, issueTime);
+    OAuth2AccessTokenEntity accessTokenEntity = (OAuth2AccessTokenEntity) accessToken;
+
+    JWTProfile profile =
+        profileResolver.resolveProfile(authentication.getOAuth2Request().getClientId());
+    
+    JWTClaimsSet atClaims = profile.getAccessTokenBuilder()
+      .buildAccessToken(accessTokenEntity, authentication, userInfo, clock.instant());
+
+    accessTokenEntity.setJwt(signClaims(atClaims));
 
     /**
      * Authorization request scope MUST include "openid" in OIDC, but access token request may or

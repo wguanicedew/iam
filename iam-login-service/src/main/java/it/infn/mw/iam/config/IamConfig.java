@@ -20,7 +20,10 @@ import java.util.Arrays;
 
 import org.h2.server.web.WebServlet;
 import org.mitre.oauth2.service.IntrospectionResultAssembler;
+import org.mitre.oauth2.service.impl.DefaultIntrospectionResultAssembler;
 import org.mitre.oauth2.service.impl.DefaultOAuth2AuthorizationCodeService;
+import org.mitre.openid.connect.service.ScopeClaimTranslationService;
+import org.mitre.openid.connect.service.UserInfoService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.embedded.FilterRegistrationBean;
 import org.springframework.boot.context.embedded.ServletRegistrationBean;
@@ -36,8 +39,17 @@ import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 
 import it.infn.mw.iam.api.account.AccountUtils;
 import it.infn.mw.iam.api.aup.AUPSignatureCheckService;
-import it.infn.mw.iam.authn.oidc.OidcTokenEnhancer;
+import it.infn.mw.iam.authn.ExternalAuthenticationInfoProcessor;
 import it.infn.mw.iam.core.IamIntrospectionResultAssembler;
+import it.infn.mw.iam.core.oauth.ClaimValueHelper;
+import it.infn.mw.iam.core.oauth.profile.IamTokenEnhancer;
+import it.infn.mw.iam.core.oauth.profile.JWTProfileResolver;
+import it.infn.mw.iam.core.oauth.profile.StaticJWTProfileResolver;
+import it.infn.mw.iam.core.oauth.profile.iam.IamJWTProfile;
+import it.infn.mw.iam.core.oauth.profile.iam.IamJWTProfileAccessTokenBuilder;
+import it.infn.mw.iam.core.oauth.profile.iam.IamJWTProfileIdTokenCustomizer;
+import it.infn.mw.iam.core.oauth.profile.iam.IamJWTProfileTokenIntrospectionHelper;
+import it.infn.mw.iam.core.oauth.profile.iam.IamJWTProfileUserinfoHelper;
 import it.infn.mw.iam.core.web.EnforceAupFilter;
 import it.infn.mw.iam.notification.NotificationProperties;
 import it.infn.mw.iam.notification.service.resolver.AddressResolutionService;
@@ -48,6 +60,7 @@ import it.infn.mw.iam.notification.service.resolver.NotifyAdminAddressStrategy;
 import it.infn.mw.iam.notification.service.resolver.NotifyAdminsStrategy;
 import it.infn.mw.iam.notification.service.resolver.NotifyGmStrategy;
 import it.infn.mw.iam.notification.service.resolver.NotifyGmsAndAdminsStrategy;
+import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamAupRepository;
 
 @Configuration
@@ -82,13 +95,34 @@ public class IamConfig {
         return new NotifyAdminsStrategy(ars);
       case NOTIFY_ADDRESS_AND_ADMINS:
         return new CompositeAdminsNotificationDelivery(
-            Arrays.asList(new NotifyAdminsStrategy(ars),
-                new NotifyAdminsStrategy(ars)));
+            Arrays.asList(new NotifyAdminsStrategy(ars), new NotifyAdminsStrategy(ars)));
 
       default:
         throw new IllegalArgumentException(
             "Unhandled admin notification policy: " + props.getAdminNotificationPolicy());
     }
+  }
+
+  @Bean
+  JWTProfileResolver jwtProfileResolver(IamProperties props, IamAccountRepository accountRepo,
+      ScopeClaimTranslationService converter, ClaimValueHelper claimHelper,
+      UserInfoService userInfoService, ExternalAuthenticationInfoProcessor proc) {
+
+    IamJWTProfileAccessTokenBuilder atBuilder =
+        new IamJWTProfileAccessTokenBuilder(props, converter, claimHelper);
+
+    IamJWTProfileUserinfoHelper uiHelper =
+        new IamJWTProfileUserinfoHelper(props, userInfoService, proc);
+
+    IamJWTProfileIdTokenCustomizer idHelper =
+        new IamJWTProfileIdTokenCustomizer(accountRepo, converter, claimHelper);
+
+    IamJWTProfileTokenIntrospectionHelper intrHelper =
+        new IamJWTProfileTokenIntrospectionHelper(props, new DefaultIntrospectionResultAssembler());
+
+    IamJWTProfile iamProfile = new IamJWTProfile(atBuilder, idHelper, uiHelper, intrHelper);
+
+    return new StaticJWTProfileResolver(iamProfile);
   }
 
   @Bean
@@ -98,21 +132,19 @@ public class IamConfig {
 
   @Bean
   AuthorizationCodeServices authorizationCodeServices() {
-
     return new DefaultOAuth2AuthorizationCodeService();
   }
 
   @Bean
   @Primary
   TokenEnhancer iamTokenEnhancer() {
-
-    return new OidcTokenEnhancer();
+    return new IamTokenEnhancer();
   }
 
   @Bean
-  IntrospectionResultAssembler defaultIntrospectionResultAssembler() {
-
-    return new IamIntrospectionResultAssembler();
+  IntrospectionResultAssembler defaultIntrospectionResultAssembler(
+      JWTProfileResolver profileResolver) {
+    return new IamIntrospectionResultAssembler(profileResolver);
   }
 
   @Bean
@@ -132,7 +164,6 @@ public class IamConfig {
   @Bean
   @Profile("dev")
   ServletRegistrationBean h2Console() {
-
     WebServlet h2Servlet = new WebServlet();
     return new ServletRegistrationBean(h2Servlet, "/h2-console/*");
   }

@@ -15,8 +15,9 @@
  */
 package it.infn.mw.iam.core.userinfo;
 
+import static java.util.Objects.isNull;
+
 import java.util.Map;
-import java.util.Objects;
 
 import org.mitre.openid.connect.model.UserInfo;
 
@@ -44,7 +45,7 @@ public class IamDecoratedUserInfo extends DelegateUserInfoAdapter implements Dec
     
     userInfo.addProperty(ORGANISATION_NAME_CLAIM, organisationName);
     
-    if (!Objects.isNull(authenticationInfo)) {
+    if (!isNull(authenticationInfo)) {
       JsonObject extAuthn = new JsonObject();
       for (Map.Entry<String, String> e : authenticationInfo.entrySet()) {
         extAuthn.addProperty(e.getKey(), e.getValue());
