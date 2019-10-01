@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.core.oauth.scope;
+package it.infn.mw.iam.core.oauth.scope.pdp;
 
 import java.util.Optional;
 import java.util.Set;

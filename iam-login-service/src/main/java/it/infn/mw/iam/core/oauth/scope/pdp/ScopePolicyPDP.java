@@ -13,25 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.core.oauth.scope;
+package it.infn.mw.iam.core.oauth.scope.pdp;
 
 import java.util.Set;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Component;
+import it.infn.mw.iam.persistence.model.IamAccount;
 
-@Component
-@ConditionalOnProperty(name="iam.enableScopeAuthz", havingValue="false", matchIfMissing=true)
-public class IamNullScopeFilter implements IamScopeFilter {
+@FunctionalInterface
+public interface ScopePolicyPDP {
 
-  public IamNullScopeFilter() {
-    // empty constructor
-  }
-
-  @Override
-  public void filterScopes(Set<String> scopes, Authentication authn) {
-    // do nothing
-  }
+  Set<String> filterScopes(Set<String> requestedScopes, IamAccount account);
 
 }

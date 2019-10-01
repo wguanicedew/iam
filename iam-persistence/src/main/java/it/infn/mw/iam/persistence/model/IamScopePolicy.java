@@ -16,6 +16,8 @@
 package it.infn.mw.iam.persistence.model;
 
 
+import static it.infn.mw.iam.persistence.model.IamScopePolicy.MatchingPolicy.EQ;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
@@ -59,6 +61,12 @@ public class IamScopePolicy implements Serializable {
     DENY
   }
 
+  public enum MatchingPolicy {
+    EQ,
+    REGEXP,
+    PATH
+  }
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -86,7 +94,6 @@ public class IamScopePolicy implements Serializable {
   @JoinColumn(name = "account_id")
   private IamAccount account;
 
-
   @ElementCollection
   @Column(name = "scope", length = 256)
   @CollectionTable(name = "iam_scope_policy_scope", joinColumns = @JoinColumn(name = "policy_id"),
@@ -94,6 +101,9 @@ public class IamScopePolicy implements Serializable {
           @Index(columnList = "scope", unique = false)})
   private Set<String> scopes = new HashSet<>();
 
+  @Enumerated(EnumType.STRING)
+  @Column(name = "matching_policy", nullable = false, length = 6)
+  private MatchingPolicy matchingPolicy = EQ;
 
   public IamScopePolicy() {
     // empty constructor
@@ -165,34 +175,26 @@ public class IamScopePolicy implements Serializable {
     this.account = account;
   }
 
-  public void linkAccount(){
-    if (account != null){
+  public void linkAccount() {
+    if (account != null) {
       account.getScopePolicies().add(this);
     }
   }
-  
-  public void linkGroup(){
-    if (group != null){
+
+  public void linkGroup() {
+    if (group != null) {
       group.getScopePolicies().add(this);
     }
   }
-  
-  public void linkAccount(IamAccount account){
+
+  public void linkAccount(IamAccount account) {
     setAccount(account);
     account.getScopePolicies().add(this);
   }
-  
-  public void linkGroup(IamGroup group){
+
+  public void linkGroup(IamGroup group) {
     setGroup(group);
     group.getScopePolicies().add(this);
-  }
-
-  @Transient
-  public boolean appliesToScope(String scope) {
-    if (getScopes().isEmpty()) {
-      return true;
-    }
-    return getScopes().contains(scope);
   }
 
   @Transient
@@ -213,9 +215,9 @@ public class IamScopePolicy implements Serializable {
     return PolicyType.ACCOUNT;
 
   }
-  
-  
-  public void from(IamScopePolicy other){
+
+
+  public void from(IamScopePolicy other) {
     setAccount(other.getAccount());
     setGroup(other.getGroup());
     setDescription(other.getDescription());
@@ -224,7 +226,7 @@ public class IamScopePolicy implements Serializable {
     linkAccount();
     linkGroup();
   }
-  
+
   @Override
   @Generated("eclipse")
   public int hashCode() {
@@ -238,7 +240,14 @@ public class IamScopePolicy implements Serializable {
     return result;
   }
 
-  
+  public MatchingPolicy getMatchingPolicy() {
+    return matchingPolicy;
+  }
+
+  public void setMatchingPolicy(MatchingPolicy matchingPolicy) {
+    this.matchingPolicy = matchingPolicy;
+  }
+
   @Override
   @Generated("eclipse")
   public boolean equals(Object obj) {
@@ -276,7 +285,9 @@ public class IamScopePolicy implements Serializable {
 
   @Override
   public String toString() {
-    return "IamScopePolicy [id=" + id + ", description=" + description + ", rule=" + rule
-        + ", group=" + group + ", account=" + account + ", scopes=" + scopes + "]";
-  }  
+    return "IamScopePolicy [id=" + id + ", description=" + description + ", creationTime="
+        + creationTime + ", lastUpdateTime=" + lastUpdateTime + ", rule=" + rule + ", group="
+        + group + ", account=" + account + ", scopes=" + scopes + ", matchingPolicy="
+        + matchingPolicy + "]";
+  }
 }

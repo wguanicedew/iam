@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.test.oauth.scope;
+package it.infn.mw.iam.test.oauth.scope.pdp;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.startsWith;
@@ -303,6 +303,22 @@ public class ScopePolicyApiIntegrationTests extends ScopePolicyTestUtils {
       .andExpect(status().isBadRequest())
       .andExpect(jsonPath("$.error").value(Matchers
         .equalTo("Invalid scope policy: scope length must be >= 1 and < 255 characters")));
+  }
+  
+  @Test
+  @WithMockOAuthUser(user = "admin", authorities = {"ROLE_USER", "ROLE_ADMIN"})
+  public void invalidScopeMatchingPolicy() throws Exception {
+
+    ScopePolicyDTO sp = new ScopePolicyDTO();
+    sp.setRule(IamScopePolicy.Rule.DENY.name());
+    sp.setMatchingPolicy("PATH");
+
+    String serializedSp = mapper.writeValueAsString(sp);
+
+    mvc.perform(post("/iam/scope_policies").content(serializedSp).contentType(APPLICATION_JSON))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.error").value(Matchers
+        .equalTo("Invalid scope policy: custom matching policy requires one or more scopes")));
   }
 
   @Test

@@ -15,6 +15,8 @@
  */
 package it.infn.mw.iam.core.oauth.profile.iam;
 
+import static java.util.stream.Collectors.joining;
+
 import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +29,6 @@ import org.mitre.openid.connect.model.UserInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 
 import it.infn.mw.iam.config.IamProperties;
@@ -41,6 +42,8 @@ public class IamJWTProfileTokenIntrospectionHelper implements IntrospectionResul
   public static final Logger LOG =
       LoggerFactory.getLogger(IamJWTProfileTokenIntrospectionHelper.class);
 
+  public static final String PROFILE = "profile";
+  public static final String AUDIENCE = "aud";
   public static final String NAME = "name";
   public static final String PREFERRED_USERNAME = "preferred_username";
   public static final String EMAIL = "email";
@@ -73,7 +76,7 @@ public class IamJWTProfileTokenIntrospectionHelper implements IntrospectionResul
       List<String> audience = accessToken.getJwt().getJWTClaimsSet().getAudience();
 
       if (audience != null && !audience.isEmpty()) {
-        result.put("aud", Joiner.on(' ').join(audience));
+        result.put(AUDIENCE, audience.stream().collect(joining(" ")));
       }
 
     } catch (ParseException e) {
@@ -85,7 +88,7 @@ public class IamJWTProfileTokenIntrospectionHelper implements IntrospectionResul
     Set<String> scopes = Sets.intersection(authScopes, accessToken.getScope());
 
     if (userInfo != null) {
-      if (scopes.contains("profile")) {
+      if (scopes.contains(PROFILE)) {
 
         IamUserInfo iamUserInfo = ((UserInfoAdapter) userInfo).getUserinfo();
 
@@ -100,7 +103,7 @@ public class IamJWTProfileTokenIntrospectionHelper implements IntrospectionResul
         result.put(ORGANISATION_NAME, properties.getOrganisation().getName());
       }
 
-      if (scopes.contains("email")) {
+      if (scopes.contains(EMAIL)) {
         result.put(EMAIL, userInfo.getEmail());
       }
     }

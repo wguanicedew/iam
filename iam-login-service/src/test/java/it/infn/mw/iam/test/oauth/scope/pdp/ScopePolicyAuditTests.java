@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.test.oauth.scope;
+package it.infn.mw.iam.test.oauth.scope.pdp;
 
 import static java.util.Collections.emptyList;
 import static org.hamcrest.Matchers.equalTo;

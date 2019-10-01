@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.test.oauth.scope;
+package it.infn.mw.iam.test.oauth.scope.pdp;
 
 
+import static it.infn.mw.iam.persistence.model.IamScopePolicy.MatchingPolicy.PATH;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
@@ -23,18 +24,17 @@ import static org.junit.Assert.assertThat;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.springframework.transaction.annotation.Transactional;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Sets;
 
 import it.infn.mw.iam.IamLoginService;
-import it.infn.mw.iam.core.oauth.scope.ScopePolicyPDP;
+import it.infn.mw.iam.core.oauth.scope.pdp.ScopePolicyPDP;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.model.IamScopePolicy;
@@ -232,5 +232,25 @@ public class ScopePolicyPdpTests extends ScopePolicyTestUtils {
         pdp.filterScopes(Sets.newHashSet("openid", "profile", "scim:write"), testAccount);
     assertThat(filteredScopes, hasSize(2));
     assertThat(filteredScopes, hasItems("openid", "profile"));
+  }
+  
+  
+  @Test
+  public void testPathFiltering() {
+    
+    IamAccount testAccount = findTestAccount();
+    IamScopePolicy up = initDenyScopePolicy();
+    
+    up.getScopes().add("read:/");
+    up.getScopes().add("write:/");
+    up.setMatchingPolicy(PATH);
+    
+    policyScopeRepo.save(up);
+
+    Set<String> filteredScopes =
+        pdp.filterScopes(Sets.newHashSet("openid", "profile", "read:/", "write", "read:/sub/path"), testAccount);
+
+    assertThat(filteredScopes, hasSize(3));
+    assertThat(filteredScopes, hasItems("openid", "profile", "write"));
   }
 }

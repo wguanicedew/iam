@@ -34,7 +34,7 @@ import org.springframework.security.oauth2.provider.TokenRequest;
 
 import com.google.common.base.Joiner;
 
-import it.infn.mw.iam.core.oauth.scope.IamScopeFilter;
+import it.infn.mw.iam.core.oauth.scope.pdp.IamScopeFilter;
 
 public class IamOAuth2RequestFactory extends ConnectOAuth2RequestFactory {
 

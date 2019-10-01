@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.test.oauth.scope;
+package it.infn.mw.iam.test.oauth.scope.pdp;
 
+import static com.google.common.collect.Sets.newHashSet;
+import static it.infn.mw.iam.persistence.model.IamScopePolicy.MatchingPolicy.PATH;
 import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -33,6 +35,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.mock.web.MockHttpSession;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -55,6 +58,19 @@ import it.infn.mw.iam.test.repository.ScopePolicyTestUtils;
 @SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class})
 @WebAppConfiguration
 @Transactional
+@TestPropertySource(
+// @formatter:off
+    properties = {
+        "scope.matchers[0].name=read", 
+        "scope.matchers[0].type=path",
+        "scope.matchers[0].prefix=read", 
+        "scope.matchers[0].path=/",
+        "scope.matchers[1].name=write", 
+        "scope.matchers[1].type=path",
+        "scope.matchers[1].prefix=write", 
+        "scope.matchers[1].path=/"
+   // @formatter:on
+    })
 public class ScopePolicyFilteringIntegrationTests extends ScopePolicyTestUtils {
 
   @Autowired
@@ -70,10 +86,8 @@ public class ScopePolicyFilteringIntegrationTests extends ScopePolicyTestUtils {
 
   @Before
   public void setup() {
-    mvc = MockMvcBuilders.webAppContextSetup(context)
-      .alwaysDo(log())
-      .apply(springSecurity())
-      .build();
+    mvc =
+        MockMvcBuilders.webAppContextSetup(context).alwaysDo(log()).apply(springSecurity()).build();
   }
 
   IamAccount findTestAccount() {
@@ -160,24 +174,65 @@ public class ScopePolicyFilteringIntegrationTests extends ScopePolicyTestUtils {
     session = (MockHttpSession) mvc
       .perform(post("/login").param("username", "test")
         .param("password", "password")
-        .param("submit", "Login").session(session))
+        .param("submit", "Login")
+        .session(session))
       .andExpect(status().is3xxRedirection())
       .andExpect(redirectedUrl("http://localhost/authorize"))
       .andReturn()
       .getRequest()
       .getSession();
-    
-    session = (MockHttpSession) mvc
-        .perform(get("/authorize").session(session))
-        .andExpect(status().isOk())
-        .andExpect(forwardedUrl( "/oauth/confirm_access"))
-        .andExpect(model().attribute("scope", equalTo("openid profile")))
-        .andReturn()
-        .getRequest()
-        .getSession();
 
-
-
+    session = (MockHttpSession) mvc.perform(get("/authorize").session(session))
+      .andExpect(status().isOk())
+      .andExpect(forwardedUrl("/oauth/confirm_access"))
+      .andExpect(model().attribute("scope", equalTo("openid profile")))
+      .andReturn()
+      .getRequest()
+      .getSession();
   }
+
+  @Test
+  public void matchingPolicyFilteringWorks() throws Exception {
+    IamScopePolicy up = initDenyScopePolicy();
+    up.setRule(Rule.DENY);
+    up.setScopes(newHashSet("read:/", "write:/"));
+    up.setMatchingPolicy(PATH);
+
+    scopePolicyRepo.save(up);
+
+    String clientId = "client";
+
+    MockHttpSession session = (MockHttpSession) mvc
+      .perform(get("/authorize").param("scope", "openid profile read:/ read:/that/thing write:/")
+        .param("response_type", "code")
+        .param("client_id", clientId)
+        .param("redirect_uri", "https://iam.local.io/iam-test-client/openid_connect_login")
+        .param("state", "1234567"))
+      .andExpect(status().is3xxRedirection())
+      .andExpect(redirectedUrl("http://localhost/login"))
+      .andReturn()
+      .getRequest()
+      .getSession();
+
+    session = (MockHttpSession) mvc
+      .perform(post("/login").param("username", "test")
+        .param("password", "password")
+        .param("submit", "Login")
+        .session(session))
+      .andExpect(status().is3xxRedirection())
+      .andExpect(redirectedUrl("http://localhost/authorize"))
+      .andReturn()
+      .getRequest()
+      .getSession();
+
+    session = (MockHttpSession) mvc.perform(get("/authorize").session(session))
+      .andExpect(status().isOk())
+      .andExpect(forwardedUrl("/oauth/confirm_access"))
+      .andExpect(model().attribute("scope", equalTo("openid profile")))
+      .andReturn()
+      .getRequest()
+      .getSession();
+  }
+
 
 }

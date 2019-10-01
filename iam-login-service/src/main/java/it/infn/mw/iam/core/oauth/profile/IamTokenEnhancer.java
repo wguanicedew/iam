@@ -36,7 +36,7 @@ import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 
-import it.infn.mw.iam.core.oauth.scope.IamScopeFilter;
+import it.infn.mw.iam.core.oauth.scope.pdp.IamScopeFilter;
 
 public class IamTokenEnhancer extends ConnectTokenEnhancer {
 

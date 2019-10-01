@@ -24,10 +24,7 @@ import it.infn.mw.iam.core.oauth.profile.UserInfoHelper;
 public class WLCGJWTProfile implements JWTProfile {
   
   public static final String PROFILE_NAME = "WLCG JWT profile v1.0";
-
-  public WLCGJWTProfile() {
-  }
-
+  
   @Override
   public JWTAccessTokenBuilder getAccessTokenBuilder() {
     return null;

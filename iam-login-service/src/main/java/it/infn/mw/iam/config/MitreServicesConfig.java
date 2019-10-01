@@ -19,6 +19,7 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import org.mitre.jwt.assertion.AssertionValidator;
 import org.mitre.jwt.assertion.impl.SelfAssertionValidator;
 import org.mitre.jwt.signer.service.impl.ClientKeyCacheService;
 import org.mitre.jwt.signer.service.impl.JWKSetCacheService;
@@ -33,7 +34,6 @@ import org.mitre.oauth2.service.impl.DefaultDeviceCodeService;
 import org.mitre.oauth2.service.impl.DefaultOAuth2ClientDetailsEntityService;
 import org.mitre.oauth2.service.impl.DefaultOAuth2ProviderTokenService;
 import org.mitre.oauth2.service.impl.DefaultSystemScopeService;
-import org.mitre.oauth2.token.ScopeServiceAwareOAuth2RequestValidator;
 import org.mitre.oauth2.web.CorsFilter;
 import org.mitre.openid.connect.config.ConfigurationPropertiesBean;
 import org.mitre.openid.connect.config.UIConfiguration;
@@ -41,6 +41,7 @@ import org.mitre.openid.connect.filter.AuthorizationRequestFilter;
 import org.mitre.openid.connect.service.ApprovedSiteService;
 import org.mitre.openid.connect.service.BlacklistedSiteService;
 import org.mitre.openid.connect.service.ClientLogoLoadingService;
+import org.mitre.openid.connect.service.DynamicClientValidationService;
 import org.mitre.openid.connect.service.LoginHintExtracter;
 import org.mitre.openid.connect.service.OIDCTokenService;
 import org.mitre.openid.connect.service.PairwiseIdentiferService;
@@ -87,7 +88,10 @@ import com.google.common.collect.Sets;
 import it.infn.mw.iam.authn.oidc.RestTemplateFactory;
 import it.infn.mw.iam.core.IamOAuth2RequestFactory;
 import it.infn.mw.iam.core.oauth.IamJWKSetCacheService;
-import it.infn.mw.iam.core.oauth.scope.IamScopeFilter;
+import it.infn.mw.iam.core.oauth.scope.matchers.ScopeMatcherOAuthRequestValidator;
+import it.infn.mw.iam.core.oauth.scope.matchers.ScopeMatcherRegistry;
+import it.infn.mw.iam.core.oauth.scope.pdp.IamScopeFilter;
+import it.infn.mw.iam.core.oidc.IamClientValidationService;
 
 @Configuration
 public class MitreServicesConfig {
@@ -152,9 +156,9 @@ public class MitreServicesConfig {
   }
 
   @Bean
-  OAuth2RequestValidator requestValidator() {
-
-    return new ScopeServiceAwareOAuth2RequestValidator();
+  OAuth2RequestValidator requestValidator(ScopeMatcherRegistry registry) {
+    
+    return new ScopeMatcherOAuthRequestValidator(registry, 50);
   }
 
   @Bean
@@ -253,6 +257,17 @@ public class MitreServicesConfig {
   public UserDetailsService defaultClientUserDetailsService() {
 
     return new DefaultClientUserDetailsService();
+  }
+
+  @Bean
+  public DynamicClientValidationService clientValidationService(ScopeMatcherRegistry registry,
+      SystemScopeService scopeService, BlacklistedSiteService blacklistService,
+      ConfigurationPropertiesBean config,
+      @Qualifier("clientAssertionValidator") AssertionValidator validator,
+      ClientDetailsEntityService clientService) {
+
+    return new IamClientValidationService(registry, scopeService, validator, blacklistService,
+        config, clientService);
   }
 
   @Bean

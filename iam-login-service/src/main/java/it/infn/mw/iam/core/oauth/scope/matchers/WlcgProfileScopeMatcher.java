@@ -13,15 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.core.oauth.scope;
+package it.infn.mw.iam.core.oauth.scope.matchers;
 
-import java.util.Set;
+public class WlcgProfileScopeMatcher extends RegexpScopeMatcher {
 
-import it.infn.mw.iam.persistence.model.IamAccount;
-
-@FunctionalInterface
-public interface ScopePolicyPDP {
-
-  Set<String> filterScopes(Set<String> requestedScopes, IamAccount account);
+  public static final String REGEXP = "^wlcg(:1.0)?";
+ 
+  public WlcgProfileScopeMatcher() {
+    super(REGEXP);
+  }
 
 }

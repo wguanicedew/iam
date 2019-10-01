@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.test.oauth.scope;
+package it.infn.mw.iam.test.oauth.scope.pdp;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -42,10 +42,10 @@ import it.infn.mw.iam.test.repository.ScopePolicyTestUtils;
 public class ScopePolicyJacksonSerializerTests extends ScopePolicyTestUtils {
 
   public static final String REPR1 =
-      "{\"id\":null,\"description\":null,\"rule\":\"PERMIT\",\"account\":null,\"group\":null,\"scopes\":[]}";
+      "{\"id\":null,\"description\":null,\"rule\":\"PERMIT\",\"matching_policy\":\"EQ\",\"account\":null,\"group\":null,\"scopes\":[]}";
 
   public static final String REPR2 = 
-      "{\"id\":null,\"description\":null,\"rule\":\"PERMIT\",\"account\":{\"uuid\":\"f5f009ca-30b6-48d1-bb6a-b976b1a95525\",\"name\":\"test\"},\"group\":null,\"scopes\":[]}";
+      "{\"id\":null,\"description\":null,\"rule\":\"PERMIT\",\"matching_policy\":\"EQ\",\"account\":{\"uuid\":\"f5f009ca-30b6-48d1-bb6a-b976b1a95525\",\"name\":\"test\"},\"group\":null,\"scopes\":[]}";
 
   @Test
   public void testJacksonSerializationHandlesNull() throws IOException {

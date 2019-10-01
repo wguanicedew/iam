@@ -55,6 +55,10 @@ import it.infn.mw.iam.core.oauth.profile.iam.IamJWTProfileIdTokenCustomizer;
 import it.infn.mw.iam.core.oauth.profile.iam.IamJWTProfileTokenIntrospectionHelper;
 import it.infn.mw.iam.core.oauth.profile.iam.IamJWTProfileUserinfoHelper;
 import it.infn.mw.iam.core.oauth.profile.wlcg.WLCGJWTProfile;
+import it.infn.mw.iam.core.oauth.scope.matchers.DefaultScopeMatcherRegistry;
+import it.infn.mw.iam.core.oauth.scope.matchers.ScopeMatcherRegistry;
+import it.infn.mw.iam.core.oauth.scope.matchers.ScopeMatchersProperties;
+import it.infn.mw.iam.core.oauth.scope.matchers.ScopeMatchersPropertiesParser;
 import it.infn.mw.iam.core.web.EnforceAupFilter;
 import it.infn.mw.iam.notification.NotificationProperties;
 import it.infn.mw.iam.notification.service.resolver.AddressResolutionService;
@@ -109,12 +113,12 @@ public class IamConfig {
     }
   }
 
-  
+
   @Bean
   @ConditionalOnProperty(name = "iam.jwt-profile.default-profile", havingValue = "iam")
   JWTProfile iamJwtProfile(IamProperties props, IamAccountRepository accountRepo,
-  ScopeClaimTranslationService converter, ClaimValueHelper claimHelper,
-  UserInfoService userInfoService, ExternalAuthenticationInfoProcessor proc) {
+      ScopeClaimTranslationService converter, ClaimValueHelper claimHelper,
+      UserInfoService userInfoService, ExternalAuthenticationInfoProcessor proc) {
     IamJWTProfileAccessTokenBuilder atBuilder =
         new IamJWTProfileAccessTokenBuilder(props, converter, claimHelper);
 
@@ -127,20 +131,21 @@ public class IamConfig {
     IamJWTProfileTokenIntrospectionHelper intrHelper =
         new IamJWTProfileTokenIntrospectionHelper(props, new DefaultIntrospectionResultAssembler());
 
-    return  new IamJWTProfile(atBuilder, idHelper, uiHelper, intrHelper);
+    return new IamJWTProfile(atBuilder, idHelper, uiHelper, intrHelper);
   }
-  
+
   @Bean
   @ConditionalOnProperty(name = "iam.jwt-profile.default-profile", havingValue = "wlcg")
   JWTProfile wlcgJwtProfile(IamProperties props, IamAccountRepository accountRepo,
-  ScopeClaimTranslationService converter, ClaimValueHelper claimHelper,
-  UserInfoService userInfoService, ExternalAuthenticationInfoProcessor proc) {
+      ScopeClaimTranslationService converter, ClaimValueHelper claimHelper,
+      UserInfoService userInfoService, ExternalAuthenticationInfoProcessor proc) {
     return new WLCGJWTProfile();
   }
-  
+
   @Bean
   JWTProfileResolver jwtProfileResolver(JWTProfile profile) {
-    LOG.info("Default JWT profile: {}", profile.name());
+    final String profileName = profile.name();
+    LOG.info("Default JWT profile: {}", profileName);
     return new StaticJWTProfileResolver(profile);
   }
 
@@ -178,6 +183,14 @@ public class IamConfig {
     FilterRegistrationBean frb = new FilterRegistrationBean(aupFilter);
     frb.setOrder(Ordered.LOWEST_PRECEDENCE);
     return frb;
+  }
+
+
+
+  @Bean
+  ScopeMatcherRegistry customScopeMatchersRegistry(ScopeMatchersProperties properties) {
+    ScopeMatchersPropertiesParser parser = new ScopeMatchersPropertiesParser();
+    return new DefaultScopeMatcherRegistry(parser.parseScopeMatchersProperties(properties), 20);
   }
 
   @Bean
