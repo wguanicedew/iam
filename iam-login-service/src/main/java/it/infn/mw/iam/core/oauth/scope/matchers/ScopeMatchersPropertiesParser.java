@@ -27,8 +27,6 @@ import it.infn.mw.iam.core.oauth.scope.matchers.ScopeMatchersProperties.MatcherP
 
 public class ScopeMatchersPropertiesParser {
 
-  public ScopeMatchersPropertiesParser() {}
-
   private ScopeMatcher parseProperties(MatcherProperties p) {
     if (regexp.equals(p.getType())) {
       return regexpMatcher(p.getRegexp());

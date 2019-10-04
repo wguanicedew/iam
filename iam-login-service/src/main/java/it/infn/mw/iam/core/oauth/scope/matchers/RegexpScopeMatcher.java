@@ -20,6 +20,8 @@ import static java.util.Objects.nonNull;
 
 import java.util.regex.Pattern;
 
+import javax.annotation.Generated;
+
 public class RegexpScopeMatcher implements ScopeMatcher {
 
   final String regexp;
@@ -49,6 +51,7 @@ public class RegexpScopeMatcher implements ScopeMatcher {
   }
 
   @Override
+  @Generated("eclipse")
   public boolean equals(Object obj) {
     if (this == obj)
       return true;

@@ -59,7 +59,7 @@ public class IamClientValidationService extends DefaultDynamicClientValidationSe
 
     Set<String> filteredClientScopes = newClient.getScope()
       .stream()
-      .filter(s -> !matchers.stream().anyMatch(m -> m.matches(s)))
+      .filter(s -> matchers.stream().noneMatch(m -> m.matches(s)))
       .collect(toSet());
 
     newClient.setScope(filteredClientScopes);

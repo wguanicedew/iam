@@ -16,14 +16,12 @@
 package it.infn.mw.iam.core.oauth.scope.matchers;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static it.infn.mw.iam.core.oauth.scope.matchers.StringEqualsScopeMatcher.stringEqualsMatcher;
 import static java.util.Objects.nonNull;
 
 import java.util.Set;
 
 import org.springframework.security.oauth2.provider.ClientDetails;
 
-import com.google.common.base.Function;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -34,10 +32,6 @@ public class DefaultScopeMatcherRegistry implements ScopeMatcherRegistry {
   public static final int DEFAULT_CACHE_SIZE = 10;
 
   private final Set<ScopeMatcher> customMatchers;
-
-  private Function<String, ScopeMatcher> cacheLoader() {
-    return s -> stringEqualsMatcher(s);
-  }
 
   private final LoadingCache<String, ScopeMatcher> plainMatchersCache;
 
@@ -50,7 +44,7 @@ public class DefaultScopeMatcherRegistry implements ScopeMatcherRegistry {
     int cacheSize =
         (plainMatchersCacheSize < DEFAULT_CACHE_SIZE ? DEFAULT_CACHE_SIZE : plainMatchersCacheSize);
     plainMatchersCache =
-        CacheBuilder.newBuilder().maximumSize(cacheSize).build(CacheLoader.from(cacheLoader()));
+        CacheBuilder.newBuilder().maximumSize(cacheSize).build(CacheLoader.from(StringEqualsScopeMatcher::stringEqualsMatcher));
     this.customMatchers = customMatchers;
   }
 

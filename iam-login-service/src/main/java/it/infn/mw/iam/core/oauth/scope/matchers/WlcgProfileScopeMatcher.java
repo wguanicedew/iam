@@ -17,10 +17,10 @@ package it.infn.mw.iam.core.oauth.scope.matchers;
 
 public class WlcgProfileScopeMatcher extends RegexpScopeMatcher {
 
-  public static final String REGEXP = "^wlcg(:1.0)?";
+  public static final String PROFILE_REGEXP = "^wlcg(:1.0)?";
  
   public WlcgProfileScopeMatcher() {
-    super(REGEXP);
+    super(PROFILE_REGEXP);
   }
 
 }

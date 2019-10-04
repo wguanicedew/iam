@@ -15,6 +15,8 @@
  */
 package it.infn.mw.iam.core.oauth.scope.matchers;
 
+import javax.annotation.Generated;
+
 public class StringEqualsScopeMatcher implements ScopeMatcher {
 
   final String expectedValue;
@@ -29,6 +31,7 @@ public class StringEqualsScopeMatcher implements ScopeMatcher {
   }
 
   @Override
+  @Generated("eclipse")
   public int hashCode() {
     final int prime = 31;
     int result = 1;
@@ -37,6 +40,7 @@ public class StringEqualsScopeMatcher implements ScopeMatcher {
   }
 
   @Override
+  @Generated("eclipse")
   public boolean equals(Object obj) {
     if (this == obj)
       return true;

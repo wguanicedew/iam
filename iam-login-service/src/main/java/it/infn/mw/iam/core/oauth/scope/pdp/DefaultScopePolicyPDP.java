@@ -48,7 +48,7 @@ import it.infn.mw.iam.persistence.repository.IamScopePolicyRepository;
 public class DefaultScopePolicyPDP implements ScopePolicyPDP {
 
   public static final Logger LOG = LoggerFactory.getLogger(DefaultScopePolicyPDP.class);
-
+  
   private Cache<String, ScopeMatcher> matchersCache =
       CacheBuilder.newBuilder().maximumSize(30).build();
 
@@ -90,8 +90,7 @@ public class DefaultScopePolicyPDP implements ScopePolicyPDP {
     protected boolean entryIsProcessed(Map.Entry<String, ScopeStatus> e) {
       return !e.getValue().equals(ScopeStatus.UNPROCESSED);
     }
-
-
+    
     protected boolean policyApplicableToScope(IamScopePolicy p, String scope) {
       if (p.getScopes().isEmpty()) {
         return true;

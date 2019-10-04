@@ -23,7 +23,6 @@ import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.OAuth2RequestValidator;
 import org.springframework.security.oauth2.provider.TokenRequest;
 
-import com.google.common.base.Function;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -37,15 +36,12 @@ public class ScopeMatcherOAuthRequestValidator implements OAuth2RequestValidator
   private final ScopeMatcherRegistry registry;
   private final LoadingCache<ClientDetails, Set<ScopeMatcher>> scopeMatchersCache;
 
-  private Function<ClientDetails, Set<ScopeMatcher>> cacheLoader() {
-    return client -> registry.findMatchersForClient(client);
-  }
-
   public ScopeMatcherOAuthRequestValidator(ScopeMatcherRegistry matcherRegistry, int cacheSize) {
     this.registry = matcherRegistry;
     int cs = cacheSize < DEFAULT_CACHE_SIZE ? DEFAULT_CACHE_SIZE : cacheSize;
-    scopeMatchersCache =
-        CacheBuilder.newBuilder().maximumSize(cs).build(CacheLoader.from(cacheLoader()));
+    scopeMatchersCache = CacheBuilder.newBuilder()
+      .maximumSize(cs)
+      .build(CacheLoader.from(registry::findMatchersForClient));
   }
 
   public ScopeMatcherOAuthRequestValidator(ScopeMatcherRegistry matcherRegistry) {
@@ -56,26 +52,20 @@ public class ScopeMatcherOAuthRequestValidator implements OAuth2RequestValidator
 
     Set<ScopeMatcher> scopeMatchers = scopeMatchersCache.getUnchecked(client);
     for (String s : requestedScopes) {
-      if (!scopeMatchers.stream().anyMatch(m -> m.matches(s))) {
+      if (scopeMatchers.stream().noneMatch(m -> m.matches(s))) {
         throw new InvalidScopeException(String.format(ERROR_MSG_FMT, s, client.getClientId()));
       }
     }
   }
 
   @Override
-  public void validateScope(AuthorizationRequest authorizationRequest, ClientDetails client)
-      throws InvalidScopeException {
-
+  public void validateScope(AuthorizationRequest authorizationRequest, ClientDetails client) {
     validateScope(authorizationRequest.getScope(), client);
-
   }
 
   @Override
-  public void validateScope(TokenRequest tokenRequest, ClientDetails client)
-      throws InvalidScopeException {
-
+  public void validateScope(TokenRequest tokenRequest, ClientDetails client){
     validateScope(tokenRequest.getScope(), client);
-
   }
 
 }

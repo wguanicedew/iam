@@ -52,8 +52,8 @@ public class ScopePolicyDTO {
   @NotBlank(message = "Invalid scope policy: rule cannot be empty")
   private String rule;
 
-  @Pattern(regexp = "EQ|REGEXP|PATH",
-      message = "Invalid scope policy: allowed values for 'matchingPolicy' are: 'EQ', 'REGEXP', 'PATH'")
+  @Pattern(regexp = "EQ|PROFILE_REGEXP|PATH",
+      message = "Invalid scope policy: allowed values for 'matchingPolicy' are: 'EQ', 'PROFILE_REGEXP', 'PATH'")
   private String matchingPolicy = "EQ";
 
   @Valid

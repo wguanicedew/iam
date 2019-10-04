@@ -32,7 +32,7 @@ import com.google.common.collect.Lists;
 public class ScopeMatchersProperties {
 
   public static class MatcherProperties {
-    public static enum MatcherType {
+    public enum MatcherType {
       regexp,
       path
     }
