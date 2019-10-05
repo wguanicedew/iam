@@ -13,15 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.core.oauth.profile.iam;
-
-import static it.infn.mw.iam.core.oauth.profile.iam.ClaimValueHelper.ADDITIONAL_CLAIMS;
+package it.infn.mw.iam.core.oauth.profile.wlcg;
 
 import java.util.Set;
 
 import org.mitre.oauth2.model.ClientDetailsEntity;
 import org.mitre.oauth2.model.OAuth2AccessTokenEntity;
-import org.mitre.openid.connect.service.ScopeClaimTranslationService;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 
 import com.nimbusds.jwt.JWTClaimsSet.Builder;
@@ -32,18 +29,13 @@ import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamUserInfo;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
-public class IamJWTProfileIdTokenCustomizer extends BaseIdTokenCustomizer {
+public class WLCGIdTokenCustomizer extends BaseIdTokenCustomizer {
 
-  private final ScopeClaimTranslationService scopeClaimConverter;
-  private final ClaimValueHelper claimValueHelper;
+  private final WLCGGroupHelper groupHelper = new WLCGGroupHelper();
 
-  public IamJWTProfileIdTokenCustomizer(IamAccountRepository accountRepo,
-      ScopeClaimTranslationService scopeClaimConverter, ClaimValueHelper claimValueHelper) {
+  public WLCGIdTokenCustomizer(IamAccountRepository accountRepo) {
     super(accountRepo);
-    this.scopeClaimConverter = scopeClaimConverter;
-    this.claimValueHelper = claimValueHelper;
   }
-
 
   @Override
   public void customizeIdTokenClaims(Builder idClaims, ClientDetailsEntity client,
@@ -53,11 +45,12 @@ public class IamJWTProfileIdTokenCustomizer extends BaseIdTokenCustomizer {
       .orElseThrow(() -> new UserNotFoundError(String.format("No user found for uuid %s", sub)));
     IamUserInfo info = account.getUserInfo();
 
-    Set<String> requiredClaims = scopeClaimConverter.getClaimsForScopeSet(request.getScope());
+    Set<String> groupNames = groupHelper.resolveGroupNames(accessToken, info);
+    
+    if (!groupNames.isEmpty()) {
+      idClaims.claim(WLCGGroupHelper.WLCG_GROUPS_SCOPE, groupNames);
+    }
 
-    requiredClaims.stream()
-      .filter(ADDITIONAL_CLAIMS::contains)
-      .forEach(c -> idClaims.claim(c, claimValueHelper.getClaimValueFromUserInfo(c, info)));
   }
 
 }

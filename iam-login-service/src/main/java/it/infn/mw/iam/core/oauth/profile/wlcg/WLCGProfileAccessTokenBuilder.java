@@ -13,18 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.core.oauth.profile.iam;
+package it.infn.mw.iam.core.oauth.profile.wlcg;
 
-import static it.infn.mw.iam.core.oauth.profile.iam.ClaimValueHelper.ADDITIONAL_CLAIMS;
 import static java.util.stream.Collectors.joining;
 
 import java.time.Instant;
-import java.util.Date;
 import java.util.Set;
 
 import org.mitre.oauth2.model.OAuth2AccessTokenEntity;
 import org.mitre.openid.connect.model.UserInfo;
-import org.mitre.openid.connect.service.ScopeClaimTranslationService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -34,39 +31,36 @@ import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.core.oauth.profile.common.BaseAccessTokenBuilder;
 import it.infn.mw.iam.persistence.repository.UserInfoAdapter;
 
-public class IamJWTProfileAccessTokenBuilder extends BaseAccessTokenBuilder {
+public class WLCGProfileAccessTokenBuilder extends BaseAccessTokenBuilder {
 
-  protected final ScopeClaimTranslationService scopeClaimConverter;
-  protected final ClaimValueHelper claimValueHelper;
+  public static final String WLCG_VER_CLAIM = "wlcg.ver";
+  public static final String PROFILE_VERSION = "1.0";
 
-  public IamJWTProfileAccessTokenBuilder(IamProperties properties,
-      ScopeClaimTranslationService scopeClaimConverter, ClaimValueHelper claimValueHelper) {
+  final WLCGGroupHelper groupHelper;
+
+  public WLCGProfileAccessTokenBuilder(IamProperties properties, WLCGGroupHelper groupHelper) {
     super(properties);
-    this.scopeClaimConverter = scopeClaimConverter;
-    this.claimValueHelper = claimValueHelper;
+    this.groupHelper = groupHelper;
   }
+
 
   @Override
   public JWTClaimsSet buildAccessToken(OAuth2AccessTokenEntity token,
       OAuth2Authentication authentication, UserInfo userInfo, Instant issueTime) {
-    
+
     Builder builder = baseJWTSetup(token, authentication, userInfo, issueTime);
 
-    if (properties.getAccessToken().isIncludeAuthnInfo() && userInfo != null) {
-      Set<String> requiredClaims = scopeClaimConverter.getClaimsForScopeSet(token.getScope());
-
-      requiredClaims.stream()
-        .filter(ADDITIONAL_CLAIMS::contains)
-        .forEach(c -> builder.claim(c, claimValueHelper.getClaimValueFromUserInfo(c,
-            ((UserInfoAdapter) userInfo).getUserinfo())));
-    }
-
-    if (properties.getAccessToken().isIncludeScope() && !token.getScope().isEmpty()) {
+    if (!token.getScope().isEmpty()) {
       builder.claim(SCOPE_CLAIM_NAME, token.getScope().stream().collect(joining(SPACE)));
     }
 
-    if (properties.getAccessToken().isIncludeNbf()) {
-      builder.notBeforeTime(Date.from(issueTime));
+    builder.claim(WLCG_VER_CLAIM, PROFILE_VERSION);
+
+    Set<String> groupNames =
+        groupHelper.resolveGroupNames(token, ((UserInfoAdapter) userInfo).getUserinfo());
+
+    if (!groupNames.isEmpty()) {
+      builder.claim(WLCGGroupHelper.WLCG_GROUPS_SCOPE, groupNames);
     }
 
     return builder.build();

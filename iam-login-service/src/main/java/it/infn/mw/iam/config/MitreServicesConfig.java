@@ -86,8 +86,9 @@ import org.springframework.web.servlet.AsyncHandlerInterceptor;
 import com.google.common.collect.Sets;
 
 import it.infn.mw.iam.authn.oidc.RestTemplateFactory;
-import it.infn.mw.iam.core.IamOAuth2RequestFactory;
 import it.infn.mw.iam.core.oauth.IamJWKSetCacheService;
+import it.infn.mw.iam.core.oauth.IamOAuth2RequestFactory;
+import it.infn.mw.iam.core.oauth.profile.JWTProfileResolver;
 import it.infn.mw.iam.core.oauth.scope.matchers.ScopeMatcherOAuthRequestValidator;
 import it.infn.mw.iam.core.oauth.scope.matchers.ScopeMatcherRegistry;
 import it.infn.mw.iam.core.oauth.scope.pdp.IamScopeFilter;
@@ -157,7 +158,7 @@ public class MitreServicesConfig {
 
   @Bean
   OAuth2RequestValidator requestValidator(ScopeMatcherRegistry registry) {
-    
+
     return new ScopeMatcherOAuthRequestValidator(registry, 50);
   }
 
@@ -168,8 +169,9 @@ public class MitreServicesConfig {
   }
 
   @Bean
-  OAuth2RequestFactory requestFactory(IamScopeFilter scopeFilter) {
-    return new IamOAuth2RequestFactory(clientDetailsEntityService(), scopeFilter);
+  OAuth2RequestFactory requestFactory(IamScopeFilter scopeFilter,
+      JWTProfileResolver profileResolver) {
+    return new IamOAuth2RequestFactory(clientDetailsEntityService(), scopeFilter, profileResolver);
   }
 
   @Bean

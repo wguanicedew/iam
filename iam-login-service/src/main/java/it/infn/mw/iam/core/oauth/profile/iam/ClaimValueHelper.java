@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.core.oauth;
+package it.infn.mw.iam.core.oauth.profile.iam;
 
 import java.util.Set;
 

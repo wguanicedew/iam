@@ -26,19 +26,16 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
 import it.infn.mw.iam.authn.ExternalAuthenticationInfoProcessor;
 import it.infn.mw.iam.config.IamProperties;
-import it.infn.mw.iam.core.oauth.profile.UserInfoHelper;
+import it.infn.mw.iam.core.oauth.profile.common.BaseUserinfoHelper;
 import it.infn.mw.iam.core.userinfo.IamDecoratedUserInfo;
 
-public class IamJWTProfileUserinfoHelper implements UserInfoHelper {
+public class IamJWTProfileUserinfoHelper extends BaseUserinfoHelper {
 
-  private final IamProperties properties;
-  private final UserInfoService userInfoService;
   private final ExternalAuthenticationInfoProcessor extAuthnProcessor;
 
   public IamJWTProfileUserinfoHelper(IamProperties props, UserInfoService userInfoService,
       ExternalAuthenticationInfoProcessor proc) {
-    this.properties = props;
-    this.userInfoService = userInfoService;
+    super(props, userInfoService);
     this.extAuthnProcessor = proc;
   }
 
@@ -46,14 +43,15 @@ public class IamJWTProfileUserinfoHelper implements UserInfoHelper {
   public UserInfo resolveUserInfo(OAuth2Authentication authentication) {
     final String username = authentication.getName();
 
-    UserInfo ui = userInfoService.getByUsernameAndClientId(username,
+    UserInfo ui = getUserInfoService().getByUsernameAndClientId(username,
         authentication.getOAuth2Request().getClientId());
 
     if (isNull(ui)) {
       return null;
     }
+    
     IamDecoratedUserInfo dui = IamDecoratedUserInfo.forUser(ui);
-    dui.setOrganisationName(properties.getOrganisation().getName());
+    dui.setOrganisationName(getProperties().getOrganisation().getName());
 
     if (isSupportedExternalAuthenticationToken(authentication.getUserAuthentication())) {
       Map<String, String> processedAuthInfo = extAuthnProcessor.process(authentication);

@@ -13,19 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.core.oauth.profile;
+package it.infn.mw.iam.core.oauth.profile.common;
 
-public interface JWTProfile {
-  
-  String name();
-  
-  JWTAccessTokenBuilder getAccessTokenBuilder();
-  
-  IDTokenCustomizer getIDTokenCustomizer();
-  
-  IntrospectionResultHelper getIntrospectionResultHelper();
+import it.infn.mw.iam.core.oauth.profile.IDTokenCustomizer;
+import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
-  UserInfoHelper getUserinfoHelper();
+public abstract class BaseIdTokenCustomizer implements IDTokenCustomizer {
+
+  private final IamAccountRepository accountRepo;
   
-  RequestValidator getRequestValidator();
+  public BaseIdTokenCustomizer(IamAccountRepository accountRepo) {
+    this.accountRepo = accountRepo;
+  }
+
+  public IamAccountRepository getAccountRepo() {
+    return accountRepo;
+  }
+
+
+
 }

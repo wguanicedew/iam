@@ -13,19 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.core.oauth.profile;
+package it.infn.mw.iam.core.oauth.profile.wlcg;
 
-public interface JWTProfile {
-  
-  String name();
-  
-  JWTAccessTokenBuilder getAccessTokenBuilder();
-  
-  IDTokenCustomizer getIDTokenCustomizer();
-  
-  IntrospectionResultHelper getIntrospectionResultHelper();
+import org.mitre.openid.connect.model.UserInfo;
 
-  UserInfoHelper getUserinfoHelper();
+import com.google.gson.JsonObject;
+
+import it.infn.mw.iam.core.userinfo.DelegateUserInfoAdapter;
+
+public class WLCGUserInfoAdapter extends DelegateUserInfoAdapter {
+
+  private WLCGUserInfoAdapter(UserInfo delegate) {
+    super(delegate);
+  }
   
-  RequestValidator getRequestValidator();
+  @Override
+  public JsonObject toJson() {
+    JsonObject json = super.toJson();
+    
+    json.remove("groups");
+    
+    return json;
+  }
+
+  public static WLCGUserInfoAdapter forUserInfo(UserInfo delegate) {
+    return new WLCGUserInfoAdapter(delegate);
+  }
 }

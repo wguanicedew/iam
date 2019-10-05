@@ -55,8 +55,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import it.infn.mw.iam.IamLoginService;
-import it.infn.mw.iam.core.oauth.IamDeviceCodeTokenGranter;
-import it.infn.mw.iam.core.oauth.TokenExchangeTokenGranter;
+import it.infn.mw.iam.core.oauth.granters.IamDeviceCodeTokenGranter;
+import it.infn.mw.iam.core.oauth.granters.TokenExchangeTokenGranter;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = IamLoginService.class)

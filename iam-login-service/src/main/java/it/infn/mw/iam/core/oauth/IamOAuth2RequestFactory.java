@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.core;
+package it.infn.mw.iam.core.oauth;
 
 import java.util.Map;
 import java.util.Set;
@@ -34,6 +34,7 @@ import org.springframework.security.oauth2.provider.TokenRequest;
 
 import com.google.common.base.Joiner;
 
+import it.infn.mw.iam.core.oauth.profile.JWTProfileResolver;
 import it.infn.mw.iam.core.oauth.scope.pdp.IamScopeFilter;
 
 public class IamOAuth2RequestFactory extends ConnectOAuth2RequestFactory {
@@ -46,12 +47,15 @@ public class IamOAuth2RequestFactory extends ConnectOAuth2RequestFactory {
 
   private final IamScopeFilter scopeFilter;
 
+  private final JWTProfileResolver profileResolver;
+
   private final Joiner joiner = Joiner.on(' ');
 
   public IamOAuth2RequestFactory(ClientDetailsEntityService clientDetailsService,
-      IamScopeFilter scopeFilter) {
+      IamScopeFilter scopeFilter, JWTProfileResolver profileResolver) {
     super(clientDetailsService);
     this.scopeFilter = scopeFilter;
+    this.profileResolver = profileResolver;
   }
 
 
@@ -61,8 +65,6 @@ public class IamOAuth2RequestFactory extends ConnectOAuth2RequestFactory {
     Authentication authn = SecurityContextHolder.getContext().getAuthentication();
 
     if (authn != null && !(authn instanceof AnonymousAuthenticationToken)) {
-      // We have an authenticated user, let's see if we all the requested scopes
-      // are indeed allowed for this user
       final Set<String> requestedScopes =
           OAuth2Utils.parseParameterList(inputParams.get(OAuth2Utils.SCOPE));
 
@@ -104,6 +106,10 @@ public class IamOAuth2RequestFactory extends ConnectOAuth2RequestFactory {
         break;
       }
     }
+
+    profileResolver.resolveProfile(client.getClientId())
+      .getRequestValidator()
+      .validateRequest(request);
 
     return request;
   }

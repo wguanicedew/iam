@@ -15,39 +15,73 @@
  */
 package it.infn.mw.iam.core.oauth.profile.wlcg;
 
+import org.mitre.oauth2.service.IntrospectionResultAssembler;
+import org.mitre.openid.connect.service.UserInfoService;
+import org.springframework.security.oauth2.provider.OAuth2Request;
+
+import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.core.oauth.profile.IDTokenCustomizer;
 import it.infn.mw.iam.core.oauth.profile.IntrospectionResultHelper;
 import it.infn.mw.iam.core.oauth.profile.JWTAccessTokenBuilder;
 import it.infn.mw.iam.core.oauth.profile.JWTProfile;
+import it.infn.mw.iam.core.oauth.profile.RequestValidator;
 import it.infn.mw.iam.core.oauth.profile.UserInfoHelper;
+import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
-public class WLCGJWTProfile implements JWTProfile {
-  
-  public static final String PROFILE_NAME = "WLCG JWT profile v1.0";
-  
+public class WLCGJWTProfile implements JWTProfile, RequestValidator {
+
+  public static final String PROFILE_VERSION = "1.0";
+  public static final String PROFILE_NAME = "WLCG JWT profile " + PROFILE_VERSION;
+
+  private final JWTAccessTokenBuilder accessTokenBuilder;
+  private final IDTokenCustomizer idTokenCustomizer;
+  private final UserInfoHelper userInfoHelper;
+  private final IntrospectionResultHelper introspectionHelper;
+  private final WLCGGroupHelper groupHelper;
+
+  public WLCGJWTProfile(IamProperties properties, UserInfoService userInfoService,
+      IamAccountRepository accountRepo, WLCGGroupHelper groupHelper,
+      IntrospectionResultAssembler defaultAssembler) {
+    accessTokenBuilder = new WLCGProfileAccessTokenBuilder(properties, groupHelper);
+    idTokenCustomizer = new WLCGIdTokenCustomizer(accountRepo);
+    userInfoHelper = new WLCGUserinfoHelper(properties, userInfoService);
+    introspectionHelper = new WLCGIntrospectionHelper(properties, defaultAssembler, groupHelper);
+    this.groupHelper = groupHelper;
+  }
+
   @Override
   public JWTAccessTokenBuilder getAccessTokenBuilder() {
-    return null;
+    return accessTokenBuilder;
   }
 
   @Override
   public IDTokenCustomizer getIDTokenCustomizer() {
-    return null;
+    return idTokenCustomizer;
   }
 
   @Override
   public IntrospectionResultHelper getIntrospectionResultHelper() {
-    return null;
+    return introspectionHelper;
   }
 
   @Override
   public UserInfoHelper getUserinfoHelper() {
-    return null;
+    return userInfoHelper;
   }
 
   @Override
   public String name() {
     return PROFILE_NAME;
+  }
+
+  @Override
+  public RequestValidator getRequestValidator() {
+    return this;
+  }
+
+  @Override
+  public void validateRequest(OAuth2Request request) {
+    groupHelper.validateGroupScopes(request);
   }
 
 }

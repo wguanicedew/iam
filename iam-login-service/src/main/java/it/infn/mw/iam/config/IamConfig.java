@@ -15,8 +15,12 @@
  */
 package it.infn.mw.iam.config;
 
+import static it.infn.mw.iam.core.oauth.profile.ScopeAwareProfileResolver.IAM_PROFILE_ID;
+import static it.infn.mw.iam.core.oauth.profile.ScopeAwareProfileResolver.WLCG_PROFILE_ID;
+
 import java.time.Clock;
 import java.util.Arrays;
+import java.util.Map;
 
 import org.h2.server.web.WebServlet;
 import org.mitre.oauth2.service.IntrospectionResultAssembler;
@@ -26,8 +30,8 @@ import org.mitre.openid.connect.service.ScopeClaimTranslationService;
 import org.mitre.openid.connect.service.UserInfoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.embedded.FilterRegistrationBean;
 import org.springframework.boot.context.embedded.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -37,23 +41,27 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.core.Ordered;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.token.TokenEnhancer;
+
+import com.google.common.collect.Maps;
 
 import it.infn.mw.iam.api.account.AccountUtils;
 import it.infn.mw.iam.api.aup.AUPSignatureCheckService;
 import it.infn.mw.iam.authn.ExternalAuthenticationInfoProcessor;
-import it.infn.mw.iam.core.IamIntrospectionResultAssembler;
-import it.infn.mw.iam.core.oauth.ClaimValueHelper;
+import it.infn.mw.iam.core.oauth.IamIntrospectionResultAssembler;
 import it.infn.mw.iam.core.oauth.profile.IamTokenEnhancer;
 import it.infn.mw.iam.core.oauth.profile.JWTProfile;
 import it.infn.mw.iam.core.oauth.profile.JWTProfileResolver;
-import it.infn.mw.iam.core.oauth.profile.StaticJWTProfileResolver;
+import it.infn.mw.iam.core.oauth.profile.ScopeAwareProfileResolver;
+import it.infn.mw.iam.core.oauth.profile.iam.ClaimValueHelper;
 import it.infn.mw.iam.core.oauth.profile.iam.IamJWTProfile;
 import it.infn.mw.iam.core.oauth.profile.iam.IamJWTProfileAccessTokenBuilder;
 import it.infn.mw.iam.core.oauth.profile.iam.IamJWTProfileIdTokenCustomizer;
 import it.infn.mw.iam.core.oauth.profile.iam.IamJWTProfileTokenIntrospectionHelper;
 import it.infn.mw.iam.core.oauth.profile.iam.IamJWTProfileUserinfoHelper;
+import it.infn.mw.iam.core.oauth.profile.wlcg.WLCGGroupHelper;
 import it.infn.mw.iam.core.oauth.profile.wlcg.WLCGJWTProfile;
 import it.infn.mw.iam.core.oauth.scope.matchers.DefaultScopeMatcherRegistry;
 import it.infn.mw.iam.core.oauth.scope.matchers.ScopeMatcherRegistry;
@@ -114,8 +122,7 @@ public class IamConfig {
   }
 
 
-  @Bean
-  @ConditionalOnProperty(name = "iam.jwt-profile.default-profile", havingValue = "iam")
+  @Bean(name = "iamJwtProfile")
   JWTProfile iamJwtProfile(IamProperties props, IamAccountRepository accountRepo,
       ScopeClaimTranslationService converter, ClaimValueHelper claimHelper,
       UserInfoService userInfoService, ExternalAuthenticationInfoProcessor proc) {
@@ -134,19 +141,33 @@ public class IamConfig {
     return new IamJWTProfile(atBuilder, idHelper, uiHelper, intrHelper);
   }
 
-  @Bean
-  @ConditionalOnProperty(name = "iam.jwt-profile.default-profile", havingValue = "wlcg")
+  @Bean(name = "wlcgJwtProfile")
   JWTProfile wlcgJwtProfile(IamProperties props, IamAccountRepository accountRepo,
       ScopeClaimTranslationService converter, ClaimValueHelper claimHelper,
       UserInfoService userInfoService, ExternalAuthenticationInfoProcessor proc) {
-    return new WLCGJWTProfile();
+
+    return new WLCGJWTProfile(props, userInfoService, accountRepo, new WLCGGroupHelper(),
+        new DefaultIntrospectionResultAssembler());
   }
 
   @Bean
-  JWTProfileResolver jwtProfileResolver(JWTProfile profile) {
-    final String profileName = profile.name();
-    LOG.info("Default JWT profile: {}", profileName);
-    return new StaticJWTProfileResolver(profile);
+  JWTProfileResolver jwtProfileResolver(@Qualifier("iamJwtProfile") JWTProfile iamProfile,
+      @Qualifier("wlcgJwtProfile") JWTProfile wlcgProfile, IamProperties properties,
+      ClientDetailsService clientDetailsService) {
+
+    JWTProfile defaultProfile = iamProfile;
+
+    if (it.infn.mw.iam.config.IamProperties.JWTProfile.Profile.WLCG
+      .equals(properties.getJwtProfile().getDefaultProfile())) {
+      defaultProfile = wlcgProfile;
+    }
+
+    Map<String, JWTProfile> profileMap = Maps.newHashMap();
+    profileMap.put(IAM_PROFILE_ID, iamProfile);
+    profileMap.put(WLCG_PROFILE_ID, wlcgProfile);
+
+    LOG.info("Default JWT profile: {}", defaultProfile.name());
+    return new ScopeAwareProfileResolver(defaultProfile, profileMap, clientDetailsService);
   }
 
   @Bean

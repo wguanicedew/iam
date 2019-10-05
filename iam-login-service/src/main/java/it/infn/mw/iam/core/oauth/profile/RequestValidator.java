@@ -15,17 +15,10 @@
  */
 package it.infn.mw.iam.core.oauth.profile;
 
-public class StaticJWTProfileResolver implements JWTProfileResolver {
+import org.springframework.security.oauth2.provider.OAuth2Request;
 
-  final JWTProfile profile;
+public interface RequestValidator {
 
-  public StaticJWTProfileResolver(JWTProfile profile) {
-    this.profile = profile;
-  }
-
-  @Override
-  public JWTProfile resolveProfile(String clientId) {
-    return profile;
-  }
+  public void validateRequest(OAuth2Request request);
 
 }

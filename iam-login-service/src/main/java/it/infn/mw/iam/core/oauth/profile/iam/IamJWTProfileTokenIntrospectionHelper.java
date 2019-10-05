@@ -15,10 +15,6 @@
  */
 package it.infn.mw.iam.core.oauth.profile.iam;
 
-import static java.util.stream.Collectors.joining;
-
-import java.text.ParseException;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -32,56 +28,29 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Sets;
 
 import it.infn.mw.iam.config.IamProperties;
-import it.infn.mw.iam.core.oauth.profile.IntrospectionResultHelper;
+import it.infn.mw.iam.core.oauth.profile.common.BaseIntrospectionHelper;
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.model.IamUserInfo;
 import it.infn.mw.iam.persistence.repository.UserInfoAdapter;
 
-public class IamJWTProfileTokenIntrospectionHelper implements IntrospectionResultHelper {
+public class IamJWTProfileTokenIntrospectionHelper extends BaseIntrospectionHelper {
 
   public static final Logger LOG =
       LoggerFactory.getLogger(IamJWTProfileTokenIntrospectionHelper.class);
 
-  public static final String PROFILE = "profile";
-  public static final String AUDIENCE = "aud";
-  public static final String NAME = "name";
-  public static final String PREFERRED_USERNAME = "preferred_username";
-  public static final String EMAIL = "email";
-  public static final String GROUPS = "groups";
-  public static final String ORGANISATION_NAME = "organisation_name";
-  public static final String ISSUER = "iss";
-
-  private IamProperties properties;
-  private IntrospectionResultAssembler assembler;
-
   public IamJWTProfileTokenIntrospectionHelper(IamProperties props,
       IntrospectionResultAssembler assembler) {
-    this.properties = props;
-    this.assembler = assembler;
+    super(props, assembler);
   }
 
   @Override
   public Map<String, Object> assembleIntrospectionResult(OAuth2AccessTokenEntity accessToken,
       UserInfo userInfo, Set<String> authScopes) {
 
-    Map<String, Object> result = assembler.assembleFrom(accessToken, userInfo, authScopes);
+    Map<String, Object> result = getAssembler().assembleFrom(accessToken, userInfo, authScopes);
 
-    final String oidcIssuer = properties.getIssuer();
-    String trailingSlashIssuer = oidcIssuer.endsWith("/") ? oidcIssuer : oidcIssuer + "/";
-
-    result.put(ISSUER, trailingSlashIssuer);
-
-    try {
-
-      List<String> audience = accessToken.getJwt().getJWTClaimsSet().getAudience();
-
-      if (audience != null && !audience.isEmpty()) {
-        result.put(AUDIENCE, audience.stream().collect(joining(" ")));
-      }
-
-    } catch (ParseException e) {
-      LOG.error("Error getting audience out of access token: {}", e.getMessage(), e);
-    }
+    addIssuerClaim(result);
+    addAudience(result, accessToken);
 
     // Intersection of scopes authorized for the client and scopes linked to the
     // access token
@@ -100,7 +69,7 @@ public class IamJWTProfileTokenIntrospectionHelper implements IntrospectionResul
 
         result.put(NAME, iamUserInfo.getName());
         result.put(PREFERRED_USERNAME, iamUserInfo.getPreferredUsername());
-        result.put(ORGANISATION_NAME, properties.getOrganisation().getName());
+        result.put(ORGANISATION_NAME, getProperties().getOrganisation().getName());
       }
 
       if (scopes.contains(EMAIL)) {
