@@ -1,18 +1,21 @@
-version: '2'
+version: '3.5'
+
+volumes:
+  db_data:
+  trust:
 
 services:
 
   db_data:
     image: busybox
     volumes:
-      - /var/lib/mysql
+      - db_data:/var/lib/mysql
     command: /bin/true
 
   db:
-    container_name: mariadb
-    image: mariadb
-    volumes_from:
-      - db_data
+    image: ${DB_IMAGE}
+    volumes:
+      - db_data:/var/lib/mysql
 
     # The setting below enables custom configuration
     # that turns on the MySQL query log
@@ -35,7 +38,7 @@ services:
     #  context: ./docker/trust-anchors
     command: /bin/true
     volumes:
-      - /etc/grid-security/certificates
+      - trust:/etc/grid-security/certificates
 
   iam-be:
     container_name: iam-be
@@ -78,10 +81,8 @@ services:
     depends_on:
       - db
 
-    volumes_from:
-      - trust
-
     volumes:
+      - trust:/etc/grid-security/certificates
       - .:/code:ro
       - /dev/urandom:/dev/random
       - ./compose/metadata/iam.local.io.metadata.xml:/indigo-iam/iam.local.io.metadata.xml:ro
@@ -111,10 +112,8 @@ services:
     ports:
       - "1045:1045"
 
-    volumes_from:
-      - trust
-
     volumes:
+      - trust:/etc/grid-security/certificates
       - .:/code:ro
 
   iam:
