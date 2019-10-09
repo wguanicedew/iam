@@ -17,10 +17,10 @@
 spring:
   datasource:
     dataSourceClassName: com.mysql.jdbc.jdbc2.optional.MysqlDataSource
-    url: jdbc:mysql://${IAM_DB_HOST:dev.local.io}:${IAM_DB_PORT:3306}/${IAM_DB_NAME:iam}
+    url: jdbc:mysql://${IAM_DB_HOST:dev.local.io}:${IAM_DB_PORT:3306}/${IAM_DB_NAME:iam}?useSSL=${IAM_DB_USE_SSL:false}
     username: ${IAM_DB_USERNAME:iam}
     password: ${IAM_DB_PASSWORD:pwd}
-    max-active: ${IAM_DB_MAX_ACTIVE:100}
+    max-active: ${IAM_DB_MAX_ACTIVE:20}
     max-idle:  ${IAM_DB_MAX_IDLE:5}
     initial-size: ${IAM_DB_INITIAL_SIZE:1}
     test-while-idle: ${IAM_DB_TEST_WHILE_IDLE:true}

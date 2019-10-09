@@ -23,16 +23,18 @@ import it.infn.mw.iam.core.userinfo.DelegateUserInfoAdapter;
 
 public class WLCGUserInfoAdapter extends DelegateUserInfoAdapter {
 
+  private static final long serialVersionUID = 1L;
+
   private WLCGUserInfoAdapter(UserInfo delegate) {
     super(delegate);
   }
-  
+
   @Override
   public JsonObject toJson() {
     JsonObject json = super.toJson();
-    
+
     json.remove("groups");
-    
+
     return json;
   }
 

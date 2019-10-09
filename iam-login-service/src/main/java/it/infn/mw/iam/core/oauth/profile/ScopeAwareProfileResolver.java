@@ -20,24 +20,27 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Objects.isNull;
 
 import java.util.Map;
-import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
+
+import com.google.common.collect.Sets;
 
 import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
 
 public class ScopeAwareProfileResolver implements JWTProfileResolver {
 
-  public static final String PROFILE_SELECTOR_SCOPE = "urn:indigo-iam.github.io:jwt-profile#";
+  public static final String IAM_PROFILE_ID = "iam";
+  public static final String WLCG_PROFILE_ID = "wlcg";
 
-  public static final String IAM_PROFILE_ID = profileId("iam");
-  public static final String WLCG_PROFILE_ID = profileId("wlcg-1.0");
+  public static final Set<String> SUPPORTED_PROFILES =
+      Sets.newHashSet(IAM_PROFILE_ID, WLCG_PROFILE_ID);
 
   private final Map<String, JWTProfile> profileMap;
   private final JWTProfile defaultProfile;
   private final ClientDetailsService clientDetailsService;
-  
+
 
   public ScopeAwareProfileResolver(JWTProfile defaultProfile, Map<String, JWTProfile> profileMap,
       ClientDetailsService clientDetailsService) {
@@ -46,8 +49,14 @@ public class ScopeAwareProfileResolver implements JWTProfileResolver {
     this.clientDetailsService = clientDetailsService;
   }
 
-  private Optional<String> findProfileScope(ClientDetails client) {
-    return client.getScope().stream().filter(s -> s.startsWith(PROFILE_SELECTOR_SCOPE)).findFirst();
+
+  private JWTProfile findProfileFromScope(ClientDetails client) {
+    return client.getScope()
+      .stream()
+      .filter(SUPPORTED_PROFILES::contains)
+      .findFirst()
+      .map(profileMap::get)
+      .orElse(defaultProfile);
   }
 
 
@@ -60,10 +69,6 @@ public class ScopeAwareProfileResolver implements JWTProfileResolver {
       throw new IllegalArgumentException("Client not found: " + clientId);
     }
 
-    return findProfileScope(client).map(profileMap::get).orElse(defaultProfile);
-  }
-
-  public static final String profileId(String profileName) {
-    return String.format("%s%s", PROFILE_SELECTOR_SCOPE, profileName);
+    return findProfileFromScope(client);
   }
 }
