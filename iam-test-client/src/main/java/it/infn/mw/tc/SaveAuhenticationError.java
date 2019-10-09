@@ -10,12 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 
-
 public class SaveAuhenticationError implements AuthenticationFailureHandler {
-
-  public SaveAuhenticationError() {
-    // TODO Auto-generated constructor stub
-  }
 
   @Override
   public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
@@ -25,7 +20,6 @@ public class SaveAuhenticationError implements AuthenticationFailureHandler {
 
     RequestDispatcher dispatcher = request.getRequestDispatcher("/error");
     dispatcher.forward(request, response);
-
 
   }
 
