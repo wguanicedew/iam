@@ -152,7 +152,7 @@ public class AupIntegrationTests extends AupTestSupport {
 
   @Test
   @WithMockUser(username = "admin", roles = {"ADMIN", "USER"})
-  public void aupTextIsRequired() throws JsonProcessingException, Exception {
+  public void aupUrlIsRequired() throws JsonProcessingException, Exception {
     AupDTO aup = converter.dtoFromEntity(buildDefaultAup());
 
     aup.setUrl(null);
@@ -162,6 +162,21 @@ public class AupIntegrationTests extends AupTestSupport {
           post("/iam/aup").contentType(APPLICATION_JSON).content(mapper.writeValueAsString(aup)))
       .andExpect(status().isBadRequest())
       .andExpect(jsonPath("$.error", equalTo("Invalid AUP: the AUP URL cannot be blank")));
+
+  }
+
+  @Test
+  @WithMockUser(username = "admin", roles = {"ADMIN", "USER"})
+  public void aupUrlIsNotAValidUrl() throws JsonProcessingException, Exception {
+    AupDTO aup = converter.dtoFromEntity(buildDefaultAup());
+
+    aup.setUrl("Not-a-URL");
+
+    mvc
+      .perform(
+          post("/iam/aup").contentType(APPLICATION_JSON).content(mapper.writeValueAsString(aup)))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.error", equalTo("Invalid AUP: the AUP URL is not valid")));
 
   }
 

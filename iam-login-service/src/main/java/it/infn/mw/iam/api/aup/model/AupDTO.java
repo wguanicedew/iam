@@ -33,7 +33,7 @@ import it.infn.mw.iam.api.validators.HtmlEscapeCheck;
 public class AupDTO {
 
   @NotBlank(message = "Invalid AUP: the AUP URL cannot be blank")
-  @URL
+  @URL(message = "Invalid AUP: the AUP URL is not valid")
   @HtmlEscapeCheck
   String url;
 
