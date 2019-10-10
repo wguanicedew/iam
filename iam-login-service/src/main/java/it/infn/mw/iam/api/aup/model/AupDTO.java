@@ -22,16 +22,20 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.NotBlank;
+import org.hibernate.validator.constraints.URL;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import it.infn.mw.iam.api.scim.controller.utils.JsonDateSerializer;
+import it.infn.mw.iam.api.validators.HtmlEscapeCheck;
 
 public class AupDTO {
 
-  @NotBlank(message = "Invalid AUP: the AUP text cannot be blank")
-  String text;
+  @NotBlank(message = "Invalid AUP: the AUP URL cannot be blank")
+  @URL
+  @HtmlEscapeCheck
+  String url;
 
   @Size(max = 128,
       message = "Invalid AUP: the description string must be at most 128 characters long")
@@ -47,15 +51,15 @@ public class AupDTO {
   @JsonSerialize(using = JsonDateSerializer.class)
   Date lastUpdateTime;
 
-  public AupDTO(@JsonProperty("text") String text, @JsonProperty("description") String description,
+  public AupDTO(@JsonProperty("url") String url, @JsonProperty("description") String description,
       @JsonProperty("signatureValidityInDays") Long signatureValidityInDays,
       @JsonProperty("creationTime") Date creationTime,
       @JsonProperty("lastUpdateTime") Date lastUpdateTime) {
-    this.text = text;
-    this.description = description;
-    this.signatureValidityInDays = signatureValidityInDays;
-    this.creationTime = creationTime;
-    this.lastUpdateTime = lastUpdateTime;
+    this.setUrl(url);
+    this.setDescription(description);
+    this.setSignatureValidityInDays(signatureValidityInDays);
+    this.setCreationTime(creationTime);
+    this.setLastUpdateTime(lastUpdateTime);
   }
 
   public String getDescription() {
@@ -68,13 +72,13 @@ public class AupDTO {
   }
 
 
-  public String getText() {
-    return text;
+  public String getUrl() {
+    return url;
   }
 
 
-  public void setText(String text) {
-    this.text = text;
+  public void setUrl(String url) {
+    this.url = url;
   }
 
 

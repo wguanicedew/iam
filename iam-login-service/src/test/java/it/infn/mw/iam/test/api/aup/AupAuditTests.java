@@ -157,7 +157,7 @@ public class AupAuditTests extends AupTestSupport {
     IamAup aup = buildDefaultAup();
     aupRepo.saveDefaultAup(aup);
 
-    aup.setText("Updated aup text");
+    aup.setUrl("http://updated-aup-text.org/");
 
     // Time travel 1 minute in the future
     Date then = new Date(now.getTime() + TimeUnit.MINUTES.toMillis(1));

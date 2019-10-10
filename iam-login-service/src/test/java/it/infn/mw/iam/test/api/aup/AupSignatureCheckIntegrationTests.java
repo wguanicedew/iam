@@ -140,7 +140,7 @@ public class AupSignatureCheckIntegrationTests extends AupTestSupport {
     
     mockTimeProvider.setTime(now.getTime() + TimeUnit.MINUTES.toMillis(10));
     
-    aup.setText("Updated AUP text");
+    aup.setUrl("http://updated-aup-text.org/");
     aup.setDescription("Updated AUP desc");
     
     mvc

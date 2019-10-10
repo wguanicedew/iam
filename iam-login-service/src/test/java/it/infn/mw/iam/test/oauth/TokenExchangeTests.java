@@ -194,7 +194,7 @@ public class TokenExchangeTests extends EndpointsTestUtils {
     aup.setCreationTime(new Date());
     aup.setLastUpdateTime(new Date());
     aup.setName("default-aup");
-    aup.setText("AUP text");
+    aup.setUrl("AUP text");
     aup.setDescription("AUP description");
     aup.setSignatureValidityInDays(0L);
 

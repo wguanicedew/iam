@@ -92,7 +92,7 @@ public class DefaultAupService implements AupService {
     
     aup.setLastUpdateTime(now);
     aup.setDescription(aupDto.getDescription());
-    aup.setText(aupDto.getText());
+    aup.setUrl(aupDto.getUrl());
     aup.setSignatureValidityInDays(aupDto.getSignatureValidityInDays());
     repo.save(aup);
     
