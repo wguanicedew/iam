@@ -68,6 +68,9 @@ import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 @WithAnonymousUser
 public class AupIntegrationTests extends AupTestSupport {
 
+  private final String INVALID_AUP_URL =
+      "https://iam.local.io/\"</script><script>alert(8);</script>";
+
   private final static String DEFAULT_AUP_URL = "http://updated-aup-text.org/";
   private final static String DEFAULT_AUP_DESC = "desc";
 
@@ -177,6 +180,36 @@ public class AupIntegrationTests extends AupTestSupport {
           post("/iam/aup").contentType(APPLICATION_JSON).content(mapper.writeValueAsString(aup)))
       .andExpect(status().isBadRequest())
       .andExpect(jsonPath("$.error", equalTo("Invalid AUP: the AUP URL is not valid")));
+
+  }
+
+  @Test
+  @WithMockUser(username = "admin", roles = {"ADMIN", "USER"})
+  public void aupUrlQueryNotAllowed() throws JsonProcessingException, Exception {
+    AupDTO aup = converter.dtoFromEntity(buildDefaultAup());
+
+    aup.setUrl("http://aup-url.org/with?query=value");
+
+    mvc
+      .perform(
+          post("/iam/aup").contentType(APPLICATION_JSON).content(mapper.writeValueAsString(aup)))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.error", equalTo("Invalid AUP: Invalid URL")));
+
+  }
+
+  @Test
+  @WithMockUser(username = "admin", roles = {"ADMIN", "USER"})
+  public void aupUrlInvalidHTMLTags() throws JsonProcessingException, Exception {
+    AupDTO aup = converter.dtoFromEntity(buildDefaultAup());
+
+    aup.setUrl(INVALID_AUP_URL);
+
+    mvc
+      .perform(
+          post("/iam/aup").contentType(APPLICATION_JSON).content(mapper.writeValueAsString(aup)))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.error", equalTo("Invalid AUP: Invalid URL")));
 
   }
 
