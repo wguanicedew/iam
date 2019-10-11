@@ -32,10 +32,10 @@
 
                 <div ng-if="$ctrl.aup != null">
                     <div class="form-group">
-                        <label>Acceptable Usage Policy Text</label>
-                        <div>{{$ctrl.aup.data.text}}</div>
+                        <label>Acceptable Usage Policy URL</label>
+                        <div><a href="{{$ctrl.aup.data.url}}">{{$ctrl.aup.data.url}}</a></div>
                         <span class="help-block">
-                            The text above is presented to users at registration time or periodically
+                            The URL above is presented to users at registration time or periodically
                             if the AUP is configured for periodic reacceptance
                         </span>
                     </div>

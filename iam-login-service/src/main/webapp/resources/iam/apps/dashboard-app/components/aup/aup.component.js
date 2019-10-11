@@ -50,7 +50,7 @@
 
         self.reset = function() {
             self.aupVal = {
-                text: self.aup.text,
+                url: self.aup.url,
                 signatureValidityInDays: self.aup.signatureValidityInDays
             };
         };
@@ -81,7 +81,7 @@
 
         self.reset = function() {
             self.aupVal = {
-                text: "AUP text...",
+                url: "",
                 signatureValidityInDays: 0
             };
         };

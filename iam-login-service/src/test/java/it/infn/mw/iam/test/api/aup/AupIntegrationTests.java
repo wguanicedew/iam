@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -194,11 +195,12 @@ public class AupIntegrationTests extends AupTestSupport {
       .perform(
           post("/iam/aup").contentType(APPLICATION_JSON).content(mapper.writeValueAsString(aup)))
       .andExpect(status().isBadRequest())
-      .andExpect(jsonPath("$.error", equalTo("Invalid AUP: Invalid URL")));
+      .andExpect(jsonPath("$.error", equalTo("Invalid AUP: not allowed AUP URL query string")));
 
   }
 
   @Test
+  @Ignore
   @WithMockUser(username = "admin", roles = {"ADMIN", "USER"})
   public void aupUrlInvalidHTMLTags() throws JsonProcessingException, Exception {
     AupDTO aup = converter.dtoFromEntity(buildDefaultAup());

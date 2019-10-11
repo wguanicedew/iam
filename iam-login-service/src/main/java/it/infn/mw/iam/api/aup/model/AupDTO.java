@@ -19,7 +19,6 @@ import java.util.Date;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.NotBlank;
@@ -29,15 +28,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import it.infn.mw.iam.api.scim.controller.utils.JsonDateSerializer;
+import it.infn.mw.iam.api.validators.NoQueryUrl;
 
 public class AupDTO {
 
-  private final String URL_NOQUERY_REGEXP =
-      "^((?:http:\\/\\/)|(?:https:\\/\\/))(www.)?((?:[a-zA-Z0-9]+\\.[a-z]{3})|(?:\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}(?::\\d+)?))([\\/a-zA-Z0-9\\.]*)$\n";
-
   @NotBlank(message = "Invalid AUP: the AUP URL cannot be blank")
   @URL(message = "Invalid AUP: the AUP URL is not valid")
-  @Pattern(regexp = URL_NOQUERY_REGEXP, message = "Invalid AUP: Invalid URL")
+  @NoQueryUrl(message = "Invalid AUP: not allowed AUP URL query string")
   String url;
 
   @Size(max = 128,

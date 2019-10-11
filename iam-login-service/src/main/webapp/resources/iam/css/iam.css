@@ -98,6 +98,10 @@
     text-align: justify;
 }
 
+#sign-aup-form .sign-aup-url {
+    text-align: center;
+}
+
 #sign-aup-form .sign-aup-btns {
     margin-top: 2em;
     font-size: x-large;
