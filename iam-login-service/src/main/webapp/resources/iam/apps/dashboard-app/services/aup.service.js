@@ -27,6 +27,7 @@
             getAup: getAup,
             createAup: createAup,
             updateAup: updateAup,
+            touchAup: touchAup,
             deleteAup: deleteAup,
             getAupSignature: getAupSignature,
             getAupSignatureForUser: getAupSignatureForUser
@@ -44,6 +45,10 @@
 
         function updateAup(aup) {
             return $http.patch('/iam/aup', aup);
+        }
+
+        function touchAup() {
+            return $http.post('/iam/aup/touch');
         }
 
         function getAupSignatureForUser(userId) {

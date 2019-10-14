@@ -76,8 +76,6 @@ public class AupController {
       throw buildValidationError(validationResult);
     }
 
-   
-
     service.saveAup(aup);
   }
 
@@ -91,6 +89,15 @@ public class AupController {
     }
 
     IamAup updatedAup = service.updateAup(aup);
+    return converter.dtoFromEntity(updatedAup);
+  }
+
+  @RequestMapping(value = "/iam/aup/touch", method = RequestMethod.POST)
+  @ResponseStatus(code = HttpStatus.OK)
+  @PreAuthorize("hasRole('ADMIN')")
+  public AupDTO touchAup() {
+
+    IamAup updatedAup = service.touchAup();
     return converter.dtoFromEntity(updatedAup);
   }
 

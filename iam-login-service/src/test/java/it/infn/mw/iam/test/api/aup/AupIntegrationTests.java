@@ -420,7 +420,7 @@ public class AupIntegrationTests extends AupTestSupport {
     assertThat(updatedAup.getUrl(), equalTo(UPDATED_AUP_URL));
     assertThat(updatedAup.getDescription(), equalTo(UPDATED_AUP_DESC));
     assertThat(updatedAup.getCreationTime(), new DateEqualModulo1Second(now));
-    assertThat(updatedAup.getLastUpdateTime(), new DateEqualModulo1Second(then));
+    assertThat(updatedAup.getLastUpdateTime(), new DateEqualModulo1Second(now));
     assertThat(updatedAup.getSignatureValidityInDays(), equalTo(18L));
   }
 
