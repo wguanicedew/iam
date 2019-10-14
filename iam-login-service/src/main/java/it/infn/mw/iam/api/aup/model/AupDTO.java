@@ -40,9 +40,9 @@ public class AupDTO {
   @Size(max = 128,
       message = "Invalid AUP: the description string must be at most 128 characters long")
   String description;
-  
+
   @NotNull(message = "Invalid AUP: signatureValidityInDays is required")
-  @Min(value=0L, message="Invalid AUP: signatureValidityInDays must be >= 0")
+  @Min(value = 0L, message = "Invalid AUP: signatureValidityInDays must be >= 0")
   Long signatureValidityInDays;
 
   @JsonSerialize(using = JsonDateSerializer.class)
@@ -55,11 +55,11 @@ public class AupDTO {
       @JsonProperty("signatureValidityInDays") Long signatureValidityInDays,
       @JsonProperty("creationTime") Date creationTime,
       @JsonProperty("lastUpdateTime") Date lastUpdateTime) {
-    this.setUrl(url);
-    this.setDescription(description);
-    this.setSignatureValidityInDays(signatureValidityInDays);
-    this.setCreationTime(creationTime);
-    this.setLastUpdateTime(lastUpdateTime);
+    this.url = url;
+    this.description = description;
+    this.signatureValidityInDays = signatureValidityInDays;
+    this.creationTime = creationTime;
+    this.lastUpdateTime = lastUpdateTime;
   }
 
   public String getDescription() {
