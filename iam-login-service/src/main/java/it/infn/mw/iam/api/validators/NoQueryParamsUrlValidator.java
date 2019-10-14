@@ -17,6 +17,7 @@ package it.infn.mw.iam.api.validators;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Objects;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -26,26 +27,29 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Scope("prototype")
-public class NoQueryUrlValidator implements ConstraintValidator<NoQueryUrl, String> {
+public class NoQueryParamsUrlValidator implements ConstraintValidator<NoQueryParamsUrl, String> {
 
 
   @Override
-  public void initialize(NoQueryUrl constraintAnnotation) {
-    // empty method 
+  public void initialize(NoQueryParamsUrl constraintAnnotation) {
+    // empty method
   }
 
   @Override
   public boolean isValid(String value, ConstraintValidatorContext context) {
 
+    if (value == null) {
+      return true;
+    }
     try {
       URI uri = new URI(value);
-      if (uri.getQuery().isEmpty()) {
-        return true;
-      }
+      return Objects.isNull(uri.getQuery());
     } catch (URISyntaxException e) {
+      context.disableDefaultConstraintViolation();
+      context.buildConstraintViolationWithTemplate("Invalid AUP: the AUP URL is not valid")
+        .addConstraintViolation();
       return false;
     }
-    return false;
   }
 
 }

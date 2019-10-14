@@ -28,13 +28,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import it.infn.mw.iam.api.scim.controller.utils.JsonDateSerializer;
-import it.infn.mw.iam.api.validators.NoQueryUrl;
+import it.infn.mw.iam.api.validators.NoQueryParamsUrl;
 
 public class AupDTO {
 
   @NotBlank(message = "Invalid AUP: the AUP URL cannot be blank")
   @URL(message = "Invalid AUP: the AUP URL is not valid")
-  @NoQueryUrl(message = "Invalid AUP: not allowed AUP URL query string")
+  @NoQueryParamsUrl(message = "Invalid AUP: query string not allowed in the AUP URL")
   String url;
 
   @Size(max = 128,

@@ -27,8 +27,8 @@ import javax.validation.Payload;
 
 @Retention(RUNTIME)
 @Target({FIELD, METHOD})
-@Constraint(validatedBy = NoQueryUrlValidator.class)
-public @interface NoQueryUrl {
+@Constraint(validatedBy = NoQueryParamsUrlValidator.class)
+public @interface NoQueryParamsUrl {
   String message() default "The AUP URL is not valid";
 
   Class<?>[] groups() default {};

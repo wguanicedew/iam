@@ -32,7 +32,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,10 +99,8 @@ public class AupIntegrationTests extends AupTestSupport {
 
   @Before
   public void setup() {
-    mvc = MockMvcBuilders.webAppContextSetup(context)
-      .alwaysDo(log())
-      .apply(springSecurity())
-      .build();
+    mvc =
+        MockMvcBuilders.webAppContextSetup(context).alwaysDo(log()).apply(springSecurity()).build();
     mockOAuth2Filter.cleanupSecurityContext();
   }
 
@@ -115,8 +112,9 @@ public class AupIntegrationTests extends AupTestSupport {
 
   @Test
   public void noAupDefinedResultsin404() throws Exception {
-    mvc.perform(get("/iam/aup")).andExpect(status().isNotFound()).andExpect(
-        jsonPath("$.error", equalTo(AupNotFoundError.AUP_NOT_DEFINED)));
+    mvc.perform(get("/iam/aup"))
+      .andExpect(status().isNotFound())
+      .andExpect(jsonPath("$.error", equalTo(AupNotFoundError.AUP_NOT_DEFINED)));
   }
 
   @Test
@@ -195,12 +193,12 @@ public class AupIntegrationTests extends AupTestSupport {
       .perform(
           post("/iam/aup").contentType(APPLICATION_JSON).content(mapper.writeValueAsString(aup)))
       .andExpect(status().isBadRequest())
-      .andExpect(jsonPath("$.error", equalTo("Invalid AUP: not allowed AUP URL query string")));
+      .andExpect(
+          jsonPath("$.error", equalTo("Invalid AUP: query string not allowed in the AUP URL")));
 
   }
 
   @Test
-  @Ignore
   @WithMockUser(username = "admin", roles = {"ADMIN", "USER"})
   public void aupUrlInvalidHTMLTags() throws JsonProcessingException, Exception {
     AupDTO aup = converter.dtoFromEntity(buildDefaultAup());
@@ -211,7 +209,7 @@ public class AupIntegrationTests extends AupTestSupport {
       .perform(
           post("/iam/aup").contentType(APPLICATION_JSON).content(mapper.writeValueAsString(aup)))
       .andExpect(status().isBadRequest())
-      .andExpect(jsonPath("$.error", equalTo("Invalid AUP: Invalid URL")));
+      .andExpect(jsonPath("$.error", equalTo("Invalid AUP: the AUP URL is not valid")));
 
   }
 
@@ -236,7 +234,7 @@ public class AupIntegrationTests extends AupTestSupport {
   @WithMockUser(username = "admin", roles = {"ADMIN", "USER"})
   public void aupCreationRequiresSignatureValidityDays() throws JsonProcessingException, Exception {
     AupDTO aup = new AupDTO(DEFAULT_AUP_URL, null, null, null, null);
-    
+
     Date now = new Date();
     mockTimeProvider.setTime(now.getTime());
 
@@ -347,8 +345,9 @@ public class AupIntegrationTests extends AupTestSupport {
   public void aupUpdateFailsWith404IfAupIsNotDefined() throws JsonProcessingException, Exception {
     AupDTO aup = converter.dtoFromEntity(buildDefaultAup());
     mvc
-      .perform(MockMvcRequestBuilders.patch("/iam/aup").contentType(APPLICATION_JSON).content(
-          mapper.writeValueAsString(aup)))
+      .perform(MockMvcRequestBuilders.patch("/iam/aup")
+        .contentType(APPLICATION_JSON)
+        .content(mapper.writeValueAsString(aup)))
       .andExpect(status().isNotFound())
       .andExpect(jsonPath("$.error", equalTo(AupNotFoundError.AUP_NOT_DEFINED)));
   }
@@ -373,7 +372,7 @@ public class AupIntegrationTests extends AupTestSupport {
       .andExpect(jsonPath("$.error", equalTo("Invalid AUP: the AUP URL cannot be blank")));
 
   }
-  
+
   @Test
   @WithMockUser(username = "admin", roles = {"ADMIN", "USER"})
   public void aupUpdateWorks() throws JsonProcessingException, Exception {
