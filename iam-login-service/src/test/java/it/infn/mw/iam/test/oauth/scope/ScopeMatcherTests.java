@@ -20,6 +20,7 @@ import static it.infn.mw.iam.core.oauth.scope.matchers.RegexpScopeMatcher.regexp
 import static it.infn.mw.iam.core.oauth.scope.matchers.StructuredPathScopeMatcher.structuredPathMatcher;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
@@ -46,7 +47,7 @@ public class ScopeMatcherTests {
 
   }
 
-  
+
   @Test
   public void testPathMatch() {
 
@@ -56,9 +57,10 @@ public class ScopeMatcherTests {
     assertThat(matcher.matches("read:/other"), is(false));
     assertThat(matcher.matches("read:/path"), is(true));
     assertThat(matcher.matches("read:/path/path/path"), is(true));
-    
+
 
   }
+
   @Test(expected = IllegalArgumentException.class)
   public void testScopeRelativePathDetection() {
 
@@ -115,13 +117,74 @@ public class ScopeMatcherTests {
     m.matches(null);
   }
 
-  
+
   @Test
   public void testPathParsing() {
-    
+
     StructuredPathScopeMatcher m = StructuredPathScopeMatcher.fromString("read:/");
     assertThat(m.getPrefix(), is("read"));
     assertThat(m.getPath(), is("/"));
   }
 
+  @Test(expected = IllegalArgumentException.class)
+  public void testNullPrefixException() {
+
+    StructuredPathScopeMatcher.structuredPathMatcher(null, "/");
+
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void emptyPrefixException() {
+
+    StructuredPathScopeMatcher.structuredPathMatcher("", "/");
+
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testNullPathException() {
+
+    StructuredPathScopeMatcher.structuredPathMatcher("test", null);
+
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void emptyPathException() {
+
+    StructuredPathScopeMatcher.structuredPathMatcher("test", "");
+  }
+
+  @Test
+  public void testStructuredScopeEquals() {
+    StructuredPathScopeMatcher m = StructuredPathScopeMatcher.structuredPathMatcher("test", "/");
+    StructuredPathScopeMatcher m2 = StructuredPathScopeMatcher.structuredPathMatcher("test", "/");
+    StructuredPathScopeMatcher m3 = StructuredPathScopeMatcher.structuredPathMatcher("other", "/");
+    StructuredPathScopeMatcher m4 =
+        StructuredPathScopeMatcher.structuredPathMatcher("test", "/other");
+
+    assertThat(m, is(m));
+    assertThat(m.equals(null), is(false));
+    assertThat(m, is(m2));
+    assertThat(m, is(not(m3)));
+    assertThat(m, is(not(m4)));
+  }
+
+  @Test
+  public void testStructuredScopeToString() {
+    StructuredPathScopeMatcher m = StructuredPathScopeMatcher.structuredPathMatcher("test", "/");
+
+    assertThat(m.toString(), is("test:/"));
+  }
+
+  @Test
+  public void testStructuredScopeHashCode() {
+    StructuredPathScopeMatcher m = StructuredPathScopeMatcher.structuredPathMatcher("test", "/");
+    StructuredPathScopeMatcher m2 =
+        StructuredPathScopeMatcher.structuredPathMatcher("test", "/path");
+    StructuredPathScopeMatcher m3 =
+        StructuredPathScopeMatcher.structuredPathMatcher("test", "/");
+
+    assertThat(m.hashCode() == m2.hashCode(), is(false));
+    assertThat(m.hashCode() == m3.hashCode(), is(true));
+
+  }
 }

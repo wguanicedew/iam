@@ -253,4 +253,5 @@ public class ScopePolicyPdpTests extends ScopePolicyTestUtils {
     assertThat(filteredScopes, hasSize(3));
     assertThat(filteredScopes, hasItems("openid", "profile", "write"));
   }
+
 }

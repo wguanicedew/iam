@@ -22,6 +22,8 @@ import static java.util.Objects.nonNull;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.Generated;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,6 +94,7 @@ public class StructuredPathScopeMatcher implements ScopeMatcher {
   }
 
   @Override
+  @Generated("eclipse")
   public int hashCode() {
     final int prime = 31;
     int result = 1;
@@ -101,6 +104,7 @@ public class StructuredPathScopeMatcher implements ScopeMatcher {
   }
 
   @Override
+  @Generated("eclipse")
   public boolean equals(Object obj) {
     if (this == obj)
       return true;
