@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.5.0 (???)
+## 1.5.0 (2019-10-03)
 
 ### Added
 
@@ -9,6 +9,10 @@
 
 - IAM now supports group managers (#231). Group managers can approve group
   membership requests.
+
+- It is now possible to define validation rules on external SAML and OpenID
+  Connect authentications, e.g., to limit access to IAM based on entitlements
+  (#277)
 
 - Real support for login hint on authorization requests: this feature allows a
   relying party to specify a preference on which external SAML IdP should be
@@ -37,13 +41,13 @@
 
 - The token management API now supports sorting (#255)
 
-- Orphaned tokens are now cleanup up from the database (#263)
+- Orphaned tokens are now cleaned up from the database (#263)
 
 - A bug that prevented the deployment of the IAM DB on MySQL 5.7 has been
   resolved (#265)
 
-- Support for the OAuth Device Code flow is now advertised in the IAM OpenID
-  Connect discovery document (#268)
+- Support for the OAuth Device Code flow is now correctly advertised in the IAM
+  OpenID Connect discovery document (#268)
 
 - The device code default expiration is correctly set for dynamically
   registered clients (#267)

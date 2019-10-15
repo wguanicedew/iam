@@ -33,6 +33,7 @@ import org.mitre.openid.connect.client.service.impl.DynamicServerConfigurationSe
 import org.mitre.openid.connect.client.service.impl.PlainAuthRequestUrlBuilder;
 import org.mitre.openid.connect.client.service.impl.StaticAuthRequestOptionsService;
 import org.mitre.openid.connect.client.service.impl.StaticClientConfigurationService;
+import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -59,6 +60,7 @@ import it.infn.mw.iam.authn.ExternalAuthenticationFailureHandler;
 import it.infn.mw.iam.authn.ExternalAuthenticationSuccessHandler;
 import it.infn.mw.iam.authn.InactiveAccountAuthenticationHander;
 import it.infn.mw.iam.authn.RootIsDashboardSuccessHandler;
+import it.infn.mw.iam.authn.common.config.AuthenticationValidator;
 import it.infn.mw.iam.authn.oidc.DefaultOidcTokenRequestor;
 import it.infn.mw.iam.authn.oidc.DefaultRestTemplateFactory;
 import it.infn.mw.iam.authn.oidc.OidcAuthenticationProvider;
@@ -163,9 +165,11 @@ public class OidcConfiguration {
 
   @Bean
   public OIDCAuthenticationProvider openIdConnectAuthenticationProvider(
-      OidcUserDetailsService userDetailService, UserInfoFetcher userInfoFetcher) {
+      OidcUserDetailsService userDetailService, UserInfoFetcher userInfoFetcher,
+      AuthenticationValidator<OIDCAuthenticationToken> validator) {
 
-    OidcAuthenticationProvider provider = new OidcAuthenticationProvider(userDetailService);
+    OidcAuthenticationProvider provider =
+        new OidcAuthenticationProvider(userDetailService, validator);
     provider.setUserInfoFetcher(userInfoFetcher);
 
     return provider;

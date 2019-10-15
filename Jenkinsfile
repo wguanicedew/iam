@@ -1,6 +1,15 @@
 #!/usr/bin/env groovy
 @Library('sd')_
+
 def kubeLabel = getKubeLabel()
+
+def maybeArchiveJUnitReports(){
+  def hasJunitReports = fileExists 'iam-login-service/target/surefire-reports'
+  if (hasJunitReports) {
+    junit '**/target/surefire-reports/TEST-*.xml'
+    step( [ $class: 'JacocoPublisher' ] )
+  }
+}
 
 pipeline {
 
@@ -15,7 +24,6 @@ pipeline {
   }
 
   parameters {
-    booleanParam(name: 'SONAR_ANALYSIS', defaultValue: false, description: 'Run Sonar Analsysis')
     booleanParam(name: 'SKIP_TESTS', defaultValue: false, description: 'Skip tests')
     booleanParam(name: 'SKIP_DOCKER', defaultValue: false, description: 'Skip docker image creation')
     booleanParam(name: 'PUSH_TO_DOCKERHUB', defaultValue: false, description: 'Push to Dockerhub')
@@ -72,39 +80,13 @@ pipeline {
           }
         }
 
-        stage('test') {
-          when{
-            allOf {
-              not {
-                expression{ return params.SONAR_ANALYSIS }
-              }
-              not {
-                expression{ return params.SKIP_TESTS }
-              }
-            }
-          }
-
-          steps {
-            sh 'mvn test'
-          }
-
-          post {
-            always {
-              junit '**/target/surefire-reports/TEST-*.xml'
-              step( [ $class: 'JacocoPublisher' ] )
-            }
-            unsuccessful {
-              archiveArtifacts artifacts:'**/**/*.dump'
-              archiveArtifacts artifacts:'**/**/*.dumpstream'
-            }
-          }
-        }
-
         stage('PR analysis'){
           when{
             allOf{
-              expression{ env.CHANGE_URL != ''}
-              expression{ return params.SONAR_ANALYSIS }
+              expression{ env.CHANGE_URL }
+              not {
+                expression { return params.SKIP_TESTS }
+              }
             }
           }
           steps {
@@ -134,8 +116,9 @@ pipeline {
 
           post {
             always {
-              junit '**/target/surefire-reports/TEST-*.xml'
-              step( [ $class: 'JacocoPublisher' ] )
+              script {
+                maybeArchiveJUnitReports()
+              }
             }
             unsuccessful {
               archiveArtifacts artifacts:'**/**/*.dump'
@@ -148,8 +131,10 @@ pipeline {
 
           when{
             allOf{
-              expression{ env.CHANGE_URL == ''}
-              expression{ return params.SONAR_ANALYSIS }
+              expression{ !env.CHANGE_URL }
+              not {
+                expression { return params.SKIP_TESTS }
+              }
             }
           }
 
@@ -172,8 +157,10 @@ pipeline {
           }
           post {
             always {
-              junit '**/target/surefire-reports/TEST-*.xml'
-                step( [ $class: 'JacocoPublisher' ] )
+              script {
+                sh 'echo post analysis'
+                maybeArchiveJUnitReports()
+              }
             }
             unsuccessful {
               archiveArtifacts artifacts:'**/**/*.dump'
@@ -185,7 +172,9 @@ pipeline {
         stage('quality-gate') {
 
           when{
-            expression{ return params.SONAR_ANALYSIS }
+            not {
+              expression { return params.SKIP_TESTS }
+            }
           }
 
           steps {
