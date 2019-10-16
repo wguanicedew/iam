@@ -33,7 +33,8 @@
                 <div ng-if="$ctrl.aup != null">
                     <div class="form-group">
                         <label>Acceptable Usage Policy URL</label>
-                        <div><a href="{{$ctrl.aup.data.url}}">{{$ctrl.aup.data.url}}</a></div>
+                        <div><a target="_blank" rel="noopener noreferrer" ng-href="{{$ctrl.aup.data.url}}">
+                                {{$ctrl.aup.data.url}}</a></div>
                         <span class="help-block">
                             The URL above is presented to users at registration time or periodically
                             if the AUP is configured for periodic reacceptance
@@ -78,7 +79,8 @@
                     </button>
                 </div>
                 <div ng-if="$ctrl.aup != null">
-                    <button class="btn btn-warning pull-left" style="margin-left: 10px" id="sign-aup-btn" ng-click="$ctrl.openSignAupDialog()">
+                    <button class="btn btn-warning pull-left" style="margin-left: 10px" id="sign-aup-btn"
+                        ng-click="$ctrl.openSignAupDialog()">
                         Request AUP signature
                     </button>
                 </div>

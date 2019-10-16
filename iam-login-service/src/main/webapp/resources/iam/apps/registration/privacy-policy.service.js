@@ -13,6 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
+(function () {
+    'use strict';
 
-var app = angular.module('registrationApp', ['ui.bootstrap', 'ngCookies']);
+    angular.module('registrationApp').factory('PrivacyPolicy', PrivacyPolicy);
+
+    PrivacyPolicy.$inject = ['$http', '$q'];
+
+    function PrivacyPolicy($http, $q) {
+        var service = {
+            getPrivacyPolicy: getPrivacyPolicy
+        };
+
+        return service;
+
+        function getPrivacyPolicy() {
+            return $http.get('/iam/config/privacy-policy')
+                .then(function (res) {
+                    return res.data;
+                }).catch(function (res) {
+                    return $q.reject(res);
+                });
+        }
+    }
+
+})();

@@ -163,7 +163,7 @@
 
         <c:if test="${loginPageConfiguration.privacyPolicyUrl.isPresent()}">
             <div id="privacy-policy">
-                <a class="btn btn-link btn-block" href="${loginPageConfiguration.privacyPolicyUrl.get()}">
+                <a class="btn btn-link btn-block" target="_blank" rel="noopener noreferrer" href="${loginPageConfiguration.privacyPolicyUrl.get()}">
                   ${loginPageConfiguration.privacyPolicyText}
                 </a>
             </div>

@@ -26,7 +26,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -72,6 +71,7 @@ import it.infn.mw.iam.IamLoginService;
   //@formatter:on}
 public class OidcConfigurationTests {
 
+  private static final String PRIVACY_POLICY_ENDPOINT = "/iam/config/privacy-policy";
   private static final String ENDPOINT = "/iam/config/oidc/providers";
 
   @Autowired
@@ -85,8 +85,6 @@ public class OidcConfigurationTests {
       .apply(springSecurity())
       .alwaysDo(log())
       .build();
-
-    MockitoAnnotations.initMocks(this);
   }
 
   @Test
@@ -107,5 +105,13 @@ public class OidcConfigurationTests {
       .andExpect(jsonPath("$[1].loginButton").exists())
       .andExpect(jsonPath("$[1].loginButton.text", is("Sign-in with OIDC-02")))
       .andExpect(jsonPath("$[1].loginButton.style", is("other")));
+  }
+  
+  @Test
+  public void testNullPrivacyPolicy() throws Exception {
+    
+    mvc.perform(get((PRIVACY_POLICY_ENDPOINT)))
+    .andExpect(status().isOk())
+    .andExpect(jsonPath("$.url").isEmpty());
   }
 }
