@@ -66,7 +66,7 @@ public class IamAupRepositoryTests extends AupTestSupport{
       .orElseThrow(() -> new AssertionError("Expected aup not found in repository"));
     
     assertThat(aup.getName(), equalTo(DEFAULT_AUP_NAME));
-    assertThat(aup.getText(), equalTo(DEFAULT_AUP_TEXT));
+    assertThat(aup.getUrl(), equalTo(DEFAULT_AUP_URL));
     assertThat(aup.getDescription(), equalTo(DEFAULT_AUP_DESC));
     assertThat(aup.getCreationTime(), new DateEqualModulo1Second(creationTime));
     assertThat(aup.getLastUpdateTime(), new DateEqualModulo1Second(creationTime));

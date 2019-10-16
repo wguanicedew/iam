@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2019
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,23 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.api.aup;
+(function () {
+    'use strict';
 
-import java.util.Optional;
+    angular.module('registrationApp').factory('PrivacyPolicy', PrivacyPolicy);
 
-import it.infn.mw.iam.api.aup.model.AupDTO;
-import it.infn.mw.iam.persistence.model.IamAup;
+    PrivacyPolicy.$inject = ['$http', '$q'];
 
-public interface AupService {
+    function PrivacyPolicy($http, $q) {
+        var service = {
+            getPrivacyPolicy: getPrivacyPolicy
+        };
 
-  Optional<IamAup> findAup();
+        return service;
 
-  IamAup saveAup(AupDTO aupDto);
+        function getPrivacyPolicy() {
+            return $http.get('/iam/config/privacy-policy')
+                .then(function (res) {
+                    return res.data;
+                }).catch(function (res) {
+                    return $q.reject(res);
+                });
+        }
+    }
 
-  IamAup updateAup(AupDTO aupDto);
-
-  IamAup touchAup();
-
-  void deleteAup();
-
-}
+})();

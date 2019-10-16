@@ -32,6 +32,7 @@
                         <script type="text/javascript" src="/resources/iam/apps/registration/registration.service.js"></script>
                         <script type="text/javascript" src="/resources/iam/apps/registration/authn-info.service.js"></script>
                         <script type="text/javascript" src="/resources/iam/apps/registration/aup.service.js"></script>
+                        <script type="text/javascript" src="/resources/iam/apps/registration/privacy-policy.service.js"></script>
                     </jsp:attribute>
                     <jsp:body>
                         <div ng-app="registrationApp">

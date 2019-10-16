@@ -141,7 +141,7 @@ public class ResourceOwnerPasswordCredentialsTests {
     aup.setCreationTime(new Date());
     aup.setLastUpdateTime(new Date());
     aup.setName("default-aup");
-    aup.setText("AUP text");
+    aup.setUrl("http://default-aup.org/");
     aup.setDescription("AUP description");
     aup.setSignatureValidityInDays(0L);
 

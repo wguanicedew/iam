@@ -22,16 +22,15 @@
 </div>
 <div class="modal-body">
     <form name="createAup">
-        <div class="form-group" ng-class="{'has-error': $ctrl.error || createAup.text.$dirty && !createAup.text.$valid}">
-            <label>Acceptable Usage Policy Text</label>
-            <textarea name="text" class="form-control" ng-model="$ctrl.aupVal.text" required="true" rows="10">
-            </textarea>
+        <div class="form-group" ng-class="{'has-error': $ctrl.error || createAup.url.$dirty && !createAup.url.$valid}">
+            <label>Acceptable Usage Policy URL</label>
+            <input name="url" class="form-control" type="url" value="http://" ng-model="$ctrl.aupVal.url" required="true">
             <span class="help-block">
-                    The text above is presented to users at registration time or periodically
+                    The URL above is presented to users at registration time or periodically
                     if the AUP is configured for periodic reacceptance
             </span>
-            <span class="help-block" ng-if="createAup.text.$dirty && createAup.text.$error.required">
-                    Please provide text for the AUP
+            <span class="help-block" ng-if="createAup.url.$dirty && createAup.url.$error.required">
+                    Please provide a valid URL for the AUP
             </span>
             <span class="help-block" ng-if="$ctrl.error">
                     {{ $ctrl.error }}
@@ -49,7 +48,7 @@
     </form>
 </div>
 <div class="modal-footer">
-    <button class="btn btn-primary" type="button" id="modal-btn-confirm" ng-disabled="!$ctrl.aupVal.text || !$ctrl.enabled" ng-click="$ctrl.doCreateAup()">Create AUP</button>
+    <button class="btn btn-primary" type="button" id="modal-btn-confirm" ng-disabled="!$ctrl.aupVal.url || !$ctrl.enabled" ng-click="$ctrl.doCreateAup()">Create AUP</button>
 
     <button class="btn btn-warning" type="button" id="modal-btn-reset" ng-click="$ctrl.reset()">Reset form</button>
 

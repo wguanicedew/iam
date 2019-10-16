@@ -13,23 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.api.aup;
+package it.infn.mw.iam.api.validators;
 
-import java.util.Optional;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import it.infn.mw.iam.api.aup.model.AupDTO;
-import it.infn.mw.iam.persistence.model.IamAup;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
-public interface AupService {
+import javax.validation.Constraint;
+import javax.validation.Payload;
 
-  Optional<IamAup> findAup();
+@Retention(RUNTIME)
+@Target({FIELD, METHOD})
+@Constraint(validatedBy = NoQueryParamsUrlValidator.class)
+public @interface NoQueryParamsUrl {
+  String message() default "The AUP URL is not valid";
 
-  IamAup saveAup(AupDTO aupDto);
+  Class<?>[] groups() default {};
 
-  IamAup updateAup(AupDTO aupDto);
-
-  IamAup touchAup();
-
-  void deleteAup();
-
+  Class<? extends Payload>[] payload() default {};
 }

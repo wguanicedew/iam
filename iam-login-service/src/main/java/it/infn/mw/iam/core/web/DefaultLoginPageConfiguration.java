@@ -51,17 +51,9 @@ public class DefaultLoginPageConfiguration implements LoginPageConfiguration, En
 
   @Value(ACCOUNT_LINKING_DISABLE_PROPERTY)
   private Boolean accountLinkingDisable;
-
-  @Value("${iam.privacyPolicy.url}")
-  private String privacyPolicyUrl;
-
-  @Value("${iam.privacyPolicy.text}")
-  private String privacyPolicyText;
-
-  @Value("${iam.loginButton.text}")
-  private String loginButtonText;
   
   private OidcValidatedProviders providers;
+
   private final IamProperties iamProperties;
   
   @Autowired
@@ -123,27 +115,23 @@ public class DefaultLoginPageConfiguration implements LoginPageConfiguration, En
 
   @Override
   public Optional<String> getPrivacyPolicyUrl() {
-    if (Strings.isNullOrEmpty(privacyPolicyUrl)) {
-      return Optional.empty();
-    }
-
-    return Optional.of(privacyPolicyUrl);
+    return Optional.ofNullable(iamProperties.getPrivacyPolicy().getUrl());
   }
 
   @Override
   public String getPrivacyPolicyText() {
-    if (Strings.isNullOrEmpty(privacyPolicyText)) {
+    if (Strings.isNullOrEmpty(iamProperties.getPrivacyPolicy().getText())) {
       return DEFAULT_PRIVACY_POLICY_TEXT;
     }
-    return privacyPolicyText;
+    return iamProperties.getPrivacyPolicy().getText();
   }
 
   @Override
   public String getLoginButtonText() {
-    if (Strings.isNullOrEmpty(loginButtonText)) {
+    if (Strings.isNullOrEmpty(iamProperties.getLoginButton().getText())) {
       return DEFAULT_LOGIN_BUTTON_TEXT;
     }
-    return loginButtonText;
+    return iamProperties.getLoginButton().getText();
   }
 
   @Override

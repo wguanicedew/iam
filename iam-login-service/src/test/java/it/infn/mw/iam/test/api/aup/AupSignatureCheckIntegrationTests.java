@@ -20,6 +20,7 @@ import static org.junit.Assert.assertThat;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -91,10 +92,8 @@ public class AupSignatureCheckIntegrationTests extends AupTestSupport {
 
   @Before
   public void setup() {
-    mvc = MockMvcBuilders.webAppContextSetup(context)
-      .alwaysDo(log())
-      .apply(springSecurity())
-      .build();
+    mvc =
+        MockMvcBuilders.webAppContextSetup(context).alwaysDo(log()).apply(springSecurity()).build();
     mockOAuth2Filter.cleanupSecurityContext();
   }
 
@@ -135,32 +134,54 @@ public class AupSignatureCheckIntegrationTests extends AupTestSupport {
 
     signatureRepo.createSignatureForAccount(testAccount,
         new Date(mockTimeProvider.currentTimeMillis()));
-    
+
     assertThat(service.needsAupSignature(testAccount), is(false));
-    
+
     mockTimeProvider.setTime(now.getTime() + TimeUnit.MINUTES.toMillis(10));
-    
-    aup.setText("Updated AUP text");
+
+    aup.setUrl("http://updated-aup-text.org/");
     aup.setDescription("Updated AUP desc");
-    
+
     mvc
-    .perform(
-        patch("/iam/aup").contentType(APPLICATION_JSON).content(mapper.writeValueAsString(aup)))
-    .andExpect(status().isOk());
-    
+      .perform(
+          patch("/iam/aup").contentType(APPLICATION_JSON).content(mapper.writeValueAsString(aup)))
+      .andExpect(status().isOk());
+
+    assertThat(service.needsAupSignature(testAccount), is(false));
+
+    mvc.perform(post("/iam/aup/touch")).andExpect(status().isOk());
+
     assertThat(service.needsAupSignature(testAccount), is(true));
-    
+
     mockTimeProvider.setTime(now.getTime() + TimeUnit.MINUTES.toMillis(20));
 
     signatureRepo.createSignatureForAccount(testAccount,
         new Date(mockTimeProvider.currentTimeMillis()));
 
     assertThat(service.needsAupSignature(testAccount), is(false));
-    
+
     mockTimeProvider.setTime(now.getTime() + TimeUnit.DAYS.toMillis(366));
-    
+
     assertThat(service.needsAupSignature(testAccount), is(true));
-    
+
   }
 
+  @Test
+  @WithMockUser(username = "admin", roles = {"ADMIN", "USER"})
+  public void aupCanAlwaysBeFetchedTest() throws JsonProcessingException, Exception {
+
+    mvc.perform(get("/iam/aup")).andExpect(status().isNotFound());
+
+    AupDTO aup = converter.dtoFromEntity(buildDefaultAup());
+
+    Date now = new Date();
+    mockTimeProvider.setTime(now.getTime());
+
+    mvc
+      .perform(
+          post("/iam/aup").contentType(APPLICATION_JSON).content(mapper.writeValueAsString(aup)))
+      .andExpect(status().isCreated());
+
+    mvc.perform(get("/iam/aup")).andExpect(status().isOk());
+  }
 }
