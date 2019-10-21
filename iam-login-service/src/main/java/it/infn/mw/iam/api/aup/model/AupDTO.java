@@ -37,6 +37,8 @@ public class AupDTO {
   @NoQueryParamsUrl(message = "Invalid AUP: query string not allowed in the AUP URL")
   String url;
 
+  String text;
+
   @Size(max = 128,
       message = "Invalid AUP: the description string must be at most 128 characters long")
   String description;
@@ -51,7 +53,8 @@ public class AupDTO {
   @JsonSerialize(using = JsonDateSerializer.class)
   Date lastUpdateTime;
 
-  public AupDTO(@JsonProperty("url") String url, @JsonProperty("description") String description,
+  public AupDTO(@JsonProperty("url") String url, @JsonProperty("text") String text,
+      @JsonProperty("description") String description,
       @JsonProperty("signatureValidityInDays") Long signatureValidityInDays,
       @JsonProperty("creationTime") Date creationTime,
       @JsonProperty("lastUpdateTime") Date lastUpdateTime) {
@@ -60,6 +63,7 @@ public class AupDTO {
     this.signatureValidityInDays = signatureValidityInDays;
     this.creationTime = creationTime;
     this.lastUpdateTime = lastUpdateTime;
+    this.text = text;
   }
 
   public String getDescription() {
@@ -71,11 +75,17 @@ public class AupDTO {
     this.description = description;
   }
 
-
   public String getUrl() {
     return url;
   }
 
+  public String getText() {
+    return text;
+  }
+
+  public void setText(String text) {
+    this.text = text;
+  }
 
   public void setUrl(String url) {
     this.url = url;

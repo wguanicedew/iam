@@ -23,6 +23,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -57,8 +58,12 @@ public class IamAup implements Serializable {
   @Column(name = "last_update_time", nullable = false)
   Date lastUpdateTime;
 
-  @Column(name = "url", nullable = false)
+  @Column(name = "url", nullable = true)
   String url;
+
+  @Lob
+  @Column(name = "text", nullable = true)
+  String text;
 
   public IamAup() {
     // empty constructor
@@ -160,4 +165,11 @@ public class IamAup implements Serializable {
     this.url = url;
   }
 
+  public String getText() {
+    return text;
+  }
+
+  public void setText(String text) {
+    this.text = text;
+  }
 }

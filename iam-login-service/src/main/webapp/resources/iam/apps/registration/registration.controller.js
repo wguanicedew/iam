@@ -55,7 +55,7 @@ function RegistrationController($scope, $q, $window, $cookies, RegistrationReque
         vm.populateRequest();
         Aup.getAup().then(function (res) {
             if (res != null) {
-                $scope.aup = res.data.url;
+                $scope.aup = res.data;
             }
         }).catch(function (res) {
             console.error("Error getting AUP : " +

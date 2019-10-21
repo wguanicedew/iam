@@ -71,6 +71,7 @@ public class AupIntegrationTests extends AupTestSupport {
   private final String INVALID_AUP_URL =
       "https://iam.local.io/\"</script><script>alert(8);</script>";
 
+  private final static String DEFAULT_AUP_TEXT = null;
   private final static String DEFAULT_AUP_URL = "http://updated-aup-text.org/";
   private final static String DEFAULT_AUP_DESC = "desc";
 
@@ -130,7 +131,7 @@ public class AupIntegrationTests extends AupTestSupport {
   @Test
   public void aupCreationRequiresAuthenticatedUser() throws JsonProcessingException, Exception {
     Date now = new Date();
-    AupDTO aup = new AupDTO(DEFAULT_AUP_URL, DEFAULT_AUP_DESC, -1L, now, now);
+    AupDTO aup = new AupDTO(DEFAULT_AUP_URL, DEFAULT_AUP_TEXT, DEFAULT_AUP_DESC, -1L, now, now);
 
     mvc
       .perform(
@@ -143,7 +144,7 @@ public class AupIntegrationTests extends AupTestSupport {
   @WithMockUser(username = "test", roles = {"USER"})
   public void aupCreationRequiresAdminPrivileges() throws JsonProcessingException, Exception {
     Date now = new Date();
-    AupDTO aup = new AupDTO(DEFAULT_AUP_URL, DEFAULT_AUP_DESC, -1L, now, now);
+    AupDTO aup = new AupDTO(DEFAULT_AUP_URL, DEFAULT_AUP_TEXT, DEFAULT_AUP_DESC, -1L, now, now);
 
     mvc
       .perform(
@@ -233,7 +234,7 @@ public class AupIntegrationTests extends AupTestSupport {
   @Test
   @WithMockUser(username = "admin", roles = {"ADMIN", "USER"})
   public void aupCreationRequiresSignatureValidityDays() throws JsonProcessingException, Exception {
-    AupDTO aup = new AupDTO(DEFAULT_AUP_URL, null, null, null, null);
+    AupDTO aup = new AupDTO(DEFAULT_AUP_URL, DEFAULT_AUP_TEXT, null, null, null, null);
 
     Date now = new Date();
     mockTimeProvider.setTime(now.getTime());
@@ -249,7 +250,7 @@ public class AupIntegrationTests extends AupTestSupport {
   @WithMockUser(username = "admin", roles = {"ADMIN", "USER"})
   public void aupCreationRequiresPositiveSignatureValidityDays()
       throws JsonProcessingException, Exception {
-    AupDTO aup = new AupDTO(DEFAULT_AUP_URL, null, -1L, null, null);
+    AupDTO aup = new AupDTO(DEFAULT_AUP_URL, DEFAULT_AUP_TEXT, null, -1L, null, null);
     Date now = new Date();
     mockTimeProvider.setTime(now.getTime());
 

@@ -31,12 +31,13 @@ public class AupConverter implements Converter<AupDTO, IamAup> {
     aup.setLastUpdateTime(dto.getLastUpdateTime());
     aup.setSignatureValidityInDays(dto.getSignatureValidityInDays());
     aup.setUrl(dto.getUrl());
+    aup.setText(dto.getText());
     return aup;
   }
 
   @Override
   public AupDTO dtoFromEntity(IamAup entity) {
-    return new AupDTO(entity.getUrl(), entity.getDescription(),
+    return new AupDTO(entity.getUrl(), entity.getText(), entity.getDescription(),
         entity.getSignatureValidityInDays(), entity.getCreationTime(), entity.getLastUpdateTime());
   }
 

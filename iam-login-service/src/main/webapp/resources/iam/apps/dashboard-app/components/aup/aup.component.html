@@ -29,9 +29,16 @@
     <section class="content" id="aup-content" ng-cloak>
         <div class="box">
             <div class="box-body">
-
                 <div ng-if="$ctrl.aup != null">
-                    <div class="form-group">
+                    <div class="form-group" ng-if="$ctrl.aup.data.text != null">
+                        <label>Acceptable Usage Policy Text</label>
+                        <div>{{$ctrl.aup.data.text}}</div>
+                        <span class="help-block">
+                            The text above is presented to users at registration time or periodically
+                            if the AUP is configured for periodic reacceptance
+                        </span>
+                    </div>
+                    <div class="form-group" ng-if="$ctrl.aup.data.url != null">
                         <label>Acceptable Usage Policy URL</label>
                         <div><a target="_blank" rel="noopener noreferrer" ng-href="{{$ctrl.aup.data.url}}">
                                 {{$ctrl.aup.data.url}}</a></div>
