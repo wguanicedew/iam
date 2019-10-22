@@ -30,15 +30,16 @@
         <div class="box">
             <div class="box-body">
                 <div ng-if="$ctrl.aup != null">
-                    <div class="form-group" ng-if="$ctrl.aup.data.text != null">
+                    <div class="form-group has-error" ng-if="$ctrl.aup.data.text">
                         <label>Acceptable Usage Policy Text</label>
                         <div>{{$ctrl.aup.data.text}}</div>
-                        <span class="help-block">
-                            The text above is presented to users at registration time or periodically
-                            if the AUP is configured for periodic reacceptance
-                        </span>
+                        <p class="help-block">
+                            Since v.1.6.0, IAM no longer supports keeping the AUP text in the AUP database and has moved
+                            to external AUP documents. Please update the AUP configuration to provide
+                            a URL pointing to the AUP document by clicking the "Edit AUP" button below.
+                        </p>
                     </div>
-                    <div class="form-group" ng-if="$ctrl.aup.data.url != null">
+                    <div class="form-group" ng-if="$ctrl.aup.data.url">
                         <label>Acceptable Usage Policy URL</label>
                         <div><a target="_blank" rel="noopener noreferrer" ng-href="{{$ctrl.aup.data.url}}">
                                 {{$ctrl.aup.data.url}}</a></div>

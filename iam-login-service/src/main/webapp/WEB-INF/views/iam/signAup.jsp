@@ -28,7 +28,7 @@
     </c:if>
     <c:if test="${aup.url != null}">
       <p id="sign-aup-subtitle">In order to proceed, you need to declare that
-      you accept the terms of this organization <a href="${aup.url}">Acceptable Usage Policy (AUP)</a></p>
+      you accept the terms of this organization <a href="${aup.url}">Acceptable Usage Policy (AUP).</a></p>
     </c:if>
     <div class="form-group sign-aup-btns">
       <input id="sign-aup-btn" class="btn btn-success" type="submit" value="I agree with the AUP terms">
