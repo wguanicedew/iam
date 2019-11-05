@@ -15,6 +15,7 @@
  */
 package it.infn.mw.iam.test.oauth;
 
+import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertNotNull;
@@ -98,6 +99,35 @@ public class AudienceTests {
     assertNotNull(claims.getAudience());
     assertThat(claims.getAudience().size(), equalTo(1));
     assertThat(claims.getAudience(), contains("example-audience"));
+  }
+  
+  @Test
+  public void testMultipleAudiencesRequestPasswordFlow() throws Exception {
+
+    String tokenResponseJson = mvc
+      .perform(post("/token").param("grant_type", "password")
+        .param("client_id", PASSWORD_GRANT_CLIENT_ID)
+        .param("client_secret", PASSWORD_GRANT_CLIENT_SECRET)
+        .param("username", TEST_USERNAME)
+        .param("password", TEST_PASSWORD)
+        .param("scope", "openid profile")
+        .param("audience", "aud1 aud2 aud3"))
+      .andExpect(status().isOk())
+      .andReturn()
+      .getResponse()
+      .getContentAsString();
+    
+    String accessToken = mapper.readTree(tokenResponseJson).get("access_token").asText();
+
+    JWT token = JWTParser.parse(accessToken);
+
+    JWTClaimsSet claims = token.getJWTClaimsSet();
+
+    assertNotNull(claims.getAudience());
+    assertThat(claims.getAudience().size(), equalTo(3));
+    assertThat(claims.getAudience(), hasItem("aud1"));
+    assertThat(claims.getAudience(), hasItem("aud2"));
+    assertThat(claims.getAudience(), hasItem("aud3"));
   }
 
   @Test

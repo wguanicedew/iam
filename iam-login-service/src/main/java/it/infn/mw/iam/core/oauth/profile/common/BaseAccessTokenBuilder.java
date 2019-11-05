@@ -25,7 +25,7 @@ import org.mitre.oauth2.model.OAuth2AccessTokenEntity;
 import org.mitre.openid.connect.model.UserInfo;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
-import com.google.common.collect.Lists;
+import com.google.common.base.Splitter;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTClaimsSet.Builder;
 
@@ -39,6 +39,8 @@ public abstract class BaseAccessTokenBuilder implements JWTAccessTokenBuilder {
   public static final String SPACE = " ";
 
   protected final IamProperties properties;
+  
+  protected final Splitter SPLITTER = Splitter.on(' ').trimResults().omitEmptyStrings();
 
   public BaseAccessTokenBuilder(IamProperties properties) {
     this.properties = properties;
@@ -64,7 +66,7 @@ public abstract class BaseAccessTokenBuilder implements JWTAccessTokenBuilder {
     final String audience = (String) authentication.getOAuth2Request().getExtensions().get(AUD_KEY);
 
     if (!isNullOrEmpty(audience)) {
-      builder.audience(Lists.newArrayList(audience));
+      builder.audience(SPLITTER.splitToList(audience));
     }
 
     return builder;
