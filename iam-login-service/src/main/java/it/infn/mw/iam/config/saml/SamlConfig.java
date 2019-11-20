@@ -154,6 +154,7 @@ import it.infn.mw.iam.authn.saml.util.SamlIdResolvers;
 import it.infn.mw.iam.authn.saml.util.SamlUserIdentifierResolver;
 import it.infn.mw.iam.authn.saml.util.metadata.ResearchAndScholarshipMetadataFilter;
 import it.infn.mw.iam.authn.saml.util.metadata.SirtfiAttributeMetadataFilter;
+import it.infn.mw.iam.authn.util.SessionTimeoutHelper;
 import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.config.saml.SamlConfig.ServerProperties;
 import it.infn.mw.iam.core.time.SystemTimeProvider;
@@ -173,6 +174,9 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
   @Autowired
   ResourceLoader resourceLoader;
 
+  @Autowired
+  SessionTimeoutHelper sessionTimeoutHelper;
+  
   @Autowired
   SamlUserIdentifierResolver resolver;
 
@@ -380,10 +384,10 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
   public SAMLAuthenticationProvider samlAuthenticationProvider(SamlUserIdentifierResolver resolver,
       IamAccountRepository accountRepo, InactiveAccountAuthenticationHander handler,
       MappingPropertiesResolver mpResolver,
-      AuthenticationValidator<ExpiringUsernameAuthenticationToken> validator) {
+      AuthenticationValidator<ExpiringUsernameAuthenticationToken> validator, SessionTimeoutHelper helper) {
 
     IamSamlAuthenticationProvider samlAuthenticationProvider =
-        new IamSamlAuthenticationProvider(resolver, validator);
+        new IamSamlAuthenticationProvider(resolver, validator, helper);
 
     samlAuthenticationProvider
       .setUserDetails(samlUserDetailsService(resolver, accountRepo, handler, mpResolver));
@@ -834,7 +838,7 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
   @Override
   protected void configure(AuthenticationManagerBuilder auth) throws Exception {
     auth.authenticationProvider(samlAuthenticationProvider(resolver, repo, inactiveAccountHandler,
-        mappingResolver, validator));
+        mappingResolver, validator, sessionTimeoutHelper));
   }
 
   private void scheduleMetadataLookupServiceRefresh(ScheduledTaskRegistrar taskRegistrar) {

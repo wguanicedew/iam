@@ -26,6 +26,9 @@ server:
       pattern: "%{X-Forwarded-For}i %l %u %t \"%r\" %s %b"
 
   use-forward-headers: ${IAM_USE_FORWARDED_HEADERS:false}
+  
+  session:
+    timeout: ${IAM_SESSION_TIMEOUT_SECS:1800}
 
 spring: 
   profiles:

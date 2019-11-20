@@ -94,7 +94,7 @@ public class OidcClientFilter extends OIDCAuthenticationFilter {
 
     String issuer = getStoredSessionString(request.getSession(), ISSUER_SESSION_VARIABLE);
     if (issuer == null) {
-      throw new AuthenticationServiceException("Issuser not found in session.");
+      throw new AuthenticationServiceException("Issuer not found in session.");
     }
     ServerConfiguration serverConfig =
         getServerConfigurationService().getServerConfiguration(issuer);

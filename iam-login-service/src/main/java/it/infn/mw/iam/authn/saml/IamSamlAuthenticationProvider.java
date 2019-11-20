@@ -16,6 +16,7 @@
 package it.infn.mw.iam.authn.saml;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -32,6 +33,7 @@ import com.google.common.base.Joiner;
 import it.infn.mw.iam.authn.common.config.AuthenticationValidator;
 import it.infn.mw.iam.authn.saml.util.SamlUserIdentifierResolutionResult;
 import it.infn.mw.iam.authn.saml.util.SamlUserIdentifierResolver;
+import it.infn.mw.iam.authn.util.SessionTimeoutHelper;
 import it.infn.mw.iam.persistence.model.IamSamlId;
 
 public class IamSamlAuthenticationProvider extends SAMLAuthenticationProvider {
@@ -39,11 +41,14 @@ public class IamSamlAuthenticationProvider extends SAMLAuthenticationProvider {
   private final SamlUserIdentifierResolver userIdResolver;
   private final AuthenticationValidator<ExpiringUsernameAuthenticationToken> validator;
   private final Joiner joiner = Joiner.on(",").skipNulls();
+  private final SessionTimeoutHelper sessionTimeoutHelper;
 
   public IamSamlAuthenticationProvider(SamlUserIdentifierResolver resolver,
-      AuthenticationValidator<ExpiringUsernameAuthenticationToken> validator) {
+      AuthenticationValidator<ExpiringUsernameAuthenticationToken> validator,
+      SessionTimeoutHelper sessionTimeoutHelper) {
     this.userIdResolver = resolver;
     this.validator = validator;
+    this.sessionTimeoutHelper = sessionTimeoutHelper;
   }
 
   private Supplier<AuthenticationServiceException> handleResolutionFailure(
@@ -74,10 +79,10 @@ public class IamSamlAuthenticationProvider extends SAMLAuthenticationProvider {
     IamSamlId samlId = result.getResolvedId().orElseThrow(handleResolutionFailure(result));
 
     validator.validateAuthentication(token);
-    
-    return new SamlExternalAuthenticationToken(samlId, token, token.getTokenExpiration(),
-        user.getUsername(), token.getCredentials(), token.getAuthorities());
 
+    return new SamlExternalAuthenticationToken(samlId, token,
+        Date.from(sessionTimeoutHelper.getDefaultSessionExpirationTime()), user.getUsername(),
+        token.getCredentials(), token.getAuthorities());
   }
 
 }
