@@ -50,6 +50,7 @@ INSERT INTO client_scope (owner_id, scope) VALUES
   (4, 'offline_access'),
   (4, 'storage.read:/'),
   (4, 'storage.write:/'),
+  (4, 'wlcg.groups'),
   (5, 'openid'),
   (5, 'profile'),
   (5, 'email'),

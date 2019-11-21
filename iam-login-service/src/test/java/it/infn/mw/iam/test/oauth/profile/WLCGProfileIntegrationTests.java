@@ -15,17 +15,24 @@
  */
 package it.infn.mw.iam.test.oauth.profile;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -46,8 +53,24 @@ import it.infn.mw.iam.test.util.WithAnonymousUser;
 @SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class})
 @WebAppConfiguration
 @Transactional
-@TestPropertySource(properties = {"iam.jwt-profile.default-profile=wlcg"})
+@TestPropertySource(properties = {
+    // @formatter:off
+    "iam.jwt-profile.default-profile=wlcg",
+    "scope.matchers[0].name=storage.read",
+    "scope.matchers[0].type=path",
+    "scope.matchers[0].prefix=storage.read",
+    "scope.matchers[0].path=/",
+    "scope.matchers[1].name=storage.write",
+    "scope.matchers[1].type=path",
+    "scope.matchers[1].prefix=storage.write",
+    "scope.matchers[1].path=/"
+    // @formatter:on
+})
 public class WLCGProfileIntegrationTests extends EndpointsTestUtils {
+
+  private static final String CLIENT_CREDENTIALS_GRANT_TYPE = "client_credentials";
+  private static final String CLIENT_CREDENTIALS_CLIENT_ID = "client-cred";
+  private static final String CLIENT_CREDENTIALS_CLIENT_SECRET = "secret";
 
   private static final String CLIENT_ID = "password-grant";
   private static final String CLIENT_SECRET = "secret";
@@ -62,7 +85,8 @@ public class WLCGProfileIntegrationTests extends EndpointsTestUtils {
 
   @Before
   public void setup() {
-    mvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
+    mvc =
+        MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).alwaysDo(log()).build();
   }
 
   private String getAccessTokenForUser(String scopes) throws Exception {
@@ -99,4 +123,41 @@ public class WLCGProfileIntegrationTests extends EndpointsTestUtils {
         hasItems("/Production", "/Analysis"));
   }
 
+  @Test
+  public void testWlcgProfileClientCredentials() throws Exception {
+
+    mvc
+      .perform(post("/token")
+        .with(httpBasic(CLIENT_CREDENTIALS_CLIENT_ID, CLIENT_CREDENTIALS_CLIENT_SECRET))
+        .param("grant_type", CLIENT_CREDENTIALS_GRANT_TYPE)
+        .param("scope", "storage.read:/a-path storage.write:/another-path"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.scope", containsString("storage.read:/a-path")))
+      .andExpect(jsonPath("$.scope", containsString("storage.write:/another-path")));
+  }
+
+  @Test
+  public void testWlcgProfileGroupRequestClientCredentials() throws Exception {
+
+    String response = mvc
+      .perform(post("/token")
+        .with(httpBasic(CLIENT_CREDENTIALS_CLIENT_ID, CLIENT_CREDENTIALS_CLIENT_SECRET))
+        .param("grant_type", CLIENT_CREDENTIALS_GRANT_TYPE)
+        .param("scope", "storage.read:/a-path wlcg.groups"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.scope", containsString("storage.read:/a-path")))
+      .andExpect(jsonPath("$.scope", containsString("wlcg.groups")))
+      .andReturn()
+      .getResponse()
+      .getContentAsString();
+
+    
+    DefaultOAuth2AccessToken tokenResponseObject =
+        mapper.readValue(response, DefaultOAuth2AccessToken.class);
+    
+    JWT accessToken = JWTParser.parse(tokenResponseObject.getValue());
+    
+    assertThat(accessToken.getJWTClaimsSet().getClaim("wlcg.groups"), nullValue());
+
+  }
 }

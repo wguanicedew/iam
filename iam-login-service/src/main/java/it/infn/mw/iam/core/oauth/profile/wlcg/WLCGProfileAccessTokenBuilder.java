@@ -66,6 +66,7 @@ public class WLCGProfileAccessTokenBuilder extends BaseAccessTokenBuilder {
       }
     }
     
+    
     return builder.build();
   }
 
