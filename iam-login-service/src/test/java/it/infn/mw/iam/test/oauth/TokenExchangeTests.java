@@ -15,6 +15,7 @@
  */
 package it.infn.mw.iam.test.oauth;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
@@ -81,10 +82,8 @@ public class TokenExchangeTests extends EndpointsTestUtils {
 
   @Before
   public void setup() throws Exception {
-    mvc = MockMvcBuilders.webAppContextSetup(context)
-      .apply(springSecurity())
-      .alwaysDo(log())
-      .build();
+    mvc =
+        MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).alwaysDo(log()).build();
   }
 
 
@@ -467,7 +466,7 @@ public class TokenExchangeTests extends EndpointsTestUtils {
   }
 
   @Test
-  public void testTokenExchangeFailureForClientCredentialsClient() throws Exception {
+  public void testTokenExchangeForClientCredentialsClient() throws Exception {
 
     String accessToken = new AccessTokenGetter().grantType("client_credentials")
       .clientId("client-cred")
@@ -478,16 +477,21 @@ public class TokenExchangeTests extends EndpointsTestUtils {
     String actorClientId = "token-exchange-actor";
     String actorClientSecret = "secret";
 
-    // @formatter:off
-    mvc.perform(post(TOKEN_ENDPOINT)
-        .with(httpBasic(actorClientId, actorClientSecret))
+    String tokenResponse = mvc
+      .perform(post(TOKEN_ENDPOINT).with(httpBasic(actorClientId, actorClientSecret))
         .param("grant_type", GRANT_TYPE)
         .param("subject_token", accessToken)
         .param("subject_token_type", TOKEN_TYPE)
         .param("scope", "read-tasks"))
-      .andExpect(status().isBadRequest())
-      .andExpect(jsonPath("$.error", equalTo("invalid_request")))
-      .andExpect(jsonPath("$.error_description", containsString("No user identity linked to subject token.")));
-    // @formatter:on
+      .andExpect(status().isOk())
+      .andReturn()
+      .getResponse()
+      .getContentAsString();
+    
+    DefaultOAuth2AccessToken tokenResponseObject =
+        mapper.readValue(tokenResponse, DefaultOAuth2AccessToken.class);
+    
+    JWT exchangedToken = JWTParser.parse(tokenResponseObject.getValue());
+    assertThat(exchangedToken.getJWTClaimsSet().getSubject(), is("client-cred"));
   }
 }

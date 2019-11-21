@@ -16,6 +16,7 @@
 package it.infn.mw.iam.core.oauth.granters;
 
 import static java.lang.String.format;
+import static java.util.Objects.isNull;
 
 import java.util.Optional;
 import java.util.Set;
@@ -95,10 +96,17 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
     Set<String> actorScopes = actorClient.getScope();
     Set<String> subjectTokenScopes = subjectToken.getScope();
 
-    LOG.info(
-        "Client '{}' requests token exchange from client '{}' to impersonate user '{}' on audience '{}' with scopes '{}'",
-        actorClient.getClientId(), subjectClient.getClientId(),
-        subjectToken.getAuthenticationHolder().getUserAuth().getName(), audience, requestedScopes);
+    if (!isNull(subjectToken.getAuthenticationHolder().getUserAuth())) {
+      LOG.info(
+          "Client '{}' requests token exchange from client '{}' to impersonate user '{}' on audience '{}' with scopes '{}'",
+          actorClient.getClientId(), subjectClient.getClientId(),
+          subjectToken.getAuthenticationHolder().getUserAuth().getName(), audience,
+          requestedScopes);
+    } else {
+      LOG.info(
+          "Client '{}' requests token exchange from client '{}' on audience '{}' with scopes '{}'",
+          actorClient.getClientId(), subjectClient.getClientId(), audience, requestedScopes);
+    }
 
     LOG.debug("System scopes: {}", systemScopes);
     LOG.debug("Requested scopes: {}", requestedScopes);
@@ -134,28 +142,34 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
       throw new InvalidRequestException("Delegation not supported");
     }
 
-
     String subjectTokenValue = tokenRequest.getRequestParameters().get("subject_token");
     OAuth2AccessTokenEntity subjectToken = tokenServices.readAccessToken(subjectTokenValue);
 
-    // Does token exchange among clients acting on behalf of themselves make sense?
+    OAuth2Authentication authentication;
+
     if (subjectToken.getAuthenticationHolder().getUserAuth() == null) {
-      throw new InvalidRequestException("No user identity linked to subject token.");
+
+      validateScopeExchange(actorClient, tokenRequest, subjectToken);
+      authentication = new OAuth2Authentication(
+          getRequestFactory().createOAuth2Request(actorClient, tokenRequest),
+          subjectToken.getAuthenticationHolder().getAuthentication());
+    } else {
+
+      Optional<IamAccount> account = accountUtils
+        .getAuthenticatedUserAccount(subjectToken.getAuthenticationHolder().getUserAuth());
+
+      if (account.isPresent() && signatureCheckService.needsAupSignature(account.get())) {
+        throw new InvalidGrantException(
+            format("User '%s' needs to sign AUP for this organization " + "in order to proceed.",
+                account.get().getUsername()));
+      }
+
+      validateScopeExchange(actorClient, tokenRequest, subjectToken);
+      authentication = new OAuth2Authentication(
+          getRequestFactory().createOAuth2Request(actorClient, tokenRequest),
+          subjectToken.getAuthenticationHolder().getAuthentication().getUserAuthentication());
     }
 
-    Optional<IamAccount> account = accountUtils
-      .getAuthenticatedUserAccount(subjectToken.getAuthenticationHolder().getUserAuth());
-    
-    if (account.isPresent() && signatureCheckService.needsAupSignature(account.get())) {
-      throw new InvalidGrantException(format("User '%s' needs to sign AUP for this organization "
-          + "in order to proceed.", account.get().getUsername()));
-    }
-
-    validateScopeExchange(actorClient, tokenRequest, subjectToken);
-
-    OAuth2Authentication authentication =
-        new OAuth2Authentication(getRequestFactory().createOAuth2Request(actorClient, tokenRequest),
-            subjectToken.getAuthenticationHolder().getAuthentication().getUserAuthentication());
 
     String audience = tokenRequest.getRequestParameters().get(AUDIENCE_FIELD);
     if (!Strings.isNullOrEmpty(audience)) {
