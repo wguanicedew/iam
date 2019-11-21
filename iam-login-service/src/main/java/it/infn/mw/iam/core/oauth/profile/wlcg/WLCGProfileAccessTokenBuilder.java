@@ -15,6 +15,7 @@
  */
 package it.infn.mw.iam.core.oauth.profile.wlcg;
 
+import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.joining;
 
 import java.time.Instant;
@@ -56,13 +57,15 @@ public class WLCGProfileAccessTokenBuilder extends BaseAccessTokenBuilder {
 
     builder.claim(WLCG_VER_CLAIM, PROFILE_VERSION);
 
-    Set<String> groupNames =
-        groupHelper.resolveGroupNames(token, ((UserInfoAdapter) userInfo).getUserinfo());
+    if (!isNull(userInfo)) {
+      Set<String> groupNames =
+          groupHelper.resolveGroupNames(token, ((UserInfoAdapter) userInfo).getUserinfo());
 
-    if (!groupNames.isEmpty()) {
-      builder.claim(WLCGGroupHelper.WLCG_GROUPS_SCOPE, groupNames);
+      if (!groupNames.isEmpty()) {
+        builder.claim(WLCGGroupHelper.WLCG_GROUPS_SCOPE, groupNames);
+      }
     }
-
+    
     return builder.build();
   }
 
