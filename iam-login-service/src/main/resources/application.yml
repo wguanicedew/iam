@@ -94,6 +94,9 @@ iam:
   local-resources:
     enable: ${IAM_LOCAL_RESOURCES_ENABLE:false}
     location: ${IAM_LOCAL_RESOURCES_LOCATION:file:/indigo-iam/local-resources}
+  
+  device-code:
+    allow-complete-verification-uri: ${IAM_DEVICE_CODE_ALLOW_COMPLETE_VERIFICATION_URI:true}
     
 x509:
   trustAnchorsDir: ${IAM_X509_TRUST_ANCHORS_DIR:/etc/grid-security/certificates}

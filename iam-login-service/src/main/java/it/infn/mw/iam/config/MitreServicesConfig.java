@@ -131,6 +131,8 @@ public class MitreServicesConfig {
 
     config.setForceHttps(false);
     config.setLocale(Locale.ENGLISH);
+    
+    config.setAllowCompleteDeviceCodeUri(properties.getDeviceCode().getAllowCompleteVerificationUri());
 
     return config;
   }

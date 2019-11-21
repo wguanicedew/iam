@@ -24,23 +24,35 @@ import it.infn.mw.iam.config.login.LoginButtonProperties;
 @ConfigurationProperties(prefix = "iam")
 public class IamProperties {
 
+  public static class DeviceCodeProperties {
+    Boolean allowCompleteVerificationUri = true;
+
+    public Boolean getAllowCompleteVerificationUri() {
+      return allowCompleteVerificationUri;
+    }
+
+    public void setAllowCompleteVerificationUri(Boolean allowCompleteVerificationUri) {
+      this.allowCompleteVerificationUri = allowCompleteVerificationUri;
+    }
+  }
+
   public static class JWKProperties {
     String keystoreLocation;
-    String defaultKeyId = "rsa1";   
-    
+    String defaultKeyId = "rsa1";
+
     public String getKeystoreLocation() {
       return keystoreLocation;
     }
-    
+
     public void setKeystoreLocation(String keystoreLocation) {
       this.keystoreLocation = keystoreLocation;
     }
-    
+
     public String getDefaultKeyId() {
       return defaultKeyId;
     }
   }
-  
+
   public static class JWTProfile {
 
     public enum Profile {
@@ -58,8 +70,8 @@ public class IamProperties {
       this.defaultProfile = defaultProfile;
     }
   }
-  
-  
+
+
   public static class SuperUser {
     String username;
     String password;
@@ -243,10 +255,12 @@ public class IamProperties {
   private PrivacyPolicy privacyPolicy = new PrivacyPolicy();
 
   private SuperUser superuser = new SuperUser();
-  
+
   private JWTProfile jwtProfile = new JWTProfile();
-  
+
   private JWKProperties jwk = new JWKProperties();
+
+  private DeviceCodeProperties deviceCode = new DeviceCodeProperties();
 
   public String getBaseUrl() {
     return baseUrl;
@@ -351,20 +365,28 @@ public class IamProperties {
   public void setSuperuser(SuperUser superuser) {
     this.superuser = superuser;
   }
-  
+
   public JWTProfile getJwtProfile() {
     return jwtProfile;
   }
-  
+
   public void setJwtProfile(JWTProfile jwtProfile) {
     this.jwtProfile = jwtProfile;
   }
-  
+
   public void setJwk(JWKProperties jwk) {
     this.jwk = jwk;
   }
-  
+
   public JWKProperties getJwk() {
     return jwk;
+  }
+
+  public void setDeviceCode(DeviceCodeProperties deviceCode) {
+    this.deviceCode = deviceCode;
+  }
+
+  public DeviceCodeProperties getDeviceCode() {
+    return deviceCode;
   }
 }
