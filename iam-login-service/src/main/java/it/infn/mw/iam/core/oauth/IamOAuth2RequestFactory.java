@@ -71,8 +71,20 @@ public class IamOAuth2RequestFactory extends ConnectOAuth2RequestFactory {
       scopeFilter.filterScopes(requestedScopes, authn);
       inputParams.put(OAuth2Utils.SCOPE, joiner.join(requestedScopes));
     }
+    
+    AuthorizationRequest authzRequest = super.createAuthorizationRequest(inputParams);
+    
+    for (String audienceKey : AUDIENCE_KEYS) {
+      if (inputParams.containsKey(audienceKey)) {
+        if (!authzRequest.getExtensions().containsKey(AUD)) {
+          authzRequest.getExtensions().put(AUD, inputParams.get(audienceKey));
+        }
+        
+        break;
+      }
+    }
 
-    return super.createAuthorizationRequest(inputParams);
+    return authzRequest;
 
   }
 
