@@ -55,6 +55,7 @@ import org.springframework.security.oauth2.provider.refresh.RefreshTokenGranter;
 
 import it.infn.mw.iam.api.account.AccountUtils;
 import it.infn.mw.iam.api.aup.AUPSignatureCheckService;
+import it.infn.mw.iam.core.oauth.exchange.TokenExchangePdp;
 import it.infn.mw.iam.core.oauth.granters.IamDeviceCodeTokenGranter;
 import it.infn.mw.iam.core.oauth.granters.IamResourceOwnerPasswordTokenGranter;
 import it.infn.mw.iam.core.oauth.granters.TokenExchangeTokenGranter;
@@ -101,6 +102,9 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 
   @Autowired
   private AUPSignatureCheckService signatureCheckService;
+  
+  @Autowired
+  private TokenExchangePdp tokenExchangePdp;
 
   @Bean
   WebResponseExceptionTranslator webResponseExceptionTranslator() {
@@ -145,6 +149,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 
     tokenExchangeGranter.setAccountUtils(accountUtils);
     tokenExchangeGranter.setSignatureCheckService(signatureCheckService);
+    tokenExchangeGranter.setExchangePdp(tokenExchangePdp);
 
     return new CompositeTokenGranter(Arrays.<TokenGranter>asList(
         new AuthorizationCodeTokenGranter(tokenServices, authorizationCodeServices,

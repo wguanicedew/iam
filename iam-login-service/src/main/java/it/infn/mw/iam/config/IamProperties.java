@@ -262,6 +262,8 @@ public class IamProperties {
 
   private DeviceCodeProperties deviceCode = new DeviceCodeProperties();
 
+  private boolean generateDdlSqlScript = false;
+
   public String getBaseUrl() {
     return baseUrl;
   }
@@ -388,5 +390,13 @@ public class IamProperties {
 
   public DeviceCodeProperties getDeviceCode() {
     return deviceCode;
+  }
+
+  public void setGenerateDdlSqlScript(boolean generateDdlSqlScript) {
+    this.generateDdlSqlScript = generateDdlSqlScript;
+  }
+
+  public boolean isGenerateDdlSqlScript() {
+    return generateDdlSqlScript;
   }
 }

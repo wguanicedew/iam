@@ -45,7 +45,7 @@ import it.infn.mw.iam.audit.events.scope_policy.ScopePolicyCreatedEvent;
 import it.infn.mw.iam.audit.events.scope_policy.ScopePolicyDeletedEvent;
 import it.infn.mw.iam.audit.events.scope_policy.ScopePolicyUpdatedEvent;
 import it.infn.mw.iam.persistence.model.IamScopePolicy;
-import it.infn.mw.iam.persistence.model.IamScopePolicy.Rule;
+import it.infn.mw.iam.persistence.model.PolicyRule;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamGroupRepository;
 import it.infn.mw.iam.persistence.repository.IamScopePolicyRepository;
@@ -107,7 +107,7 @@ public class ScopePolicyAuditTests extends ScopePolicyTestUtils {
     
     IamScopePolicy sp = initDenyScopePolicy();
     sp.setId(1L);
-    sp.setRule(Rule.DENY);
+    sp.setRule(PolicyRule.DENY);
     
     when(scopePolicyRepo.findById(1L)).thenReturn(Optional.of(sp));
     
@@ -128,7 +128,7 @@ public class ScopePolicyAuditTests extends ScopePolicyTestUtils {
     
     IamScopePolicy sp = initDenyScopePolicy();
     sp.setId(1L);
-    sp.setRule(Rule.DENY);
+    sp.setRule(PolicyRule.DENY);
     
     when(scopePolicyRepo.findById(1L)).thenReturn(Optional.of(sp));
     

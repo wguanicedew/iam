@@ -97,7 +97,7 @@ public class AuthorizationCodeIntegrationTests {
     String[] audienceKeys = {"aud", "audience"};
 
     for (String audKey : audienceKeys) {
-      
+
       // @formatter:off
       ValidatableResponse resp1 = RestAssured.given()
         .queryParam("response_type", RESPONSE_TYPE_CODE)
@@ -129,7 +129,7 @@ public class AuthorizationCodeIntegrationTests {
       // @formatter:on
 
       // @formatter:off
-      ValidatableResponse resp3 = RestAssured.given()
+      RestAssured.given()
         .cookie(resp2.extract().detailedCookie("JSESSIONID"))
         .queryParam("response_type", RESPONSE_TYPE_CODE)
         .queryParam("client_id", TEST_CLIENT_ID)
@@ -142,6 +142,7 @@ public class AuthorizationCodeIntegrationTests {
       .when()
         .get(authorizeUrl)
       .then()
+        .log().all()
         .statusCode(HttpStatus.OK.value());
       // @formatter:on
 
@@ -184,15 +185,14 @@ public class AuthorizationCodeIntegrationTests {
       String accessToken =
           mapper.readTree(resp5.extract().body().asString()).get("access_token").asText();
 
-      String idToken = 
-          mapper.readTree(resp5.extract().body().asString()).get("id_token").asText();
-      
+      String idToken = mapper.readTree(resp5.extract().body().asString()).get("id_token").asText();
+
       JWT atJwt = JWTParser.parse(accessToken);
       JWT itJwt = JWTParser.parse(idToken);
-      
+
       assertThat(atJwt.getJWTClaimsSet().getAudience(), hasSize(1));
       assertThat(atJwt.getJWTClaimsSet().getAudience(), hasItem("example-audience"));
-      
+
       assertThat(itJwt.getJWTClaimsSet().getAudience(), hasSize(1));
       assertThat(itJwt.getJWTClaimsSet().getAudience(), hasItem(TEST_CLIENT_ID));
     }

@@ -15,6 +15,8 @@
  */
 package it.infn.mw.iam.core.oauth.granters;
 
+import static it.infn.mw.iam.core.oauth.exchange.TokenExchangePdpResult.Decision.INVALID_SCOPE;
+import static it.infn.mw.iam.core.oauth.exchange.TokenExchangePdpResult.Decision.PERMIT;
 import static java.lang.String.format;
 import static java.util.Objects.isNull;
 
@@ -29,6 +31,7 @@ import org.mitre.oauth2.service.SystemScopeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.oauth2.client.resource.OAuth2AccessDeniedException;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
@@ -40,10 +43,11 @@ import org.springframework.security.oauth2.provider.TokenRequest;
 import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Sets;
 
 import it.infn.mw.iam.api.account.AccountUtils;
 import it.infn.mw.iam.api.aup.AUPSignatureCheckService;
+import it.infn.mw.iam.core.oauth.exchange.TokenExchangePdp;
+import it.infn.mw.iam.core.oauth.exchange.TokenExchangePdpResult;
 import it.infn.mw.iam.persistence.model.IamAccount;
 
 public class TokenExchangeTokenGranter extends AbstractTokenGranter {
@@ -59,6 +63,7 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
 
   private AccountUtils accountUtils;
   private AUPSignatureCheckService signatureCheckService;
+  private TokenExchangePdp exchangePdp;
 
 
   @Autowired
@@ -70,31 +75,16 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
     this.systemScopeService = systemScopeService;
   }
 
-  protected Set<String> loadSystemScopes() {
-    final Set<String> systemScopes = Sets.newHashSet();
 
-    systemScopes.addAll(systemScopeService.toStrings(systemScopeService.getUnrestricted()));
-    systemScopes.addAll(systemScopeService.toStrings(systemScopeService.getRestricted()));
 
-    return systemScopes;
-  }
-
-  protected void validateScopeExchange(final ClientDetails actorClient,
+  protected void validateExchange(final ClientDetails actorClient,
       final TokenRequest tokenRequest, OAuth2AccessTokenEntity subjectToken) {
 
-    /**
-     * These scopes, in order to be "exchanged" across services, need to be present in the set of
-     * scopes linked to the subject token that is presented for the exchange.
-     */
-    final Set<String> systemScopes = loadSystemScopes();
 
     String audience = tokenRequest.getRequestParameters().get(AUDIENCE_FIELD);
-
     ClientDetailsEntity subjectClient = subjectToken.getClient();
-
     Set<String> requestedScopes = tokenRequest.getScope();
     Set<String> actorScopes = actorClient.getScope();
-    Set<String> subjectTokenScopes = subjectToken.getScope();
 
     if (!isNull(subjectToken.getAuthenticationHolder().getUserAuth())) {
       LOG.info(
@@ -108,27 +98,20 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
           actorClient.getClientId(), subjectClient.getClientId(), audience, requestedScopes);
     }
 
-    LOG.debug("System scopes: {}", systemScopes);
-    LOG.debug("Requested scopes: {}", requestedScopes);
-    LOG.debug("Actor scopes: {}", actorScopes);
-    LOG.debug("Subject token scopes: {}", subjectTokenScopes);
+    TokenExchangePdpResult result =
+        exchangePdp.validateTokenExchange(tokenRequest, subjectClient, actorClient);
 
-    // Ensure that actor can only request scopes allowed by its configuration
-    if (!actorScopes.containsAll(requestedScopes)) {
-      String errorMsg =
-          String.format("Client '%s' requested a scope that is not allowed to request",
-              actorClient.getClientId());
-
-      throw new InvalidScopeException(errorMsg, requestedScopes);
-    }
-
-    for (String rs : requestedScopes) {
-      if (systemScopes.contains(rs) && !subjectTokenScopes.contains(rs)) {
-        LOG.error(
-            "Requested scope '{}' is an IAM system scope but not linked to subject token scopes",
-            rs);
-        throw new InvalidScopeException(String.format(
-            "Requested scope '%s' is an IAM system scope but not linked to subject token", rs));
+    LOG.debug("Token exchange pdp decision: {}", result.decision());
+    
+    
+    if (INVALID_SCOPE.equals(result.decision())) {
+      
+      throw new InvalidScopeException(format("%s: %s", result.message().get(), result.invalidScope().get()));
+    } else if (!PERMIT.equals(result.decision())) {
+      if (result.message().isPresent()) {
+        throw new OAuth2AccessDeniedException(result.message().get());
+      } else {
+        throw new OAuth2AccessDeniedException("Token exchange not allowed");
       }
     }
   }
@@ -149,7 +132,7 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
 
     if (subjectToken.getAuthenticationHolder().getUserAuth() == null) {
 
-      validateScopeExchange(actorClient, tokenRequest, subjectToken);
+      validateExchange(actorClient, tokenRequest, subjectToken);
       authentication = new OAuth2Authentication(
           getRequestFactory().createOAuth2Request(actorClient, tokenRequest),
           subjectToken.getAuthenticationHolder().getAuthentication());
@@ -164,7 +147,7 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
                 account.get().getUsername()));
       }
 
-      validateScopeExchange(actorClient, tokenRequest, subjectToken);
+      validateExchange(actorClient, tokenRequest, subjectToken);
       authentication = new OAuth2Authentication(
           getRequestFactory().createOAuth2Request(actorClient, tokenRequest),
           subjectToken.getAuthenticationHolder().getAuthentication().getUserAuthentication());
@@ -198,6 +181,8 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
     this.signatureCheckService = signatureCheckService;
   }
 
-
+  public void setExchangePdp(TokenExchangePdp exchangePdp) {
+    this.exchangePdp = exchangePdp;
+  }
 
 }

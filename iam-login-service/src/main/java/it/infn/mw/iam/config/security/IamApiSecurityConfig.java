@@ -107,7 +107,7 @@ public class IamApiSecurityConfig {
 
     @Autowired
     private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
-
+    
     @Autowired
     private CorsFilter corsFilter;
 
@@ -121,6 +121,7 @@ public class IamApiSecurityConfig {
         .and()
           .exceptionHandling()
             .authenticationEntryPoint(authenticationEntryPoint)
+            .accessDeniedHandler(new OAuth2AccessDeniedHandler())
         .and()
           .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
           .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)

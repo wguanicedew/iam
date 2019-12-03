@@ -56,11 +56,6 @@ public class IamScopePolicy implements Serializable {
     GROUP
   }
 
-  public enum Rule {
-    PERMIT,
-    DENY
-  }
-
   public enum MatchingPolicy {
     EQ,
     REGEXP,
@@ -84,7 +79,7 @@ public class IamScopePolicy implements Serializable {
 
   @Enumerated(EnumType.STRING)
   @Column(name = "rule", nullable = false, length = 6)
-  private Rule rule;
+  private PolicyRule rule;
 
   @ManyToOne(optional = true)
   @JoinColumn(name = "group_id")
@@ -142,11 +137,11 @@ public class IamScopePolicy implements Serializable {
     this.lastUpdateTime = lastUpdateTime;
   }
 
-  public Rule getRule() {
+  public PolicyRule getRule() {
     return rule;
   }
 
-  public void setRule(Rule rule) {
+  public void setRule(PolicyRule rule) {
     this.rule = rule;
   }
 
@@ -199,7 +194,7 @@ public class IamScopePolicy implements Serializable {
 
   @Transient
   public boolean isPermit() {
-    return Rule.PERMIT.equals(rule);
+    return PolicyRule.PERMIT.equals(rule);
   }
 
   @Transient

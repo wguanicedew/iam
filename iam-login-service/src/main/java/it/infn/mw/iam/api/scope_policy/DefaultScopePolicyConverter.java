@@ -25,7 +25,7 @@ import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.model.IamScopePolicy;
 import it.infn.mw.iam.persistence.model.IamScopePolicy.MatchingPolicy;
-import it.infn.mw.iam.persistence.model.IamScopePolicy.Rule;
+import it.infn.mw.iam.persistence.model.PolicyRule;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamGroupRepository;
 
@@ -88,7 +88,7 @@ public class DefaultScopePolicyConverter implements IamScopePolicyConverter {
     IamScopePolicy scopePolicy = new IamScopePolicy();
 
     scopePolicy.setDescription(sp.getDescription());
-    scopePolicy.setRule(Rule.valueOf(sp.getRule()));
+    scopePolicy.setRule(PolicyRule.valueOf(sp.getRule()));
     scopePolicy.setMatchingPolicy(MatchingPolicy.valueOf(sp.getMatchingPolicy()));
 
     if (sp.getScopes() != null) {

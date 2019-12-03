@@ -57,6 +57,7 @@ import it.infn.mw.iam.api.scope_policy.ScopePolicyDTO;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.model.IamScopePolicy;
+import it.infn.mw.iam.persistence.model.PolicyRule;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamGroupRepository;
 import it.infn.mw.iam.persistence.repository.IamScopePolicyRepository;
@@ -213,7 +214,7 @@ public class ScopePolicyApiIntegrationTests extends ScopePolicyTestUtils {
   @WithMockOAuthUser(user = "admin", authorities = {"ROLE_USER", "ROLE_ADMIN"})
   public void invalidAccountIdRuleValidationTest() throws Exception {
     ScopePolicyDTO sp = new ScopePolicyDTO();
-    sp.setRule(IamScopePolicy.Rule.DENY.name());
+    sp.setRule(PolicyRule.DENY.name());
     IamAccountRefDTO accountRef = new IamAccountRefDTO();
     accountRef.setUuid(UUID.randomUUID().toString());
     sp.setAccount(accountRef);
@@ -229,7 +230,7 @@ public class ScopePolicyApiIntegrationTests extends ScopePolicyTestUtils {
   @WithMockOAuthUser(user = "admin", authorities = {"ROLE_USER", "ROLE_ADMIN"})
   public void invalidGroupIdRuleValidationTest() throws Exception {
     ScopePolicyDTO sp = new ScopePolicyDTO();
-    sp.setRule(IamScopePolicy.Rule.DENY.name());
+    sp.setRule(PolicyRule.DENY.name());
 
     GroupRefDTO groupRef = new GroupRefDTO();
 
@@ -254,7 +255,7 @@ public class ScopePolicyApiIntegrationTests extends ScopePolicyTestUtils {
       .orElseThrow(() -> new AssertionError("Expected Analysis group not found"));
 
     ScopePolicyDTO sp = new ScopePolicyDTO();
-    sp.setRule(IamScopePolicy.Rule.DENY.name());
+    sp.setRule(PolicyRule.DENY.name());
 
     GroupRefDTO groupRef = new GroupRefDTO();
     groupRef.setUuid(analysisGroup.getUuid());
@@ -276,7 +277,7 @@ public class ScopePolicyApiIntegrationTests extends ScopePolicyTestUtils {
   public void invalidScopePolicyScopesLengthLowerBound() throws Exception {
 
     ScopePolicyDTO sp = new ScopePolicyDTO();
-    sp.setRule(IamScopePolicy.Rule.DENY.name());
+    sp.setRule(PolicyRule.DENY.name());
     sp.setScopes(Sets.newHashSet(""));
     String serializedSp = mapper.writeValueAsString(sp);
 
@@ -295,7 +296,7 @@ public class ScopePolicyApiIntegrationTests extends ScopePolicyTestUtils {
       s.append('s');
 
     ScopePolicyDTO sp = new ScopePolicyDTO();
-    sp.setRule(IamScopePolicy.Rule.DENY.name());
+    sp.setRule(PolicyRule.DENY.name());
     sp.setScopes(Sets.newHashSet(s.toString()));
     String serializedSp = mapper.writeValueAsString(sp);
 
@@ -310,7 +311,7 @@ public class ScopePolicyApiIntegrationTests extends ScopePolicyTestUtils {
   public void invalidScopeMatchingPolicy() throws Exception {
 
     ScopePolicyDTO sp = new ScopePolicyDTO();
-    sp.setRule(IamScopePolicy.Rule.DENY.name());
+    sp.setRule(PolicyRule.DENY.name());
     sp.setMatchingPolicy("PATH");
 
     String serializedSp = mapper.writeValueAsString(sp);
@@ -326,7 +327,7 @@ public class ScopePolicyApiIntegrationTests extends ScopePolicyTestUtils {
   public void testDefaultPolicyCreation() throws Exception {
 
     ScopePolicyDTO sp = new ScopePolicyDTO();
-    sp.setRule(IamScopePolicy.Rule.DENY.name());
+    sp.setRule(PolicyRule.DENY.name());
     sp.setScopes(Sets.newHashSet("scim:read", "scim:write"));
 
     String serializedSp = mapper.writeValueAsString(sp);
@@ -341,7 +342,7 @@ public class ScopePolicyApiIntegrationTests extends ScopePolicyTestUtils {
   public void testDefaultPolicyCreationNoScopes() throws Exception {
 
     ScopePolicyDTO sp = new ScopePolicyDTO();
-    sp.setRule(IamScopePolicy.Rule.DENY.name());
+    sp.setRule(PolicyRule.DENY.name());
 
     String serializedSp = mapper.writeValueAsString(sp);
     mvc.perform(post("/iam/scope_policies").content(serializedSp).contentType(APPLICATION_JSON))
@@ -363,7 +364,7 @@ public class ScopePolicyApiIntegrationTests extends ScopePolicyTestUtils {
       .orElseThrow(() -> new AssertionError("Expected test user not found"));
 
     ScopePolicyDTO sp = new ScopePolicyDTO();
-    sp.setRule(IamScopePolicy.Rule.DENY.name());
+    sp.setRule(PolicyRule.DENY.name());
     sp.setScopes(Sets.newHashSet("scim:read", "scim:write"));
 
     IamAccountRefDTO account = new IamAccountRefDTO();
@@ -402,7 +403,7 @@ public class ScopePolicyApiIntegrationTests extends ScopePolicyTestUtils {
       .orElseThrow(() -> new AssertionError("Expected Analysis group not found"));
 
     ScopePolicyDTO sp = new ScopePolicyDTO();
-    sp.setRule(IamScopePolicy.Rule.DENY.name());
+    sp.setRule(PolicyRule.DENY.name());
     sp.setScopes(Sets.newHashSet("scim:read", "scim:write"));
 
     GroupRefDTO groupRef = new GroupRefDTO();
@@ -468,7 +469,7 @@ public class ScopePolicyApiIntegrationTests extends ScopePolicyTestUtils {
   public void testScopeCascade() throws Exception {
 
     ScopePolicyDTO sp = new ScopePolicyDTO();
-    sp.setRule(IamScopePolicy.Rule.DENY.name());
+    sp.setRule(PolicyRule.DENY.name());
     sp.setScopes(Sets.newHashSet("scim:read", "scim:write"));
 
     String serializedSp = mapper.writeValueAsString(sp);
@@ -476,7 +477,7 @@ public class ScopePolicyApiIntegrationTests extends ScopePolicyTestUtils {
       .andExpect(status().isCreated());
 
     sp = new ScopePolicyDTO();
-    sp.setRule(IamScopePolicy.Rule.PERMIT.name());
+    sp.setRule(PolicyRule.PERMIT.name());
     sp.setScopes(Sets.newHashSet("scim:read", "scim:write"));
 
     serializedSp = mapper.writeValueAsString(sp);
@@ -490,7 +491,7 @@ public class ScopePolicyApiIntegrationTests extends ScopePolicyTestUtils {
   @WithMockOAuthUser(user = "test", authorities = {"ROLE_USER"})
   public void testDefaultPolicyUpdateFailsWithForbiddenForUnauthorizedUser() throws Exception {
     ScopePolicyDTO sp = new ScopePolicyDTO();
-    sp.setRule(IamScopePolicy.Rule.DENY.name());
+    sp.setRule(PolicyRule.DENY.name());
     sp.setId(1L);
 
     String serializedSp = mapper.writeValueAsString(sp);
@@ -501,7 +502,7 @@ public class ScopePolicyApiIntegrationTests extends ScopePolicyTestUtils {
   @Test
   public void testDefaultPolicyUpdateFailsWithAnonymousUser() throws Exception {
     ScopePolicyDTO sp = new ScopePolicyDTO();
-    sp.setRule(IamScopePolicy.Rule.DENY.name());
+    sp.setRule(PolicyRule.DENY.name());
     sp.setId(1L);
 
     String serializedSp = mapper.writeValueAsString(sp);
@@ -516,7 +517,7 @@ public class ScopePolicyApiIntegrationTests extends ScopePolicyTestUtils {
 
     ScopePolicyDTO sp = new ScopePolicyDTO();
     sp.setDescription(description);
-    sp.setRule(IamScopePolicy.Rule.DENY.name());
+    sp.setRule(PolicyRule.DENY.name());
     sp.setId(1L);
 
     String serializedSp = mapper.writeValueAsString(sp);
@@ -555,7 +556,7 @@ public class ScopePolicyApiIntegrationTests extends ScopePolicyTestUtils {
 
     ScopePolicyDTO sp = new ScopePolicyDTO();
     sp.setDescription(description);
-    sp.setRule(IamScopePolicy.Rule.DENY.name());
+    sp.setRule(PolicyRule.DENY.name());
     sp.setId(10L);
 
     String serializedSp = mapper.writeValueAsString(sp);
@@ -575,7 +576,7 @@ public class ScopePolicyApiIntegrationTests extends ScopePolicyTestUtils {
 
     ScopePolicyDTO sp = new ScopePolicyDTO();
     sp.setDescription(description);
-    sp.setRule(IamScopePolicy.Rule.DENY.name());
+    sp.setRule(PolicyRule.DENY.name());
 
     GroupRefDTO groupRef = new GroupRefDTO();
     groupRef.setUuid(analysisGroup.getUuid());
@@ -598,7 +599,7 @@ public class ScopePolicyApiIntegrationTests extends ScopePolicyTestUtils {
 
     ScopePolicyDTO sp = new ScopePolicyDTO();
     sp.setDescription("sp");
-    sp.setRule(IamScopePolicy.Rule.DENY.name());
+    sp.setRule(PolicyRule.DENY.name());
     sp.setScopes(Sets.newHashSet(SCIM_READ, SCIM_WRITE));
 
     GroupRefDTO groupRef = new GroupRefDTO();
@@ -612,7 +613,7 @@ public class ScopePolicyApiIntegrationTests extends ScopePolicyTestUtils {
 
     ScopePolicyDTO sp2 = new ScopePolicyDTO();
     sp2.setDescription("sp2");
-    sp2.setRule(IamScopePolicy.Rule.DENY.name());
+    sp2.setRule(PolicyRule.DENY.name());
     sp2.setGroup(groupRef);
 
     mvc.perform(post("/iam/scope_policies").content(mapper.writeValueAsString(sp2))
