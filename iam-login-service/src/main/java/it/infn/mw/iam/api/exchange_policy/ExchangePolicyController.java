@@ -50,7 +50,7 @@ public class ExchangePolicyController {
   final IamTokenExchangePolicyRepository repo;
   final ExchangePolicyConverter converter;
   final Clock clock;
-  
+
   @Autowired
   public ExchangePolicyController(Clock clock, IamTokenExchangePolicyRepository repo,
       ExchangePolicyConverter converter) {
@@ -77,26 +77,27 @@ public class ExchangePolicyController {
   @RequestMapping(value = "/policies/{id}", method = RequestMethod.DELETE)
   @ResponseStatus(code = HttpStatus.NO_CONTENT)
   public void deleteExchangePolicy(@PathVariable Long id) {
-    Optional.ofNullable(repo.findOne(id)).orElseThrow(() -> notFoundError(id));
-    repo.delete(id);
+    IamTokenExchangePolicyEntity p =
+        Optional.ofNullable(repo.findOne(id)).orElseThrow(() -> notFoundError(id));
+    repo.delete(p.getId());
   }
 
   @RequestMapping(value = "/policies", method = RequestMethod.POST)
   @ResponseStatus(code = HttpStatus.CREATED)
   public void createExchangePolicy(@Valid @RequestBody ExchangePolicyDTO dto,
       BindingResult validationResult) {
-    
+
     if (validationResult.hasErrors()) {
       throw buildValidationError(validationResult);
     }
-    
+
     Date now = Date.from(clock.instant());
-    
+
     IamTokenExchangePolicyEntity policy = converter.entityFromDto(dto);
-    
+
     policy.setCreationTime(now);
     policy.setLastUpdateTime(now);
-    
+
     repo.save(policy);
   }
 
@@ -111,11 +112,12 @@ public class ExchangePolicyController {
   public ErrorDTO invalidPolicy(Exception ex) {
     return ErrorDTO.fromString(ex.getMessage());
   }
-  
+
   @ResponseStatus(value = HttpStatus.BAD_REQUEST)
   @ExceptionHandler(HttpMessageNotReadableException.class)
   public ErrorDTO invalidRequestBody(Exception ex) {
-    return ErrorDTO.fromString("Invalid token exchange policy: could not parse the policy JSON representation");
+    return ErrorDTO
+      .fromString("Invalid token exchange policy: could not parse the policy JSON representation");
   }
 
 }

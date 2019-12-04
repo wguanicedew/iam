@@ -39,13 +39,13 @@ public class ScopePolicyValidator implements ConstraintValidator<ScopePolicy, Sc
   }
 
   private boolean isValidMatchingPolicy(ScopePolicyDTO value, ConstraintValidatorContext context) {
-    if (value.getMatchingPolicy().equals(PATH.name())
-        || value.getMatchingPolicy().equals(REGEXP.name())) {
-      if (isNull(value.getScopes()) || value.getScopes().isEmpty()) {
-        context.disableDefaultConstraintViolation();
-        context.buildConstraintViolationWithTemplate(EMPTY_SCOPE_MSG).addConstraintViolation();
-        return false;
-      }
+    if ((value.getMatchingPolicy().equals(PATH.name())
+        || value.getMatchingPolicy().equals(REGEXP.name()))
+        && (isNull(value.getScopes()) || value.getScopes().isEmpty())) {
+
+      context.disableDefaultConstraintViolation();
+      context.buildConstraintViolationWithTemplate(EMPTY_SCOPE_MSG).addConstraintViolation();
+      return false;
     }
 
     return true;

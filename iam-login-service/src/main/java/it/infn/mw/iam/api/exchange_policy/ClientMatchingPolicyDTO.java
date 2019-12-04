@@ -39,7 +39,7 @@ public class ClientMatchingPolicyDTO {
   String matchParam;
 
   public ClientMatchingPolicyDTO() {
-    // empty ctor
+    type = ClientMatchingPolicyType.ANY;
   }
   
   @JsonCreator

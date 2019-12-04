@@ -37,7 +37,7 @@ public class ExchangeScopePolicyDTO {
   private String matchParam;
   
   public ExchangeScopePolicyDTO() {
-    
+    // empty on purpose
   }
 
   public PolicyRule getRule() {

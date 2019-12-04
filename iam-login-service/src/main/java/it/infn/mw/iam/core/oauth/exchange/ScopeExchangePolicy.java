@@ -60,7 +60,7 @@ public class ScopeExchangePolicy {
     ScopeMatcher matcher;
     if (sp.getType().equals(IamScopePolicy.MatchingPolicy.EQ)) {
       matcher = stringEqualsMatcher(sp.getMatchParam());
-    } else if (sp.getType().equals(IamScopePolicy.MatchingPolicy.REGEXP)) {
+    } else if (sp.getType().equals(IamScopePolicy.MatchingPolicy.PATH)) {
       matcher = StructuredPathScopeMatcher.fromString(sp.getMatchParam());
     } else if (sp.getType().equals(IamScopePolicy.MatchingPolicy.REGEXP)) {
       matcher = RegexpScopeMatcher.regexpMatcher(sp.getMatchParam());

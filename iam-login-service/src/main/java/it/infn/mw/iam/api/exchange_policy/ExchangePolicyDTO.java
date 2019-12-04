@@ -58,6 +58,7 @@ public class ExchangePolicyDTO {
   private List<ExchangeScopePolicyDTO> scopePolicies = Lists.newArrayList();
   
   public ExchangePolicyDTO() {
+    // empty on purpose
   }
 
   public Long getId() {
