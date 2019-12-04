@@ -54,7 +54,7 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
 
   public static final String GRANT_TYPE = "urn:ietf:params:oauth:grant-type:token-exchange";
   private static final String TOKEN_TYPE = "urn:ietf:params:oauth:token-type:jwt";
-  public static final String[] AUDIENCE_KEYS = {"audience", "aud"};
+  private static final String[] AUDIENCE_KEYS = {"audience", "aud"};
   private static final String AUDIENCE_FIELD = "audience"; 
 
   public static final String TOKEN_EXCHANGE_SUBJECT_CLIENT_ID_KEY = "iam.token_exchange.subject_client_id";
