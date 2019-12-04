@@ -145,7 +145,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     resourceOwnerPasswordCredentialGranter.setSignatureCheckService(signatureCheckService);
 
     TokenExchangeTokenGranter tokenExchangeGranter = new TokenExchangeTokenGranter(tokenServices,
-        clientDetailsService, requestFactory, systemScopeService);
+        clientDetailsService, requestFactory);
 
     tokenExchangeGranter.setAccountUtils(accountUtils);
     tokenExchangeGranter.setSignatureCheckService(signatureCheckService);

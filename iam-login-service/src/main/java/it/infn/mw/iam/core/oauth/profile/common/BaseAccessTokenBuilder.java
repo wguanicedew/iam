@@ -16,9 +16,12 @@
 package it.infn.mw.iam.core.oauth.profile.common;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static it.infn.mw.iam.core.oauth.granters.TokenExchangeTokenGranter.GRANT_TYPE;
+import static java.util.Objects.isNull;
 
 import java.time.Instant;
 import java.util.Date;
+import java.util.Map;
 import java.util.UUID;
 
 import org.mitre.oauth2.model.OAuth2AccessTokenEntity;
@@ -26,24 +29,49 @@ import org.mitre.openid.connect.model.UserInfo;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
 import com.google.common.base.Splitter;
+import com.google.common.collect.Maps;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTClaimsSet.Builder;
 
 import it.infn.mw.iam.config.IamProperties;
+import it.infn.mw.iam.core.oauth.granters.TokenExchangeTokenGranter;
 import it.infn.mw.iam.core.oauth.profile.JWTAccessTokenBuilder;
 
 public abstract class BaseAccessTokenBuilder implements JWTAccessTokenBuilder {
 
   public static final String AUD_KEY = "aud";
   public static final String SCOPE_CLAIM_NAME = "scope";
+  public static final String ACT_CLAIM_NAME = "act";
   public static final String SPACE = " ";
+  
 
   protected final IamProperties properties;
-  
+
   protected final Splitter SPLITTER = Splitter.on(' ').trimResults().omitEmptyStrings();
 
   public BaseAccessTokenBuilder(IamProperties properties) {
     this.properties = properties;
+  }
+
+  protected JWTClaimsSet.Builder handleClientTokenExchange(JWTClaimsSet.Builder builder,
+      OAuth2AccessTokenEntity token, OAuth2Authentication authentication, UserInfo userInfo) {
+
+    if (GRANT_TYPE.equals(authentication.getOAuth2Request().getGrantType())) {
+
+      if (isNull(userInfo)) {
+        String subjectClientId = (String) authentication.getOAuth2Request()
+          .getExtensions()
+          .get(TokenExchangeTokenGranter.TOKEN_EXCHANGE_SUBJECT_CLIENT_ID_KEY);
+        
+        builder.subject(subjectClientId);
+      } 
+      
+      Map<String, String> actClaimContent = Maps.newHashMap();
+      actClaimContent.put("sub", authentication.getName());
+      builder.claim(ACT_CLAIM_NAME, actClaimContent);
+    }
+
+    return builder;
   }
 
   protected JWTClaimsSet.Builder baseJWTSetup(OAuth2AccessTokenEntity token,
@@ -69,7 +97,7 @@ public abstract class BaseAccessTokenBuilder implements JWTAccessTokenBuilder {
       builder.audience(SPLITTER.splitToList(audience));
     }
 
-    return builder;
+    return handleClientTokenExchange(builder, token, authentication, userInfo);
   }
 
 

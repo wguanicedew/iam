@@ -67,6 +67,7 @@ public class TokensConverter {
     AuthenticationHolderEntity ah = rt.getAuthenticationHolder();
 
     ClientRef clientRef = buildClientRef(ah.getClientId());
+    
     UserRef userRef = buildUserRef(ah.getUserAuth());
 
     return RefreshToken.builder()

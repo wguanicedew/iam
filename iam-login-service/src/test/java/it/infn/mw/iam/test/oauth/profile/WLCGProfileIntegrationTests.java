@@ -15,24 +15,37 @@
  */
 package it.infn.mw.iam.test.oauth.profile;
 
-import static org.hamcrest.CoreMatchers.containsString;
+
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.List;
+
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -45,9 +58,12 @@ import com.nimbusds.jwt.JWTParser;
 
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.config.IamProperties;
+import it.infn.mw.iam.core.oauth.granters.TokenExchangeTokenGranter;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 import it.infn.mw.iam.test.oauth.EndpointsTestUtils;
 import it.infn.mw.iam.test.util.WithAnonymousUser;
+import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
+import it.infn.mw.iam.test.util.oauth.MockOAuth2Request;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class})
@@ -72,10 +88,22 @@ public class WLCGProfileIntegrationTests extends EndpointsTestUtils {
   private static final String CLIENT_CREDENTIALS_CLIENT_ID = "client-cred";
   private static final String CLIENT_CREDENTIALS_CLIENT_SECRET = "secret";
 
+  private static final String TOKEN_EXCHANGE_GRANT_TYPE = TokenExchangeTokenGranter.GRANT_TYPE;
+  private static final String REFRESH_TOKEN_GRANT_TYPE = "refresh_token";
+
   private static final String CLIENT_ID = "password-grant";
   private static final String CLIENT_SECRET = "secret";
   private static final String USERNAME = "test";
   private static final String PASSWORD = "password";
+
+  private static final String ADMIN_USERNAME = "admin";
+  private static final String ADMIN_PASSWORD = "password";
+
+  private static final String SUBJECT_CLIENT_ID = "token-exchange-subject";
+  private static final String SUBJECT_CLIENT_SECRET = "secret";
+
+  private static final String ACTOR_CLIENT_ID = "token-exchange-actor";
+  private static final String ACTOR_CLIENT_SECRET = "secret";
 
   @Autowired
   private WebApplicationContext context;
@@ -83,12 +111,39 @@ public class WLCGProfileIntegrationTests extends EndpointsTestUtils {
   @Autowired
   IamProperties iamProperties;
 
+  @Autowired
+  MockOAuth2Filter oauth2Filter;
+
   @Before
   public void setup() {
+    oauth2Filter.cleanupSecurityContext();
     mvc =
         MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).alwaysDo(log()).build();
   }
 
+  @After
+  public void teardown() {
+    oauth2Filter.cleanupSecurityContext();
+  }
+
+  private void setOAuthAdminSecurityContext() {
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    Authentication userAuth = new UsernamePasswordAuthenticationToken("admin", "",
+        AuthorityUtils.createAuthorityList("ROLE_USER", "ROLE_ADMIN"));
+    
+    String[] authnScopes = new String[] {"openid"};
+    
+    OAuth2Authentication authn = new OAuth2Authentication(
+        new MockOAuth2Request("password-grant", authnScopes), userAuth);
+    
+    authn.setAuthenticated(true);
+    authn.setDetails("No details");
+
+    context.setAuthentication(authn);
+    
+    oauth2Filter.setSecurityContext(context);
+  }
+  
   private String getAccessTokenForUser(String scopes) throws Exception {
 
     return new AccessTokenGetter().grantType("password")
@@ -151,13 +206,104 @@ public class WLCGProfileIntegrationTests extends EndpointsTestUtils {
       .getResponse()
       .getContentAsString();
 
-    
+
     DefaultOAuth2AccessToken tokenResponseObject =
         mapper.readValue(response, DefaultOAuth2AccessToken.class);
-    
+
     JWT accessToken = JWTParser.parse(tokenResponseObject.getValue());
-    
+
     assertThat(accessToken.getJWTClaimsSet().getClaim("wlcg.groups"), nullValue());
 
+  }
+
+
+  @Test
+  public void testWlcgProfileServiceIdentityTokenExchange() throws Exception {
+
+
+    String subjectToken = new AccessTokenGetter().grantType(CLIENT_CREDENTIALS_GRANT_TYPE)
+      .clientId(SUBJECT_CLIENT_ID)
+      .clientSecret(SUBJECT_CLIENT_SECRET)
+      .scope("storage.read:/ storage.write:/subpath")
+      .audience(ACTOR_CLIENT_ID)
+      .getAccessTokenValue();
+
+    String tokenResponse = mvc
+      .perform(post("/token").with(httpBasic(ACTOR_CLIENT_ID, ACTOR_CLIENT_SECRET))
+        .param("grant_type", TOKEN_EXCHANGE_GRANT_TYPE)
+        .param("subject_token", subjectToken)
+        .param("subject_token_type", "urn:ietf:params:oauth:token-type:jwt")
+        .param("scope", "storage.read:/subpath storage.write:/subpath/test offline_access")
+        .param("audience", "se1.example se2.example"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.access_token").exists())
+      .andExpect(jsonPath("$.refresh_token").exists())
+      .andExpect(jsonPath("$.scope",
+          allOf(containsString("storage.read:/subpath "), containsString("offline_access"),
+              containsString("storage.write:/subpath/test"))))
+      .andReturn()
+      .getResponse()
+      .getContentAsString();
+
+    DefaultOAuth2AccessToken tokenResponseObject =
+        mapper.readValue(tokenResponse, DefaultOAuth2AccessToken.class);
+
+    JWT exchangedToken = JWTParser.parse(tokenResponseObject.getValue());
+    assertThat(exchangedToken.getJWTClaimsSet().getSubject(), is(SUBJECT_CLIENT_ID));
+
+    assertThat(
+        exchangedToken.getJWTClaimsSet().getJSONObjectClaim("act").getAsString("sub"), is(ACTOR_CLIENT_ID));
+    
+    String atScopes = exchangedToken.getJWTClaimsSet().getStringClaim("scope");
+
+    assertThat(atScopes, containsString("storage.read:/subpath"));
+
+    assertThat(atScopes, containsString("storage.write:/subpath/test"));
+
+    assertThat(atScopes, containsString("offline_access"));
+
+    List<String> audiences = exchangedToken.getJWTClaimsSet().getStringListClaim("aud");
+
+    assertThat(audiences, notNullValue());
+    assertThat(audiences, hasItems("se1.example", "se2.example"));
+
+    tokenResponse = mvc
+      .perform(post("/token").with(httpBasic(ACTOR_CLIENT_ID, ACTOR_CLIENT_SECRET))
+        .param("grant_type", REFRESH_TOKEN_GRANT_TYPE)
+        .param("refresh_token", tokenResponseObject.getRefreshToken().getValue()))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.access_token").exists())
+      .andExpect(jsonPath("$.refresh_token").exists())
+      .andExpect(jsonPath("$.scope",
+          allOf(containsString("storage.read:/subpath "), containsString("offline_access"),
+              containsString("storage.write:/subpath/test"))))
+      .andReturn()
+      .getResponse()
+      .getContentAsString();
+
+    tokenResponseObject = mapper.readValue(tokenResponse, DefaultOAuth2AccessToken.class);
+
+    JWT refreshedToken = JWTParser.parse(tokenResponseObject.getValue());
+    assertThat(refreshedToken.getJWTClaimsSet().getSubject(), is(SUBJECT_CLIENT_ID));
+   
+    String rtScopes = refreshedToken.getJWTClaimsSet().getStringClaim("scope");
+
+    assertThat(rtScopes, containsString("storage.read:/subpath"));
+
+    assertThat(rtScopes, containsString("storage.write:/subpath/test"));
+
+    assertThat(rtScopes, containsString("offline_access"));
+
+    List<String> rtAudiences = exchangedToken.getJWTClaimsSet().getStringListClaim("aud");
+
+    assertThat(rtAudiences, notNullValue());
+    assertThat(rtAudiences, hasItems("se1.example", "se2.example"));
+
+    setOAuthAdminSecurityContext();
+    
+    mvc
+      .perform(get("/iam/api/refresh-tokens"))
+      .andExpect(status().isOk());
+    
   }
 }

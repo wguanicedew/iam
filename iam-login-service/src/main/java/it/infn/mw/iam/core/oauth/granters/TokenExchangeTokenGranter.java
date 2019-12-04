@@ -15,6 +15,7 @@
  */
 package it.infn.mw.iam.core.oauth.granters;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static it.infn.mw.iam.core.oauth.exchange.TokenExchangePdpResult.Decision.INVALID_SCOPE;
 import static it.infn.mw.iam.core.oauth.exchange.TokenExchangePdpResult.Decision.PERMIT;
 import static java.lang.String.format;
@@ -27,7 +28,6 @@ import org.mitre.oauth2.model.ClientDetailsEntity;
 import org.mitre.oauth2.model.OAuth2AccessTokenEntity;
 import org.mitre.oauth2.service.ClientDetailsEntityService;
 import org.mitre.oauth2.service.OAuth2TokenEntityService;
-import org.mitre.oauth2.service.SystemScopeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,8 +42,6 @@ import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.TokenRequest;
 import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 
-import com.google.common.base.Strings;
-
 import it.infn.mw.iam.api.account.AccountUtils;
 import it.infn.mw.iam.api.aup.AUPSignatureCheckService;
 import it.infn.mw.iam.core.oauth.exchange.TokenExchangePdp;
@@ -56,10 +54,12 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
 
   public static final String GRANT_TYPE = "urn:ietf:params:oauth:grant-type:token-exchange";
   private static final String TOKEN_TYPE = "urn:ietf:params:oauth:token-type:jwt";
-  private static final String AUDIENCE_FIELD = "audience";
+  public static final String[] AUDIENCE_KEYS = {"audience", "aud"};
+  private static final String AUDIENCE_FIELD = "audience"; 
 
+  public static final String TOKEN_EXCHANGE_SUBJECT_CLIENT_ID_KEY = "iam.token_exchange.subject_client_id";
+  
   private final OAuth2TokenEntityService tokenServices;
-  private final SystemScopeService systemScopeService;
 
   private AccountUtils accountUtils;
   private AUPSignatureCheckService signatureCheckService;
@@ -69,10 +69,9 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
   @Autowired
   public TokenExchangeTokenGranter(final OAuth2TokenEntityService tokenServices,
       final ClientDetailsEntityService clientDetailsService,
-      final OAuth2RequestFactory requestFactory, final SystemScopeService systemScopeService) {
+      final OAuth2RequestFactory requestFactory) {
     super(tokenServices, clientDetailsService, requestFactory, GRANT_TYPE);
     this.tokenServices = tokenServices;
-    this.systemScopeService = systemScopeService;
   }
 
 
@@ -80,11 +79,9 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
   protected void validateExchange(final ClientDetails actorClient,
       final TokenRequest tokenRequest, OAuth2AccessTokenEntity subjectToken) {
 
-
     String audience = tokenRequest.getRequestParameters().get(AUDIENCE_FIELD);
     ClientDetailsEntity subjectClient = subjectToken.getClient();
     Set<String> requestedScopes = tokenRequest.getScope();
-    Set<String> actorScopes = actorClient.getScope();
 
     if (!isNull(subjectToken.getAuthenticationHolder().getUserAuth())) {
       LOG.info(
@@ -135,7 +132,9 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
       validateExchange(actorClient, tokenRequest, subjectToken);
       authentication = new OAuth2Authentication(
           getRequestFactory().createOAuth2Request(actorClient, tokenRequest),
-          subjectToken.getAuthenticationHolder().getAuthentication());
+          null);
+      authentication.getOAuth2Request().getExtensions().put(TOKEN_EXCHANGE_SUBJECT_CLIENT_ID_KEY, 
+          subjectToken.getClient().getClientId());
     } else {
 
       Optional<IamAccount> account = accountUtils
@@ -155,7 +154,7 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
 
 
     String audience = tokenRequest.getRequestParameters().get(AUDIENCE_FIELD);
-    if (!Strings.isNullOrEmpty(audience)) {
+    if (!isNullOrEmpty(audience)) {
       authentication.getOAuth2Request().getExtensions().put("aud", audience);
     }
 
