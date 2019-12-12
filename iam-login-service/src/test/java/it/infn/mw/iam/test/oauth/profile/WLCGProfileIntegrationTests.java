@@ -102,10 +102,7 @@ public class WLCGProfileIntegrationTests extends EndpointsTestUtils {
   private static final String USERNAME = "test";
   private static final String PASSWORD = "password";
   private static final String USER_SUBJECT = "80e5fb8d-b7c8-451a-89ba-346ae278a66f";
-
-  private static final String ADMIN_USERNAME = "admin";
-  private static final String ADMIN_PASSWORD = "password";
-
+  
   private static final String SUBJECT_CLIENT_ID = "token-exchange-subject";
   private static final String SUBJECT_CLIENT_SECRET = "secret";
 
