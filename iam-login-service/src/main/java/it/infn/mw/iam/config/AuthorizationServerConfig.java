@@ -21,7 +21,6 @@ import java.util.Collections;
 import org.mitre.oauth2.service.ClientDetailsEntityService;
 import org.mitre.oauth2.service.DeviceCodeService;
 import org.mitre.oauth2.service.OAuth2TokenEntityService;
-import org.mitre.oauth2.service.SystemScopeService;
 import org.mitre.oauth2.token.ChainedTokenGranter;
 import org.mitre.oauth2.token.JWTAssertionTokenGranter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,9 +89,6 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 
   @Autowired
   private PasswordEncoder passwordEncoder;
-
-  @Autowired
-  private SystemScopeService systemScopeService;
 
   @Autowired
   private DeviceCodeService deviceCodeService;
