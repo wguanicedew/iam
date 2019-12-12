@@ -54,7 +54,8 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
 
   public static final Logger LOG = LoggerFactory.getLogger(TokenExchangeTokenGranter.class);
 
-  public static final String TOKEN_EXCHANGE_GRANT_TYPE = "urn:ietf:params:oauth:grant-type:token-exchange";
+  public static final String TOKEN_EXCHANGE_GRANT_TYPE =
+      "urn:ietf:params:oauth:grant-type:token-exchange";
   private static final String TOKEN_TYPE = "urn:ietf:params:oauth:token-type:jwt";
   private static final String AUDIENCE_FIELD = "audience";
 
@@ -112,9 +113,16 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
 
 
     if (INVALID_SCOPE.equals(result.decision())) {
+      String errorMsg = "An invalid scope was requested";
 
-      throw new InvalidScopeException(
-          format("%s: %s", result.message().get(), result.invalidScope().get()));
+      // These clauses will _always_ be true, but this way sonarcloud
+      // does not complain...
+      if (result.message().isPresent() && result.invalidScope().isPresent()) {
+        errorMsg = format("%s: %s", result.message().get(), result.invalidScope().get());
+      }
+
+      throw new InvalidScopeException(errorMsg);
+
     } else if (!PERMIT.equals(result.decision())) {
       if (result.message().isPresent()) {
         throw new OAuth2AccessDeniedException(result.message().get());
@@ -142,20 +150,21 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
       authentication.getOAuth2Request()
         .getExtensions()
         .put(TOKEN_EXCHANGE_SUBJECT_SUB_KEY, subjectTokenSub);
-      
-      JSONObject subjectActClaim = subjectToken.getJwt().getJWTClaimsSet().getJSONObjectClaim("act");
-      
+
+      JSONObject subjectActClaim =
+          subjectToken.getJwt().getJWTClaimsSet().getJSONObjectClaim("act");
+
       if (!isNull(subjectActClaim)) {
         authentication.getOAuth2Request()
-        .getExtensions()
-        .put(TOKEN_EXCHANGE_SUBJECT_ACT_KEY, subjectActClaim);
+          .getExtensions()
+          .put(TOKEN_EXCHANGE_SUBJECT_ACT_KEY, subjectActClaim);
       }
-      
+
     } catch (ParseException e) {
       LOG.error("Error extracting claims from subject token JWT: {}", e.getMessage(), e);
     }
-    
-    
+
+
   }
 
   @Override
