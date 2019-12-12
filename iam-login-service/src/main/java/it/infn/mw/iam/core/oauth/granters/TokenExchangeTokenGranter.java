@@ -21,6 +21,7 @@ import static it.infn.mw.iam.core.oauth.exchange.TokenExchangePdpResult.Decision
 import static java.lang.String.format;
 import static java.util.Objects.isNull;
 
+import java.text.ParseException;
 import java.util.Optional;
 import java.util.Set;
 
@@ -47,18 +48,27 @@ import it.infn.mw.iam.api.aup.AUPSignatureCheckService;
 import it.infn.mw.iam.core.oauth.exchange.TokenExchangePdp;
 import it.infn.mw.iam.core.oauth.exchange.TokenExchangePdpResult;
 import it.infn.mw.iam.persistence.model.IamAccount;
+import net.minidev.json.JSONObject;
 
 public class TokenExchangeTokenGranter extends AbstractTokenGranter {
 
   public static final Logger LOG = LoggerFactory.getLogger(TokenExchangeTokenGranter.class);
 
-  public static final String GRANT_TYPE = "urn:ietf:params:oauth:grant-type:token-exchange";
+  public static final String TOKEN_EXCHANGE_GRANT_TYPE = "urn:ietf:params:oauth:grant-type:token-exchange";
   private static final String TOKEN_TYPE = "urn:ietf:params:oauth:token-type:jwt";
-  private static final String[] AUDIENCE_KEYS = {"audience", "aud"};
-  private static final String AUDIENCE_FIELD = "audience"; 
+  private static final String AUDIENCE_FIELD = "audience";
 
-  public static final String TOKEN_EXCHANGE_SUBJECT_CLIENT_ID_KEY = "iam.token_exchange.subject_client_id";
-  
+  public static final String TOKEN_EXCHANGE_SUBJECT_TOKEN_KEY = "iam.token_exchange.subject_token";
+
+  public static final String TOKEN_EXCHANGE_SUBJECT_CLIENT_ID_KEY =
+      "iam.token_exchange.subject_token.cid";
+
+  public static final String TOKEN_EXCHANGE_SUBJECT_SUB_KEY =
+      "iam.token_exchange.subject_token.sub";
+
+  public static final String TOKEN_EXCHANGE_SUBJECT_ACT_KEY =
+      "iam.token_exchange.subject_token.act";
+
   private final OAuth2TokenEntityService tokenServices;
 
   private AccountUtils accountUtils;
@@ -70,14 +80,14 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
   public TokenExchangeTokenGranter(final OAuth2TokenEntityService tokenServices,
       final ClientDetailsEntityService clientDetailsService,
       final OAuth2RequestFactory requestFactory) {
-    super(tokenServices, clientDetailsService, requestFactory, GRANT_TYPE);
+    super(tokenServices, clientDetailsService, requestFactory, TOKEN_EXCHANGE_GRANT_TYPE);
     this.tokenServices = tokenServices;
   }
 
 
 
-  protected void validateExchange(final ClientDetails actorClient,
-      final TokenRequest tokenRequest, OAuth2AccessTokenEntity subjectToken) {
+  protected void validateExchange(final ClientDetails actorClient, final TokenRequest tokenRequest,
+      OAuth2AccessTokenEntity subjectToken) {
 
     String audience = tokenRequest.getRequestParameters().get(AUDIENCE_FIELD);
     ClientDetailsEntity subjectClient = subjectToken.getClient();
@@ -99,11 +109,12 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
         exchangePdp.validateTokenExchange(tokenRequest, subjectClient, actorClient);
 
     LOG.debug("Token exchange pdp decision: {}", result.decision());
-    
-    
+
+
     if (INVALID_SCOPE.equals(result.decision())) {
-      
-      throw new InvalidScopeException(format("%s: %s", result.message().get(), result.invalidScope().get()));
+
+      throw new InvalidScopeException(
+          format("%s: %s", result.message().get(), result.invalidScope().get()));
     } else if (!PERMIT.equals(result.decision())) {
       if (result.message().isPresent()) {
         throw new OAuth2AccessDeniedException(result.message().get());
@@ -111,6 +122,40 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
         throw new OAuth2AccessDeniedException("Token exchange not allowed");
       }
     }
+  }
+
+  protected void setSubjectTokenOAuthRequestProperties(TokenRequest tokenRequest,
+      OAuth2Authentication authentication, OAuth2AccessTokenEntity subjectToken) {
+
+    authentication.getOAuth2Request()
+      .getExtensions()
+      .put(TOKEN_EXCHANGE_SUBJECT_TOKEN_KEY,
+          tokenRequest.getRequestParameters().get("subject_token"));
+
+    authentication.getOAuth2Request()
+      .getExtensions()
+      .put(TOKEN_EXCHANGE_SUBJECT_CLIENT_ID_KEY, subjectToken.getClient().getClientId());
+
+
+    try {
+      String subjectTokenSub = subjectToken.getJwt().getJWTClaimsSet().getSubject();
+      authentication.getOAuth2Request()
+        .getExtensions()
+        .put(TOKEN_EXCHANGE_SUBJECT_SUB_KEY, subjectTokenSub);
+      
+      JSONObject subjectActClaim = subjectToken.getJwt().getJWTClaimsSet().getJSONObjectClaim("act");
+      
+      if (!isNull(subjectActClaim)) {
+        authentication.getOAuth2Request()
+        .getExtensions()
+        .put(TOKEN_EXCHANGE_SUBJECT_ACT_KEY, subjectActClaim);
+      }
+      
+    } catch (ParseException e) {
+      LOG.error("Error extracting claims from subject token JWT: {}", e.getMessage(), e);
+    }
+    
+    
   }
 
   @Override
@@ -131,10 +176,7 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
 
       validateExchange(actorClient, tokenRequest, subjectToken);
       authentication = new OAuth2Authentication(
-          getRequestFactory().createOAuth2Request(actorClient, tokenRequest),
-          null);
-      authentication.getOAuth2Request().getExtensions().put(TOKEN_EXCHANGE_SUBJECT_CLIENT_ID_KEY, 
-          subjectToken.getClient().getClientId());
+          getRequestFactory().createOAuth2Request(actorClient, tokenRequest), null);
     } else {
 
       Optional<IamAccount> account = accountUtils
@@ -152,6 +194,7 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
           subjectToken.getAuthenticationHolder().getAuthentication().getUserAuthentication());
     }
 
+    setSubjectTokenOAuthRequestProperties(tokenRequest, authentication, subjectToken);
 
     String audience = tokenRequest.getRequestParameters().get(AUDIENCE_FIELD);
     if (!isNullOrEmpty(audience)) {

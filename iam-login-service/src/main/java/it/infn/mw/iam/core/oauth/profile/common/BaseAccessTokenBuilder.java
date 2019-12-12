@@ -16,7 +16,7 @@
 package it.infn.mw.iam.core.oauth.profile.common;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static it.infn.mw.iam.core.oauth.granters.TokenExchangeTokenGranter.GRANT_TYPE;
+import static it.infn.mw.iam.core.oauth.granters.TokenExchangeTokenGranter.TOKEN_EXCHANGE_GRANT_TYPE;
 import static java.util.Objects.isNull;
 
 import java.time.Instant;
@@ -36,6 +36,7 @@ import com.nimbusds.jwt.JWTClaimsSet.Builder;
 import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.core.oauth.granters.TokenExchangeTokenGranter;
 import it.infn.mw.iam.core.oauth.profile.JWTAccessTokenBuilder;
+import net.minidev.json.JSONObject;
 
 public abstract class BaseAccessTokenBuilder implements JWTAccessTokenBuilder {
 
@@ -43,7 +44,7 @@ public abstract class BaseAccessTokenBuilder implements JWTAccessTokenBuilder {
   public static final String SCOPE_CLAIM_NAME = "scope";
   public static final String ACT_CLAIM_NAME = "act";
   public static final String SPACE = " ";
-  
+
 
   protected final IamProperties properties;
 
@@ -53,21 +54,33 @@ public abstract class BaseAccessTokenBuilder implements JWTAccessTokenBuilder {
     this.properties = properties;
   }
 
+
   protected JWTClaimsSet.Builder handleClientTokenExchange(JWTClaimsSet.Builder builder,
       OAuth2AccessTokenEntity token, OAuth2Authentication authentication, UserInfo userInfo) {
 
-    if (GRANT_TYPE.equals(authentication.getOAuth2Request().getGrantType())) {
+    if (TOKEN_EXCHANGE_GRANT_TYPE.equals(authentication.getOAuth2Request().getGrantType())) {
 
-      if (isNull(userInfo)) {
+
+
+      if (authentication.isClientOnly()) {
         String subjectClientId = (String) authentication.getOAuth2Request()
           .getExtensions()
           .get(TokenExchangeTokenGranter.TOKEN_EXCHANGE_SUBJECT_CLIENT_ID_KEY);
-        
+
         builder.subject(subjectClientId);
-      } 
-      
-      Map<String, String> actClaimContent = Maps.newHashMap();
-      actClaimContent.put("sub", authentication.getName());
+      }
+
+      Map<String, Object> actClaimContent = Maps.newHashMap();
+
+      actClaimContent.put("sub", authentication.getOAuth2Request().getClientId());
+      JSONObject subjectTokenActClaim = (JSONObject) authentication.getOAuth2Request()
+        .getExtensions()
+        .get(TokenExchangeTokenGranter.TOKEN_EXCHANGE_SUBJECT_ACT_KEY);
+
+      if (!isNull(subjectTokenActClaim)) {
+        actClaimContent.put("act", subjectTokenActClaim);
+      }
+
       builder.claim(ACT_CLAIM_NAME, actClaimContent);
     }
 

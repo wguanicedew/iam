@@ -64,6 +64,7 @@ import it.infn.mw.iam.test.oauth.EndpointsTestUtils;
 import it.infn.mw.iam.test.util.WithAnonymousUser;
 import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 import it.infn.mw.iam.test.util.oauth.MockOAuth2Request;
+import net.minidev.json.JSONObject;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class})
@@ -85,16 +86,22 @@ import it.infn.mw.iam.test.util.oauth.MockOAuth2Request;
 public class WLCGProfileIntegrationTests extends EndpointsTestUtils {
 
   private static final String CLIENT_CREDENTIALS_GRANT_TYPE = "client_credentials";
+  private static final String PASSWORD_GRANT_TYPE = "password";
+
   private static final String CLIENT_CREDENTIALS_CLIENT_ID = "client-cred";
   private static final String CLIENT_CREDENTIALS_CLIENT_SECRET = "secret";
 
-  private static final String TOKEN_EXCHANGE_GRANT_TYPE = TokenExchangeTokenGranter.GRANT_TYPE;
+  private static final String TOKEN_EXCHANGE_GRANT_TYPE =
+      TokenExchangeTokenGranter.TOKEN_EXCHANGE_GRANT_TYPE;
   private static final String REFRESH_TOKEN_GRANT_TYPE = "refresh_token";
+
+
 
   private static final String CLIENT_ID = "password-grant";
   private static final String CLIENT_SECRET = "secret";
   private static final String USERNAME = "test";
   private static final String PASSWORD = "password";
+  private static final String USER_SUBJECT = "80e5fb8d-b7c8-451a-89ba-346ae278a66f";
 
   private static final String ADMIN_USERNAME = "admin";
   private static final String ADMIN_PASSWORD = "password";
@@ -130,20 +137,20 @@ public class WLCGProfileIntegrationTests extends EndpointsTestUtils {
     SecurityContext context = SecurityContextHolder.createEmptyContext();
     Authentication userAuth = new UsernamePasswordAuthenticationToken("admin", "",
         AuthorityUtils.createAuthorityList("ROLE_USER", "ROLE_ADMIN"));
-    
+
     String[] authnScopes = new String[] {"openid"};
-    
-    OAuth2Authentication authn = new OAuth2Authentication(
-        new MockOAuth2Request("password-grant", authnScopes), userAuth);
-    
+
+    OAuth2Authentication authn =
+        new OAuth2Authentication(new MockOAuth2Request("password-grant", authnScopes), userAuth);
+
     authn.setAuthenticated(true);
     authn.setDetails("No details");
 
     context.setAuthentication(authn);
-    
+
     oauth2Filter.setSecurityContext(context);
   }
-  
+
   private String getAccessTokenForUser(String scopes) throws Exception {
 
     return new AccessTokenGetter().grantType("password")
@@ -220,7 +227,6 @@ public class WLCGProfileIntegrationTests extends EndpointsTestUtils {
   @Test
   public void testWlcgProfileServiceIdentityTokenExchange() throws Exception {
 
-
     String subjectToken = new AccessTokenGetter().grantType(CLIENT_CREDENTIALS_GRANT_TYPE)
       .clientId(SUBJECT_CLIENT_ID)
       .clientSecret(SUBJECT_CLIENT_SECRET)
@@ -251,9 +257,9 @@ public class WLCGProfileIntegrationTests extends EndpointsTestUtils {
     JWT exchangedToken = JWTParser.parse(tokenResponseObject.getValue());
     assertThat(exchangedToken.getJWTClaimsSet().getSubject(), is(SUBJECT_CLIENT_ID));
 
-    assertThat(
-        exchangedToken.getJWTClaimsSet().getJSONObjectClaim("act").getAsString("sub"), is(ACTOR_CLIENT_ID));
-    
+    assertThat(exchangedToken.getJWTClaimsSet().getJSONObjectClaim("act").getAsString("sub"),
+        is(ACTOR_CLIENT_ID));
+
     String atScopes = exchangedToken.getJWTClaimsSet().getStringClaim("scope");
 
     assertThat(atScopes, containsString("storage.read:/subpath"));
@@ -285,7 +291,7 @@ public class WLCGProfileIntegrationTests extends EndpointsTestUtils {
 
     JWT refreshedToken = JWTParser.parse(tokenResponseObject.getValue());
     assertThat(refreshedToken.getJWTClaimsSet().getSubject(), is(SUBJECT_CLIENT_ID));
-   
+
     String rtScopes = refreshedToken.getJWTClaimsSet().getStringClaim("scope");
 
     assertThat(rtScopes, containsString("storage.read:/subpath"));
@@ -300,10 +306,85 @@ public class WLCGProfileIntegrationTests extends EndpointsTestUtils {
     assertThat(rtAudiences, hasItems("se1.example", "se2.example"));
 
     setOAuthAdminSecurityContext();
+
+    mvc.perform(get("/iam/api/refresh-tokens")).andExpect(status().isOk());
+
+  }
+
+  @Test
+  public void testWlcgProfileUserIdentityTokenExchange() throws Exception {
+
+    String subjectToken = new AccessTokenGetter().grantType(PASSWORD_GRANT_TYPE)
+      .clientId(SUBJECT_CLIENT_ID)
+      .clientSecret(SUBJECT_CLIENT_SECRET)
+      .username(USERNAME)
+      .password(PASSWORD)
+      .scope("storage.read:/ storage.write:/subpath openid")
+      .audience(ACTOR_CLIENT_ID)
+      .getAccessTokenValue();
+
+    String tokenResponse =
+        mvc
+          .perform(post("/token").with(httpBasic(ACTOR_CLIENT_ID, ACTOR_CLIENT_SECRET))
+            .param("grant_type", TOKEN_EXCHANGE_GRANT_TYPE)
+            .param("subject_token", subjectToken)
+            .param("subject_token_type", "urn:ietf:params:oauth:token-type:jwt")
+            .param("scope",
+                "storage.read:/subpath storage.write:/subpath/test openid offline_access")
+            .param("audience", "se1.example se2.example"))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.access_token").exists())
+          .andExpect(jsonPath("$.refresh_token").exists())
+          .andExpect(jsonPath("$.scope",
+              allOf(containsString("storage.read:/subpath "), containsString("offline_access"),
+                  containsString("storage.write:/subpath/test"), containsString("openid"),
+                  containsString("offline_access"))))
+          .andReturn()
+          .getResponse()
+          .getContentAsString();
+
+    DefaultOAuth2AccessToken tokenResponseObject =
+        mapper.readValue(tokenResponse, DefaultOAuth2AccessToken.class);
+
+    JWT exchangedToken = JWTParser.parse(tokenResponseObject.getValue());
+    assertThat(exchangedToken.getJWTClaimsSet().getSubject(), is(USER_SUBJECT));
     
-    mvc
-      .perform(get("/iam/api/refresh-tokens"))
-      .andExpect(status().isOk());
+    assertThat(exchangedToken.getJWTClaimsSet().getJSONObjectClaim("act").getAsString("sub"),
+        is(ACTOR_CLIENT_ID));
     
+
+    tokenResponse =
+        mvc
+          .perform(post("/token").with(httpBasic(ACTOR_CLIENT_ID, ACTOR_CLIENT_SECRET))
+            .param("grant_type", TOKEN_EXCHANGE_GRANT_TYPE)
+            .param("subject_token", tokenResponseObject.getValue())
+            .param("subject_token_type", "urn:ietf:params:oauth:token-type:jwt")
+            .param("scope",
+                "storage.read:/subpath storage.write:/subpath/test openid offline_access")
+            .param("audience", "se4.example"))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.access_token").exists())
+          .andExpect(jsonPath("$.refresh_token").exists())
+          .andExpect(jsonPath("$.scope",
+              allOf(containsString("storage.read:/subpath "), containsString("offline_access"),
+                  containsString("storage.write:/subpath/test"), containsString("openid"),
+                  containsString("offline_access"))))
+          .andReturn()
+          .getResponse()
+          .getContentAsString();
+    
+    DefaultOAuth2AccessToken tokenResponseObject2 =
+        mapper.readValue(tokenResponse, DefaultOAuth2AccessToken.class);
+
+    JWT exchangedToken2 = JWTParser.parse(tokenResponseObject2.getValue());
+    assertThat(exchangedToken2.getJWTClaimsSet().getSubject(), is(USER_SUBJECT));
+    
+    assertThat(exchangedToken2.getJWTClaimsSet().getJSONObjectClaim("act").getAsString("sub"),
+        is(ACTOR_CLIENT_ID));
+    
+    
+    JSONObject nestedActClaimValue = (JSONObject) exchangedToken2.getJWTClaimsSet().getJSONObjectClaim("act").get("act");
+    assertThat(nestedActClaimValue.getAsString("sub"), is(ACTOR_CLIENT_ID));
+
   }
 }

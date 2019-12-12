@@ -16,7 +16,7 @@
 package it.infn.mw.iam.test.oauth.exchange;
 
 import static it.infn.mw.iam.core.oauth.exchange.TokenExchangePdpResult.Decision.NOT_APPLICABLE;
-import static it.infn.mw.iam.core.oauth.granters.TokenExchangeTokenGranter.GRANT_TYPE;
+import static it.infn.mw.iam.core.oauth.granters.TokenExchangeTokenGranter.TOKEN_EXCHANGE_GRANT_TYPE;
 import static it.infn.mw.iam.persistence.model.PolicyRule.DENY;
 import static it.infn.mw.iam.persistence.model.PolicyRule.PERMIT;
 import static java.util.Arrays.asList;
@@ -71,7 +71,7 @@ public class TokenExchangePdPTests extends TokenExchangePdpTestSupport {
   DefaultTokenExchangePdp pdp;
 
   private TokenRequest buildTokenRequest() {
-    return new TokenRequest(emptyMap(), "destination", Collections.emptySet(), GRANT_TYPE);
+    return new TokenRequest(emptyMap(), "destination", Collections.emptySet(), TOKEN_EXCHANGE_GRANT_TYPE);
   }
 
   @Before
