@@ -31,7 +31,9 @@ import java.util.stream.Collectors;
 import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml2.metadata.IDPSSODescriptor;
+import org.opensaml.saml2.metadata.provider.MetadataProvider;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
+import org.opensaml.saml2.metadata.provider.ObservableMetadataProvider;
 import org.opensaml.samlext.saml2mdui.UIInfo;
 import org.opensaml.xml.XMLObject;
 import org.slf4j.Logger;
@@ -48,7 +50,7 @@ import it.infn.mw.iam.authn.saml.model.IdpDescription;
 
 @Component
 @Profile("saml")
-public class DefaultMetadataLookupService implements MetadataLookupService {
+public class DefaultMetadataLookupService implements MetadataLookupService, ObservableMetadataProvider.Observer {
 
   private static final int MAX_RESULTS = 20;
   private static final Logger LOG = LoggerFactory.getLogger(DefaultMetadataLookupService.class);
@@ -61,13 +63,14 @@ public class DefaultMetadataLookupService implements MetadataLookupService {
   @Autowired
   public DefaultMetadataLookupService(MetadataManager manager) {
     this.metadataManager = manager;
+    manager.getObservers().add(this);
     refreshMetadata();
   }
 
   private void initializeMetadataSet() throws MetadataProviderException {
 
     final Instant startTime = Instant.now();
-    LOG.info("Initializing IdP descriptor list from metadata");
+    LOG.debug("Initializing IdP descriptor list from metadata");
     
     Set<IdpDescription> newDescriptions = new HashSet<>();
 
@@ -86,7 +89,7 @@ public class DefaultMetadataLookupService implements MetadataLookupService {
     } finally {
       lock.writeLock().unlock();
       final Duration d = Duration.between(startTime, Instant.now());
-      LOG.debug("Descriptor list initialization took {} msec", d.toMillis());
+      LOG.debug("Idp descriptor list initialization took {} msec", d.toMillis());
     }
 
   }
@@ -188,6 +191,11 @@ public class DefaultMetadataLookupService implements MetadataLookupService {
     } catch (MetadataProviderException e) {
       throw new SamlMetadataError(e);
     }
+  }
+
+  @Override
+  public void onEvent(MetadataProvider provider) {
+    refreshMetadata();
   }
 
 }

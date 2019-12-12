@@ -208,8 +208,6 @@ public class IamSamlProperties {
 
   private int maxAuthenticationAgeSec;
 
-  private int metadataLookupServiceRefreshPeriodSec = (int) TimeUnit.MINUTES.toSeconds(5);
-
   private long metadataRefreshPeriodSec = TimeUnit.HOURS.toSeconds(12);
   
   private String idpEntityIdWhilelist;
@@ -308,14 +306,6 @@ public class IamSamlProperties {
 
   public void setIdResolvers(String idResolvers) {
     this.idResolvers = idResolvers;
-  }
-
-  public int getMetadataLookupServiceRefreshPeriodSec() {
-    return metadataLookupServiceRefreshPeriodSec;
-  }
-
-  public void setMetadataLookupServiceRefreshPeriodSec(int metadataLookupServiceRefreshPeriodSec) {
-    this.metadataLookupServiceRefreshPeriodSec = metadataLookupServiceRefreshPeriodSec;
   }
 
 
