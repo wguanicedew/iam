@@ -28,6 +28,9 @@ public class ScopePolicyValidator implements ConstraintValidator<ScopePolicy, Sc
 
   private static final String EMPTY_SCOPE_MSG =
       "{it.infn.mw.iam.api.scope_policy.validation.ScopePolicyValidator.emptyScope.message}";
+  
+  private static final String NULL_MATCHING_POLICY_MSG =
+      "{it.infn.mw.iam.api.scope_policy.validation.ScopePolicyValidator.nullMatchingPolicy.message}";
 
   public ScopePolicyValidator() {
     // empty
@@ -39,6 +42,13 @@ public class ScopePolicyValidator implements ConstraintValidator<ScopePolicy, Sc
   }
 
   private boolean isValidMatchingPolicy(ScopePolicyDTO value, ConstraintValidatorContext context) {
+    
+    if (isNull(value.getMatchingPolicy())){
+      context.disableDefaultConstraintViolation();
+      context.buildConstraintViolationWithTemplate(NULL_MATCHING_POLICY_MSG).addConstraintViolation();
+      return false;
+    }
+    
     if ((value.getMatchingPolicy().equals(PATH.name())
         || value.getMatchingPolicy().equals(REGEXP.name()))
         && (isNull(value.getScopes()) || value.getScopes().isEmpty())) {
@@ -53,9 +63,7 @@ public class ScopePolicyValidator implements ConstraintValidator<ScopePolicy, Sc
 
   @Override
   public boolean isValid(ScopePolicyDTO value, ConstraintValidatorContext context) {
-    boolean nullChecks =
-        !(value == null || (value.getAccount() != null && value.getGroup() != null));
-
+    boolean nullChecks = !(value == null || (value.getAccount() != null && value.getGroup() != null));
     return nullChecks && isValidMatchingPolicy(value, context);
   }
 

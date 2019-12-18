@@ -15,6 +15,7 @@
  */
 package it.infn.mw.iam.test.oauth.scope.pdp;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertThat;
@@ -335,6 +336,21 @@ public class ScopePolicyApiIntegrationTests extends ScopePolicyTestUtils {
       .andExpect(status().isCreated());
 
     assertThat(scopePolicyRepo.count(), equalTo(2L));
+  }
+  
+  @Test
+  @WithMockOAuthUser(user = "admin", authorities = {"ROLE_USER", "ROLE_ADMIN"})
+  public void testMatchingPolicyIsRequired() throws Exception {
+
+    ScopePolicyDTO sp = new ScopePolicyDTO();
+    sp.setMatchingPolicy(null);
+    sp.setRule(PolicyRule.DENY.name());
+    sp.setScopes(Sets.newHashSet("scim:read", "scim:write"));
+
+    String serializedSp = mapper.writeValueAsString(sp);
+    mvc.perform(post("/iam/scope_policies").content(serializedSp).contentType(APPLICATION_JSON))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.error", is("Invalid scope policy: matching policy cannot be empty or null")));
   }
 
   @Test
