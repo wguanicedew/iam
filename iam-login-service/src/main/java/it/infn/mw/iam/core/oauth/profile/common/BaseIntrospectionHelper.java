@@ -16,18 +16,25 @@
 package it.infn.mw.iam.core.oauth.profile.common;
 
 import static java.util.stream.Collectors.joining;
+import static org.mitre.oauth2.service.IntrospectionResultAssembler.SCOPE;
 
 import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.mitre.oauth2.model.OAuth2AccessTokenEntity;
 import org.mitre.oauth2.service.IntrospectionResultAssembler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Sets;
+
 import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.core.oauth.profile.IntrospectionResultHelper;
+import it.infn.mw.iam.core.oauth.scope.matchers.ScopeMatcher;
+import it.infn.mw.iam.core.oauth.scope.matchers.ScopeMatcherRegistry;
 
 public abstract class BaseIntrospectionHelper implements IntrospectionResultHelper {
 
@@ -44,10 +51,13 @@ public abstract class BaseIntrospectionHelper implements IntrospectionResultHelp
 
   private final IamProperties properties;
   private final IntrospectionResultAssembler assembler;
+  private final ScopeMatcherRegistry scopeMatchersRegistry;
 
-  public BaseIntrospectionHelper(IamProperties props, IntrospectionResultAssembler assembler) {
+  public BaseIntrospectionHelper(IamProperties props, IntrospectionResultAssembler assembler,
+      ScopeMatcherRegistry scopeMatchersRegistry) {
     this.properties = props;
     this.assembler = assembler;
+    this.scopeMatchersRegistry = scopeMatchersRegistry;
   }
 
   public IamProperties getProperties() {
@@ -56,6 +66,16 @@ public abstract class BaseIntrospectionHelper implements IntrospectionResultHelp
 
   public IntrospectionResultAssembler getAssembler() {
     return assembler;
+  }
+
+  public ScopeMatcherRegistry getScopeMatchersRegistry() {
+    return scopeMatchersRegistry;
+  }
+
+  protected void addScopeClaim(Map<String, Object> introspectionResult, Set<String> scopes) {
+    if (!scopes.isEmpty()) {
+      introspectionResult.put(SCOPE, scopes.stream().collect(joining(" ")));
+    }
   }
 
   protected void addIssuerClaim(Map<String, Object> introspectionResult) {
@@ -80,6 +100,25 @@ public abstract class BaseIntrospectionHelper implements IntrospectionResultHelp
       LOG.error("Error getting audience out of access token: {}", e.getMessage(), e);
     }
 
+  }
+
+  protected Set<String> filterScopes(OAuth2AccessTokenEntity accessToken, Set<String> authScopes) {
+
+    Set<ScopeMatcher> matchers = authScopes.stream()
+      .map(getScopeMatchersRegistry()::findMatcherForScope)
+      .collect(Collectors.toSet());
+
+    Set<String> filteredScopes = Sets.newHashSet();
+
+    // We must use for loop here since streams are not supported
+    // by this version of EclipseLink on entity collections
+    for (String accessTokenScope : accessToken.getScope()) {
+      if (matchers.stream().anyMatch(m -> m.matches(accessTokenScope))) {
+        filteredScopes.add(accessTokenScope);
+      }
+    }
+
+    return filteredScopes;
   }
 
 }

@@ -55,6 +55,7 @@ import it.infn.mw.iam.core.oauth.profile.IamTokenEnhancer;
 import it.infn.mw.iam.core.oauth.profile.JWTProfile;
 import it.infn.mw.iam.core.oauth.profile.JWTProfileResolver;
 import it.infn.mw.iam.core.oauth.profile.ScopeAwareProfileResolver;
+import it.infn.mw.iam.core.oauth.profile.common.BaseIntrospectionHelper;
 import it.infn.mw.iam.core.oauth.profile.iam.ClaimValueHelper;
 import it.infn.mw.iam.core.oauth.profile.iam.IamJWTProfile;
 import it.infn.mw.iam.core.oauth.profile.iam.IamJWTProfileAccessTokenBuilder;
@@ -125,7 +126,8 @@ public class IamConfig {
   @Bean(name = "iamJwtProfile")
   JWTProfile iamJwtProfile(IamProperties props, IamAccountRepository accountRepo,
       ScopeClaimTranslationService converter, ClaimValueHelper claimHelper,
-      UserInfoService userInfoService, ExternalAuthenticationInfoProcessor proc) {
+      UserInfoService userInfoService, ExternalAuthenticationInfoProcessor proc,
+      ScopeMatcherRegistry registry) {
     IamJWTProfileAccessTokenBuilder atBuilder =
         new IamJWTProfileAccessTokenBuilder(props, converter, claimHelper);
 
@@ -135,8 +137,8 @@ public class IamConfig {
     IamJWTProfileIdTokenCustomizer idHelper =
         new IamJWTProfileIdTokenCustomizer(accountRepo, converter, claimHelper);
 
-    IamJWTProfileTokenIntrospectionHelper intrHelper =
-        new IamJWTProfileTokenIntrospectionHelper(props, new DefaultIntrospectionResultAssembler());
+    BaseIntrospectionHelper intrHelper = new IamJWTProfileTokenIntrospectionHelper(
+        props, new DefaultIntrospectionResultAssembler(), registry);
 
     return new IamJWTProfile(atBuilder, idHelper, uiHelper, intrHelper);
   }
@@ -144,10 +146,11 @@ public class IamConfig {
   @Bean(name = "wlcgJwtProfile")
   JWTProfile wlcgJwtProfile(IamProperties props, IamAccountRepository accountRepo,
       ScopeClaimTranslationService converter, ClaimValueHelper claimHelper,
-      UserInfoService userInfoService, ExternalAuthenticationInfoProcessor proc) {
+      UserInfoService userInfoService, ExternalAuthenticationInfoProcessor proc,
+      ScopeMatcherRegistry registry) {
 
     return new WLCGJWTProfile(props, userInfoService, accountRepo, new WLCGGroupHelper(),
-        new DefaultIntrospectionResultAssembler());
+        new DefaultIntrospectionResultAssembler(), registry);
   }
 
   @Bean

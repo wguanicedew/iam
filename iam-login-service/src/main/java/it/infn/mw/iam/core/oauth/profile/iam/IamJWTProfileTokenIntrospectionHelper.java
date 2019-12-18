@@ -25,10 +25,9 @@ import org.mitre.openid.connect.model.UserInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Sets;
-
 import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.core.oauth.profile.common.BaseIntrospectionHelper;
+import it.infn.mw.iam.core.oauth.scope.matchers.ScopeMatcherRegistry;
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.model.IamUserInfo;
 import it.infn.mw.iam.persistence.repository.UserInfoAdapter;
@@ -39,9 +38,10 @@ public class IamJWTProfileTokenIntrospectionHelper extends BaseIntrospectionHelp
       LoggerFactory.getLogger(IamJWTProfileTokenIntrospectionHelper.class);
 
   public IamJWTProfileTokenIntrospectionHelper(IamProperties props,
-      IntrospectionResultAssembler assembler) {
-    super(props, assembler);
+      IntrospectionResultAssembler assembler, ScopeMatcherRegistry registry) {
+    super(props, assembler, registry);
   }
+
 
   @Override
   public Map<String, Object> assembleIntrospectionResult(OAuth2AccessTokenEntity accessToken,
@@ -53,8 +53,11 @@ public class IamJWTProfileTokenIntrospectionHelper extends BaseIntrospectionHelp
     addAudience(result, accessToken);
 
     // Intersection of scopes authorized for the client and scopes linked to the
-    // access token
-    Set<String> scopes = Sets.intersection(authScopes, accessToken.getScope());
+    // access token, using the scope matchers registry
+    
+    Set<String> scopes = filterScopes(accessToken, authScopes);
+    
+    addScopeClaim(result, scopes);
 
     if (userInfo != null) {
       if (scopes.contains(PROFILE)) {

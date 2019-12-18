@@ -30,6 +30,7 @@ import org.mitre.oauth2.model.SystemScope;
 import org.mitre.oauth2.service.SystemScopeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -38,54 +39,51 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import it.infn.mw.iam.IamLoginService;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {IamLoginService.class})
 @WebAppConfiguration
 @Transactional
-@TestPropertySource(properties = {
-    "scope.matchers[0].name=storage.read",
-    "scope.matchers[0].type=path",
-    "scope.matchers[0].prefix=storage.read",
-    "scope.matchers[0].path=/",
-    "scope.matchers[1].name=storage.write",
-    "scope.matchers[1].type=path",
-    "scope.matchers[1].prefix=storage.write",
-    "scope.matchers[1].path=/"
-}
-)
+@TestPropertySource(
+    properties = {"scope.matchers[0].name=storage.read", "scope.matchers[0].type=path",
+        "scope.matchers[0].prefix=storage.read", "scope.matchers[0].path=/",
+        "scope.matchers[1].name=storage.write", "scope.matchers[1].type=path",
+        "scope.matchers[1].prefix=storage.write", "scope.matchers[1].path=/"})
 public class StructuredScopeRequestIntegrationTests {
 
   private static final String CLIENT_CREDENTIALS_GRANT_TYPE = "client_credentials";
   private static final String CLIENT_CREDENTIALS_CLIENT_ID = "client-cred";
   private static final String CLIENT_CREDENTIALS_CLIENT_SECRET = "secret";
-  
+
   @Autowired
   private WebApplicationContext context;
-  
+
   @Autowired
   SystemScopeService scopeService;
   
+  @Autowired
+  private ObjectMapper mapper;
+
   private MockMvc mvc;
 
   @Before
   public void setup() throws Exception {
-    mvc = MockMvcBuilders.webAppContextSetup(context)
-      .apply(springSecurity())
-      .alwaysDo(log())
-      .build();
-    
+    mvc =
+        MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).alwaysDo(log()).build();
+
     SystemScope storageReadScope = new SystemScope("storage.read:/");
     storageReadScope.setRestricted(true);
-    
+
     SystemScope storageWriteScope = new SystemScope("storage.write:/");
     storageWriteScope.setRestricted(true);
 
     scopeService.save(storageReadScope);
     scopeService.save(storageWriteScope);
   }
-  
+
   @Test
   public void test() throws Exception {
 
@@ -100,4 +98,31 @@ public class StructuredScopeRequestIntegrationTests {
     // @formatter:on
   }
 
+
+  @Test
+  public void testIntrospectionResponse() throws Exception {
+ // @formatter:off
+    String tokenResponse = 
+        mvc.perform(post("/token")
+        .with(httpBasic(CLIENT_CREDENTIALS_CLIENT_ID, CLIENT_CREDENTIALS_CLIENT_SECRET))
+        .param("grant_type", CLIENT_CREDENTIALS_GRANT_TYPE)
+        .param("scope", "storage.read:/a-path storage.write:/another-path"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.scope", containsString("storage.read:/a-path")))
+      .andExpect(jsonPath("$.scope", containsString("storage.write:/another-path")))
+      .andReturn()
+      .getResponse().getContentAsString();
+    // @formatter:on
+
+    DefaultOAuth2AccessToken tokenResponseObject =
+        mapper.readValue(tokenResponse, DefaultOAuth2AccessToken.class);
+    
+    String accessToken = tokenResponseObject.getValue();
+    mvc.perform(post("/introspect")
+      .with(httpBasic(CLIENT_CREDENTIALS_CLIENT_ID, CLIENT_CREDENTIALS_CLIENT_SECRET))
+      .param("token", accessToken))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.scope", containsString("storage.read:/a-path")))
+      .andExpect(jsonPath("$.scope", containsString("storage.write:/another-path")));
+  }
 }
