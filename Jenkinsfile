@@ -50,8 +50,8 @@ pipeline {
                 image 'cloud-vm114.cloud.cnaf.infn.it/cnafsd/centos7-jenkins-slave:latest'
                 ttyEnabled true
                 command 'cat'
-                resourceRequestCpu '2'
-                resourceLimitCpu '2'
+                resourceRequestCpu '500m'
+                resourceLimitCpu '3'
                 resourceRequestMemory '2500Mi'
                 resourceLimitMemory '2500Mi'
           }
