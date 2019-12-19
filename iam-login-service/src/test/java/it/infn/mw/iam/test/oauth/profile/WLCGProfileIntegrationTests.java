@@ -165,6 +165,7 @@ public class WLCGProfileIntegrationTests extends EndpointsTestUtils {
     JWT token = JWTParser.parse(getAccessTokenForUser("openid profile"));
 
     assertThat(token.getJWTClaimsSet().getClaim("scope"), is("openid profile"));
+    assertThat(token.getJWTClaimsSet().getClaim("nbf"), notNullValue());
     assertThat(token.getJWTClaimsSet().getClaim("wlcg.ver"), is("1.0"));
     assertThat(token.getJWTClaimsSet().getClaim("groups"), nullValue());
     assertThat(token.getJWTClaimsSet().getClaim("wlcg.groups"), nullValue());
@@ -177,6 +178,7 @@ public class WLCGProfileIntegrationTests extends EndpointsTestUtils {
 
     assertThat(token.getJWTClaimsSet().getClaim("scope"), is("openid profile wlcg.groups"));
     assertThat(token.getJWTClaimsSet().getClaim("wlcg.ver"), is("1.0"));
+    assertThat(token.getJWTClaimsSet().getClaim("nbf"), notNullValue());
     assertThat(token.getJWTClaimsSet().getClaim("groups"), nullValue());
     assertThat(token.getJWTClaimsSet().getStringListClaim("wlcg.groups"),
         hasItems("/Production", "/Analysis"));

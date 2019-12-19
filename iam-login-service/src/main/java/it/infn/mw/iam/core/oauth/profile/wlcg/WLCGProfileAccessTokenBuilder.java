@@ -19,6 +19,7 @@ import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.joining;
 
 import java.time.Instant;
+import java.util.Date;
 import java.util.Set;
 
 import org.mitre.oauth2.model.OAuth2AccessTokenEntity;
@@ -51,6 +52,8 @@ public class WLCGProfileAccessTokenBuilder extends BaseAccessTokenBuilder {
 
     Builder builder = baseJWTSetup(token, authentication, userInfo, issueTime);
 
+    builder.notBeforeTime(Date.from(issueTime));
+    
     if (!token.getScope().isEmpty()) {
       builder.claim(SCOPE_CLAIM_NAME, token.getScope().stream().collect(joining(SPACE)));
     }
