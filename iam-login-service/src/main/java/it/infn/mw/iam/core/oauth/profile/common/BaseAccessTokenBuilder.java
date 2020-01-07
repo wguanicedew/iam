@@ -87,6 +87,11 @@ public abstract class BaseAccessTokenBuilder implements JWTAccessTokenBuilder {
     return builder;
   }
 
+  protected boolean hasAudienceRequest(OAuth2Authentication authentication) {
+    final String audience = (String) authentication.getOAuth2Request().getExtensions().get(AUD_KEY);
+    return !isNullOrEmpty(audience);
+  }
+
   protected JWTClaimsSet.Builder baseJWTSetup(OAuth2AccessTokenEntity token,
       OAuth2Authentication authentication, UserInfo userInfo, Instant issueTime) {
 

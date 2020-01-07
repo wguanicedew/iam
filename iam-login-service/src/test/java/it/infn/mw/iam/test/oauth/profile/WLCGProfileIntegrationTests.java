@@ -21,6 +21,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
@@ -108,6 +110,8 @@ public class WLCGProfileIntegrationTests extends EndpointsTestUtils {
 
   private static final String ACTOR_CLIENT_ID = "token-exchange-actor";
   private static final String ACTOR_CLIENT_SECRET = "secret";
+  
+  private static final String ALL_AUDIENCES_VALUE = "https://wlcg.cern.ch/jwt/v1/any";
 
   @Autowired
   private WebApplicationContext context;
@@ -169,6 +173,34 @@ public class WLCGProfileIntegrationTests extends EndpointsTestUtils {
     assertThat(token.getJWTClaimsSet().getClaim("wlcg.ver"), is("1.0"));
     assertThat(token.getJWTClaimsSet().getClaim("groups"), nullValue());
     assertThat(token.getJWTClaimsSet().getClaim("wlcg.groups"), nullValue());
+    assertThat(token.getJWTClaimsSet().getAudience(), hasSize(1));
+    assertThat(token.getJWTClaimsSet().getAudience(), hasItem(ALL_AUDIENCES_VALUE));
+  }
+  
+  @Test
+  @WithAnonymousUser
+  public void testWlcgProfileAudience() throws Exception {
+    
+    
+    String accessToken = new AccessTokenGetter().grantType("password")
+    .clientId(CLIENT_ID)
+    .clientSecret(CLIENT_SECRET)
+    .username(USERNAME)
+    .password(PASSWORD)
+    .scope("openid profile")
+    .audience("test-audience-1 test-audience-2")
+    .getAccessTokenValue();
+    
+    JWT token = JWTParser.parse(accessToken);
+
+    assertThat(token.getJWTClaimsSet().getClaim("scope"), is("openid profile"));
+    assertThat(token.getJWTClaimsSet().getClaim("nbf"), notNullValue());
+    assertThat(token.getJWTClaimsSet().getClaim("wlcg.ver"), is("1.0"));
+    assertThat(token.getJWTClaimsSet().getClaim("groups"), nullValue());
+    assertThat(token.getJWTClaimsSet().getClaim("wlcg.groups"), nullValue());
+    assertThat(token.getJWTClaimsSet().getAudience(), hasSize(2));
+    assertThat(token.getJWTClaimsSet().getAudience(), hasItem("test-audience-1"));
+    assertThat(token.getJWTClaimsSet().getAudience(), hasItem("test-audience-2"));
   }
 
   @Test

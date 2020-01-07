@@ -37,6 +37,7 @@ public class WLCGProfileAccessTokenBuilder extends BaseAccessTokenBuilder {
 
   public static final String WLCG_VER_CLAIM = "wlcg.ver";
   public static final String PROFILE_VERSION = "1.0";
+  public static final String ALL_AUDIENCES_VALUE = "https://wlcg.cern.ch/jwt/v1/any";
 
   final WLCGGroupHelper groupHelper;
 
@@ -69,6 +70,9 @@ public class WLCGProfileAccessTokenBuilder extends BaseAccessTokenBuilder {
       }
     }
     
+    if (!hasAudienceRequest(authentication)) {
+      builder.audience(ALL_AUDIENCES_VALUE);
+    }
     
     return builder.build();
   }
