@@ -55,7 +55,7 @@ public class AudienceTests {
 
   public static final String PASSWORD_GRANT_CLIENT_ID = "password-grant";
   public static final String PASSWORD_GRANT_CLIENT_SECRET = "secret";
-  
+
   public static final String CLIENT_CRED_GRANT_CLIENT_ID = "client-cred";
   public static final String CLIENT_CRED_GRANT_CLIENT_SECRET = "secret";
 
@@ -69,11 +69,10 @@ public class AudienceTests {
 
   @Before
   public void before() {
-    mvc = MockMvcBuilders.webAppContextSetup(context)
-        .alwaysDo(log())
-        .apply(springSecurity())
-        .build();
+    mvc =
+        MockMvcBuilders.webAppContextSetup(context).alwaysDo(log()).apply(springSecurity()).build();
   }
+
   @Test
   public void testAudienceRequestPasswordFlow() throws Exception {
 
@@ -89,7 +88,7 @@ public class AudienceTests {
       .andReturn()
       .getResponse()
       .getContentAsString();
-    
+
     String accessToken = mapper.readTree(tokenResponseJson).get("access_token").asText();
 
     JWT token = JWTParser.parse(accessToken);
@@ -100,7 +99,7 @@ public class AudienceTests {
     assertThat(claims.getAudience().size(), equalTo(1));
     assertThat(claims.getAudience(), contains("example-audience"));
   }
-  
+
   @Test
   public void testMultipleAudiencesRequestPasswordFlow() throws Exception {
 
@@ -116,7 +115,7 @@ public class AudienceTests {
       .andReturn()
       .getResponse()
       .getContentAsString();
-    
+
     String accessToken = mapper.readTree(tokenResponseJson).get("access_token").asText();
 
     JWT token = JWTParser.parse(accessToken);
@@ -132,17 +131,17 @@ public class AudienceTests {
 
   @Test
   public void testAudienceRequestClientCredentialsFlow() throws Exception {
-    
+
     String tokenResponseJson = mvc
-        .perform(post("/token").param("grant_type", "client_credentials")
-          .param("client_id", CLIENT_CRED_GRANT_CLIENT_ID)
-          .param("client_secret", CLIENT_CRED_GRANT_CLIENT_SECRET)
-          .param("audience", "example-audience"))
-        .andExpect(status().isOk())
-        .andReturn()
-        .getResponse()
-        .getContentAsString();
-    
+      .perform(post("/token").param("grant_type", "client_credentials")
+        .param("client_id", CLIENT_CRED_GRANT_CLIENT_ID)
+        .param("client_secret", CLIENT_CRED_GRANT_CLIENT_SECRET)
+        .param("audience", "example-audience"))
+      .andExpect(status().isOk())
+      .andReturn()
+      .getResponse()
+      .getContentAsString();
+
     String accessToken = mapper.readTree(tokenResponseJson).get("access_token").asText();
     JWT token = JWTParser.parse(accessToken);
 
@@ -151,6 +150,83 @@ public class AudienceTests {
     assertNotNull(claims.getAudience());
     assertThat(claims.getAudience().size(), equalTo(1));
     assertThat(claims.getAudience(), contains("example-audience"));
+  }
+
+  @Test
+  public void testAudienceRequestRefreshTokenFlow() throws Exception {
+    String tokenResponseJson = mvc
+      .perform(post("/token").param("grant_type", "password")
+        .param("client_id", PASSWORD_GRANT_CLIENT_ID)
+        .param("client_secret", PASSWORD_GRANT_CLIENT_SECRET)
+        .param("username", TEST_USERNAME)
+        .param("password", TEST_PASSWORD)
+        .param("scope", "openid profile offline_access"))
+      .andExpect(status().isOk())
+      .andReturn()
+      .getResponse()
+      .getContentAsString();
+
+    String refreshToken = mapper.readTree(tokenResponseJson).get("refresh_token").asText();
+
+    tokenResponseJson = mvc
+      .perform(post("/token").param("grant_type", "refresh_token")
+        .param("client_id", PASSWORD_GRANT_CLIENT_ID)
+        .param("client_secret", PASSWORD_GRANT_CLIENT_SECRET)
+        .param("refresh_token", refreshToken)
+        .param("audience", "test-audience"))
+      .andExpect(status().isOk())
+      .andReturn()
+      .getResponse()
+      .getContentAsString();
+
+    String accessToken = mapper.readTree(tokenResponseJson).get("access_token").asText();
+
+    JWT token = JWTParser.parse(accessToken);
+    JWTClaimsSet claims = token.getJWTClaimsSet();
+
+    assertNotNull(claims.getAudience());
+    assertThat(claims.getAudience().size(), equalTo(1));
+    assertThat(claims.getAudience(), hasItem("test-audience"));
+
+
+  }
+
+  @Test
+  public void testAudienceRequestRefreshTokenAudiencePreservedFlow() throws Exception {
+    String tokenResponseJson = mvc
+      .perform(post("/token").param("grant_type", "password")
+        .param("client_id", PASSWORD_GRANT_CLIENT_ID)
+        .param("client_secret", PASSWORD_GRANT_CLIENT_SECRET)
+        .param("username", TEST_USERNAME)
+        .param("password", TEST_PASSWORD)
+        .param("scope", "openid profile offline_access")
+        .param("audience", "test-audience"))
+      .andExpect(status().isOk())
+      .andReturn()
+      .getResponse()
+      .getContentAsString();
+
+    String refreshToken = mapper.readTree(tokenResponseJson).get("refresh_token").asText();
+
+    tokenResponseJson = mvc
+      .perform(post("/token").param("grant_type", "refresh_token")
+        .param("client_id", PASSWORD_GRANT_CLIENT_ID)
+        .param("client_secret", PASSWORD_GRANT_CLIENT_SECRET)
+        .param("refresh_token", refreshToken)
+        .param("audience", "test-audience"))
+      .andExpect(status().isOk())
+      .andReturn()
+      .getResponse()
+      .getContentAsString();
+
+    String accessToken = mapper.readTree(tokenResponseJson).get("access_token").asText();
+
+    JWT token = JWTParser.parse(accessToken);
+    JWTClaimsSet claims = token.getJWTClaimsSet();
+
+    assertNotNull(claims.getAudience());
+    assertThat(claims.getAudience().size(), equalTo(1));
+    assertThat(claims.getAudience(), hasItem("test-audience"));
   }
 
 }
