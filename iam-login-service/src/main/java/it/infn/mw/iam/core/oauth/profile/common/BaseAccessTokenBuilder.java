@@ -40,6 +40,7 @@ import net.minidev.json.JSONObject;
 
 public abstract class BaseAccessTokenBuilder implements JWTAccessTokenBuilder {
 
+  public static final String AUDIENCE = "audience";
   public static final String AUD_KEY = "aud";
   public static final String SCOPE_CLAIM_NAME = "scope";
   public static final String ACT_CLAIM_NAME = "act";
@@ -87,6 +88,17 @@ public abstract class BaseAccessTokenBuilder implements JWTAccessTokenBuilder {
     return builder;
   }
 
+  protected boolean hasRefreshTokenAudienceRequest(OAuth2Authentication authentication) {
+    if (!isNull(authentication.getOAuth2Request().getRefreshTokenRequest())) {
+      final String audience = authentication.getOAuth2Request()
+        .getRefreshTokenRequest()
+        .getRequestParameters()
+        .get(AUDIENCE);
+      return !isNullOrEmpty(audience);
+    }
+    return false;
+  }
+
   protected boolean hasAudienceRequest(OAuth2Authentication authentication) {
     final String audience = (String) authentication.getOAuth2Request().getExtensions().get(AUD_KEY);
     return !isNullOrEmpty(audience);
@@ -109,12 +121,21 @@ public abstract class BaseAccessTokenBuilder implements JWTAccessTokenBuilder {
       .subject(subject)
       .jwtID(UUID.randomUUID().toString());
 
-    final String audience = (String) authentication.getOAuth2Request().getExtensions().get(AUD_KEY);
+    String audience = null;
+    if (hasAudienceRequest(authentication)) {
+      audience = (String) authentication.getOAuth2Request().getExtensions().get(AUD_KEY);
+    }
+
+    if (hasRefreshTokenAudienceRequest(authentication)) {
+      audience = authentication.getOAuth2Request()
+        .getRefreshTokenRequest()
+        .getRequestParameters()
+        .get(AUDIENCE);
+    }
 
     if (!isNullOrEmpty(audience)) {
       builder.audience(SPLITTER.splitToList(audience));
     }
-
     return handleClientTokenExchange(builder, token, authentication, userInfo);
   }
 

@@ -17,6 +17,7 @@ package it.infn.mw.iam.test.oauth;
 
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
@@ -188,7 +189,22 @@ public class AudienceTests {
     assertThat(claims.getAudience().size(), equalTo(1));
     assertThat(claims.getAudience(), hasItem("test-audience"));
 
+    tokenResponseJson = mvc
+      .perform(post("/token").param("grant_type", "refresh_token")
+        .param("client_id", PASSWORD_GRANT_CLIENT_ID)
+        .param("client_secret", PASSWORD_GRANT_CLIENT_SECRET)
+        .param("refresh_token", refreshToken))
+      .andExpect(status().isOk())
+      .andReturn()
+      .getResponse()
+      .getContentAsString();
 
+    accessToken = mapper.readTree(tokenResponseJson).get("access_token").asText();
+
+    token = JWTParser.parse(accessToken);
+    claims = token.getJWTClaimsSet();
+
+    assertThat(claims.getAudience(), empty());
   }
 
   @Test

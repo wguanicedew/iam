@@ -62,6 +62,8 @@ INSERT INTO client_scope (owner_id, scope) VALUES
   (5, 'proxy:generate'),
   (5, 'wlcg.groups'),
   (5, 'storage.read:/'),
+  (5, 'storage.modify:/'),
+  (5, 'storage.create:/'),
   (6, 'openid'),
   (6, 'profile'),
   (6, 'email'),
