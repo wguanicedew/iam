@@ -52,7 +52,7 @@ services:
       IAM_JAR: /code/iam-login-service/target/iam-login-service.war
       IAM_HOST: iam.local.io
       IAM_BASE_URL: https://iam.local.io
-      IAM_ISSUER: https://iam.local.io
+      IAM_ISSUER: https://iam.local.io/
       IAM_USE_FORWARDED_HEADERS: "true"
       IAM_NOTIFICATION_DISABLE: "true"
 
@@ -65,6 +65,8 @@ services:
 
       IAM_IAM_TEST_CLIENT_ID: ${IAM_IAM_TEST_CLIENT_ID}
       IAM_IAM_TEST_CLIENT_SECRET: ${IAM_IAM_TEST_CLIENT_SECRET}
+
+      IAM_JWT_DEFAULT_PROFILE: wlcg
 
       # IAM_SAML_IDP_METADATA: file:///code/compose/metadata/test-idp.cloud.cnaf.infn.it.metadata.xml 
       # IAM_SAML_ENTITY_ID: urn:iam:iam-devel
