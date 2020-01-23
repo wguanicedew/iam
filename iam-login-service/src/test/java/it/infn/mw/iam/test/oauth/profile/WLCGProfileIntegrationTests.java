@@ -16,14 +16,16 @@
 package it.infn.mw.iam.test.oauth.profile;
 
 
+import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -56,6 +58,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.nimbusds.jwt.JWT;
+import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
 
 import it.infn.mw.iam.IamLoginService;
@@ -104,13 +107,13 @@ public class WLCGProfileIntegrationTests extends EndpointsTestUtils {
   private static final String USERNAME = "test";
   private static final String PASSWORD = "password";
   private static final String USER_SUBJECT = "80e5fb8d-b7c8-451a-89ba-346ae278a66f";
-  
+
   private static final String SUBJECT_CLIENT_ID = "token-exchange-subject";
   private static final String SUBJECT_CLIENT_SECRET = "secret";
 
   private static final String ACTOR_CLIENT_ID = "token-exchange-actor";
   private static final String ACTOR_CLIENT_SECRET = "secret";
-  
+
   private static final String ALL_AUDIENCES_VALUE = "https://wlcg.cern.ch/jwt/v1/any";
 
   @Autowired
@@ -176,21 +179,21 @@ public class WLCGProfileIntegrationTests extends EndpointsTestUtils {
     assertThat(token.getJWTClaimsSet().getAudience(), hasSize(1));
     assertThat(token.getJWTClaimsSet().getAudience(), hasItem(ALL_AUDIENCES_VALUE));
   }
-  
+
   @Test
   @WithAnonymousUser
   public void testWlcgProfileAudience() throws Exception {
-    
-    
+
+
     String accessToken = new AccessTokenGetter().grantType("password")
-    .clientId(CLIENT_ID)
-    .clientSecret(CLIENT_SECRET)
-    .username(USERNAME)
-    .password(PASSWORD)
-    .scope("openid profile")
-    .audience("test-audience-1 test-audience-2")
-    .getAccessTokenValue();
-    
+      .clientId(CLIENT_ID)
+      .clientSecret(CLIENT_SECRET)
+      .username(USERNAME)
+      .password(PASSWORD)
+      .scope("openid profile")
+      .audience("test-audience-1 test-audience-2")
+      .getAccessTokenValue();
+
     JWT token = JWTParser.parse(accessToken);
 
     assertThat(token.getJWTClaimsSet().getClaim("scope"), is("openid profile"));
@@ -201,6 +204,25 @@ public class WLCGProfileIntegrationTests extends EndpointsTestUtils {
     assertThat(token.getJWTClaimsSet().getAudience(), hasSize(2));
     assertThat(token.getJWTClaimsSet().getAudience(), hasItem("test-audience-1"));
     assertThat(token.getJWTClaimsSet().getAudience(), hasItem("test-audience-2"));
+
+    accessToken = new AccessTokenGetter().grantType("password")
+      .clientId(CLIENT_ID)
+      .clientSecret(CLIENT_SECRET)
+      .username(USERNAME)
+      .password(PASSWORD)
+      .scope("openid profile")
+      .getAccessTokenValue();
+
+    token = JWTParser.parse(accessToken);
+
+    assertThat(token.getJWTClaimsSet().getClaim("scope"), is("openid profile"));
+    assertThat(token.getJWTClaimsSet().getClaim("nbf"), notNullValue());
+    assertThat(token.getJWTClaimsSet().getClaim("wlcg.ver"), is("1.0"));
+    assertThat(token.getJWTClaimsSet().getClaim("groups"), nullValue());
+    assertThat(token.getJWTClaimsSet().getClaim("wlcg.groups"), nullValue());
+    assertThat(token.getJWTClaimsSet().getAudience(), hasSize(1));
+    assertThat(token.getJWTClaimsSet().getAudience(), hasItem("https://wlcg.cern.ch/jwt/v1/any"));
+
   }
 
   @Test
@@ -379,10 +401,10 @@ public class WLCGProfileIntegrationTests extends EndpointsTestUtils {
 
     JWT exchangedToken = JWTParser.parse(tokenResponseObject.getValue());
     assertThat(exchangedToken.getJWTClaimsSet().getSubject(), is(USER_SUBJECT));
-    
+
     assertThat(exchangedToken.getJWTClaimsSet().getJSONObjectClaim("act").getAsString("sub"),
         is(ACTOR_CLIENT_ID));
-    
+
 
     tokenResponse =
         mvc
@@ -403,19 +425,116 @@ public class WLCGProfileIntegrationTests extends EndpointsTestUtils {
           .andReturn()
           .getResponse()
           .getContentAsString();
-    
+
     DefaultOAuth2AccessToken tokenResponseObject2 =
         mapper.readValue(tokenResponse, DefaultOAuth2AccessToken.class);
 
     JWT exchangedToken2 = JWTParser.parse(tokenResponseObject2.getValue());
     assertThat(exchangedToken2.getJWTClaimsSet().getSubject(), is(USER_SUBJECT));
-    
+
     assertThat(exchangedToken2.getJWTClaimsSet().getJSONObjectClaim("act").getAsString("sub"),
         is(ACTOR_CLIENT_ID));
-    
-    
-    JSONObject nestedActClaimValue = (JSONObject) exchangedToken2.getJWTClaimsSet().getJSONObjectClaim("act").get("act");
+
+
+    JSONObject nestedActClaimValue =
+        (JSONObject) exchangedToken2.getJWTClaimsSet().getJSONObjectClaim("act").get("act");
     assertThat(nestedActClaimValue.getAsString("sub"), is(ACTOR_CLIENT_ID));
 
+  }
+
+  @Test
+  public void testAudiencePreservedAcrossRefresh() throws Exception {
+    String tokenResponseJson = mvc
+      .perform(post("/token").param("grant_type", "password")
+        .param("client_id", CLIENT_ID)
+        .param("client_secret", CLIENT_SECRET)
+        .param("username", "test")
+        .param("password", "password")
+        .param("scope", "openid profile offline_access")
+        .param("audience", "test-audience"))
+      .andExpect(status().isOk())
+      .andReturn()
+      .getResponse()
+      .getContentAsString();
+
+    String refreshToken = mapper.readTree(tokenResponseJson).get("refresh_token").asText();
+
+    tokenResponseJson = mvc
+      .perform(post("/token").param("grant_type", "refresh_token")
+        .param("client_id", CLIENT_ID)
+        .param("client_secret", CLIENT_SECRET)
+        .param("refresh_token", refreshToken)
+        .param("audience", "test-audience"))
+      .andExpect(status().isOk())
+      .andReturn()
+      .getResponse()
+      .getContentAsString();
+
+    String accessToken = mapper.readTree(tokenResponseJson).get("access_token").asText();
+
+    JWT token = JWTParser.parse(accessToken);
+    JWTClaimsSet claims = token.getJWTClaimsSet();
+
+    assertNotNull(claims.getAudience());
+    assertThat(claims.getAudience().size(), equalTo(1));
+    assertThat(claims.getAudience(), hasItem("test-audience"));
+  }
+
+  @Test
+  public void testAudienceRequestRefreshTokenFlow() throws Exception {
+    String tokenResponseJson = mvc
+      .perform(post("/token").param("grant_type", "password")
+        .param("client_id", CLIENT_ID)
+        .param("client_secret", CLIENT_SECRET)
+        .param("username", "test")
+        .param("password", "password")
+        .param("scope", "openid profile offline_access"))
+      .andExpect(status().isOk())
+      .andReturn()
+      .getResponse()
+      .getContentAsString();
+
+    JWTClaimsSet claims =
+        JWTParser.parse(mapper.readTree(tokenResponseJson).get("access_token").asText())
+          .getJWTClaimsSet();
+
+    assertThat(claims.getAudience().size(), equalTo(1));
+    assertThat(claims.getAudience(), hasItem("https://wlcg.cern.ch/jwt/v1/any"));
+
+    String refreshToken = mapper.readTree(tokenResponseJson).get("refresh_token").asText();
+
+    tokenResponseJson = mvc
+      .perform(post("/token").param("grant_type", "refresh_token")
+        .param("client_id", CLIENT_ID)
+        .param("client_secret", CLIENT_SECRET)
+        .param("refresh_token", refreshToken)
+        .param("audience", "test-audience"))
+      .andExpect(status().isOk())
+      .andReturn()
+      .getResponse()
+      .getContentAsString();
+
+    claims = JWTParser.parse(mapper.readTree(tokenResponseJson).get("access_token").asText())
+        .getJWTClaimsSet();
+
+    assertNotNull(claims.getAudience());
+    assertThat(claims.getAudience().size(), equalTo(1));
+    assertThat(claims.getAudience(), hasItem("test-audience"));
+
+    tokenResponseJson = mvc
+      .perform(post("/token").param("grant_type", "refresh_token")
+        .param("client_id", CLIENT_ID)
+        .param("client_secret", CLIENT_SECRET)
+        .param("refresh_token", refreshToken))
+      .andExpect(status().isOk())
+      .andReturn()
+      .getResponse()
+      .getContentAsString();
+
+    claims = JWTParser.parse(mapper.readTree(tokenResponseJson).get("access_token").asText())
+        .getJWTClaimsSet();
+
+    assertThat(claims.getAudience().size(), equalTo(1));
+    assertThat(claims.getAudience(), hasItem("https://wlcg.cern.ch/jwt/v1/any"));
   }
 }

@@ -70,7 +70,7 @@ public class WLCGProfileAccessTokenBuilder extends BaseAccessTokenBuilder {
       }
     }
     
-    if (!hasAudienceRequest(authentication)) {
+    if (!hasAudienceRequest(authentication) && !hasRefreshTokenAudienceRequest(authentication)) {
       builder.audience(ALL_AUDIENCES_VALUE);
     }
     
