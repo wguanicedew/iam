@@ -17,17 +17,16 @@ package it.infn.mw.iam.core.oauth.profile;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Objects.isNull;
+import static java.util.stream.Collectors.toCollection;
 
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
-
-import com.google.common.collect.Sets;
-
-import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
 
 public class ScopeAwareProfileResolver implements JWTProfileResolver {
 
@@ -35,7 +34,7 @@ public class ScopeAwareProfileResolver implements JWTProfileResolver {
   public static final String WLCG_PROFILE_ID = "wlcg";
 
   private static final Set<String> SUPPORTED_PROFILES =
-      Sets.newHashSet(IAM_PROFILE_ID, WLCG_PROFILE_ID);
+      newHashSet(IAM_PROFILE_ID, WLCG_PROFILE_ID);
 
   private final Map<String, JWTProfile> profileMap;
   private final JWTProfile defaultProfile;
@@ -51,12 +50,20 @@ public class ScopeAwareProfileResolver implements JWTProfileResolver {
 
 
   private JWTProfile findProfileFromScope(ClientDetails client) {
-    return client.getScope()
+    
+    Set<String> clientScopes = client.getScope();
+    
+    Set<JWTProfile> matchedProfiles = clientScopes
       .stream()
       .filter(SUPPORTED_PROFILES::contains)
-      .findFirst()
       .map(profileMap::get)
-      .orElse(defaultProfile);
+      .collect(toCollection(LinkedHashSet::new));
+
+    if (matchedProfiles.isEmpty() || matchedProfiles.size() > 1) {
+      return defaultProfile;
+    }
+
+    return matchedProfiles.iterator().next();
   }
 
 
