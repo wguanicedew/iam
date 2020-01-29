@@ -137,20 +137,10 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
 
     authentication.getOAuth2Request()
       .getExtensions()
-      .put(TOKEN_EXCHANGE_SUBJECT_TOKEN_KEY,
-          tokenRequest.getRequestParameters().get("subject_token"));
-
-    authentication.getOAuth2Request()
-      .getExtensions()
       .put(TOKEN_EXCHANGE_SUBJECT_CLIENT_ID_KEY, subjectToken.getClient().getClientId());
 
 
     try {
-      String subjectTokenSub = subjectToken.getJwt().getJWTClaimsSet().getSubject();
-      authentication.getOAuth2Request()
-        .getExtensions()
-        .put(TOKEN_EXCHANGE_SUBJECT_SUB_KEY, subjectTokenSub);
-
       JSONObject subjectActClaim =
           subjectToken.getJwt().getJWTClaimsSet().getJSONObjectClaim("act");
 

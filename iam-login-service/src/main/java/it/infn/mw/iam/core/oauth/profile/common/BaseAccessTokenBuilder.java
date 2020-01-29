@@ -60,26 +60,30 @@ public abstract class BaseAccessTokenBuilder implements JWTAccessTokenBuilder {
       OAuth2AccessTokenEntity token, OAuth2Authentication authentication, UserInfo userInfo) {
 
     if (TOKEN_EXCHANGE_GRANT_TYPE.equals(authentication.getOAuth2Request().getGrantType())) {
-
-
-
+      
       if (authentication.isClientOnly()) {
         String subjectClientId = (String) authentication.getOAuth2Request()
           .getExtensions()
           .get(TokenExchangeTokenGranter.TOKEN_EXCHANGE_SUBJECT_CLIENT_ID_KEY);
 
+        authentication.getOAuth2Request()
+        .getExtensions().remove(TokenExchangeTokenGranter.TOKEN_EXCHANGE_SUBJECT_CLIENT_ID_KEY);
+        
         builder.subject(subjectClientId);
       }
 
       Map<String, Object> actClaimContent = Maps.newHashMap();
 
       actClaimContent.put("sub", authentication.getOAuth2Request().getClientId());
+      
       JSONObject subjectTokenActClaim = (JSONObject) authentication.getOAuth2Request()
         .getExtensions()
         .get(TokenExchangeTokenGranter.TOKEN_EXCHANGE_SUBJECT_ACT_KEY);
 
       if (!isNull(subjectTokenActClaim)) {
         actClaimContent.put("act", subjectTokenActClaim);
+        authentication.getOAuth2Request()
+        .getExtensions().remove(TokenExchangeTokenGranter.TOKEN_EXCHANGE_SUBJECT_ACT_KEY);
       }
 
       builder.claim(ACT_CLAIM_NAME, actClaimContent);
