@@ -306,9 +306,15 @@ public class MitreSecurityConfig {
     protected void configure(final HttpSecurity http) throws Exception {
 
       // @formatter:off
-      http.antMatcher("/devicecode/**")
-        .csrf().disable()
-        .authorizeRequests().anyRequest().permitAll();
+      http
+        .antMatcher("/devicecode")
+          .csrf().disable()
+          .authorizeRequests()
+            .anyRequest()
+              .permitAll()
+          .and()
+            .sessionManagement()
+              .sessionCreationPolicy(STATELESS);
       // @formatter:on
     }
   }
