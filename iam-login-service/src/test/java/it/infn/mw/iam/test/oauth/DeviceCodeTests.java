@@ -21,7 +21,6 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
@@ -71,6 +70,8 @@ public class DeviceCodeTests extends EndpointsTestUtils {
   public static final String USERINFO_ENDPOINT = "/userinfo";
   public static final String INTROSPECTION_ENDPOINT = "/introspect";
 
+  public static final String PUBLIC_DEVICE_CODE_CLIENT_ID = "public-dc-client";
+
   public static final String DEVICE_CODE_CLIENT_ID = "device-code-client";
   public static final String DEVICE_CODE_CLIENT_SECRET = "secret";
   public static final String DEVICE_CODE_GRANT_TYPE =
@@ -93,19 +94,6 @@ public class DeviceCodeTests extends EndpointsTestUtils {
   @Before
   public void setup() throws Exception {
     buildMockMvc();
-  }
-
-
-  @Test
-  public void testDeviceCodeEndpointRequiresClientAuth() throws Exception {
-
-    mvc
-      .perform(post(DEVICE_CODE_ENDPOINT).contentType(APPLICATION_FORM_URLENCODED)
-        .param("client_id", "whatever"))
-      .andExpect(status().isUnauthorized())
-      .andExpect(jsonPath("$.error", equalTo("unauthorized")))
-      .andExpect(jsonPath("$.error_description", startsWith("Full authentication is required")));
-
   }
 
   @Test
@@ -303,34 +291,34 @@ public class DeviceCodeTests extends EndpointsTestUtils {
       .andReturn()
       .getRequest()
       .getSession();
-    
+
     String tokenResponse = mvc
-        .perform(
-            post(TOKEN_ENDPOINT).with(httpBasic(DEVICE_CODE_CLIENT_ID, DEVICE_CODE_CLIENT_SECRET))
-              .param("grant_type", DEVICE_CODE_GRANT_TYPE)
-              .param("device_code", deviceCode)
-              .param("aud", "example-audience"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.access_token").exists())
-        .andExpect(jsonPath("$.refresh_token").exists())
-        .andExpect(jsonPath("$.id_token").exists())
-        .andExpect(jsonPath("$.scope").exists())
-        .andExpect(jsonPath("$.scope", containsString("openid")))
-        .andExpect(jsonPath("$.scope", containsString("profile")))
-        .andExpect(jsonPath("$.scope", containsString("offline_access")))
-        .andReturn()
-        .getResponse()
-        .getContentAsString();
+      .perform(
+          post(TOKEN_ENDPOINT).with(httpBasic(DEVICE_CODE_CLIENT_ID, DEVICE_CODE_CLIENT_SECRET))
+            .param("grant_type", DEVICE_CODE_GRANT_TYPE)
+            .param("device_code", deviceCode)
+            .param("aud", "example-audience"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.access_token").exists())
+      .andExpect(jsonPath("$.refresh_token").exists())
+      .andExpect(jsonPath("$.id_token").exists())
+      .andExpect(jsonPath("$.scope").exists())
+      .andExpect(jsonPath("$.scope", containsString("openid")))
+      .andExpect(jsonPath("$.scope", containsString("profile")))
+      .andExpect(jsonPath("$.scope", containsString("offline_access")))
+      .andReturn()
+      .getResponse()
+      .getContentAsString();
 
-      JsonNode tokenResponseJson = mapper.readTree(tokenResponse);
+    JsonNode tokenResponseJson = mapper.readTree(tokenResponse);
 
-      String accessToken = tokenResponseJson.get("access_token").asText();
-      JWT token = JWTParser.parse(accessToken);
-      JWTClaimsSet claims = token.getJWTClaimsSet();
+    String accessToken = tokenResponseJson.get("access_token").asText();
+    JWT token = JWTParser.parse(accessToken);
+    JWTClaimsSet claims = token.getJWTClaimsSet();
 
-      assertNotNull(claims.getAudience());
-      assertThat(claims.getAudience().size(), equalTo(1));
-      assertThat(claims.getAudience(), contains("example-audience"));
+    assertNotNull(claims.getAudience());
+    assertThat(claims.getAudience().size(), equalTo(1));
+    assertThat(claims.getAudience(), contains("example-audience"));
   }
 
   @Test
@@ -587,5 +575,112 @@ public class DeviceCodeTests extends EndpointsTestUtils {
         .param("token", accessToken))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.active", equalTo(true)));
+  }
+
+
+  @Test
+  public void publicClientDeviceCodeWorks() throws Exception {
+
+    String deviceResponse = mvc
+      .perform(post(DEVICE_CODE_ENDPOINT).contentType(APPLICATION_FORM_URLENCODED)
+        .param("client_id", PUBLIC_DEVICE_CODE_CLIENT_ID)
+        .param("scope", "openid profile"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.user_code").isString())
+      .andExpect(jsonPath("$.device_code").isString())
+      .andExpect(jsonPath("$.verification_uri", equalTo(DEVICE_USER_URL)))
+      .andExpect(jsonPath("$.expires_in", is(600)))
+      .andReturn()
+      .getResponse()
+      .getContentAsString();
+
+    JsonNode responseJson = mapper.readTree(deviceResponse);
+
+    String userCode = responseJson.get("user_code").asText();
+    String deviceCode = responseJson.get("device_code").asText();
+
+    mvc
+      .perform(post(TOKEN_ENDPOINT).param("grant_type", DEVICE_CODE_GRANT_TYPE)
+        .param("device_code", deviceCode)
+        .param("client_id", PUBLIC_DEVICE_CODE_CLIENT_ID))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.error", equalTo("authorization_pending")))
+      .andExpect(jsonPath("$.error_description",
+          equalTo("Authorization pending for code: " + deviceCode)));
+
+    MockHttpSession session = (MockHttpSession) mvc.perform(get(DEVICE_USER_URL))
+      .andExpect(status().is3xxRedirection())
+      .andExpect(redirectedUrl("http://localhost:8080/login"))
+      .andReturn()
+      .getRequest()
+      .getSession();
+
+    session = (MockHttpSession) mvc.perform(get("http://localhost:8080/login").session(session))
+      .andExpect(status().isOk())
+      .andExpect(view().name("iam/login"))
+      .andReturn()
+      .getRequest()
+      .getSession();
+
+    session = (MockHttpSession) mvc
+      .perform(post(LOGIN_URL).param("username", TEST_USERNAME)
+        .param("password", TEST_PASSWORD)
+        .param("submit", "Login")
+        .session(session))
+      .andExpect(status().is3xxRedirection())
+      .andExpect(redirectedUrl(DEVICE_USER_URL))
+      .andReturn()
+      .getRequest()
+      .getSession();
+
+    session = (MockHttpSession) mvc.perform(get(DEVICE_USER_URL).session(session))
+      .andExpect(status().isOk())
+      .andExpect(view().name("requestUserCode"))
+      .andReturn()
+      .getRequest()
+      .getSession();
+
+    session = (MockHttpSession) mvc
+      .perform(post(DEVICE_USER_VERIFY_URL).param("user_code", userCode).session(session))
+      .andExpect(status().isOk())
+      .andExpect(view().name("approveDevice"))
+      .andReturn()
+      .getRequest()
+      .getSession();
+
+    session = (MockHttpSession) mvc
+      .perform(post(DEVICE_USER_APPROVE_URL).param("user_code", userCode)
+        .param("user_oauth_approval", "true")
+        .session(session))
+      .andExpect(status().isOk())
+      .andExpect(view().name("deviceApproved"))
+      .andReturn()
+      .getRequest()
+      .getSession();
+
+
+    String tokenResponse = mvc
+      .perform(post(TOKEN_ENDPOINT).param("grant_type", DEVICE_CODE_GRANT_TYPE)
+        .param("device_code", deviceCode)
+        .param("client_id", PUBLIC_DEVICE_CODE_CLIENT_ID))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.access_token").exists())
+      .andExpect(jsonPath("$.id_token").exists())
+      .andExpect(jsonPath("$.scope").exists())
+      .andExpect(jsonPath("$.scope", containsString("openid")))
+      .andExpect(jsonPath("$.scope", containsString("profile")))
+      .andReturn()
+      .getResponse()
+      .getContentAsString();
+
+    JsonNode tokenResponseJson = mapper.readTree(tokenResponse);
+
+    String accessToken = tokenResponseJson.get("access_token").asText();
+
+    String authorizationHeader = String.format("Bearer %s", accessToken);
+
+    // Check that the token can be used for userinfo
+    mvc.perform(get(USERINFO_ENDPOINT).header("Authorization", authorizationHeader))
+      .andExpect(status().isOk());
   }
 }

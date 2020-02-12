@@ -302,39 +302,21 @@ public class MitreSecurityConfig {
   @Order(27)
   public static class DeviceCodeEnpointConfig extends WebSecurityConfigurerAdapter {
 
-    @Autowired
-    @Qualifier("clientUserDetailsService")
-    private UserDetailsService userDetailsService;
-
-    @Autowired
-    private CorsFilter corsFilter;
-
-    @Autowired
-    private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
-
-    @Override
-    protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
-
-      auth.userDetailsService(userDetailsService);
-    }
-
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
 
       // @formatter:off
-      http.antMatcher("/devicecode/**")
-        .httpBasic()
-          .authenticationEntryPoint(authenticationEntryPoint)
-        .and()
-          .addFilterBefore(corsFilter, SecurityContextPersistenceFilter.class)
-          .sessionManagement()
-            .sessionCreationPolicy(STATELESS).and()
-        .csrf()
-          .disable()
-        .authorizeRequests()
-          .anyRequest()
-            .fullyAuthenticated();
+      http
+        .antMatcher("/devicecode")
+          .csrf().disable()
+          .authorizeRequests()
+            .anyRequest()
+              .permitAll()
+          .and()
+            .sessionManagement()
+              .sessionCreationPolicy(STATELESS);
       // @formatter:on
     }
   }
+  
 }

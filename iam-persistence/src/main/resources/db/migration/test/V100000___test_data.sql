@@ -20,9 +20,10 @@ INSERT INTO client_details (id, client_id, client_secret, client_name, dynamical
    600);
 
 INSERT INTO client_details (id, client_id, client_secret, client_name, dynamically_registered,
-  refresh_token_validity_seconds, access_token_validity_seconds, id_token_validity_seconds, allow_introspection,
-  token_endpoint_auth_method, require_auth_time) VALUES
-(13, 'implicit-flow-client', null, 'Implicit Flow client', false, null, 3600, 600, false, null, false);
+  refresh_token_validity_seconds, access_token_validity_seconds, id_token_validity_seconds, device_code_validity_seconds, 
+  allow_introspection, token_endpoint_auth_method, require_auth_time) VALUES
+(13, 'implicit-flow-client', null, 'Implicit Flow client', false, null, 3600, 600, 600, false, null, false),
+(14, 'public-dc-client', null, 'Public Device Code client', false, null, 3600, 600, 600, false, null, false);
 
 INSERT INTO client_scope (owner_id, scope) VALUES
   (1, 'openid'),
@@ -117,7 +118,12 @@ INSERT INTO client_scope (owner_id, scope) VALUES
   (13, 'profile'),
   (13, 'email'),
   (13, 'address'),
-  (13, 'phone');
+  (13, 'phone'),
+  (14, 'profile'),
+  (14, 'email'),
+  (14, 'address'),
+  (14, 'phone');
+  
   
   
 INSERT INTO client_redirect_uri (owner_id, redirect_uri) VALUES
@@ -155,7 +161,8 @@ INSERT INTO client_grant_type (owner_id, grant_type) VALUES
   (11, 'client_credentials'),
   (12, 'refresh_token'),
   (12, 'urn:ietf:params:oauth:grant-type:device_code'),
-  (13, 'implicit');
+  (13, 'implicit'),
+  (14, 'urn:ietf:params:oauth:grant-type:device_code');
     
 INSERT INTO iam_user_info(ID,GIVENNAME,FAMILYNAME, EMAIL, EMAILVERIFIED, BIRTHDATE, GENDER) VALUES
 (2, 'Test', 'User', 'test@iam.test', true, '1950-01-01','M');
