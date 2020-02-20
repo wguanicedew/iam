@@ -38,6 +38,28 @@
         };
     }
 
+    function SignAupController($scope, $uibModalInstance, AupService) {
+        var self = this;
+        self.enabled = true;
+
+        self.cancel = function() {
+            $uibModalInstance.close();
+        };
+
+        self.doTouchAup = function() {
+            self.error = undefined;
+            self.enabled = false;
+            AupService.touchAup()
+                .then(function(res) {
+                    $uibModalInstance.close('AUP signature requested succesfully');
+                    self.enabled = true;
+                }).catch(function(res) {
+                    self.error = res.data.error;
+                    self.enabled = true;
+                });
+        };
+    }
+
     function EditAupController($scope, $uibModalInstance, AupService, aup) {
         var self = this;
         self.enabled = true;
@@ -50,7 +72,7 @@
 
         self.reset = function() {
             self.aupVal = {
-                text: self.aup.text,
+                url: self.aup.url,
                 signatureValidityInDays: self.aup.signatureValidityInDays
             };
         };
@@ -81,7 +103,7 @@
 
         self.reset = function() {
             self.aupVal = {
-                text: "AUP text...",
+                url: "",
                 signatureValidityInDays: 0
             };
         };
@@ -149,6 +171,16 @@
             var modalInstance = $uibModal.open({
                 templateUrl: '/resources/iam/apps/dashboard-app/components/aup/aup.delete.dialog.html',
                 controller: DeleteAupController,
+                controllerAs: '$ctrl'
+            });
+
+            modalInstance.result.then(self.handleSuccess);
+        };
+
+        self.openSignAupDialog = function() {
+            var modalInstance = $uibModal.open({
+                templateUrl: '/resources/iam/apps/dashboard-app/components/aup/aup.sign.dialog.html',
+                controller: SignAupController,
                 controllerAs: '$ctrl'
             });
 

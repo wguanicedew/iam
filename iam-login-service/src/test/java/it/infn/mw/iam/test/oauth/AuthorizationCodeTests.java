@@ -87,18 +87,16 @@ public class AuthorizationCodeTests {
 
   @Value("${iam.baseUrl}")
   String iamBaseUrl;
-  
+
   MockMvc mvc;
 
   @Before
   public void setup() {
-    mvc = MockMvcBuilders.webAppContextSetup(context)
-      .apply(springSecurity())
-      .alwaysDo(log())
-      .build();
+    mvc =
+        MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).alwaysDo(log()).build();
   }
 
-  
+
   @Test
   public void testOidcAuthorizationCodeFlowExternalHint() throws Exception {
 
@@ -161,7 +159,7 @@ public class AuthorizationCodeTests {
     aup.setCreationTime(new Date());
     aup.setLastUpdateTime(new Date());
     aup.setName("default-aup");
-    aup.setText("AUP text");
+    aup.setUrl("http://default-aup.org/");
     aup.setDescription("AUP description");
     aup.setSignatureValidityInDays(0L);
 
@@ -198,17 +196,17 @@ public class AuthorizationCodeTests {
 
     SecurityContext context = (SecurityContext) session.getAttribute("SPRING_SECURITY_CONTEXT");
 
-    
+
     session = (MockHttpSession) mvc
-       // Not sure why I have to do this, since using session *should be* enough
+      // Not sure why I have to do this, since using session *should be* enough
       .perform(get(SIGN_AUP_URL).session(session).with(securityContext(context)))
       .andExpect(status().isOk())
       .andExpect(view().name("iam/signAup"))
       .andReturn()
       .getRequest()
       .getSession();
-    
-    
+
+
     mvc.perform(post(SIGN_AUP_URL).session(session).with(securityContext(context)))
       .andExpect(status().isFound())
       .andExpect(redirectedUrl(uriComponents.encode().toUriString()))
@@ -217,6 +215,5 @@ public class AuthorizationCodeTests {
       .getSession();
 
   }
-
 
 }

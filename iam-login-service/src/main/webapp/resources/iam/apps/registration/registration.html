@@ -143,12 +143,40 @@
                     <div>{{extAuthInfo.subject}}</div>
                 </div>
             </div>
-            <div ng-if="aup != null">
+            <div ng-if="!aup && privacyPolicy.url">
+                <p>
+                    By submitting this registration request, you declare that you agree
+                    with the terms of this organization <a href="{{privacyPolicy.url}}">{{privacyPolicy.text}}</a>.
+                </p>
+            </div>
+            <div ng-if="aup && aup.text">
                 <div class="form-group">
                     <label class="control-label">Acceptable Usage Policy (AUP)</label>
-                    <div>{{aup}}</div>
-                    <p class="help-block">By submitting this registration request, you agree to the terms of this
-                        organization Acceptable Usage Policy (AUP).
+                    <div>{{aup.text}}</div>
+                    <p class="help-block" ng-if="privacyPolicy.url == null">By submitting this registration request, you
+                        agree to the terms of this
+                        organization Acceptable Usage Policy shown above.
+                    </p>
+                    <p class="help-block" ng-if="privacyPolicy.url != null">By submitting this registration request, you
+                        agree to the terms of this
+                        organization Acceptable Usage Policy shown above and
+                        <a target="_blank" rel="noopener noreferrer"
+                            href="{{privacyPolicy.url}}">{{privacyPolicy.text}}</a>.
+                    </p>
+                </div>
+            </div>
+            <div ng-if="aup && aup.url">
+                <div class="form-group">
+                    <p ng-if="!privacyPolicy.url">
+                        By submitting this registration request, you declare that you agree
+                        with the terms of this organization <a target="_blank" rel="noopener noreferrer"
+                            href="{{aup.url}}">Acceptable Usage Policy</a>.
+                    </p>
+                    <p ng-if="privacyPolicy.url">
+                        By submitting this registration request, you declare that you agree
+                        with the terms of this organization <a href="{{aup.url}}">Acceptable Usage Policy</a>
+                        and <a target="_blank" rel="noopener noreferrer"
+                            href="{{privacyPolicy.url}}">{{privacyPolicy.text}}</a>.
                     </p>
                 </div>
             </div>

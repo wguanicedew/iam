@@ -41,6 +41,7 @@ public class IamScopePolicySerializer extends JsonSerializer<IamScopePolicy>{
     
     gen.writeStringField("description", value.getDescription());
     gen.writeStringField("rule", value.getRule().name());
+    gen.writeStringField("matching_policy", value.getMatchingPolicy().name());
     
     
     if (isNull(value.getAccount())) {

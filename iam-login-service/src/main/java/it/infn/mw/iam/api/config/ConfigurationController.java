@@ -23,6 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import it.infn.mw.iam.config.IamProperties;
+import it.infn.mw.iam.config.IamProperties.PrivacyPolicy;
 import it.infn.mw.iam.config.login.LoginButtonProperties;
 import it.infn.mw.iam.config.oidc.OidcProvider;
 import it.infn.mw.iam.config.oidc.OidcValidatedProviders;
@@ -32,34 +34,39 @@ import it.infn.mw.iam.config.saml.IamSamlProperties;
 @RestController
 @RequestMapping("/iam/config")
 public class ConfigurationController {
-  
+
   private final List<IamSamlLoginShortcut> loginShortcuts;
   private final LoginButtonProperties wayfLoginButton;
   private final OidcValidatedProviders providers;
-  
-  
+  private final IamProperties iamProperties;
+
   @Autowired
-  public ConfigurationController(OidcValidatedProviders providers, IamSamlProperties samlProps) {
+  public ConfigurationController(OidcValidatedProviders providers, IamSamlProperties samlProps,
+      IamProperties iamProperties) {
     this.providers = providers;
-    this.loginShortcuts= samlProps.getLoginShortcuts();
+    this.loginShortcuts = samlProps.getLoginShortcuts();
     this.wayfLoginButton = samlProps.getWayfLoginButton();
+    this.iamProperties = iamProperties;
   }
 
   @RequestMapping(method = GET, value = "/oidc/providers")
   public List<OidcProvider> listProviders() {
     return providers.getValidatedProviders();
   }
-  
+
   @RequestMapping(method = GET, value = "/saml/shortcuts")
   public List<IamSamlLoginShortcut> listSamlLoginShortcuts() {
     return loginShortcuts;
   }
-  
+
   @RequestMapping(method = GET, value = "/saml/wayf-login-button")
   public LoginButtonProperties listWayfLoginButton() {
     return wayfLoginButton;
   }
-  
-  
-  
+
+  @RequestMapping(method = GET, value = "/privacy-policy")
+  public PrivacyPolicy privacyPolicyURL() {
+    return iamProperties.getPrivacyPolicy();
+  }
+
 }

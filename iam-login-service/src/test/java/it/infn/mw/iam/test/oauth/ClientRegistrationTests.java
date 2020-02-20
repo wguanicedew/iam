@@ -55,8 +55,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import it.infn.mw.iam.IamLoginService;
-import it.infn.mw.iam.core.oauth.IamDeviceCodeTokenGranter;
-import it.infn.mw.iam.core.oauth.TokenExchangeTokenGranter;
+import it.infn.mw.iam.core.oauth.granters.IamDeviceCodeTokenGranter;
+import it.infn.mw.iam.core.oauth.granters.TokenExchangeTokenGranter;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = IamLoginService.class)
@@ -203,12 +203,12 @@ public class ClientRegistrationTests extends ClientRegistrationTestSupport {
   public void tokenExchangeGrantTypeNotAllowedWhenRegisteringNewClient() throws Exception {
 
     String jsonInString = ClientJsonStringBuilder.builder()
-      .grantTypes("authorization_code", TokenExchangeTokenGranter.GRANT_TYPE)
+      .grantTypes("authorization_code", TokenExchangeTokenGranter.TOKEN_EXCHANGE_GRANT_TYPE)
       .build();
 
     mvc.perform(post(REGISTER_ENDPOINT).contentType(APPLICATION_JSON).content(jsonInString))
       .andExpect(status().isCreated())
-      .andExpect(jsonPath("$.grant_types", not(hasItem(TokenExchangeTokenGranter.GRANT_TYPE))));
+      .andExpect(jsonPath("$.grant_types", not(hasItem(TokenExchangeTokenGranter.TOKEN_EXCHANGE_GRANT_TYPE))));
 
   }
 
@@ -236,7 +236,7 @@ public class ClientRegistrationTests extends ClientRegistrationTestSupport {
 
     ClientDetailsEntity clientModel = clientService.loadClientByClientId(clientId);
     clientModel.getGrantTypes().add("password");
-    clientModel.getGrantTypes().add(TokenExchangeTokenGranter.GRANT_TYPE);
+    clientModel.getGrantTypes().add(TokenExchangeTokenGranter.TOKEN_EXCHANGE_GRANT_TYPE);
 
     clientRepo.saveClient(clientModel);
 
@@ -246,7 +246,7 @@ public class ClientRegistrationTests extends ClientRegistrationTestSupport {
       .andExpect(status().isOk())
       .andExpect(content().contentType(APPLICATION_JSON))
       .andExpect(
-          jsonPath("$.grant_types", hasItems("password", TokenExchangeTokenGranter.GRANT_TYPE)))
+          jsonPath("$.grant_types", hasItems("password", TokenExchangeTokenGranter.TOKEN_EXCHANGE_GRANT_TYPE)))
       .andReturn()
       .getResponse()
       .getContentAsString();
@@ -257,12 +257,12 @@ public class ClientRegistrationTests extends ClientRegistrationTestSupport {
         .content(clientJson))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.grant_types", hasItem("password")))
-      .andExpect(jsonPath("$.grant_types", hasItem(TokenExchangeTokenGranter.GRANT_TYPE)));
+      .andExpect(jsonPath("$.grant_types", hasItem(TokenExchangeTokenGranter.TOKEN_EXCHANGE_GRANT_TYPE)));
 
 
     clientModel = clientService.loadClientByClientId(clientId);
     clientModel.getGrantTypes().remove("password");
-    clientModel.getGrantTypes().remove(TokenExchangeTokenGranter.GRANT_TYPE);
+    clientModel.getGrantTypes().remove(TokenExchangeTokenGranter.TOKEN_EXCHANGE_GRANT_TYPE);
     clientRepo.saveClient(clientModel);
 
     mvc
@@ -271,7 +271,7 @@ public class ClientRegistrationTests extends ClientRegistrationTestSupport {
       .andExpect(status().isOk())
       .andExpect(content().contentType(APPLICATION_JSON))
       .andExpect(jsonPath("$.grant_types", not(hasItem("password"))))
-      .andExpect(jsonPath("$.grant_types", not(hasItem(TokenExchangeTokenGranter.GRANT_TYPE))))
+      .andExpect(jsonPath("$.grant_types", not(hasItem(TokenExchangeTokenGranter.TOKEN_EXCHANGE_GRANT_TYPE))))
       .andReturn()
       .getResponse()
       .getContentAsString();
@@ -282,7 +282,7 @@ public class ClientRegistrationTests extends ClientRegistrationTestSupport {
         .content(clientJson))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.grant_types", not(hasItem("password"))))
-      .andExpect(jsonPath("$.grant_types", not(hasItem(TokenExchangeTokenGranter.GRANT_TYPE))));
+      .andExpect(jsonPath("$.grant_types", not(hasItem(TokenExchangeTokenGranter.TOKEN_EXCHANGE_GRANT_TYPE))));
 
   }
 

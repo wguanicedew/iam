@@ -19,6 +19,8 @@ import static com.google.common.collect.Sets.newHashSet;
 import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.EPPN;
 import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.EPTID;
 import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.EPUID;
+import static java.lang.Boolean.TRUE;
+import static java.util.concurrent.TimeUnit.HOURS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 import java.io.File;
@@ -154,6 +156,7 @@ import it.infn.mw.iam.authn.saml.util.SamlIdResolvers;
 import it.infn.mw.iam.authn.saml.util.SamlUserIdentifierResolver;
 import it.infn.mw.iam.authn.saml.util.metadata.ResearchAndScholarshipMetadataFilter;
 import it.infn.mw.iam.authn.saml.util.metadata.SirtfiAttributeMetadataFilter;
+import it.infn.mw.iam.authn.util.SessionTimeoutHelper;
 import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.config.saml.SamlConfig.ServerProperties;
 import it.infn.mw.iam.core.time.SystemTimeProvider;
@@ -173,6 +176,9 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
   @Autowired
   ResourceLoader resourceLoader;
 
+  @Autowired
+  SessionTimeoutHelper sessionTimeoutHelper;
+  
   @Autowired
   SamlUserIdentifierResolver resolver;
 
@@ -218,7 +224,7 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
   @Autowired
   IamSSOProfileOptions defaultOptions;
 
-  Timer metadataFetchTimer = new Timer();
+  Timer metadataFetchTimer = new Timer("metadata-fetch", TRUE);
 
   BasicParserPool basicParserPool = new BasicParserPool();
 
@@ -380,10 +386,10 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
   public SAMLAuthenticationProvider samlAuthenticationProvider(SamlUserIdentifierResolver resolver,
       IamAccountRepository accountRepo, InactiveAccountAuthenticationHander handler,
       MappingPropertiesResolver mpResolver,
-      AuthenticationValidator<ExpiringUsernameAuthenticationToken> validator) {
+      AuthenticationValidator<ExpiringUsernameAuthenticationToken> validator, SessionTimeoutHelper helper) {
 
     IamSamlAuthenticationProvider samlAuthenticationProvider =
-        new IamSamlAuthenticationProvider(resolver, validator);
+        new IamSamlAuthenticationProvider(resolver, validator, helper);
 
     samlAuthenticationProvider
       .setUserDetails(samlUserDetailsService(resolver, accountRepo, handler, mpResolver));
@@ -611,6 +617,17 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
                 metadataBackupFile.getAbsolutePath());
 
         metadataProvider.setParserPool(basicParserPool);
+       
+        
+        long mdRefreshSecs = samlProperties.getMetadataRefreshPeriodSec();
+        if (mdRefreshSecs <= 0L) {
+          mdRefreshSecs = HOURS.toSeconds(12);
+          LOG.warn("Overriding setting for saml.metadata-refresh-period-sec with default value: {} seconds", mdRefreshSecs);
+        }
+        
+        LOG.info("Setting max metadata refresh delay for {} to {} seconds", trimmedMedataUrl, mdRefreshSecs);
+        metadataProvider.setMinRefreshDelay((int)SECONDS.toMillis(mdRefreshSecs-1));
+        metadataProvider.setMaxRefreshDelay(SECONDS.toMillis(mdRefreshSecs));
         providers.add(metadataDelegate(metadataProvider, p));
       } else {
         LOG.error("Skipping invalid saml.idp-metatadata value: {}", trimmedMedataUrl);
@@ -634,7 +651,7 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
 
     CachingMetadataManager manager = new IamCachingMetadataManager(metadataProviders());
     manager.setKeyManager(keyManager());
-    manager.setRefreshCheckInterval(SECONDS.toMillis(samlProperties.getMetadataRefreshPeriodSec()));
+    manager.setRefreshCheckInterval(-1);
     manager.refreshMetadata();
 
     return manager;
@@ -834,14 +851,7 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
   @Override
   protected void configure(AuthenticationManagerBuilder auth) throws Exception {
     auth.authenticationProvider(samlAuthenticationProvider(resolver, repo, inactiveAccountHandler,
-        mappingResolver, validator));
-  }
-
-  private void scheduleMetadataLookupServiceRefresh(ScheduledTaskRegistrar taskRegistrar) {
-    LOG.info("Scheduling metadata lookup service refresh task to run every {} seconds.",
-        samlProperties.getMetadataLookupServiceRefreshPeriodSec());
-    taskRegistrar.addFixedRateTask(() -> metadataLookupService.refreshMetadata(),
-        TimeUnit.SECONDS.toMillis(samlProperties.getMetadataLookupServiceRefreshPeriodSec()));
+        mappingResolver, validator, sessionTimeoutHelper));
   }
 
   private void scheduleProvisionedAccountsCleanup(final ScheduledTaskRegistrar taskRegistrar) {
@@ -871,7 +881,6 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
   @Override
   public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
     scheduleProvisionedAccountsCleanup(taskRegistrar);
-    scheduleMetadataLookupServiceRefresh(taskRegistrar);
   }
 
 }

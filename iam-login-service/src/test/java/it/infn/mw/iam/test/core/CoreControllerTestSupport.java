@@ -15,6 +15,8 @@
  */
 package it.infn.mw.iam.test.core;
 
+import java.time.Instant;
+
 import org.mockito.Mockito;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
@@ -27,6 +29,7 @@ import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 
 @Configuration
 public class CoreControllerTestSupport {
+  public static final Instant NOW = Instant.parse("2019-01-01T00:00:00.00Z");
 
   @Primary
   @Bean(name = "resourceServerFilter")
@@ -46,5 +49,10 @@ public class CoreControllerTestSupport {
   ApplicationEventPublisher mockApplicationEventPublisher() {
     return Mockito.mock(ApplicationEventPublisher.class);
   }
+  
+//  @Bean
+//  Clock mockClock() {
+//    return Clock.fixed(NOW, ZoneId.systemDefault());
+//  }
   
 }

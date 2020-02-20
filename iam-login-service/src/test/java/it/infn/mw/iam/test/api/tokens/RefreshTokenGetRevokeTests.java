@@ -16,6 +16,7 @@
 package it.infn.mw.iam.test.api.tokens;
 
 import static it.infn.mw.iam.api.tokens.TokensControllerSupport.APPLICATION_JSON_CONTENT_TYPE;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -100,7 +101,7 @@ public class RefreshTokenGetRevokeTests extends TestTokensUtils {
     System.out.println(remoteRt);
 
     assertThat(remoteRt.getId(), equalTo(rt.getId()));
-    assertThat(remoteRt.getValue(), equalTo(rt.getValue()));
+    assertThat(remoteRt.getValue(), nullValue());
     assertThat(remoteRt.getExpiration(), equalTo(rt.getExpiration()));
 
     assertThat(remoteRt.getClient().getId(), equalTo(client.getId()));

@@ -28,8 +28,6 @@ public class OidcProviderValidatorProperties {
   List<OidcProviderValidatorCheckProperties> checks;
   String message;
 
-  public OidcProviderValidatorProperties() {}
-
   public CombinationRule getCombinationRule() {
     return combinationRule;
   }

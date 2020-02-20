@@ -39,7 +39,7 @@ import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.model.IamScopePolicy;
-import it.infn.mw.iam.persistence.model.IamScopePolicy.Rule;
+import it.infn.mw.iam.persistence.model.PolicyRule;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamGroupRepository;
 import it.infn.mw.iam.persistence.repository.IamScopePolicyRepository;
@@ -74,7 +74,7 @@ public class IamScopePolicyRepositoryTests extends ScopePolicyTestUtils {
 
     IamScopePolicy policy = initDenyScopePolicy();
     policy.setGroup(analysisGroup);
-    policy.setRule(Rule.PERMIT);
+    policy.setRule(PolicyRule.PERMIT);
     policy.setScopes(Sets.newHashSet(SCIM_WRITE));
 
     policyRepo.save(policy);
@@ -84,7 +84,7 @@ public class IamScopePolicyRepositoryTests extends ScopePolicyTestUtils {
     assertThat(policies, hasSize(1));
     assertThat(policies.get(0).getGroup(), equalTo(analysisGroup));
     assertThat(policies.get(0).getAccount(), nullValue());
-    assertThat(policies.get(0).getRule(), equalTo(Rule.PERMIT));
+    assertThat(policies.get(0).getRule(), equalTo(PolicyRule.PERMIT));
 
     assertThat(policies.get(0).getScopes(), hasSize(1));
     assertThat(policies.get(0).getScopes(), hasItem(SCIM_WRITE));
@@ -98,7 +98,7 @@ public class IamScopePolicyRepositoryTests extends ScopePolicyTestUtils {
 
     IamScopePolicy policy = initDenyScopePolicy();
     policy.setAccount(testAccount);
-    policy.setRule(Rule.PERMIT);
+    policy.setRule(PolicyRule.PERMIT);
     policy.setScopes(Sets.newHashSet(SCIM_WRITE));
 
     policyRepo.save(policy);
@@ -109,7 +109,7 @@ public class IamScopePolicyRepositoryTests extends ScopePolicyTestUtils {
 
     assertThat(policies.get(0).getAccount(), equalTo(testAccount));
     assertThat(policies.get(0).getGroup(), nullValue());
-    assertThat(policies.get(0).getRule(), equalTo(Rule.PERMIT));
+    assertThat(policies.get(0).getRule(), equalTo(PolicyRule.PERMIT));
 
     assertThat(policies.get(0).getScopes(), hasSize(1));
     assertThat(policies.get(0).getScopes(), hasItem(SCIM_WRITE));
@@ -123,7 +123,7 @@ public class IamScopePolicyRepositoryTests extends ScopePolicyTestUtils {
 
     IamScopePolicy policy = initDenyScopePolicy();
     policy.setAccount(testAccount);
-    policy.setRule(Rule.PERMIT);
+    policy.setRule(PolicyRule.PERMIT);
     policy.setScopes(Sets.newHashSet(SCIM_WRITE));
 
     policyRepo.save(policy);
@@ -145,14 +145,14 @@ public class IamScopePolicyRepositoryTests extends ScopePolicyTestUtils {
 
     IamScopePolicy policy = initDenyScopePolicy();
     policy.setGroup(analysisGroup);
-    policy.setRule(Rule.PERMIT);
+    policy.setRule(PolicyRule.PERMIT);
     policy.setScopes(Sets.newHashSet(SCIM_WRITE));
 
     policyRepo.save(policy);
 
     IamScopePolicy policy2 = initDenyScopePolicy();
     policy2.setGroup(analysisGroup);
-    policy2.setRule(Rule.DENY);
+    policy2.setRule(PolicyRule.DENY);
     policy2.setScopes(Sets.newHashSet(WHATEVER));
 
     policyRepo.save(policy2);

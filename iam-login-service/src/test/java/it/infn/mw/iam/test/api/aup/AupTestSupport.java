@@ -23,7 +23,7 @@ import it.infn.mw.iam.test.api.TestSupport;
 public class AupTestSupport extends TestSupport{
   
   public static final String DEFAULT_AUP_NAME = "default-aup";
-  public static final String DEFAULT_AUP_TEXT = "default-aup-text";
+  public static final String DEFAULT_AUP_URL = "http://default.aup.url/";
   public static final String DEFAULT_AUP_DESC = "default-aup-desc";
 
 
@@ -32,7 +32,7 @@ public class AupTestSupport extends TestSupport{
     IamAup aup = new IamAup();
     
     aup.setName(DEFAULT_AUP_NAME);
-    aup.setText(DEFAULT_AUP_TEXT);
+    aup.setUrl(DEFAULT_AUP_URL);
     aup.setDescription(DEFAULT_AUP_DESC);
     aup.setCreationTime(now);
     aup.setLastUpdateTime(now);

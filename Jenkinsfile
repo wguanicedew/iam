@@ -25,6 +25,7 @@ pipeline {
 
   parameters {
     booleanParam(name: 'SKIP_TESTS', defaultValue: false, description: 'Skip tests')
+    booleanParam(name: 'RUN_SONAR', defaultValue: false, description: 'Runs SONAR analysis')
     booleanParam(name: 'SKIP_DOCKER', defaultValue: false, description: 'Skip docker image creation')
     booleanParam(name: 'PUSH_TO_DOCKERHUB', defaultValue: false, description: 'Push to Dockerhub')
   }
@@ -80,9 +81,33 @@ pipeline {
           }
         }
 
+        stage('Tests (no Sonar analysis)') {
+          when{
+            allOf{
+              not {
+                triggeredBy 'TimerTrigger'
+              }
+              not {
+                expression { return params.RUN_SONAR }
+              }
+              not {
+                expression { return params.SKIP_TESTS }
+              }
+            }
+          }
+
+          steps {
+            sh 'mvn test'
+          }
+        }
+
         stage('PR analysis'){
           when{
             allOf{
+              anyOf {
+                triggeredBy 'TimerTrigger'
+                expression { return params.RUN_SONAR }
+              }
               expression{ env.CHANGE_URL }
               not {
                 expression { return params.SKIP_TESTS }
@@ -131,12 +156,17 @@ pipeline {
 
           when{
             allOf{
+              anyOf {
+                triggeredBy 'TimerTrigger'
+                expression { return params.RUN_SONAR }
+              }
               expression{ !env.CHANGE_URL }
               not {
                 expression { return params.SKIP_TESTS }
               }
             }
           }
+
 
           steps {
             script{
@@ -172,8 +202,14 @@ pipeline {
         stage('quality-gate') {
 
           when{
-            not {
-              expression { return params.SKIP_TESTS }
+            allOf{
+              anyOf {
+                triggeredBy 'TimerTrigger'
+                expression { return params.RUN_SONAR }
+              }
+              not {
+                expression { return params.SKIP_TESTS }
+              }
             }
           }
 

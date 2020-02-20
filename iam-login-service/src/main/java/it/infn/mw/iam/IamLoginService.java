@@ -32,7 +32,7 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import it.infn.mw.iam.core.IamBanner;
+import it.infn.mw.iam.core.util.IamBanner;
 
 @SpringBootApplication
 @EnableTransactionManagement

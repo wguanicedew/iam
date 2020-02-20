@@ -15,9 +15,7 @@
  */
 package it.infn.mw.iam.authn.common.config;
 
-import it.infn.mw.iam.authn.common.ValidatorError;
-
 @FunctionalInterface
 public interface AuthenticationValidator<T> {
-  void validateAuthentication(T authentication) throws ValidatorError;
+  void validateAuthentication(T authentication);
 }

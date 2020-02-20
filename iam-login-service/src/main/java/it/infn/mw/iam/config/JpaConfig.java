@@ -64,6 +64,7 @@ public class JpaConfig extends JpaBaseConfiguration {
     }
 
     if (System.getProperty("iam.generate-ddl-sql-script") != null) {
+      map.put("eclipselink.logging.level", "FINE");
       map.put("eclipselink.ddl-generation.output-mode", "sql-script");
       map.put("eclipselink.ddl-generation", "create-tables");
       map.put("eclipselink.create-ddl-jdbc-file-name", "ddl.sql");

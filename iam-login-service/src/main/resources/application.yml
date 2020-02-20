@@ -26,6 +26,9 @@ server:
       pattern: "%{X-Forwarded-For}i %l %u %t \"%r\" %s %b"
 
   use-forward-headers: ${IAM_USE_FORWARDED_HEADERS:false}
+  
+  session:
+    timeout: ${IAM_SESSION_TIMEOUT_SECS:1800}
 
 spring: 
   profiles:
@@ -51,6 +54,12 @@ iam:
   issuer: ${IAM_ISSUER:http://${iam.host}:8080}
   topbarTitle: ${IAM_TOPBAR_TITLE:INDIGO IAM for ${iam.organisation.name}}
   
+  jwk:
+    keystore-location: ${IAM_KEY_STORE_LOCATION:classpath:keystore.jwks}
+    
+  jwt-profile:
+    default-profile: ${IAM_JWT_DEFAULT_PROFILE:iam}
+  
   logo:
     url: ${IAM_LOGO_URL:resources/images/indigo-logo.png}
     dimension: ${IAM_LOGO_DIMENSION:200}
@@ -63,8 +72,6 @@ iam:
 
   organisation:
     name: ${IAM_ORGANISATION_NAME:indigo-dc}
-
-  keyStoreLocation: ${IAM_KEY_STORE_LOCATION:classpath:keystore.jwks}
   
   privacyPolicy:
     url: ${IAM_PRIVACY_POLICY_URL:}
@@ -87,6 +94,9 @@ iam:
   local-resources:
     enable: ${IAM_LOCAL_RESOURCES_ENABLE:false}
     location: ${IAM_LOCAL_RESOURCES_LOCATION:file:/indigo-iam/local-resources}
+  
+  device-code:
+    allow-complete-verification-uri: ${IAM_DEVICE_CODE_ALLOW_COMPLETE_VERIFICATION_URI:true}
     
 x509:
   trustAnchorsDir: ${IAM_X509_TRUST_ANCHORS_DIR:/etc/grid-security/certificates}

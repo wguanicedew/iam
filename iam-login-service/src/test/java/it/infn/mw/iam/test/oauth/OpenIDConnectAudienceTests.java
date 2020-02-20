@@ -15,6 +15,7 @@
  */
 package it.infn.mw.iam.test.oauth;
 
+import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.startsWith;
@@ -162,5 +163,76 @@ public class OpenIDConnectAudienceTests {
     assertThat(idTokenClaims.getAudience().size(), equalTo(1));
     assertThat(idTokenClaims.getAudience(), contains(TEST_CLIENT_ID));
 
+  }
+  
+  @Test
+  public void testOidcAuthorizationRequestWithMultipleAudiences() throws Exception {
+
+    User testUser = new User(TEST_USER_ID, TEST_USER_PASSWORD,
+        commaSeparatedStringToAuthorityList("ROLE_USER"));
+
+    MockHttpSession session = (MockHttpSession) mvc
+      .perform(get(AUTHORIZATION_ENDPOINT).param("response_type", RESPONSE_TYPE_CODE)
+        .param("client_id", TEST_CLIENT_ID)
+        .param("redirect_uri", TEST_CLIENT_REDIRECT_URI)
+        .param("scope", SCOPE)
+        .param("nonce", "1")
+        .param("state", "1")
+        .param("aud", "aud1 aud2 aud3")
+        .with(SecurityMockMvcRequestPostProcessors.user(testUser)))
+      .andExpect(status().isOk())
+      .andExpect(forwardedUrl("/oauth/confirm_access"))
+      .andReturn()
+      .getRequest()
+      .getSession();
+
+    MvcResult result = mvc
+      .perform(post("/authorize").session(session)
+        .param("user_oauth_approval", "true")
+        .param("scope_openid", "openid")
+        .param("scope_profile", "profile")
+        .param("authorize", "Authorize")
+        .param("remember", "none")
+        .with(csrf()))
+      .andExpect(status().is3xxRedirection())
+      .andReturn();
+
+    String redirectUrl = result.getResponse().getRedirectedUrl();
+    session = (MockHttpSession) result.getRequest().getSession();
+
+    assertThat(redirectUrl, startsWith(TEST_CLIENT_REDIRECT_URI));
+    UriComponents redirectUri = UriComponentsBuilder.fromUri(new URI(redirectUrl)).build();
+    String code = redirectUri.getQueryParams().getFirst("code");
+
+    String tokenResponse = mvc
+      .perform(post("/token").param("grant_type", "authorization_code")
+        .param("code", code)
+        .param("redirect_uri", TEST_CLIENT_REDIRECT_URI)
+        .with(SecurityMockMvcRequestPostProcessors.httpBasic(TEST_CLIENT_ID, TEST_CLIENT_SECRET)))
+      .andExpect(status().isOk())
+      .andReturn()
+      .getResponse()
+      .getContentAsString();
+
+    TokenResponse response = objectMapper.readValue(tokenResponse, TokenResponse.class);
+
+    response.getAccessToken();
+
+    JWT token = JWTParser.parse(response.getAccessToken());
+    JWTClaimsSet claims = token.getJWTClaimsSet();
+
+    assertNotNull(claims.getAudience());
+    assertThat(claims.getAudience().size(), equalTo(3));
+    
+    assertThat(claims.getAudience(), hasItem("aud1"));
+    assertThat(claims.getAudience(), hasItem("aud2"));
+    assertThat(claims.getAudience(), hasItem("aud3"));
+
+    JWT idToken = JWTParser.parse(response.getIdToken());
+
+    JWTClaimsSet idTokenClaims = idToken.getJWTClaimsSet();
+    assertNotNull(idTokenClaims.getAudience());
+    assertThat(idTokenClaims.getAudience().size(), equalTo(1));
+    assertThat(idTokenClaims.getAudience(), contains(TEST_CLIENT_ID));
   }
 }

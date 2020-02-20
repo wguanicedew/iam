@@ -1,18 +1,21 @@
-version: '2'
+version: '3.5'
+
+volumes:
+  db_data:
+  trust:
 
 services:
 
   db_data:
     image: busybox
     volumes:
-      - /var/lib/mysql
+      - db_data:/var/lib/mysql
     command: /bin/true
 
   db:
-    container_name: mariadb
-    image: mariadb
-    volumes_from:
-      - db_data
+    image: ${DB_IMAGE}
+    volumes:
+      - db_data:/var/lib/mysql
 
     # The setting below enables custom configuration
     # that turns on the MySQL query log
@@ -35,7 +38,7 @@ services:
     #  context: ./docker/trust-anchors
     command: /bin/true
     volumes:
-      - /etc/grid-security/certificates
+      - trust:/etc/grid-security/certificates
 
   iam-be:
     container_name: iam-be
@@ -49,7 +52,7 @@ services:
       IAM_JAR: /code/iam-login-service/target/iam-login-service.war
       IAM_HOST: iam.local.io
       IAM_BASE_URL: https://iam.local.io
-      IAM_ISSUER: https://iam.local.io
+      IAM_ISSUER: https://iam.local.io/
       IAM_USE_FORWARDED_HEADERS: "true"
       IAM_NOTIFICATION_DISABLE: "true"
 
@@ -63,14 +66,16 @@ services:
       IAM_IAM_TEST_CLIENT_ID: ${IAM_IAM_TEST_CLIENT_ID}
       IAM_IAM_TEST_CLIENT_SECRET: ${IAM_IAM_TEST_CLIENT_SECRET}
 
+      IAM_JWT_DEFAULT_PROFILE: wlcg
+
       # IAM_SAML_IDP_METADATA: file:///code/compose/metadata/test-idp.cloud.cnaf.infn.it.metadata.xml 
       # IAM_SAML_ENTITY_ID: urn:iam:iam-devel
       # IAM_SAML_ENTITY_ID: https://iam.local.io
       
-      IAM_RCAUTH_ENABLED: "false"
-      IAM_RCAUTH_CLIENT_ID: ${IAM_RCAUTH_CLIENT_ID}
-      IAM_RCAUTH_CLIENT_SECRET: ${IAM_RCAUTH_CLIENT_SECRET}
-      IAM_RCAUTH_ISSUER: ${IAM_RCAUTH_ISSUER}
+      # IAM_RCAUTH_ENABLED: "false"
+      # IAM_RCAUTH_CLIENT_ID: ${IAM_RCAUTH_CLIENT_ID}
+      # IAM_RCAUTH_CLIENT_SECRET: ${IAM_RCAUTH_CLIENT_SECRET}
+      # IAM_RCAUTH_ISSUER: ${IAM_RCAUTH_ISSUER}
 
     ports:
       - "1044:1044"
@@ -78,16 +83,14 @@ services:
     depends_on:
       - db
 
-    volumes_from:
-      - trust
-
     volumes:
+      - trust:/etc/grid-security/certificates
       - .:/code:ro
       - /dev/urandom:/dev/random
-      - ./compose/metadata/iam.local.io.metadata.xml:/indigo-iam/iam.local.io.metadata.xml:ro
-      - ./compose/metadata/spid-idp.example.metadata.xml:/indigo-iam/spid-idp.example.metadata.xml:ro
-      - ./compose/custom-saml/application-saml.yml:/indigo-iam/config/application-saml.yml:ro
-      #- ./compose/multiple-oidc-providers/application.yml:/indigo-iam/config/application.yml
+        # - ./compose/metadata/iam.local.io.metadata.xml:/indigo-iam/iam.local.io.metadata.xml:ro
+        # - ./compose/metadata/spid-idp.example.metadata.xml:/indigo-iam/spid-idp.example.metadata.xml:ro
+        # - ./compose/custom-saml/application-saml.yml:/indigo-iam/config/application-saml.yml:ro
+        # - ./compose/multiple-oidc-providers/application.yml:/indigo-iam/config/application.yml
 
   client:
     build:
@@ -111,10 +114,8 @@ services:
     ports:
       - "1045:1045"
 
-    volumes_from:
-      - trust
-
     volumes:
+      - trust:/etc/grid-security/certificates
       - .:/code:ro
 
   iam:

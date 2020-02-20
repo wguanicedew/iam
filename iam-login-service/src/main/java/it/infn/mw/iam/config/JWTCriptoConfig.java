@@ -19,21 +19,24 @@ import org.mitre.jose.keystore.JWKSetKeyStore;
 import org.mitre.jwt.encryption.service.impl.DefaultJWTEncryptionAndDecryptionService;
 import org.mitre.jwt.signer.service.impl.DefaultJWTSigningAndValidationService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ResourceLoader;
 
 import com.nimbusds.jose.JWEAlgorithm;
+import com.nimbusds.jose.JWSAlgorithm;
 
 import it.infn.mw.iam.config.error.IAMJWTKeystoreError;
 import it.infn.mw.iam.util.JWKKeystoreLoader;
 
 @Configuration
 public class JWTCriptoConfig {
+  
+  public static final String DEFAULT_JWK_SIGN_ALGO = JWSAlgorithm.RS256.getName();
+  public static final JWEAlgorithm DEFAULT_JWE_ENC_ALGO = JWEAlgorithm.RSA_OAEP_256;
 
-  @Value("${iam.keyStoreLocation}")
-  String keyStoreLocation;
+  @Autowired
+  IamProperties iamProperties;
 
   @Autowired
   ResourceLoader resourceLoader;
@@ -45,7 +48,7 @@ public class JWTCriptoConfig {
 
   @Bean(name = "defaultKeyStore")
   public JWKSetKeyStore defaultKeyStore(JWKKeystoreLoader loader) {
-    return loader.loadKeystoreFromLocation(keyStoreLocation);
+    return loader.loadKeystoreFromLocation(iamProperties.getJwk().getKeystoreLocation());
   }
 
   @Bean(name = "defaultsignerService")
@@ -53,8 +56,8 @@ public class JWTCriptoConfig {
     try {
       DefaultJWTSigningAndValidationService signerService =
           new DefaultJWTSigningAndValidationService(keystore);
-      signerService.setDefaultSignerKeyId("rsa1");
-      signerService.setDefaultSigningAlgorithmName("RS256");
+      signerService.setDefaultSignerKeyId(iamProperties.getJwk().getDefaultKeyId());
+      signerService.setDefaultSigningAlgorithmName(DEFAULT_JWK_SIGN_ALGO);
       return signerService;
     } catch (Exception e) {
       throw new IAMJWTKeystoreError("Error creating JWT signing and validation service", e);
@@ -68,9 +71,9 @@ public class JWTCriptoConfig {
     try {
       DefaultJWTEncryptionAndDecryptionService encryptionService =
           new DefaultJWTEncryptionAndDecryptionService(keystore);
-      encryptionService.setDefaultAlgorithm(JWEAlgorithm.RSA1_5);
-      encryptionService.setDefaultDecryptionKeyId("rsa1");
-      encryptionService.setDefaultEncryptionKeyId("rsa1");
+      encryptionService.setDefaultAlgorithm(DEFAULT_JWE_ENC_ALGO);
+      encryptionService.setDefaultDecryptionKeyId(iamProperties.getJwk().getDefaultKeyId());
+      encryptionService.setDefaultEncryptionKeyId(iamProperties.getJwk().getDefaultKeyId());
       return encryptionService;
     } catch (Exception e) {
       throw new IAMJWTKeystoreError("Error creating JWT encryption/decription service", e);

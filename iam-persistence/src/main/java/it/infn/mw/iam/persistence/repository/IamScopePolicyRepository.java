@@ -25,6 +25,7 @@ import org.springframework.data.repository.query.Param;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.model.IamScopePolicy;
+import it.infn.mw.iam.persistence.model.PolicyRule;
 
 public interface IamScopePolicyRepository
     extends PagingAndSortingRepository<IamScopePolicy, Long>, IamScopePolicyRepositoryCustom {
@@ -33,18 +34,18 @@ public interface IamScopePolicyRepository
   List<IamScopePolicy> findDefaultPolicies();
 
   @Query("select s from IamScopePolicy s where s.group is null and s.account is null and s.rule = :rule")
-  List<IamScopePolicy> findDefaultPoliciesByRule(@Param("rule") IamScopePolicy.Rule rule);
+  List<IamScopePolicy> findDefaultPoliciesByRule(@Param("rule") PolicyRule rule);
 
   @Query("select s from IamScopePolicy s join s.scopes ss where ss = :scope")
   List<IamScopePolicy> findByScope(@Param("scope") String scope);
 
   List<IamScopePolicy> findByGroup(IamGroup group);
 
-  List<IamScopePolicy> findByGroupAndRule(IamGroup group, IamScopePolicy.Rule rule);
+  List<IamScopePolicy> findByGroupAndRule(IamGroup group, PolicyRule rule);
 
   List<IamScopePolicy> findByAccount(IamAccount account);
 
-  List<IamScopePolicy> findByAccountAndRule(IamAccount account, IamScopePolicy.Rule rule);
+  List<IamScopePolicy> findByAccountAndRule(IamAccount account, PolicyRule rule);
 
   Optional<IamScopePolicy> findById(Long id);
 }

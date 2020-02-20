@@ -15,6 +15,7 @@
  */
 package it.infn.mw.iam.config.oidc;
 
+import java.time.Clock;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -71,6 +72,7 @@ import it.infn.mw.iam.authn.oidc.RestTemplateFactory;
 import it.infn.mw.iam.authn.oidc.service.DefaultOidcUserDetailsService;
 import it.infn.mw.iam.authn.oidc.service.NullClientConfigurationService;
 import it.infn.mw.iam.authn.oidc.service.OidcUserDetailsService;
+import it.infn.mw.iam.authn.util.SessionTimeoutHelper;
 import it.infn.mw.iam.core.IamThirdPartyIssuerService;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
@@ -164,12 +166,13 @@ public class OidcConfiguration {
   }
 
   @Bean
-  public OIDCAuthenticationProvider openIdConnectAuthenticationProvider(
+  public OIDCAuthenticationProvider openIdConnectAuthenticationProvider(Clock clock,
       OidcUserDetailsService userDetailService, UserInfoFetcher userInfoFetcher,
-      AuthenticationValidator<OIDCAuthenticationToken> validator) {
+      AuthenticationValidator<OIDCAuthenticationToken> validator, SessionTimeoutHelper timeoutHelper) {
 
     OidcAuthenticationProvider provider =
-        new OidcAuthenticationProvider(userDetailService, validator);
+        new OidcAuthenticationProvider(userDetailService, validator, timeoutHelper);
+    
     provider.setUserInfoFetcher(userInfoFetcher);
 
     return provider;

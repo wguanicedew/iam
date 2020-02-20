@@ -15,12 +15,22 @@
  */
 package it.infn.mw.iam.api.scope_policy.validation;
 
+import static it.infn.mw.iam.persistence.model.IamScopePolicy.MatchingPolicy.PATH;
+import static it.infn.mw.iam.persistence.model.IamScopePolicy.MatchingPolicy.REGEXP;
+import static java.util.Objects.isNull;
+
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 import it.infn.mw.iam.api.scope_policy.ScopePolicyDTO;
 
 public class ScopePolicyValidator implements ConstraintValidator<ScopePolicy, ScopePolicyDTO> {
+
+  private static final String EMPTY_SCOPE_MSG =
+      "{it.infn.mw.iam.api.scope_policy.validation.ScopePolicyValidator.emptyScope.message}";
+  
+  private static final String NULL_MATCHING_POLICY_MSG =
+      "{it.infn.mw.iam.api.scope_policy.validation.ScopePolicyValidator.nullMatchingPolicy.message}";
 
   public ScopePolicyValidator() {
     // empty
@@ -31,10 +41,30 @@ public class ScopePolicyValidator implements ConstraintValidator<ScopePolicy, Sc
     // empty
   }
 
+  private boolean isValidMatchingPolicy(ScopePolicyDTO value, ConstraintValidatorContext context) {
+    
+    if (isNull(value.getMatchingPolicy())){
+      context.disableDefaultConstraintViolation();
+      context.buildConstraintViolationWithTemplate(NULL_MATCHING_POLICY_MSG).addConstraintViolation();
+      return false;
+    }
+    
+    if ((value.getMatchingPolicy().equals(PATH.name())
+        || value.getMatchingPolicy().equals(REGEXP.name()))
+        && (isNull(value.getScopes()) || value.getScopes().isEmpty())) {
+
+      context.disableDefaultConstraintViolation();
+      context.buildConstraintViolationWithTemplate(EMPTY_SCOPE_MSG).addConstraintViolation();
+      return false;
+    }
+
+    return true;
+  }
+
   @Override
   public boolean isValid(ScopePolicyDTO value, ConstraintValidatorContext context) {
-    
-    return !(value == null || (value.getAccount() != null && value.getGroup() != null));
+    boolean nullChecks = !(value == null || (value.getAccount() != null && value.getGroup() != null));
+    return nullChecks && isValidMatchingPolicy(value, context);
   }
 
 }

@@ -24,7 +24,8 @@ import it.infn.mw.iam.api.scim.converter.ScimResourceLocationProvider;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.model.IamScopePolicy;
-import it.infn.mw.iam.persistence.model.IamScopePolicy.Rule;
+import it.infn.mw.iam.persistence.model.IamScopePolicy.MatchingPolicy;
+import it.infn.mw.iam.persistence.model.PolicyRule;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamGroupRepository;
 
@@ -51,6 +52,7 @@ public class DefaultScopePolicyConverter implements IamScopePolicyConverter {
     dto.setLastUpdateTime(sp.getLastUpdateTime());
     dto.setDescription(sp.getDescription());
     dto.setRule(sp.getRule().name());
+    dto.setMatchingPolicy(sp.getMatchingPolicy().name());
 
     if (!sp.getScopes().isEmpty()) {
       dto.setScopes(Sets.newHashSet());
@@ -86,7 +88,8 @@ public class DefaultScopePolicyConverter implements IamScopePolicyConverter {
     IamScopePolicy scopePolicy = new IamScopePolicy();
 
     scopePolicy.setDescription(sp.getDescription());
-    scopePolicy.setRule(Rule.valueOf(sp.getRule()));
+    scopePolicy.setRule(PolicyRule.valueOf(sp.getRule()));
+    scopePolicy.setMatchingPolicy(MatchingPolicy.valueOf(sp.getMatchingPolicy()));
 
     if (sp.getScopes() != null) {
       scopePolicy.getScopes().addAll(sp.getScopes());

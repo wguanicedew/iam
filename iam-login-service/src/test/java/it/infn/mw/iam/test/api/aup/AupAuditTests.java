@@ -71,6 +71,8 @@ import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 @WithAnonymousUser
 public class AupAuditTests extends AupTestSupport {
 
+  private final String UPDATED_AUP_URL = "http://updated-aup.org/";
+
   @Autowired
   private WebApplicationContext context;
 
@@ -157,7 +159,7 @@ public class AupAuditTests extends AupTestSupport {
     IamAup aup = buildDefaultAup();
     aupRepo.saveDefaultAup(aup);
 
-    aup.setText("Updated aup text");
+    aup.setUrl(UPDATED_AUP_URL);
 
     // Time travel 1 minute in the future
     Date then = new Date(now.getTime() + TimeUnit.MINUTES.toMillis(1));

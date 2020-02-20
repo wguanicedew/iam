@@ -46,7 +46,7 @@ public class DefaultOidcTokenValidator
 
 
   @Override
-  public void validateAuthentication(OIDCAuthenticationToken token) throws ValidatorError {
+  public void validateAuthentication(OIDCAuthenticationToken token) {
 
     Optional<ValidatorCheck<JWT>> checks = resolver.resolveChecks(token.getIssuer());
 

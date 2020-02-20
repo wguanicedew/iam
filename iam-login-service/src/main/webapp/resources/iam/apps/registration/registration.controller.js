@@ -19,10 +19,10 @@ angular.module('registrationApp').controller('RegistrationController',
     RegistrationController);
 
 RegistrationController.$inject = ['$scope', '$q', '$window', '$cookies',
-    'RegistrationRequestService', 'AuthnInfo', 'Aup'
+    'RegistrationRequestService', 'AuthnInfo', 'Aup', 'PrivacyPolicy'
 ];
 
-function RegistrationController($scope, $q, $window, $cookies, RegistrationRequestService, AuthnInfo, Aup) {
+function RegistrationController($scope, $q, $window, $cookies, RegistrationRequestService, AuthnInfo, Aup, PrivacyPolicy) {
 
     var vm = this;
     var EXT_AUTHN_ROLE = 'ROLE_EXT_AUTH_UNREGISTERED';
@@ -32,6 +32,8 @@ function RegistrationController($scope, $q, $window, $cookies, RegistrationReque
 
     $scope.textAlert = undefined;
     $scope.operationResult = undefined;
+
+    $scope.privacyPolicy = undefined;
 
     $scope.busy = false;
 
@@ -53,12 +55,17 @@ function RegistrationController($scope, $q, $window, $cookies, RegistrationReque
         vm.populateRequest();
         Aup.getAup().then(function (res) {
             if (res != null) {
-                $scope.aup = res.data.text;
+                $scope.aup = res.data;
             }
         }).catch(function (res) {
             console.error("Error getting AUP : " +
                 res.status + " " + res.statusText);
         });
+        PrivacyPolicy.getPrivacyPolicy().then(function (res) {
+            $scope.privacyPolicy = res;
+        }).catch(function (res) {
+            console.error("Error fetching privacy policy: " + res.status + " " + res.statusText);
+        })
     }
 
     function userIsExternallyAuthenticated() {

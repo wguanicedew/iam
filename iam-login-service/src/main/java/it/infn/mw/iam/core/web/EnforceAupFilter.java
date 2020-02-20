@@ -45,6 +45,7 @@ public class EnforceAupFilter implements Filter {
 
   public static final Logger LOG = LoggerFactory.getLogger(EnforceAupFilter.class);
 
+  public static final String AUP_API_PATH = "/iam/aup";
   public static final String AUP_SIGN_PATH = "/iam/aup/sign";
   public static final String SIGN_AUP_JSP = "signAup.jsp";
 
@@ -83,7 +84,9 @@ public class EnforceAupFilter implements Filter {
 
     HttpSession session = req.getSession(false);
 
-    if (!accountUtils.isAuthenticated() || isNull(session)) {
+    String requestURL = req.getRequestURL().toString();
+
+    if (!accountUtils.isAuthenticated() || isNull(session) || requestURL.endsWith(AUP_API_PATH)) {
       chain.doFilter(request, response);
       return;
     }
@@ -96,7 +99,6 @@ public class EnforceAupFilter implements Filter {
     }
 
     if (!isNull(session.getAttribute(REQUESTING_SIGNATURE))) {
-      String requestURL = req.getRequestURL().toString();
       if (requestURL.endsWith(AUP_SIGN_PATH) || requestURL.endsWith(SIGN_AUP_JSP)) {
         chain.doFilter(request, response);
         return;
