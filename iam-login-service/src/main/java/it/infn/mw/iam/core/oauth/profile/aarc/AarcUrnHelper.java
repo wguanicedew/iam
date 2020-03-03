@@ -15,7 +15,7 @@
  */
 package it.infn.mw.iam.core.oauth.profile.aarc;
 
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
@@ -30,12 +30,12 @@ public class AarcUrnHelper {
   @Value("${iam.organisation.name}")
   String organisationName;
 
-  @Value("${iam.urn.namespace")
+  @Value("${iam.urn.namespace}")
   String namespace;
 
   public Set<String> resolveGroups(Set<IamGroup> iamGroups) {
 
-    Set<String> encodedGroups = Collections.emptySet();
+    Set<String> encodedGroups = new HashSet<>();
     iamGroups.forEach(g -> encodedGroups.add(encodeGroup(g)));
     return encodedGroups;
   }
@@ -44,8 +44,6 @@ public class AarcUrnHelper {
 
     StringBuilder urn = new StringBuilder();
     urn.append("urn:" + namespace + ":group:");
-    urn.append(group.getName());
-    urn.append(":");
 
     StringBuilder groupHierarchy = new StringBuilder(group.getName());
     Optional<IamGroup> parent = Optional.ofNullable(group.getParentGroup());
