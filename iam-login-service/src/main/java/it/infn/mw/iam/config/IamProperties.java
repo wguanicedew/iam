@@ -230,6 +230,20 @@ public class IamProperties {
     }
   }
 
+  public static class Urn {
+
+    private String namespace = "geant:iam";
+
+    public String getNamespace() {
+      return namespace;
+    }
+
+    public void setNamespace(String namespace) {
+      this.namespace = namespace;
+    }
+
+  }
+
   private String host;
 
   private String issuer;
@@ -263,6 +277,8 @@ public class IamProperties {
   private DeviceCodeProperties deviceCode = new DeviceCodeProperties();
 
   private boolean generateDdlSqlScript = false;
+
+  private Urn urn = new Urn();
 
   public String getBaseUrl() {
     return baseUrl;
@@ -398,5 +414,13 @@ public class IamProperties {
 
   public boolean isGenerateDdlSqlScript() {
     return generateDdlSqlScript;
+  }
+
+  public Urn getUrn() {
+    return urn;
+  }
+
+  public void setUrn(Urn urn) {
+    this.urn = urn;
   }
 }

@@ -55,6 +55,12 @@ import it.infn.mw.iam.core.oauth.profile.IamTokenEnhancer;
 import it.infn.mw.iam.core.oauth.profile.JWTProfile;
 import it.infn.mw.iam.core.oauth.profile.JWTProfileResolver;
 import it.infn.mw.iam.core.oauth.profile.ScopeAwareProfileResolver;
+import it.infn.mw.iam.core.oauth.profile.aarc.AarcUrnHelper;
+import it.infn.mw.iam.core.oauth.profile.aarc.AarcJWTProfile;
+import it.infn.mw.iam.core.oauth.profile.aarc.AarcJWTProfileAccessTokenBuilder;
+import it.infn.mw.iam.core.oauth.profile.aarc.AarcJWTProfileIdTokenCustomizer;
+import it.infn.mw.iam.core.oauth.profile.aarc.AarcJWTProfileTokenIntrospectionHelper;
+import it.infn.mw.iam.core.oauth.profile.aarc.AarcJWTProfileUserinfoHelper;
 import it.infn.mw.iam.core.oauth.profile.common.BaseIntrospectionHelper;
 import it.infn.mw.iam.core.oauth.profile.iam.ClaimValueHelper;
 import it.infn.mw.iam.core.oauth.profile.iam.IamJWTProfile;
@@ -122,6 +128,23 @@ public class IamConfig {
     }
   }
 
+  @Bean(name = "aarcJwtProfile")
+  JWTProfile aarcJwtProfile(IamProperties props, IamAccountRepository accountRepo,
+      AarcUrnHelper aarcUrnHelper, UserInfoService userInfoService, ScopeMatcherRegistry registry) {
+    AarcJWTProfileAccessTokenBuilder atBuilder =
+        new AarcJWTProfileAccessTokenBuilder(props, aarcUrnHelper);
+
+    AarcJWTProfileUserinfoHelper uiHelper =
+        new AarcJWTProfileUserinfoHelper(props, userInfoService, aarcUrnHelper);
+
+    AarcJWTProfileIdTokenCustomizer idHelper =
+        new AarcJWTProfileIdTokenCustomizer(accountRepo, aarcUrnHelper);
+
+    BaseIntrospectionHelper intrHelper = new AarcJWTProfileTokenIntrospectionHelper(props,
+        new DefaultIntrospectionResultAssembler(), registry, aarcUrnHelper);
+
+    return new AarcJWTProfile(atBuilder, idHelper, uiHelper, intrHelper);
+  }
 
   @Bean(name = "iamJwtProfile")
   JWTProfile iamJwtProfile(IamProperties props, IamAccountRepository accountRepo,
