@@ -15,6 +15,7 @@
  */
 package it.infn.mw.iam.config;
 
+import static it.infn.mw.iam.core.oauth.profile.ScopeAwareProfileResolver.AARC_PROFILE_ID;
 import static it.infn.mw.iam.core.oauth.profile.ScopeAwareProfileResolver.IAM_PROFILE_ID;
 import static it.infn.mw.iam.core.oauth.profile.ScopeAwareProfileResolver.WLCG_PROFILE_ID;
 
@@ -178,7 +179,8 @@ public class IamConfig {
 
   @Bean
   JWTProfileResolver jwtProfileResolver(@Qualifier("iamJwtProfile") JWTProfile iamProfile,
-      @Qualifier("wlcgJwtProfile") JWTProfile wlcgProfile, IamProperties properties,
+      @Qualifier("wlcgJwtProfile") JWTProfile wlcgProfile,
+      @Qualifier("aarcJwtProfile") JWTProfile aarcProfile, IamProperties properties,
       ClientDetailsService clientDetailsService) {
 
     JWTProfile defaultProfile = iamProfile;
@@ -188,9 +190,15 @@ public class IamConfig {
       defaultProfile = wlcgProfile;
     }
 
+    if (it.infn.mw.iam.config.IamProperties.JWTProfile.Profile.AARC
+      .equals(properties.getJwtProfile().getDefaultProfile())) {
+      defaultProfile = aarcProfile;
+    }
+
     Map<String, JWTProfile> profileMap = Maps.newHashMap();
     profileMap.put(IAM_PROFILE_ID, iamProfile);
     profileMap.put(WLCG_PROFILE_ID, wlcgProfile);
+    profileMap.put(AARC_PROFILE_ID, aarcProfile);
 
     LOG.info("Default JWT profile: {}", defaultProfile.name());
     return new ScopeAwareProfileResolver(defaultProfile, profileMap, clientDetailsService);
