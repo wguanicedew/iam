@@ -2,7 +2,7 @@
 
 ## 1.6.0 (???)
 
-## 1.5.0 (???)
+## 1.5.0 (2019-10-25)
 
 ### Added
 
@@ -57,8 +57,10 @@
 - The `updated_at` user info claim is now correctly encoded as an epoch second
   (#272)
 
-- IAM now defaults to transient NameID (#291)
+- IAM now defaults to transient NameID in SAML authentication requests (#291)
 
+- A bug in email validation that prevented the use of certain email addresses
+  during registration has been fixed (#302)
 
 ## 1.4.0 (2018-05-18)
 
