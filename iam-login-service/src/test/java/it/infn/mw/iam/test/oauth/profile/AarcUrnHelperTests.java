@@ -49,7 +49,7 @@ import it.infn.mw.iam.test.core.CoreControllerTestSupport;
   "iam.urn.namespace=geant:iam:test",
   // @formatter:on
 })
-public class AarcUrnHelperTest {
+public class AarcUrnHelperTests {
 
 
   @Autowired
