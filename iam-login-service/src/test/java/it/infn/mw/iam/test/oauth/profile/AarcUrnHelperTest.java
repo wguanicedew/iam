@@ -18,7 +18,10 @@ package it.infn.mw.iam.test.oauth.profile;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
 
@@ -35,6 +38,7 @@ import com.google.common.collect.Sets;
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.core.oauth.profile.aarc.AarcUrnHelper;
 import it.infn.mw.iam.persistence.model.IamGroup;
+import it.infn.mw.iam.persistence.model.IamUserInfo;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -51,9 +55,11 @@ public class AarcUrnHelperTest {
   @Autowired
   AarcUrnHelper helper;
 
+  IamUserInfo userInfo = mock(IamUserInfo.class);
+
   @Before
   public void setup() {
-
+    when(userInfo.getGroups()).thenReturn(Collections.emptySet());
   }
 
   protected IamGroup buildGroup(String name) {
@@ -78,8 +84,9 @@ public class AarcUrnHelperTest {
     String s = "urn:geant:iam:test:group:test#org";
 
     IamGroup g = buildGroup("test");
+    when(userInfo.getGroups()).thenReturn(Sets.newHashSet(g));
 
-    Set<String> urns = helper.resolveGroups(Sets.newHashSet(g));
+    Set<String> urns = helper.resolveGroups(userInfo);
     assertThat(urns, hasSize(1));
     assertThat(urns, hasItem(s));
   }
@@ -92,8 +99,9 @@ public class AarcUrnHelperTest {
 
     IamGroup parent = buildGroup("parent");
     IamGroup child = buildGroup("child", parent);
+    when(userInfo.getGroups()).thenReturn(Sets.newHashSet(parent, child));
 
-    Set<String> urns = helper.resolveGroups(Sets.newHashSet(parent, child));
+    Set<String> urns = helper.resolveGroups(userInfo);
     assertThat(urns, hasSize(2));
     assertThat(urns, hasItem(parentUrn));
     assertThat(urns, hasItem(childUrn));

@@ -60,7 +60,7 @@ public class AarcJWTProfileTokenIntrospectionHelper extends BaseIntrospectionHel
 
       if (!iamUserInfo.getGroups().isEmpty()) {
 
-        result.put(AARC_GROUPS_CLAIM_NAME, aarcUrnHelper.resolveGroups(iamUserInfo.getGroups()));
+        result.put(AARC_GROUPS_CLAIM_NAME, aarcUrnHelper.resolveGroups(iamUserInfo));
       }
     }
 

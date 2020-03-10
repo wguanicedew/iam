@@ -48,7 +48,7 @@ public class AarcJWTProfileAccessTokenBuilder extends BaseAccessTokenBuilder {
 
     if (!isNull(userInfo)) {
       Set<String> groupUrns =
-          aarcUrnHelper.resolveGroups(((UserInfoAdapter) userInfo).getUserinfo().getGroups());
+          aarcUrnHelper.resolveGroups(((UserInfoAdapter) userInfo).getUserinfo());
 
       if (!groupUrns.isEmpty()) {
         builder.claim(AARC_GROUPS_CLAIM_NAME, groupUrns);

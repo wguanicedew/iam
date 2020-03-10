@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import it.infn.mw.iam.persistence.model.IamGroup;
+import it.infn.mw.iam.persistence.model.IamUserInfo;
 
 @Component
 public class AarcUrnHelper {
@@ -33,17 +34,22 @@ public class AarcUrnHelper {
   @Value("${iam.urn.namespace}")
   String namespace;
 
-  public Set<String> resolveGroups(Set<IamGroup> iamGroups) {
+  public Set<String> resolveGroups(IamUserInfo userInfo) {
 
     Set<String> encodedGroups = new HashSet<>();
-    iamGroups.forEach(g -> encodedGroups.add(encodeGroup(g)));
+    userInfo
+      .getGroups()
+      .forEach(g -> encodedGroups.add(encodeGroup(g)));
     return encodedGroups;
   }
 
-  public String encodeGroup(IamGroup group) {
+  private String encodeGroup(IamGroup group) {
 
     StringBuilder urn = new StringBuilder();
-    urn.append("urn:" + namespace + ":group:");
+
+    urn.append("urn:");
+    urn.append(namespace);
+    urn.append(":group:");
 
     StringBuilder groupHierarchy = new StringBuilder(group.getName());
     Optional<IamGroup> parent = Optional.ofNullable(group.getParentGroup());
@@ -51,9 +57,11 @@ public class AarcUrnHelper {
       groupHierarchy.insert(0, parent.get().getName() + ":");
       parent = Optional.ofNullable(parent.get().getParentGroup());
     }
-
     urn.append(groupHierarchy.toString());
-    urn.append("#" + organisationName);
+
+    urn.append("#");
+    urn.append(organisationName);
+
     return urn.toString();
   }
 }

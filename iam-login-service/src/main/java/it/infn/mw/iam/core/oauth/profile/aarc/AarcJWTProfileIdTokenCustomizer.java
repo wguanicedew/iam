@@ -47,7 +47,7 @@ public class AarcJWTProfileIdTokenCustomizer extends BaseIdTokenCustomizer {
       .orElseThrow(() -> new UserNotFoundError(String.format("No user found for uuid %s", sub)));
     IamUserInfo info = account.getUserInfo();
 
-    idClaims.claim(AARC_GROUPS_CLAIM_NAME, aarcUrnHelper.resolveGroups(info.getGroups()));
+    idClaims.claim(AARC_GROUPS_CLAIM_NAME, aarcUrnHelper.resolveGroups(info));
   }
 
 }
