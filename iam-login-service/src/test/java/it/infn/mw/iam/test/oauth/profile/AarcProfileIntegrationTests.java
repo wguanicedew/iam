@@ -161,8 +161,29 @@ public class AarcProfileIntegrationTests extends EndpointsTestUtils {
       .andExpect(jsonPath("$." + AARC_OIDC_CLAIM_ENTITLEMENT, containsInAnyOrder(URN_GROUP_ANALYSIS, URN_GROUP_PRODUCTION)))
       .andExpect(jsonPath("$.name", equalTo("Test User")))
       .andExpect(jsonPath("$.given_name", equalTo("Test")))
+      .andExpect(jsonPath("$.family_name", equalTo("User")));
+    // @formatter:on
+  }
+
+  @Test
+  @WithMockOAuthUser(clientId = CLIENT_ID, user = USERNAME, authorities = {"ROLE_USER"},
+      scopes = {"openid profile email"})
+  public void testAarcProfileUserinfoWithEmail() throws Exception {
+
+    // @formatter:off
+    mvc.perform(get("/userinfo"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.sub").exists())
+      .andExpect(jsonPath("$.organisation_name").doesNotExist())
+      .andExpect(jsonPath("$.groups").doesNotExist())
+      .andExpect(jsonPath("$." + AARC_OIDC_CLAIM_AFFILIATION, equalTo("org")))
+      .andExpect(jsonPath("$." + AARC_OIDC_CLAIM_ENTITLEMENT, hasSize(equalTo(2))))
+      .andExpect(jsonPath("$." + AARC_OIDC_CLAIM_ENTITLEMENT, containsInAnyOrder(URN_GROUP_ANALYSIS, URN_GROUP_PRODUCTION)))
+      .andExpect(jsonPath("$.name", equalTo("Test User")))
+      .andExpect(jsonPath("$.given_name", equalTo("Test")))
       .andExpect(jsonPath("$.family_name", equalTo("User")))
-      .andExpect(jsonPath("$.email", equalTo("test@iam.test")));
+      .andExpect(jsonPath("$.email", equalTo("test@iam.test")))
+      .andExpect(jsonPath("$.email_verified", equalTo(true)));
     // @formatter:on
   }
 
