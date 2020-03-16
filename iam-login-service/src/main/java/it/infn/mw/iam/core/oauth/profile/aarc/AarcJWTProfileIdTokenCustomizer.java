@@ -15,7 +15,8 @@
  */
 package it.infn.mw.iam.core.oauth.profile.aarc;
 
-import static it.infn.mw.iam.core.oauth.profile.common.BaseAccessTokenBuilder.AARC_GROUPS_CLAIM_NAME;
+import static it.infn.mw.iam.core.oauth.profile.aarc.AarcJWTProfile.AARC_OIDC_CLAIM_AFFILIATION;
+import static it.infn.mw.iam.core.oauth.profile.aarc.AarcJWTProfile.AARC_OIDC_CLAIM_ENTITLEMENT;
 
 import org.mitre.oauth2.model.ClientDetailsEntity;
 import org.mitre.oauth2.model.OAuth2AccessTokenEntity;
@@ -47,7 +48,8 @@ public class AarcJWTProfileIdTokenCustomizer extends BaseIdTokenCustomizer {
       .orElseThrow(() -> new UserNotFoundError(String.format("No user found for uuid %s", sub)));
     IamUserInfo info = account.getUserInfo();
 
-    idClaims.claim(AARC_GROUPS_CLAIM_NAME, aarcUrnHelper.resolveGroups(info));
+    idClaims.claim(AARC_OIDC_CLAIM_AFFILIATION, aarcUrnHelper.getOrganisationName());
+    idClaims.claim(AARC_OIDC_CLAIM_ENTITLEMENT, aarcUrnHelper.resolveGroups(info));
   }
 
 }

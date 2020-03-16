@@ -15,13 +15,21 @@
  */
 package it.infn.mw.iam.test.oauth.profile;
 
-import static it.infn.mw.iam.core.oauth.profile.common.BaseAccessTokenBuilder.AARC_GROUPS_CLAIM_NAME;
+import static it.infn.mw.iam.core.oauth.profile.aarc.AarcJWTProfile.AARC_OIDC_CLAIM_AFFILIATION;
+import static it.infn.mw.iam.core.oauth.profile.aarc.AarcJWTProfile.AARC_OIDC_CLAIM_ENTITLEMENT;
 import static org.hamcrest.CoreMatchers.hasItem;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
 
@@ -47,6 +55,7 @@ import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 import it.infn.mw.iam.test.oauth.EndpointsTestUtils;
 import it.infn.mw.iam.test.util.WithAnonymousUser;
+import it.infn.mw.iam.test.util.WithMockOAuthUser;
 import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -67,6 +76,9 @@ public class AarcProfileIntegrationTests extends EndpointsTestUtils {
   private static final String USERNAME = "test";
   private static final String PASSWORD = "password";
 
+  private static final String URN_GROUP_ANALYSIS = "urn:geant:iam:test:group:Analysis#org";
+  private static final String URN_GROUP_PRODUCTION = "urn:geant:iam:test:group:Production#org";
+
   @Autowired
   private WebApplicationContext context;
 
@@ -78,7 +90,6 @@ public class AarcProfileIntegrationTests extends EndpointsTestUtils {
 
   @Before
   public void setup() {
-    oauth2Filter.cleanupSecurityContext();
     mvc =
         MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).alwaysDo(log()).build();
   }
@@ -105,11 +116,54 @@ public class AarcProfileIntegrationTests extends EndpointsTestUtils {
     JWT token = JWTParser.parse(getAccessTokenForUser("openid profile"));
 
     assertThat(token.getJWTClaimsSet().getClaim("groups"), nullValue());
-    List<String> groups = Lists.newArrayList(token.getJWTClaimsSet().getStringArrayClaim(AARC_GROUPS_CLAIM_NAME));
+    List<String> groups = Lists.newArrayList(token.getJWTClaimsSet().getStringArrayClaim(AARC_OIDC_CLAIM_ENTITLEMENT));
     assertThat(groups, hasSize(2));
-    assertThat(groups, hasItem("urn:geant:iam:test:group:Analysis#org"));
-    assertThat(groups, hasItem("urn:geant:iam:test:group:Production#org"));
+    assertThat(groups, hasItem(URN_GROUP_ANALYSIS));
+    assertThat(groups, hasItem(URN_GROUP_PRODUCTION));
 
+  }
+
+  @Test
+  @WithAnonymousUser
+  public void testAarcProfileIntrospect() throws Exception {
+    JWT token = JWTParser.parse(getAccessTokenForUser("openid profile"));
+
+    // @formatter:off
+    mvc.perform(post("/introspect")
+        .with(httpBasic(CLIENT_ID, CLIENT_SECRET))
+        .param("token", token.getParsedString()))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.active", equalTo(true)))
+      .andExpect(jsonPath("$." + AARC_OIDC_CLAIM_AFFILIATION, equalTo("org")))
+      .andExpect(jsonPath("$." + AARC_OIDC_CLAIM_ENTITLEMENT, hasSize(equalTo(2))))
+      .andExpect(jsonPath("$." + AARC_OIDC_CLAIM_ENTITLEMENT, containsInAnyOrder(URN_GROUP_ANALYSIS, URN_GROUP_PRODUCTION)))
+      .andExpect(jsonPath("$.name", equalTo("Test User")))
+      .andExpect(jsonPath("$.given_name", equalTo("Test")))
+      .andExpect(jsonPath("$.family_name", equalTo("User")))
+      .andExpect(jsonPath("$.email", equalTo("test@iam.test")));
+    // @formatter:on
+
+  }
+
+  @Test
+  @WithMockOAuthUser(clientId = CLIENT_ID, user = USERNAME, authorities = {"ROLE_USER"},
+      scopes = {"openid profile"})
+  public void testAarcProfileUserinfo() throws Exception {
+
+    // @formatter:off
+    mvc.perform(get("/userinfo"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.sub").exists())
+      .andExpect(jsonPath("$.organisation_name").doesNotExist())
+      .andExpect(jsonPath("$.groups").doesNotExist())
+      .andExpect(jsonPath("$." + AARC_OIDC_CLAIM_AFFILIATION, equalTo("org")))
+      .andExpect(jsonPath("$." + AARC_OIDC_CLAIM_ENTITLEMENT, hasSize(equalTo(2))))
+      .andExpect(jsonPath("$." + AARC_OIDC_CLAIM_ENTITLEMENT, containsInAnyOrder(URN_GROUP_ANALYSIS, URN_GROUP_PRODUCTION)))
+      .andExpect(jsonPath("$.name", equalTo("Test User")))
+      .andExpect(jsonPath("$.given_name", equalTo("Test")))
+      .andExpect(jsonPath("$.family_name", equalTo("User")))
+      .andExpect(jsonPath("$.email", equalTo("test@iam.test")));
+    // @formatter:on
   }
 
 }

@@ -15,10 +15,11 @@
  */
 package it.infn.mw.iam.core.oauth.profile.aarc;
 
+import static it.infn.mw.iam.core.oauth.profile.aarc.AarcJWTProfile.AARC_OIDC_CLAIM_AFFILIATION;
+import static it.infn.mw.iam.core.oauth.profile.aarc.AarcJWTProfile.AARC_OIDC_CLAIM_ENTITLEMENT;
 import static java.util.Objects.isNull;
 
 import java.time.Instant;
-import java.util.Set;
 
 import org.mitre.oauth2.model.OAuth2AccessTokenEntity;
 import org.mitre.openid.connect.model.UserInfo;
@@ -29,6 +30,7 @@ import com.nimbusds.jwt.JWTClaimsSet.Builder;
 
 import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.core.oauth.profile.common.BaseAccessTokenBuilder;
+import it.infn.mw.iam.persistence.model.IamUserInfo;
 import it.infn.mw.iam.persistence.repository.UserInfoAdapter;
 
 public class AarcJWTProfileAccessTokenBuilder extends BaseAccessTokenBuilder {
@@ -47,12 +49,11 @@ public class AarcJWTProfileAccessTokenBuilder extends BaseAccessTokenBuilder {
     Builder builder = baseJWTSetup(token, authentication, userInfo, issueTime);
 
     if (!isNull(userInfo)) {
-      Set<String> groupUrns =
-          aarcUrnHelper.resolveGroups(((UserInfoAdapter) userInfo).getUserinfo());
 
-      if (!groupUrns.isEmpty()) {
-        builder.claim(AARC_GROUPS_CLAIM_NAME, groupUrns);
-      }
+      IamUserInfo ui = ((UserInfoAdapter) userInfo).getUserinfo();
+
+      builder.claim(AARC_OIDC_CLAIM_AFFILIATION, aarcUrnHelper.resolveGroups(ui));
+      builder.claim(AARC_OIDC_CLAIM_ENTITLEMENT, aarcUrnHelper.resolveGroups(ui));
     }
 
     return builder.build();

@@ -64,4 +64,9 @@ public class AarcUrnHelper {
 
     return urn.toString();
   }
+
+  public String getOrganisationName() {
+
+    return organisationName;
+  }
 }

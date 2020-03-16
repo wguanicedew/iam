@@ -28,6 +28,9 @@ public class AarcJWTProfile implements JWTProfile, RequestValidator {
 
   public static final String PROFILE_NAME = "AARC JWT profile";
 
+  public static final String AARC_OIDC_CLAIM_AFFILIATION = "eduperson_scoped_affiliation";
+  public static final String AARC_OIDC_CLAIM_ENTITLEMENT = "eduperson_entitlement";
+
   private final JWTAccessTokenBuilder accessTokenBuilder;
   private final IDTokenCustomizer idTokenCustomizer;
   private final UserInfoHelper userInfoHelper;

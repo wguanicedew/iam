@@ -15,30 +15,15 @@
  */
 package it.infn.mw.iam.core.userinfo;
 
-public enum UserInfoClaim {
-  SUB,
-  NAME,
-  PREFERRED_USERNAME,
-  GIVEN_NAME,
-  FAMILY_NAME,
-  MIDDLE_NAME,
-  NICKNAME,
-  PROFILE,
-  PICTURE,
-  WEBSITE,
-  GENDER,
-  ZONEINFO,
-  LOCALE,
-  UPDATED_AT,
-  BIRTHDATE,
-  EMAIL,
-  EMAIL_VERIFIED,
-  PHONE_NUMBER,
-  PHONE_NUMBER_VERIFIED,
-  ADDRESS,
-  ORGANISATION_NAME,
-  GROUPS,
-  EXTERNAL_AUTHN,
-  EDUPERSON_SCOPED_AFFILIATION,
-  EDUPERSON_ENTITLEMENT;
+import java.util.Set;
+
+import org.mitre.openid.connect.model.UserInfo;
+
+public interface AarcUserInfo extends UserInfo {
+
+  String getScopedAffiliation();
+  void setScopedAffiliation(String scopedAffiliation);
+
+  Set<String> getEntitlements();
+  void setEntitlements(Set<String> entitlements);
 }

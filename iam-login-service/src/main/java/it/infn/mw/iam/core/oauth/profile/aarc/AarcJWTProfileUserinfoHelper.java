@@ -15,7 +15,6 @@
  */
 package it.infn.mw.iam.core.oauth.profile.aarc;
 
-import static it.infn.mw.iam.core.oauth.profile.aarc.AarcUserInfoAdapter.forUserInfo;
 import static java.util.Objects.isNull;
 
 import org.mitre.openid.connect.model.UserInfo;
@@ -24,6 +23,9 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
 import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.core.oauth.profile.common.BaseUserinfoHelper;
+import it.infn.mw.iam.core.userinfo.AarcDecoratedUserInfo;
+import it.infn.mw.iam.persistence.model.IamUserInfo;
+import it.infn.mw.iam.persistence.repository.UserInfoAdapter;
 
 public class AarcJWTProfileUserinfoHelper extends BaseUserinfoHelper {
 
@@ -43,8 +45,14 @@ public class AarcJWTProfileUserinfoHelper extends BaseUserinfoHelper {
     if (isNull(ui)) {
       return null;
     }
-    
-    return forUserInfo(ui, aarcUrnHelper);
+
+    IamUserInfo iamUserInfo = ((UserInfoAdapter) ui).getUserinfo();
+
+    AarcDecoratedUserInfo aui = AarcDecoratedUserInfo.forUser(ui);
+    aui.setScopedAffiliation(aarcUrnHelper.getOrganisationName());
+    aui.setEntitlements(aarcUrnHelper.resolveGroups(iamUserInfo));
+
+    return aui;
   }
 
 }

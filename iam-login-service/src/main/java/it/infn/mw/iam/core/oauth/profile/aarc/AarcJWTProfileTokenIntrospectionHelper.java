@@ -15,7 +15,8 @@
  */
 package it.infn.mw.iam.core.oauth.profile.aarc;
 
-import static it.infn.mw.iam.core.oauth.profile.common.BaseAccessTokenBuilder.AARC_GROUPS_CLAIM_NAME;
+import static it.infn.mw.iam.core.oauth.profile.aarc.AarcJWTProfile.AARC_OIDC_CLAIM_AFFILIATION;
+import static it.infn.mw.iam.core.oauth.profile.aarc.AarcJWTProfile.AARC_OIDC_CLAIM_ENTITLEMENT;
 
 import java.util.Map;
 import java.util.Set;
@@ -47,20 +48,19 @@ public class AarcJWTProfileTokenIntrospectionHelper extends BaseIntrospectionHel
 
     Map<String, Object> result = getAssembler().assembleFrom(accessToken, userInfo, authScopes);
 
-    addIssuerClaim(result);
-    addAudience(result, accessToken);
-
-    Set<String> scopes = filterScopes(accessToken, authScopes);
-    
-    addScopeClaim(result, scopes);
-
     if (userInfo != null) {
 
       IamUserInfo iamUserInfo = ((UserInfoAdapter) userInfo).getUserinfo();
 
+      result.put(NAME, iamUserInfo.getName());
+      result.put(GIVEN_NAME, iamUserInfo.getGivenName());
+      result.put(FAMILY_NAME, iamUserInfo.getFamilyName());
+      result.put(EMAIL, iamUserInfo.getEmail());
+      result.put(AARC_OIDC_CLAIM_AFFILIATION, aarcUrnHelper.getOrganisationName());
+
       if (!iamUserInfo.getGroups().isEmpty()) {
 
-        result.put(AARC_GROUPS_CLAIM_NAME, aarcUrnHelper.resolveGroups(iamUserInfo));
+        result.put(AARC_OIDC_CLAIM_ENTITLEMENT, aarcUrnHelper.resolveGroups(iamUserInfo));
       }
     }
 

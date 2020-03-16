@@ -17,6 +17,8 @@ package it.infn.mw.iam.core.userinfo;
 
 import static it.infn.mw.iam.core.userinfo.UserInfoClaim.ADDRESS;
 import static it.infn.mw.iam.core.userinfo.UserInfoClaim.BIRTHDATE;
+import static it.infn.mw.iam.core.userinfo.UserInfoClaim.EDUPERSON_ENTITLEMENT;
+import static it.infn.mw.iam.core.userinfo.UserInfoClaim.EDUPERSON_SCOPED_AFFILIATION;
 import static it.infn.mw.iam.core.userinfo.UserInfoClaim.EMAIL;
 import static it.infn.mw.iam.core.userinfo.UserInfoClaim.EMAIL_VERIFIED;
 import static it.infn.mw.iam.core.userinfo.UserInfoClaim.EXTERNAL_AUTHN;
@@ -63,9 +65,10 @@ public class IamScopeClaimTranslationService implements ScopeClaimTranslationSer
   public static final String PHONE_SCOPE = "phone";
   public static final String ADDRESS_SCOPE = "address";
 
-  protected static final Set<UserInfoClaim> PROFILE_CLAIMS = EnumSet.of(NAME, PREFERRED_USERNAME,
-      GIVEN_NAME, FAMILY_NAME, MIDDLE_NAME, NICKNAME, PROFILE, PICTURE, WEBSITE, GENDER, ZONEINFO,
-      LOCALE, UPDATED_AT, BIRTHDATE, ORGANISATION_NAME, GROUPS, EXTERNAL_AUTHN);
+  protected static final Set<UserInfoClaim> PROFILE_CLAIMS =
+      EnumSet.of(NAME, PREFERRED_USERNAME, GIVEN_NAME, FAMILY_NAME, MIDDLE_NAME, NICKNAME, PROFILE,
+          PICTURE, WEBSITE, GENDER, ZONEINFO, LOCALE, UPDATED_AT, BIRTHDATE, ORGANISATION_NAME,
+          GROUPS, EXTERNAL_AUTHN, EDUPERSON_SCOPED_AFFILIATION, EDUPERSON_ENTITLEMENT);
 
   protected static final Set<UserInfoClaim> EMAIL_CLAIMS = EnumSet.of(EMAIL, EMAIL_VERIFIED);
 

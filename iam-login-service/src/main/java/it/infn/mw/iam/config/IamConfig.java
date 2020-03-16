@@ -56,12 +56,12 @@ import it.infn.mw.iam.core.oauth.profile.IamTokenEnhancer;
 import it.infn.mw.iam.core.oauth.profile.JWTProfile;
 import it.infn.mw.iam.core.oauth.profile.JWTProfileResolver;
 import it.infn.mw.iam.core.oauth.profile.ScopeAwareProfileResolver;
-import it.infn.mw.iam.core.oauth.profile.aarc.AarcUrnHelper;
 import it.infn.mw.iam.core.oauth.profile.aarc.AarcJWTProfile;
 import it.infn.mw.iam.core.oauth.profile.aarc.AarcJWTProfileAccessTokenBuilder;
 import it.infn.mw.iam.core.oauth.profile.aarc.AarcJWTProfileIdTokenCustomizer;
 import it.infn.mw.iam.core.oauth.profile.aarc.AarcJWTProfileTokenIntrospectionHelper;
 import it.infn.mw.iam.core.oauth.profile.aarc.AarcJWTProfileUserinfoHelper;
+import it.infn.mw.iam.core.oauth.profile.aarc.AarcUrnHelper;
 import it.infn.mw.iam.core.oauth.profile.common.BaseIntrospectionHelper;
 import it.infn.mw.iam.core.oauth.profile.iam.ClaimValueHelper;
 import it.infn.mw.iam.core.oauth.profile.iam.IamJWTProfile;
@@ -132,6 +132,7 @@ public class IamConfig {
   @Bean(name = "aarcJwtProfile")
   JWTProfile aarcJwtProfile(IamProperties props, IamAccountRepository accountRepo,
       AarcUrnHelper aarcUrnHelper, UserInfoService userInfoService, ScopeMatcherRegistry registry) {
+
     AarcJWTProfileAccessTokenBuilder atBuilder =
         new AarcJWTProfileAccessTokenBuilder(props, aarcUrnHelper);
 
@@ -152,6 +153,7 @@ public class IamConfig {
       ScopeClaimTranslationService converter, ClaimValueHelper claimHelper,
       UserInfoService userInfoService, ExternalAuthenticationInfoProcessor proc,
       ScopeMatcherRegistry registry) {
+
     IamJWTProfileAccessTokenBuilder atBuilder =
         new IamJWTProfileAccessTokenBuilder(props, converter, claimHelper);
 
@@ -161,8 +163,8 @@ public class IamConfig {
     IamJWTProfileIdTokenCustomizer idHelper =
         new IamJWTProfileIdTokenCustomizer(accountRepo, converter, claimHelper);
 
-    BaseIntrospectionHelper intrHelper = new IamJWTProfileTokenIntrospectionHelper(
-        props, new DefaultIntrospectionResultAssembler(), registry);
+    BaseIntrospectionHelper intrHelper = new IamJWTProfileTokenIntrospectionHelper(props,
+        new DefaultIntrospectionResultAssembler(), registry);
 
     return new IamJWTProfile(atBuilder, idHelper, uiHelper, intrHelper);
   }
