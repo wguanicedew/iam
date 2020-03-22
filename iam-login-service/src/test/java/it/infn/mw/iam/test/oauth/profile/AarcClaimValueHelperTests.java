@@ -36,7 +36,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import com.google.common.collect.Sets;
 
 import it.infn.mw.iam.IamLoginService;
-import it.infn.mw.iam.core.oauth.profile.aarc.AarcUrnHelper;
+import it.infn.mw.iam.core.oauth.profile.aarc.AarcClaimValueHelper;
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.model.IamUserInfo;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
@@ -49,11 +49,11 @@ import it.infn.mw.iam.test.core.CoreControllerTestSupport;
   "iam.urn.namespace=geant:iam:test",
   // @formatter:on
 })
-public class AarcUrnHelperTests {
+public class AarcClaimValueHelperTests {
 
 
   @Autowired
-  AarcUrnHelper helper;
+  AarcClaimValueHelper helper;
 
   IamUserInfo userInfo = mock(IamUserInfo.class);
 

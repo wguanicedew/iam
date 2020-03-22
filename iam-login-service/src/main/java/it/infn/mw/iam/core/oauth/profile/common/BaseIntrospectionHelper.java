@@ -50,6 +50,8 @@ public abstract class BaseIntrospectionHelper implements IntrospectionResultHelp
   public static final String GROUPS = "groups";
   public static final String ORGANISATION_NAME = "organisation_name";
   public static final String ISSUER = "iss";
+  public static final String EDUPERSON_SCOPED_AFFILIATION = "eduperson_scoped_affiliation";
+  public static final String EDUPERSON_ENTITLEMENT = "eduperson_entitlement";
 
   private final IamProperties properties;
   private final IntrospectionResultAssembler assembler;

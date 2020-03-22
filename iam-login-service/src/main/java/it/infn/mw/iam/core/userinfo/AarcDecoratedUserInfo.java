@@ -15,9 +15,6 @@
  */
 package it.infn.mw.iam.core.userinfo;
 
-import static it.infn.mw.iam.core.oauth.profile.aarc.AarcJWTProfile.AARC_OIDC_CLAIM_AFFILIATION;
-import static it.infn.mw.iam.core.oauth.profile.aarc.AarcJWTProfile.AARC_OIDC_CLAIM_ENTITLEMENT;
-
 import java.util.Set;
 
 import org.mitre.openid.connect.model.UserInfo;
@@ -29,6 +26,9 @@ import com.google.gson.JsonPrimitive;
 public class AarcDecoratedUserInfo extends DelegateUserInfoAdapter implements AarcUserInfo {
 
   private static final long serialVersionUID = 1L;
+
+  public static final String EDUPERSON_SCOPED_AFFILIATION_CLAIM = "eduperson_scoped_affiliation";
+  public static final String EDUPERSON_ENTITLEMENT_CLAIM = "eduperson_entitlement";
 
   private String scopedAffiliation;
   private Set<String> entitlements;
@@ -44,11 +44,11 @@ public class AarcDecoratedUserInfo extends DelegateUserInfoAdapter implements Aa
     json.remove("groups");
     json.remove("organisation_name");
 
-    json.add(AARC_OIDC_CLAIM_AFFILIATION, new JsonPrimitive(scopedAffiliation));
+    json.add(EDUPERSON_SCOPED_AFFILIATION_CLAIM, new JsonPrimitive(scopedAffiliation));
 
     JsonArray urns = new JsonArray();
     entitlements.forEach(urn -> urns.add(new JsonPrimitive(urn)));
-    json.add(AARC_OIDC_CLAIM_ENTITLEMENT, urns);
+    json.add(EDUPERSON_ENTITLEMENT_CLAIM, urns);
 
     return json;
   }
@@ -70,7 +70,7 @@ public class AarcDecoratedUserInfo extends DelegateUserInfoAdapter implements Aa
 
   @Override
   public void setEntitlements(Set<String> entitlements) {
-    this.entitlements = entitlements; 
+    this.entitlements = entitlements;
   }
 
   public static AarcDecoratedUserInfo forUser(UserInfo u) {

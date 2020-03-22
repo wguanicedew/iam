@@ -22,17 +22,37 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.ImmutableSet;
+
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.model.IamUserInfo;
 
 @Component
-public class AarcUrnHelper {
+public class AarcClaimValueHelper {
+
+  public static final Set<String> ADDITIONAL_CLAIMS =
+      ImmutableSet.of("eduperson_scoped_affiliation", "eduperson_entitlement");
 
   @Value("${iam.organisation.name}")
   String organisationName;
 
   @Value("${iam.urn.namespace}")
   String namespace;
+
+  public Object getClaimValueFromUserInfo(String claim, IamUserInfo info) {
+
+    switch (claim) {
+
+      case "eduperson_scoped_affiliation":
+        return organisationName;
+
+      case "eduperson_entitlement":
+        return resolveGroups(info);
+
+      default:
+        return null;
+    }
+  }
 
   public Set<String> resolveGroups(IamUserInfo userInfo) {
 
@@ -65,8 +85,4 @@ public class AarcUrnHelper {
     return urn.toString();
   }
 
-  public String getOrganisationName() {
-
-    return organisationName;
-  }
 }

@@ -15,11 +15,13 @@
  */
 package it.infn.mw.iam.core.oauth.profile.aarc;
 
-import static it.infn.mw.iam.core.oauth.profile.aarc.AarcJWTProfile.AARC_OIDC_CLAIM_AFFILIATION;
-import static it.infn.mw.iam.core.oauth.profile.aarc.AarcJWTProfile.AARC_OIDC_CLAIM_ENTITLEMENT;
+import static it.infn.mw.iam.core.oauth.profile.aarc.AarcClaimValueHelper.ADDITIONAL_CLAIMS;
+
+import java.util.Set;
 
 import org.mitre.oauth2.model.ClientDetailsEntity;
 import org.mitre.oauth2.model.OAuth2AccessTokenEntity;
+import org.mitre.openid.connect.service.ScopeClaimTranslationService;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 
 import com.nimbusds.jwt.JWTClaimsSet.Builder;
@@ -32,12 +34,14 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
 public class AarcJWTProfileIdTokenCustomizer extends BaseIdTokenCustomizer {
 
-  protected final AarcUrnHelper aarcUrnHelper;
+  protected final ScopeClaimTranslationService scopeClaimConverter;
+  protected final AarcClaimValueHelper claimValueHelper;
 
   public AarcJWTProfileIdTokenCustomizer(IamAccountRepository accountRepo,
-      AarcUrnHelper aarcUrnHelper) {
+      ScopeClaimTranslationService scopeClaimConverter, AarcClaimValueHelper claimValueHelper) {
     super(accountRepo);
-    this.aarcUrnHelper = aarcUrnHelper;
+    this.scopeClaimConverter = scopeClaimConverter;
+    this.claimValueHelper = claimValueHelper;
   }
 
   @Override
@@ -48,8 +52,11 @@ public class AarcJWTProfileIdTokenCustomizer extends BaseIdTokenCustomizer {
       .orElseThrow(() -> new UserNotFoundError(String.format("No user found for uuid %s", sub)));
     IamUserInfo info = account.getUserInfo();
 
-    idClaims.claim(AARC_OIDC_CLAIM_AFFILIATION, aarcUrnHelper.getOrganisationName());
-    idClaims.claim(AARC_OIDC_CLAIM_ENTITLEMENT, aarcUrnHelper.resolveGroups(info));
+    Set<String> requiredClaims = scopeClaimConverter.getClaimsForScopeSet(request.getScope());
+
+    requiredClaims.stream()
+      .filter(ADDITIONAL_CLAIMS::contains)
+      .forEach(c -> idClaims.claim(c, claimValueHelper.getClaimValueFromUserInfo(c, info)));
   }
 
 }

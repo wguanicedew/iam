@@ -29,12 +29,12 @@ import it.infn.mw.iam.persistence.repository.UserInfoAdapter;
 
 public class AarcJWTProfileUserinfoHelper extends BaseUserinfoHelper {
 
-  protected final AarcUrnHelper aarcUrnHelper;
+  protected final AarcClaimValueHelper claimValueHelper;
 
   public AarcJWTProfileUserinfoHelper(IamProperties props, UserInfoService userInfoService,
-      AarcUrnHelper aarcUrnHelper) {
+      AarcClaimValueHelper claimValueHelper) {
     super(props, userInfoService);
-    this.aarcUrnHelper = aarcUrnHelper;
+    this.claimValueHelper = claimValueHelper;
   }
 
   @Override
@@ -49,8 +49,8 @@ public class AarcJWTProfileUserinfoHelper extends BaseUserinfoHelper {
     IamUserInfo iamUserInfo = ((UserInfoAdapter) ui).getUserinfo();
 
     AarcDecoratedUserInfo aui = AarcDecoratedUserInfo.forUser(ui);
-    aui.setScopedAffiliation(aarcUrnHelper.getOrganisationName());
-    aui.setEntitlements(aarcUrnHelper.resolveGroups(iamUserInfo));
+    aui.setScopedAffiliation(getProperties().getOrganisation().getName());
+    aui.setEntitlements(claimValueHelper.resolveGroups(iamUserInfo));
 
     return aui;
   }

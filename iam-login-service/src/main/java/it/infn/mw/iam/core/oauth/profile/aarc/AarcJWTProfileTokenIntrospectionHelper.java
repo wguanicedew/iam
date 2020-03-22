@@ -15,9 +15,6 @@
  */
 package it.infn.mw.iam.core.oauth.profile.aarc;
 
-import static it.infn.mw.iam.core.oauth.profile.aarc.AarcJWTProfile.AARC_OIDC_CLAIM_AFFILIATION;
-import static it.infn.mw.iam.core.oauth.profile.aarc.AarcJWTProfile.AARC_OIDC_CLAIM_ENTITLEMENT;
-
 import java.util.Map;
 import java.util.Set;
 
@@ -33,13 +30,13 @@ import it.infn.mw.iam.persistence.repository.UserInfoAdapter;
 
 public class AarcJWTProfileTokenIntrospectionHelper extends BaseIntrospectionHelper {
 
-  protected final AarcUrnHelper aarcUrnHelper;
+  protected final AarcClaimValueHelper claimValueHelper;
 
   public AarcJWTProfileTokenIntrospectionHelper(IamProperties props,
       IntrospectionResultAssembler assembler, ScopeMatcherRegistry scopeMatchersRegistry,
-      AarcUrnHelper aarcUrnHelper) {
+      AarcClaimValueHelper claimValueHelper) {
     super(props, assembler, scopeMatchersRegistry);
-    this.aarcUrnHelper = aarcUrnHelper;
+    this.claimValueHelper = claimValueHelper;
   }
 
   @Override
@@ -48,19 +45,32 @@ public class AarcJWTProfileTokenIntrospectionHelper extends BaseIntrospectionHel
 
     Map<String, Object> result = getAssembler().assembleFrom(accessToken, userInfo, authScopes);
 
+    Set<String> scopes = filterScopes(accessToken, authScopes);
+
     if (userInfo != null) {
 
       IamUserInfo iamUserInfo = ((UserInfoAdapter) userInfo).getUserinfo();
 
-      result.put(NAME, iamUserInfo.getName());
-      result.put(GIVEN_NAME, iamUserInfo.getGivenName());
-      result.put(FAMILY_NAME, iamUserInfo.getFamilyName());
-      result.put(EMAIL, iamUserInfo.getEmail());
-      result.put(AARC_OIDC_CLAIM_AFFILIATION, aarcUrnHelper.getOrganisationName());
+      if (scopes.contains(PROFILE)) {
 
-      if (!iamUserInfo.getGroups().isEmpty()) {
+        result.put(NAME, iamUserInfo.getName());
+        result.put(GIVEN_NAME, iamUserInfo.getGivenName());
+        result.put(FAMILY_NAME, iamUserInfo.getFamilyName());
 
-        result.put(AARC_OIDC_CLAIM_ENTITLEMENT, aarcUrnHelper.resolveGroups(iamUserInfo));
+      }
+
+      if (scopes.contains(EMAIL)) {
+        result.put(EMAIL, userInfo.getEmail());
+      }
+
+      if (scopes.contains(EDUPERSON_SCOPED_AFFILIATION)) {
+        result.put(EDUPERSON_SCOPED_AFFILIATION,
+            claimValueHelper.getClaimValueFromUserInfo(EDUPERSON_SCOPED_AFFILIATION, iamUserInfo));
+      }
+
+      if (scopes.contains(EDUPERSON_ENTITLEMENT)) {
+        result.put(EDUPERSON_ENTITLEMENT,
+            claimValueHelper.getClaimValueFromUserInfo(EDUPERSON_ENTITLEMENT, iamUserInfo));
       }
     }
 

@@ -64,11 +64,12 @@ public class IamScopeClaimTranslationService implements ScopeClaimTranslationSer
   public static final String EMAIL_SCOPE = "email";
   public static final String PHONE_SCOPE = "phone";
   public static final String ADDRESS_SCOPE = "address";
+  public static final String EDUPERSON_SCOPED_AFFILIATION_SCOPE = "eduperson_scoped_affiliation";
+  public static final String EDUPERSON_ENTITLEMENT_SCOPE = "eduperson_entitlement";
 
-  protected static final Set<UserInfoClaim> PROFILE_CLAIMS =
-      EnumSet.of(NAME, PREFERRED_USERNAME, GIVEN_NAME, FAMILY_NAME, MIDDLE_NAME, NICKNAME, PROFILE,
-          PICTURE, WEBSITE, GENDER, ZONEINFO, LOCALE, UPDATED_AT, BIRTHDATE, ORGANISATION_NAME,
-          GROUPS, EXTERNAL_AUTHN, EDUPERSON_SCOPED_AFFILIATION, EDUPERSON_ENTITLEMENT);
+  protected static final Set<UserInfoClaim> PROFILE_CLAIMS = EnumSet.of(NAME, PREFERRED_USERNAME,
+      GIVEN_NAME, FAMILY_NAME, MIDDLE_NAME, NICKNAME, PROFILE, PICTURE, WEBSITE, GENDER, ZONEINFO,
+      LOCALE, UPDATED_AT, BIRTHDATE, ORGANISATION_NAME, GROUPS, EXTERNAL_AUTHN);
 
   protected static final Set<UserInfoClaim> EMAIL_CLAIMS = EnumSet.of(EMAIL, EMAIL_VERIFIED);
 
@@ -81,6 +82,8 @@ public class IamScopeClaimTranslationService implements ScopeClaimTranslationSer
     mapScopeToClaim(EMAIL_SCOPE, EMAIL_CLAIMS);
     mapScopeToClaim(PHONE_SCOPE, PHONE_CLAIMS);
     mapScopeToClaim(ADDRESS_SCOPE, ADDRESS);
+    mapScopeToClaim(EDUPERSON_SCOPED_AFFILIATION_SCOPE, EDUPERSON_SCOPED_AFFILIATION);
+    mapScopeToClaim(EDUPERSON_ENTITLEMENT_SCOPE, EDUPERSON_ENTITLEMENT);
   }
 
   private void mapScopeToClaim(String scope, UserInfoClaim claim) {
