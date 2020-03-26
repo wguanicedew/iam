@@ -33,11 +33,14 @@ public class AarcClaimValueHelper {
   public static final Set<String> ADDITIONAL_CLAIMS =
       ImmutableSet.of("eduperson_scoped_affiliation", "eduperson_entitlement");
 
+  @Value("${iam.host}")
+  String host;
+
   @Value("${iam.organisation.name}")
   String organisationName;
 
-  @Value("${iam.urn.namespace}")
-  String namespace;
+  @Value("${iam.aarcProfile.urnNamespace}")
+  String urnNamespace;
 
   public Object getClaimValueFromUserInfo(String claim, IamUserInfo info) {
 
@@ -67,9 +70,7 @@ public class AarcClaimValueHelper {
 
     StringBuilder urn = new StringBuilder();
 
-    urn.append("urn:");
-    urn.append(namespace);
-    urn.append(":group:");
+    urn.append(String.format("urn:%s:group:", urnNamespace));
 
     StringBuilder groupHierarchy = new StringBuilder(group.getName());
     Optional<IamGroup> parent = Optional.ofNullable(group.getParentGroup());
@@ -79,8 +80,7 @@ public class AarcClaimValueHelper {
     }
     urn.append(groupHierarchy.toString());
 
-    urn.append("#");
-    urn.append(organisationName);
+    urn.append(String.format("#%s:443", host));
 
     return urn.toString();
   }

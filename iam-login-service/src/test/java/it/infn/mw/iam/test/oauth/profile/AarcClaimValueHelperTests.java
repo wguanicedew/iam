@@ -45,8 +45,9 @@ import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 @SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class})
 @TestPropertySource(properties = {
   // @formatter:off
+  "iam.host=example.org",
   "iam.organisation.name=org",
-  "iam.urn.namespace=geant:iam:test",
+  "iam.aarcProfile.urnNamespace=geant:iam:test",
   // @formatter:on
 })
 public class AarcClaimValueHelperTests {
@@ -79,9 +80,18 @@ public class AarcClaimValueHelperTests {
   }
 
   @Test
+  public void testEmptyGroupsUrnEncode() {
+
+    when(userInfo.getGroups()).thenReturn(Sets.newHashSet());
+
+    Set<String> urns = helper.resolveGroups(userInfo);
+    assertThat(urns, hasSize(0));
+  }
+
+  @Test
   public void testGroupUrnEncode() {
 
-    String s = "urn:geant:iam:test:group:test#org";
+    String s = "urn:geant:iam:test:group:test#example.org:443";
 
     IamGroup g = buildGroup("test");
     when(userInfo.getGroups()).thenReturn(Sets.newHashSet(g));
@@ -94,8 +104,8 @@ public class AarcClaimValueHelperTests {
   @Test
   public void testGroupHierarchyUrnEncode() {
 
-    String parentUrn = "urn:geant:iam:test:group:parent#org";
-    String childUrn = "urn:geant:iam:test:group:parent:child#org";
+    String parentUrn = "urn:geant:iam:test:group:parent#example.org:443";
+    String childUrn = "urn:geant:iam:test:group:parent:child#example.org:443";
 
     IamGroup parent = buildGroup("parent");
     IamGroup child = buildGroup("child", parent);

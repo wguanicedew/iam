@@ -231,16 +231,16 @@ public class IamProperties {
     }
   }
 
-  public static class Urn {
+  public static class AarcProfileProperties {
 
-    private String namespace = "geant:iam";
+    private String urnNamespace = "geant:iam";
 
-    public String getNamespace() {
-      return namespace;
+    public String getUrnNamespace() {
+      return urnNamespace;
     }
 
-    public void setNamespace(String namespace) {
-      this.namespace = namespace;
+    public void setUrnNamespace(String urnNamespace) {
+      this.urnNamespace = urnNamespace;
     }
 
   }
@@ -279,7 +279,7 @@ public class IamProperties {
 
   private boolean generateDdlSqlScript = false;
 
-  private Urn urn = new Urn();
+  private AarcProfileProperties aarcProfile = new AarcProfileProperties();
 
   public String getBaseUrl() {
     return baseUrl;
@@ -417,11 +417,11 @@ public class IamProperties {
     return generateDdlSqlScript;
   }
 
-  public Urn getUrn() {
-    return urn;
+  public AarcProfileProperties getAarcProfile() {
+    return aarcProfile;
   }
 
-  public void setUrn(Urn urn) {
-    this.urn = urn;
+  public void setAarcProfile(AarcProfileProperties aarcProfile) {
+    this.aarcProfile = aarcProfile;
   }
 }
