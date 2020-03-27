@@ -71,7 +71,7 @@ import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
     "iam.host=example.org",
     "iam.jwt-profile.default-profile=aarc",
     "iam.organisation.name=org",
-    "iam.aarcProfile.urnNamespace=geant:iam:test",
+    "iam.aarcProfile.urnNamespace=example:iam:test",
     // @formatter:on
 })
 public class AarcProfileIntegrationTests extends EndpointsTestUtils {
@@ -81,8 +81,8 @@ public class AarcProfileIntegrationTests extends EndpointsTestUtils {
   private static final String USERNAME = "test";
   private static final String PASSWORD = "password";
 
-  private static final String URN_GROUP_ANALYSIS = "urn:geant:iam:test:group:Analysis#example.org:443";
-  private static final String URN_GROUP_PRODUCTION = "urn:geant:iam:test:group:Production#example.org:443";
+  private static final String URN_GROUP_ANALYSIS = "urn:example:iam:test:group:Analysis#example.org:443";
+  private static final String URN_GROUP_PRODUCTION = "urn:example:iam:test:group:Production#example.org:443";
 
   protected static final Set<String> BASE_SCOPES = Sets.newHashSet("openid", "profile");
   protected static final Set<String> EDUPERSON_AFFILIATION_SCOPE =

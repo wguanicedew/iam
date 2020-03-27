@@ -47,7 +47,7 @@ import it.infn.mw.iam.test.core.CoreControllerTestSupport;
   // @formatter:off
   "iam.host=example.org",
   "iam.organisation.name=org",
-  "iam.aarcProfile.urnNamespace=geant:iam:test",
+  "iam.aarcProfile.urnNamespace=example:iam:test",
   // @formatter:on
 })
 public class AarcClaimValueHelperTests {
@@ -91,7 +91,7 @@ public class AarcClaimValueHelperTests {
   @Test
   public void testGroupUrnEncode() {
 
-    String s = "urn:geant:iam:test:group:test#example.org:443";
+    String s = "urn:example:iam:test:group:test#example.org:443";
 
     IamGroup g = buildGroup("test");
     when(userInfo.getGroups()).thenReturn(Sets.newHashSet(g));
@@ -104,8 +104,8 @@ public class AarcClaimValueHelperTests {
   @Test
   public void testGroupHierarchyUrnEncode() {
 
-    String parentUrn = "urn:geant:iam:test:group:parent#example.org:443";
-    String childUrn = "urn:geant:iam:test:group:parent:child#example.org:443";
+    String parentUrn = "urn:example:iam:test:group:parent#example.org:443";
+    String childUrn = "urn:example:iam:test:group:parent:child#example.org:443";
 
     IamGroup parent = buildGroup("parent");
     IamGroup child = buildGroup("child", parent);

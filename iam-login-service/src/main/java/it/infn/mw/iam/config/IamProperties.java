@@ -233,7 +233,7 @@ public class IamProperties {
 
   public static class AarcProfileProperties {
 
-    private String urnNamespace = "geant:iam";
+    private String urnNamespace = "example:iam";
 
     public String getUrnNamespace() {
       return urnNamespace;
