@@ -27,7 +27,7 @@ public class MockCernHrService implements CernHrDBApiService {
   @Override
   public boolean hasValidExperimentParticipation(String personId) {
     
-    return false;
+    return true;
   }
 
 }

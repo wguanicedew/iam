@@ -21,41 +21,41 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 import javax.servlet.http.HttpSession;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import it.infn.mw.iam.util.test.saml.SamlSecurityContextBuilder;
+import it.infn.mw.iam.config.cern.CernProperties;
+import it.infn.mw.iam.util.test.OidcSecurityContextBuilder;
 
 @Controller
 @Profile({"mock"})
 public class MockCernAuthController {
 
+  @Autowired
+  CernProperties properties;
+  
   @RequestMapping(method = GET, path = "/mock-cern-auth")
   public String mockCernAuthentication(HttpSession session) {
 
-    SamlSecurityContextBuilder builder = new SamlSecurityContextBuilder();
-    builder.authorities(EXT_AUTHN_UNREGISTERED_USER_AUTH.getAuthority())
-      .subject("123456789")
-      .issuer("https://cern.ch/login")
-      .email("test@example.org")
-      .username("testone")
-      .name("Test", "One");
-
-    // CERN registration details
-    builder.cernPersonId("123456789")
-      .cernFirstName("Test")
-      .cernLastName("One")
-      .cernEmail("test@example.org")
-      .cernHomeInstitute("Test institute");
-
-    SecurityContext samlSecurityContext = builder.buildSecurityContext();
-    SecurityContextHolder.clearContext();
-    SecurityContextHolder.setContext(samlSecurityContext);
+    OidcSecurityContextBuilder builder = new OidcSecurityContextBuilder();
     
-    session.setAttribute(SPRING_SECURITY_CONTEXT_KEY, samlSecurityContext);
+    builder.claim(properties.getPersonIdClaim(), "987654321")
+    .claim("email", "test@example.org")
+    .name("Test", "User")
+    .username("test")
+    .subject("123456789")
+    .issuer(properties.getSsoIssuer())
+    .authorities(EXT_AUTHN_UNREGISTERED_USER_AUTH.getAuthority());
+
+    SecurityContext context = builder.buildSecurityContext();
+    SecurityContextHolder.clearContext();
+    SecurityContextHolder.setContext(context);
+    
+    session.setAttribute(SPRING_SECURITY_CONTEXT_KEY, context);
     
     return "redirect:/cern-registration";
   }

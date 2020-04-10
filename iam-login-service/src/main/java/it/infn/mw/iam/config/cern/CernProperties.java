@@ -53,6 +53,10 @@ public class CernProperties {
     }
   }
 
+  private String ssoIssuer = "https://auth.cern.ch/auth/realms/cern";
+  
+  private String personIdClaim = "cern_person_id";
+  
   private String ssoEntityId = "https://cern.ch/login";
 
   private String experimentName;
@@ -81,5 +85,21 @@ public class CernProperties {
 
   public void setExperimentName(String experimentName) {
     this.experimentName = experimentName;
+  }
+  
+  public void setSsoIssuer(String ssoIssuer) {
+    this.ssoIssuer = ssoIssuer;
+  }
+  
+  public String getSsoIssuer() {
+    return ssoIssuer;
+  }
+  
+  public String getPersonIdClaim() {
+    return personIdClaim;
+  }
+  
+  public void setPersonIdClaim(String personIdClaim) {
+    this.personIdClaim = personIdClaim;
   }
 }

@@ -70,24 +70,17 @@ function RegistrationController($scope, $q, $window, $cookies, RegistrationReque
         var success = function (res) {
             var info = res.data;
             $scope.extAuthInfo = info;
-            $scope.homeInstitute = info.additional_attributes.cernHomeInstitute;
             $scope.request = {
-                givenname: info.additional_attributes.cernFirstName,
-                familyname: info.additional_attributes.cernLastName,
+                givenname: info.additional_attributes.given_name,
+                familyname: info.additional_attributes.family_name,
                 username: info.suggested_username,
-                email: info.additional_attributes.cernEmail,
+                email: info.additional_attributes.email,
                 notes: '',
                 labels: [{
-                        prefix: 'https://cern.ch/login',
-                        name: 'PersonID',
-                        value: info.additional_attributes.cernPersonId
-                    },
-                    {
-                        prefix: 'https://cern.ch/login',
-                        name: 'HomeInstitute',
-                        value: info.additional_attributes.cernHomeInstitute
-                    },
-                ]
+                    prefix: 'https://cern.ch/login',
+                    name: 'PersonID',
+                    value: info.additional_attributes.cern_person_id
+                }]
             };
 
             if (info.type === 'OIDC') {

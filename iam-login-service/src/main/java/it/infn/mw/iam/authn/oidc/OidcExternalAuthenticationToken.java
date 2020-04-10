@@ -15,12 +15,17 @@
  */
 package it.infn.mw.iam.authn.oidc;
 
+import static java.util.Objects.isNull;
+
+import java.text.ParseException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
+
+import com.google.common.collect.Maps;
 
 import it.infn.mw.iam.authn.AbstractExternalAuthenticationToken;
 import it.infn.mw.iam.authn.ExternalAccountLinker;
@@ -54,11 +59,31 @@ public class OidcExternalAuthenticationToken
   public ExternalAuthenticationRegistrationInfo toExernalAuthenticationRegistrationInfo() {
 
     ExternalAuthenticationRegistrationInfo ri =
-	new ExternalAuthenticationRegistrationInfo(ExternalAuthenticationType.OIDC);
+        new ExternalAuthenticationRegistrationInfo(ExternalAuthenticationType.OIDC);
 
+    ri.setAdditionalAttributes(Maps.newHashMap());
     ri.setSubject(getExternalAuthentication().getSub());
     ri.setIssuer(getExternalAuthentication().getIssuer());
 
+    if (!isNull(getExternalAuthentication().getIdToken())) {
+      try {
+        Map<String, Object> claims =
+            getExternalAuthentication().getIdToken().getJWTClaimsSet().getClaims();
+
+        for (String key : claims.keySet()) {
+          try {
+            String value =
+                getExternalAuthentication().getIdToken().getJWTClaimsSet().getStringClaim(key);
+            ri.getAdditionalAttributes().put(key, value);
+          } catch (ParseException e) {
+            // swallow
+          }
+        }
+      } catch (ParseException e) {
+        // swallow
+      }
+    }
+    
     if (getExternalAuthentication().getUserInfo() != null) {
       ri.setEmail(getExternalAuthentication().getUserInfo().getEmail());
       ri.setGivenName(getExternalAuthentication().getUserInfo().getGivenName());

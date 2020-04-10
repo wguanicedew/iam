@@ -16,7 +16,9 @@
 package it.infn.mw.iam.authn;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.isNull;
 
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,7 +36,7 @@ public class DefaultExternalAuthenticationInfoBuilder implements ExternalAuthent
   public static final String OIDC_TYPE = "oidc";
   public static final String SAML_TYPE = "saml";
 
-  public DefaultExternalAuthenticationInfoBuilder() { 
+  public DefaultExternalAuthenticationInfoBuilder() {
     // Empty constructor required by Spring
   }
 
@@ -47,6 +49,26 @@ public class DefaultExternalAuthenticationInfoBuilder implements ExternalAuthent
     result.put("sub", token.getExternalAuthentication().getSub());
     result.put("iss", token.getExternalAuthentication().getIssuer());
 
+    if (!isNull(token.getExternalAuthentication().getIdToken())) {
+      
+      try {
+        Map<String, Object> claims =
+            token.getExternalAuthentication().getIdToken().getJWTClaimsSet().getClaims();
+
+        claims.keySet().forEach(k -> {
+          try {
+            String value =
+                token.getExternalAuthentication().getIdToken().getJWTClaimsSet().getStringClaim(k);
+            result.put(k, value);
+          } catch (ParseException e) {
+            // swallow exception
+          }
+        });
+      } catch (ParseException e) {
+        // swallow exception
+      }
+    }
+
     return result;
   }
 
@@ -57,12 +79,12 @@ public class DefaultExternalAuthenticationInfoBuilder implements ExternalAuthent
     result.put(TYPE_ATTR, SAML_TYPE);
 
     SAMLCredential cred = (SAMLCredential) token.getExternalAuthentication().getCredentials();
-    
+
     result.put("idpEntityId", cred.getRemoteEntityID());
 
-    for (Saml2Attribute attr: Saml2Attribute.values()){
-      String attrVal = cred.getAttributeAsString(attr.getAttributeName()); 
-      if ( attrVal != null) {
+    for (Saml2Attribute attr : Saml2Attribute.values()) {
+      String attrVal = cred.getAttributeAsString(attr.getAttributeName());
+      if (attrVal != null) {
         result.put(attr.name(), attrVal);
       }
     }

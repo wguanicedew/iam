@@ -22,8 +22,8 @@
 <t:page title="Register">
   <h2 class="text-center">No HR record found</h2>
   <p class="text-center"> 
-    No valid ${experiment} membership record found for user ${user.CERN_FIRST_NAME} ${user.CERN_LAST_NAME} 
-    (PersonID: ${user.CERN_PERSON_ID}).
+    No valid ${experiment} membership record found for user ${user.given_name} ${user.family_name} 
+    (PersonID: ${user.cern_person_id}).
   </p>
   <div id="register-confirm-back-btn" class="row text-center">
     <a class="btn btn-primary" href='/reset-session'>Back to Login Page</a>

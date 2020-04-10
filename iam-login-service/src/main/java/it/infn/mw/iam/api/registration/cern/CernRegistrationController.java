@@ -15,9 +15,10 @@
  */
 package it.infn.mw.iam.api.registration.cern;
 
-import static java.util.Objects.isNull;
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
+import java.text.ParseException;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.saml.SAMLCredential;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,8 +34,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.ModelAndView;
 
 import it.infn.mw.iam.authn.ExternalAuthenticationInfoBuilder;
-import it.infn.mw.iam.authn.saml.SamlExternalAuthenticationToken;
-import it.infn.mw.iam.authn.saml.util.Saml2Attribute;
+import it.infn.mw.iam.authn.oidc.OidcExternalAuthenticationToken;
 import it.infn.mw.iam.config.cern.CernProperties;
 
 @Profile("cern")
@@ -68,22 +67,33 @@ public class CernRegistrationController {
   }
 
   private void checkUnregisteredUserIsFromCernSSO(Authentication authentication) {
-    if (authentication instanceof SamlExternalAuthenticationToken) {
-      SamlExternalAuthenticationToken token = (SamlExternalAuthenticationToken) authentication;
 
-      if (!cernProperties.getSsoEntityId().equals(token.getSamlId().getIdpId())) {
+    if (authentication instanceof OidcExternalAuthenticationToken) {
+      OidcExternalAuthenticationToken token = (OidcExternalAuthenticationToken) authentication;
+      if (!cernProperties.getSsoIssuer().equals(token.getExternalAuthentication().getIssuer())) {
         throw new AccessDeniedException("CERN SSO authentication is required");
       }
+
     }
   }
 
   private String resolvePersonId(Authentication authentication) {
-    SamlExternalAuthenticationToken token = (SamlExternalAuthenticationToken) authentication;
-    SAMLCredential cred = (SAMLCredential) token.getCredentials();
 
-    String personId = cred.getAttributeAsString(Saml2Attribute.CERN_PERSON_ID.getAttributeName());
-    if (isNull(personId)) {
-      throw new AccessDeniedException("CERN person id not found in SAML assertion");
+    OidcExternalAuthenticationToken token = (OidcExternalAuthenticationToken) authentication;
+
+    String personId = null;
+
+    try {
+      personId = token.getExternalAuthentication()
+        .getIdToken()
+        .getJWTClaimsSet()
+        .getStringClaim(cernProperties.getPersonIdClaim());
+    } catch (ParseException e) {
+      throw new AccessDeniedException("CERN person id not found in CERN SSO id token!");
+    }
+
+    if (isNullOrEmpty(personId)) {
+      throw new AccessDeniedException("CERN person id not found in CERN SSO id token!");
     }
 
     return personId;
@@ -100,8 +110,8 @@ public class CernRegistrationController {
         mav.setViewName("iam/cern/register");
       } else {
         Map<String, String> userInfoMap =
-            ((SamlExternalAuthenticationToken) authentication).buildAuthnInfoMap(infoBuilder);
-        
+            ((OidcExternalAuthenticationToken) authentication).buildAuthnInfoMap(infoBuilder);
+
         mav.addObject("experiment", cernProperties.getExperimentName());
         mav.addObject("user", userInfoMap);
         mav.setViewName("iam/cern/not-a-vo-member");

@@ -178,7 +178,7 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
 
   @Autowired
   SessionTimeoutHelper sessionTimeoutHelper;
-  
+
   @Autowired
   SamlUserIdentifierResolver resolver;
 
@@ -373,12 +373,20 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
   @Bean
   public MultiThreadedHttpConnectionManager multiThreadedHttpConnectionManager() {
 
-    return new MultiThreadedHttpConnectionManager();
+    MultiThreadedHttpConnectionManager manager = new MultiThreadedHttpConnectionManager();
+
+    manager.getParams()
+      .setConnectionTimeout(
+          (int) TimeUnit.SECONDS.toMillis(samlProperties.getHttpClientConnectionTimeoutSecs()));
+    
+    manager.getParams()
+      .setSoTimeout((int) TimeUnit.SECONDS.toMillis(samlProperties.getHttpClientSocketTimeoutSecs()));
+
+    return manager;
   }
 
   @Bean
   public HttpClient httpClient() {
-
     return new HttpClient(multiThreadedHttpConnectionManager());
   }
 
@@ -386,7 +394,8 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
   public SAMLAuthenticationProvider samlAuthenticationProvider(SamlUserIdentifierResolver resolver,
       IamAccountRepository accountRepo, InactiveAccountAuthenticationHander handler,
       MappingPropertiesResolver mpResolver,
-      AuthenticationValidator<ExpiringUsernameAuthenticationToken> validator, SessionTimeoutHelper helper) {
+      AuthenticationValidator<ExpiringUsernameAuthenticationToken> validator,
+      SessionTimeoutHelper helper) {
 
     IamSamlAuthenticationProvider samlAuthenticationProvider =
         new IamSamlAuthenticationProvider(resolver, validator, helper);
@@ -577,6 +586,8 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
     List<MetadataProvider> providers = new ArrayList<>();
 
     configureLocalIamMetadata(providers);
+    
+    HttpClient httpClient = httpClient();
 
     for (IamSamlIdpMetadataProperties p : samlProperties.getIdpMetadata()) {
       String trimmedMedataUrl = p.getMetadataUrl().trim();
@@ -613,21 +624,27 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
         metadataBackupFile.deleteOnExit();
 
         FileBackedHTTPMetadataProvider metadataProvider =
-            new FileBackedHTTPMetadataProvider(metadataFetchTimer, httpClient(), trimmedMedataUrl,
+            new FileBackedHTTPMetadataProvider(metadataFetchTimer, httpClient, trimmedMedataUrl,
                 metadataBackupFile.getAbsolutePath());
 
         metadataProvider.setParserPool(basicParserPool);
-       
-        
+
+
         long mdRefreshSecs = samlProperties.getMetadataRefreshPeriodSec();
         if (mdRefreshSecs <= 0L) {
           mdRefreshSecs = HOURS.toSeconds(12);
-          LOG.warn("Overriding setting for saml.metadata-refresh-period-sec with default value: {} seconds", mdRefreshSecs);
+          LOG.warn(
+              "Overriding setting for saml.metadata-refresh-period-sec with default value: {} seconds",
+              mdRefreshSecs);
         }
-        
-        LOG.info("Setting max metadata refresh delay for {} to {} seconds", trimmedMedataUrl, mdRefreshSecs);
-        metadataProvider.setMinRefreshDelay((int)SECONDS.toMillis(mdRefreshSecs-1));
+
+        LOG.info("Setting max metadata refresh delay for {} to {} seconds", trimmedMedataUrl,
+            mdRefreshSecs);
+        metadataProvider.setMinRefreshDelay((int) SECONDS.toMillis(mdRefreshSecs - 1));
         metadataProvider.setMaxRefreshDelay(SECONDS.toMillis(mdRefreshSecs));
+
+        metadataProvider.setFailFastInitialization(true);
+        
         providers.add(metadataDelegate(metadataProvider, p));
       } else {
         LOG.error("Skipping invalid saml.idp-metatadata value: {}", trimmedMedataUrl);

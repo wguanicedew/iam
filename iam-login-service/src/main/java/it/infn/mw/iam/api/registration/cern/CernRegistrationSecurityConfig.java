@@ -38,7 +38,7 @@ public class CernRegistrationSecurityConfig extends WebSecurityConfigurerAdapter
   CernProperties properties;
 
   AuthenticationEntryPoint entryPoint() {
-    String discoveryId = String.format("/saml/login?idp=%s", properties.getSsoEntityId());
+    String discoveryId = String.format("/openid_connect_login?iss=%s", properties.getSsoIssuer());
     return new LoginUrlAuthenticationEntryPoint(discoveryId);
   }
 

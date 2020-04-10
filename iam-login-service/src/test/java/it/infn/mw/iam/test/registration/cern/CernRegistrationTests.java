@@ -47,7 +47,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
@@ -55,8 +54,9 @@ import org.springframework.web.context.WebApplicationContext;
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.registration.cern.CernHrDBApiService;
 import it.infn.mw.iam.api.registration.cern.CernHrDbApiError;
+import it.infn.mw.iam.config.cern.CernProperties;
 import it.infn.mw.iam.test.util.WithAnonymousUser;
-import it.infn.mw.iam.test.util.WithMockSAMLUser;
+import it.infn.mw.iam.test.util.WithMockOIDCUser;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {IamLoginService.class, CernRegistrationTests.class})
@@ -71,6 +71,9 @@ public class CernRegistrationTests {
   @Autowired
   private CernHrDBApiService mockService;
 
+  @Autowired
+  private CernProperties cernProperties;
+
   private MockMvc mvc;
 
   @Bean
@@ -81,10 +84,8 @@ public class CernRegistrationTests {
 
   @Before
   public void setup() {
-    mvc = MockMvcBuilders.webAppContextSetup(context)
-      .apply(springSecurity())
-      .alwaysDo(log())
-      .build();
+    mvc =
+        MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).alwaysDo(log()).build();
   }
 
   @After
@@ -97,16 +98,17 @@ public class CernRegistrationTests {
   public void testRedirectToCernSso() throws Exception {
 
     mvc.perform(get("/start-registration"))
-      .andExpect(MockMvcResultMatchers.status().isFound())
+      .andExpect(status().isFound())
       .andExpect(redirectedUrl("/cern-registration"));
 
     mvc.perform(get("/cern-registration"))
-      .andExpect(MockMvcResultMatchers.status().isFound())
-      .andExpect(redirectedUrl("http://localhost/saml/login?idp=https://cern.ch/login"));
+      .andExpect(status().isFound())
+      .andExpect(redirectedUrl(
+          "http://localhost/openid_connect_login?iss=" + cernProperties.getSsoIssuer()));
   }
 
   @Test
-  @WithMockSAMLUser(issuer = "https://idp.example",
+  @WithMockOIDCUser(issuer = "https://idp.example",
       authorities = EXT_AUTHN_UNREGISTERED_USER_AUTH_STRING)
   public void testCernAuthIsRequired() throws Exception {
     mvc.perform(get("/cern-registration"))
@@ -116,8 +118,9 @@ public class CernRegistrationTests {
   }
 
   @Test
-  @WithMockSAMLUser(issuer = "https://cern.ch/login",
-      authorities = EXT_AUTHN_UNREGISTERED_USER_AUTH_STRING, cernPersonId = "12345678")
+  @WithMockOIDCUser(issuer = "https://auth.cern.ch/auth/realms/cern",
+      authorities = EXT_AUTHN_UNREGISTERED_USER_AUTH_STRING,
+      claims = {"cern_person_id", "12345678"})
   public void testCernAuthHonoured() throws Exception {
     when(mockService.hasValidExperimentParticipation(Mockito.anyString())).thenReturn(true);
 
@@ -131,9 +134,9 @@ public class CernRegistrationTests {
     assertThat(personIdCaptor.getValue(), is("12345678"));
   }
 
-  @Test
-  @WithMockSAMLUser(issuer = "https://cern.ch/login",
-      authorities = EXT_AUTHN_UNREGISTERED_USER_AUTH_STRING, cernPersonId = "12345678")
+  @WithMockOIDCUser(issuer = "https://auth.cern.ch/auth/realms/cern",
+      authorities = EXT_AUTHN_UNREGISTERED_USER_AUTH_STRING,
+      claims = {"cern_person_id", "12345678"})
   public void testNotVoMemberBehaviour() throws Exception {
     when(mockService.hasValidExperimentParticipation(Mockito.anyString())).thenReturn(false);
 
@@ -148,8 +151,9 @@ public class CernRegistrationTests {
   }
 
   @Test
-  @WithMockSAMLUser(issuer = "https://cern.ch/login",
-      authorities = EXT_AUTHN_UNREGISTERED_USER_AUTH_STRING, cernPersonId = "12345678")
+  @WithMockOIDCUser(issuer = "https://auth.cern.ch/auth/realms/cern",
+      authorities = EXT_AUTHN_UNREGISTERED_USER_AUTH_STRING,
+      claims = {"cern_person_id", "12345678"})
   public void testCernHrDbApiExceptionHandling() throws Exception {
     when(mockService.hasValidExperimentParticipation(Mockito.anyString()))
       .thenThrow(new CernHrDbApiError("error"));
