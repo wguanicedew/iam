@@ -16,7 +16,6 @@
 package it.infn.mw.iam.test.registration.cern;
 
 import static it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport.EXT_AUTHN_UNREGISTERED_USER_AUTH_STRING;
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
@@ -29,7 +28,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
@@ -57,6 +55,7 @@ import it.infn.mw.iam.api.registration.cern.CernHrDbApiError;
 import it.infn.mw.iam.config.cern.CernProperties;
 import it.infn.mw.iam.test.util.WithAnonymousUser;
 import it.infn.mw.iam.test.util.WithMockOIDCUser;
+import it.infn.mw.iam.test.util.WithMockSAMLUser;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {IamLoginService.class, CernRegistrationTests.class})
@@ -112,9 +111,16 @@ public class CernRegistrationTests {
       authorities = EXT_AUTHN_UNREGISTERED_USER_AUTH_STRING)
   public void testCernAuthIsRequired() throws Exception {
     mvc.perform(get("/cern-registration"))
-      .andExpect(status().isOk())
-      .andExpect(forwardedUrl("/login"))
-      .andExpect(request().attribute("accessDeniedError", containsString("CERN SSO")));
+      .andExpect(status().isUnauthorized())
+      .andExpect(forwardedUrl("/WEB-INF/views/iam/cern/insufficient-auth.jsp"));
+  }
+  
+  @Test
+  @WithMockSAMLUser(authorities = EXT_AUTHN_UNREGISTERED_USER_AUTH_STRING)
+  public void testOidcAuthIsRequired() throws Exception {
+    mvc.perform(get("/cern-registration"))
+      .andExpect(status().isUnauthorized())
+      .andExpect(forwardedUrl("/WEB-INF/views/iam/cern/insufficient-auth.jsp"));
   }
 
   @Test

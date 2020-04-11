@@ -57,9 +57,12 @@ public class DefaultExternalAuthenticationInfoBuilder implements ExternalAuthent
 
         claims.keySet().forEach(k -> {
           try {
-            String value =
-                token.getExternalAuthentication().getIdToken().getJWTClaimsSet().getStringClaim(k);
-            result.put(k, value);
+            
+            Object value =
+                token.getExternalAuthentication().getIdToken().getJWTClaimsSet().getClaim(k);
+            
+            claims.put(k, String.valueOf(value));
+            
           } catch (ParseException e) {
             // swallow exception
           }

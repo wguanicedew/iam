@@ -15,17 +15,14 @@
  */
 package it.infn.mw.iam.api.registration.cern;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
-import java.text.ParseException;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -33,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.ModelAndView;
 
+import it.infn.mw.iam.api.registration.cern.error.InsufficientAuthenticationError;
 import it.infn.mw.iam.authn.ExternalAuthenticationInfoBuilder;
 import it.infn.mw.iam.authn.oidc.OidcExternalAuthenticationToken;
 import it.infn.mw.iam.config.cern.CernProperties;
@@ -49,10 +47,13 @@ public class CernRegistrationController {
 
   private final CernHrDBApiService hrService;
   private final ExternalAuthenticationInfoBuilder infoBuilder;
+  private final CernPersonIdResolver resolver;
 
   @Autowired
   public CernRegistrationController(CernHrDBApiService hrService, CernProperties props,
-      ExternalAuthenticationInfoBuilder infoBuilder, Environment env) {
+      ExternalAuthenticationInfoBuilder infoBuilder, CernPersonIdResolver resolver,
+      Environment env) {
+
     registrationProfileEnabled = false;
 
     for (String ap : env.getActiveProfiles()) {
@@ -64,6 +65,7 @@ public class CernRegistrationController {
     this.infoBuilder = infoBuilder;
     this.cernProperties = props;
     this.hrService = hrService;
+    this.resolver = resolver;
   }
 
   private void checkUnregisteredUserIsFromCernSSO(Authentication authentication) {
@@ -71,32 +73,19 @@ public class CernRegistrationController {
     if (authentication instanceof OidcExternalAuthenticationToken) {
       OidcExternalAuthenticationToken token = (OidcExternalAuthenticationToken) authentication;
       if (!cernProperties.getSsoIssuer().equals(token.getExternalAuthentication().getIssuer())) {
-        throw new AccessDeniedException("CERN SSO authentication is required");
+        throw new InsufficientAuthenticationError(
+            String.format("CERN SSO authentication is required, but user was autenticated by '%s'",
+                token.getExternalAuthentication().getIssuer()));
       }
-
+    } else {
+      throw new InsufficientAuthenticationError(
+          String.format("Invalid authentication type: %s", authentication.getClass().getName()));
     }
+
   }
 
   private String resolvePersonId(Authentication authentication) {
-
-    OidcExternalAuthenticationToken token = (OidcExternalAuthenticationToken) authentication;
-
-    String personId = null;
-
-    try {
-      personId = token.getExternalAuthentication()
-        .getIdToken()
-        .getJWTClaimsSet()
-        .getStringClaim(cernProperties.getPersonIdClaim());
-    } catch (ParseException e) {
-      throw new AccessDeniedException("CERN person id not found in CERN SSO id token!");
-    }
-
-    if (isNullOrEmpty(personId)) {
-      throw new AccessDeniedException("CERN person id not found in CERN SSO id token!");
-    }
-
-    return personId;
+    return resolver.resolvePersonId((OidcExternalAuthenticationToken) authentication);
   }
 
   @RequestMapping(method = GET, path = "/cern-registration")
@@ -130,4 +119,15 @@ public class CernRegistrationController {
     mav.addObject("hrError", e);
     return mav;
   }
+  
+  @ResponseStatus(code = HttpStatus.UNAUTHORIZED)
+  @ExceptionHandler(InsufficientAuthenticationError.class)
+  public ModelAndView handleAuthenticationError(InsufficientAuthenticationError e) {
+    ModelAndView mav = new ModelAndView("iam/cern/insufficient-auth");
+    mav.addObject("authError", e);
+    mav.addObject("experiment", cernProperties.getExperimentName());
+    return mav;
+  }
+
+
 }

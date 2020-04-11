@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.access.AccessDeniedHandler;
 
 public class OidcAccessDeniedHandler implements AccessDeniedHandler {
@@ -31,6 +32,7 @@ public class OidcAccessDeniedHandler implements AccessDeniedHandler {
   public void handle(HttpServletRequest request, HttpServletResponse response,
       AccessDeniedException accessDeniedException) throws IOException, ServletException {
 
+    SecurityContextHolder.clearContext();
     RequestDispatcher dispatcher = request.getRequestDispatcher("/login");
     request.setAttribute("accessDeniedError", accessDeniedException.getMessage());
 

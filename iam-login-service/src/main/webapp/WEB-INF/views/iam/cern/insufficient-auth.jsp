@@ -20,11 +20,13 @@
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags/iam"%>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
 <t:page title="Register">
-  <h2 class="text-center">No HR record found</h2>
-  <p class="text-center"> 
-    No valid <strong>${experiment}</strong> membership record found for user ${user.given_name} ${user.family_name} 
-    (PersonID: ${user.cern_person_id}).
-  </p>
+  <h2 class="text-center">Insufficient authentication</h2>
+  <p class="text-center">
+    Your CERN SSO authentication does not meet <strong>${experiment}</strong>
+    requirements.
+  <div class="text-center" id="exception-message">
+    <p>${authError.message}</p>
+  </div>
   <div id="register-confirm-back-btn" class="row text-center">
     <a class="btn btn-primary" href='/reset-session'>Back to Login Page</a>
   </div>
