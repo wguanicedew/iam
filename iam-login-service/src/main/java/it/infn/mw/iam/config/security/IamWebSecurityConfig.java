@@ -15,6 +15,11 @@
  */
 package it.infn.mw.iam.config.security;
 
+import static it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport.EXT_AUTHN_UNREGISTERED_USER_AUTH;
+import static it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo.ExternalAuthenticationType.OIDC;
+
+import javax.servlet.RequestDispatcher;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,11 +35,13 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.data.repository.query.SecurityEvaluationContextExtension;
 import org.springframework.security.oauth2.provider.expression.OAuth2WebSecurityExpressionHandler;
 import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.context.SecurityContextPersistenceFilter;
@@ -55,12 +62,13 @@ import it.infn.mw.iam.authn.x509.IamX509AuthenticationProvider;
 import it.infn.mw.iam.authn.x509.IamX509AuthenticationUserDetailService;
 import it.infn.mw.iam.authn.x509.IamX509PreauthenticationProcessingFilter;
 import it.infn.mw.iam.authn.x509.X509AuthenticationCredentialExtractor;
+import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
 @Configuration
 @EnableWebSecurity
 public class IamWebSecurityConfig {
-  
+
   @Bean
   public SecurityEvaluationContextExtension contextExtension() {
     return new SecurityEvaluationContextExtension();
@@ -142,7 +150,7 @@ public class IamWebSecurityConfig {
 
       // @formatter:off
       http.requestMatchers()
-        .antMatchers("/", "/login**", "/logout", "/authorize", "/manage/**", "/dashboard**", "/start-registration",
+        .antMatchers("/", "/login**", "/logout", "/authorize", "/manage/**", "/dashboard**",
             "/reset-session", "/device/**")
         .and()
         .sessionManagement()
@@ -150,7 +158,6 @@ public class IamWebSecurityConfig {
         .and()
           .authorizeRequests()
             .antMatchers("/login**", "/webjars/**").permitAll()
-            .antMatchers("/start-registration").permitAll()
             .antMatchers("/authorize**").permitAll()
             .antMatchers("/reset-session").permitAll()
             .antMatchers("/device/**").authenticated()
@@ -187,6 +194,57 @@ public class IamWebSecurityConfig {
 
       return new EnforceAupSignatureSuccessHandler(delegate, aupSignatureCheckService, accountUtils,
           accountRepo);
+    }
+  }
+
+  @Configuration
+  @Order(101)
+  public static class RegistrationConfig extends WebSecurityConfigurerAdapter {
+
+    @Autowired
+    IamProperties iamProperties;
+
+    AccessDeniedHandler accessDeniedHandler() {
+      return (request, response, authError) -> {
+        SecurityContextHolder.clearContext();
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/iam/insufficient-auth");
+        request.setAttribute("authError", authError);
+        dispatcher.forward(request, response);
+      };
+    }
+
+    AuthenticationEntryPoint entryPoint() {
+      String discoveryId = "/unset";
+      if (OIDC.equals(iamProperties.getRegistration().getAuthenticationType())) {
+        discoveryId = String.format("/openid_connect_login?iss=%s",
+            iamProperties.getRegistration().getOidcIssuer());
+      } else {
+        discoveryId =
+            String.format("/saml/login?idp=%s", iamProperties.getRegistration().getSamlEntityId());
+      }
+      return new LoginUrlAuthenticationEntryPoint(discoveryId);
+    }
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+
+      http.requestMatchers()
+        .antMatchers("/start-registration")
+        .and()
+        .sessionManagement()
+        .enableSessionUrlRewriting(false);
+
+      if (iamProperties.getRegistration().isRequireExternalAuthentication()) {
+        http.authorizeRequests()
+          .antMatchers("/start-registration")
+          .hasAuthority(EXT_AUTHN_UNREGISTERED_USER_AUTH.getAuthority())
+          .and()
+          .exceptionHandling()
+          .accessDeniedHandler(accessDeniedHandler())
+          .authenticationEntryPoint(entryPoint());
+      } else {
+        http.authorizeRequests().antMatchers("/start-registration").permitAll();
+      }
     }
   }
 

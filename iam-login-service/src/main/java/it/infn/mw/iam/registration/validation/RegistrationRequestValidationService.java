@@ -13,20 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.api.registration.cern.error;
+package it.infn.mw.iam.registration.validation;
 
-import org.springframework.security.access.AccessDeniedException;
+import java.util.Optional;
 
-public class InsufficientAuthenticationError extends AccessDeniedException {
+import it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo;
+import it.infn.mw.iam.registration.RegistrationRequestDto;
 
-  private static final long serialVersionUID = 1L;
+public interface RegistrationRequestValidationService {
 
-  public InsufficientAuthenticationError(String msg) {
-    super(msg);
-  }
-
-  public InsufficientAuthenticationError(String msg, Throwable t) {
-    super(msg, t);
-  }
-
+  RegistrationRequestValidationResult validateRegistrationRequest(
+      RegistrationRequestDto registrationRequest,
+      Optional<ExternalAuthenticationRegistrationInfo> authentication);
 }

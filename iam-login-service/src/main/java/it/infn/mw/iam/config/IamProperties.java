@@ -15,14 +15,95 @@
  */
 package it.infn.mw.iam.config;
 
+import java.util.Map;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo.ExternalAuthenticationType;
 import it.infn.mw.iam.config.login.LoginButtonProperties;
 
 @Component
 @ConfigurationProperties(prefix = "iam")
 public class IamProperties {
+
+  @JsonInclude(JsonInclude.Include.NON_EMPTY)
+  public static class RegistrationFieldProperties {
+    boolean readOnly = false;
+    String externalAuthAttribute;
+
+    public boolean isReadOnly() {
+      return readOnly;
+    }
+
+    public void setReadOnly(boolean readOnly) {
+      this.readOnly = readOnly;
+    }
+
+    public String getExternalAuthAttribute() {
+      return externalAuthAttribute;
+    }
+
+    public void setExternalAuthAttribute(String externalAuthAttribute) {
+      this.externalAuthAttribute = externalAuthAttribute;
+    }
+  }
+
+  @JsonInclude(JsonInclude.Include.NON_EMPTY)
+  public static class RegistrationProperties {
+
+    boolean requireExternalAuthentication = false;
+
+    ExternalAuthenticationType authenticationType;
+
+    String oidcIssuer;
+
+    String samlEntityId;
+
+    Map<String, RegistrationFieldProperties> fields;
+
+    public boolean isRequireExternalAuthentication() {
+      return requireExternalAuthentication;
+    }
+
+    public void setRequireExternalAuthentication(boolean requireExternalAuthentication) {
+      this.requireExternalAuthentication = requireExternalAuthentication;
+    }
+
+    public ExternalAuthenticationType getAuthenticationType() {
+      return authenticationType;
+    }
+
+    public void setAuthenticationType(ExternalAuthenticationType authenticationType) {
+      this.authenticationType = authenticationType;
+    }
+
+    public String getOidcIssuer() {
+      return oidcIssuer;
+    }
+
+    public void setOidcIssuer(String oidcIssuer) {
+      this.oidcIssuer = oidcIssuer;
+    }
+
+    public String getSamlEntityId() {
+      return samlEntityId;
+    }
+
+    public void setSamlEntityId(String samlEntityId) {
+      this.samlEntityId = samlEntityId;
+    }
+
+    public Map<String, RegistrationFieldProperties> getFields() {
+      return fields;
+    }
+
+    public void setFields(Map<String, RegistrationFieldProperties> fields) {
+      this.fields = fields;
+    }
+  }
 
   public static class DeviceCodeProperties {
     Boolean allowCompleteVerificationUri = true;
@@ -34,6 +115,8 @@ public class IamProperties {
     public void setAllowCompleteVerificationUri(Boolean allowCompleteVerificationUri) {
       this.allowCompleteVerificationUri = allowCompleteVerificationUri;
     }
+
+
   }
 
   public static class JWKProperties {
@@ -264,6 +347,8 @@ public class IamProperties {
 
   private boolean generateDdlSqlScript = false;
 
+  private RegistrationProperties registration = new RegistrationProperties();
+
   public String getBaseUrl() {
     return baseUrl;
   }
@@ -398,5 +483,13 @@ public class IamProperties {
 
   public boolean isGenerateDdlSqlScript() {
     return generateDdlSqlScript;
+  }
+
+  public RegistrationProperties getRegistration() {
+    return registration;
+  }
+
+  public void setRegistration(RegistrationProperties registration) {
+    this.registration = registration;
   }
 }

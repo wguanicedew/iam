@@ -23,6 +23,8 @@ import it.infn.mw.iam.config.oidc.OidcProvider;
 
 public interface LoginPageConfiguration {
 
+  boolean isExternalAuthenticationEnabled();
+  
   boolean isOidcEnabled();
 
   boolean isGithubEnabled();

@@ -13,11 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.api.registration.cern;
+package it.infn.mw.iam.api.registration.cern.mock;
 
-import it.infn.mw.iam.authn.oidc.OidcExternalAuthenticationToken;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Service;
 
-@FunctionalInterface
-public interface CernPersonIdResolver {
-  String resolvePersonId(OidcExternalAuthenticationToken token);
+import it.infn.mw.iam.api.registration.cern.CernHrDBApiService;
+
+@Profile({"mock"})
+@Service
+@Primary
+public class MockCernHrService implements CernHrDBApiService {
+
+  @Override
+  public boolean hasValidExperimentParticipation(String personId) {
+    
+    return true;
+  }
+
 }

@@ -32,7 +32,6 @@ public class PersistentUUIDTokenGenerator implements TokenGenerator {
 
   @Override
   public String generateToken() {
-
     lastToken = generator.generateToken();
     return lastToken;
   }

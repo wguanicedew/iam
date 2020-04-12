@@ -48,7 +48,6 @@
 </head>
 
 <script>
-
 var _accountLinkingMessage = "${accountLinkingMessage}";
 var _accountLinkingError = "${accountLinkingError}";
 
@@ -59,6 +58,7 @@ function getUserX509CertficateSubject() {
 function getUserX509CertficateIssuer() {
 	  return '${sessionScope.IAM_X509_CRED.issuer}';
 }
+
 //get the info of the currently authenticated user, if available (null otherwise)
 function getUserInfo() {
   return ${userInfoJson};
@@ -100,5 +100,9 @@ function getSamlEnabled() {
 
 function getRcauthEnabled() {
   return ${iamRcauthEnabled};
+}
+
+function getExternalAuthenticationEnabled() {
+    return ${loginPageConfiguration.externalAuthenticationEnabled};
 }
 </script>

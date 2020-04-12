@@ -15,11 +15,14 @@
  */
 package it.infn.mw.iam.authn.oidc;
 
+import static it.infn.mw.iam.authn.DefaultExternalAuthenticationInfoBuilder.OIDC_TYPE;
+import static it.infn.mw.iam.authn.DefaultExternalAuthenticationInfoBuilder.TYPE_ATTR;
+import static it.infn.mw.iam.authn.util.JwtUtils.getClaimsAsMap;
 import static java.util.Objects.isNull;
 
-import java.text.ParseException;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
@@ -51,7 +54,6 @@ public class OidcExternalAuthenticationToken
 
   @Override
   public Map<String, String> buildAuthnInfoMap(ExternalAuthenticationInfoBuilder visitor) {
-
     return visitor.buildInfoMap(this);
   }
 
@@ -65,30 +67,14 @@ public class OidcExternalAuthenticationToken
     ri.setSubject(getExternalAuthentication().getSub());
     ri.setIssuer(getExternalAuthentication().getIssuer());
 
-    if (!isNull(getExternalAuthentication().getIdToken())) {
-      try {
-        Map<String, Object> claims =
-            getExternalAuthentication().getIdToken().getJWTClaimsSet().getClaims();
-
-        for (String key : claims.keySet()) {
-          try {
-            String value =
-                getExternalAuthentication().getIdToken().getJWTClaimsSet().getStringClaim(key);
-            ri.getAdditionalAttributes().put(key, value);
-          } catch (ParseException e) {
-            // swallow
-          }
-        }
-      } catch (ParseException e) {
-        // swallow
-      }
-    }
-    
     if (getExternalAuthentication().getUserInfo() != null) {
       ri.setEmail(getExternalAuthentication().getUserInfo().getEmail());
       ri.setGivenName(getExternalAuthentication().getUserInfo().getGivenName());
       ri.setFamilyName(getExternalAuthentication().getUserInfo().getFamilyName());
+      ri.setSuggestedUsername(getExternalAuthentication().getUserInfo().getPreferredUsername());
     }
+
+    ri.getAdditionalAttributes().putAll(buildAuthnInfoMap());
 
     return ri;
   }
@@ -96,6 +82,21 @@ public class OidcExternalAuthenticationToken
   @Override
   public void linkToIamAccount(ExternalAccountLinker visitor, IamAccount account) {
     visitor.linkToIamAccount(account, this);
+  }
+
+  @Override
+  public Map<String, String> buildAuthnInfoMap() {
+    Map<String, String> infoMap = new HashMap<>();
+
+    infoMap.put(TYPE_ATTR, OIDC_TYPE);
+    infoMap.put("sub", getExternalAuthentication().getSub());
+    infoMap.put("iss", getExternalAuthentication().getIssuer());
+
+    if (!isNull(getExternalAuthentication().getIdToken())) {
+      infoMap.putAll(getClaimsAsMap(getExternalAuthentication().getIdToken()));
+    }
+
+    return infoMap;
   }
 
 }

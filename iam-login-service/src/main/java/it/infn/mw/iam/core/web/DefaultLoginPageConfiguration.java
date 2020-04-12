@@ -115,7 +115,12 @@ public class DefaultLoginPageConfiguration implements LoginPageConfiguration, En
 
   @Override
   public Optional<String> getPrivacyPolicyUrl() {
-    return Optional.ofNullable(iamProperties.getPrivacyPolicy().getUrl());
+    
+    if (Strings.isNullOrEmpty(iamProperties.getPrivacyPolicy().getUrl())) {
+      return Optional.empty();
+    }
+    
+    return Optional.of(iamProperties.getPrivacyPolicy().getUrl());
   }
 
   @Override
@@ -142,6 +147,12 @@ public class DefaultLoginPageConfiguration implements LoginPageConfiguration, En
   @Override
   public Logo getLogo() {
     return iamProperties.getLogo();
+  }
+
+
+  @Override
+  public boolean isExternalAuthenticationEnabled() {
+    return isOidcEnabled() || isSamlEnabled();
   }
 
 }

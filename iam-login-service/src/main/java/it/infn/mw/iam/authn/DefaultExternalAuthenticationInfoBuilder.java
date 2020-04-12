@@ -16,12 +16,14 @@
 package it.infn.mw.iam.authn;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static it.infn.mw.iam.authn.util.JwtUtils.getClaimsAsMap;
 import static java.util.Objects.isNull;
 
-import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.saml.SAMLCredential;
 import org.springframework.stereotype.Component;
 
@@ -31,6 +33,10 @@ import it.infn.mw.iam.authn.saml.util.Saml2Attribute;
 
 @Component
 public class DefaultExternalAuthenticationInfoBuilder implements ExternalAuthenticationInfoBuilder {
+
+  public static final Logger LOG =
+      LoggerFactory.getLogger(DefaultExternalAuthenticationInfoBuilder.class);
+
 
   public static final String TYPE_ATTR = "type";
   public static final String OIDC_TYPE = "oidc";
@@ -43,36 +49,17 @@ public class DefaultExternalAuthenticationInfoBuilder implements ExternalAuthent
   public Map<String, String> buildInfoMap(OidcExternalAuthenticationToken token) {
     checkNotNull(token, "token cannot be null");
 
-    Map<String, String> result = new HashMap<>();
+    Map<String, String> infoMap = new HashMap<>();
 
-    result.put(TYPE_ATTR, OIDC_TYPE);
-    result.put("sub", token.getExternalAuthentication().getSub());
-    result.put("iss", token.getExternalAuthentication().getIssuer());
+    infoMap.put(TYPE_ATTR, OIDC_TYPE);
+    infoMap.put("sub", token.getExternalAuthentication().getSub());
+    infoMap.put("iss", token.getExternalAuthentication().getIssuer());
 
     if (!isNull(token.getExternalAuthentication().getIdToken())) {
-      
-      try {
-        Map<String, Object> claims =
-            token.getExternalAuthentication().getIdToken().getJWTClaimsSet().getClaims();
-
-        claims.keySet().forEach(k -> {
-          try {
-            
-            Object value =
-                token.getExternalAuthentication().getIdToken().getJWTClaimsSet().getClaim(k);
-            
-            claims.put(k, String.valueOf(value));
-            
-          } catch (ParseException e) {
-            // swallow exception
-          }
-        });
-      } catch (ParseException e) {
-        // swallow exception
-      }
+      infoMap.putAll(getClaimsAsMap(token.getExternalAuthentication().getIdToken()));
     }
-
-    return result;
+    
+    return infoMap;
   }
 
   public Map<String, String> buildInfoMap(SamlExternalAuthenticationToken token) {

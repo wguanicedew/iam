@@ -97,6 +97,12 @@ iam:
   
   device-code:
     allow-complete-verification-uri: ${IAM_DEVICE_CODE_ALLOW_COMPLETE_VERIFICATION_URI:true}
+  
+  registration:
+    require-external-authentication: ${IAM_REGISTRATION_REQUIRE_EXTERNAL_AUTHENTICATION:false}
+    authentication-type: ${IAM_REGISTRATION_AUTHENTICATION_TYPE:oidc}
+    oidc-issuer: ${IAM_REGISTRATION_OIDC_ISSUER:https://example.org}
+    saml-entity-id: ${IAM_REGISTRATION_SAML_ENTITY_ID:urn:example}
     
 x509:
   trustAnchorsDir: ${IAM_X509_TRUST_ANCHORS_DIR:/etc/grid-security/certificates}

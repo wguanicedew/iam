@@ -43,7 +43,7 @@ public class MockCernAuthController {
 
     OidcSecurityContextBuilder builder = new OidcSecurityContextBuilder();
     
-    builder//.claim(properties.getPersonIdClaim(), "987654321")
+    builder.claim(properties.getPersonIdClaim(), "987654321")
     .claim("email", "test@example.org")
     .name("Test", "User")
     .username("test")
@@ -57,6 +57,6 @@ public class MockCernAuthController {
     
     session.setAttribute(SPRING_SECURITY_CONTEXT_KEY, context);
     
-    return "redirect:/cern-registration";
+    return "redirect:/start-registration";
   }
 }

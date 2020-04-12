@@ -30,7 +30,9 @@
                 <div class="col-xs-8 col-sm-8">
                     <div class="account-icon">
                         <i class="fa fa-google" title="Google account" ng-if="$ctrl.isGoogleAccount(oidcId)"></i>
-                        <i class="fa fa-openid" title="OpenID Connect account" ng-if="!$ctrl.isGoogleAccount(oidcId)"></i>
+                        <i class="fa fa-openid" title="OpenID Connect
+                        account"
+                            ng-if="!$ctrl.isGoogleAccount(oidcId)"></i>
                     </div>
                     <div class="account-detail">
                         <div class="oidc-issuer">{{oidcId.issuer}}</div>
@@ -73,7 +75,7 @@
         </div>
     </div>
 
-    <div class="box-footer" ng-if="$ctrl.userCtrl.canLinkAccounts()">
+    <div class="box-footer" ng-if="$ctrl.userCtrl.canLinkAccounts() && $ctrl.userCtrl.externalAuthenticationEnabled">
         <button class="btn btn-success btn-sm" name="btn-link-oidc" ng-click="$ctrl.openLinkExternalAccountDialog()">
             <i class="fa fa-link"></i> Link external account
         </button>

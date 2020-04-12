@@ -54,6 +54,8 @@ public class OidcSecurityContextBuilder extends SecurityContextBuilderSupport {
   public SecurityContext buildSecurityContext() {
 
     OIDCAuthenticationToken authToken = mock(OIDCAuthenticationToken.class);
+    UserInfo userInfo = mock(UserInfo.class);
+    when(authToken.getUserInfo()).thenReturn(userInfo);
 
     JWTClaimsSet.Builder builder = new JWTClaimsSet.Builder();
 
@@ -68,6 +70,7 @@ public class OidcSecurityContextBuilder extends SecurityContextBuilderSupport {
     when(authToken.getName()).thenReturn(username);
     when(authToken.getIdToken()).thenReturn(idToken);
     
+    
     if (expirationTime == null) {
       Calendar cal = Calendar.getInstance();
       cal.add(Calendar.HOUR, 2);
@@ -76,6 +79,16 @@ public class OidcSecurityContextBuilder extends SecurityContextBuilderSupport {
 
     OidcExternalAuthenticationToken token = new OidcExternalAuthenticationToken(authToken,
         expirationTime, authToken.getPrincipal(), "", authorities);
+    
+    
+    when(userInfo.getGivenName()).thenReturn(stringClaims.get("given_name"));
+    when(userInfo.getFamilyName()).thenReturn(stringClaims.get("family_name"));
+    when(userInfo.getName()).thenReturn(stringClaims.get("name"));
+    when(userInfo.getEmail()).thenReturn(stringClaims.get("email"));
+    when(userInfo.getPreferredUsername()).thenReturn(username);
+    
+    
+
 
     SecurityContext context = SecurityContextHolder.createEmptyContext();
     context.setAuthentication(token);
