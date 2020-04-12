@@ -14,37 +14,40 @@
 # limitations under the License.
 #
 
-oidc:
-  providers:
-  - name: cern
-    enabled: true
-    issuer: https://cern.ch
-    client:
-      client-id: test
-      client-secret: test
-      scope: "openid profile email"
-    login-button:
-      text: CERN SSO
-      title: Login with CERN SSO
-    validator:
-      kind: hasClaim
-      params:
-        claimName: cern_person_id
-iam:
-  registration:
-    require-external-authentication: true
-    oidc-issuer: https://cern.ch
-    authentication-type: oidc
-    fields:
-      name:
-        read-only: true
-        external-auth-attribute: given_name
-      surname:
-        read-only: true
-        external-auth-attribute: family_name
-      email:
-        read-only: false
-        external-auth-attribute: email
-      username:
-        read-only: false
-        external-auth-attribute: preferred_username
+#oidc:
+#  providers:
+#  - name: google
+#    enabled: true
+#    issuer:  https://accounts.google.com
+#    client:
+#      clientId: ${IAM_GOOGLE_CLIENT_ID}
+#      clientSecret: ${IAM_GOOGLE_CLIENT_SECRET}
+#      redirectUris: ${iam.baseUrl}/openid_connect_login
+#      scope: openid,profile,email,address,phone
+#    loginButton:
+#      text: Google
+#      style: btn-social btn-google
+#      image:
+#        fa-icon: google
+#    #validator:
+#    #  kind: hasClaim
+#    #  params:
+#    #   claimName: cern_person_id
+#iam:
+#  registration:
+#    require-external-authentication: true
+#    oidc-issuer: https://accounts.google.com
+#    authentication-type: oidc
+#    fields:
+#      name:
+#        read-only: true
+#        external-auth-attribute: given_name
+#      surname:
+#        read-only: true
+#        external-auth-attribute: family_name
+#      email:
+#        read-only: false
+#        external-auth-attribute: email
+#      username:
+#        read-only: false
+#        external-auth-attribute: preferred_username

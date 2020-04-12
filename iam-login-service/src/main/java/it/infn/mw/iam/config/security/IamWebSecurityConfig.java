@@ -35,7 +35,6 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.data.repository.query.SecurityEvaluationContextExtension;
@@ -206,8 +205,7 @@ public class IamWebSecurityConfig {
 
     AccessDeniedHandler accessDeniedHandler() {
       return (request, response, authError) -> {
-        SecurityContextHolder.clearContext();
-        RequestDispatcher dispatcher = request.getRequestDispatcher("/iam/insufficient-auth");
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/registration/insufficient-auth");
         request.setAttribute("authError", authError);
         dispatcher.forward(request, response);
       };

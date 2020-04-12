@@ -168,6 +168,7 @@ function RegistrationController(
 
   function reset() {
     resetRequest();
+    populateRequest();
     $scope.registrationForm.$setPristine();
   }
 

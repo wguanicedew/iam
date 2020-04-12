@@ -18,6 +18,8 @@ package it.infn.mw.iam.registration;
 import java.util.List;
 import java.util.Optional;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,8 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -54,12 +58,14 @@ import it.infn.mw.iam.registration.validation.RegistrationRequestValidatorError;
 public class RegistrationApiController {
 
   public static final Logger LOG = LoggerFactory.getLogger(RegistrationApiController.class);
-  
+  private static final GrantedAuthority USER_AUTHORITY = new SimpleGrantedAuthority("ROLE_USER");
+
   private final RegistrationRequestService service;
   private final RegistrationProperties registrationProperties;
-  
+
   @Autowired
-  public RegistrationApiController(RegistrationRequestService registrationService, IamProperties properties) {
+  public RegistrationApiController(RegistrationRequestService registrationService,
+      IamProperties properties) {
     service = registrationService;
     registrationProperties = properties.getRegistration();
   }
@@ -81,8 +87,8 @@ public class RegistrationApiController {
     return Optional.empty();
   }
 
-  
-  
+
+
   @PreAuthorize("#oauth2.hasScope('registration:read') or hasRole('ADMIN')")
   @RequestMapping(value = "/registration/list", method = RequestMethod.GET)
   @ResponseBody
@@ -146,12 +152,23 @@ public class RegistrationApiController {
     return new ModelAndView("iam/requestVerified");
   }
 
+  @RequestMapping(value = "/registration/insufficient-auth", method = RequestMethod.GET)
+  public ModelAndView insufficientAuth(final Model model, final HttpServletRequest request, final Authentication auth) {
+    
+    if (auth.isAuthenticated() && auth.getAuthorities().contains(USER_AUTHORITY)) {
+      return new ModelAndView("redirect:/dashboard");
+    }
+    
+    model.addAttribute("authError", request.getAttribute("authError"));
+    return new ModelAndView("iam/insufficient-auth");
+  }
+
   @RequestMapping(value = "/registration/submitted", method = RequestMethod.GET)
   public ModelAndView submissionSuccess() {
     SecurityContextHolder.clearContext();
     return new ModelAndView("iam/requestSubmitted");
   }
-  
+
   @RequestMapping(value = "/registration/config", method = RequestMethod.GET)
   public RegistrationProperties registrationConfig() {
     return registrationProperties;

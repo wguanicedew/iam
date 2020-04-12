@@ -22,6 +22,9 @@
     </h2>
     <div class="ext-authn-info" ng-show="extAuthInfo != null">
         <p>
+            This is the <strong>{{organisationName}}</strong> registration page.
+        </p>
+        <p>
             You have been succesfully authenticated, but your credentials are
             <strong>not</strong> yet linked to an
             <strong>{{organisationName}}</strong> account.
@@ -47,8 +50,7 @@
             To proceed with the registration please fill in your personal information below.
         </p>
     </div>
-    <div>
-
+    <div class="box box-default no-border registration-box">
         <form name="registrationForm" id="registration-form">
             <div ng-show="operationResult != null">
                 <div class="alert"
