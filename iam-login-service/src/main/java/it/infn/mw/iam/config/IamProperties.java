@@ -15,12 +15,14 @@
  */
 package it.infn.mw.iam.config;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.google.common.collect.Lists;
 
 import it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo.ExternalAuthenticationType;
 import it.infn.mw.iam.config.login.LoginButtonProperties;
@@ -28,6 +30,26 @@ import it.infn.mw.iam.config.login.LoginButtonProperties;
 @Component
 @ConfigurationProperties(prefix = "iam")
 public class IamProperties {
+
+  public enum EditableFields {
+    NAME,
+    SURNAME,
+    EMAIL,
+    PICTURE
+  }
+
+  @JsonInclude(JsonInclude.Include.NON_EMPTY)
+  public static class UserProfileProperties {
+    private List<EditableFields> editableFields = Lists.newArrayList();
+
+    public List<EditableFields> getEditableFields() {
+      return editableFields;
+    }
+
+    public void setEditableFields(List<EditableFields> editableFields) {
+      this.editableFields = editableFields;
+    }
+  }
 
   @JsonInclude(JsonInclude.Include.NON_EMPTY)
   public static class RegistrationFieldProperties {
@@ -349,6 +371,9 @@ public class IamProperties {
 
   private RegistrationProperties registration = new RegistrationProperties();
 
+  private UserProfileProperties userProfile = new UserProfileProperties();
+
+
   public String getBaseUrl() {
     return baseUrl;
   }
@@ -492,4 +517,13 @@ public class IamProperties {
   public void setRegistration(RegistrationProperties registration) {
     this.registration = registration;
   }
+
+  public UserProfileProperties getUserProfile() {
+    return userProfile;
+  }
+
+  public void setUserProfile(UserProfileProperties userProfile) {
+    this.userProfile = userProfile;
+  }
+
 }

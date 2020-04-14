@@ -23,6 +23,9 @@ import static it.infn.mw.iam.core.IamRegistrationRequestStatus.NEW;
 import static it.infn.mw.iam.core.IamRegistrationRequestStatus.REJECTED;
 import static java.util.Objects.isNull;
 
+import java.time.Clock;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -55,6 +58,7 @@ import it.infn.mw.iam.audit.events.registration.RegistrationRejectEvent;
 import it.infn.mw.iam.audit.events.registration.RegistrationRequestEvent;
 import it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo;
 import it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo.ExternalAuthenticationType;
+import it.infn.mw.iam.config.lifecycle.LifecycleProperties;
 import it.infn.mw.iam.core.IamRegistrationRequestStatus;
 import it.infn.mw.iam.core.user.IamAccountService;
 import it.infn.mw.iam.notification.NotificationFactory;
@@ -108,6 +112,12 @@ public class DefaultRegistrationRequestService
   @Autowired(required = false)
   private RegistrationRequestValidationService validationService;
 
+  @Autowired
+  private LifecycleProperties lifecycleProperties;
+
+  @Autowired
+  private Clock clock;
+
   private ApplicationEventPublisher eventPublisher;
 
   private IamRegistrationRequest findRequestById(String requestUuid) {
@@ -151,7 +161,8 @@ public class DefaultRegistrationRequestService
 
   private void createAupSignatureForAccountIfNeeded(IamAccount account) {
     iamAupRepo.findDefaultAup()
-      .ifPresent(a -> iamAupSignatureRepo.createSignatureForAccount(account, new Date()));
+      .ifPresent(
+          a -> iamAupSignatureRepo.createSignatureForAccount(account, Date.from(clock.instant())));
   }
 
 
@@ -170,7 +181,7 @@ public class DefaultRegistrationRequestService
         throw new RegistrationRequestValidatorError(result.getErrorMessage());
       }
     }
-    
+
     ScimUser.Builder userBuilder = ScimUser.builder()
       .buildName(dto.getGivenname(), dto.getFamilyname())
       .buildEmail(dto.getEmail())
@@ -188,7 +199,7 @@ public class DefaultRegistrationRequestService
 
     IamRegistrationRequest requestEntity = new IamRegistrationRequest();
     requestEntity.setUuid(UUID.randomUUID().toString());
-    requestEntity.setCreationTime(new Date());
+    requestEntity.setCreationTime(Date.from(clock.instant()));
 
     requestEntity.setStatus(NEW);
     requestEntity.setNotes(dto.getNotes());
@@ -285,17 +296,26 @@ public class DefaultRegistrationRequestService
     return allowedStateTransitions.contains(currentStatus, newStatus);
   }
 
+
+
   private RegistrationRequestDto handleApprove(IamRegistrationRequest request) {
     IamAccount account = request.getAccount();
     account.setActive(true);
     account.setResetKey(tokenGenerator.generateToken());
-    account.setLastUpdateTime(new Date());
+    account.setLastUpdateTime(Date.from(clock.instant()));
     account.setLabels(request.getLabels());
+
+    if (!isNull(lifecycleProperties.getAccount().getAccountLifetimeDays())
+        && lifecycleProperties.getAccount().getAccountLifetimeDays() > 0) {
+      Instant endTime = clock.instant()
+        .plus(lifecycleProperties.getAccount().getAccountLifetimeDays(), ChronoUnit.DAYS);
+      account.setEndTime(Date.from(endTime));
+    }
 
     notificationFactory.createAccountActivatedMessage(request);
 
     request.setStatus(APPROVED);
-    request.setLastUpdateTime(new Date());
+    request.setLastUpdateTime(Date.from(clock.instant()));
     requestRepository.save(request);
 
     eventPublisher.publishEvent(new RegistrationApproveEvent(this, request,
@@ -306,7 +326,7 @@ public class DefaultRegistrationRequestService
 
   private RegistrationRequestDto handleConfirm(IamRegistrationRequest request) {
     request.setStatus(CONFIRMED);
-    request.setLastUpdateTime(new Date());
+    request.setLastUpdateTime(Date.from(clock.instant()));
     request.getAccount().getUserInfo().setEmailVerified(true);
     request.getAccount().setConfirmationKey(null);
     requestRepository.save(request);

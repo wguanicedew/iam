@@ -20,15 +20,19 @@ import static it.infn.mw.iam.core.IamRegistrationRequestStatus.APPROVED;
 import static it.infn.mw.iam.core.IamRegistrationRequestStatus.CONFIRMED;
 import static it.infn.mw.iam.core.IamRegistrationRequestStatus.NEW;
 import static it.infn.mw.iam.core.IamRegistrationRequestStatus.REJECTED;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.function.Supplier;
 
 import org.junit.After;
 import org.junit.Before;
@@ -49,6 +53,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
+import it.infn.mw.iam.persistence.model.IamAccount;
+import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.registration.PersistentUUIDTokenGenerator;
 import it.infn.mw.iam.registration.RegistrationRequestDto;
 import it.infn.mw.iam.registration.RegistrationRequestService;
@@ -73,12 +79,19 @@ public class RegistrationPrivilegedTests {
 
   @Autowired
   private MockOAuth2Filter mockOAuth2Filter;
-  
+
   private MockMvc mvc;
-  
+
   @Autowired
-  private RegistrationRequestService registrationService; 
-  
+  private RegistrationRequestService registrationService;
+
+  @Autowired
+  private IamAccountRepository repo;
+
+  private Supplier<AssertionError> assertionError(String message) {
+    return () -> new AssertionError(message);
+  }
+
   private RegistrationRequestDto createRegistrationRequest(String username) throws Exception {
 
     String email = username + "@example.org";
@@ -102,7 +115,7 @@ public class RegistrationPrivilegedTests {
 
     return objectMapper.readValue(response, RegistrationRequestDto.class);
   }
-  
+
   private void confirmRegistrationRequest(String confirmationKey) throws Exception {
     // @formatter:off
     mvc.perform(get("/registration/confirm/{token}", confirmationKey))
@@ -113,24 +126,22 @@ public class RegistrationPrivilegedTests {
 
   protected RegistrationRequestDto approveRequest(String uuid) throws Exception {
     String response = mvc
-        .perform(post("/registration/approve/{uuid}", uuid)
-          .with(SecurityMockMvcRequestPostProcessors.user("admin").roles("ADMIN", "USER")))
-        .andExpect(status().isOk())
-        .andReturn()
-        .getResponse()
-        .getContentAsString();
+      .perform(post("/registration/approve/{uuid}", uuid)
+        .with(SecurityMockMvcRequestPostProcessors.user("admin").roles("ADMIN", "USER")))
+      .andExpect(status().isOk())
+      .andReturn()
+      .getResponse()
+      .getContentAsString();
     // @formatter:on
     return objectMapper.readValue(response, RegistrationRequestDto.class);
   }
 
   @Before
   public void setup() {
-    mvc = MockMvcBuilders.webAppContextSetup(context)
-      .apply(springSecurity())
-      .alwaysDo(log())
-      .build();
+    mvc =
+        MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).alwaysDo(log()).build();
   }
-  
+
   @After
   public void teardown() {
     mockOAuth2Filter.cleanupSecurityContext();
@@ -210,6 +221,11 @@ public class RegistrationPrivilegedTests {
       .andExpect(jsonPath("$.status", equalTo(APPROVED.name())))
       .andExpect(jsonPath("$.uuid", equalTo(reg.getUuid())));
     // @formatter:on
+
+    IamAccount account = repo.findByUsername("test_approve")
+      .orElseThrow(assertionError("Expected account not found"));
+    assertThat(account.getEndTime(), nullValue());
+
   }
 
   @Test
@@ -271,34 +287,34 @@ public class RegistrationPrivilegedTests {
       .andExpect(status().isNotFound());
     // @formatter:on
   }
-  
+
   @Test
   @WithMockOAuthUser(clientId = "registration-client", scopes = {"registration:write"})
   public void confirmAlreadyConfirmedRequest() throws Exception {
     // create new request
     RegistrationRequestDto reg = createRegistrationRequest("test_multiple_confirm");
     assertNotNull(reg);
-    
+
     String confirmationKey = generator.getLastToken();
     approveRequest(reg.getUuid());
-    
+
     mvc.perform(get("/registration/confirm/{token}", confirmationKey))
-    .andExpect(status().isNotFound());
-    
+      .andExpect(status().isNotFound());
+
   }
-  
+
   @Test(expected = IllegalArgumentException.class)
   @WithMockOAuthUser(clientId = "registration-client", scopes = {"registration:write"})
   public void approveAlreadyManagedRequest() throws Exception {
-    
+
     // create new request
     RegistrationRequestDto reg = createRegistrationRequest("test_multiple_approve");
     assertNotNull(reg);
-    
+
     // first approval works fine
     registrationService.approveRequest(reg.getUuid());
-    
+
     // second one raises exception, due to unallowed transition
-    registrationService.approveRequest(reg.getUuid()); 
+    registrationService.approveRequest(reg.getUuid());
   }
 }

@@ -17,6 +17,10 @@ package it.infn.mw.iam.test.service;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -40,15 +44,19 @@ import org.junit.runner.RunWith;
 import org.mitre.oauth2.model.OAuth2AccessTokenEntity;
 import org.mitre.oauth2.model.OAuth2RefreshTokenEntity;
 import org.mitre.oauth2.service.OAuth2TokenEntityService;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.google.common.collect.Sets;
 
+import it.infn.mw.iam.audit.events.account.AccountEndTimeUpdatedEvent;
 import it.infn.mw.iam.core.time.TimeProvider;
 import it.infn.mw.iam.core.user.DefaultIamAccountService;
 import it.infn.mw.iam.core.user.exception.CredentialAlreadyBoundException;
@@ -86,6 +94,8 @@ public class IamAccountServiceTests extends IamAccountServiceTestSupport {
   @InjectMocks
   private DefaultIamAccountService accountService;
 
+  @Captor
+  private ArgumentCaptor<ApplicationEvent> eventCaptor;
 
   @Before
   public void setup() {
@@ -679,7 +689,7 @@ public class IamAccountServiceTests extends IamAccountServiceTestSupport {
     account.linkSshKeys(asList(TEST_SSH_KEY_1, TEST_SSH_KEY_2));
     accountService.createAccount(account);
 
-    for (IamSshKey key: account.getSshKeys()) {
+    for (IamSshKey key : account.getSshKeys()) {
       if (key.getValue().equals(TEST_SSH_KEY_1.getValue())) {
         assertTrue(key.isPrimary());
       }
@@ -696,7 +706,7 @@ public class IamAccountServiceTests extends IamAccountServiceTestSupport {
     account.linkSshKeys(asList(TEST_SSH_KEY_1, TEST_SSH_KEY_2));
     accountService.createAccount(account);
 
-    for (IamSshKey key: account.getSshKeys()) {
+    for (IamSshKey key : account.getSshKeys()) {
       if (key.getValue().equals(TEST_SSH_KEY_1.getValue())) {
         assertFalse(key.isPrimary());
       }
@@ -704,7 +714,7 @@ public class IamAccountServiceTests extends IamAccountServiceTestSupport {
         assertTrue(key.isPrimary());
       }
     }
-   
+
   }
 
   @Test(expected = InvalidCredentialException.class)
@@ -775,5 +785,45 @@ public class IamAccountServiceTests extends IamAccountServiceTestSupport {
     accountService.deleteAccount(CICCIO_ACCOUNT);
     verify(tokenService).revokeAccessToken(Mockito.eq(accessToken));
     verify(tokenService).revokeRefreshToken(Mockito.eq(refreshToken));
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void testSetEndTimeRequiresNonNullAccount() {
+    try {
+      accountService.setAccountEndTime(null, null);
+    } catch (NullPointerException e) {
+      assertThat(e.getMessage(), containsString("Cannot set endTime on a null account"));
+      throw e;
+    }
+  }
+
+  @Test
+  public void testSetEndTimeWorksForNullDate() {
+    accountService.setAccountEndTime(CICCIO_ACCOUNT, null);
+    verify(accountRepo, times(1)).save(CICCIO_ACCOUNT);
+    verify(eventPublisher, times(1)).publishEvent(eventCaptor.capture());
+
+    ApplicationEvent event = eventCaptor.getValue();
+    assertThat(event, instanceOf(AccountEndTimeUpdatedEvent.class));
+
+    AccountEndTimeUpdatedEvent e = (AccountEndTimeUpdatedEvent) event;
+    assertThat(e.getPreviousEndTime(), nullValue());
+    assertThat(e.getAccount().getEndTime(), nullValue());
+  }
+
+  @Test
+  public void testSetEndTimeWorksForNonNullDate() {
+
+    Date newEndTime = new Date();
+    accountService.setAccountEndTime(CICCIO_ACCOUNT, newEndTime);
+    verify(accountRepo, times(1)).save(CICCIO_ACCOUNT);
+    verify(eventPublisher, times(1)).publishEvent(eventCaptor.capture());
+
+    ApplicationEvent event = eventCaptor.getValue();
+    assertThat(event, instanceOf(AccountEndTimeUpdatedEvent.class));
+
+    AccountEndTimeUpdatedEvent e = (AccountEndTimeUpdatedEvent) event;
+    assertThat(e.getPreviousEndTime(), nullValue());
+    assertThat(e.getAccount().getEndTime(), is(newEndTime));
   }
 }

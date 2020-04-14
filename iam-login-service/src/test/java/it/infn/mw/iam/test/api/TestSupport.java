@@ -47,6 +47,7 @@ public class TestSupport {
   protected static final String TEST_100_USER = "test_100";
   protected static final String TEST_100_USER_UUID = "f2ce8cb2-a1db-4884-9ef0-d8842cc02b4a";
 
+  protected static final String EXPECTED_ACCOUNT_NOT_FOUND = "Expected account not found";
   protected static final String EXPECTED_GROUP_NOT_FOUND = "Expected group not found";
 
   protected static String LABEL_PREFIX = "indigo-iam.github.io";

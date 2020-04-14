@@ -79,5 +79,27 @@ public interface IamAccountService {
    * @return the updated account
    */
   IamAccount deleteLabel(IamAccount account, IamLabel label);
-
+  
+  /**
+   * Sets end time for a given account
+   * @param account
+   * @param endTime
+   * @return the updated account
+   */
+  IamAccount setAccountEndTime(IamAccount account, Date endTime);
+  
+  /**
+   * Disables account
+   * @param account
+   * @return the updated account
+   */
+  IamAccount disableAccount(IamAccount account);
+  
+  /**
+   * Restores account
+   * @param account
+   * @return the updated account
+   */
+  IamAccount restoreAccount(IamAccount account);
+  
 }

@@ -28,8 +28,6 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
-import org.springframework.transaction.annotation.Transactional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
@@ -39,6 +37,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -62,6 +61,8 @@ import it.infn.mw.iam.api.scim.model.ScimUserPatchRequest;
 import it.infn.mw.iam.api.scim.updater.AccountUpdater;
 import it.infn.mw.iam.api.scim.updater.UpdaterType;
 import it.infn.mw.iam.api.scim.updater.factory.DefaultAccountUpdaterFactory;
+import it.infn.mw.iam.config.IamProperties;
+import it.infn.mw.iam.config.IamProperties.EditableFields;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
@@ -70,10 +71,8 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 @Transactional
 public class ScimMeController implements ApplicationEventPublisherAware {
 
-  protected static final EnumSet<UpdaterType> SUPPORTED_UPDATER_TYPES =
-      EnumSet.of(ACCOUNT_REMOVE_OIDC_ID, ACCOUNT_REMOVE_SAML_ID, ACCOUNT_REPLACE_EMAIL,
-          ACCOUNT_REPLACE_FAMILY_NAME, ACCOUNT_REPLACE_GIVEN_NAME, ACCOUNT_REPLACE_PICTURE,
-          ACCOUNT_REMOVE_PICTURE);
+  protected static final EnumSet<UpdaterType> ACCOUNT_LINKING_UPDATERS =
+      EnumSet.of(ACCOUNT_REMOVE_OIDC_ID, ACCOUNT_REMOVE_SAML_ID);
 
   private final IamAccountRepository iamAccountRepository;
 
@@ -83,16 +82,36 @@ public class ScimMeController implements ApplicationEventPublisherAware {
 
   private ApplicationEventPublisher eventPublisher;
 
+  private final EnumSet<UpdaterType> enabledUpdaters;
+
   @Autowired
   public ScimMeController(IamAccountRepository accountRepository, UserConverter userConverter,
       PasswordEncoder passwordEncoder, OidcIdConverter oidcIdConverter,
       SamlIdConverter samlIdConverter, SshKeyConverter sshKeyConverter,
-      X509CertificateConverter x509CertificateConverter) {
+      X509CertificateConverter x509CertificateConverter, IamProperties properties) {
 
     this.iamAccountRepository = accountRepository;
     this.userConverter = userConverter;
     this.updatersFactory = new DefaultAccountUpdaterFactory(passwordEncoder, accountRepository,
         oidcIdConverter, samlIdConverter, sshKeyConverter, x509CertificateConverter);
+
+    enabledUpdaters = EnumSet.noneOf(UpdaterType.class);
+
+    enabledUpdaters.addAll(ACCOUNT_LINKING_UPDATERS);
+    
+    properties.getUserProfile().getEditableFields().forEach(e -> {
+      if (EditableFields.NAME.equals(e)) {
+        enabledUpdaters.add(ACCOUNT_REPLACE_GIVEN_NAME);
+      } else if (EditableFields.SURNAME.equals(e)) {
+        enabledUpdaters.add(ACCOUNT_REPLACE_FAMILY_NAME);
+      } else if (EditableFields.PICTURE.equals(e)) {
+        enabledUpdaters.add(ACCOUNT_REPLACE_PICTURE);
+        enabledUpdaters.add(ACCOUNT_REMOVE_PICTURE);
+      } else if (EditableFields.EMAIL.equals(e)) {
+        enabledUpdaters.add(ACCOUNT_REPLACE_EMAIL);
+      }
+    });
+
   }
 
   public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
@@ -131,7 +150,7 @@ public class ScimMeController implements ApplicationEventPublisherAware {
     boolean hasChanged = false;
 
     for (AccountUpdater u : updaters) {
-      if (!SUPPORTED_UPDATER_TYPES.contains(u.getType())) {
+      if (!enabledUpdaters.contains(u.getType())) {
         throw new ScimPatchOperationNotSupported(u.getType().getDescription() + " not supported");
       }
       if (u.update()) {
@@ -164,7 +183,8 @@ public class ScimMeController implements ApplicationEventPublisherAware {
 
     final String username = auth.getName();
 
-    return iamAccountRepository.findByUsername(username).orElseThrow(
-        () -> new ScimResourceNotFoundException("No user mapped to username '" + username + "'"));
+    return iamAccountRepository.findByUsername(username)
+      .orElseThrow(
+          () -> new ScimResourceNotFoundException("No user mapped to username '" + username + "'"));
   }
 }

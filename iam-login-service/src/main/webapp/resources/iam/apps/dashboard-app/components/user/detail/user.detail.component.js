@@ -13,37 +13,44 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-(function() {
+(function () {
     'use strict';
 
     function UserDetailController(Utils, AupService) {
         var self = this;
 
-        self.$onInit = function() {
+        self.$onInit = function () {
             console.log('userDetailController onInit');
             console.log('userDetailController self.aup: ', self.aup);
         };
 
-        self.isVoAdmin = function() {
+        self.isVoAdmin = function () {
             return Utils.userIsVoAdmin(self.user);
         };
 
-        self.aupIsEnabled = function() {
+        self.aupIsEnabled = function () {
             return self.aup !== null;
         };
 
-        self.indigoUser = function() {
+        self.indigoUser = function () {
             return self.user['urn:indigo-dc:scim:schemas:IndigoUser'];
         };
 
-        self.hasAupSignatureTime = function() {
+        self.hasAupSignatureTime = function () {
             return self.user.aupSignature !== null;
+        };
+
+        self.hasEndTime = function () {
+            return self.indigoUser().endTime;
         };
     }
 
     angular.module('dashboardApp').component('userDetail', {
         templateUrl: "/resources/iam/apps/dashboard-app/components/user/detail/user.detail.component.html",
-        bindings: { user: '=', aup: '=' },
+        bindings: {
+            user: '=',
+            aup: '='
+        },
         controller: ['Utils', 'AupService', UserDetailController]
     });
 })();

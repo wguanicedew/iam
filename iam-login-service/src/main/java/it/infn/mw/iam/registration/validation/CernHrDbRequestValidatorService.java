@@ -16,6 +16,7 @@
 package it.infn.mw.iam.registration.validation;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static it.infn.mw.iam.registration.validation.RegistrationRequestValidationResult.error;
 import static it.infn.mw.iam.registration.validation.RegistrationRequestValidationResult.invalid;
 import static it.infn.mw.iam.registration.validation.RegistrationRequestValidationResult.ok;
 import static java.lang.String.format;
@@ -33,21 +34,23 @@ import com.google.common.collect.Lists;
 
 import it.infn.mw.iam.api.common.LabelDTO;
 import it.infn.mw.iam.api.registration.cern.CernHrDBApiService;
+import it.infn.mw.iam.api.registration.cern.CernHrDbApiError;
+import it.infn.mw.iam.api.registration.cern.dto.VOPersonDTO;
 import it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo;
 import it.infn.mw.iam.config.cern.CernProperties;
 import it.infn.mw.iam.registration.RegistrationRequestDto;
 
 @Service
 @Profile("cern")
-public class HrDbRequestValidatorService implements RegistrationRequestValidationService {
+public class CernHrDbRequestValidatorService implements RegistrationRequestValidationService {
 
-  public static final Logger LOG = LoggerFactory.getLogger(HrDbRequestValidatorService.class);
+  public static final Logger LOG = LoggerFactory.getLogger(CernHrDbRequestValidatorService.class);
 
   final CernHrDBApiService hrDbApi;
   final CernProperties cernProperties;
 
   @Autowired
-  public HrDbRequestValidatorService(CernHrDBApiService hrDbApi, CernProperties properties) {
+  public CernHrDbRequestValidatorService(CernHrDBApiService hrDbApi, CernProperties properties) {
     this.hrDbApi = hrDbApi;
     this.cernProperties = properties;
   }
@@ -64,6 +67,15 @@ public class HrDbRequestValidatorService implements RegistrationRequestValidatio
     }
 
     request.getLabels().add(label);
+  }
+
+  public void synchronizeInfo(RegistrationRequestDto request, String personId) {
+
+    VOPersonDTO voPersonDTO = hrDbApi.getHrDbPersonRecord(personId);
+
+    request.setGivenname(voPersonDTO.getFirstName());
+    request.setFamilyname(voPersonDTO.getName());
+    request.setEmail(voPersonDTO.getEmail());
   }
 
   @Override
@@ -89,10 +101,15 @@ public class HrDbRequestValidatorService implements RegistrationRequestValidatio
       return invalid(format("CERN person id claim '%s' not found in authentication attributes",
           cernProperties.getPersonIdClaim()));
     }
-
-    if (hrDbApi.hasValidExperimentParticipation(cernPersonId)) {
-      addPersonIdLabel(registrationRequest, cernPersonId);
-      return ok();
+    
+    try {
+      if (hrDbApi.hasValidExperimentParticipation(cernPersonId)) {
+        addPersonIdLabel(registrationRequest, cernPersonId);
+        synchronizeInfo(registrationRequest, cernPersonId);
+        return ok();
+      }
+    } catch (CernHrDbApiError e) {
+      return error("HR Db API error: "+e.getMessage());
     }
 
     return invalid(format("No valid experiment participation found for user %s %s (PersonId: %s)",

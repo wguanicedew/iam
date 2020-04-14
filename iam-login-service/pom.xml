@@ -405,6 +405,7 @@
             <exclude>**/*.tag</exclude>
             <exclude>**/Dockerfile</exclude>
             <exclude>**/Dockerfile.prod</exclude>
+            <exclude>**/resources/iam/js/datepicker/*.js</exclude>
             <exclude>**/resources/js/lib/*.js</exclude>
             <exclude>**/resources/js/*.js</exclude>
             <exclude>**/resources/template/*.html</exclude>

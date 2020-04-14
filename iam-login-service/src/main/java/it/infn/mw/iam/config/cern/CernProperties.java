@@ -15,18 +15,64 @@
  */
 package it.infn.mw.iam.config.cern;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
+
+import org.hibernate.validator.constraints.NotBlank;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.validation.annotation.Validated;
 
 @Configuration
 @ConfigurationProperties("cern")
+@Validated
 public class CernProperties {
+
+  public static class TaskProperties {
+
+    boolean enabled = true;
+
+    @NotBlank
+    String cronSchedule = "0 23 */12 * * *";
+
+    @Min(value = 5L)
+    int pageSize = 50;
+
+    public boolean isEnabled() {
+      return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+      this.enabled = enabled;
+    }
+
+    public String getCronSchedule() {
+      return cronSchedule;
+    }
+
+    public void setCronSchedule(String cronSchedule) {
+      this.cronSchedule = cronSchedule;
+    }
+
+    public int getPageSize() {
+      return pageSize;
+    }
+
+    public void setPageSize(int pageSize) {
+      this.pageSize = pageSize;
+    }
+  }
 
   public static class HrDbApiProperties {
 
-    String url;
-    String username;
-    String password;
+    @NotBlank
+    String url = "http://hr.test.example";
+
+    @NotBlank
+    String username = "username";
+
+    @NotBlank
+    String password = "password";
 
     public String getUrl() {
       return url;
@@ -53,23 +99,20 @@ public class CernProperties {
     }
   }
 
+  @NotBlank
   private String ssoIssuer = "https://auth.cern.ch/auth/realms/cern";
-  
-  private String personIdClaim = "cern_person_id";
-  
-  private String ssoEntityId = "https://cern.ch/login";
 
-  private String experimentName;
-  
+  @NotBlank
+  private String personIdClaim = "cern_person_id";
+
+  @NotBlank
+  private String experimentName = "test";
+
+  @Valid
   private HrDbApiProperties hrApi;
 
-  public String getSsoEntityId() {
-    return ssoEntityId;
-  }
-
-  public void setSsoEntityId(String ssoEntityId) {
-    this.ssoEntityId = ssoEntityId;
-  }
+  @Valid
+  private TaskProperties task;
 
   public HrDbApiProperties getHrApi() {
     return hrApi;
@@ -86,20 +129,28 @@ public class CernProperties {
   public void setExperimentName(String experimentName) {
     this.experimentName = experimentName;
   }
-  
+
   public void setSsoIssuer(String ssoIssuer) {
     this.ssoIssuer = ssoIssuer;
   }
-  
+
   public String getSsoIssuer() {
     return ssoIssuer;
   }
-  
+
   public String getPersonIdClaim() {
     return personIdClaim;
   }
-  
+
   public void setPersonIdClaim(String personIdClaim) {
     this.personIdClaim = personIdClaim;
+  }
+
+  public TaskProperties getTask() {
+    return task;
+  }
+
+  public void setTask(TaskProperties task) {
+    this.task = task;
   }
 }

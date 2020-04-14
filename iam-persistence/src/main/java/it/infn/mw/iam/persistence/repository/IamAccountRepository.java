@@ -72,7 +72,7 @@ public interface IamAccountRepository
 
   @Query("select a from IamAccount a join a.groups ag where ag.id = :groupId")
   List<IamAccount> findByGroupId(@Param("groupId") Long groupId);
-  
+
   Optional<IamAccount> findByConfirmationKey(@Param("confirmationKey") String confirmationKey);
 
   Optional<IamAccount> findByResetKey(@Param("resetKey") String resetKey);
@@ -89,4 +89,23 @@ public interface IamAccountRepository
 
   @Query("select count(a) from IamAccount a join a.userInfo ui where lower(ui.email) LIKE lower(concat('%', :filter, '%')) or lower(a.username) LIKE lower(concat('%', :filter, '%')) or lower(a.uuid) LIKE lower(concat('%', :filter, '%')) or lower(concat(ui.givenName, ' ', ui.familyName)) LIKE lower(concat('%', :filter, '%'))")
   long countByFilter(@Param("filter") String filter);
+
+  @Query("select a from IamAccount a where a.endTime < :timestamp")
+  Page<IamAccount> findExpiredAccountsAtTimestamp(@Param("timestamp") Date timestamp, Pageable op);
+
+  @Query("select a from IamAccount a join a.labels label where label.prefix = :prefix and label.name = :name")
+  Page<IamAccount> findByLabelPrefixAndName(@Param("prefix") String prefix,
+      @Param("name") String name, Pageable op);
+
+  @Query("select a from IamAccount a join a.labels label where label.prefix = :prefix and label.name = :name and label.value = :value")
+  Page<IamAccount> findByLabelPrefixAndNameAndValue(@Param("prefix") String prefix,
+      @Param("name") String name, @Param("value") String value, Pageable op);
+
+  @Query("select a from IamAccount a join a.labels label where label.prefix is null and label.name = :name")
+  Page<IamAccount> findByLabelName(@Param("name") String name, Pageable op);
+
+  @Query("select a from IamAccount a join a.labels label where label.prefix is null and label.name = :name and label.value = :value")
+  Page<IamAccount> findByLabelNameAndValue(@Param("name") String name, @Param("value") String value,
+      Pageable op);
+
 }
