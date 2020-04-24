@@ -21,8 +21,7 @@ spring:
     port: 8125
   datasource:
     driverClassName: org.h2.Driver
-    #url: jdbc:h2:mem:iam;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    url: jdbc:h2:mem:iam
+    url: jdbc:h2:mem:iam;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     username: sa
     password:
     test-while-idle: true
