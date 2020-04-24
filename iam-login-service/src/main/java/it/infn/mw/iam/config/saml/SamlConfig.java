@@ -64,7 +64,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -166,7 +165,6 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 @Profile("saml")
 @EnableConfigurationProperties({IamSamlProperties.class,
     IamSamlJITAccountProvisioningProperties.class, ServerProperties.class})
-@EnableScheduling
 public class SamlConfig extends WebSecurityConfigurerAdapter implements SchedulingConfigurer {
 
   public static final Logger LOG = LoggerFactory.getLogger(SamlConfig.class);

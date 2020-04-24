@@ -88,7 +88,6 @@ public class TaskConfig implements SchedulingConfigurer {
   long notificationTaskPeriodMsec;
 
 
-
   @Bean(destroyMethod = "shutdown")
   public ScheduledExecutorService taskScheduler() {
     return Executors.newSingleThreadScheduledExecutor();
