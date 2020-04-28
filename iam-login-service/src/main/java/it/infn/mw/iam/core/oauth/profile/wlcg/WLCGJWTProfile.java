@@ -28,6 +28,7 @@ import it.infn.mw.iam.core.oauth.profile.RequestValidator;
 import it.infn.mw.iam.core.oauth.profile.UserInfoHelper;
 import it.infn.mw.iam.core.oauth.scope.matchers.ScopeMatcherRegistry;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
+import it.infn.mw.iam.persistence.repository.IamOAuthAccessTokenRepository;
 
 public class WLCGJWTProfile implements JWTProfile, RequestValidator {
 
@@ -39,15 +40,16 @@ public class WLCGJWTProfile implements JWTProfile, RequestValidator {
   private final UserInfoHelper userInfoHelper;
   private final IntrospectionResultHelper introspectionHelper;
   private final WLCGGroupHelper groupHelper;
-  
+
   public WLCGJWTProfile(IamProperties properties, UserInfoService userInfoService,
       IamAccountRepository accountRepo, WLCGGroupHelper groupHelper,
-      IntrospectionResultAssembler defaultAssembler,
-      ScopeMatcherRegistry registry) {
-    accessTokenBuilder = new WLCGProfileAccessTokenBuilder(properties, groupHelper);
+      IntrospectionResultAssembler defaultAssembler, ScopeMatcherRegistry registry,
+      IamOAuthAccessTokenRepository repo) {
+    accessTokenBuilder = new WLCGProfileAccessTokenBuilder(properties, repo, groupHelper);
     idTokenCustomizer = new WLCGIdTokenCustomizer(accountRepo);
     userInfoHelper = new WLCGUserinfoHelper(properties, userInfoService);
-    introspectionHelper = new WLCGIntrospectionHelper(properties, defaultAssembler, registry, groupHelper);
+    introspectionHelper =
+        new WLCGIntrospectionHelper(properties, defaultAssembler, registry, groupHelper);
     this.groupHelper = groupHelper;
   }
 

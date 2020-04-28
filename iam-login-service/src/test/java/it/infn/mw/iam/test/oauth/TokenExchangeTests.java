@@ -350,16 +350,27 @@ public class TokenExchangeTests extends EndpointsTestUtils {
     String refreshToken = responseToken.getRefreshToken().getValue();
 
     // use refresh token
-    // @formatter:off
-    mvc.perform(post(TOKEN_ENDPOINT)
-        .with(httpBasic(actorClientId, actorClientSecret))
+    String refreshedTokenResponse = mvc
+      .perform(post(TOKEN_ENDPOINT).with(httpBasic(actorClientId, actorClientSecret))
         .param("grant_type", "refresh_token")
         .param("refresh_token", refreshToken)
         .param("client_id", actorClientId)
         .param("client_secret", actorClientSecret))
       .andExpect(status().isOk())
-      .andExpect(jsonPath("$.access_token", notNullValue()));
-    // @formatter:on
+      .andExpect(jsonPath("$.access_token", notNullValue()))
+      .andReturn()
+      .getResponse()
+      .getContentAsString();
+
+    DefaultOAuth2AccessToken refreshedToken =
+        mapper.readValue(refreshedTokenResponse, DefaultOAuth2AccessToken.class);
+
+    mvc
+      .perform(post("/introspect").with(httpBasic("password-grant", "secret"))
+        .param("token", refreshedToken.getValue()))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.active", equalTo(true)));
+
   }
 
   @Test
@@ -447,25 +458,27 @@ public class TokenExchangeTests extends EndpointsTestUtils {
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.access_token").exists())
       .andExpect(jsonPath("$.refresh_token").exists())
-      .andExpect(jsonPath("$.scope", allOf(containsString("read-tasks"), containsString("offline_access"))))
+      .andExpect(jsonPath("$.scope",
+          allOf(containsString("read-tasks"), containsString("offline_access"))))
       .andReturn()
       .getResponse()
       .getContentAsString();
 
     DefaultOAuth2AccessToken tokenResponseObject =
         mapper.readValue(tokenResponse, DefaultOAuth2AccessToken.class);
-    
+
     JWT exchangedToken = JWTParser.parse(tokenResponseObject.getValue());
     assertThat(exchangedToken.getJWTClaimsSet().getSubject(), is("client-cred"));
-   
-    
+
+
     mvc
-    .perform(post(TOKEN_ENDPOINT).with(httpBasic(actorClientId, actorClientSecret))
-      .param("grant_type", "refresh_token")
-      .param("refresh_token", tokenResponseObject.getRefreshToken().getValue()))
+      .perform(post(TOKEN_ENDPOINT).with(httpBasic(actorClientId, actorClientSecret))
+        .param("grant_type", "refresh_token")
+        .param("refresh_token", tokenResponseObject.getRefreshToken().getValue()))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.access_token").exists())
       .andExpect(jsonPath("$.refresh_token").exists())
-      .andExpect(jsonPath("$.scope", allOf(containsString("read-tasks"), containsString("offline_access"))));
+      .andExpect(jsonPath("$.scope",
+          allOf(containsString("read-tasks"), containsString("offline_access"))));
   }
 }

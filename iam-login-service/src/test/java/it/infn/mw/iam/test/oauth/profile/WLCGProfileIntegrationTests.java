@@ -405,6 +405,12 @@ public class WLCGProfileIntegrationTests extends EndpointsTestUtils {
     assertThat(exchangedToken.getJWTClaimsSet().getJSONObjectClaim("act").getAsString("sub"),
         is(ACTOR_CLIENT_ID));
 
+    // Check that token can be introspected properly
+    mvc
+      .perform(post("/introspect").with(httpBasic(CLIENT_ID, CLIENT_SECRET))
+        .param("token", tokenResponseObject.getValue()))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.active", equalTo(true)));
 
     tokenResponse =
         mvc
@@ -439,6 +445,13 @@ public class WLCGProfileIntegrationTests extends EndpointsTestUtils {
     JSONObject nestedActClaimValue =
         (JSONObject) exchangedToken2.getJWTClaimsSet().getJSONObjectClaim("act").get("act");
     assertThat(nestedActClaimValue.getAsString("sub"), is(ACTOR_CLIENT_ID));
+    
+ // Check that token can be introspected properly
+    mvc
+      .perform(post("/introspect").with(httpBasic(CLIENT_ID, CLIENT_SECRET))
+        .param("token", tokenResponseObject2.getValue()))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.active", equalTo(true)));
 
   }
 
@@ -515,7 +528,7 @@ public class WLCGProfileIntegrationTests extends EndpointsTestUtils {
       .getContentAsString();
 
     claims = JWTParser.parse(mapper.readTree(tokenResponseJson).get("access_token").asText())
-        .getJWTClaimsSet();
+      .getJWTClaimsSet();
 
     assertNotNull(claims.getAudience());
     assertThat(claims.getAudience().size(), equalTo(1));
@@ -532,7 +545,7 @@ public class WLCGProfileIntegrationTests extends EndpointsTestUtils {
       .getContentAsString();
 
     claims = JWTParser.parse(mapper.readTree(tokenResponseJson).get("access_token").asText())
-        .getJWTClaimsSet();
+      .getJWTClaimsSet();
 
     assertThat(claims.getAudience().size(), equalTo(1));
     assertThat(claims.getAudience(), hasItem("https://wlcg.cern.ch/jwt/v1/any"));

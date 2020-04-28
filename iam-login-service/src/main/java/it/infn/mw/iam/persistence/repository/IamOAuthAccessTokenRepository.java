@@ -17,6 +17,8 @@ package it.infn.mw.iam.persistence.repository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
+
 import org.mitre.oauth2.model.OAuth2AccessTokenEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,8 +26,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
+import com.nimbusds.jwt.JWT;
+
 public interface IamOAuthAccessTokenRepository
   extends PagingAndSortingRepository<OAuth2AccessTokenEntity, Long> {
+  
+  @Query("select t from OAuth2AccessTokenEntity t where t.jwt = :tokenValue")
+  Optional<OAuth2AccessTokenEntity> findByTokenValue(@Param("tokenValue") JWT tokenValue);
 
   @Query("select t from OAuth2AccessTokenEntity t where t.authenticationHolder.userAuth.name = :userId "
     + "and (t.expiration is NULL or t.expiration > :timestamp)")

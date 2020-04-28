@@ -31,6 +31,7 @@ import com.nimbusds.jwt.JWTClaimsSet.Builder;
 
 import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.core.oauth.profile.common.BaseAccessTokenBuilder;
+import it.infn.mw.iam.persistence.repository.IamOAuthAccessTokenRepository;
 import it.infn.mw.iam.persistence.repository.UserInfoAdapter;
 
 public class WLCGProfileAccessTokenBuilder extends BaseAccessTokenBuilder {
@@ -41,8 +42,9 @@ public class WLCGProfileAccessTokenBuilder extends BaseAccessTokenBuilder {
 
   final WLCGGroupHelper groupHelper;
 
-  public WLCGProfileAccessTokenBuilder(IamProperties properties, WLCGGroupHelper groupHelper) {
-    super(properties);
+  public WLCGProfileAccessTokenBuilder(IamProperties properties, IamOAuthAccessTokenRepository repo,
+      WLCGGroupHelper groupHelper) {
+    super(properties, repo);
     this.groupHelper = groupHelper;
   }
 
@@ -54,7 +56,7 @@ public class WLCGProfileAccessTokenBuilder extends BaseAccessTokenBuilder {
     Builder builder = baseJWTSetup(token, authentication, userInfo, issueTime);
 
     builder.notBeforeTime(Date.from(issueTime));
-    
+
     if (!token.getScope().isEmpty()) {
       builder.claim(SCOPE_CLAIM_NAME, token.getScope().stream().collect(joining(SPACE)));
     }
@@ -69,11 +71,11 @@ public class WLCGProfileAccessTokenBuilder extends BaseAccessTokenBuilder {
         builder.claim(WLCGGroupHelper.WLCG_GROUPS_SCOPE, groupNames);
       }
     }
-    
+
     if (!hasAudienceRequest(authentication) && !hasRefreshTokenAudienceRequest(authentication)) {
       builder.audience(ALL_AUDIENCES_VALUE);
     }
-    
+
     return builder.build();
   }
 
