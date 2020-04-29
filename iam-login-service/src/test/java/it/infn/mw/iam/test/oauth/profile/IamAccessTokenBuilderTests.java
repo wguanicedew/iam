@@ -27,6 +27,7 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mitre.oauth2.model.ClientDetailsEntity;
 import org.mitre.oauth2.model.OAuth2AccessTokenEntity;
 import org.mitre.openid.connect.model.UserInfo;
 import org.mitre.openid.connect.service.ScopeClaimTranslationService;
@@ -58,6 +59,9 @@ public class IamAccessTokenBuilderTests {
   OAuth2AccessTokenEntity tokenEntity;
 
   @Mock
+  ClientDetailsEntity client;
+  
+  @Mock
   OAuth2Authentication authentication;
 
   @Spy
@@ -77,8 +81,11 @@ public class IamAccessTokenBuilderTests {
     tokenBuilder =
         new IamJWTProfileAccessTokenBuilder(properties, scService, claimValueHelper);
     when(tokenEntity.getExpiration()).thenReturn(null);
+    when(tokenEntity.getClient()).thenReturn(client);
+    when(client.getClientId()).thenReturn("client");
     when(authentication.getName()).thenReturn("auth-name");
     when(authentication.getOAuth2Request()).thenReturn(oauth2Request);
+    when(authentication.isClientOnly()).thenReturn(false);
     when(userInfo.getSub()).thenReturn("userinfo-sub");
     when(oauth2Request.getGrantType()).thenReturn(TOKEN_EXCHANGE_GRANT_TYPE);
   }
