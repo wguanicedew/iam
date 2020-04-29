@@ -16,6 +16,7 @@
 package it.infn.mw.iam.test.oauth;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
@@ -56,6 +57,7 @@ import com.nimbusds.jwt.JWTParser;
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.persistence.model.IamAup;
 import it.infn.mw.iam.persistence.repository.IamAupRepository;
+import net.minidev.json.JSONObject;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -67,8 +69,9 @@ public class TokenExchangeTests extends EndpointsTestUtils {
   private static final String GRANT_TYPE = "urn:ietf:params:oauth:grant-type:token-exchange";
   private static final String TOKEN_TYPE = "urn:ietf:params:oauth:token-type:jwt";
 
-  private static final String USERNAME = "test";
-  private static final String PASSWORD = "password";
+  private static final String TEST_USER_USERNAME = "test";
+  private static final String TEST_USER_PASSWORD = "password";
+  private static final String TEST_USER_SUB = "80e5fb8d-b7c8-451a-89ba-346ae278a66f";
   private static final String TOKEN_ENDPOINT = "/token";
 
   @Autowired
@@ -101,8 +104,8 @@ public class TokenExchangeTests extends EndpointsTestUtils {
     String accessToken = new AccessTokenGetter().grantType("password")
       .clientId(clientId)
       .clientSecret(clientSecret)
-      .username(USERNAME)
-      .password(PASSWORD)
+      .username(TEST_USER_USERNAME)
+      .password(TEST_USER_PASSWORD)
       .scope("openid profile")
       .getAccessTokenValue();
 
@@ -167,8 +170,8 @@ public class TokenExchangeTests extends EndpointsTestUtils {
     String accessToken = new AccessTokenGetter().grantType("password")
       .clientId(clientId)
       .clientSecret(clientSecret)
-      .username(USERNAME)
-      .password(PASSWORD)
+      .username(TEST_USER_USERNAME)
+      .password(TEST_USER_PASSWORD)
       .scope("openid profile")
       .getAccessTokenValue();
 
@@ -215,8 +218,8 @@ public class TokenExchangeTests extends EndpointsTestUtils {
     String accessToken = new AccessTokenGetter().grantType("password")
       .clientId(clientId)
       .clientSecret(clientSecret)
-      .username(USERNAME)
-      .password(PASSWORD)
+      .username(TEST_USER_USERNAME)
+      .password(TEST_USER_PASSWORD)
       .scope("openid profile")
       .getAccessTokenValue();
 
@@ -286,8 +289,8 @@ public class TokenExchangeTests extends EndpointsTestUtils {
     String accessToken = new AccessTokenGetter().grantType("password")
       .clientId(clientId)
       .clientSecret(clientSecret)
-      .username(USERNAME)
-      .password(PASSWORD)
+      .username(TEST_USER_USERNAME)
+      .password(TEST_USER_PASSWORD)
       .scope("openid profile")
       .getAccessTokenValue();
 
@@ -319,8 +322,8 @@ public class TokenExchangeTests extends EndpointsTestUtils {
     String accessToken = new AccessTokenGetter().grantType("password")
       .clientId(clientId)
       .clientSecret(clientSecret)
-      .username(USERNAME)
-      .password(PASSWORD)
+      .username(TEST_USER_USERNAME)
+      .password(TEST_USER_PASSWORD)
       .scope("openid profile offline_access")
       .getAccessTokenValue();
 
@@ -346,6 +349,16 @@ public class TokenExchangeTests extends EndpointsTestUtils {
 
     DefaultOAuth2AccessToken responseToken =
         mapper.readValue(response, DefaultOAuth2AccessToken.class);
+    
+    
+    JWT exchangedToken = JWTParser.parse(responseToken.getValue());
+    assertThat(exchangedToken.getJWTClaimsSet().getSubject(), is(TEST_USER_SUB));
+    
+    JSONObject actClaim = exchangedToken.getJWTClaimsSet().getJSONObjectClaim("act");
+    
+    assertThat(actClaim, notNullValue());
+    assertThat(actClaim.getAsString("sub"), is("token-exchange-actor"));
+    assertThat(actClaim.getAsString("act"), nullValue());
 
     String refreshToken = responseToken.getRefreshToken().getValue();
 
@@ -365,6 +378,14 @@ public class TokenExchangeTests extends EndpointsTestUtils {
     DefaultOAuth2AccessToken refreshedToken =
         mapper.readValue(refreshedTokenResponse, DefaultOAuth2AccessToken.class);
 
+    JWT refreshedTokenJwt = JWTParser.parse(refreshedToken.getValue());
+    assertThat(refreshedTokenJwt.getJWTClaimsSet().getSubject(), is(TEST_USER_SUB));
+    actClaim = refreshedTokenJwt.getJWTClaimsSet().getJSONObjectClaim("act");
+    
+    assertThat(actClaim, notNullValue());
+    assertThat(actClaim.getAsString("sub"), is("token-exchange-actor"));
+    assertThat(actClaim.getAsString("act"), nullValue());
+    
     mvc
       .perform(post("/introspect").with(httpBasic("password-grant", "secret"))
         .param("token", refreshedToken.getValue()))
@@ -387,16 +408,16 @@ public class TokenExchangeTests extends EndpointsTestUtils {
     String subjectToken = new AccessTokenGetter().grantType("password")
       .clientId(clientId)
       .clientSecret(clientSecret)
-      .username(USERNAME)
-      .password(PASSWORD)
+      .username(TEST_USER_USERNAME)
+      .password(TEST_USER_PASSWORD)
       .scope("openid")
       .getAccessTokenValue();
 
     String actorToken = new AccessTokenGetter().grantType("password")
       .clientId(clientId)
       .clientSecret(clientSecret)
-      .username(USERNAME)
-      .password(PASSWORD)
+      .username(TEST_USER_USERNAME)
+      .password(TEST_USER_PASSWORD)
       .scope("openid")
       .getAccessTokenValue();
 

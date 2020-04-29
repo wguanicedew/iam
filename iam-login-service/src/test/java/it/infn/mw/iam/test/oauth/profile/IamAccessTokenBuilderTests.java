@@ -23,7 +23,6 @@ import static org.mockito.Mockito.when;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Map;
-import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -32,28 +31,22 @@ import org.mitre.oauth2.model.OAuth2AccessTokenEntity;
 import org.mitre.openid.connect.model.UserInfo;
 import org.mitre.openid.connect.service.ScopeClaimTranslationService;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
 import com.google.common.collect.Maps;
-import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.jwt.PlainJWT;
 
 import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.core.oauth.profile.iam.ClaimValueHelper;
 import it.infn.mw.iam.core.oauth.profile.iam.IamJWTProfileAccessTokenBuilder;
-import it.infn.mw.iam.persistence.repository.IamOAuthAccessTokenRepository;
 import it.infn.mw.iam.test.util.oauth.MockOAuth2Request;
 
 @RunWith(MockitoJUnitRunner.class)
 public class IamAccessTokenBuilderTests {
 
   IamProperties properties = new IamProperties();
-
-  @Mock
-  IamOAuthAccessTokenRepository repo;
 
   @Mock
   ScopeClaimTranslationService scService;
@@ -82,27 +75,26 @@ public class IamAccessTokenBuilderTests {
   public void setup() {
 
     tokenBuilder =
-        new IamJWTProfileAccessTokenBuilder(properties, scService, claimValueHelper, repo);
+        new IamJWTProfileAccessTokenBuilder(properties, scService, claimValueHelper);
     when(tokenEntity.getExpiration()).thenReturn(null);
     when(authentication.getName()).thenReturn("auth-name");
     when(authentication.getOAuth2Request()).thenReturn(oauth2Request);
     when(userInfo.getSub()).thenReturn("userinfo-sub");
     when(oauth2Request.getGrantType()).thenReturn(TOKEN_EXCHANGE_GRANT_TYPE);
-    when(repo.findByTokenValue(Mockito.any())).thenReturn(Optional.empty());
   }
 
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = InvalidRequestException.class)
   public void testMissingSubjectTokenTokenExchangeErrors() {
     try {
       tokenBuilder.buildAccessToken(tokenEntity, authentication, userInfo, now);
-    } catch (IllegalArgumentException e) {
+    } catch (InvalidRequestException e) {
       assertThat(e.getMessage(), containsString("subject_token not found"));
       throw e;
     }
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = InvalidRequestException.class)
   public void testSubjectTokenNotParsable() {
     Map<String, String> paramsMap = Maps.newHashMap();
     paramsMap.put("subject_token", "3427thjdfhgejt73ja");
@@ -110,26 +102,8 @@ public class IamAccessTokenBuilderTests {
     oauth2Request.setRequestParameters(paramsMap);
     try {
       tokenBuilder.buildAccessToken(tokenEntity, authentication, userInfo, now);
-    } catch (IllegalArgumentException e) {
+    } catch (InvalidRequestException e) {
       assertThat(e.getMessage(), containsString("Error parsing subject token"));
-      throw e;
-    }
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void testTokenNotFoundInRepo() {
-    JWTClaimsSet.Builder jwtBuilder = new JWTClaimsSet.Builder();
-    jwtBuilder.subject("sub").issuer("iss");
-
-    PlainJWT plainJwt = new PlainJWT(jwtBuilder.build());
-
-    Map<String, String> paramsMap = Maps.newHashMap();
-    paramsMap.put("subject_token", plainJwt.serialize());
-    oauth2Request.setRequestParameters(paramsMap);
-    try {
-      tokenBuilder.buildAccessToken(tokenEntity, authentication, userInfo, now);
-    } catch (IllegalArgumentException e) {
-      assertThat(e.getMessage(), containsString("Subject token not found in IAM database"));
       throw e;
     }
   }

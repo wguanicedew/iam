@@ -28,7 +28,6 @@ import it.infn.mw.iam.core.oauth.profile.RequestValidator;
 import it.infn.mw.iam.core.oauth.profile.UserInfoHelper;
 import it.infn.mw.iam.core.oauth.scope.matchers.ScopeMatcherRegistry;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
-import it.infn.mw.iam.persistence.repository.IamOAuthAccessTokenRepository;
 
 public class WLCGJWTProfile implements JWTProfile, RequestValidator {
 
@@ -43,9 +42,8 @@ public class WLCGJWTProfile implements JWTProfile, RequestValidator {
 
   public WLCGJWTProfile(IamProperties properties, UserInfoService userInfoService,
       IamAccountRepository accountRepo, WLCGGroupHelper groupHelper,
-      IntrospectionResultAssembler defaultAssembler, ScopeMatcherRegistry registry,
-      IamOAuthAccessTokenRepository repo) {
-    accessTokenBuilder = new WLCGProfileAccessTokenBuilder(properties, repo, groupHelper);
+      IntrospectionResultAssembler defaultAssembler, ScopeMatcherRegistry registry) {
+    accessTokenBuilder = new WLCGProfileAccessTokenBuilder(properties, groupHelper);
     idTokenCustomizer = new WLCGIdTokenCustomizer(accountRepo);
     userInfoHelper = new WLCGUserinfoHelper(properties, userInfoService);
     introspectionHelper =
