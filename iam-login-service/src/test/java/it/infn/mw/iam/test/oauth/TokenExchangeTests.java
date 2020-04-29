@@ -502,4 +502,124 @@ public class TokenExchangeTests extends EndpointsTestUtils {
       .andExpect(jsonPath("$.scope",
           allOf(containsString("read-tasks"), containsString("offline_access"))));
   }
+  
+  @Test
+  public void testActClaimSetting() throws Exception {
+
+    String clientId = "token-exchange-subject";
+    String clientSecret = "secret";
+
+    String actorClientId = "token-exchange-actor";
+    String actorClientSecret = "secret";
+
+    String audClientId = "client";
+
+    String accessToken = new AccessTokenGetter().grantType("password")
+      .clientId(clientId)
+      .clientSecret(clientSecret)
+      .username(TEST_USER_USERNAME)
+      .password(TEST_USER_PASSWORD)
+      .scope("openid profile offline_access")
+      .getAccessTokenValue();
+
+    // @formatter:off
+    String response = mvc.perform(post(TOKEN_ENDPOINT)
+        .with(httpBasic(actorClientId, actorClientSecret))
+        .param("grant_type", GRANT_TYPE)
+        .param("audience", audClientId)
+        .param("subject_token", accessToken)
+        .param("subject_token_type", TOKEN_TYPE)
+        .param("scope", "openid offline_access"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.scope", equalTo("openid offline_access")))
+      .andExpect(jsonPath("$.issued_token_type", equalTo(TOKEN_TYPE)))
+      .andExpect(jsonPath("$.token_type", equalTo("Bearer")))
+      .andExpect(jsonPath("$.id_token", notNullValue()))
+      .andExpect(jsonPath("$.access_token", notNullValue()))
+      .andExpect(jsonPath("$.refresh_token", notNullValue()))
+      .andReturn()
+      .getResponse()
+      .getContentAsString();
+    // @formatter:on
+
+    DefaultOAuth2AccessToken responseToken =
+        mapper.readValue(response, DefaultOAuth2AccessToken.class);
+    
+    
+    JWT exchangedToken = JWTParser.parse(responseToken.getValue());
+    assertThat(exchangedToken.getJWTClaimsSet().getSubject(), is(TEST_USER_SUB));
+    
+    JSONObject actClaim = exchangedToken.getJWTClaimsSet().getJSONObjectClaim("act");
+    
+    assertThat(actClaim, notNullValue());
+    assertThat(actClaim.getAsString("sub"), is("token-exchange-actor"));
+    assertThat(actClaim.getAsString("act"), nullValue());
+
+    String refreshToken = responseToken.getRefreshToken().getValue();
+
+    // use refresh token
+    String refreshedTokenResponse = mvc
+      .perform(post(TOKEN_ENDPOINT).with(httpBasic(actorClientId, actorClientSecret))
+        .param("grant_type", "refresh_token")
+        .param("refresh_token", refreshToken)
+        .param("client_id", actorClientId)
+        .param("client_secret", actorClientSecret))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.access_token", notNullValue()))
+      .andReturn()
+      .getResponse()
+      .getContentAsString();
+
+    DefaultOAuth2AccessToken refreshedToken =
+        mapper.readValue(refreshedTokenResponse, DefaultOAuth2AccessToken.class);
+
+    JWT refreshedTokenJwt = JWTParser.parse(refreshedToken.getValue());
+    assertThat(refreshedTokenJwt.getJWTClaimsSet().getSubject(), is(TEST_USER_SUB));
+    actClaim = refreshedTokenJwt.getJWTClaimsSet().getJSONObjectClaim("act");
+    
+    assertThat(actClaim, notNullValue());
+    assertThat(actClaim.getAsString("sub"), is("token-exchange-actor"));
+    assertThat(actClaim.getAsString("act"), nullValue());
+    
+    mvc
+      .perform(post("/introspect").with(httpBasic("password-grant", "secret"))
+        .param("token", refreshedToken.getValue()))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.active", equalTo(true)));
+    
+    
+    String secondActorClient = "token-lookup-client";
+    
+    // @formatter:off
+    response = mvc.perform(post(TOKEN_ENDPOINT)
+        .with(httpBasic(secondActorClient, "secret"))
+        .param("grant_type", GRANT_TYPE)
+        .param("subject_token", refreshedToken.getValue())
+        .param("subject_token_type", TOKEN_TYPE)
+        .param("scope", "openid offline_access"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.scope", equalTo("openid offline_access")))
+      .andExpect(jsonPath("$.issued_token_type", equalTo(TOKEN_TYPE)))
+      .andExpect(jsonPath("$.token_type", equalTo("Bearer")))
+      .andExpect(jsonPath("$.id_token", notNullValue()))
+      .andExpect(jsonPath("$.access_token", notNullValue()))
+      .andExpect(jsonPath("$.refresh_token", notNullValue()))
+      .andReturn()
+      .getResponse()
+      .getContentAsString();
+    // @formatter:on
+    
+    DefaultOAuth2AccessToken secondExchangeResponse =  mapper.readValue(response, DefaultOAuth2AccessToken.class);
+    JWT secondExchangeJwt = JWTParser.parse(secondExchangeResponse.getValue());
+    assertThat(secondExchangeJwt.getJWTClaimsSet().getSubject(), is(TEST_USER_SUB));
+    actClaim = secondExchangeJwt.getJWTClaimsSet().getJSONObjectClaim("act");
+    
+    assertThat(actClaim, notNullValue());
+    assertThat(actClaim.getAsString("sub"), is("token-lookup-client"));
+    
+    JSONObject innerActClaim = (JSONObject) actClaim.get("act");
+    assertThat(innerActClaim.getAsString("sub"), is("token-exchange-actor"));
+    
+
+  }
 }

@@ -51,6 +51,7 @@ public abstract class BaseAccessTokenBuilder implements JWTAccessTokenBuilder {
   public static final String AUD_KEY = "aud";
   public static final String SCOPE_CLAIM_NAME = "scope";
   public static final String ACT_CLAIM_NAME = "act";
+  public static final String CLIENT_ID_CLAIM_NAME = "client_id";
   public static final String SPACE = " ";
 
   public static final String SUBJECT_TOKEN = "subject_token";
@@ -102,7 +103,7 @@ public abstract class BaseAccessTokenBuilder implements JWTAccessTokenBuilder {
       if (!isNull(subjectTokenActClaim)) {
         actClaimContent.put("act", subjectTokenActClaim);
       }
-      
+
       builder.claim(ACT_CLAIM_NAME, actClaimContent);
 
     } catch (ParseException e) {
@@ -143,7 +144,12 @@ public abstract class BaseAccessTokenBuilder implements JWTAccessTokenBuilder {
       .subject(subject)
       .jwtID(UUID.randomUUID().toString());
 
+    if (!authentication.isClientOnly()) {
+      builder.claim(CLIENT_ID_CLAIM_NAME, token.getClient().getClientId());
+    }
+
     String audience = null;
+
     if (hasAudienceRequest(authentication)) {
       audience = (String) authentication.getOAuth2Request().getExtensions().get(AUD_KEY);
     }

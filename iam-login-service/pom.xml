@@ -343,8 +343,8 @@
           <!-- Jacoco prepare-agent builds some command-line params without -->
           <!-- which jacoco will not instrument. Hence it is important to add -->
           <!-- those command-line params here (${argLine} holds those params) -->
-          <argLine>${argLine} -Xms1024m</argLine>
-          <runOrder>random</runOrder>
+          <argLine>${argLine}</argLine>
+          <runOrder>alphabetical</runOrder>
           <useSystemClassLoader>false</useSystemClassLoader>
         </configuration>
       </plugin>
