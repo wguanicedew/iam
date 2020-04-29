@@ -39,7 +39,6 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTClaimsSet.Builder;
 import com.nimbusds.jwt.JWTParser;
 
-import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
 import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.core.oauth.profile.JWTAccessTokenBuilder;
 import it.infn.mw.iam.persistence.repository.IamOAuthAccessTokenRepository;
@@ -65,18 +64,6 @@ public abstract class BaseAccessTokenBuilder implements JWTAccessTokenBuilder {
     this.properties = properties;
     this.repo = repo;
   }
-
-
-  protected Optional<String> resolveClientIdForSubjectToken(OAuth2Authentication authentication) {
-    String subjectTokenString =
-        authentication.getOAuth2Request().getRequestParameters().get(SUBJECT_TOKEN);
-
-    if (!isNull(subjectTokenString)) {
-
-    }
-    return Optional.empty();
-  }
-
 
   protected JWTClaimsSet.Builder handleClientTokenExchange(JWTClaimsSet.Builder builder,
       OAuth2AccessTokenEntity token, OAuth2Authentication authentication, UserInfo userInfo) {
