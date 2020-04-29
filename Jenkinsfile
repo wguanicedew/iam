@@ -48,7 +48,7 @@ pipeline {
           inheritFrom 'ci-template'
           containerTemplate {
                 name 'runner'
-                image 'cloud-vm114.cloud.cnaf.infn.it/cnafsd/centos7-jenkins-slave:latest'
+                image 'cloud-vm114.cloud.cnaf.infn.it/cnafsd/centos7-jenkins-slave:a1cccc2'
                 ttyEnabled true
                 command 'cat'
                 resourceRequestCpu '1'
