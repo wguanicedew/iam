@@ -81,8 +81,8 @@ public class AarcProfileIntegrationTests extends EndpointsTestUtils {
   private static final String USERNAME = "test";
   private static final String PASSWORD = "password";
 
-  private static final String URN_GROUP_ANALYSIS = "urn:example:iam:test:group:Analysis#example.org:443";
-  private static final String URN_GROUP_PRODUCTION = "urn:example:iam:test:group:Production#example.org:443";
+  private static final String URN_GROUP_ANALYSIS = "urn:example:iam:test:group:Analysis#example.org";
+  private static final String URN_GROUP_PRODUCTION = "urn:example:iam:test:group:Production#example.org";
 
   protected static final Set<String> BASE_SCOPES = Sets.newHashSet("openid", "profile");
   protected static final Set<String> EDUPERSON_AFFILIATION_SCOPE =

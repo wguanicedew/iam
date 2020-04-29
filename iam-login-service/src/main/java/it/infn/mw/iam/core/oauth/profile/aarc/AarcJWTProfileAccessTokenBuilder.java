@@ -31,6 +31,7 @@ import com.nimbusds.jwt.JWTClaimsSet.Builder;
 
 import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.core.oauth.profile.common.BaseAccessTokenBuilder;
+import it.infn.mw.iam.persistence.repository.IamOAuthAccessTokenRepository;
 import it.infn.mw.iam.persistence.repository.UserInfoAdapter;
 
 public class AarcJWTProfileAccessTokenBuilder extends BaseAccessTokenBuilder {
@@ -39,8 +40,9 @@ public class AarcJWTProfileAccessTokenBuilder extends BaseAccessTokenBuilder {
   protected final AarcClaimValueHelper claimValueHelper;
 
   public AarcJWTProfileAccessTokenBuilder(IamProperties properties,
-      ScopeClaimTranslationService scopeClaimConverter, AarcClaimValueHelper claimValueHelper) {
-    super(properties);
+      ScopeClaimTranslationService scopeClaimConverter, AarcClaimValueHelper claimValueHelper,
+      IamOAuthAccessTokenRepository repo) {
+    super(properties, repo);
     this.scopeClaimConverter = scopeClaimConverter;
     this.claimValueHelper = claimValueHelper;
   }

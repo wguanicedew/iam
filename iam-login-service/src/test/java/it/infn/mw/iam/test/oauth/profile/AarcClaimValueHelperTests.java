@@ -91,7 +91,7 @@ public class AarcClaimValueHelperTests {
   @Test
   public void testGroupUrnEncode() {
 
-    String s = "urn:example:iam:test:group:test#example.org:443";
+    String s = "urn:example:iam:test:group:test#example.org";
 
     IamGroup g = buildGroup("test");
     when(userInfo.getGroups()).thenReturn(Sets.newHashSet(g));
@@ -104,8 +104,8 @@ public class AarcClaimValueHelperTests {
   @Test
   public void testGroupHierarchyUrnEncode() {
 
-    String parentUrn = "urn:example:iam:test:group:parent#example.org:443";
-    String childUrn = "urn:example:iam:test:group:parent:child#example.org:443";
+    String parentUrn = "urn:example:iam:test:group:parent#example.org";
+    String childUrn = "urn:example:iam:test:group:parent:child#example.org";
 
     IamGroup parent = buildGroup("parent");
     IamGroup child = buildGroup("child", parent);

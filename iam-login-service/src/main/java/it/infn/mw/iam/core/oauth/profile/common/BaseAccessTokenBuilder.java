@@ -19,26 +19,34 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static it.infn.mw.iam.core.oauth.granters.TokenExchangeTokenGranter.TOKEN_EXCHANGE_GRANT_TYPE;
 import static java.util.Objects.isNull;
 
+import java.text.ParseException;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.mitre.oauth2.model.OAuth2AccessTokenEntity;
 import org.mitre.openid.connect.model.UserInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Maps;
+import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTClaimsSet.Builder;
+import com.nimbusds.jwt.JWTParser;
 
+import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
 import it.infn.mw.iam.config.IamProperties;
-import it.infn.mw.iam.core.oauth.granters.TokenExchangeTokenGranter;
 import it.infn.mw.iam.core.oauth.profile.JWTAccessTokenBuilder;
-import net.minidev.json.JSONObject;
+import it.infn.mw.iam.persistence.repository.IamOAuthAccessTokenRepository;
 
 public abstract class BaseAccessTokenBuilder implements JWTAccessTokenBuilder {
+
+  public static final Logger LOG = LoggerFactory.getLogger(BaseAccessTokenBuilder.class);
 
   public static final String AUDIENCE = "audience";
   public static final String AUD_KEY = "aud";
@@ -46,13 +54,27 @@ public abstract class BaseAccessTokenBuilder implements JWTAccessTokenBuilder {
   public static final String ACT_CLAIM_NAME = "act";
   public static final String SPACE = " ";
 
+  public static final String SUBJECT_TOKEN = "subject_token";
 
   protected final IamProperties properties;
+  protected final IamOAuthAccessTokenRepository repo;
 
   protected final Splitter SPLITTER = Splitter.on(' ').trimResults().omitEmptyStrings();
 
-  public BaseAccessTokenBuilder(IamProperties properties) {
+  public BaseAccessTokenBuilder(IamProperties properties, IamOAuthAccessTokenRepository repo) {
     this.properties = properties;
+    this.repo = repo;
+  }
+
+
+  protected Optional<String> resolveClientIdForSubjectToken(OAuth2Authentication authentication) {
+    String subjectTokenString =
+        authentication.getOAuth2Request().getRequestParameters().get(SUBJECT_TOKEN);
+
+    if (!isNull(subjectTokenString)) {
+
+    }
+    return Optional.empty();
   }
 
 
@@ -60,33 +82,50 @@ public abstract class BaseAccessTokenBuilder implements JWTAccessTokenBuilder {
       OAuth2AccessTokenEntity token, OAuth2Authentication authentication, UserInfo userInfo) {
 
     if (TOKEN_EXCHANGE_GRANT_TYPE.equals(authentication.getOAuth2Request().getGrantType())) {
+
+      String subjectTokenString =
+          authentication.getOAuth2Request().getRequestParameters().get(SUBJECT_TOKEN);
+
+      if (isNull(subjectTokenString)) {
+        throw new IllegalArgumentException("subject_token not found in token exchange request!");
+      }
+
+      JWT subjectTokenJwt = null;
+
+      try {
+        subjectTokenJwt = JWTParser.parse(subjectTokenString);
+      } catch (ParseException e) {
+        throw new IllegalArgumentException("Error parsing subject token: " + e.getMessage(), e);
+      }
+
+      Optional.ofNullable(subjectTokenJwt)
+        .orElseThrow(() -> new IllegalArgumentException(
+            "subject token jwt still null after succesful parsing!"));
       
+      OAuth2AccessTokenEntity subjectToken = repo.findByTokenValue(subjectTokenJwt)
+        .orElseThrow(
+            () -> new IllegalArgumentException("Subject token not found in IAM database!"));
+
       if (authentication.isClientOnly()) {
-        String subjectClientId = (String) authentication.getOAuth2Request()
-          .getExtensions()
-          .get(TokenExchangeTokenGranter.TOKEN_EXCHANGE_SUBJECT_CLIENT_ID_KEY);
-
-        authentication.getOAuth2Request()
-        .getExtensions().remove(TokenExchangeTokenGranter.TOKEN_EXCHANGE_SUBJECT_CLIENT_ID_KEY);
-        
-        builder.subject(subjectClientId);
+        builder.subject(subjectToken.getClient().getClientId());
       }
-
-      Map<String, Object> actClaimContent = Maps.newHashMap();
-
-      actClaimContent.put("sub", authentication.getOAuth2Request().getClientId());
       
-      JSONObject subjectTokenActClaim = (JSONObject) authentication.getOAuth2Request()
-        .getExtensions()
-        .get(TokenExchangeTokenGranter.TOKEN_EXCHANGE_SUBJECT_ACT_KEY);
+      Map<String, Object> actClaimContent = Maps.newHashMap();
+      actClaimContent.put("sub", authentication.getOAuth2Request().getClientId());
 
-      if (!isNull(subjectTokenActClaim)) {
-        actClaimContent.put("act", subjectTokenActClaim);
-        authentication.getOAuth2Request()
-        .getExtensions().remove(TokenExchangeTokenGranter.TOKEN_EXCHANGE_SUBJECT_ACT_KEY);
+      try {
+        
+        Object subjectTokenActClaim = subjectToken.getJwt().getJWTClaimsSet().getClaim(ACT_CLAIM_NAME);
+         
+        if (!isNull(subjectTokenActClaim)) {
+          actClaimContent.put("act", subjectTokenActClaim);
+        }
+
+        builder.claim(ACT_CLAIM_NAME, actClaimContent);
+
+      } catch (ParseException e) {
+        LOG.error("Error getting 'act' claim from subject token: " + e.getMessage(), e);
       }
-
-      builder.claim(ACT_CLAIM_NAME, actClaimContent);
     }
 
     return builder;

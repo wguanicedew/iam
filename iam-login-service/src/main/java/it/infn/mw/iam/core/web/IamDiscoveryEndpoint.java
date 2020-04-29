@@ -114,12 +114,12 @@ public class IamDiscoveryEndpoint {
             userService.getByEmailAddress(resourceUri.getUserInfo() + "@" + resourceUri.getHost());
 
         if (user == null) {
-          // user wasn't found, see if the local part of the username matches, plus our issuer host
+          // user wasn't found, see if the local part of the username matches, plus our issuer iamHost
 
           user = userService.getByUsername(resourceUri.getUserInfo()); // first part is the username
 
           if (user != null) {
-            // username matched, check the host component
+            // username matched, check the iamHost component
             UriComponents issuerComponents =
                 UriComponentsBuilder.fromHttpUrl(config.getIssuer()).build();
             if (!Strings.nullToEmpty(issuerComponents.getHost())

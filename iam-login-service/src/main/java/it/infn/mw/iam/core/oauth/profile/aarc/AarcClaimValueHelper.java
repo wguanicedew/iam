@@ -34,7 +34,7 @@ public class AarcClaimValueHelper {
       ImmutableSet.of("eduperson_scoped_affiliation", "eduperson_entitlement");
 
   @Value("${iam.host}")
-  String host;
+  String iamHost;
 
   @Value("${iam.organisation.name}")
   String organisationName;
@@ -80,7 +80,7 @@ public class AarcClaimValueHelper {
     }
     urn.append(groupHierarchy.toString());
 
-    urn.append(String.format("#%s:443", host));
+    urn.append(String.format("#%s", iamHost));
 
     return urn.toString();
   }

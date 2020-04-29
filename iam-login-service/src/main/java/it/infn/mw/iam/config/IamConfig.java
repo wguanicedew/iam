@@ -87,6 +87,7 @@ import it.infn.mw.iam.notification.service.resolver.NotifyGmStrategy;
 import it.infn.mw.iam.notification.service.resolver.NotifyGmsAndAdminsStrategy;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamAupRepository;
+import it.infn.mw.iam.persistence.repository.IamOAuthAccessTokenRepository;
 
 @Configuration
 public class IamConfig {
@@ -132,10 +133,11 @@ public class IamConfig {
   @Bean(name = "aarcJwtProfile")
   JWTProfile aarcJwtProfile(IamProperties props, IamAccountRepository accountRepo,
       ScopeClaimTranslationService converter, AarcClaimValueHelper claimHelper,
-      UserInfoService userInfoService, ScopeMatcherRegistry registry) {
+      UserInfoService userInfoService, ScopeMatcherRegistry registry,
+      IamOAuthAccessTokenRepository repo) {
 
     AarcJWTProfileAccessTokenBuilder atBuilder =
-        new AarcJWTProfileAccessTokenBuilder(props, converter, claimHelper);
+        new AarcJWTProfileAccessTokenBuilder(props, converter, claimHelper, repo);
 
     AarcJWTProfileUserinfoHelper uiHelper =
         new AarcJWTProfileUserinfoHelper(props, userInfoService, claimHelper);
@@ -153,10 +155,10 @@ public class IamConfig {
   JWTProfile iamJwtProfile(IamProperties props, IamAccountRepository accountRepo,
       ScopeClaimTranslationService converter, ClaimValueHelper claimHelper,
       UserInfoService userInfoService, ExternalAuthenticationInfoProcessor proc,
-      ScopeMatcherRegistry registry) {
+      ScopeMatcherRegistry registry, IamOAuthAccessTokenRepository repo) {
 
     IamJWTProfileAccessTokenBuilder atBuilder =
-        new IamJWTProfileAccessTokenBuilder(props, converter, claimHelper);
+        new IamJWTProfileAccessTokenBuilder(props, converter, claimHelper, repo);
 
     IamJWTProfileUserinfoHelper uiHelper =
         new IamJWTProfileUserinfoHelper(props, userInfoService, proc);
@@ -174,10 +176,10 @@ public class IamConfig {
   JWTProfile wlcgJwtProfile(IamProperties props, IamAccountRepository accountRepo,
       ScopeClaimTranslationService converter, ClaimValueHelper claimHelper,
       UserInfoService userInfoService, ExternalAuthenticationInfoProcessor proc,
-      ScopeMatcherRegistry registry) {
+      ScopeMatcherRegistry registry, IamOAuthAccessTokenRepository repo) {
 
     return new WLCGJWTProfile(props, userInfoService, accountRepo, new WLCGGroupHelper(),
-        new DefaultIntrospectionResultAssembler(), registry);
+        new DefaultIntrospectionResultAssembler(), registry, repo);
   }
 
   @Bean

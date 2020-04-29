@@ -21,7 +21,6 @@ import static it.infn.mw.iam.core.oauth.exchange.TokenExchangePdpResult.Decision
 import static java.lang.String.format;
 import static java.util.Objects.isNull;
 
-import java.text.ParseException;
 import java.util.Optional;
 import java.util.Set;
 
@@ -48,7 +47,6 @@ import it.infn.mw.iam.api.aup.AUPSignatureCheckService;
 import it.infn.mw.iam.core.oauth.exchange.TokenExchangePdp;
 import it.infn.mw.iam.core.oauth.exchange.TokenExchangePdpResult;
 import it.infn.mw.iam.persistence.model.IamAccount;
-import net.minidev.json.JSONObject;
 
 public class TokenExchangeTokenGranter extends AbstractTokenGranter {
 
@@ -58,17 +56,6 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
       "urn:ietf:params:oauth:grant-type:token-exchange";
   private static final String TOKEN_TYPE = "urn:ietf:params:oauth:token-type:jwt";
   private static final String AUDIENCE_FIELD = "audience";
-
-  public static final String TOKEN_EXCHANGE_SUBJECT_TOKEN_KEY = "iam.token_exchange.subject_token";
-
-  public static final String TOKEN_EXCHANGE_SUBJECT_CLIENT_ID_KEY =
-      "iam.token_exchange.subject_token.cid";
-
-  public static final String TOKEN_EXCHANGE_SUBJECT_SUB_KEY =
-      "iam.token_exchange.subject_token.sub";
-
-  public static final String TOKEN_EXCHANGE_SUBJECT_ACT_KEY =
-      "iam.token_exchange.subject_token.act";
 
   private final OAuth2TokenEntityService tokenServices;
 
@@ -132,30 +119,7 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
     }
   }
 
-  protected void setSubjectTokenOAuthRequestProperties(TokenRequest tokenRequest,
-      OAuth2Authentication authentication, OAuth2AccessTokenEntity subjectToken) {
 
-    authentication.getOAuth2Request()
-      .getExtensions()
-      .put(TOKEN_EXCHANGE_SUBJECT_CLIENT_ID_KEY, subjectToken.getClient().getClientId());
-
-
-    try {
-      JSONObject subjectActClaim =
-          subjectToken.getJwt().getJWTClaimsSet().getJSONObjectClaim("act");
-
-      if (!isNull(subjectActClaim)) {
-        authentication.getOAuth2Request()
-          .getExtensions()
-          .put(TOKEN_EXCHANGE_SUBJECT_ACT_KEY, subjectActClaim);
-      }
-
-    } catch (ParseException e) {
-      LOG.error("Error extracting claims from subject token JWT: {}", e.getMessage(), e);
-    }
-
-
-  }
 
   @Override
   protected OAuth2Authentication getOAuth2Authentication(final ClientDetails actorClient,
@@ -192,8 +156,6 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
           getRequestFactory().createOAuth2Request(actorClient, tokenRequest),
           subjectToken.getAuthenticationHolder().getAuthentication().getUserAuthentication());
     }
-
-    setSubjectTokenOAuthRequestProperties(tokenRequest, authentication, subjectToken);
 
     String audience = tokenRequest.getRequestParameters().get(AUDIENCE_FIELD);
     if (!isNullOrEmpty(audience)) {

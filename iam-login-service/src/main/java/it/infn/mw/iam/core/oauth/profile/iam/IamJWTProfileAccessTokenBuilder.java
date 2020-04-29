@@ -32,6 +32,7 @@ import com.nimbusds.jwt.JWTClaimsSet.Builder;
 
 import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.core.oauth.profile.common.BaseAccessTokenBuilder;
+import it.infn.mw.iam.persistence.repository.IamOAuthAccessTokenRepository;
 import it.infn.mw.iam.persistence.repository.UserInfoAdapter;
 
 public class IamJWTProfileAccessTokenBuilder extends BaseAccessTokenBuilder {
@@ -40,8 +41,9 @@ public class IamJWTProfileAccessTokenBuilder extends BaseAccessTokenBuilder {
   protected final ClaimValueHelper claimValueHelper;
 
   public IamJWTProfileAccessTokenBuilder(IamProperties properties,
-      ScopeClaimTranslationService scopeClaimConverter, ClaimValueHelper claimValueHelper) {
-    super(properties);
+      ScopeClaimTranslationService scopeClaimConverter, ClaimValueHelper claimValueHelper,
+      IamOAuthAccessTokenRepository repo) {
+    super(properties, repo);
     this.scopeClaimConverter = scopeClaimConverter;
     this.claimValueHelper = claimValueHelper;
   }
@@ -49,7 +51,7 @@ public class IamJWTProfileAccessTokenBuilder extends BaseAccessTokenBuilder {
   @Override
   public JWTClaimsSet buildAccessToken(OAuth2AccessTokenEntity token,
       OAuth2Authentication authentication, UserInfo userInfo, Instant issueTime) {
-    
+
     Builder builder = baseJWTSetup(token, authentication, userInfo, issueTime);
 
     if (properties.getAccessToken().isIncludeAuthnInfo() && userInfo != null) {
