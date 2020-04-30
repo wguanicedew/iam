@@ -97,7 +97,6 @@ public abstract class BaseAccessTokenBuilder implements JWTAccessTokenBuilder {
       Map<String, Object> actClaimContent = Maps.newHashMap();
       actClaimContent.put("sub", authentication.getOAuth2Request().getClientId());
 
-
       Object subjectTokenActClaim = subjectToken.getJWTClaimsSet().getClaim(ACT_CLAIM_NAME);
 
       if (!isNull(subjectTokenActClaim)) {
@@ -107,7 +106,7 @@ public abstract class BaseAccessTokenBuilder implements JWTAccessTokenBuilder {
       builder.claim(ACT_CLAIM_NAME, actClaimContent);
 
     } catch (ParseException e) {
-      LOG.error("Error getting claims from subject token: " + e.getMessage(), e);
+      LOG.error("Error getting claims from subject token: {}", e.getMessage(), e);
     }
   }
 
