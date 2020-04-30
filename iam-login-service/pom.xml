@@ -343,7 +343,7 @@
           <!-- Jacoco prepare-agent builds some command-line params without -->
           <!-- which jacoco will not instrument. Hence it is important to add -->
           <!-- those command-line params here (${argLine} holds those params) -->
-          <argLine>${argLine} -Xmx2500m</argLine>
+          <argLine>${argLine}</argLine>
           <runOrder>alphabetical</runOrder>
           <useSystemClassLoader>false</useSystemClassLoader>
         </configuration>

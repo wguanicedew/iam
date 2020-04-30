@@ -23,14 +23,15 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.mitre.oauth2.model.OAuth2AccessTokenEntity;
 import org.mitre.openid.connect.model.UserInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.OAuth2Request;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Maps;
@@ -41,7 +42,6 @@ import com.nimbusds.jwt.JWTParser;
 
 import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.core.oauth.profile.JWTAccessTokenBuilder;
-import it.infn.mw.iam.persistence.repository.IamOAuthAccessTokenRepository;
 
 public abstract class BaseAccessTokenBuilder implements JWTAccessTokenBuilder {
 
@@ -51,71 +51,64 @@ public abstract class BaseAccessTokenBuilder implements JWTAccessTokenBuilder {
   public static final String AUD_KEY = "aud";
   public static final String SCOPE_CLAIM_NAME = "scope";
   public static final String ACT_CLAIM_NAME = "act";
+  public static final String CLIENT_ID_CLAIM_NAME = "client_id";
   public static final String SPACE = " ";
 
   public static final String SUBJECT_TOKEN = "subject_token";
 
   protected final IamProperties properties;
-  protected final IamOAuthAccessTokenRepository repo;
 
   protected final Splitter SPLITTER = Splitter.on(' ').trimResults().omitEmptyStrings();
 
-  public BaseAccessTokenBuilder(IamProperties properties, IamOAuthAccessTokenRepository repo) {
+  public BaseAccessTokenBuilder(IamProperties properties) {
     this.properties = properties;
-    this.repo = repo;
   }
 
-  protected JWTClaimsSet.Builder handleClientTokenExchange(JWTClaimsSet.Builder builder,
+
+  protected boolean isTokenExchangeRequest(OAuth2Authentication authentication) {
+    return TOKEN_EXCHANGE_GRANT_TYPE.equals(authentication.getOAuth2Request().getGrantType());
+  }
+
+  protected JWT resolveSubjectTokenFromRequest(OAuth2Request request) {
+    String subjectTokenString = request.getRequestParameters().get(SUBJECT_TOKEN);
+
+    if (isNull(subjectTokenString)) {
+      throw new InvalidRequestException("subject_token not found in token exchange request!");
+    }
+
+    try {
+      return JWTParser.parse(subjectTokenString);
+    } catch (ParseException e) {
+      throw new InvalidRequestException("Error parsing subject token: " + e.getMessage(), e);
+    }
+  }
+
+
+  protected void handleClientTokenExchange(JWTClaimsSet.Builder builder,
       OAuth2AccessTokenEntity token, OAuth2Authentication authentication, UserInfo userInfo) {
 
-    if (TOKEN_EXCHANGE_GRANT_TYPE.equals(authentication.getOAuth2Request().getGrantType())) {
-
-      String subjectTokenString =
-          authentication.getOAuth2Request().getRequestParameters().get(SUBJECT_TOKEN);
-
-      if (isNull(subjectTokenString)) {
-        throw new IllegalArgumentException("subject_token not found in token exchange request!");
-      }
-
-      JWT subjectTokenJwt = null;
-
-      try {
-        subjectTokenJwt = JWTParser.parse(subjectTokenString);
-      } catch (ParseException e) {
-        throw new IllegalArgumentException("Error parsing subject token: " + e.getMessage(), e);
-      }
-
-      Optional.ofNullable(subjectTokenJwt)
-        .orElseThrow(() -> new IllegalArgumentException(
-            "subject token jwt still null after succesful parsing!"));
-      
-      OAuth2AccessTokenEntity subjectToken = repo.findByTokenValue(subjectTokenJwt)
-        .orElseThrow(
-            () -> new IllegalArgumentException("Subject token not found in IAM database!"));
+    try {
+      JWT subjectToken = resolveSubjectTokenFromRequest(authentication.getOAuth2Request());
 
       if (authentication.isClientOnly()) {
-        builder.subject(subjectToken.getClient().getClientId());
+        builder.subject(subjectToken.getJWTClaimsSet().getSubject());
       }
-      
+
       Map<String, Object> actClaimContent = Maps.newHashMap();
       actClaimContent.put("sub", authentication.getOAuth2Request().getClientId());
 
-      try {
-        
-        Object subjectTokenActClaim = subjectToken.getJwt().getJWTClaimsSet().getClaim(ACT_CLAIM_NAME);
-         
-        if (!isNull(subjectTokenActClaim)) {
-          actClaimContent.put("act", subjectTokenActClaim);
-        }
 
-        builder.claim(ACT_CLAIM_NAME, actClaimContent);
+      Object subjectTokenActClaim = subjectToken.getJWTClaimsSet().getClaim(ACT_CLAIM_NAME);
 
-      } catch (ParseException e) {
-        LOG.error("Error getting 'act' claim from subject token: " + e.getMessage(), e);
+      if (!isNull(subjectTokenActClaim)) {
+        actClaimContent.put("act", subjectTokenActClaim);
       }
-    }
 
-    return builder;
+      builder.claim(ACT_CLAIM_NAME, actClaimContent);
+
+    } catch (ParseException e) {
+      LOG.error("Error getting claims from subject token: " + e.getMessage(), e);
+    }
   }
 
   protected boolean hasRefreshTokenAudienceRequest(OAuth2Authentication authentication) {
@@ -151,7 +144,12 @@ public abstract class BaseAccessTokenBuilder implements JWTAccessTokenBuilder {
       .subject(subject)
       .jwtID(UUID.randomUUID().toString());
 
+    if (!authentication.isClientOnly()) {
+      builder.claim(CLIENT_ID_CLAIM_NAME, token.getClient().getClientId());
+    }
+
     String audience = null;
+
     if (hasAudienceRequest(authentication)) {
       audience = (String) authentication.getOAuth2Request().getExtensions().get(AUD_KEY);
     }
@@ -166,7 +164,12 @@ public abstract class BaseAccessTokenBuilder implements JWTAccessTokenBuilder {
     if (!isNullOrEmpty(audience)) {
       builder.audience(SPLITTER.splitToList(audience));
     }
-    return handleClientTokenExchange(builder, token, authentication, userInfo);
+
+    if (isTokenExchangeRequest(authentication)) {
+      handleClientTokenExchange(builder, token, authentication, userInfo);
+    }
+
+    return builder;
   }
 
 
