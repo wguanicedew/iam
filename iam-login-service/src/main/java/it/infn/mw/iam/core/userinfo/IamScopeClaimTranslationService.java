@@ -17,6 +17,8 @@ package it.infn.mw.iam.core.userinfo;
 
 import static it.infn.mw.iam.core.userinfo.UserInfoClaim.ADDRESS;
 import static it.infn.mw.iam.core.userinfo.UserInfoClaim.BIRTHDATE;
+import static it.infn.mw.iam.core.userinfo.UserInfoClaim.EDUPERSON_ENTITLEMENT;
+import static it.infn.mw.iam.core.userinfo.UserInfoClaim.EDUPERSON_SCOPED_AFFILIATION;
 import static it.infn.mw.iam.core.userinfo.UserInfoClaim.EMAIL;
 import static it.infn.mw.iam.core.userinfo.UserInfoClaim.EMAIL_VERIFIED;
 import static it.infn.mw.iam.core.userinfo.UserInfoClaim.EXTERNAL_AUTHN;
@@ -62,6 +64,8 @@ public class IamScopeClaimTranslationService implements ScopeClaimTranslationSer
   public static final String EMAIL_SCOPE = "email";
   public static final String PHONE_SCOPE = "phone";
   public static final String ADDRESS_SCOPE = "address";
+  public static final String EDUPERSON_SCOPED_AFFILIATION_SCOPE = "eduperson_scoped_affiliation";
+  public static final String EDUPERSON_ENTITLEMENT_SCOPE = "eduperson_entitlement";
 
   protected static final Set<UserInfoClaim> PROFILE_CLAIMS = EnumSet.of(NAME, PREFERRED_USERNAME,
       GIVEN_NAME, FAMILY_NAME, MIDDLE_NAME, NICKNAME, PROFILE, PICTURE, WEBSITE, GENDER, ZONEINFO,
@@ -78,6 +82,8 @@ public class IamScopeClaimTranslationService implements ScopeClaimTranslationSer
     mapScopeToClaim(EMAIL_SCOPE, EMAIL_CLAIMS);
     mapScopeToClaim(PHONE_SCOPE, PHONE_CLAIMS);
     mapScopeToClaim(ADDRESS_SCOPE, ADDRESS);
+    mapScopeToClaim(EDUPERSON_SCOPED_AFFILIATION_SCOPE, EDUPERSON_SCOPED_AFFILIATION);
+    mapScopeToClaim(EDUPERSON_ENTITLEMENT_SCOPE, EDUPERSON_ENTITLEMENT);
   }
 
   private void mapScopeToClaim(String scope, UserInfoClaim claim) {

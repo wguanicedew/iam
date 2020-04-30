@@ -57,7 +57,8 @@ public class IamProperties {
 
     public enum Profile {
       IAM,
-      WLCG
+      WLCG,
+      AARC
     }
 
     Profile defaultProfile = Profile.IAM;
@@ -230,6 +231,20 @@ public class IamProperties {
     }
   }
 
+  public static class AarcProfileProperties {
+
+    private String urnNamespace = "example:iam";
+
+    public String getUrnNamespace() {
+      return urnNamespace;
+    }
+
+    public void setUrnNamespace(String urnNamespace) {
+      this.urnNamespace = urnNamespace;
+    }
+
+  }
+
   private String host;
 
   private String issuer;
@@ -263,6 +278,8 @@ public class IamProperties {
   private DeviceCodeProperties deviceCode = new DeviceCodeProperties();
 
   private boolean generateDdlSqlScript = false;
+
+  private AarcProfileProperties aarcProfile = new AarcProfileProperties();
 
   public String getBaseUrl() {
     return baseUrl;
@@ -398,5 +415,13 @@ public class IamProperties {
 
   public boolean isGenerateDdlSqlScript() {
     return generateDdlSqlScript;
+  }
+
+  public AarcProfileProperties getAarcProfile() {
+    return aarcProfile;
+  }
+
+  public void setAarcProfile(AarcProfileProperties aarcProfile) {
+    this.aarcProfile = aarcProfile;
   }
 }

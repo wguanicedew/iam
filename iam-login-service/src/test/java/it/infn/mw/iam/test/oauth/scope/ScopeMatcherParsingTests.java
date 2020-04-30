@@ -38,7 +38,7 @@ import it.infn.mw.iam.core.oauth.scope.matchers.ScopeMatchersProperties.MatcherP
 import it.infn.mw.iam.core.oauth.scope.matchers.ScopeMatchersPropertiesParser;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ScopeMatcherParsingTest {
+public class ScopeMatcherParsingTests {
 
   ScopeMatchersProperties p = new ScopeMatchersProperties();
   
