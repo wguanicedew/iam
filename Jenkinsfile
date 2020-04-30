@@ -71,13 +71,13 @@ pipeline {
 
         stage('license-check') {
           steps {
-              sh 'mvn license:check'
+              sh 'mvn -B license:check'
           }
         }
 
         stage('compile') {
           steps {
-            sh 'mvn compile'
+            sh 'mvn -B compile'
           }
         }
 
@@ -97,7 +97,7 @@ pipeline {
           }
 
           steps {
-            sh 'mvn test'
+            sh 'mvn -B test'
           }
         }
 
@@ -174,7 +174,7 @@ pipeline {
 
                 withSonarQubeEnv('sonarcloud.io'){
                   sh """
-                    mvn -U ${checkstyle_opts} \\
+                    mvn -B -U ${checkstyle_opts} \\
                     install sonar:sonar \\
                     -Dsonar.host.url=${SONAR_HOST_URL} \\
                     -Dsonar.login=${SONAR_AUTH_TOKEN} \\
@@ -222,7 +222,7 @@ pipeline {
 
         stage('package') {
           steps {
-            sh 'mvn -B -DskipTests=true clean package' 
+            sh 'mvn -B -DskipTests=true clean deploy package' 
             archiveArtifacts 'iam-login-service/target/iam-login-service.war'
             archiveArtifacts 'iam-login-service/target/classes/iam.version.properties'
             archiveArtifacts 'iam-test-client/target/iam-test-client.jar'
