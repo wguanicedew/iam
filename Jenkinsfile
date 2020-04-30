@@ -51,10 +51,10 @@ pipeline {
                 image 'cloud-vm114.cloud.cnaf.infn.it/cnafsd/centos7-jenkins-slave:latest'
                 ttyEnabled true
                 command 'cat'
-                resourceRequestCpu '500m'
-                resourceLimitCpu '3'
-                resourceRequestMemory '2500Mi'
-                resourceLimitMemory '2500Mi'
+                resourceRequestCpu '2'
+                resourceLimitCpu '4'
+                resourceRequestMemory '3200Mi'
+                resourceLimitMemory '3200Mi'
           }
         }
       }
