@@ -419,7 +419,7 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
       // Assume https when sitting behind a reverse proxy
       cp.setScheme("https");
 
-      // FIXME: find more reliable way of extracting the host name
+      // FIXME: find more reliable way of extracting the iamHost name
       cp.setServerName(iamProperties.getBaseUrl().substring(8));
       cp.setServerPort(443);
       cp.setIncludeServerPortInRequestURL(false);
