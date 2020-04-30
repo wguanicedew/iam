@@ -31,7 +31,6 @@ import com.nimbusds.jwt.JWTClaimsSet.Builder;
 
 import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.core.oauth.profile.common.BaseAccessTokenBuilder;
-import it.infn.mw.iam.persistence.repository.IamOAuthAccessTokenRepository;
 import it.infn.mw.iam.persistence.repository.UserInfoAdapter;
 
 public class WLCGProfileAccessTokenBuilder extends BaseAccessTokenBuilder {
@@ -42,9 +41,9 @@ public class WLCGProfileAccessTokenBuilder extends BaseAccessTokenBuilder {
 
   final WLCGGroupHelper groupHelper;
 
-  public WLCGProfileAccessTokenBuilder(IamProperties properties, IamOAuthAccessTokenRepository repo,
+  public WLCGProfileAccessTokenBuilder(IamProperties properties,
       WLCGGroupHelper groupHelper) {
-    super(properties, repo);
+    super(properties);
     this.groupHelper = groupHelper;
   }
 

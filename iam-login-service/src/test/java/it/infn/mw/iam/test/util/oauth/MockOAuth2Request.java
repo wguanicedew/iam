@@ -16,6 +16,7 @@
 package it.infn.mw.iam.test.util.oauth;
 
 import java.util.Collections;
+import java.util.Map;
 import java.util.Objects;
 
 import org.springframework.security.oauth2.provider.OAuth2Request;
@@ -39,5 +40,10 @@ public class MockOAuth2Request extends OAuth2Request {
   @Override
   public boolean isApproved() {
     return true;
+  }
+  
+  @Override
+  public void setRequestParameters(Map<String, String> requestParameters) {
+    super.setRequestParameters(requestParameters);
   }
 }
