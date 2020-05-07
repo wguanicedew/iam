@@ -8,6 +8,7 @@ WorkingDirectory=/etc/iam-login-service
 ExecStart=/usr/bin/java $IAM_JAVA_OPTS -jar /var/lib/indigo/iam-login-service/iam-login-service.war
 KillMode=process
 User=iam
+SyslogIdentifier=iam-login-service
 
 [Install]
 WantedBy=multi-user.target
