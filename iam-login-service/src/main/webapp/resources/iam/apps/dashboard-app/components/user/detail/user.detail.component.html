@@ -87,10 +87,10 @@
                     Signed AUP
                 </td>
                 <td class="text-right" ng-if="$ctrl.hasAupSignatureTime()">
-                    <a>{{$ctrl.user.aupSignature.signatureTime | relativeDate }}</a>
+                    {{$ctrl.user.aupSignature.signatureTime | relativeDate }}
                 </td>
                 <td class="text-right" ng-if="!$ctrl.hasAupSignatureTime()">
-                    <a>No AUP signature found</a>
+                    No AUP signature found
                 </td>
             </tr>
         </tbody>
