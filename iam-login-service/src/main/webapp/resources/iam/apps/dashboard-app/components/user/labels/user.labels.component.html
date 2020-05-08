@@ -20,7 +20,7 @@
         <tbody>
             <tr ng-repeat="label in $ctrl.labels">
                 <td class="text-bold text-left">
-                    {{label.name}}
+                    {{$ctrl.labelName(label)}}
                 </td>
                 <td class="text-right">
                     {{label.value}}

@@ -24,11 +24,20 @@
     function UserLabelsController(toaster, $uibModal, LabelsService) {
         var self = this;
 
+        self.labelName = labelName;
+
         self.$onInit = function () {
             console.log('UserLabelsController onInit');
             console.log('UserLabelsController self.labels: ', self.labels);
         };
 
+        function labelName(label) {
+            if (label.prefix) {
+                return label.prefix + "/" + label.name;
+            }
+
+            return label.name;
+        }
     }
 
     function userLabels() {
