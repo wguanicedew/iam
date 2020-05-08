@@ -135,16 +135,7 @@
                     Please provide a reason for your registration request
                 </span>
             </div>
-            <div ng-show="extAuthInfo != null">
-                <div class="form-group">
-                    <label class="control-label">External authentication type</label>
-                    <div>{{extAuthInfo.type}}</div>
-                    <label class="control-label">External authentication provider</label>
-                    <div>{{extAuthInfo.issuer}}</div>
-                    <label class="control-label">Subject</label>
-                    <div>{{extAuthInfo.subject}}</div>
-                </div>
-            </div>
+
             <div ng-if="!aup && privacyPolicy.url">
                 <p>
                     By submitting this registration request, you declare that you agree
