@@ -16,7 +16,7 @@
 (function () {
     'use strict';
 
-    function UserDetailController(Utils, AupService) {
+    function UserDetailController(Utils) {
         var self = this;
 
         self.$onInit = function () {
@@ -41,8 +41,9 @@
         };
 
         self.hasEndTime = function () {
-            return self.indigoUser().endTime;
+            return self.indigoUser() && self.indigoUser().endTime;
         };
+
     }
 
     angular.module('dashboardApp').component('userDetail', {
@@ -51,6 +52,6 @@
             user: '=',
             aup: '='
         },
-        controller: ['Utils', 'AupService', UserDetailController]
+        controller: ['Utils', UserDetailController]
     });
 })();

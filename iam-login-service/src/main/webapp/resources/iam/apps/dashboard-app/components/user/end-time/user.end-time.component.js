@@ -44,11 +44,14 @@
         self.endTime = self.indigoUser().endTime;
     }
 
-    function UserEndTimeController(toaster, $uibModal, $filter) {
+    function UserEndTimeController(toaster, AccountLifecycleService, $uibModal, $filter) {
         var self = this;
 
         self.$onInit = function () {
             console.log('UserEndTimeController onInit');
+            AccountLifecycleService.readOnlyAccountEndTime().then(function (res) {
+                self.readOnly = res;
+            });
             self.enabled = true;
         };
 
@@ -101,7 +104,7 @@
             user: '='
         },
         controller: [
-            'toaster', '$uibModal', '$filter', UserEndTimeController
+            'toaster', 'AccountLifecycleService', '$uibModal', '$filter', UserEndTimeController
         ]
     });
 })();

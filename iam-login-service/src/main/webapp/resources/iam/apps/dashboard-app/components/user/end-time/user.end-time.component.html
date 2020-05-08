@@ -16,7 +16,7 @@
 
 -->
 <button class="btn btn-primary btn-block" style="margin-top: 5px" name="set-user-end-time"
-    ng-click="$ctrl.openSetEndTimeDialog()">
+    ng-click="$ctrl.openSetEndTimeDialog()" ng-if="!$ctrl.readOnly">
     <i class="fa fa-calendar"></i>
     <strong>Change membership end time</strong>
 </button>

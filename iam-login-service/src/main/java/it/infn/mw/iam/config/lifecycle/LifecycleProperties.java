@@ -92,7 +92,9 @@ public class LifecycleProperties {
     ExpiredAccountPolicyProperties expiredAccountPolicy = new ExpiredAccountPolicyProperties();
     
     TaskProperties expiredAccountsTask = new TaskProperties();
-
+    
+    boolean readOnlyEndTime  = false;
+    
     public Integer getAccountLifetimeDays() {
       return accountLifetimeDays;
     }
@@ -116,6 +118,15 @@ public class LifecycleProperties {
     public void setExpiredAccountsTask(TaskProperties expiredAccountsTask) {
       this.expiredAccountsTask = expiredAccountsTask;
     }
+
+    public boolean isReadOnlyEndTime() {
+      return readOnlyEndTime;
+    }
+
+    public void setReadOnlyEndTime(boolean readOnlyEndTime) {
+      this.readOnlyEndTime = readOnlyEndTime;
+    }
+    
   }
 
   @Valid

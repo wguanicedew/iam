@@ -24,7 +24,8 @@
     function AccountLifecycleService($http, $q) {
 
         var service = {
-            setAccountEndTime: setAccountEndTime
+            setAccountEndTime: setAccountEndTime,
+            readOnlyAccountEndTime: readOnlyAccountEndTime
         };
 
         return service;
@@ -35,6 +36,13 @@
 
         function handleError(res) {
             return $q.reject(res);
+        }
+
+        function readOnlyAccountEndTime() {
+
+            return $http.get("/iam/config/lifecycle/account/read-only-end-time", {
+                cache: true
+            }).then(handleSuccess, handleError);
         }
 
         function setAccountEndTime(accountId, endTime) {

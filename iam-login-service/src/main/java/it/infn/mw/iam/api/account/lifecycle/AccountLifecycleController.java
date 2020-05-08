@@ -36,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import it.infn.mw.iam.api.common.ErrorDTO;
 import it.infn.mw.iam.api.common.NoSuchAccountError;
+import it.infn.mw.iam.config.lifecycle.LifecycleProperties;
 import it.infn.mw.iam.core.user.IamAccountService;
 import it.infn.mw.iam.persistence.model.IamAccount;
 
@@ -46,12 +47,17 @@ public class AccountLifecycleController {
 
   public static final String BASE_RESOURCE = "/iam/account/{id}/endTime";
   public static final String INVALID_LIFECYCLE_TEMPLATE = "Invalid lifecycle object: %s";
+  public static final String READONLY_ENDTIME_MSG =
+      "Account end time is read-only for this organization";
 
   private final IamAccountService service;
+  private final LifecycleProperties properties;
 
   @Autowired
-  public AccountLifecycleController(IamAccountService accountService) {
+  public AccountLifecycleController(IamAccountService accountService,
+      LifecycleProperties properties) {
     this.service = accountService;
+    this.properties = properties;
   }
 
   private Supplier<NoSuchAccountError> noSuchAccountError(String uuid) {
@@ -68,14 +74,25 @@ public class AccountLifecycleController {
   @RequestMapping(method = PUT)
   public void setEndTime(@PathVariable String id, @RequestBody @Validated AccountLifecycleDTO dto,
       BindingResult validationResult) {
+
+    if (properties.getAccount().isReadOnlyEndTime()) {
+      throw new InvalidLifecycleError(READONLY_ENDTIME_MSG);
+    }
+
     handleValidationError(validationResult);
     IamAccount account = service.findByUuid(id).orElseThrow(noSuchAccountError(id));
     service.setAccountEndTime(account, dto.getEndTime());
   }
-  
+
   @ResponseStatus(value = HttpStatus.BAD_REQUEST)
   @ExceptionHandler(HttpMessageNotReadableException.class)
   public ErrorDTO invalidRepresentation(Exception ex) {
+    return ErrorDTO.fromString(ex.getMessage());
+  }
+
+  @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(InvalidLifecycleError.class)
+  public ErrorDTO invalidLifecycle(Exception ex) {
     return ErrorDTO.fromString(ex.getMessage());
   }
 
