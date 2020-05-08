@@ -109,10 +109,10 @@ public class CernProperties {
   private String experimentName = "test";
 
   @Valid
-  private HrDbApiProperties hrApi;
+  private HrDbApiProperties hrApi = new HrDbApiProperties();
 
   @Valid
-  private TaskProperties task;
+  private TaskProperties task = new TaskProperties();
 
   public HrDbApiProperties getHrApi() {
     return hrApi;
