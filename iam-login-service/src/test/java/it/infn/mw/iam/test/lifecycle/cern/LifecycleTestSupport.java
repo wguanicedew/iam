@@ -15,6 +15,10 @@
  */
 package it.infn.mw.iam.test.lifecycle.cern;
 
+import static it.infn.mw.iam.core.lifecycle.cern.CernHrLifecycleHandler.LABEL_ACTION;
+import static it.infn.mw.iam.core.lifecycle.cern.CernHrLifecycleHandler.LABEL_CERN_PREFIX;
+import static it.infn.mw.iam.core.lifecycle.cern.CernHrLifecycleHandler.LABEL_IGNORE;
+
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -24,7 +28,6 @@ import com.google.common.collect.Sets;
 import it.infn.mw.iam.api.registration.cern.dto.InstituteDTO;
 import it.infn.mw.iam.api.registration.cern.dto.ParticipationDTO;
 import it.infn.mw.iam.api.registration.cern.dto.VOPersonDTO;
-import it.infn.mw.iam.core.lifecycle.cern.CernHrLifecycleHandler;
 import it.infn.mw.iam.core.lifecycle.cern.CernHrLifecycleHandler.Action;
 import it.infn.mw.iam.persistence.model.IamLabel;
 
@@ -41,8 +44,8 @@ public interface LifecycleTestSupport {
 
   default IamLabel cernIgnoreLabel() {
     return IamLabel.builder()
-      .prefix(CernHrLifecycleHandler.LABEL_CERN_PREFIX)
-      .name(CernHrLifecycleHandler.LABEL_IGNORE)
+      .prefix(LABEL_CERN_PREFIX)
+      .name(LABEL_IGNORE)
       .build();
   }
 
@@ -52,7 +55,7 @@ public interface LifecycleTestSupport {
 
   default IamLabel cernPersonIdLabel(String personId) {
     return IamLabel.builder()
-      .prefix(CERN_SSO_ISSUER)
+      .prefix(LABEL_CERN_PREFIX)
       .name("cern_person_id")
       .value(personId)
       .build();
@@ -60,8 +63,8 @@ public interface LifecycleTestSupport {
 
   default IamLabel actionLabel(Action a) {
     return IamLabel.builder()
-      .prefix(CernHrLifecycleHandler.LABEL_CERN_PREFIX)
-      .name(CernHrLifecycleHandler.LABEL_ACTION)
+      .prefix(LABEL_CERN_PREFIX)
+      .name(LABEL_ACTION)
       .value(a.name())
       .build();
   }

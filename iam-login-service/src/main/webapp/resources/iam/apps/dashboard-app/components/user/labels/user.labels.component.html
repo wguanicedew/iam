@@ -15,12 +15,21 @@
     limitations under the License.
 
 -->
-<div class="table-responsive" ng-if="$ctrl.labels">
-    <table class="table no-border table-striped table-sm">
+<div ng-if="$ctrl.labels && $ctrl.labels.length > 0">
+    <table class="table no-border table-striped table-sm
+    table-responsive">
+        <thead>
+            <tr>
+                <th>Labels</th>
+            </tr>
+        </thead>
         <tbody>
             <tr ng-repeat="label in $ctrl.labels">
                 <td class="text-bold text-left">
-                    {{$ctrl.labelName(label)}}
+                    <div class="iam-label-prefix" ng-if="label.prefix">{{label.prefix}}</div>
+                    <div class="iam-label-name">
+                        {{label.name}}
+                    </div>
                 </td>
                 <td class="text-right">
                     {{label.value}}

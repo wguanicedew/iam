@@ -193,7 +193,7 @@ public class CernHrLifecycleHandler implements Runnable, SchedulingConfigurer {
   }
 
   private Optional<IamLabel> getPersonIdLabel(IamAccount account) {
-    return account.getLabelByPrefixAndName(cernProperties.getSsoIssuer(),
+    return account.getLabelByPrefixAndName(LABEL_CERN_PREFIX,
         cernProperties.getPersonIdClaim());
   }
 
@@ -230,7 +230,7 @@ public class CernHrLifecycleHandler implements Runnable, SchedulingConfigurer {
 
     while (true) {
       Page<IamAccount> accountsPage = accountRepo.findByLabelPrefixAndName(
-          cernProperties.getSsoIssuer(), cernProperties.getPersonIdClaim(), pageRequest);
+          LABEL_CERN_PREFIX, cernProperties.getPersonIdClaim(), pageRequest);
 
       if (accountsPage.hasContent()) {
         for (IamAccount account : accountsPage.getContent()) {

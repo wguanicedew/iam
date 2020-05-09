@@ -238,7 +238,7 @@ public class CernRegistrationValidationServiceTests {
 
     assertThat(request.getLabels(), notNullValue());
     assertThat(request.getLabels(), hasSize(1));
-    assertThat(request.getLabels().get(0).getPrefix(), is("https://auth.cern.ch/auth/realms/cern"));
+    assertThat(request.getLabels().get(0).getPrefix(), is("hr.cern"));
     assertThat(request.getLabels().get(0).getName(), is("cern_person_id"));
     assertThat(request.getLabels().get(0).getValue(), is("988211"));
     assertThat(request.getGivenname(), is(mockVoPerson().getFirstName()));
@@ -254,7 +254,7 @@ public class CernRegistrationValidationServiceTests {
     assertThat(account.getLabels(), hasSize(1));
 
     Optional<IamLabel> personId =
-        account.getLabelByPrefixAndName("https://auth.cern.ch/auth/realms/cern", "cern_person_id");
+        account.getLabelByPrefixAndName("hr.cern", "cern_person_id");
     assertThat(personId.isPresent(), is(true));
     assertThat(personId.get().getValue(), is("988211"));
   }

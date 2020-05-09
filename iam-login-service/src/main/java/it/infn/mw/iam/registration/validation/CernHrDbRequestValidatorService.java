@@ -16,6 +16,7 @@
 package it.infn.mw.iam.registration.validation;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static it.infn.mw.iam.core.lifecycle.cern.CernHrLifecycleHandler.LABEL_CERN_PREFIX;
 import static it.infn.mw.iam.registration.validation.RegistrationRequestValidationResult.error;
 import static it.infn.mw.iam.registration.validation.RegistrationRequestValidationResult.invalid;
 import static it.infn.mw.iam.registration.validation.RegistrationRequestValidationResult.ok;
@@ -44,6 +45,8 @@ import it.infn.mw.iam.registration.RegistrationRequestDto;
 @Profile("cern")
 public class CernHrDbRequestValidatorService implements RegistrationRequestValidationService {
 
+
+
   public static final Logger LOG = LoggerFactory.getLogger(CernHrDbRequestValidatorService.class);
 
   final CernHrDBApiService hrDbApi;
@@ -57,7 +60,7 @@ public class CernHrDbRequestValidatorService implements RegistrationRequestValid
 
   public void addPersonIdLabel(RegistrationRequestDto request, String personId) {
     LabelDTO label = LabelDTO.builder()
-      .prefix(cernProperties.getSsoIssuer())
+      .prefix(LABEL_CERN_PREFIX)
       .name(cernProperties.getPersonIdClaim())
       .value(personId)
       .build();
@@ -101,7 +104,7 @@ public class CernHrDbRequestValidatorService implements RegistrationRequestValid
       return invalid(format("CERN person id claim '%s' not found in authentication attributes",
           cernProperties.getPersonIdClaim()));
     }
-    
+
     try {
       if (hrDbApi.hasValidExperimentParticipation(cernPersonId)) {
         addPersonIdLabel(registrationRequest, cernPersonId);
@@ -109,7 +112,7 @@ public class CernHrDbRequestValidatorService implements RegistrationRequestValid
         return ok();
       }
     } catch (CernHrDbApiError e) {
-      return error("HR Db API error: "+e.getMessage());
+      return error("HR Db API error: " + e.getMessage());
     }
 
     return invalid(format("No valid experiment participation found for user %s %s (PersonId: %s)",
