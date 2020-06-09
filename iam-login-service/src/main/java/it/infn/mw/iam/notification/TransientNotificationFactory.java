@@ -26,6 +26,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.runtime.RuntimeConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -244,6 +245,11 @@ public class TransientNotificationFactory implements NotificationFactory {
 
   protected IamEmailNotification createMessage(String template, Map<String, Object> model,
       IamNotificationType messageType, String subject, List<String> receiverAddress) {
+
+    if(properties.getUseCustomTemplates()) {
+      velocityEngine.setProperty(RuntimeConstants.RESOURCE_LOADER, "file");
+      velocityEngine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, properties.getCustomTemplateLocation());
+    }
 
     String body =
         VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, template, "UTF-8", model);

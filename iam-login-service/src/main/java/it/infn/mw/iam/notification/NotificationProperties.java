@@ -41,6 +41,10 @@ public class NotificationProperties {
 
   private Boolean disable;
 
+  private Boolean useCustomTemplates;
+
+  private String customTemplateLocation;
+
   @NotBlank
   private String mailFrom;
 
@@ -120,5 +124,21 @@ public class NotificationProperties {
   public void setGroupManagerNotificationPolicy(
       GroupManagerNotificationPolicy groupManagerNotificationPolicy) {
     this.groupManagerNotificationPolicy = groupManagerNotificationPolicy;
+  }
+
+  public void setUseCustomTemplates(Boolean useCustomTemplates) {
+    this.useCustomTemplates = useCustomTemplates;
+  }
+
+  public void setCustomTemplateLocation(String customTemplateLocation) {
+    this.customTemplateLocation = customTemplateLocation;
+  }
+
+  public Boolean getUseCustomTemplates() {
+    return useCustomTemplates;
+  }
+
+  public String getCustomTemplateLocation() {
+    return customTemplateLocation;
   }
 }
