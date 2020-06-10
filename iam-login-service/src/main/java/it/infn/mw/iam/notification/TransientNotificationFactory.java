@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
+import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -246,17 +247,18 @@ public class TransientNotificationFactory implements NotificationFactory {
   protected IamEmailNotification createMessage(String template, Map<String, Object> model,
       IamNotificationType messageType, String subject, List<String> receiverAddress) {
 
-    VelocityEngine ve = new VelocityEngine();
+    VelocityEngine ve;
 
     if(properties.getUseCustomTemplates()) {
+      ve = new VelocityEngine();
       LOG.info("Using custom template");
       ve.setProperty(RuntimeConstants.RESOURCE_LOADER, "file");
       ve.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, properties.getCustomTemplateLocation());
       ve.setProperty("file.resource.loader.class", "org.apache.velocity.runtime.resource.loader.FileResourceLoader");
     } else {
-      ve.setProperty(RuntimeConstants.RESOURCE_LOADER, "class");
-      ve.setProperty("file.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+      ve = velocityEngine; // Use default instead here, it knows where to look
     }
+
     ve.init();
 
     String body =
