@@ -246,14 +246,15 @@ public class TransientNotificationFactory implements NotificationFactory {
   protected IamEmailNotification createMessage(String template, Map<String, Object> model,
       IamNotificationType messageType, String subject, List<String> receiverAddress) {
 
-    //if(properties.getUseCustomTemplates()) {
     VelocityEngine ve = new VelocityEngine();
-      LOG.info("Using custom templates hopefully");
+
+    if(properties.getUseCustomTemplates()) {
+      LOG.info("Using custom template");
       ve.setProperty(RuntimeConstants.RESOURCE_LOADER, "file");
-      ve.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, "/templates/");
+      ve.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, properties.getCustomTemplateLocation());
       ve.setProperty("file.resource.loader.class", "org.apache.velocity.runtime.resource.loader.FileResourceLoader");
-      ve.init();
-    //}
+    }
+    ve.init();
 
     String body =
         VelocityEngineUtils.mergeTemplateIntoString(ve, template, "UTF-8", model);

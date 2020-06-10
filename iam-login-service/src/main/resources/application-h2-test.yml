@@ -26,7 +26,7 @@ spring:
     password:
   
 notification:
-  disable: true
+  disable: ${IAM_NOTIFICATION_DISABLE:true}
 
 flyway:
   locations:
