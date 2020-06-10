@@ -253,6 +253,9 @@ public class TransientNotificationFactory implements NotificationFactory {
       ve.setProperty(RuntimeConstants.RESOURCE_LOADER, "file");
       ve.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, properties.getCustomTemplateLocation());
       ve.setProperty("file.resource.loader.class", "org.apache.velocity.runtime.resource.loader.FileResourceLoader");
+    } else {
+      ve.setProperty(RuntimeConstants.RESOURCE_LOADER, "class");
+      ve.setProperty("file.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
     }
     ve.init();
 
