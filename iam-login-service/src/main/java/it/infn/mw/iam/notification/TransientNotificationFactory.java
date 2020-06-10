@@ -247,8 +247,11 @@ public class TransientNotificationFactory implements NotificationFactory {
       IamNotificationType messageType, String subject, List<String> receiverAddress) {
 
     if(properties.getUseCustomTemplates()) {
+      LOG.debug("Using custom templates hopefully");
       velocityEngine.setProperty(RuntimeConstants.RESOURCE_LOADER, "file");
       velocityEngine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, properties.getCustomTemplateLocation());
+      velocityEngine.setProperty("file.resource.loader.class", "org.apache.velocity.runtime.resource.loader.FileResourceLoader");
+      velocityEngine.init();
     }
 
     String body =
