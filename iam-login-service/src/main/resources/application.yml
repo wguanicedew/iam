@@ -97,7 +97,10 @@ iam:
   
   device-code:
     allow-complete-verification-uri: ${IAM_DEVICE_CODE_ALLOW_COMPLETE_VERIFICATION_URI:true}
-    
+
+  aarc-profile:
+    urn-namespace: ${IAM_AARC_PROFILE_URN_NAMESPACE:example:iam}
+
 x509:
   trustAnchorsDir: ${IAM_X509_TRUST_ANCHORS_DIR:/etc/grid-security/certificates}
   trustAnchorsRefreshMsec: ${IAM_X509_TRUST_ANCHORS_REFRESH:14400}
