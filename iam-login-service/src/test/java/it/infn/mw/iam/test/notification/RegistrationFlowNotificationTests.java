@@ -182,7 +182,7 @@ public class RegistrationFlowNotificationTests {
     message = notificationDelivery.getDeliveredNotifications().get(0);
 
     assertThat(message.getSubject(), equalTo(properties.getSubject().get("activated")));
-
+    assertThat(message.getBody(), containsString(request.getUsername()));
 
   }
 

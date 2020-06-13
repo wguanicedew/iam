@@ -62,6 +62,7 @@ import it.infn.mw.iam.authn.x509.IamX509AuthenticationUserDetailService;
 import it.infn.mw.iam.authn.x509.IamX509PreauthenticationProcessingFilter;
 import it.infn.mw.iam.authn.x509.X509AuthenticationCredentialExtractor;
 import it.infn.mw.iam.config.IamProperties;
+import it.infn.mw.iam.core.IamLocalAuthenticationProvider;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
 @Configuration
@@ -113,11 +114,12 @@ public class IamWebSecurityConfig {
     private ExternalAuthenticationHintService hintService;
 
     @Autowired
+    private IamProperties iamProperties;
+
+    @Autowired
     public void configureGlobal(final AuthenticationManagerBuilder auth) throws Exception {
       // @formatter:off
-      auth
-        .userDetailsService(iamUserDetailsService)
-        .passwordEncoder(passwordEncoder);
+      auth.authenticationProvider(new IamLocalAuthenticationProvider(iamProperties, iamUserDetailsService, passwordEncoder));
       // @formatter:on
     }
 
@@ -205,7 +207,8 @@ public class IamWebSecurityConfig {
 
     AccessDeniedHandler accessDeniedHandler() {
       return (request, response, authError) -> {
-        RequestDispatcher dispatcher = request.getRequestDispatcher("/registration/insufficient-auth");
+        RequestDispatcher dispatcher =
+            request.getRequestDispatcher("/registration/insufficient-auth");
         request.setAttribute("authError", authError);
         dispatcher.forward(request, response);
       };

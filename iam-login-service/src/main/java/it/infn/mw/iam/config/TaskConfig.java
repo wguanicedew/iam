@@ -43,7 +43,7 @@ import it.infn.mw.iam.notification.service.NotificationStoreService;
 
 @Configuration
 @EnableScheduling
-@Profile("prod")
+@Profile({"prod", "dev"})
 public class TaskConfig implements SchedulingConfigurer {
 
   public static final Logger LOG = LoggerFactory.getLogger(TaskConfig.class);

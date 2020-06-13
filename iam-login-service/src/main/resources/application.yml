@@ -104,13 +104,17 @@ iam:
     oidc-issuer: ${IAM_REGISTRATION_OIDC_ISSUER:https://example.org}
     saml-entity-id: ${IAM_REGISTRATION_SAML_ENTITY_ID:urn:example}
     
+  local-authn:
+    login-page-visibility: ${IAM_LOCAL_AUTHN_LOGIN_PAGE_VISIBILITY:visible}
+    enabled-for: ${IAM_LOCAL_AUTHN_ENABLED_FOR:all}
+    
   user-profile:
     editable-fields:
     - email
     - name
     - picture
     - surname
-    
+   
 x509:
   trustAnchorsDir: ${IAM_X509_TRUST_ANCHORS_DIR:/etc/grid-security/certificates}
   trustAnchorsRefreshMsec: ${IAM_X509_TRUST_ANCHORS_REFRESH:14400}

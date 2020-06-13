@@ -67,7 +67,7 @@ public class IamRootController {
 
     SecurityContextHolder.clearContext();
     session.invalidate();
-    
+
     return "redirect:/";
   }
 }
