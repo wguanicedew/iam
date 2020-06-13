@@ -39,7 +39,7 @@ public class AarcClaimValueHelper {
   @Value("${iam.organisation.name}")
   String organisationName;
 
-  @Value("${iam.aarcProfile.urnNamespace}")
+  @Value("${iam.aarc-profile.urn-namespace}")
   String urnNamespace;
 
   public Object getClaimValueFromUserInfo(String claim, IamUserInfo info) {
