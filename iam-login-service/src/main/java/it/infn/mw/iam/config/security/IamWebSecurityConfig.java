@@ -215,7 +215,7 @@ public class IamWebSecurityConfig {
     }
 
     AuthenticationEntryPoint entryPoint() {
-      String discoveryId = "/unset";
+      String discoveryId;
       if (OIDC.equals(iamProperties.getRegistration().getAuthenticationType())) {
         discoveryId = String.format("/openid_connect_login?iss=%s",
             iamProperties.getRegistration().getOidcIssuer());

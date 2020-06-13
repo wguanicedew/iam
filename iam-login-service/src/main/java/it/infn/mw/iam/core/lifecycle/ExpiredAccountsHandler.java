@@ -75,7 +75,7 @@ public class ExpiredAccountsHandler implements Runnable {
       return checkTime.isAfter(endTime.plus(gracePeriodDays, ChronoUnit.DAYS));
     }
 
-    return false;
+    return true;
   }
 
   private boolean pastSuspensionGracePeriod(IamAccount expiredAccount) {

@@ -17,6 +17,8 @@ package it.infn.mw.iam.test.lifecycle;
 
 import static it.infn.mw.iam.core.lifecycle.ExpiredAccountsHandler.LIFECYCLE_STATUS_LABEL;
 import static it.infn.mw.iam.core.lifecycle.ExpiredAccountsHandler.LIFECYCLE_TIMESTAMP_LABEL;
+import static it.infn.mw.iam.test.api.TestSupport.EXPECTED_ACCOUNT_NOT_FOUND;
+import static it.infn.mw.iam.test.api.TestSupport.TEST_USER_UUID;
 import static java.lang.String.valueOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -54,9 +56,9 @@ import it.infn.mw.iam.test.lifecycle.cern.LifecycleTestSupport;
 @WebAppConfiguration
 @Transactional
 @TestPropertySource(
-    properties = {"lifecycle.account.expiredAccountPolicy.suspensionGracePeriodDays=7",
+    properties = {"lifecycle.account.expiredAccountPolicy.suspensionGracePeriodDays=0",
         "lifecycle.account.expiredAccountPolicy.removalGracePeriodDays=30"})
-public class AccountLifecycleTests extends TestSupport implements LifecycleTestSupport {
+public class AccountLifecycleTestsNoGracePeriod implements LifecycleTestSupport {
 
   @Configuration
   public static class TestConfig {
@@ -66,7 +68,9 @@ public class AccountLifecycleTests extends TestSupport implements LifecycleTestS
       return Clock.fixed(NOW, ZoneId.systemDefault());
     }
   }
-
+  
+  
+  
   @Autowired
   private IamAccountRepository repo;
 
@@ -74,40 +78,13 @@ public class AccountLifecycleTests extends TestSupport implements LifecycleTestS
   private ExpiredAccountsHandler handler;
 
   @Test
-  public void testSuspensionGracePeriodWorks() {
+  public void testZeroDaysSuspensionGracePeriod() {
     IamAccount testAccount =
-        repo.findByUuid(TEST_USER_UUID).orElseThrow(assertionError(EXPECTED_ACCOUNT_NOT_FOUND));
+        repo.findByUuid(TestSupport.TEST_USER_UUID).orElseThrow(assertionError(TestSupport.EXPECTED_ACCOUNT_NOT_FOUND));
 
     assertThat(testAccount.isActive(), is(true));
 
     testAccount.setEndTime(Date.from(FOUR_DAYS_AGO));
-    repo.save(testAccount);
-
-    handler.handleExpiredAccounts();
-
-    testAccount =
-        repo.findByUuid(TEST_USER_UUID).orElseThrow(assertionError(EXPECTED_ACCOUNT_NOT_FOUND));
-
-    assertThat(testAccount.isActive(), is(true));
-
-    Optional<IamLabel> timestampLabel = testAccount.getLabelByName(LIFECYCLE_TIMESTAMP_LABEL);
-
-    assertThat(timestampLabel.isPresent(), is(true));
-    assertThat(timestampLabel.get().getValue(), is(valueOf(NOW.toEpochMilli())));
-
-    Optional<IamLabel> statusLabel = testAccount.getLabelByName(LIFECYCLE_STATUS_LABEL);
-    assertThat(statusLabel.isPresent(), is(true));
-    assertThat(statusLabel.get().getValue(),
-        is(ExpiredAccountsHandler.AccountLifecycleStatus.PENDING_SUSPENSION.name()));
-  }
-
-  @Test
-  public void testRemovalGracePeriodWorks() {
-    IamAccount testAccount =
-        repo.findByUuid(TEST_USER_UUID).orElseThrow(assertionError(EXPECTED_ACCOUNT_NOT_FOUND));
-
-    assertThat(testAccount.isActive(), is(true));
-    testAccount.setEndTime(Date.from(EIGHT_DAYS_AGO));
     repo.save(testAccount);
 
     handler.handleExpiredAccounts();
@@ -125,23 +102,7 @@ public class AccountLifecycleTests extends TestSupport implements LifecycleTestS
     Optional<IamLabel> statusLabel = testAccount.getLabelByName(LIFECYCLE_STATUS_LABEL);
     assertThat(statusLabel.isPresent(), is(true));
     assertThat(statusLabel.get().getValue(),
-        is(ExpiredAccountsHandler.AccountLifecycleStatus.PENDING_REMOVAL.name()));
-  }
-
-  @Test
-  public void testAccountRemovalWorks() {
-    IamAccount testAccount =
-        repo.findByUuid(TEST_USER_UUID).orElseThrow(assertionError(EXPECTED_ACCOUNT_NOT_FOUND));
-
-    testAccount.setEndTime(Date.from(THIRTY_ONE_DAYS_AGO));
-
-    repo.save(testAccount);
-
-    handler.handleExpiredAccounts();
-
-    Optional<IamAccount> account = repo.findByUuid(TEST_USER_UUID);;
-
-    assertThat(account.isPresent(), is(false));
+        is(ExpiredAccountsHandler.AccountLifecycleStatus.PENDING_REMOVAL.toString()));
   }
 
 }

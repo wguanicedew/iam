@@ -22,6 +22,7 @@ import static it.infn.mw.iam.core.lifecycle.cern.CernHrLifecycleHandler.LABEL_IG
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.function.Supplier;
 
 import com.google.common.collect.Sets;
 
@@ -93,6 +94,10 @@ public interface LifecycleTestSupport {
     dto.getParticipations().add(p);
 
     return dto;
+  }
+  
+  default Supplier<AssertionError> assertionError(String message) {
+    return () -> new AssertionError(message);
   }
 
 }

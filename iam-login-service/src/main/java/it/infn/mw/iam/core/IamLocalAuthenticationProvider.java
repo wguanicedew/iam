@@ -39,7 +39,7 @@ public class IamLocalAuthenticationProvider extends DaoAuthenticationProvider {
 
   private final LocalAuthenticationAllowedUsers allowedUsers;
 
-  private final Predicate<GrantedAuthority> ADMIN_MATCHER =
+  private static final Predicate<GrantedAuthority> ADMIN_MATCHER =
       a -> a.getAuthority().equals("ROLE_ADMIN");
 
   public IamLocalAuthenticationProvider(IamProperties properties, UserDetailsService uds, PasswordEncoder passwordEncoder) {

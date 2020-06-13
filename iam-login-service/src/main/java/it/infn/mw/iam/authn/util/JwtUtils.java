@@ -63,7 +63,6 @@ public class JwtUtils {
       } else {
         LOG.warn("Unsupported claim type '{}' for claim '{}'... skipping it",
             claimValue.getClass().getName(), claimName);
-        continue;
       }
     }
     return claimsMap;
