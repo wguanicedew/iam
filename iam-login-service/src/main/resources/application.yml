@@ -101,9 +101,8 @@ notification:
   adminAddress: ${IAM_NOTIFICATION_ADMIN_ADDRESS:indigo-alerts@localhost}
   admin-notification-policy: ${IAM_NOTIFICATION_ADMIN_NOTIFICATION_POLICY:notify-address}
   group-manager-notification-policy: ${IAM_NOTIFICATION_GROUP_MANAGER_NOTIFICATION_POLICY:notify-gms-and-admins}
-  useCustomTemplates: ${IAM_NOTIFICATION_USE_CUSTOM_TEMPLATES:false}
-  customTemplateLocation: ${IAM_NOTIFICATION_CUSTOM_TEMPLATE_LOCATION:/templates/}
-  
+  use-custom-templates: ${IAM_NOTIFICATION_USE_CUSTOM_TEMPLATES:false}
+  custom-template-location: ${IAM_NOTIFICATION_CUSTOM_TEMPLATE_LOCATION:/templates/}
   subject:
     confirmation: Confirm your ${iam.organisation.name} registration request
     activated: Your ${iam.organisation.name} account is now active
