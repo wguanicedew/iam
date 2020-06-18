@@ -49,12 +49,32 @@ import it.infn.mw.iam.notification.service.resolver.NotifyAdminsStrategy;
 import it.infn.mw.iam.notification.service.resolver.NotifyGmStrategy;
 import it.infn.mw.iam.notification.service.resolver.NotifyGmsAndAdminsStrategy;
 import it.infn.mw.iam.persistence.repository.IamAupRepository;
+import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
+import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 
 @Configuration
 public class IamConfig {
 
   @Value("${iam.organisation.name}")
   private String iamOrganisationName;
+
+  @Bean
+  FreeMarkerViewResolver freeMarkerViewResolver() {
+    FreeMarkerViewResolver resolver = new FreeMarkerViewResolver();
+    resolver.setSuffix(".ftl");
+    return resolver;
+  }
+
+  @Bean
+  FreeMarkerConfigurationFactoryBean freeMarkerConfiguration(NotificationProperties props) {
+    FreeMarkerConfigurationFactoryBean freeMarkerConfigurationFactoryBean = new FreeMarkerConfigurationFactoryBean();
+    freeMarkerConfigurationFactoryBean.setTemplateLoaderPath("classpath:/templates/");
+    //if(props.getUseCustomTemplates()) {
+    //  freeMarkerConfigurer.setTemplateLoaderPath(props.getCustomTemplateLocation());
+    //  freeMarkerConfigurer.setResourceLoader(fileSystemResourceLoader);
+    //}
+    return freeMarkerConfigurationFactoryBean;
+  }
 
   @Bean
   GroupManagerNotificationDeliveryStrategy gmDeliveryStrategy(

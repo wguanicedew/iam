@@ -18,7 +18,7 @@ package it.infn.mw.iam.notification;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.velocity.app.VelocityEngine;
+import freemarker.template.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,10 +34,10 @@ public class PersistentNotificationFactory extends TransientNotificationFactory 
   final IamEmailNotificationRepository repo;
 
   @Autowired
-  public PersistentNotificationFactory(VelocityEngine ve, NotificationProperties np,
-      IamEmailNotificationRepository repo, AdminNotificationDeliveryStrategy ands,
-      GroupManagerNotificationDeliveryStrategy gmds) {
-    super(ve, np, ands, gmds);
+  public PersistentNotificationFactory(Configuration fm, NotificationProperties np,
+                                       IamEmailNotificationRepository repo, AdminNotificationDeliveryStrategy ands,
+                                       GroupManagerNotificationDeliveryStrategy gmds) {
+    super(fm, np, ands, gmds);
     this.repo = repo;
   }
 

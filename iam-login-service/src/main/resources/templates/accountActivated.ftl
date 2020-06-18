@@ -1,10 +1,10 @@
-Dear $recipient,
+Dear ${recipient},
 
 your registration request has been approved.
 
 You can set your password by following this link:
 
-$resetPasswordUrl
+${resetPasswordUrl}
 
 
-The $organisationName registration service
+The ${organisationName} registration service

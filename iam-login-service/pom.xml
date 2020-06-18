@@ -304,6 +304,11 @@
     </dependency>
 
     <dependency>
+      <groupId>org.freemarker</groupId>
+      <artifactId>freemarker</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>cz.jirutka.validator</groupId>
       <artifactId>validator-collection</artifactId>
     </dependency>
@@ -402,6 +407,7 @@
           <excludes>
             <exclude>.jslintrc</exclude>
             <exclude>**/*.vm</exclude>
+            <exclude>**/*.ftl</exclude>
             <exclude>**/*.tag</exclude>
             <exclude>**/Dockerfile</exclude>
             <exclude>**/Dockerfile.prod</exclude>
