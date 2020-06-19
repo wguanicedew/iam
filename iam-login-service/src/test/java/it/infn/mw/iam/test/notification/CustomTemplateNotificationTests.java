@@ -16,6 +16,7 @@
 package it.infn.mw.iam.test.notification;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import freemarker.template.Configuration;
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.notification.NotificationProperties;
 import it.infn.mw.iam.persistence.model.IamEmailNotification;
@@ -55,9 +56,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @Transactional
 @WithAnonymousUser
 @TestPropertySource(properties = {
-        "notification.disable=false",
-        "notification.useCustomTemplates=true",
-        "notification.customTemplateLocation=C://Users//fou43474//iam//iam-login-service//src//test//resources//templates-on-disk/"
+        "notification.disable=false"
 })
 public class CustomTemplateNotificationTests {
 
@@ -94,18 +93,23 @@ public class CustomTemplateNotificationTests {
   @Autowired
   private ObjectMapper mapper;
 
+  @Autowired
+  private Configuration fmConfig;
+
   private MockMvc mvc;
 
   @Before
   public void setUp() throws InterruptedException {
     mvc =
         MockMvcBuilders.webAppContextSetup(context).alwaysDo(log()).apply(springSecurity()).build();
+    fmConfig.clearTemplateCache();
   }
 
   @After
   public void tearDown() throws InterruptedException {
     mockOAuth2Filter.cleanupSecurityContext();
     notificationDelivery.clearDeliveredNotifications();
+    fmConfig.clearTemplateCache();
   }
 
   @Test
@@ -140,7 +144,7 @@ public class CustomTemplateNotificationTests {
     assertThat(message.getBody(),
             containsString("you have requested to be a member of"));
     //assertThat(message.getBody(),
-            //containsString("TEMPLATE ON DISK"));
+    //        containsString("ON DISK"));
 
     notificationDelivery.clearDeliveredNotifications();
   }
