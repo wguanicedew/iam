@@ -54,7 +54,9 @@
 
             <c:if test="${ param.error != null }">
                 <div class="alert alert-danger">
-                    <strong><spring:message code="login.error" /></strong>
+                    <strong>
+            <spring:message code="login.error" />
+          </strong>
                     <div>${SPRING_SECURITY_LAST_EXCEPTION.message}</div>
                 </div>
             </c:if>
@@ -155,6 +157,12 @@
               This certificate is not linked to any account in this organization
               </p>
             </c:if>
+          </div>
+        </c:if>
+        
+        <c:if test="${loginPageConfiguration.includeCustomContent}">
+          <div id="login-custom-content">
+            <c:import url="${loginPageConfiguration.customContentUrl}" />
           </div>
         </c:if>
     </jsp:body>
