@@ -29,7 +29,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import it.infn.mw.iam.core.oauth.scope.matchers.ScopeMatcher;
 import it.infn.mw.iam.core.oauth.scope.matchers.StructuredPathScopeMatcher;
-import it.infn.mw.iam.core.oauth.scope.matchers.WlcgProfileScopeMatcher;
+
 
 @RunWith(MockitoJUnitRunner.class)
 public class ScopeMatcherTests {
@@ -46,7 +46,6 @@ public class ScopeMatcherTests {
     assertThat(matcher.matches("read:/pippo/other#cheers"), is(true));
 
   }
-
 
   @Test
   public void testPathMatch() {
@@ -91,18 +90,6 @@ public class ScopeMatcherTests {
       assertThat(e.getMessage(), containsString("prefix must not contain context separator"));
       throw e;
     }
-  }
-
-  @Test
-  public void regexMatcherTest() {
-    WlcgProfileScopeMatcher m = new WlcgProfileScopeMatcher();
-
-    assertThat(m.matches("wlcg"), is(true));
-    assertThat(m.matches("wlcg:1.0"), is(true));
-    assertThat(m.matches("wlcg:2.0"), is(false));
-    assertThat(m.matches("wlgc"), is(false));
-    assertThat(m.matches(""), is(false));
-
   }
 
   @Test(expected = IllegalArgumentException.class)

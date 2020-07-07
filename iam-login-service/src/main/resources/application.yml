@@ -175,4 +175,3 @@ rcauth:
 proxycert:
   key-size: ${IAM_PROXYCERT_KEY_SIZE:2048}
   max-lifetime-seconds: ${IAM_PROXYCERT_MAX_LIFETIME_SECONDS:43200}
-  
