@@ -36,3 +36,4 @@ jobs:
             -Dsonar.pullrequest.base=${{ github.BASE_REF }}
             -Dsonar.pullrequest.github.repository=${{ github.repository }}
             -Dsonar.scm.provider=git
+            -Dsonar.host.url=https://sonarcloud.io
