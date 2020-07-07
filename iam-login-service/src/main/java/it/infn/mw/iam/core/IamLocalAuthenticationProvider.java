@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -42,7 +41,8 @@ public class IamLocalAuthenticationProvider extends DaoAuthenticationProvider {
   private static final Predicate<GrantedAuthority> ADMIN_MATCHER =
       a -> a.getAuthority().equals("ROLE_ADMIN");
 
-  public IamLocalAuthenticationProvider(IamProperties properties, UserDetailsService uds, PasswordEncoder passwordEncoder) {
+  public IamLocalAuthenticationProvider(IamProperties properties, UserDetailsService uds,
+      PasswordEncoder passwordEncoder) {
     this.allowedUsers = properties.getLocalAuthn().getEnabledFor();
     setUserDetailsService(uds);
     setPasswordEncoder(passwordEncoder);
