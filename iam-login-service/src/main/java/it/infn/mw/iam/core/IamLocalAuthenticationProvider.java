@@ -50,7 +50,7 @@ public class IamLocalAuthenticationProvider extends DaoAuthenticationProvider {
 
   @Override
   protected void additionalAuthenticationChecks(UserDetails userDetails,
-      UsernamePasswordAuthenticationToken authentication) throws AuthenticationException {
+      UsernamePasswordAuthenticationToken authentication) {
 
     super.additionalAuthenticationChecks(userDetails, authentication);
     if (LocalAuthenticationAllowedUsers.NONE.equals(allowedUsers)

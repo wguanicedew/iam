@@ -68,6 +68,8 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 @Configuration
 @EnableWebSecurity
 public class IamWebSecurityConfig {
+  
+  
 
   @Bean
   public SecurityEvaluationContextExtension contextExtension() {
@@ -201,6 +203,8 @@ public class IamWebSecurityConfig {
   @Configuration
   @Order(101)
   public static class RegistrationConfig extends WebSecurityConfigurerAdapter {
+    
+    public static final String START_REGISTRATION_ENDPOINT = "/start-registration";
 
     @Autowired
     IamProperties iamProperties;
@@ -230,21 +234,21 @@ public class IamWebSecurityConfig {
     protected void configure(HttpSecurity http) throws Exception {
 
       http.requestMatchers()
-        .antMatchers("/start-registration")
+        .antMatchers(START_REGISTRATION_ENDPOINT)
         .and()
         .sessionManagement()
         .enableSessionUrlRewriting(false);
 
       if (iamProperties.getRegistration().isRequireExternalAuthentication()) {
         http.authorizeRequests()
-          .antMatchers("/start-registration")
+          .antMatchers(START_REGISTRATION_ENDPOINT)
           .hasAuthority(EXT_AUTHN_UNREGISTERED_USER_AUTH.getAuthority())
           .and()
           .exceptionHandling()
           .accessDeniedHandler(accessDeniedHandler())
           .authenticationEntryPoint(entryPoint());
       } else {
-        http.authorizeRequests().antMatchers("/start-registration").permitAll();
+        http.authorizeRequests().antMatchers(START_REGISTRATION_ENDPOINT).permitAll();
       }
     }
   }

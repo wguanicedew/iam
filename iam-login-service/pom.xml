@@ -353,9 +353,8 @@
         <artifactId>jacoco-maven-plugin</artifactId>
         <configuration>
           <excludes>
-            <exclude>it/infn/mw/iam/github/**/*.class</exclude>
-            <exclude>it/infn/mw/iam/config/github/**/*.class</exclude>
             <exclude>it/infn/mw/iam/api/registration/cern/mock/*.class</exclude>
+            <exclude>it/infn/mw/iam/api/registration/cern/dto/*.class</exclude>
           </excludes>
         </configuration>
         <executions>
