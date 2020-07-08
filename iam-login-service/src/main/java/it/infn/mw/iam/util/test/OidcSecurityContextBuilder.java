@@ -37,7 +37,7 @@ import it.infn.mw.iam.authn.oidc.OidcExternalAuthenticationToken;
 
 public class OidcSecurityContextBuilder extends SecurityContextBuilderSupport {
 
-  UserInfo userInfo = null;
+  private UserInfo userInfo = null;
   private Map<String, String> stringClaims = Maps.newHashMap();
 
   public OidcSecurityContextBuilder() {
@@ -54,8 +54,8 @@ public class OidcSecurityContextBuilder extends SecurityContextBuilderSupport {
   public SecurityContext buildSecurityContext() {
 
     OIDCAuthenticationToken authToken = mock(OIDCAuthenticationToken.class);
-    UserInfo userInfo = mock(UserInfo.class);
-    when(authToken.getUserInfo()).thenReturn(userInfo);
+    UserInfo ui = mock(UserInfo.class);
+    when(authToken.getUserInfo()).thenReturn(ui);
 
     JWTClaimsSet.Builder builder = new JWTClaimsSet.Builder();
 
@@ -81,11 +81,11 @@ public class OidcSecurityContextBuilder extends SecurityContextBuilderSupport {
         expirationTime, authToken.getPrincipal(), "", authorities);
     
     
-    when(userInfo.getGivenName()).thenReturn(stringClaims.get("given_name"));
-    when(userInfo.getFamilyName()).thenReturn(stringClaims.get("family_name"));
-    when(userInfo.getName()).thenReturn(stringClaims.get("name"));
-    when(userInfo.getEmail()).thenReturn(stringClaims.get("email"));
-    when(userInfo.getPreferredUsername()).thenReturn(username);
+    when(ui.getGivenName()).thenReturn(stringClaims.get("given_name"));
+    when(ui.getFamilyName()).thenReturn(stringClaims.get("family_name"));
+    when(ui.getName()).thenReturn(stringClaims.get("name"));
+    when(ui.getEmail()).thenReturn(stringClaims.get("email"));
+    when(ui.getPreferredUsername()).thenReturn(username);
     
     
 
@@ -120,6 +120,7 @@ public class OidcSecurityContextBuilder extends SecurityContextBuilderSupport {
 
   }
 
+  @Override
   public OidcSecurityContextBuilder expirationTime(long unixTime) {
     if (unixTime > 0) {
       this.expirationTime = new Date(unixTime);

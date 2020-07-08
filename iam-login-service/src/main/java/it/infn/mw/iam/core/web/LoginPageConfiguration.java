@@ -23,6 +23,10 @@ import it.infn.mw.iam.config.oidc.OidcProvider;
 
 public interface LoginPageConfiguration {
 
+  boolean isLocalAuthenticationVisible();
+  
+  boolean isShowLinkToLocalAuthenticationPage();
+  
   boolean isExternalAuthenticationEnabled();
   
   boolean isOidcEnabled();

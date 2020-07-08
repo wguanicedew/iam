@@ -48,21 +48,23 @@ public class DefaultLoginPageConfiguration implements LoginPageConfiguration, En
   private boolean githubEnabled;
   private boolean samlEnabled;
   private boolean registrationEnabled;
+  private boolean localAuthenticationVisible;
+  private boolean showLinkToLocalAuthn;
 
   @Value(ACCOUNT_LINKING_DISABLE_PROPERTY)
   private Boolean accountLinkingDisable;
-  
+
   private OidcValidatedProviders providers;
 
   private final IamProperties iamProperties;
-  
+
   @Autowired
   public DefaultLoginPageConfiguration(OidcValidatedProviders providers, IamProperties properties) {
     this.providers = providers;
     this.iamProperties = properties;
   }
-  
-  
+
+
   @PostConstruct
   public void init() {
 
@@ -70,6 +72,10 @@ public class DefaultLoginPageConfiguration implements LoginPageConfiguration, En
     githubEnabled = activeProfilesContains("github");
     samlEnabled = activeProfilesContains("saml");
     registrationEnabled = activeProfilesContains("registration");
+    localAuthenticationVisible = IamProperties.LocalAuthenticationLoginPageMode.VISIBLE
+      .equals(iamProperties.getLocalAuthn().getLoginPageVisibility());
+    showLinkToLocalAuthn = IamProperties.LocalAuthenticationLoginPageMode.HIDDEN_WITH_LINK
+      .equals(iamProperties.getLocalAuthn().getLoginPageVisibility());
   }
 
   private boolean activeProfilesContains(String val) {
@@ -115,11 +121,11 @@ public class DefaultLoginPageConfiguration implements LoginPageConfiguration, En
 
   @Override
   public Optional<String> getPrivacyPolicyUrl() {
-    
+
     if (Strings.isNullOrEmpty(iamProperties.getPrivacyPolicy().getUrl())) {
       return Optional.empty();
     }
-    
+
     return Optional.of(iamProperties.getPrivacyPolicy().getUrl());
   }
 
@@ -155,4 +161,14 @@ public class DefaultLoginPageConfiguration implements LoginPageConfiguration, En
     return isOidcEnabled() || isSamlEnabled();
   }
 
+  @Override
+  public boolean isLocalAuthenticationVisible() {
+    return localAuthenticationVisible;
+  }
+
+
+  @Override
+  public boolean isShowLinkToLocalAuthenticationPage() {
+    return showLinkToLocalAuthn;
+  }
 }

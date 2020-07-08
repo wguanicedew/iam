@@ -80,7 +80,6 @@ public class DefaultCernHrDBApiService implements CernHrDBApiService {
       return response.getBody();
     } catch (RestClientException e) {
       final String errorMsg = "HR db api error: " + e.getMessage();
-      LOG.warn(errorMsg, e);
       throw new CernHrDbApiError(errorMsg, e);
     } 
   }
@@ -101,7 +100,6 @@ public class DefaultCernHrDBApiService implements CernHrDBApiService {
       return response.getBody();
     } catch (RestClientException e) {
       final String errorMsg = "HR db api error: " + e.getMessage();
-      LOG.warn(errorMsg, e);
       throw new CernHrDbApiError(errorMsg, e);
     }
   }

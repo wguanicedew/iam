@@ -329,12 +329,6 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
     return new Timer("metadata-fetch", Boolean.TRUE);
   }
   
-//  @Bean
-//  public BasicParserPool samlParserPool() {
-//    BasicParserPool parserPool = new BasicParserPool();
-//    return parserPool;
-//  }
-
   @Bean
   public SAMLEntryPoint samlEntryPoint() {
     IamSamlEntryPoint ep = new IamSamlEntryPoint(optionsResolver);

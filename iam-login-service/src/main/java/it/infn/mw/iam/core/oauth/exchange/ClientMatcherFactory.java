@@ -20,6 +20,10 @@ import it.infn.mw.iam.persistence.model.IamClientMatchingPolicy;
 
 public class ClientMatcherFactory {
 
+  private ClientMatcherFactory() {
+    // empty on purpose
+  }
+  
   public static ClientMatcher newClientMatcher(IamClientMatchingPolicy clientMatchingPolicy) {
     switch (clientMatchingPolicy.getType()) {
       case ANY:
