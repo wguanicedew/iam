@@ -35,7 +35,6 @@ import java.time.Clock;
 import java.time.ZoneId;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Supplier;
 
 import org.junit.After;
 import org.junit.Test;
@@ -96,10 +95,6 @@ public class CernAccountLifecycleTests extends TestSupport implements LifecycleT
     CernHrDBApiService hrDb() {
       return mock(CernHrDBApiService.class);
     }
-  }
-
-  private Supplier<AssertionError> assertionError(String message) {
-    return () -> new AssertionError(message);
   }
 
   @Autowired

@@ -47,7 +47,7 @@ import it.infn.mw.iam.test.core.CoreControllerTestSupport;
   // @formatter:off
   "iam.host=example.org",
   "iam.organisation.name=org",
-  "iam.aarcProfile.urnNamespace=example:iam:test",
+  "iam.aarc-profile.urn-namespace=example:iam:test",
   // @formatter:on
 })
 public class AarcClaimValueHelperTests {

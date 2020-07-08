@@ -30,53 +30,53 @@ import it.infn.mw.iam.api.common.LabelDTO;
 
 public class TestSupport {
 
-  protected static final ResultMatcher OK = status().isOk();
-  protected static final ResultMatcher NO_CONTENT = status().isNoContent();
-  protected static final ResultMatcher BAD_REQUEST = status().isBadRequest();
-  protected static final ResultMatcher UNAUTHORIZED = status().isUnauthorized();
-  protected static final ResultMatcher FORBIDDEN = status().isForbidden();
-  protected static final ResultMatcher NOT_FOUND = status().isNotFound();
+  public static final ResultMatcher OK = status().isOk();
+  public static final ResultMatcher NO_CONTENT = status().isNoContent();
+  public static final ResultMatcher BAD_REQUEST = status().isBadRequest();
+  public static final ResultMatcher UNAUTHORIZED = status().isUnauthorized();
+  public static final ResultMatcher FORBIDDEN = status().isForbidden();
+  public static final ResultMatcher NOT_FOUND = status().isNotFound();
 
-  protected static final String RANDOM_UUID = UUID.randomUUID().toString();
+  public static final String RANDOM_UUID = UUID.randomUUID().toString();
 
-  protected static final String TEST_001_GROUP_UUID = "c617d586-54e6-411d-8e38-649677980001";
-  protected static final String TEST_002_GROUP_UUID = "c617d586-54e6-411d-8e38-649677980002";
+  public static final String TEST_001_GROUP_UUID = "c617d586-54e6-411d-8e38-649677980001";
+  public static final String TEST_002_GROUP_UUID = "c617d586-54e6-411d-8e38-649677980002";
   
-  protected static final String TEST_USER = "test";
-  protected static final String TEST_USER_UUID = "80e5fb8d-b7c8-451a-89ba-346ae278a66f";
-  protected static final String TEST_100_USER = "test_100";
-  protected static final String TEST_100_USER_UUID = "f2ce8cb2-a1db-4884-9ef0-d8842cc02b4a";
+  public static final String TEST_USER = "test";
+  public static final String TEST_USER_UUID = "80e5fb8d-b7c8-451a-89ba-346ae278a66f";
+  public static final String TEST_100_USER = "test_100";
+  public static final String TEST_100_USER_UUID = "f2ce8cb2-a1db-4884-9ef0-d8842cc02b4a";
 
-  protected static final String EXPECTED_ACCOUNT_NOT_FOUND = "Expected account not found";
-  protected static final String EXPECTED_GROUP_NOT_FOUND = "Expected group not found";
+  public static final String EXPECTED_ACCOUNT_NOT_FOUND = "Expected account not found";
+  public static final String EXPECTED_GROUP_NOT_FOUND = "Expected group not found";
 
-  protected static String LABEL_PREFIX = "indigo-iam.github.io";
-  protected static String LABEL_NAME = "example.label";
-  protected static String LABEL_VALUE = "example-label-value";
+  public static String LABEL_PREFIX = "indigo-iam.github.io";
+  public static String LABEL_NAME = "example.label";
+  public static String LABEL_VALUE = "example-label-value";
 
-  protected static LabelDTO TEST_LABEL =
+  public static LabelDTO TEST_LABEL =
       LabelDTO.builder().prefix(LABEL_PREFIX).name(LABEL_NAME).value(LABEL_VALUE).build();
 
-  protected static final TypeReference<List<LabelDTO>> LIST_OF_LABEL_DTO =
+  public static final TypeReference<List<LabelDTO>> LIST_OF_LABEL_DTO =
       new TypeReference<List<LabelDTO>>() {};
 
-  protected static final ResultMatcher INVALID_PREFIX_ERROR_MESSAGE =
+  public static final ResultMatcher INVALID_PREFIX_ERROR_MESSAGE =
       jsonPath("$.error", containsString("invalid prefix (does not match"));
 
-  protected static final ResultMatcher PREFIX_TOO_LONG_ERROR_MESSAGE =
+  public static final ResultMatcher PREFIX_TOO_LONG_ERROR_MESSAGE =
       jsonPath("$.error", containsString("invalid prefix length"));
 
-  protected static final ResultMatcher NAME_REQUIRED_ERROR_MESSAGE =
+  public static final ResultMatcher NAME_REQUIRED_ERROR_MESSAGE =
       jsonPath("$.error", containsString("name is required"));
 
-  protected static final ResultMatcher INVALID_NAME_ERROR_MESSAGE =
+  public static final ResultMatcher INVALID_NAME_ERROR_MESSAGE =
       jsonPath("$.error", containsString("invalid name (does not match"));
 
 
-  protected static final ResultMatcher NAME_TOO_LONG_ERROR_MESSAGE =
+  public static final ResultMatcher NAME_TOO_LONG_ERROR_MESSAGE =
       jsonPath("$.error", containsString("invalid name length"));
 
-  protected static final ResultMatcher VALUE_TOO_LONG_ERROR_MESSAGE =
+  public static final ResultMatcher VALUE_TOO_LONG_ERROR_MESSAGE =
       jsonPath("$.error", containsString("invalid value length"));
 
 }

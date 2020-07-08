@@ -53,11 +53,7 @@ import it.infn.mw.iam.persistence.repository.IamAupRepository;
 @SpringApplicationConfiguration(classes = {IamLoginService.class})
 @WebAppConfiguration
 @Transactional
-public class LoginTests {
-
-  public static final String LOGIN_URL = "/login";
-  public static final String ADMIN_USERNAME = "admin";
-  public static final String ADMIN_PASSWORD = "password";
+public class LoginTests implements LoginTestSupport {
 
   @Autowired
   private WebApplicationContext context;
@@ -72,10 +68,8 @@ public class LoginTests {
 
   @Before
   public void setup() {
-    mvc = MockMvcBuilders.webAppContextSetup(context)
-      .apply(springSecurity())
-      .alwaysDo(log())
-      .build();
+    mvc =
+        MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).alwaysDo(log()).build();
   }
 
   @Test
@@ -142,9 +136,9 @@ public class LoginTests {
     aupRepo.save(aup);
 
     mvc
-      .perform(
-          post(LOGIN_URL).param("username", ADMIN_USERNAME).param("password", ADMIN_PASSWORD).param(
-              "submit", "Login"))
+      .perform(post(LOGIN_URL).param("username", ADMIN_USERNAME)
+        .param("password", ADMIN_PASSWORD)
+        .param("submit", "Login"))
       .andExpect(status().isFound())
       .andExpect(redirectedUrl("/iam/aup/sign"));
 

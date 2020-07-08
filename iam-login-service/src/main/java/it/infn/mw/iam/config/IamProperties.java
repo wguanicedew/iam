@@ -30,12 +30,43 @@ import it.infn.mw.iam.config.login.LoginButtonProperties;
 @Component
 @ConfigurationProperties(prefix = "iam")
 public class IamProperties {
-
+  
   public enum EditableFields {
     NAME,
     SURNAME,
     EMAIL,
     PICTURE
+  }
+  
+  public enum LocalAuthenticationAllowedUsers {
+    ALL,
+    VO_ADMINS,
+    NONE
+  }
+  
+  public enum LocalAuthenticationLoginPageMode {
+    VISIBLE,
+    HIDDEN,
+    HIDDEN_WITH_LINK
+  }
+  
+  public static class LocalAuthenticationProperties {
+    
+    LocalAuthenticationLoginPageMode loginPageVisibility;
+    LocalAuthenticationAllowedUsers enabledFor;
+    
+    public LocalAuthenticationLoginPageMode getLoginPageVisibility() {
+      return loginPageVisibility;
+    }
+    public void setLoginPageVisibility(LocalAuthenticationLoginPageMode loginPageVisibility) {
+      this.loginPageVisibility = loginPageVisibility;
+    }
+    public LocalAuthenticationAllowedUsers getEnabledFor() {
+      return enabledFor;
+    }
+    public void setEnabledFor(LocalAuthenticationAllowedUsers enabledFor) {
+      this.enabledFor = enabledFor;
+    }
   }
 
   @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -77,7 +108,7 @@ public class IamProperties {
   public static class RegistrationProperties {
 
     boolean requireExternalAuthentication = false;
-
+    
     ExternalAuthenticationType authenticationType;
 
     String oidcIssuer;
@@ -389,6 +420,8 @@ public class IamProperties {
   private UserProfileProperties userProfile = new UserProfileProperties();
 
   private AarcProfileProperties aarcProfile = new AarcProfileProperties();
+  
+  private LocalAuthenticationProperties localAuthn = new LocalAuthenticationProperties();
 
   public String getBaseUrl() {
     return baseUrl;
@@ -549,4 +582,13 @@ public class IamProperties {
   public void setAarcProfile(AarcProfileProperties aarcProfile) {
     this.aarcProfile = aarcProfile;
   }
+  
+  public LocalAuthenticationProperties getLocalAuthn() {
+    return localAuthn;
+  }
+  
+  public void setLocalAuthn(LocalAuthenticationProperties localAuthn) {
+    this.localAuthn = localAuthn;
+  }
+  
 }

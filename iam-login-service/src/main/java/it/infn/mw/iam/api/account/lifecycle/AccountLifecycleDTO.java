@@ -20,9 +20,6 @@ import java.util.Date;
 public class AccountLifecycleDTO {
   
   private Date endTime;
-
-  public AccountLifecycleDTO() {
-  }
   
   public Date getEndTime() {
     return endTime;

@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 package it.infn.mw.iam.api.account.password_reset;
-// Keep these includes, as the Javadoc refers to them...
-import it.infn.mw.iam.api.account.password_reset.error.BadUserPasswordError;
-import it.infn.mw.iam.api.account.password_reset.error.InvalidPasswordResetTokenError;
-import it.infn.mw.iam.api.account.password_reset.error.UserNotActiveOrNotVerified;
 
 /**
  * 
  * The IAM password reset service
  *
  */
+@SuppressWarnings("unused")
 public interface PasswordResetService {
 
 

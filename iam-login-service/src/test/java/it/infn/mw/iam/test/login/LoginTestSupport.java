@@ -13,8 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.core.lifecycle;
+package it.infn.mw.iam.test.login;
 
-public interface AccountLifecycle {
+public interface LoginTestSupport {
 
+  public static final String LOGIN_URL = "/login";
+  public static final String ADMIN_USERNAME = "admin";
+  public static final String ADMIN_PASSWORD = "password";
+  
+  public static final String USER_USERNAME = "test";
+  public static final String USER_PASSWORD = "password";
+  
+  public static final String DISABLED_AUTH_MSG = "Local authentication is disabled";
 }
