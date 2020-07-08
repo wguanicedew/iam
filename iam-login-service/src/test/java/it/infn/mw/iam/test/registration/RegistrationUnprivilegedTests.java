@@ -239,6 +239,15 @@ public class RegistrationUnprivilegedTests extends AupTestSupport {
       .andExpect(status().isBadRequest());
     // @formatter:on
   }
+  
+  @Test
+  public void testEmailAvailableEndpoint() throws Exception {
+    mvc.perform(get("/registration/email-available/email@example.org")).andExpect(status().isOk())
+      .andExpect(jsonPath("$").value(true));
+    
+    mvc.perform(get("/registration/email-available/test@iam.test")).andExpect(status().isOk())
+    .andExpect(jsonPath("$").value(false));
+  }
 
 
   private Authentication anonymousAuthenticationToken() {
@@ -277,4 +286,6 @@ public class RegistrationUnprivilegedTests extends AupTestSupport {
       .andExpect(jsonPath("$.status", equalTo(CONFIRMED.name())));
     // @formatter:on
   }
+  
+  
 }

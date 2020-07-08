@@ -22,12 +22,4 @@ public class RegistrationRequestValidatorError extends RuntimeException {
   public RegistrationRequestValidatorError(String message) {
     super(message);
   }
-
-  public RegistrationRequestValidatorError(Throwable cause) {
-    super(cause);
-  }
-
-  public RegistrationRequestValidatorError(String message, Throwable cause) {
-    super(message, cause);
-  }
 }

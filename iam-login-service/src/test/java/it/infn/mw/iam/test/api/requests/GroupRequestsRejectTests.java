@@ -79,6 +79,8 @@ public class GroupRequestsRejectTests extends GroupRequestsTestUtils {
       .apply(springSecurity())
       .alwaysDo(log())
       .build();
+    
+    emailRepository.deleteAll();
   }
 
   @Test

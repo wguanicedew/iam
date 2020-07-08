@@ -54,7 +54,6 @@ import it.infn.mw.iam.authn.EnforceAupSignatureSuccessHandler;
 import it.infn.mw.iam.authn.ExternalAuthenticationHintService;
 import it.infn.mw.iam.authn.HintAwareAuthenticationEntryPoint;
 import it.infn.mw.iam.authn.RootIsDashboardSuccessHandler;
-import it.infn.mw.iam.authn.oidc.OidcAccessDeniedHandler;
 import it.infn.mw.iam.authn.oidc.OidcAuthenticationProvider;
 import it.infn.mw.iam.authn.oidc.OidcClientFilter;
 import it.infn.mw.iam.authn.x509.IamX509AuthenticationProvider;
@@ -172,7 +171,6 @@ public class IamWebSecurityConfig {
             .successHandler(successHandler())
         .and()
           .exceptionHandling()
-            .accessDeniedHandler(new OidcAccessDeniedHandler())
             .authenticationEntryPoint(entryPoint())
         .and()
           .addFilterBefore(authorizationRequestFilter, SecurityContextPersistenceFilter.class)
@@ -290,7 +288,6 @@ public class IamWebSecurityConfig {
         .antMatcher("/openid_connect_login**")
           .exceptionHandling()
             .authenticationEntryPoint(authenticationEntryPoint())
-          .accessDeniedHandler(new OidcAccessDeniedHandler())
         .and()
           .addFilterAfter(oidcFilter, SecurityContextPersistenceFilter.class).authorizeRequests()
         .antMatchers("/openid_connect_login**")
