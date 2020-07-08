@@ -97,7 +97,6 @@ public abstract class BaseAccessTokenBuilder implements JWTAccessTokenBuilder {
       Map<String, Object> actClaimContent = Maps.newHashMap();
       actClaimContent.put("sub", authentication.getOAuth2Request().getClientId());
 
-
       Object subjectTokenActClaim = subjectToken.getJWTClaimsSet().getClaim(ACT_CLAIM_NAME);
 
       if (!isNull(subjectTokenActClaim)) {
