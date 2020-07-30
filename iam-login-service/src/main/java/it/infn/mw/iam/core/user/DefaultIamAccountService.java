@@ -164,7 +164,7 @@ public class DefaultIamAccountService implements IamAccountService {
 
     eventPublisher.publishEvent(new AccountRemovedEvent(this, account,
         "Removed account for user " + account.getUsername()));
-
+    
     return account;
   }
 

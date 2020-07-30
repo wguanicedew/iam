@@ -33,6 +33,8 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -143,5 +145,45 @@ public class AccountLifecycleTests extends TestSupport implements LifecycleTestS
 
     assertThat(account.isPresent(), is(false));
   }
+
+  @Test
+  public void testNoAccountsRemoved() {
+
+    long accountBefore = repo.count();
+
+    handler.handleExpiredAccounts();
+
+    long accountAfter = repo.count();
+
+    assertThat(accountBefore, is(accountAfter));
+  }
+
+  @Test
+  public void testMultiplePagesOfAccountsRemoved() {
+
+    long accountBefore = repo.count();
+
+    Page<IamAccount> accountsPage = repo.findAll(new PageRequest(0, 20));
+
+    long touchedAccounts = 0;
+    
+    if (accountsPage.hasContent()) {
+      for (IamAccount a: accountsPage.getContent()) {
+        a.setEndTime(Date.from(THIRTY_ONE_DAYS_AGO));
+        repo.save(a);
+        touchedAccounts++;
+      }
+    }
+
+    assertThat(touchedAccounts, is(20L));
+    
+    handler.handleExpiredAccounts();
+
+    long accountAfter = repo.count();
+
+    assertThat(accountAfter, is(accountBefore - 20));
+  }
+
+
 
 }
