@@ -15,10 +15,13 @@
  */
 package it.infn.mw.iam.core.lifecycle;
 
+import static com.google.common.collect.Sets.newHashSet;
+
 import java.time.Clock;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +29,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Component;
 
 import it.infn.mw.iam.config.lifecycle.LifecycleProperties;
@@ -38,9 +43,7 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 public class ExpiredAccountsHandler implements Runnable {
 
   public enum AccountLifecycleStatus {
-    OK,
-    PENDING_SUSPENSION,
-    PENDING_REMOVAL
+    OK, PENDING_SUSPENSION, PENDING_REMOVAL
   }
 
   public static final String LIFECYCLE_TIMESTAMP_LABEL = "lifecycle.timestamp";
@@ -48,7 +51,7 @@ public class ExpiredAccountsHandler implements Runnable {
   public static final String LIFECYCLE_IGNORE_LABEL = "lifecycle.ignore";
   public static final String LIFECYCLE_MESSAGE_LABEL = "lifecycle.message";
 
-  public static final int PAGE_SIZE = 5;
+  public static final int PAGE_SIZE = 10;
 
   public static final Logger LOG = LoggerFactory.getLogger(ExpiredAccountsHandler.class);
 
@@ -58,6 +61,8 @@ public class ExpiredAccountsHandler implements Runnable {
   private final Clock clock;
 
   private Instant checkTime;
+
+  private Set<IamAccount> accountsScheduledForRemoval = newHashSet();
 
   @Autowired
   public ExpiredAccountsHandler(Clock clock, LifecycleProperties properties,
@@ -127,10 +132,14 @@ public class ExpiredAccountsHandler implements Runnable {
   }
 
 
+  private void scheduleAccountRemoval(IamAccount expiredAccount) {
+    accountsScheduledForRemoval.add(expiredAccount);
+  }
+
   private void handleExpiredAccount(IamAccount expiredAccount) {
 
     if (pastRemovalGracePeriod(expiredAccount)) {
-      removeAccount(expiredAccount);
+      scheduleAccountRemoval(expiredAccount);
     } else if (pastSuspensionGracePeriod(expiredAccount)) {
       suspendAccount(expiredAccount);
     } else {
@@ -140,11 +149,13 @@ public class ExpiredAccountsHandler implements Runnable {
 
   public void handleExpiredAccounts() {
 
+    accountsScheduledForRemoval.clear();
+
     LOG.debug("Starting...");
     checkTime = clock.instant();
     Date now = Date.from(checkTime);
 
-    Pageable pageRequest = new PageRequest(0, PAGE_SIZE);
+    Pageable pageRequest = new PageRequest(0, PAGE_SIZE, new Sort(Direction.ASC, "endTime"));
 
     while (true) {
       Page<IamAccount> expiredAccountsPage =
@@ -152,7 +163,7 @@ public class ExpiredAccountsHandler implements Runnable {
       LOG.debug("expiredAccountsPage: {}", expiredAccountsPage);
 
       if (expiredAccountsPage.hasContent()) {
-        // The old version of EclipseLink may have issues if using foreach
+        
         for (IamAccount expiredAccount : expiredAccountsPage.getContent()) {
           handleExpiredAccount(expiredAccount);
         }
@@ -163,6 +174,11 @@ public class ExpiredAccountsHandler implements Runnable {
       }
 
       pageRequest = expiredAccountsPage.nextPageable();
+    }
+
+    // Removals must be handled separately, otherwise pagination breaks 
+    for (IamAccount a : accountsScheduledForRemoval) {
+      removeAccount(a);
     }
   }
 

@@ -58,7 +58,7 @@ import it.infn.mw.iam.test.lifecycle.cern.LifecycleTestSupport;
 @TestPropertySource(
     properties = {"lifecycle.account.expiredAccountPolicy.suspensionGracePeriodDays=0",
         "lifecycle.account.expiredAccountPolicy.removalGracePeriodDays=30"})
-public class AccountLifecycleTestsNoGracePeriod implements LifecycleTestSupport {
+public class AccountLifecycleTestsNoSuspensionGracePeriod implements LifecycleTestSupport {
 
   @Configuration
   public static class TestConfig {
@@ -68,8 +68,6 @@ public class AccountLifecycleTestsNoGracePeriod implements LifecycleTestSupport 
       return Clock.fixed(NOW, ZoneId.systemDefault());
     }
   }
-  
-  
   
   @Autowired
   private IamAccountRepository repo;
