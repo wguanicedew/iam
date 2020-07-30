@@ -41,6 +41,8 @@ public @interface WithMockOIDCUser {
   String issuer() default "test-oidc-issuer";
 
   String[] authorities() default {"ROLE_" + EXT_AUTHN_UNREGISTERED_USER_ROLE};
+  
+  String[] claims() default {};
 
   long expirationTime() default -1;
 }

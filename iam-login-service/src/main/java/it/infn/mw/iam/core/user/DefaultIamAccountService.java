@@ -18,6 +18,7 @@ package it.infn.mw.iam.core.user;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static it.infn.mw.iam.core.lifecycle.ExpiredAccountsHandler.LIFECYCLE_STATUS_LABEL;
 
 import java.util.Date;
 import java.util.List;
@@ -35,7 +36,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import it.infn.mw.iam.audit.events.account.AccountCreatedEvent;
+import it.infn.mw.iam.audit.events.account.AccountDisabledEvent;
+import it.infn.mw.iam.audit.events.account.AccountEndTimeUpdatedEvent;
 import it.infn.mw.iam.audit.events.account.AccountRemovedEvent;
+import it.infn.mw.iam.audit.events.account.AccountRestoredEvent;
 import it.infn.mw.iam.audit.events.account.label.AccountLabelRemovedEvent;
 import it.infn.mw.iam.audit.events.account.label.AccountLabelSetEvent;
 import it.infn.mw.iam.core.user.exception.CredentialAlreadyBoundException;
@@ -76,11 +80,11 @@ public class DefaultIamAccountService implements IamAccountService {
   private void labelSetEvent(IamAccount account, IamLabel label) {
     eventPublisher.publishEvent(new AccountLabelSetEvent(this, account, label));
   }
-  
+
   private void labelRemovedEvent(IamAccount account, IamLabel label) {
     eventPublisher.publishEvent(new AccountLabelRemovedEvent(this, account, label));
   }
-  
+
   @Override
   public IamAccount createAccount(IamAccount account) {
     checkNotNull(account, "Cannot create a null account");
@@ -108,8 +112,9 @@ public class DefaultIamAccountService implements IamAccountService {
 
     account.setPassword(passwordEncoder.encode(account.getPassword()));
 
-    IamAuthority roleUserAuthority = authoritiesRepo.findByAuthority("ROLE_USER").orElseThrow(
-        () -> new IllegalStateException("ROLE_USER not found in database. This is a bug"));
+    IamAuthority roleUserAuthority = authoritiesRepo.findByAuthority("ROLE_USER")
+      .orElseThrow(
+          () -> new IllegalStateException("ROLE_USER not found in database. This is a bug"));
 
     account.getAuthorities().add(roleUserAuthority);
 
@@ -139,14 +144,14 @@ public class DefaultIamAccountService implements IamAccountService {
     Set<OAuth2AccessTokenEntity> accessTokens =
         tokenService.getAllAccessTokensForUser(account.getUsername());
 
-    Set<OAuth2RefreshTokenEntity> refreshTokens = 
+    Set<OAuth2RefreshTokenEntity> refreshTokens =
         tokenService.getAllRefreshTokensForUser(account.getUsername());
-    
-    for (OAuth2AccessTokenEntity t: accessTokens) {
+
+    for (OAuth2AccessTokenEntity t : accessTokens) {
       tokenService.revokeAccessToken(t);
     }
-    
-    for (OAuth2RefreshTokenEntity t: refreshTokens) {
+
+    for (OAuth2RefreshTokenEntity t : refreshTokens) {
       tokenService.revokeRefreshToken(t);
     }
   }
@@ -300,21 +305,58 @@ public class DefaultIamAccountService implements IamAccountService {
   public IamAccount setLabel(IamAccount account, IamLabel label) {
     account.getLabels().remove(label);
     account.getLabels().add(label);
-    
+
     accountRepo.save(account);
-    
+
     labelSetEvent(account, label);
-    
+
     return account;
   }
 
   @Override
   public IamAccount deleteLabel(IamAccount account, IamLabel label) {
     account.getLabels().remove(label);
-    
+
     accountRepo.save(account);
     labelRemovedEvent(account, label);
+
+    return account;
+  }
+
+  @Override
+  public IamAccount setAccountEndTime(IamAccount account, Date endTime) {
+    checkNotNull(account, "Cannot set endTime on a null account");
+
+    final Date previousEndTime = account.getEndTime();
+    account.setEndTime(endTime);
+    account.touch();
     
+    account.removeLabelByName(LIFECYCLE_STATUS_LABEL);
+    
+    accountRepo.save(account);
+
+    eventPublisher
+      .publishEvent(new AccountEndTimeUpdatedEvent(this, account, previousEndTime, String
+        .format("Account endTime set to '%s' for user '%s'", endTime, account.getUsername())));
+
+    return account;
+  }
+
+  @Override
+  public IamAccount disableAccount(IamAccount account) {
+    account.setActive(false);
+    account.touch();
+    accountRepo.save(account);
+    eventPublisher.publishEvent(new AccountDisabledEvent(this, account));
+    return account;
+  }
+
+  @Override
+  public IamAccount restoreAccount(IamAccount account) {
+    account.setActive(true);
+    account.touch();
+    accountRepo.save(account);
+    eventPublisher.publishEvent(new AccountRestoredEvent(this, account));
     return account;
   }
 }

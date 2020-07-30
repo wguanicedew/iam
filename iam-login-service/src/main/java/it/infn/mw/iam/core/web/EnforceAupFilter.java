@@ -103,7 +103,9 @@ public class EnforceAupFilter implements Filter {
         chain.doFilter(request, response);
         return;
       }
-      res.sendRedirect(AUP_SIGN_PATH);
+      if (!res.isCommitted()) {
+        res.sendRedirect(AUP_SIGN_PATH);
+      }
       return;
     }
 

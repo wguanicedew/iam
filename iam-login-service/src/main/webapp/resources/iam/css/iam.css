@@ -36,17 +36,6 @@
     padding: 40px;
 }
 
-/*
-#logo-container {
-    margin: auto;
-    margin-top: 10px;
-    width: 200px;
-    height: 200px;
-    background-size: 200px;
-    background-image: url("/resources/images/indigo-logo.png");
-    background-repeat: no-repeat;
-}
-*/
 
 #logo-container a {
     display: block;
@@ -454,6 +443,13 @@ body.skin-blue {
     min-width: 50px;
 }
 
+.iam-label-prefix {
+    color: #999999;
+    font-size: smaller;
+
+}
+
+
 [ng-click],
 [data-ng-click],
 [x-ng-click] {
@@ -467,8 +463,6 @@ body.skin-blue {
 .table-selector {
     width: 40px;
 }
-
-
 
 .table .username {
     position: relative;
@@ -506,8 +500,9 @@ body.skin-blue {
     word-wrap: break-word;
 }
 
-
-
+.registration-box {
+    height: calc(100vh - 50px);
+}
 
 @media (max-width: 767px) {
     #vo-reqs .form-inline .form-control {

@@ -50,9 +50,6 @@ public class CoreControllerTestSupport {
     return Mockito.mock(ApplicationEventPublisher.class);
   }
   
-//  @Bean
-//  Clock mockClock() {
-//    return Clock.fixed(NOW, ZoneId.systemDefault());
-//  }
+
   
 }

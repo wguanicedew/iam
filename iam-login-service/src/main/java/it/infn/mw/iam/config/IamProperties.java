@@ -15,14 +15,148 @@
  */
 package it.infn.mw.iam.config;
 
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.google.common.collect.Lists;
+
+import it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo.ExternalAuthenticationType;
 import it.infn.mw.iam.config.login.LoginButtonProperties;
 
 @Component
 @ConfigurationProperties(prefix = "iam")
 public class IamProperties {
+  
+  public enum EditableFields {
+    NAME,
+    SURNAME,
+    EMAIL,
+    PICTURE
+  }
+  
+  public enum LocalAuthenticationAllowedUsers {
+    ALL,
+    VO_ADMINS,
+    NONE
+  }
+  
+  public enum LocalAuthenticationLoginPageMode {
+    VISIBLE,
+    HIDDEN,
+    HIDDEN_WITH_LINK
+  }
+  
+  public static class LocalAuthenticationProperties {
+    
+    LocalAuthenticationLoginPageMode loginPageVisibility;
+    LocalAuthenticationAllowedUsers enabledFor;
+    
+    public LocalAuthenticationLoginPageMode getLoginPageVisibility() {
+      return loginPageVisibility;
+    }
+    public void setLoginPageVisibility(LocalAuthenticationLoginPageMode loginPageVisibility) {
+      this.loginPageVisibility = loginPageVisibility;
+    }
+    public LocalAuthenticationAllowedUsers getEnabledFor() {
+      return enabledFor;
+    }
+    public void setEnabledFor(LocalAuthenticationAllowedUsers enabledFor) {
+      this.enabledFor = enabledFor;
+    }
+  }
+
+  @JsonInclude(JsonInclude.Include.NON_EMPTY)
+  public static class UserProfileProperties {
+    private List<EditableFields> editableFields = Lists.newArrayList();
+
+    public List<EditableFields> getEditableFields() {
+      return editableFields;
+    }
+
+    public void setEditableFields(List<EditableFields> editableFields) {
+      this.editableFields = editableFields;
+    }
+  }
+
+  @JsonInclude(JsonInclude.Include.NON_EMPTY)
+  public static class RegistrationFieldProperties {
+    boolean readOnly = false;
+    String externalAuthAttribute;
+
+    public boolean isReadOnly() {
+      return readOnly;
+    }
+
+    public void setReadOnly(boolean readOnly) {
+      this.readOnly = readOnly;
+    }
+
+    public String getExternalAuthAttribute() {
+      return externalAuthAttribute;
+    }
+
+    public void setExternalAuthAttribute(String externalAuthAttribute) {
+      this.externalAuthAttribute = externalAuthAttribute;
+    }
+  }
+
+  @JsonInclude(JsonInclude.Include.NON_EMPTY)
+  public static class RegistrationProperties {
+
+    boolean requireExternalAuthentication = false;
+    
+    ExternalAuthenticationType authenticationType;
+
+    String oidcIssuer;
+
+    String samlEntityId;
+
+    Map<String, RegistrationFieldProperties> fields;
+
+    public boolean isRequireExternalAuthentication() {
+      return requireExternalAuthentication;
+    }
+
+    public void setRequireExternalAuthentication(boolean requireExternalAuthentication) {
+      this.requireExternalAuthentication = requireExternalAuthentication;
+    }
+
+    public ExternalAuthenticationType getAuthenticationType() {
+      return authenticationType;
+    }
+
+    public void setAuthenticationType(ExternalAuthenticationType authenticationType) {
+      this.authenticationType = authenticationType;
+    }
+
+    public String getOidcIssuer() {
+      return oidcIssuer;
+    }
+
+    public void setOidcIssuer(String oidcIssuer) {
+      this.oidcIssuer = oidcIssuer;
+    }
+
+    public String getSamlEntityId() {
+      return samlEntityId;
+    }
+
+    public void setSamlEntityId(String samlEntityId) {
+      this.samlEntityId = samlEntityId;
+    }
+
+    public Map<String, RegistrationFieldProperties> getFields() {
+      return fields;
+    }
+
+    public void setFields(Map<String, RegistrationFieldProperties> fields) {
+      this.fields = fields;
+    }
+  }
 
   public static class DeviceCodeProperties {
     Boolean allowCompleteVerificationUri = true;
@@ -34,6 +168,8 @@ public class IamProperties {
     public void setAllowCompleteVerificationUri(Boolean allowCompleteVerificationUri) {
       this.allowCompleteVerificationUri = allowCompleteVerificationUri;
     }
+
+
   }
 
   public static class JWKProperties {
@@ -279,7 +415,13 @@ public class IamProperties {
 
   private boolean generateDdlSqlScript = false;
 
+  private RegistrationProperties registration = new RegistrationProperties();
+
+  private UserProfileProperties userProfile = new UserProfileProperties();
+
   private AarcProfileProperties aarcProfile = new AarcProfileProperties();
+  
+  private LocalAuthenticationProperties localAuthn = new LocalAuthenticationProperties();
 
   public String getBaseUrl() {
     return baseUrl;
@@ -417,6 +559,22 @@ public class IamProperties {
     return generateDdlSqlScript;
   }
 
+  public RegistrationProperties getRegistration() {
+    return registration;
+  }
+
+  public void setRegistration(RegistrationProperties registration) {
+    this.registration = registration;
+  }
+
+  public UserProfileProperties getUserProfile() {
+    return userProfile;
+  }
+
+  public void setUserProfile(UserProfileProperties userProfile) {
+    this.userProfile = userProfile;
+  }
+
   public AarcProfileProperties getAarcProfile() {
     return aarcProfile;
   }
@@ -424,4 +582,13 @@ public class IamProperties {
   public void setAarcProfile(AarcProfileProperties aarcProfile) {
     this.aarcProfile = aarcProfile;
   }
+  
+  public LocalAuthenticationProperties getLocalAuthn() {
+    return localAuthn;
+  }
+  
+  public void setLocalAuthn(LocalAuthenticationProperties localAuthn) {
+    this.localAuthn = localAuthn;
+  }
+  
 }

@@ -97,7 +97,24 @@ iam:
   
   device-code:
     allow-complete-verification-uri: ${IAM_DEVICE_CODE_ALLOW_COMPLETE_VERIFICATION_URI:true}
-
+  
+  registration:
+    require-external-authentication: ${IAM_REGISTRATION_REQUIRE_EXTERNAL_AUTHENTICATION:false}
+    authentication-type: ${IAM_REGISTRATION_AUTHENTICATION_TYPE:oidc}
+    oidc-issuer: ${IAM_REGISTRATION_OIDC_ISSUER:https://example.org}
+    saml-entity-id: ${IAM_REGISTRATION_SAML_ENTITY_ID:urn:example}
+    
+  local-authn:
+    login-page-visibility: ${IAM_LOCAL_AUTHN_LOGIN_PAGE_VISIBILITY:visible}
+    enabled-for: ${IAM_LOCAL_AUTHN_ENABLED_FOR:all}
+    
+  user-profile:
+    editable-fields:
+    - email
+    - name
+    - picture
+    - surname
+   
   aarc-profile:
     urn-namespace: ${IAM_AARC_PROFILE_URN_NAMESPACE:example:iam}
 
@@ -165,4 +182,3 @@ rcauth:
 proxycert:
   key-size: ${IAM_PROXYCERT_KEY_SIZE:2048}
   max-lifetime-seconds: ${IAM_PROXYCERT_MAX_LIFETIME_SECONDS:43200}
-  

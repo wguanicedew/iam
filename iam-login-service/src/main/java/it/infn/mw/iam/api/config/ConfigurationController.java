@@ -25,6 +25,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.config.IamProperties.PrivacyPolicy;
+import it.infn.mw.iam.config.IamProperties.UserProfileProperties;
+import it.infn.mw.iam.config.lifecycle.LifecycleProperties;
 import it.infn.mw.iam.config.login.LoginButtonProperties;
 import it.infn.mw.iam.config.oidc.OidcProvider;
 import it.infn.mw.iam.config.oidc.OidcValidatedProviders;
@@ -39,14 +41,16 @@ public class ConfigurationController {
   private final LoginButtonProperties wayfLoginButton;
   private final OidcValidatedProviders providers;
   private final IamProperties iamProperties;
+  private final LifecycleProperties lifecycleProperties;
 
   @Autowired
   public ConfigurationController(OidcValidatedProviders providers, IamSamlProperties samlProps,
-      IamProperties iamProperties) {
+      IamProperties iamProperties, LifecycleProperties lifecycleProperties) {
     this.providers = providers;
     this.loginShortcuts = samlProps.getLoginShortcuts();
     this.wayfLoginButton = samlProps.getWayfLoginButton();
     this.iamProperties = iamProperties;
+    this.lifecycleProperties = lifecycleProperties;
   }
 
   @RequestMapping(method = GET, value = "/oidc/providers")
@@ -69,4 +73,13 @@ public class ConfigurationController {
     return iamProperties.getPrivacyPolicy();
   }
 
+  @RequestMapping(method = GET, value = "/profile")
+  public UserProfileProperties profileProperties() {
+    return iamProperties.getUserProfile();
+  }
+
+  @RequestMapping(method = GET, value = "/lifecycle/account/read-only-end-time")
+  public boolean readOnlyAccountEndTime() {
+    return lifecycleProperties.getAccount().isReadOnlyEndTime();
+  }
 }

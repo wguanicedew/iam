@@ -61,8 +61,11 @@
   <script type="text/javascript" src="<c:url value='/webjars/angular-sanitize/angular-sanitize.min.js'/>"></script>
   <script type="text/javascript" src="<c:url value='/webjars/angular-ui-bootstrap/ui-bootstrap-tpls.min.js'/>"></script>
   <script type="text/javascript" src="<c:url value='/webjars/bootstrap/bootstrap.min.js'/>"></script>
+  <script type="text/javascript" src="/resources/iam/js/datepicker/bootstrap-datepicker.min.js"></script>
+  
   <script type="text/javascript" src="/resources/iam/js/adminLTE.js"></script>
   <script type="text/javascript" src="/resources/iam/js/toaster/toaster.min.js"></script>
+  
   <script type="text/javascript" src="/resources/iam/js/directive/angular-relative-date.min.js"></script>
   
   
@@ -99,11 +102,11 @@
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/services/group.service.js"></script>
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/services/group-requests.service.js"></script>
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/services/labels.service.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/services/account-lifecycle.service.js"></script>
   
   
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/controllers/registration.controller.js"></script>
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/controllers/account-privileges.controller.js"></script>
-  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/controllers/edit-user.controller.js"></script>
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/controllers/add-user-group.controller.js"></script>
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/controllers/edit-password.controller.js"></script>
   
@@ -120,6 +123,7 @@
   
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/user/detail/user.detail.component.js"></script>
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/user/edit/user.edit.component.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/user/edit/edit-user.controller.js"></script>
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/user/status/user.status.component.js"></script>
   <script type="text/javascript"
     src="/resources/iam/apps/dashboard-app/components/user/privileges/user.privileges.component.js"></script>
@@ -130,6 +134,7 @@
     src="/resources/iam/apps/dashboard-app/components/user/linked-accounts/user.linked-accounts.component.js"></script>
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/user/x509/user.x509.component.js"></script>
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/user/labels/user.labels.component.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/user/end-time/user.end-time.component.js"></script>
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/user/user.component.js"></script>
   
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/users/userslist/users.userslist.component.js"></script>

@@ -19,6 +19,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
@@ -40,11 +41,14 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.registration.cern.CernHrDBApiService;
 import it.infn.mw.iam.api.registration.cern.CernHrDbApiError;
+import it.infn.mw.iam.api.registration.cern.dto.ErrorDTO;
+import it.infn.mw.iam.api.registration.cern.dto.VOPersonDTO;
 import it.infn.mw.iam.authn.oidc.RestTemplateFactory;
 import it.infn.mw.iam.test.util.oidc.MockRestTemplateFactory;
 
@@ -55,9 +59,8 @@ import it.infn.mw.iam.test.util.oidc.MockRestTemplateFactory;
 @TestPropertySource(properties = {"cern.hr-api.username=" + CernTestSupport.HR_API_USERNAME,
     "cern.hr-api.password=" + CernTestSupport.HR_API_PASSWORD,
     "cern.hr-api.url=" + CernTestSupport.HR_API_URL,
-    "cern.experiment-name=" + CernTestSupport.EXPERIMENT_NAME,
-    "cern.sso-entity-id=" + CernTestSupport.SSO_ENTITY_ID})
-@ActiveProfiles({"h2-test","cern"})
+    "cern.experiment-name=" + CernTestSupport.EXPERIMENT_NAME, "cern.task.enabled=false"})
+@ActiveProfiles({"h2-test", "cern"})
 public class CernHrDbApiClientTests extends CernTestSupport {
 
   @Bean
@@ -109,7 +112,7 @@ public class CernHrDbApiClientTests extends CernTestSupport {
     assertThat(hrDbService.hasValidExperimentParticipation(personId), is(false));
   }
 
-  @Test(expected=CernHrDbApiError.class)
+  @Test(expected = CernHrDbApiError.class)
   public void checkAuthorizationError() {
     String personId = "12356789";
     String apiValidationUrl = apiValidationUrl(personId);
@@ -122,6 +125,41 @@ public class CernHrDbApiClientTests extends CernTestSupport {
       hrDbService.hasValidExperimentParticipation(personId);
     } catch (CernHrDbApiError e) {
       assertThat(e.getMessage(), containsString("401"));
+      throw e;
+    }
+  }
+
+  @Test
+  public void checkPersonRecord() throws JsonProcessingException {
+    String personId = "12356789";
+    String voPersonUrl = voPersonUrl(personId);
+    mockRtf.getMockServer()
+      .expect(requestTo(voPersonUrl))
+      .andExpect(method(GET))
+      .andExpect(header("Authorization", BASIC_AUTH_HEADER_VALUE))
+      .andRespond(withStatus(OK).contentType(APPLICATION_JSON_UTF8)
+        .body(mapper.writeValueAsString(mockHrUser(personId))));
+
+    VOPersonDTO user = hrDbService.getHrDbPersonRecord(personId);
+    assertThat(user.getFirstName(), is(MOCK_HR_USER_FIRST_NAME));
+    assertThat(user.getName(), is(MOCK_HR_USER_FAMILY_NAME));
+  }
+
+  @Test(expected = CernHrDbApiError.class)
+  public void checkErrorPersonRecord() throws JsonProcessingException {
+    String personId = "12356789";
+    String voPersonUrl = voPersonUrl(personId);
+    mockRtf.getMockServer()
+      .expect(requestTo(voPersonUrl))
+      .andExpect(method(GET))
+      .andExpect(header("Authorization", BASIC_AUTH_HEADER_VALUE))
+      .andRespond(withStatus(NOT_FOUND).contentType(APPLICATION_JSON_UTF8)
+        .body(mapper.writeValueAsString(ErrorDTO.newError("NOT_FOUND", "User not found"))));
+
+    try {
+      hrDbService.getHrDbPersonRecord(personId);
+    } catch (CernHrDbApiError e) {
+      assertThat(e.getMessage(), is("HR db api error: 404 Not Found"));
       throw e;
     }
   }

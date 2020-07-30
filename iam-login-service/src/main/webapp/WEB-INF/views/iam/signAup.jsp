@@ -21,14 +21,17 @@
   <h2 class="text-center">Sign Acceptable Usage Policy</h2>
   <form id="sign-aup-form" class="sign-aup-form form" action="/iam/aup/sign" method="post">
     <c:if test="${aup.text != null}">
-      <p id="sign-aup-subtitle">In order to proceed, you need to sign the Acceptable Usage Policy (AUP) for this organization:</p>
+      <p id="sign-aup-subtitle">In order to proceed, you need to sign the Acceptable Usage Policy (AUP) for this
+        organization:</p>
       <div class="form-group">
         <div class="aup-text">${aup.text}</div>
       </div>
     </c:if>
     <c:if test="${aup.url != null}">
-      <p id="sign-aup-subtitle">In order to proceed, you need to declare that
-      you accept the terms of this organization <a href="${aup.url}">Acceptable Usage Policy (AUP).</a></p>
+      <p id="sign-aup-subtitle">
+        In order to proceed, you need to declare that you have read and that you accept the terms of this organization
+        <a href="${aup.url}" target="_blank" rel="noopener noreferrer">Acceptable Usage Policy (AUP).</a>
+      </p>
     </c:if>
     <div class="form-group sign-aup-btns">
       <input id="sign-aup-btn" class="btn btn-success" type="submit" value="I agree with the AUP terms">

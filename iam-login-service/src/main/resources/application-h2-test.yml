@@ -24,6 +24,11 @@ spring:
     url: jdbc:h2:mem:iam;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     username: sa
     password:
+    test-while-idle: true
+    test-on-borrow: true
+    validation-query: SELECT 1
+    time-between-eviction-runs-millis: 5000
+    min-evictable-idle-time-millis: 10000
   
 notification:
   disable: true

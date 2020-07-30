@@ -235,6 +235,9 @@ public class IamSamlProperties {
   
   private List<IssuerValidationProperties> validators = Lists.newArrayList();
   
+  private long httpClientConnectionTimeoutSecs = 5;
+  private long httpClientSocketTimeoutSecs = 5;
+  
   
   public List<IamSamlIdpMetadataProperties> getIdpMetadata() {
     return idpMetadata;
@@ -403,5 +406,21 @@ public class IamSamlProperties {
 
   public void setValidators(List<IssuerValidationProperties> validators) {
     this.validators = validators;
+  }
+
+  public long getHttpClientConnectionTimeoutSecs() {
+    return httpClientConnectionTimeoutSecs;
+  }
+
+  public void setHttpClientConnectionTimeoutSecs(long httpClientConnectionTimeoutSecs) {
+    this.httpClientConnectionTimeoutSecs = httpClientConnectionTimeoutSecs;
+  }
+
+  public long getHttpClientSocketTimeoutSecs() {
+    return httpClientSocketTimeoutSecs;
+  }
+
+  public void setHttpClientSocketTimeoutSecs(long httpClientSocketTimeoutSecs) {
+    this.httpClientSocketTimeoutSecs = httpClientSocketTimeoutSecs;
   }
 }

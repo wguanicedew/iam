@@ -18,28 +18,39 @@ package it.infn.mw.iam.registration;
 import java.util.List;
 import java.util.Optional;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
+import it.infn.mw.iam.api.common.ErrorDTO;
 import it.infn.mw.iam.api.scim.exception.ScimResourceNotFoundException;
 import it.infn.mw.iam.authn.AbstractExternalAuthenticationToken;
 import it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo;
+import it.infn.mw.iam.config.IamProperties;
+import it.infn.mw.iam.config.IamProperties.RegistrationProperties;
 import it.infn.mw.iam.core.IamRegistrationRequestStatus;
+import it.infn.mw.iam.registration.validation.RegistrationRequestValidatorError;
 
 @RestController
 @Transactional
@@ -47,7 +58,17 @@ import it.infn.mw.iam.core.IamRegistrationRequestStatus;
 public class RegistrationApiController {
 
   public static final Logger LOG = LoggerFactory.getLogger(RegistrationApiController.class);
-  private RegistrationRequestService service;
+  private static final GrantedAuthority USER_AUTHORITY = new SimpleGrantedAuthority("ROLE_USER");
+
+  private final RegistrationRequestService service;
+  private final RegistrationProperties registrationProperties;
+
+  @Autowired
+  public RegistrationApiController(RegistrationRequestService registrationService,
+      IamProperties properties) {
+    service = registrationService;
+    registrationProperties = properties.getRegistration();
+  }
 
   private Optional<ExternalAuthenticationRegistrationInfo> getExternalAuthenticationInfo() {
 
@@ -66,21 +87,7 @@ public class RegistrationApiController {
     return Optional.empty();
   }
 
-  @Autowired
-  public RegistrationApiController(RegistrationRequestService registrationService) {
-    service = registrationService;
-  }
 
-  @RequestMapping(value = "/registration/username-available/{username:.+}",
-      method = RequestMethod.GET)
-  public Boolean usernameAvailable(@PathVariable("username") String username) {
-    return service.usernameAvailable(username);
-  }
-
-  @RequestMapping(value = "/registration/email-available/{email:.+}", method = RequestMethod.GET)
-  public Boolean emailAvailable(@PathVariable("email") String email) {
-    return service.emailAvailable(email);
-  }
 
   @PreAuthorize("#oauth2.hasScope('registration:read') or hasRole('ADMIN')")
   @RequestMapping(value = "/registration/list", method = RequestMethod.GET)
@@ -145,10 +152,31 @@ public class RegistrationApiController {
     return new ModelAndView("iam/requestVerified");
   }
 
+  @RequestMapping(value = "/registration/insufficient-auth", method = RequestMethod.GET)
+  public ModelAndView insufficientAuth(final Model model, final HttpServletRequest request, final Authentication auth) {
+    
+    if (auth.isAuthenticated() && auth.getAuthorities().contains(USER_AUTHORITY)) {
+      return new ModelAndView("redirect:/dashboard");
+    }
+    
+    model.addAttribute("authError", request.getAttribute("authError"));
+    return new ModelAndView("iam/insufficient-auth");
+  }
+
   @RequestMapping(value = "/registration/submitted", method = RequestMethod.GET)
   public ModelAndView submissionSuccess() {
     SecurityContextHolder.clearContext();
     return new ModelAndView("iam/requestSubmitted");
   }
 
+  @RequestMapping(value = "/registration/config", method = RequestMethod.GET)
+  public RegistrationProperties registrationConfig() {
+    return registrationProperties;
+  }
+
+  @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(RegistrationRequestValidatorError.class)
+  public ErrorDTO handleValidationError(RegistrationRequestValidatorError e) {
+    return ErrorDTO.fromString(e.getMessage());
+  }
 }

@@ -85,7 +85,10 @@ import net.minidev.json.JSONObject;
     "scope.matchers[1].name=storage.write",
     "scope.matchers[1].type=path",
     "scope.matchers[1].prefix=storage.write",
-    "scope.matchers[1].path=/"
+    "scope.matchers[1].path=/",
+    "scope.matchers[2].name=wlcg.groups",
+    "scope.matchers[2].type=regexp",
+    "scope.matchers[2].regexp=^wlcg\\.groups(?::((?:\\/[a-zA-Z0-9][a-zA-Z0-9_.-]*)+))?$",
     // @formatter:on
 })
 public class WLCGProfileIntegrationTests extends EndpointsTestUtils {
@@ -231,6 +234,19 @@ public class WLCGProfileIntegrationTests extends EndpointsTestUtils {
     JWT token = JWTParser.parse(getAccessTokenForUser("openid profile wlcg.groups"));
 
     assertThat(token.getJWTClaimsSet().getClaim("scope"), is("openid profile wlcg.groups"));
+    assertThat(token.getJWTClaimsSet().getClaim("wlcg.ver"), is("1.0"));
+    assertThat(token.getJWTClaimsSet().getClaim("nbf"), notNullValue());
+    assertThat(token.getJWTClaimsSet().getClaim("groups"), nullValue());
+    assertThat(token.getJWTClaimsSet().getStringListClaim("wlcg.groups"),
+        hasItems("/Production", "/Analysis"));
+  }
+  
+  @Test
+  @WithAnonymousUser
+  public void testWlcgProfileGroupRequest() throws Exception {
+    JWT token = JWTParser.parse(getAccessTokenForUser("openid profile wlcg.groups:/Analysis"));
+
+    assertThat(token.getJWTClaimsSet().getClaim("scope"), is("openid profile wlcg.groups:/Analysis"));
     assertThat(token.getJWTClaimsSet().getClaim("wlcg.ver"), is("1.0"));
     assertThat(token.getJWTClaimsSet().getClaim("nbf"), notNullValue());
     assertThat(token.getJWTClaimsSet().getClaim("groups"), nullValue());
