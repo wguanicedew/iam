@@ -26,7 +26,7 @@ pipeline {
   parameters {
     booleanParam(name: 'SKIP_TESTS', defaultValue: false, description: 'Skip tests')
     booleanParam(name: 'RUN_SONAR', defaultValue: false, description: 'Runs SONAR analysis')
-    booleanParam(name: 'SKIP_DOCKER', defaultValue: false, description: 'Skip docker image creation')
+    booleanParam(name: 'SKIP_DOCKER', defaultValue: true, description: 'Skip docker image creation')
     booleanParam(name: 'PUSH_TO_DOCKERHUB', defaultValue: false, description: 'Push to Dockerhub')
   }
 
