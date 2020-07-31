@@ -1,6 +1,51 @@
 # Changelog
 
-## 1.6.0 (???)
+## 1.6.0 (2020-07-31)
+
+### Added
+
+- IAM now supports multiple token profiles (#313)
+
+- IAM now implements basic account lifecycle management (#327)
+
+- It is now possible to disable local authentication and only rely on brokered
+  authentication (#330)
+
+- The editing of user profile information can now be disabled (#329)
+
+- IAM can now be configured to require authentication through an external
+  identity provider at registration time (#328)
+
+- IAM now stores and manages a URL pointing to the AUP document instead of
+  storing the AUP text in the database (#287)
+
+- IAM now allows to customize the organization logo size presented in login and
+  other pages (#280)
+
+### Fixed
+
+- A race condition that could lead to SAML login being blocked has been fixed
+  (#334)
+
+- The applicant username is now included in the registration confirmation email
+  (#325)
+
+- The "link external account" button is now disabled when no external IdP is
+  configured (#323) and the registration page does not mention external IdPs
+  when none are configured (#322)
+
+- A bug in the pagination handling of "Add to group" dialog has been fixex
+  (#318)
+
+- The token management API no longer shows registration tokens (#312)
+
+- The token management API no longer exposes token values to privileged users
+  (#308)
+
+- IAM no longer requires client authentication for the device code grant (#316)
+
+- A bug that prevented adding users to an IAM instance from the dashboard when
+  registration is disabled has been fixed (#326)
 
 ## 1.5.0 (2019-10-25)
 
