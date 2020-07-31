@@ -28,6 +28,7 @@ jobs:
     - name: Copy artifact to docker dir
       run: cp iam-login-service/target/iam-login-service.war iam-login-service/docker
     - name: Build & push docker images
+      uses: docker/build-push-action@v1
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_PASSWORD }}
