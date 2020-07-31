@@ -26,8 +26,10 @@ jobs:
     - name: Build
       run: mvn -U -B package
     - name: Copy artifact to docker dir
-      run: cp iam-login-service/target/iam-login-service.war iam-login-service/docker
-    - name: Build & push docker images
+      run: |
+        cp iam-login-service/target/iam-login-service.war iam-login-service/docker
+        cp iam-test-client/target/iam-test-client.jar iam-test-client/docker
+    - name: Build & push iam-login-service docker image
       uses: docker/build-push-action@v1
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -37,3 +39,15 @@ jobs:
         tag_with_sha: true
         dockerfile: iam-login-service/docker/Dockerfile.prod
         path: iam-login-service/docker
+        push: ${{ startsWith(github.ref, 'refs/tags/') }}
+    - name: Build & push iam-test-client docker image
+      uses: docker/build-push-action@v1
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+        repository: indigoiam/iam-test-client
+        tag_with_ref: true
+        tag_with_sha: true
+        dockerfile: iam-test-client/docker/Dockerfile.prod
+        path: iam-test-client/docker
+        push: ${{ startsWith(github.ref, 'refs/tags/') }}
