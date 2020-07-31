@@ -25,3 +25,14 @@ jobs:
       run: mvn -B license:check
     - name: Build
       run: mvn -U -B package
+    - name: Copy artifact to docker dir
+      run: cp iam-login-service/target/iam-login-service.war iam-login-service/docker
+    - name: Build & push docker images
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+        repository: indigoiam/iam-login-service
+        tag_with_ref: true
+        tag_with_sha: true
+        dockerfile: iam-login-service/docker/Dockerfile.prod
+        path: iam-login-service/docker
