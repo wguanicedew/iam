@@ -17,11 +17,11 @@
 
 angular.module('dashboardApp').factory('ClientsService', ClientsService);
 
-ClientsService.$inject = [ '$http' ];
+ClientsService.$inject = ['$http'];
 
 function ClientsService($http) {
     var service = {
-        getClientList : getClientList
+        getClientList: getClientList
     };
 
     var urlClients = "/api/clients";
@@ -29,7 +29,6 @@ function ClientsService($http) {
     return service;
 
     function getClientList() {
-        console.info("Getting client list");
         return $http.get(urlClients);
     }
 }

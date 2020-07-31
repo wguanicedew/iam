@@ -16,14 +16,16 @@
 package it.infn.mw.iam.authn.saml;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static it.infn.mw.iam.authn.DefaultExternalAuthenticationInfoBuilder.SAML_TYPE;
+import static it.infn.mw.iam.authn.DefaultExternalAuthenticationInfoBuilder.TYPE_ATTR;
 import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.EPPN;
 import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.GIVEN_NAME;
 import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.MAIL;
 import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.SN;
-import static java.util.Objects.isNull;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.security.core.GrantedAuthority;
@@ -90,15 +92,8 @@ public class SamlExternalAuthenticationToken
     }
 
     Map<String, String> additionalAttrs = Maps.newHashMap();
+    additionalAttrs.putAll(buildAuthnInfoMap());
     
-    for (Saml2Attribute attr: Saml2Attribute.values()) {
-      String attrVal = cred.getAttributeAsString(attr.getAttributeName()); 
-      if (!isNull(attrVal)) {
-        additionalAttrs.put(attr.getAlias(), attrVal);
-      }
-    }
-    
-    ri.setAdditionalAttributes(additionalAttrs);
     return ri;
   }
 
@@ -109,5 +104,26 @@ public class SamlExternalAuthenticationToken
 
   public IamSamlId getSamlId() {
     return samlId;
+  }
+
+  @Override
+  public Map<String, String> buildAuthnInfoMap() {
+
+    Map<String, String> authnInfo = new HashMap<>();
+
+    authnInfo.put(TYPE_ATTR, SAML_TYPE);
+
+    SAMLCredential cred = (SAMLCredential) getExternalAuthentication().getCredentials();
+
+    authnInfo.put("idpEntityId", cred.getRemoteEntityID());
+
+    for (Saml2Attribute attr : Saml2Attribute.values()) {
+      String attrVal = cred.getAttributeAsString(attr.getAttributeName());
+      if (attrVal != null) {
+        authnInfo.put(attr.name(), attrVal);
+      }
+    }
+
+    return authnInfo;
   }
 }

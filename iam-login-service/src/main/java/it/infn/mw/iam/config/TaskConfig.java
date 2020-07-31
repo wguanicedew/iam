@@ -28,11 +28,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
+import it.infn.mw.iam.config.lifecycle.LifecycleProperties;
+import it.infn.mw.iam.core.lifecycle.ExpiredAccountsHandler;
 import it.infn.mw.iam.core.user.IamAccountService;
 import it.infn.mw.iam.notification.NotificationDelivery;
 import it.infn.mw.iam.notification.NotificationDeliveryTask;
@@ -40,6 +43,7 @@ import it.infn.mw.iam.notification.service.NotificationStoreService;
 
 @Configuration
 @EnableScheduling
+@Profile({"prod", "dev"})
 public class TaskConfig implements SchedulingConfigurer {
 
   public static final Logger LOG = LoggerFactory.getLogger(TaskConfig.class);
@@ -73,11 +77,18 @@ public class TaskConfig implements SchedulingConfigurer {
   @Autowired
   NotificationDeliveryTask deliveryTask;
 
+  @Autowired
+  LifecycleProperties lifecycleProperties;
+
+  @Autowired
+  ExpiredAccountsHandler expiredAccountsHandler;
+
   @Value("${notification.disable}")
   boolean notificationDisabled;
 
   @Value("${notification.taskDelay}")
   long notificationTaskPeriodMsec;
+
 
   @Bean(destroyMethod = "shutdown")
   public ScheduledExecutorService taskScheduler() {
@@ -109,25 +120,35 @@ public class TaskConfig implements SchedulingConfigurer {
   }
 
   public void schedulePendingNotificationsDelivery(final ScheduledTaskRegistrar taskRegistrar) {
-    
+
     if (notificationTaskPeriodMsec < 0) {
-      LOG.info(
-          "Period notification delivery task will NOT be scheduled, since "
-          + "notificationTaskPeriodMsec is a negative number: {}",
-          notificationTaskPeriodMsec);
+      LOG.info("Period notification delivery task will NOT be scheduled, since "
+          + "notificationTaskPeriodMsec is a negative number: {}", notificationTaskPeriodMsec);
       return;
     }
 
     LOG.info("Scheduling pending notification delivery task to run every {} sec",
         TimeUnit.MILLISECONDS.toSeconds(notificationTaskPeriodMsec));
-    
+
     taskRegistrar.addFixedRateTask(deliveryTask, notificationTaskPeriodMsec);
+  }
+
+  public void scheduledExpiredAccountsTask(final ScheduledTaskRegistrar taskRegistrar) {
+    if (!lifecycleProperties.getAccount().getExpiredAccountsTask().isEnabled()) {
+      LOG.info("Expired accounts task is disabled");
+    } else {
+      final String cronSchedule =
+          lifecycleProperties.getAccount().getExpiredAccountsTask().getCronSchedule();
+      LOG.info("Scheduling expired accounts handler task with schedule: {}", cronSchedule);
+      taskRegistrar.addCronTask(expiredAccountsHandler, cronSchedule);
+    }
   }
 
   @Override
   public void configureTasks(final ScheduledTaskRegistrar taskRegistrar) {
     taskRegistrar.setScheduler(taskScheduler());
     schedulePendingNotificationsDelivery(taskRegistrar);
+    scheduledExpiredAccountsTask(taskRegistrar);
   }
 
 }

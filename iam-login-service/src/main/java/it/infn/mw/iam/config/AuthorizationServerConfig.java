@@ -21,7 +21,6 @@ import java.util.Collections;
 import org.mitre.oauth2.service.ClientDetailsEntityService;
 import org.mitre.oauth2.service.DeviceCodeService;
 import org.mitre.oauth2.service.OAuth2TokenEntityService;
-import org.mitre.oauth2.service.SystemScopeService;
 import org.mitre.oauth2.token.ChainedTokenGranter;
 import org.mitre.oauth2.token.JWTAssertionTokenGranter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,9 +54,10 @@ import org.springframework.security.oauth2.provider.refresh.RefreshTokenGranter;
 
 import it.infn.mw.iam.api.account.AccountUtils;
 import it.infn.mw.iam.api.aup.AUPSignatureCheckService;
-import it.infn.mw.iam.core.oauth.IamDeviceCodeTokenGranter;
-import it.infn.mw.iam.core.oauth.IamResourceOwnerPasswordTokenGranter;
-import it.infn.mw.iam.core.oauth.TokenExchangeTokenGranter;
+import it.infn.mw.iam.core.oauth.exchange.TokenExchangePdp;
+import it.infn.mw.iam.core.oauth.granters.IamDeviceCodeTokenGranter;
+import it.infn.mw.iam.core.oauth.granters.IamResourceOwnerPasswordTokenGranter;
+import it.infn.mw.iam.core.oauth.granters.TokenExchangeTokenGranter;
 import it.infn.mw.iam.core.util.IamAuthenticationEventPublisher;
 
 @Configuration
@@ -91,9 +91,6 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
   private PasswordEncoder passwordEncoder;
 
   @Autowired
-  private SystemScopeService systemScopeService;
-
-  @Autowired
   private DeviceCodeService deviceCodeService;
 
   @Autowired
@@ -101,6 +98,9 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 
   @Autowired
   private AUPSignatureCheckService signatureCheckService;
+  
+  @Autowired
+  private TokenExchangePdp tokenExchangePdp;
 
   @Bean
   WebResponseExceptionTranslator webResponseExceptionTranslator() {
@@ -141,10 +141,11 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     resourceOwnerPasswordCredentialGranter.setSignatureCheckService(signatureCheckService);
 
     TokenExchangeTokenGranter tokenExchangeGranter = new TokenExchangeTokenGranter(tokenServices,
-        clientDetailsService, requestFactory, systemScopeService);
+        clientDetailsService, requestFactory);
 
     tokenExchangeGranter.setAccountUtils(accountUtils);
     tokenExchangeGranter.setSignatureCheckService(signatureCheckService);
+    tokenExchangeGranter.setExchangePdp(tokenExchangePdp);
 
     return new CompositeTokenGranter(Arrays.<TokenGranter>asList(
         new AuthorizationCodeTokenGranter(tokenServices, authorizationCodeServices,

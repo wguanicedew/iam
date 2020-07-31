@@ -73,7 +73,7 @@ public class V10_2___CheckDuplicateEmails implements SpringJdbcMigration {
         }
 
       }
-      LOG.warn("### END Of DUPLICATE EMAIL WARNING ###");
+      LOG.debug("### END Of DUPLICATE EMAIL WARNING ###");
     }
   }
 

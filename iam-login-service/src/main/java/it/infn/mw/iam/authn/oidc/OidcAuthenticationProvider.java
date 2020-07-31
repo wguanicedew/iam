@@ -15,7 +15,6 @@
  */
 package it.infn.mw.iam.authn.oidc;
 
-import java.text.ParseException;
 import java.util.Date;
 
 import org.mitre.openid.connect.client.OIDCAuthenticationProvider;
@@ -23,13 +22,13 @@ import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.User;
 
 import it.infn.mw.iam.authn.common.config.AuthenticationValidator;
 import it.infn.mw.iam.authn.oidc.service.OidcUserDetailsService;
+import it.infn.mw.iam.authn.util.SessionTimeoutHelper;
 
 public class OidcAuthenticationProvider extends OIDCAuthenticationProvider {
 
@@ -37,22 +36,17 @@ public class OidcAuthenticationProvider extends OIDCAuthenticationProvider {
 
   private final OidcUserDetailsService userDetailsService;
   private final AuthenticationValidator<OIDCAuthenticationToken> tokenValidatorService;
+  private final SessionTimeoutHelper sessionTimeoutHelper;
 
   @Autowired
   public OidcAuthenticationProvider(OidcUserDetailsService userDetailsService,
-      AuthenticationValidator<OIDCAuthenticationToken> tokenValidatorService) {
+      AuthenticationValidator<OIDCAuthenticationToken> tokenValidatorService, SessionTimeoutHelper sessionTimeoutHelper) {
 
     this.userDetailsService = userDetailsService;
     this.tokenValidatorService = tokenValidatorService;
+    this.sessionTimeoutHelper = sessionTimeoutHelper;
   }
 
-  private Date getExpirationTimeFromOIDCAuthenticationToken(OIDCAuthenticationToken token) {
-    try {
-      return token.getIdToken().getJWTClaimsSet().getExpirationTime();
-    } catch (ParseException e) {
-      throw new BadCredentialsException("Could not extract expiration time from ID token", e);
-    }
-  }
 
   @Override
   public Authentication authenticate(Authentication authentication) throws AuthenticationException {
@@ -68,8 +62,8 @@ public class OidcAuthenticationProvider extends OIDCAuthenticationProvider {
     User user = (User) userDetailsService.loadUserByOIDC(token);
 
     return new OidcExternalAuthenticationToken(token,
-        getExpirationTimeFromOIDCAuthenticationToken(token), user.getUsername(), null,
-        user.getAuthorities());
+        Date.from(sessionTimeoutHelper.getDefaultSessionExpirationTime()),
+        user.getUsername(), null, user.getAuthorities());
   }
 
 }

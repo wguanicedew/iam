@@ -20,17 +20,13 @@ import org.opensaml.saml2.core.Attribute;
 import org.springframework.security.saml.SAMLCredential;
 
 public class SamlValidatorTestSupport {
-  
+
   public static final String ENTITLEMENT_ATTR_NAME = "entitlment";
-  
+
   @Mock
   protected SAMLCredential credential;
-  
+
   @Mock
   protected Attribute attribute;
-
-  public SamlValidatorTestSupport() {
-    // TODO Auto-generated constructor stub
-  }
 
 }

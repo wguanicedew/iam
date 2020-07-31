@@ -21,7 +21,6 @@ angular.module('dashboardApp').factory("scimFactory", ['$q', '$http', '$httpPara
 	var urlMe = urlBase + '/Me';
 
 	var service = {
-
 		getUsers: getUsers,
 		getGroups: getGroups,
 		getUser: getUser,
@@ -45,10 +44,21 @@ angular.module('dashboardApp').factory("scimFactory", ['$q', '$http', '$httpPara
 		setUserActiveStatus: setUserActiveStatus,
 		updateUser: updateUser,
 		updateMe: updateMe,
-		getAllUsers: getAllUsers
-	}
+		getAllUsers: getAllUsers,
+		getUserProfileConfig: getUserProfileConfig
+	};
 
 	return service;
+
+	function getUserProfileConfig() {
+		return $http.get("/iam/config/profile", {
+			cache: true
+		}).then(function (res) {
+			return res.data;
+		}).catch(function (err) {
+			return $q.reject(err);
+		});
+	}
 
 	function getUsers(startIndex, count) {
 
@@ -60,51 +70,51 @@ angular.module('dashboardApp').factory("scimFactory", ['$q', '$http', '$httpPara
 		var url = urlUsers + '?' + qs;
 
 		return $http.get(url);
-	};
+	}
 
 	function getAllUsers(chunkRequestSize = 100) {
 
-	  console.info("Getting all users");
+		console.info("Getting all users");
 
-	  var deferred = $q.defer();
+		var deferred = $q.defer();
 
-	  var promises = [];
-	  var users = [];
-	  var handleResponse = function(response){
-	    angular.forEach(response.data.Resources, function(user){
-	      users.push(user);
-	    });
-	  };
-	  var handleError = function(error) {
-		  deferred.reject(error)
-	  };
+		var promises = [];
+		var users = [];
+		var handleResponse = function (response) {
+			angular.forEach(response.data.Resources, function (user) {
+				users.push(user);
+			});
+		};
+		var handleError = function (error) {
+			deferred.reject(error)
+		};
 
-	  var handleFirstResponse = function(response){
+		var handleFirstResponse = function (response) {
 
-	    var totalResults = response.data.totalResults;
-	    var lastLoaded = chunkRequestSize;
+			var totalResults = response.data.totalResults;
+			var lastLoaded = chunkRequestSize;
 
-	    while (lastLoaded < totalResults) {
-	      promises.push(getUsers(lastLoaded+1, chunkRequestSize));
-	      lastLoaded = lastLoaded + chunkRequestSize;
-	    }
+			while (lastLoaded < totalResults) {
+				promises.push(getUsers(lastLoaded + 1, chunkRequestSize));
+				lastLoaded = lastLoaded + chunkRequestSize;
+			}
 
-	    angular.forEach(response.data.Resources, function(user){
-	      users.push(user);
-	    });
+			angular.forEach(response.data.Resources, function (user) {
+				users.push(user);
+			});
 
-	    $q.all(promises).then(function(response){
-	      angular.forEach(promises, function(p){
-	        p.then(handleResponse);
-	      });
-	      return users;
-	    }, handleError);
+			$q.all(promises).then(function (response) {
+				angular.forEach(promises, function (p) {
+					p.then(handleResponse);
+				});
+				return users;
+			}, handleError);
 
-	    return users;
-	  };
+			return users;
+		};
 
-	  deferred.resolve(getUsers(1, chunkRequestSize).then(handleFirstResponse, handleError));
-	  return deferred.promise;
+		deferred.resolve(getUsers(1, chunkRequestSize).then(handleFirstResponse, handleError));
+		return deferred.promise;
 	};
 
 	function getGroups(startIndex, count) {
@@ -239,49 +249,53 @@ angular.module('dashboardApp').factory("scimFactory", ['$q', '$http', '$httpPara
 
 		return $http.patch(url, data, config);
 	};
-	
+
 	function removeMemberFromGroup(groupId, memberId, memberLocation, memberDisplayName) {
-		
+
 		console.info("Patch groupId, remove member", groupId, memberId, memberLocation);
-		
+
 		var config = {
-				headers: { 'Content-Type': 'application/scim+json' }
-			};
+			headers: {
+				'Content-Type': 'application/scim+json'
+			}
+		};
 		var data = {
-				schemas: ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
-				operations: [{
-					op: "remove",
-					path: "members",
-					value: [{
-						display: memberDisplayName,
-						value: memberId,
-						$ref: memberLocation
-					}]
+			schemas: ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
+			operations: [{
+				op: "remove",
+				path: "members",
+				value: [{
+					display: memberDisplayName,
+					value: memberId,
+					$ref: memberLocation
 				}]
+			}]
 		};
 		var url = urlGroups + '/' + groupId;
 
 		return $http.patch(url, data, config);
 	};
-	
+
 	function removeMemberFromGroup(groupId, memberId, memberLocation, memberDisplayName) {
-		
+
 		console.info("Patch groupId, remove member", groupId, memberId, memberLocation);
-		
+
 		var config = {
-				headers: { 'Content-Type': 'application/scim+json' }
-			};
+			headers: {
+				'Content-Type': 'application/scim+json'
+			}
+		};
 		var data = {
-				schemas: ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
-				operations: [{
-					op: "remove",
-					path: "members",
-					value: [{
-						display: memberDisplayName,
-						value: memberId,
-						$ref: memberLocation
-					}]
+			schemas: ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
+			operations: [{
+				op: "remove",
+				path: "members",
+				value: [{
+					display: memberDisplayName,
+					value: memberId,
+					$ref: memberLocation
 				}]
+			}]
 		};
 		var url = urlGroups + '/' + groupId;
 
@@ -291,7 +305,7 @@ angular.module('dashboardApp').factory("scimFactory", ['$q', '$http', '$httpPara
 	function addOpenIDAccount(userId, account) {
 
 		var url = urlUsers + '/' + userId;
-		
+
 		var config = {
 			headers: {
 				'Content-Type': 'application/scim+json'
@@ -318,7 +332,7 @@ angular.module('dashboardApp').factory("scimFactory", ['$q', '$http', '$httpPara
 	function removeOpenIDAccount(userId, account) {
 
 		var url = urlUsers + '/' + userId;
-	
+
 		var config = {
 			headers: {
 				'Content-Type': 'application/scim+json'
@@ -337,7 +351,7 @@ angular.module('dashboardApp').factory("scimFactory", ['$q', '$http', '$httpPara
 				}
 			}]
 		};
-		
+
 		return $http.patch(url, data, config);
 	}
 
@@ -449,7 +463,7 @@ angular.module('dashboardApp').factory("scimFactory", ['$q', '$http', '$httpPara
 	function addSamlId(userId, samlId) {
 
 		var url = urlUsers + '/' + userId;
-		
+
 		var config = {
 			headers: {
 				'Content-Type': 'application/scim+json'
@@ -466,7 +480,7 @@ angular.module('dashboardApp').factory("scimFactory", ['$q', '$http', '$httpPara
 				}
 			}]
 		};
-		
+
 		return $http.patch(url, data, config);
 	}
 
@@ -557,5 +571,5 @@ angular.module('dashboardApp').factory("scimFactory", ['$q', '$http', '$httpPara
 		return $http.patch(urlMe, data, config);
 	};
 
-	return scimFactory;
+
 }]);

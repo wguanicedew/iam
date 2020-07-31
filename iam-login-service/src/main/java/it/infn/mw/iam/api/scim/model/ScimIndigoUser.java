@@ -54,29 +54,33 @@ public class ScimIndigoUser {
 
   private final List<ScimSshKey> sshKeys;
   private final List<ScimOidcId> oidcIds;
-  
+
   @Valid
   private final List<ScimSamlId> samlIds;
 
   @Valid
   private final List<ScimX509Certificate> certificates;
-  
+
   @JsonSerialize(using = JsonDateSerializer.class)
-  private final Date aupSignatureTime; 
-  
+  private final Date aupSignatureTime;
+
+  @JsonSerialize(using = JsonDateSerializer.class)
+  private final Date endTime;
+
   @JsonCreator
   private ScimIndigoUser(@JsonProperty("oidcIds") List<ScimOidcId> oidcIds,
       @JsonProperty("sshKeys") List<ScimSshKey> sshKeys,
       @JsonProperty("samlIds") List<ScimSamlId> samlIds,
       @JsonProperty("x509Certificates") List<ScimX509Certificate> certs,
-      @JsonProperty("aupSignatureTime") Date aupSignatureTime) {
+      @JsonProperty("aupSignatureTime") Date aupSignatureTime,
+      @JsonProperty("endTime") Date endTime) {
 
     this.oidcIds = oidcIds != null ? oidcIds : new LinkedList<>();
     this.sshKeys = sshKeys != null ? sshKeys : new LinkedList<>();
     this.samlIds = samlIds != null ? samlIds : new LinkedList<>();
-    this.certificates = certs != null ? certs: new LinkedList<>();
+    this.certificates = certs != null ? certs : new LinkedList<>();
     this.aupSignatureTime = aupSignatureTime;
-
+    this.endTime = endTime;
   }
 
   private ScimIndigoUser(Builder b) {
@@ -85,6 +89,7 @@ public class ScimIndigoUser {
     this.samlIds = b.samlIds;
     this.certificates = b.certificates;
     this.aupSignatureTime = b.aupSignatureTime;
+    this.endTime = b.endTime;
   }
 
   @JsonIgnore
@@ -115,7 +120,7 @@ public class ScimIndigoUser {
   public Date getAupSignatureTime() {
     return aupSignatureTime;
   }
-  
+
   public static Builder builder() {
 
     return new Builder();
@@ -129,7 +134,8 @@ public class ScimIndigoUser {
     private List<ScimX509Certificate> certificates = new LinkedList<>();
 
     private Date aupSignatureTime;
-    
+    private Date endTime;
+
     public Builder addSshKey(ScimSshKey sshKey) {
 
       sshKeys.add(sshKey);
@@ -148,16 +154,21 @@ public class ScimIndigoUser {
       return this;
     }
 
-    public Builder addCertificate(ScimX509Certificate cert){
+    public Builder addCertificate(ScimX509Certificate cert) {
       certificates.add(cert);
       return this;
     }
-    
+
     public Builder aupSignatureTime(Date signatureTime) {
       this.aupSignatureTime = signatureTime;
       return this;
     }
-    
+
+    public Builder endTime(Date endTime) {
+      this.endTime = endTime;
+      return this;
+    }
+
     public ScimIndigoUser build() {
       return new ScimIndigoUser(this);
     }

@@ -25,7 +25,8 @@ pipeline {
 
   parameters {
     booleanParam(name: 'SKIP_TESTS', defaultValue: false, description: 'Skip tests')
-    booleanParam(name: 'SKIP_DOCKER', defaultValue: false, description: 'Skip docker image creation')
+    booleanParam(name: 'RUN_SONAR', defaultValue: false, description: 'Runs SONAR analysis')
+    booleanParam(name: 'BUILD_DOCKER_IMAGES', defaultValue: false, description: 'Build docker images')
     booleanParam(name: 'PUSH_TO_DOCKERHUB', defaultValue: false, description: 'Push to Dockerhub')
   }
 
@@ -50,10 +51,10 @@ pipeline {
                 image 'cloud-vm114.cloud.cnaf.infn.it/cnafsd/centos7-jenkins-slave:latest'
                 ttyEnabled true
                 command 'cat'
-                resourceRequestCpu '500m'
-                resourceLimitCpu '3'
-                resourceRequestMemory '2500Mi'
-                resourceLimitMemory '2500Mi'
+                resourceRequestCpu '2'
+                resourceLimitCpu '4'
+                resourceRequestMemory '3200Mi'
+                resourceLimitMemory '3200Mi'
           }
         }
       }
@@ -70,19 +71,43 @@ pipeline {
 
         stage('license-check') {
           steps {
-              sh 'mvn license:check'
+              sh 'mvn -B license:check'
           }
         }
 
         stage('compile') {
           steps {
-            sh 'mvn compile'
+            sh 'mvn -B compile'
+          }
+        }
+
+        stage('Tests (no Sonar analysis)') {
+          when{
+            allOf{
+              not {
+                triggeredBy 'TimerTrigger'
+              }
+              not {
+                expression { return params.RUN_SONAR }
+              }
+              not {
+                expression { return params.SKIP_TESTS }
+              }
+            }
+          }
+
+          steps {
+            sh 'mvn -B test'
           }
         }
 
         stage('PR analysis'){
           when{
             allOf{
+              anyOf {
+                triggeredBy 'TimerTrigger'
+                expression { return params.RUN_SONAR }
+              }
               expression{ env.CHANGE_URL }
               not {
                 expression { return params.SKIP_TESTS }
@@ -131,6 +156,10 @@ pipeline {
 
           when{
             allOf{
+              anyOf {
+                triggeredBy 'TimerTrigger'
+                expression { return params.RUN_SONAR }
+              }
               expression{ !env.CHANGE_URL }
               not {
                 expression { return params.SKIP_TESTS }
@@ -138,13 +167,14 @@ pipeline {
             }
           }
 
+
           steps {
             script{
               def checkstyle_opts = 'checkstyle:check -Dcheckstyle.config.location=google_checks.xml'
 
                 withSonarQubeEnv('sonarcloud.io'){
                   sh """
-                    mvn -U ${checkstyle_opts} \\
+                    mvn -B -U ${checkstyle_opts} \\
                     install sonar:sonar \\
                     -Dsonar.host.url=${SONAR_HOST_URL} \\
                     -Dsonar.login=${SONAR_AUTH_TOKEN} \\
@@ -172,8 +202,14 @@ pipeline {
         stage('quality-gate') {
 
           when{
-            not {
-              expression { return params.SKIP_TESTS }
+            allOf{
+              anyOf {
+                triggeredBy 'TimerTrigger'
+                expression { return params.RUN_SONAR }
+              }
+              not {
+                expression { return params.SKIP_TESTS }
+              }
             }
           }
 
@@ -186,7 +222,7 @@ pipeline {
 
         stage('package') {
           steps {
-            sh 'mvn -B -DskipTests=true clean package' 
+            sh 'mvn -B -DskipTests=true clean deploy package' 
             archiveArtifacts 'iam-login-service/target/iam-login-service.war'
             archiveArtifacts 'iam-login-service/target/classes/iam.version.properties'
             archiveArtifacts 'iam-test-client/target/iam-test-client.jar'
@@ -198,9 +234,7 @@ pipeline {
 
     stage('docker-images') {
       when{
-        not {
-          expression { return params.SKIP_DOCKER }
-        }
+          expression { return params.BUILD_DOCKER_IMAGES }
       }
 
       agent {

@@ -29,22 +29,16 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public class DefaultStartRegistrationController {
 
   public static final String REGISTRATION_PROFILE = "registration";
-  public static final String CERN_PROFILE = "cern";
 
   private boolean registrationProfileEnabled;
-  private boolean cernProfileEnabled;
 
   @Autowired
   public DefaultStartRegistrationController(Environment env) {
-    registrationProfileEnabled = cernProfileEnabled = false;
+    registrationProfileEnabled = false;
 
     for (String ap : env.getActiveProfiles()) {
       if (REGISTRATION_PROFILE.equals(ap)) {
         registrationProfileEnabled = true;
-      }
-
-      if (CERN_PROFILE.equals(ap)) {
-        cernProfileEnabled = true;
       }
     }
   }
@@ -56,13 +50,9 @@ public class DefaultStartRegistrationController {
         && !authentication.getAuthorities().contains(EXT_AUTHN_UNREGISTERED_USER_AUTH)) {
       return "iam/dashboard";
     }
-
+    
     if (registrationProfileEnabled) {
-      if (cernProfileEnabled) {
-        return "redirect:/cern-registration";
-      } else {
-        return "iam/register";
-      }
+      return "iam/register";
     } else {
       return "iam/registrationDisabled";
     }

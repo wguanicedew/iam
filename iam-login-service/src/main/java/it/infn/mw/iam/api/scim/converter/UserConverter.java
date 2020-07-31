@@ -229,6 +229,8 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
       indigoUserBuilder.aupSignatureTime(entity.getAupSignature().getSignatureTime());
     }
     
+    indigoUserBuilder.endTime(entity.getEndTime());
+    
     ScimIndigoUser indigoUser = indigoUserBuilder.build();
 
     return indigoUser.isEmpty() ? null : indigoUser;

@@ -107,7 +107,7 @@ public class IamApiSecurityConfig {
 
     @Autowired
     private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
-
+    
     @Autowired
     private CorsFilter corsFilter;
 
@@ -121,6 +121,7 @@ public class IamApiSecurityConfig {
         .and()
           .exceptionHandling()
             .authenticationEntryPoint(authenticationEntryPoint)
+            .accessDeniedHandler(new OAuth2AccessDeniedHandler())
         .and()
           .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
           .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
@@ -130,14 +131,16 @@ public class IamApiSecurityConfig {
           .authorizeRequests()
             .antMatchers("/iam/password-reset/**").permitAll()
             .antMatchers(POST, "/registration/create").permitAll()
+            .antMatchers(GET, "/registration/insufficient-auth").permitAll()
             .antMatchers(GET, "/registration/username-available/**").permitAll()
             .antMatchers(GET, "/registration/email-available/**").permitAll()
+            .antMatchers(GET, "/registration/config").permitAll()
             .antMatchers(GET, "/registration/confirm/**").permitAll()
             .antMatchers(GET, "/registration/verify/**").permitAll()
             .antMatchers(GET, "/registration/submitted").permitAll()
             .antMatchers(GET, "/iam/config/**").permitAll()
             .antMatchers(GET, AUP_PATH).permitAll()
-            .anyRequest().authenticated()            
+            .anyRequest().authenticated()
         .and()
           .csrf().disable();
       // @formatter:on

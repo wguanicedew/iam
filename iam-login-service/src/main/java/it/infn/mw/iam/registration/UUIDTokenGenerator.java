@@ -24,7 +24,6 @@ public class UUIDTokenGenerator implements TokenGenerator {
 
   @Override
   public String generateToken() {
-
     return UUID.randomUUID().toString();
   }
 

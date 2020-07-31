@@ -33,7 +33,7 @@ public class MockSmtpServerUtils {
 
     do {
       try {
-        // Open a client socket to talk with host at port
+        // Open a client socket to talk with iamHost at port
         (new Socket(host, port)).close();
 
         // If we reach this far there's someone listening,

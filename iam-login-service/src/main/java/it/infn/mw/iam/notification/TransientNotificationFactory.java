@@ -101,10 +101,14 @@ public class TransientNotificationFactory implements NotificationFactory {
     String resetPasswordUrl = String.format("%s%s/%s", baseUrl,
         PasswordResetController.BASE_TOKEN_URL, request.getAccount().getResetKey());
 
+
+
     Map<String, Object> model = new HashMap<>();
     model.put(RECIPIENT_FIELD, recipient);
+
     model.put("resetPasswordUrl", resetPasswordUrl);
     model.put(ORGANISATION_NAME, organisationName);
+    model.put(USERNAME_FIELD, request.getAccount().getUsername());
 
     IamEmailNotification notification = createMessage("accountActivated.vm", model,
         IamNotificationType.ACTIVATED, properties.getSubject().get("activated"),
@@ -118,13 +122,14 @@ public class TransientNotificationFactory implements NotificationFactory {
   }
 
   @Override
-  public IamEmailNotification createRequestRejectedMessage(IamRegistrationRequest request, Optional<String> motivation) {
+  public IamEmailNotification createRequestRejectedMessage(IamRegistrationRequest request,
+      Optional<String> motivation) {
     String recipient = request.getAccount().getUserInfo().getName();
 
     Map<String, Object> model = new HashMap<>();
     model.put(RECIPIENT_FIELD, recipient);
     model.put(ORGANISATION_NAME, organisationName);
-    
+
     if (motivation.isPresent()) {
       model.put(MOTIVATION_FIELD, motivation.get());
     }
@@ -192,7 +197,8 @@ public class TransientNotificationFactory implements NotificationFactory {
 
     LOG.debug("Create group membership admin notification for request {}", groupRequest.getUuid());
     return createMessage("adminHandleGroupRequest.vm", model, IamNotificationType.GROUP_MEMBERSHIP,
-        subject, groupManagerDeliveryStrategy.resolveGroupManagersEmailAddresses(groupRequest.getGroup()));
+        subject,
+        groupManagerDeliveryStrategy.resolveGroupManagersEmailAddresses(groupRequest.getGroup()));
   }
 
   @Override

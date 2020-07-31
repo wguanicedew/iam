@@ -58,7 +58,6 @@ public class TokensConverter {
         .expiration(at.getExpiration())
         .scopes(at.getScope())
         .user(userRef)
-        .value(at.getValue())
         .build();
   }
 
@@ -67,6 +66,7 @@ public class TokensConverter {
     AuthenticationHolderEntity ah = rt.getAuthenticationHolder();
 
     ClientRef clientRef = buildClientRef(ah.getClientId());
+    
     UserRef userRef = buildUserRef(ah.getUserAuth());
 
     return RefreshToken.builder()
@@ -74,7 +74,6 @@ public class TokensConverter {
         .client(clientRef)
         .expiration(rt.getExpiration())
         .user(userRef)
-        .value(rt.getValue())
         .build();
   }
 

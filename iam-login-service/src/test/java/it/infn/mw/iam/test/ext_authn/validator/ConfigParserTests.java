@@ -115,7 +115,7 @@ public class ConfigParserTests {
     ValidatorCheck hasAttr = configParser.parseValidatorProperties(properties);
     assertThat(hasAttr, instanceOf(SamlHasAttributeCheck.class));
   }
-  
+
   @Test(expected = ValidatorConfigError.class)
   public void disjunctionRequiresChildren() {
     properties.setKind("or");
@@ -126,61 +126,61 @@ public class ConfigParserTests {
       throw e;
     }
   }
-  
+
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Test
   public void disjunctionRecognized() {
-    
+
     ValidatorProperties child1 = new ValidatorProperties();
     child1.setKind("hasAttr");
     child1.setParams(ImmutableMap.of("attributeName", "1.2.3.4"));
-    
+
     ValidatorProperties child2 = new ValidatorProperties();
     child2.setKind("hasAttr");
     child2.setParams(ImmutableMap.of("attributeName", "3.4.5.6"));
-    
+
     properties.setChildrens(asList(child1, child2));
     properties.setKind("or");
-    
+
     ValidatorCheck or = configParser.parseValidatorProperties(properties);
     assertThat(or, instanceOf(Disjunction.class));
-    
+
     Disjunction<SAMLCredential> typedOr = (Disjunction<SAMLCredential>) or;
     assertThat(typedOr.getChecks(), hasSize(2));
     assertThat(typedOr.getChecks().get(0), instanceOf(SamlHasAttributeCheck.class));
     assertThat(typedOr.getChecks().get(1), instanceOf(SamlHasAttributeCheck.class));
   }
-  
+
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Test
   public void nestedStructureRecognized() {
-    
+
     ValidatorProperties child0 = new ValidatorProperties();
     child0.setKind("hasAttr");
     child0.setParams(ImmutableMap.of("attributeName", "1.2.3.4.5"));
-    
+
     ValidatorProperties child2 = new ValidatorProperties();
     child2.setKind("hasAttr");
     child2.setParams(ImmutableMap.of("attributeName", "3.4.5.6"));
-    
+
     ValidatorProperties child1 = new ValidatorProperties();
     child1.setKind("not");
     child1.setChildrens(asList(child2));
-    
+
     properties.setChildrens(asList(child0, child1));
     properties.setKind("and");
-    
+
     ValidatorCheck and = configParser.parseValidatorProperties(properties);
     assertThat(and, instanceOf(Conjunction.class));
-    
+
     Conjunction<SAMLCredential> typedAnd = (Conjunction<SAMLCredential>) and;
     assertThat(typedAnd.getChecks(), hasSize(2));
     assertThat(typedAnd.getChecks().get(0), instanceOf(SamlHasAttributeCheck.class));
     assertThat(typedAnd.getChecks().get(1), instanceOf(Negation.class));
-    
+
     Negation<SAMLCredential> not = (Negation<SAMLCredential>) typedAnd.getChecks().get(1);
     assertThat(not.getChecks(), hasSize(1));
-    assertThat(not.getChecks().get(0),instanceOf(SamlHasAttributeCheck.class));
+    assertThat(not.getChecks().get(0), instanceOf(SamlHasAttributeCheck.class));
   }
 
 }

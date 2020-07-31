@@ -17,9 +17,13 @@ package it.infn.mw.iam.api.registration.cern;
 
 import org.springframework.context.annotation.Profile;
 
+import it.infn.mw.iam.api.registration.cern.dto.VOPersonDTO;
+
 @Profile("cern")
 public interface CernHrDBApiService {
 
   boolean hasValidExperimentParticipation(String personId);
-  
+
+  VOPersonDTO getHrDbPersonRecord(String personId);
+
 }

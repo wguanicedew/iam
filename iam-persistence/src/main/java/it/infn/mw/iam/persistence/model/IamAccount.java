@@ -23,6 +23,8 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -72,12 +74,16 @@ public class IamAccount implements Serializable {
   private boolean active;
 
   @Temporal(TemporalType.TIMESTAMP)
-  @Column(name="creationtime", nullable = false)
+  @Column(name = "creationtime", nullable = false)
   private Date creationTime;
 
   @Temporal(TemporalType.TIMESTAMP)
-  @Column(name="lastupdatetime", nullable = false)
+  @Column(name = "lastupdatetime", nullable = false)
   private Date lastUpdateTime;
+
+  @Temporal(TemporalType.TIMESTAMP)
+  @Column(name = "end_time", nullable = true)
+  private Date endTime;
 
   @Column(name = "provisioned", nullable = false)
   private boolean provisioned = false;
@@ -90,7 +96,7 @@ public class IamAccount implements Serializable {
   @Column(name = "last_login_time", nullable = true)
   private Date lastLoginTime;
 
-  @ManyToMany(fetch=FetchType.EAGER)
+  @ManyToMany(fetch = FetchType.EAGER)
   @JoinTable(name = "iam_account_authority",
       joinColumns = @JoinColumn(name = "account_id", referencedColumnName = "id"),
       inverseJoinColumns = @JoinColumn(name = "authority_id", referencedColumnName = "id"))
@@ -136,19 +142,16 @@ public class IamAccount implements Serializable {
 
   @OneToMany(mappedBy = "account", cascade = CascadeType.REMOVE)
   private Set<IamGroupRequest> groupRequests = new HashSet<>();
-  
+
   @ElementCollection
-  @CollectionTable(
-      indexes= {@Index(columnList="name"), @Index(columnList="name,val")},
-      name="iam_account_attrs",
-     joinColumns=@JoinColumn(name="account_id"))
+  @CollectionTable(indexes = {@Index(columnList = "name"), @Index(columnList = "name,val")},
+      name = "iam_account_attrs", joinColumns = @JoinColumn(name = "account_id"))
   private Set<IamAttribute> attributes = new HashSet<>();
-  
+
   @ElementCollection
   @CollectionTable(
-      indexes= {@Index(columnList="prefix,name,val"), @Index(columnList="prefix,name")},
-      name="iam_account_labels",
-     joinColumns=@JoinColumn(name="account_id"))
+      indexes = {@Index(columnList = "prefix,name,val"), @Index(columnList = "prefix,name")},
+      name = "iam_account_labels", joinColumns = @JoinColumn(name = "account_id"))
   private Set<IamLabel> labels = new HashSet<>();
 
   public IamAccount() {
@@ -552,7 +555,7 @@ public class IamAccount implements Serializable {
   public void setGroupRequest(Set<IamGroupRequest> groupRequests) {
     this.groupRequests = groupRequests;
   }
-  
+
   public Set<IamAttribute> getAttributes() {
     return attributes;
   }
@@ -560,13 +563,48 @@ public class IamAccount implements Serializable {
   public void setAttributes(Set<IamAttribute> attributes) {
     this.attributes = attributes;
   }
-  
+
   public Set<IamLabel> getLabels() {
     return labels;
   }
-  
+
   public void setLabels(Set<IamLabel> labels) {
     this.labels = labels;
+  }
+
+  public Optional<IamLabel> getLabelByPrefixAndName(String prefix, String name) {
+    for (IamLabel l : getLabels()) {
+      if (l.getName().equals(name) && prefix.equals(l.getPrefix())) {
+        return Optional.of(l);
+      }
+    }
+    return Optional.empty();
+  }
+  
+  public Optional<IamLabel> getLabelByName(String name) {
+    for (IamLabel l : getLabels()) {
+      if (l.getName().equals(name) && Objects.isNull(l.getPrefix())) {
+        return Optional.of(l);
+      }
+    }
+    return Optional.empty();
+  }
+  
+  public Optional<IamLabel> removeLabelByNameAndPrefix(String prefix, String name) {
+    
+    Optional<IamLabel> label = getLabelByPrefixAndName(prefix, name);
+    if (label.isPresent()) {
+      getLabels().remove(label.get());
+    }
+    return label;
+  }
+  
+  public Optional<IamLabel> removeLabelByName(String name) {
+    Optional<IamLabel> label = getLabelByName(name);
+    if (label.isPresent()) {
+      getLabels().remove(label.get());
+    }
+    return label;
   }
 
   @Override
@@ -586,5 +624,13 @@ public class IamAccount implements Serializable {
     userInfo.setIamAccount(newAccount);
     newAccount.setUserInfo(userInfo);
     return newAccount;
+  }
+
+  public Date getEndTime() {
+    return endTime;
+  }
+
+  public void setEndTime(Date endTime) {
+    this.endTime = endTime;
   }
 }

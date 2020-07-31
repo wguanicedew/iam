@@ -42,9 +42,9 @@ public class DefaultAupService implements AupService {
 
   private final TimeProvider timeProvider;
   private final ApplicationEventPublisher eventPublisher;
-  
+
   @Autowired
-  public DefaultAupService(IamAupRepository repo, IamAupSignatureRepository signatureRepo, 
+  public DefaultAupService(IamAupRepository repo, IamAupSignatureRepository signatureRepo,
       AupConverter converter, TimeProvider timeProvider, ApplicationEventPublisher eventPublisher) {
     this.repo = repo;
     this.signatureRepo = signatureRepo;
@@ -61,16 +61,16 @@ public class DefaultAupService implements AupService {
   @Override
   public IamAup saveAup(AupDTO aupDto) {
     IamAup aup = converter.entityFromDto(aupDto);
-    long currentTimeMillis = timeProvider.currentTimeMillis(); 
-    
+    long currentTimeMillis = timeProvider.currentTimeMillis();
+
     Date now = new Date(currentTimeMillis);
     aup.setCreationTime(now);
     aup.setLastUpdateTime(now);
-    
+
     repo.saveDefaultAup(aup);
-    
+
     eventPublisher.publishEvent(new AupCreatedEvent(this, aup));
-    
+
     return aup;
   }
 
@@ -84,18 +84,34 @@ public class DefaultAupService implements AupService {
 
   @Override
   public IamAup updateAup(AupDTO aupDto) {
-    
-    long currentTimeMillis = timeProvider.currentTimeMillis(); 
-    Date now = new Date(currentTimeMillis);
-    
+
     IamAup aup = repo.findDefaultAup().orElseThrow(AupNotFoundError::new);
-    
-    aup.setLastUpdateTime(now);
+
     aup.setDescription(aupDto.getDescription());
-    aup.setText(aupDto.getText());
+    aup.setUrl(aupDto.getUrl());
     aup.setSignatureValidityInDays(aupDto.getSignatureValidityInDays());
+    /*
+     * Due to transition from text to URL, when updating the AUP only URL is considered while text
+     * is ignored and set to null
+     */
+    aup.setText(null);
     repo.save(aup);
-    
+
+    eventPublisher.publishEvent(new AupUpdatedEvent(this, aup));
+    return aup;
+  }
+
+  @Override
+  public IamAup touchAup() {
+
+    long currentTimeMillis = timeProvider.currentTimeMillis();
+    Date now = new Date(currentTimeMillis);
+
+    IamAup aup = repo.findDefaultAup().orElseThrow(AupNotFoundError::new);
+
+    aup.setLastUpdateTime(now);
+    repo.save(aup);
+
     eventPublisher.publishEvent(new AupUpdatedEvent(this, aup));
     return aup;
   }

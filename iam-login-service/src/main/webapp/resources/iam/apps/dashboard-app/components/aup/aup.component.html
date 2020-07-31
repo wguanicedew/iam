@@ -29,13 +29,22 @@
     <section class="content" id="aup-content" ng-cloak>
         <div class="box">
             <div class="box-body">
-
                 <div ng-if="$ctrl.aup != null">
-                    <div class="form-group">
+                    <div class="form-group has-error" ng-if="$ctrl.aup.data.text">
                         <label>Acceptable Usage Policy Text</label>
                         <div>{{$ctrl.aup.data.text}}</div>
+                        <p class="help-block">
+                            Since v.1.6.0, IAM no longer supports keeping the AUP text in the AUP database and has moved
+                            to external AUP documents. Please update the AUP configuration to provide
+                            a URL pointing to the AUP document by clicking the "Edit AUP" button below.
+                        </p>
+                    </div>
+                    <div class="form-group" ng-if="$ctrl.aup.data.url">
+                        <label>Acceptable Usage Policy URL</label>
+                        <div><a target="_blank" rel="noopener noreferrer" ng-href="{{$ctrl.aup.data.url}}">
+                                {{$ctrl.aup.data.url}}</a></div>
                         <span class="help-block">
-                            The text above is presented to users at registration time or periodically
+                            The URL above is presented to users at registration time or periodically
                             if the AUP is configured for periodic reacceptance
                         </span>
                     </div>
@@ -53,9 +62,9 @@
                             {{$ctrl.aup.data.signatureValidityInDays}}
                         </p>
                         <span class="help-block">
-                                If set to a positive value, users will be prompted periodically  for an
-                                AUP signature (with the period defined in days). 
-                                If set to zero, the AUP signature will be asked only at registration time.
+                            If set to a positive value, users will be prompted periodically for an
+                            AUP signature (with the period defined in days).
+                            If set to zero, the AUP signature will be asked only at registration time.
                         </span>
                     </div>
                 </div>
@@ -66,20 +75,28 @@
             </div>
             <div class="box-footer">
                 <div ng-if="$ctrl.aup == null">
-                    <button class="btn btn-success pull-left" id="create-aup-btn" ng-click="$ctrl.openCreateAupDialog()">
-                            <i class="fa fa-plus"></i>
-                            Create AUP
-                        </button>
+                    <button class="btn btn-success pull-left" id="create-aup-btn"
+                        ng-click="$ctrl.openCreateAupDialog()">
+                        <i class="fa fa-plus"></i>
+                        Create AUP
+                    </button>
                 </div>
                 <div ng-if="$ctrl.aup != null">
                     <button class="btn btn-primary pull-left" id="edit-aup-btn" ng-click="$ctrl.openEditAupDialog()">
-                                Edit AUP
-                        </button>
+                        Edit AUP
+                    </button>
                 </div>
                 <div ng-if="$ctrl.aup != null">
-                    <button class="btn btn-danger pull-left" style="margin-left: 10px" id="delete-aup-btn" ng-click="$ctrl.openDeleteAupDialog()">
-                                Delete AUP
-                        </button>
+                    <button class="btn btn-warning pull-left" style="margin-left: 10px" id="sign-aup-btn"
+                        ng-click="$ctrl.openSignAupDialog()">
+                        Request AUP signature
+                    </button>
+                </div>
+                <div ng-if="$ctrl.aup != null">
+                    <button class="btn btn-danger pull-left" style="margin-left: 10px" id="delete-aup-btn"
+                        ng-click="$ctrl.openDeleteAupDialog()">
+                        Delete AUP
+                    </button>
                 </div>
                 <div class="clearfix"></div>
             </div>

@@ -208,8 +208,6 @@ public class IamSamlProperties {
 
   private int maxAuthenticationAgeSec;
 
-  private int metadataLookupServiceRefreshPeriodSec = (int) TimeUnit.MINUTES.toSeconds(5);
-
   private long metadataRefreshPeriodSec = TimeUnit.HOURS.toSeconds(12);
   
   private String idpEntityIdWhilelist;
@@ -236,6 +234,9 @@ public class IamSamlProperties {
   private ValidatorProperties defaultValidator;
   
   private List<IssuerValidationProperties> validators = Lists.newArrayList();
+  
+  private long httpClientConnectionTimeoutSecs = 5;
+  private long httpClientSocketTimeoutSecs = 5;
   
   
   public List<IamSamlIdpMetadataProperties> getIdpMetadata() {
@@ -308,14 +309,6 @@ public class IamSamlProperties {
 
   public void setIdResolvers(String idResolvers) {
     this.idResolvers = idResolvers;
-  }
-
-  public int getMetadataLookupServiceRefreshPeriodSec() {
-    return metadataLookupServiceRefreshPeriodSec;
-  }
-
-  public void setMetadataLookupServiceRefreshPeriodSec(int metadataLookupServiceRefreshPeriodSec) {
-    this.metadataLookupServiceRefreshPeriodSec = metadataLookupServiceRefreshPeriodSec;
   }
 
 
@@ -413,5 +406,21 @@ public class IamSamlProperties {
 
   public void setValidators(List<IssuerValidationProperties> validators) {
     this.validators = validators;
+  }
+
+  public long getHttpClientConnectionTimeoutSecs() {
+    return httpClientConnectionTimeoutSecs;
+  }
+
+  public void setHttpClientConnectionTimeoutSecs(long httpClientConnectionTimeoutSecs) {
+    this.httpClientConnectionTimeoutSecs = httpClientConnectionTimeoutSecs;
+  }
+
+  public long getHttpClientSocketTimeoutSecs() {
+    return httpClientSocketTimeoutSecs;
+  }
+
+  public void setHttpClientSocketTimeoutSecs(long httpClientSocketTimeoutSecs) {
+    this.httpClientSocketTimeoutSecs = httpClientSocketTimeoutSecs;
   }
 }

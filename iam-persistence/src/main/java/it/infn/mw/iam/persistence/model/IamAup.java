@@ -58,10 +58,13 @@ public class IamAup implements Serializable {
   @Column(name = "last_update_time", nullable = false)
   Date lastUpdateTime;
 
+  @Column(name = "url", nullable = true)
+  String url;
+
   @Lob
-  @Column(name="text", nullable=false)
+  @Column(name = "text", nullable = true)
   String text;
-  
+
   public IamAup() {
     // empty constructor
   }
@@ -154,6 +157,14 @@ public class IamAup implements Serializable {
     this.lastUpdateTime = lastUpdateTime;
   }
 
+  public String getUrl() {
+    return url;
+  }
+
+  public void setUrl(String url) {
+    this.url = url;
+  }
+
   public String getText() {
     return text;
   }
@@ -161,5 +172,4 @@ public class IamAup implements Serializable {
   public void setText(String text) {
     this.text = text;
   }
-  
 }

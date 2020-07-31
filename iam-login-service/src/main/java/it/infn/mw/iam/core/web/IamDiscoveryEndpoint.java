@@ -114,12 +114,12 @@ public class IamDiscoveryEndpoint {
             userService.getByEmailAddress(resourceUri.getUserInfo() + "@" + resourceUri.getHost());
 
         if (user == null) {
-          // user wasn't found, see if the local part of the username matches, plus our issuer host
+          // user wasn't found, see if the local part of the username matches, plus our issuer iamHost
 
           user = userService.getByUsername(resourceUri.getUserInfo()); // first part is the username
 
           if (user != null) {
-            // username matched, check the host component
+            // username matched, check the iamHost component
             UriComponents issuerComponents =
                 UriComponentsBuilder.fromHttpUrl(config.getIssuer()).build();
             if (!Strings.nullToEmpty(issuerComponents.getHost())
@@ -175,8 +175,8 @@ public class IamDiscoveryEndpoint {
     end_session_endpoint
         OPTIONAL. URL of the OP's endpoint that initiates logging out the End-User. See [OpenID.Session].
     jwks_uri
-        REQUIRED. URL of the OP's JSON Web Key Set [JWK] document. This contains the signing key(s) the Client uses to
-        validate signatures from the OP. The JWK Set MAY also contain the Server's encryption key(s),
+        REQUIRED. URL of the OP's JSON Web Key Set [JWKProperties] document. This contains the signing key(s) the Client uses to
+        validate signatures from the OP. The JWKProperties Set MAY also contain the Server's encryption key(s),
         which are used by Clients to encrypt requests to the Server. When both signing and encryption keys are made available,
         a use (Key Use) parameter value is REQUIRED for all keys in the document to indicate each key's intended usage.
     registration_endpoint

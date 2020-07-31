@@ -66,9 +66,11 @@ public class TestUtils {
 
   public static void initRestAssured() {
 
-    RestAssured.config = RestAssuredConfig.config().objectMapperConfig(
-        new ObjectMapperConfig().jackson2ObjectMapperFactory(getJacksonObjectMapperFactory()));
-
+    RestAssured.config = RestAssuredConfig.config()
+      .objectMapperConfig(
+          new ObjectMapperConfig().jackson2ObjectMapperFactory(getJacksonObjectMapperFactory()));
+    
+    RestAssured.config.getLogConfig().enableLoggingOfRequestAndResponseIfValidationFails();
   }
 
   public static ScimMemberRef getMemberRef(ScimUser user) {
@@ -112,7 +114,7 @@ public class TestUtils {
   public static AccessTokenGetter passwordTokenGetter(String clientId, String clientSecret) {
     return new AccessTokenGetter(clientId, clientSecret).grantType("password");
   }
-  
+
   public static class AccessTokenGetter {
     private String clientId;
     private String clientSecret;

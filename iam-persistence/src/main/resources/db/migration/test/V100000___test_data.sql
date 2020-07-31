@@ -20,9 +20,10 @@ INSERT INTO client_details (id, client_id, client_secret, client_name, dynamical
    600);
 
 INSERT INTO client_details (id, client_id, client_secret, client_name, dynamically_registered,
-  refresh_token_validity_seconds, access_token_validity_seconds, id_token_validity_seconds, allow_introspection,
-  token_endpoint_auth_method, require_auth_time) VALUES
-(13, 'implicit-flow-client', null, 'Implicit Flow client', false, null, 3600, 600, false, null, false);
+  refresh_token_validity_seconds, access_token_validity_seconds, id_token_validity_seconds, device_code_validity_seconds, 
+  allow_introspection, token_endpoint_auth_method, require_auth_time) VALUES
+(13, 'implicit-flow-client', null, 'Implicit Flow client', false, null, 3600, 600, 600, false, null, false),
+(14, 'public-dc-client', null, 'Public Device Code client', false, null, 3600, 600, 600, false, null, false);
 
 INSERT INTO client_scope (owner_id, scope) VALUES
   (1, 'openid'),
@@ -33,6 +34,8 @@ INSERT INTO client_scope (owner_id, scope) VALUES
   (1, 'offline_access'),
   (1, 'read-tasks'),
   (1, 'write-tasks'),
+  (1, 'read:/'),
+  (1, 'write:/'),
   (2, 'openid'),
   (2, 'profile'),
   (2, 'read-tasks'),
@@ -46,6 +49,9 @@ INSERT INTO client_scope (owner_id, scope) VALUES
   (4, 'read-tasks'),
   (4, 'write-tasks'),
   (4, 'offline_access'),
+  (4, 'storage.read:/'),
+  (4, 'storage.write:/'),
+  (4, 'wlcg.groups'),
   (5, 'openid'),
   (5, 'profile'),
   (5, 'email'),
@@ -55,6 +61,10 @@ INSERT INTO client_scope (owner_id, scope) VALUES
   (5, 'scim:read'),
   (5, 'scim:write'),
   (5, 'proxy:generate'),
+  (5, 'wlcg.groups'),
+  (5, 'storage.read:/'),
+  (5, 'storage.modify:/'),
+  (5, 'storage.create:/'),
   (6, 'openid'),
   (6, 'profile'),
   (6, 'email'),
@@ -77,9 +87,13 @@ INSERT INTO client_scope (owner_id, scope) VALUES
   (8, 'phone'),
   (8, 'offline_access'),
   (8, 'read-tasks'),
+  (8, 'storage.read:/'),
+  (8, 'storage.write:/'),
   (9, 'openid'),
   (9, 'profile'),
   (9, 'offline_access'),
+  (9, 'storage.read:/'),
+  (9, 'storage.write:/'),
   (10, 'openid'),
   (10, 'profile'),
   (10, 'registration:read'),
@@ -104,7 +118,12 @@ INSERT INTO client_scope (owner_id, scope) VALUES
   (13, 'profile'),
   (13, 'email'),
   (13, 'address'),
-  (13, 'phone');
+  (13, 'phone'),
+  (14, 'profile'),
+  (14, 'email'),
+  (14, 'address'),
+  (14, 'phone');
+  
   
   
 INSERT INTO client_redirect_uri (owner_id, redirect_uri) VALUES
@@ -129,18 +148,22 @@ INSERT INTO client_grant_type (owner_id, grant_type) VALUES
   (6, 'client_credentials'),
   (7, 'client_credentials'),
   (8, 'urn:ietf:params:oauth:grant-type:token-exchange'),
+  (8, 'client_credentials'),
   (8, 'password'),
   (8, 'refresh_token'),
   (9, 'password'),
   (9, 'refresh_token'),
+  (9, 'client_credentials'),
   (10, 'client_credentials'),
   (10, 'refresh_token'),
   (11, 'authorization_code'),
   (11, 'refresh_token'),
   (11, 'client_credentials'),
+  (11, 'urn:ietf:params:oauth:grant-type:token-exchange'),
   (12, 'refresh_token'),
   (12, 'urn:ietf:params:oauth:grant-type:device_code'),
-  (13, 'implicit');
+  (13, 'implicit'),
+  (14, 'urn:ietf:params:oauth:grant-type:device_code');
     
 INSERT INTO iam_user_info(ID,GIVENNAME,FAMILYNAME, EMAIL, EMAILVERIFIED, BIRTHDATE, GENDER) VALUES
 (2, 'Test', 'User', 'test@iam.test', true, '1950-01-01','M');

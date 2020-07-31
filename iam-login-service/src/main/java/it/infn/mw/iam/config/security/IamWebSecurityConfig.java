@@ -15,6 +15,11 @@
  */
 package it.infn.mw.iam.config.security;
 
+import static it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport.EXT_AUTHN_UNREGISTERED_USER_AUTH;
+import static it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo.ExternalAuthenticationType.OIDC;
+
+import javax.servlet.RequestDispatcher;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,6 +40,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.data.repository.query.SecurityEvaluationContextExtension;
 import org.springframework.security.oauth2.provider.expression.OAuth2WebSecurityExpressionHandler;
 import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.context.SecurityContextPersistenceFilter;
@@ -48,19 +54,22 @@ import it.infn.mw.iam.authn.EnforceAupSignatureSuccessHandler;
 import it.infn.mw.iam.authn.ExternalAuthenticationHintService;
 import it.infn.mw.iam.authn.HintAwareAuthenticationEntryPoint;
 import it.infn.mw.iam.authn.RootIsDashboardSuccessHandler;
-import it.infn.mw.iam.authn.oidc.OidcAccessDeniedHandler;
 import it.infn.mw.iam.authn.oidc.OidcAuthenticationProvider;
 import it.infn.mw.iam.authn.oidc.OidcClientFilter;
 import it.infn.mw.iam.authn.x509.IamX509AuthenticationProvider;
 import it.infn.mw.iam.authn.x509.IamX509AuthenticationUserDetailService;
 import it.infn.mw.iam.authn.x509.IamX509PreauthenticationProcessingFilter;
 import it.infn.mw.iam.authn.x509.X509AuthenticationCredentialExtractor;
+import it.infn.mw.iam.config.IamProperties;
+import it.infn.mw.iam.core.IamLocalAuthenticationProvider;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
 @Configuration
 @EnableWebSecurity
 public class IamWebSecurityConfig {
   
+  
+
   @Bean
   public SecurityEvaluationContextExtension contextExtension() {
     return new SecurityEvaluationContextExtension();
@@ -106,11 +115,12 @@ public class IamWebSecurityConfig {
     private ExternalAuthenticationHintService hintService;
 
     @Autowired
+    private IamProperties iamProperties;
+
+    @Autowired
     public void configureGlobal(final AuthenticationManagerBuilder auth) throws Exception {
       // @formatter:off
-      auth
-        .userDetailsService(iamUserDetailsService)
-        .passwordEncoder(passwordEncoder);
+      auth.authenticationProvider(new IamLocalAuthenticationProvider(iamProperties, iamUserDetailsService, passwordEncoder));
       // @formatter:on
     }
 
@@ -142,7 +152,7 @@ public class IamWebSecurityConfig {
 
       // @formatter:off
       http.requestMatchers()
-        .antMatchers("/", "/login**", "/logout", "/authorize", "/manage/**", "/dashboard**", "/start-registration",
+        .antMatchers("/", "/login**", "/logout", "/authorize", "/manage/**", "/dashboard**",
             "/reset-session", "/device/**")
         .and()
         .sessionManagement()
@@ -150,7 +160,6 @@ public class IamWebSecurityConfig {
         .and()
           .authorizeRequests()
             .antMatchers("/login**", "/webjars/**").permitAll()
-            .antMatchers("/start-registration").permitAll()
             .antMatchers("/authorize**").permitAll()
             .antMatchers("/reset-session").permitAll()
             .antMatchers("/device/**").authenticated()
@@ -162,7 +171,6 @@ public class IamWebSecurityConfig {
             .successHandler(successHandler())
         .and()
           .exceptionHandling()
-            .accessDeniedHandler(new OidcAccessDeniedHandler())
             .authenticationEntryPoint(entryPoint())
         .and()
           .addFilterBefore(authorizationRequestFilter, SecurityContextPersistenceFilter.class)
@@ -187,6 +195,59 @@ public class IamWebSecurityConfig {
 
       return new EnforceAupSignatureSuccessHandler(delegate, aupSignatureCheckService, accountUtils,
           accountRepo);
+    }
+  }
+
+  @Configuration
+  @Order(101)
+  public static class RegistrationConfig extends WebSecurityConfigurerAdapter {
+    
+    public static final String START_REGISTRATION_ENDPOINT = "/start-registration";
+
+    @Autowired
+    IamProperties iamProperties;
+
+    AccessDeniedHandler accessDeniedHandler() {
+      return (request, response, authError) -> {
+        RequestDispatcher dispatcher =
+            request.getRequestDispatcher("/registration/insufficient-auth");
+        request.setAttribute("authError", authError);
+        dispatcher.forward(request, response);
+      };
+    }
+
+    AuthenticationEntryPoint entryPoint() {
+      String discoveryId;
+      if (OIDC.equals(iamProperties.getRegistration().getAuthenticationType())) {
+        discoveryId = String.format("/openid_connect_login?iss=%s",
+            iamProperties.getRegistration().getOidcIssuer());
+      } else {
+        discoveryId =
+            String.format("/saml/login?idp=%s", iamProperties.getRegistration().getSamlEntityId());
+      }
+      return new LoginUrlAuthenticationEntryPoint(discoveryId);
+    }
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+
+      http.requestMatchers()
+        .antMatchers(START_REGISTRATION_ENDPOINT)
+        .and()
+        .sessionManagement()
+        .enableSessionUrlRewriting(false);
+
+      if (iamProperties.getRegistration().isRequireExternalAuthentication()) {
+        http.authorizeRequests()
+          .antMatchers(START_REGISTRATION_ENDPOINT)
+          .hasAuthority(EXT_AUTHN_UNREGISTERED_USER_AUTH.getAuthority())
+          .and()
+          .exceptionHandling()
+          .accessDeniedHandler(accessDeniedHandler())
+          .authenticationEntryPoint(entryPoint());
+      } else {
+        http.authorizeRequests().antMatchers(START_REGISTRATION_ENDPOINT).permitAll();
+      }
     }
   }
 
@@ -227,7 +288,6 @@ public class IamWebSecurityConfig {
         .antMatcher("/openid_connect_login**")
           .exceptionHandling()
             .authenticationEntryPoint(authenticationEntryPoint())
-          .accessDeniedHandler(new OidcAccessDeniedHandler())
         .and()
           .addFilterAfter(oidcFilter, SecurityContextPersistenceFilter.class).authorizeRequests()
         .antMatchers("/openid_connect_login**")

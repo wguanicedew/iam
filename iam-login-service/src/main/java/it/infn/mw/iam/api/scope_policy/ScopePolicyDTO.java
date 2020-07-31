@@ -37,7 +37,8 @@ public class ScopePolicyDTO {
 
   private Long id;
 
-  @Size(max=512, message = "Invalid scope policy: The description string must be at most 512 characters long")
+  @Size(max = 512,
+      message = "Invalid scope policy: The description string must be at most 512 characters long")
   private String description;
 
   @JsonSerialize(using = JsonDateSerializer.class)
@@ -46,9 +47,15 @@ public class ScopePolicyDTO {
   @JsonSerialize(using = JsonDateSerializer.class)
   private Date lastUpdateTime;
 
-  @Pattern(regexp = "PERMIT|DENY", message = "Invalid scope policy: allowed values for 'rule' are: 'PERMIT', 'DENY'")
-  @NotBlank(message="Invalid scope policy: rule cannot be empty")
+  @Pattern(regexp = "PERMIT|DENY",
+      message = "Invalid scope policy: allowed values for 'rule' are: 'PERMIT', 'DENY'")
+  @NotBlank(message = "Invalid scope policy: rule cannot be empty")
   private String rule;
+
+  @Pattern(regexp = "EQ|REGEXP|PATH",
+      message = "Invalid scope policy: allowed values for 'matchingPolicy' are: 'EQ', 'REGEXP', 'PATH'")
+  @NotBlank(message = "Invalid scope policy: matching policy cannot be empty or null")
+  private String matchingPolicy = "EQ";
 
   @Valid
   private IamAccountRefDTO account;
@@ -56,25 +63,26 @@ public class ScopePolicyDTO {
   @Valid
   private GroupRefDTO group;
 
-  @EachSize(min=1, max=255, message="Invalid scope policy: scope length must be >= 1 and < 255 characters")
+  @EachSize(min = 1, max = 255,
+      message = "Invalid scope policy: scope length must be >= 1 and < 255 characters")
   private Set<String> scopes;
 
   public ScopePolicyDTO() {}
 
   @JsonCreator
-  public ScopePolicyDTO(@JsonProperty("id") long id, 
-      @JsonProperty("description") String description, 
-      @JsonProperty("creationTime") Date creationTime, 
-      @JsonProperty("lastUpdateTime") Date lastUpdateTime,
-      @JsonProperty("rule") String rule, 
-      @JsonProperty("account") IamAccountRefDTO account, 
-      @JsonProperty("group")GroupRefDTO group, 
-      @JsonProperty("scopes")Set<String> scopes) {
+  public ScopePolicyDTO(@JsonProperty("id") long id,
+      @JsonProperty("description") String description,
+      @JsonProperty("creationTime") Date creationTime,
+      @JsonProperty("lastUpdateTime") Date lastUpdateTime, @JsonProperty("rule") String rule,
+      @JsonProperty("matchingPolicy") String matchingPolicy,
+      @JsonProperty("account") IamAccountRefDTO account, @JsonProperty("group") GroupRefDTO group,
+      @JsonProperty("scopes") Set<String> scopes) {
     this.id = id;
     this.description = description;
     this.creationTime = creationTime;
     this.lastUpdateTime = lastUpdateTime;
     this.rule = rule;
+    this.matchingPolicy = matchingPolicy;
     this.account = account;
     this.group = group;
     this.scopes = scopes;
@@ -142,6 +150,14 @@ public class ScopePolicyDTO {
 
   public void setScopes(Set<String> scopes) {
     this.scopes = scopes;
+  }
+
+  public String getMatchingPolicy() {
+    return matchingPolicy;
+  }
+
+  public void setMatchingPolicy(String matchingPolicy) {
+    this.matchingPolicy = matchingPolicy;
   }
 
 }

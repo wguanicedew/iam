@@ -23,7 +23,7 @@ import org.springframework.security.core.authority.AuthorityUtils;
 
 import it.infn.mw.iam.api.scope_policy.ScopePolicyDTO;
 import it.infn.mw.iam.persistence.model.IamScopePolicy;
-import it.infn.mw.iam.persistence.model.IamScopePolicy.Rule;
+import it.infn.mw.iam.persistence.model.PolicyRule;
 
 public class ScopePolicyTestUtils {
   
@@ -35,13 +35,13 @@ public class ScopePolicyTestUtils {
   
   protected ScopePolicyDTO initPermitScopePolicyDTO(){
     ScopePolicyDTO dto = new ScopePolicyDTO();
-    dto.setRule(Rule.PERMIT.name());
+    dto.setRule(PolicyRule.PERMIT.name());
     return dto;
   }
   
   protected ScopePolicyDTO initDenyScopePolicyDTO(){
     ScopePolicyDTO dto = new ScopePolicyDTO();
-    dto.setRule(Rule.DENY.name());
+    dto.setRule(PolicyRule.DENY.name());
     return dto;
   }
   
@@ -54,13 +54,13 @@ public class ScopePolicyTestUtils {
   }
   protected IamScopePolicy initDenyScopePolicy(){
     IamScopePolicy p = initScopePolicy();
-    p.setRule(Rule.DENY);
+    p.setRule(PolicyRule.DENY);
     return p;
   }
   
   protected IamScopePolicy initPermitScopePolicy(){
     IamScopePolicy p = initScopePolicy();
-    p.setRule(Rule.PERMIT);
+    p.setRule(PolicyRule.PERMIT);
     return p;
   }
   

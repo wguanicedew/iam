@@ -19,23 +19,37 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.test.context.support.WithSecurityContextFactory;
 
 import it.infn.mw.iam.test.util.WithMockOIDCUser;
+import it.infn.mw.iam.util.test.OidcSecurityContextBuilder;
 
 public class WithMockOIDCUserSecurityContextFactory
     implements WithSecurityContextFactory<WithMockOIDCUser> {
+
 
   @Override
   public SecurityContext createSecurityContext(WithMockOIDCUser annotation) {
 
     OidcSecurityContextBuilder builder = new OidcSecurityContextBuilder();
 
-    return builder.issuer(annotation.issuer())
+    builder.issuer(annotation.issuer())
       .subject(annotation.subject())
       .email(annotation.email())
       .name(annotation.givenName(), annotation.familyName())
       .username(annotation.username())
       .authorities(annotation.authorities())
-      .expirationTime(annotation.expirationTime())
-      .buildSecurityContext();
+      .expirationTime(annotation.expirationTime());
+
+    if (annotation.claims().length >= 2) {
+      if (annotation.claims().length % 2 != 0) {
+        throw new IllegalArgumentException(
+            "claims must be a string array with an even number of elements");
+      }
+
+      for (int i = 0; i < annotation.claims().length; i += 2) {
+        builder.claim(annotation.claims()[i], annotation.claims()[i + 1]);
+      }
+    }
+
+    return builder.buildSecurityContext();
   }
 
 

@@ -52,67 +52,58 @@ public class RCAuthTestSupport extends X509TestSupport {
   public static final String AUTHORIZATION_URI = "https://rcauth.example/oauth2/authorize";
   public static final String TOKEN_URI = "https://rcauth.example/oauth2/token";
   public static final String GET_CERT_URI = "https://rcauth.example/oauth2/getcert";
-  
+
   public static final String JWK_URI = "https://rcauth.example/oauth2/jwk";
-  
+
   public static final String RANDOM_AUTHZ_CODE = "123";
   public static final String RANDOM_ACCESS_TOKEN = "i_am_an_access_token";
-  
+
   public static final String SUB = "sub-123";
-  
+
   public static final String CERT_SUBJECT_DN_CLAIM = "cert_subject_dn";
-  
+
   public static final String DN = "CN=Test User 123456789,O=INDIGO IAM,C=IT";
-  
+
   public static final String NONCE = "LolaNonce";
-  
+
   public static final String IAM_ENTITY_ID = "iam-entity-id";
   public static final String CODE_VALUE = "diablocode";
-  
-  
-  
+
   protected JWKSetKeyStore rcAuthKeyStore = rcAuthKeyStore();
   protected JWSAlgorithm jwsAlgo = JWSAlgorithm.RS256;
-  
+
   protected IdTokenBuilder tokenBuilder = new IdTokenBuilder(rcAuthKeyStore, jwsAlgo);
-  
-  public RCAuthTestSupport() {
-    // TODO Auto-generated constructor stub
-  }
 
   @Bean
   @Primary
   public ServerConfigurationService serverConfigService() {
-  
+
     ServerConfigurationService scs = mock(ServerConfigurationService.class);
     ServerConfiguration sc = mock(ServerConfiguration.class);
     when(sc.getAuthorizationEndpointUri()).thenReturn(AUTHORIZATION_URI);
     when(sc.getTokenEndpointUri()).thenReturn(TOKEN_URI);
     when(sc.getJwksUri()).thenReturn(JWK_URI);
-  
+
     when(scs.getServerConfiguration(RCAuthTestSupport.ISSUER)).thenReturn(sc);
     return scs;
   }
-   
+
   @Bean
   @Primary
-  public JWKSetCacheService mockjwkSetCacheService()
-      throws NoSuchAlgorithmException, InvalidKeySpecException {
+  public JWKSetCacheService mockjwkSetCacheService() throws NoSuchAlgorithmException, InvalidKeySpecException {
 
-    JWTSigningAndValidationService signatureValidator =
-    new DefaultJWTSigningAndValidationService(rcAuthKeyStore());
+    JWTSigningAndValidationService signatureValidator = new DefaultJWTSigningAndValidationService(rcAuthKeyStore());
 
     JWKSetCacheService mockCacheService = mock(JWKSetCacheService.class);
     when(mockCacheService.getValidator(JWK_URI)).thenReturn(signatureValidator);
-    
+
     return mockCacheService;
   }
-  
+
   public JWKSetKeyStore rcAuthKeyStore() {
     JWKSetKeyStore ks = new JWKSetKeyStore();
     ks.setLocation(new ClassPathResource("/oidc/mock_op_keys.jks"));
     return ks;
   }
-  
-  
+
 }

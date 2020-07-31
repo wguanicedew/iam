@@ -44,8 +44,7 @@ public class DefaultSamlValidator
   }
 
   @Override
-  public void validateAuthentication(ExpiringUsernameAuthenticationToken token)
-      throws ValidatorError {
+  public void validateAuthentication(ExpiringUsernameAuthenticationToken token){
 
     SAMLCredential samlCredentials = (SAMLCredential) token.getCredentials();
 

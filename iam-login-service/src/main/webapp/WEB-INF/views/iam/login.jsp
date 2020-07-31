@@ -54,7 +54,8 @@
 
             <c:if test="${ param.error != null }">
                 <div class="alert alert-danger">
-                    <spring:message code="login.error" />
+                    <strong><spring:message code="login.error" /></strong>
+                    <div>${SPRING_SECURITY_LAST_EXCEPTION.message}</div>
                 </div>
             </c:if>
 
@@ -70,50 +71,20 @@
       </h3>
         </div>
         
-        <form id="login-form" action="/login" method="post">
-        
-            <div class="signin-preamble text-muted">
-              Sign in with your ${iamOrganisationName} credentials
-            </div>
-
-            <div class="form-group">
-                <div class="input-group">
-                    <span class="input-group-addon">
-            <i class="glyphicon glyphicon-user"></i>
-          </span>
-                    <input id="username" class="form-control" type="text" placeholder="Username" autocomplete="off"
-            spellcheck="false" value="${ login_hint }" name="username">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <div class="input-group">
-                    <span class="input-group-addon">
-            <i class="glyphicon glyphicon-lock"></i>
-          </span>
-                    <input id="password" name="password" class="form-control" type="password" placeholder="Password">
-                </div>
-            </div>
-
-            <div>
-                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
-                <input id="login-submit" type="submit" class="btn btn-primary btn-block"
-          value="${loginPageConfiguration.loginButtonText}" name="submit" class="form-control">
-            </div>
-        </form>
-
-        <c:if test="${loginPageConfiguration.registrationEnabled}">
-            <div id="forgot-password" ng-controller="ForgotPasswordModalController">
-                <a class="btn btn-link btn-block" ng-click="open()">Forgot your password?</a>
-            </div>
+        <c:if test="${loginPageConfiguration.localAuthenticationVisible or param.sll != null}">
+          <jsp:include page="login-form.jsp" />
         </c:if>
-
-        <div id="login-external-authn">     
-            
+        
+        <div id="login-external-authn">
             <c:if
         test="${loginPageConfiguration.oidcEnabled or loginPageConfiguration.samlEnabled or IAM_X509_CAN_LOGIN}">
               <div class="ext-login-preamble text-muted">
-                  Or sign in with
+                <c:choose>
+                    <c:when test="${ loginPageConfiguration.localAuthenticationVisible}">Or sign in with</c:when>
+                    <c:otherwise>
+                        Sign in with
+                    </c:otherwise>
+                </c:choose>
               </div>
             </c:if>
             
@@ -145,11 +116,16 @@
                 <c:forEach items="${iamSamlProperties.loginShortcuts}" var="ls">
                   <c:if test="${ls.enabled}">
                     <t:loginButton cssClass="ext-authn-login-button" href="/saml/login?idp=${ls.entityId}"
-                      btn="${ls.loginButton}" id="saml-login-${ls.name}" />
+              btn="${ls.loginButton}" id="saml-login-${ls.name}" />
                   </c:if>
                 </c:forEach>
             </c:if>
+            
+            <c:if test="${loginPageConfiguration.showLinkToLocalAuthenticationPage and param.sll == null}">
+                <a class="btn btn-block btn-login" href="/login?sll=y">Local credentials</a>
+            </c:if>
         </div>
+        
 
         <c:if test="${loginPageConfiguration.registrationEnabled}">
             
@@ -157,13 +133,14 @@
                 <div class="registration-preamble text-muted">
                    Not a member?
                 </div>
-                <a class="btn btn-success btn-block" href="/start-registration">Register a new account</a>
+                <a class="btn btn-success btn-block" href="/start-registration">Apply for an account</a>
             </div>
         </c:if>
 
         <c:if test="${loginPageConfiguration.privacyPolicyUrl.isPresent()}">
             <div id="privacy-policy">
-                <a class="btn btn-link btn-block" href="${loginPageConfiguration.privacyPolicyUrl.get()}">
+                <a class="btn btn-link btn-block" target="_blank" rel="noopener noreferrer"
+          href="${loginPageConfiguration.privacyPolicyUrl.get()}">
                   ${loginPageConfiguration.privacyPolicyText}
                 </a>
             </div>
