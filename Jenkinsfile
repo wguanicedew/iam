@@ -26,7 +26,7 @@ pipeline {
   parameters {
     booleanParam(name: 'SKIP_TESTS', defaultValue: false, description: 'Skip tests')
     booleanParam(name: 'RUN_SONAR', defaultValue: false, description: 'Runs SONAR analysis')
-    booleanParam(name: 'SKIP_DOCKER', defaultValue: true, description: 'Skip docker image creation')
+    booleanParam(name: 'BUILD_DOCKER_IMAGES', defaultValue: false, description: 'Build docker images')
     booleanParam(name: 'PUSH_TO_DOCKERHUB', defaultValue: false, description: 'Push to Dockerhub')
   }
 
@@ -234,9 +234,7 @@ pipeline {
 
     stage('docker-images') {
       when{
-        not {
-          expression { return params.SKIP_DOCKER }
-        }
+          expression { return params.BUILD_DOCKER_IMAGES }
       }
 
       agent {
