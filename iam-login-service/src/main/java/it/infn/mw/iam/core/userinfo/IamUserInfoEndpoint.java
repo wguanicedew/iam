@@ -16,7 +16,12 @@
 package it.infn.mw.iam.core.userinfo;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.util.Objects.isNull;
 
+import java.util.Set;
+
+import org.mitre.oauth2.model.OAuth2AccessTokenEntity;
+import org.mitre.oauth2.repository.OAuth2TokenRepository;
 import org.mitre.oauth2.service.SystemScopeService;
 import org.mitre.openid.connect.model.UserInfo;
 import org.mitre.openid.connect.view.HttpCodeView;
@@ -29,6 +34,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -36,6 +42,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
 import it.infn.mw.iam.core.oauth.profile.JWTProfile;
 import it.infn.mw.iam.core.oauth.profile.JWTProfileResolver;
 
@@ -47,11 +54,32 @@ public class IamUserInfoEndpoint {
 
   private final JWTProfileResolver profileResolver;
 
+  private final OAuth2TokenRepository tokenRepo;
+
   @Autowired
-  public IamUserInfoEndpoint(JWTProfileResolver profileResolver) {
+  public IamUserInfoEndpoint(JWTProfileResolver profileResolver, OAuth2TokenRepository tokenRepo) {
     this.profileResolver = profileResolver;
+    this.tokenRepo = tokenRepo;
   }
 
+
+  private Set<String> resolveScope(OAuth2Authentication auth) {
+
+    OAuth2AuthenticationDetails details = (OAuth2AuthenticationDetails) auth.getDetails();
+
+    if (isNull(details) || isNull(details.getTokenValue())) {
+      return auth.getOAuth2Request().getScope();
+    }
+
+    OAuth2AccessTokenEntity accessTokenEntity =
+        tokenRepo.getAccessTokenByValue(details.getTokenValue());
+
+    if (isNull(accessTokenEntity)) {
+      throw new IllegalArgumentException("Invalid token");
+    } else {
+      return accessTokenEntity.getScope();
+    }
+  }
 
   @PreAuthorize("hasRole('ROLE_USER') and #oauth2.hasScope('" + SystemScopeService.OPENID_SCOPE
       + "')")
@@ -70,8 +98,7 @@ public class IamUserInfoEndpoint {
       model.addAttribute(HttpCodeView.CODE, HttpStatus.NOT_FOUND);
       return HttpCodeView.VIEWNAME;
     }
-
-    model.addAttribute(UserInfoView.SCOPE, auth.getOAuth2Request().getScope());
+    model.addAttribute(UserInfoView.SCOPE, resolveScope(auth));
     model.addAttribute(UserInfoView.AUTHORIZED_CLAIMS,
         auth.getOAuth2Request().getExtensions().get("claims"));
 
