@@ -122,4 +122,5 @@ public class UserInfoEndpointTests {
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.updated_at").isNumber());
   }
+
 }
