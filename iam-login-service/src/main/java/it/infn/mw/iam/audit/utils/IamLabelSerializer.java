@@ -31,7 +31,7 @@ public class IamLabelSerializer extends JsonSerializer<IamLabel> {
     gen.writeStartObject();
     gen.writeStringField("prefix", value.getPrefix());
     gen.writeStringField("name", value.getName());
-    gen.writeStringField("value", value.getName());
+    gen.writeStringField("value", value.getValue());
     gen.writeEndObject();
   }
 

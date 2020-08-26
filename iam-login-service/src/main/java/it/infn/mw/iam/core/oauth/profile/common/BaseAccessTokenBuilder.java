@@ -58,7 +58,7 @@ public abstract class BaseAccessTokenBuilder implements JWTAccessTokenBuilder {
 
   protected final IamProperties properties;
 
-  protected final Splitter SPLITTER = Splitter.on(' ').trimResults().omitEmptyStrings();
+  protected final Splitter splitter = Splitter.on(' ').trimResults().omitEmptyStrings();
 
   public BaseAccessTokenBuilder(IamProperties properties) {
     this.properties = properties;
@@ -161,7 +161,7 @@ public abstract class BaseAccessTokenBuilder implements JWTAccessTokenBuilder {
     }
 
     if (!isNullOrEmpty(audience)) {
-      builder.audience(SPLITTER.splitToList(audience));
+      builder.audience(splitter.splitToList(audience));
     }
 
     if (isTokenExchangeRequest(authentication)) {

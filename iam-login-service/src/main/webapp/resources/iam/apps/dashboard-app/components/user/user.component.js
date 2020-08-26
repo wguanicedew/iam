@@ -28,6 +28,7 @@
         };
 
         self.accountLinkingEnabled = getAccountLinkingEnabled();
+        self.externalAuthenticationEnabled = getExternalAuthenticationEnabled();
 
         self.isVoAdmin = function () {
             return Utils.isAdmin();

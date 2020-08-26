@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import it.infn.mw.iam.api.registration.cern.dto.VOPersonDTO;
 import it.infn.mw.iam.authn.oidc.RestTemplateFactory;
 import it.infn.mw.iam.config.cern.CernProperties;
 
@@ -39,7 +40,10 @@ public class DefaultCernHrDBApiService implements CernHrDBApiService {
 
   public static final Logger LOG = LoggerFactory.getLogger(DefaultCernHrDBApiService.class);
 
-  public static final String API_PATH_TEMPLATE = "/api/VOPersons/participation/%s/valid/%s";
+  public static final String PARTICIPATION_API_PATH_TEMPLATE =
+      "/api/VOPersons/participation/%s/valid/%s";
+
+  public static final String VO_PERSON_API_PATH_TEMPLATE = "/api/VOPersons/%s";
 
   final RestTemplateFactory rtFactory;
   final CernProperties properties;
@@ -65,17 +69,37 @@ public class DefaultCernHrDBApiService implements CernHrDBApiService {
     RestTemplate rt = rtFactory.newRestTemplate();
 
     String personValidUrl = String.format("%s%s", properties.getHrApi().getUrl(),
-        format(API_PATH_TEMPLATE, properties.getExperimentName(), personId));
+        format(PARTICIPATION_API_PATH_TEMPLATE, properties.getExperimentName(), personId));
 
-    LOG.debug("Querying HR db api for person {} at URL {}", personId, personValidUrl);
+    LOG.debug("Querying HR db participation API for person {} at URL {}", personId, personValidUrl);
 
     try {
+
       ResponseEntity<Boolean> response = rt.exchange(personValidUrl, HttpMethod.GET,
           new HttpEntity<>(buildAuthHeaders()), Boolean.class);
       return response.getBody();
     } catch (RestClientException e) {
       final String errorMsg = "HR db api error: " + e.getMessage();
-      LOG.warn(errorMsg, e);
+      throw new CernHrDbApiError(errorMsg, e);
+    } 
+  }
+
+  @Override
+  public VOPersonDTO getHrDbPersonRecord(String personId) {
+
+    RestTemplate rt = rtFactory.newRestTemplate();
+
+    String personValidUrl = String.format("%s%s", properties.getHrApi().getUrl(),
+        format(VO_PERSON_API_PATH_TEMPLATE, personId));
+
+    LOG.debug("Querying HR db VO person API for person {} at URL {}", personId, personValidUrl);
+
+    try {
+      ResponseEntity<VOPersonDTO> response = rt.exchange(personValidUrl, HttpMethod.GET,
+          new HttpEntity<>(buildAuthHeaders()), VOPersonDTO.class);
+      return response.getBody();
+    } catch (RestClientException e) {
+      final String errorMsg = "HR db api error: " + e.getMessage();
       throw new CernHrDbApiError(errorMsg, e);
     }
   }

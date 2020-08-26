@@ -97,6 +97,10 @@
 		return ${loginPageConfiguration.accountLinkingEnabled};
 	}
 	
+	function getExternalAuthenticationEnabled() {
+		return ${loginPageConfiguration.externalAuthenticationEnabled};
+	}
+	
 	function getOrganisationName() {
 		return '${iamOrganisationName}';
 	}

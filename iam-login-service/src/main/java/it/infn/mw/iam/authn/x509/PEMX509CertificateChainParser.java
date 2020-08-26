@@ -23,8 +23,6 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.X509Certificate;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import eu.emi.security.authn.x509.impl.CertificateUtils;
@@ -32,8 +30,6 @@ import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 
 @Component
 public class PEMX509CertificateChainParser implements X509CertificateChainParser {
-
-  public static final Logger LOG = LoggerFactory.getLogger(PEMX509CertificateChainParser.class);
   
   public PEMX509CertificateChainParser() {
     configureSecProvider();
@@ -53,8 +49,6 @@ public class PEMX509CertificateChainParser implements X509CertificateChainParser
     } catch (IOException e) {
       final String errorMessage = String.format("Error parsing certificate chain: %s", 
           e.getMessage());
-      
-      LOG.error(errorMessage, e);
       
       throw new CertificateParsingError(errorMessage, e);
     }

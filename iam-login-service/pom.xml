@@ -22,7 +22,7 @@
   <parent>
     <groupId>it.infn.mw</groupId>
     <artifactId>iam-parent</artifactId>
-    <version>1.6.0-SNAPSHOT</version>
+    <version>1.7.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>iam-login-service</artifactId>
@@ -353,9 +353,8 @@
         <artifactId>jacoco-maven-plugin</artifactId>
         <configuration>
           <excludes>
-            <exclude>it/infn/mw/iam/github/**/*.class</exclude>
-            <exclude>it/infn/mw/iam/config/github/**/*.class</exclude>
             <exclude>it/infn/mw/iam/api/registration/cern/mock/*.class</exclude>
+            <exclude>it/infn/mw/iam/api/registration/cern/dto/*.class</exclude>
           </excludes>
         </configuration>
         <executions>
@@ -405,6 +404,7 @@
             <exclude>**/*.tag</exclude>
             <exclude>**/Dockerfile</exclude>
             <exclude>**/Dockerfile.prod</exclude>
+            <exclude>**/resources/iam/js/datepicker/*.js</exclude>
             <exclude>**/resources/js/lib/*.js</exclude>
             <exclude>**/resources/js/*.js</exclude>
             <exclude>**/resources/template/*.html</exclude>

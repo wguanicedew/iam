@@ -23,6 +23,9 @@ import static it.infn.mw.iam.core.IamRegistrationRequestStatus.NEW;
 import static it.infn.mw.iam.core.IamRegistrationRequestStatus.REJECTED;
 import static java.util.Objects.isNull;
 
+import java.time.Clock;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -31,6 +34,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
@@ -53,6 +58,7 @@ import it.infn.mw.iam.audit.events.registration.RegistrationRejectEvent;
 import it.infn.mw.iam.audit.events.registration.RegistrationRequestEvent;
 import it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo;
 import it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo.ExternalAuthenticationType;
+import it.infn.mw.iam.config.lifecycle.LifecycleProperties;
 import it.infn.mw.iam.core.IamRegistrationRequestStatus;
 import it.infn.mw.iam.core.user.IamAccountService;
 import it.infn.mw.iam.notification.NotificationFactory;
@@ -63,10 +69,15 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamAupRepository;
 import it.infn.mw.iam.persistence.repository.IamAupSignatureRepository;
 import it.infn.mw.iam.persistence.repository.IamRegistrationRequestRepository;
+import it.infn.mw.iam.registration.validation.RegistrationRequestValidationResult;
+import it.infn.mw.iam.registration.validation.RegistrationRequestValidationService;
+import it.infn.mw.iam.registration.validation.RegistrationRequestValidatorError;
 
 @Service
 public class DefaultRegistrationRequestService
     implements RegistrationRequestService, ApplicationEventPublisherAware {
+
+  public static final Logger LOG = LoggerFactory.getLogger(DefaultRegistrationRequestService.class);
 
   @Autowired
   private IamRegistrationRequestRepository requestRepository;
@@ -88,22 +99,31 @@ public class DefaultRegistrationRequestService
 
   @Autowired
   private IamAccountRepository iamAccountRepo;
-  
+
   @Autowired
   private IamAupRepository iamAupRepo;
-  
+
   @Autowired
   private IamAupSignatureRepository iamAupSignatureRepo;
-  
+
   @Autowired
   private LabelDTOConverter labelConverter;
 
+  @Autowired(required = false)
+  private RegistrationRequestValidationService validationService;
+
+  @Autowired
+  private LifecycleProperties lifecycleProperties;
+
+  @Autowired
+  private Clock clock;
+
   private ApplicationEventPublisher eventPublisher;
-  
+
   private IamRegistrationRequest findRequestById(String requestUuid) {
-    return
-        requestRepository.findByUuid(requestUuid).orElseThrow(() -> new ScimResourceNotFoundException(
-            String.format("No request mapped to uuid [%s]", requestUuid)));
+    return requestRepository.findByUuid(requestUuid)
+      .orElseThrow(() -> new ScimResourceNotFoundException(
+          String.format("No request mapped to uuid [%s]", requestUuid)));
   }
 
   private static final Table<IamRegistrationRequestStatus, IamRegistrationRequestStatus, Boolean> allowedStateTransitions =
@@ -140,16 +160,27 @@ public class DefaultRegistrationRequestService
   }
 
   private void createAupSignatureForAccountIfNeeded(IamAccount account) {
-    iamAupRepo.findDefaultAup().ifPresent(a -> 
-      iamAupSignatureRepo.createSignatureForAccount(account, new Date())
-    );
+    iamAupRepo.findDefaultAup()
+      .ifPresent(
+          a -> iamAupSignatureRepo.createSignatureForAccount(account, Date.from(clock.instant())));
   }
-  
+
+
   @Override
   public RegistrationRequestDto createRequest(RegistrationRequestDto dto,
       Optional<ExternalAuthenticationRegistrationInfo> extAuthnInfo) {
 
     notesSanityChecks(dto.getNotes());
+
+    if (!isNull(validationService)) {
+      RegistrationRequestValidationResult result =
+          validationService.validateRegistrationRequest(dto, extAuthnInfo);
+
+      if (!result.isOk()) {
+        LOG.info("Request validation failed: {}", result.getErrorMessage());
+        throw new RegistrationRequestValidatorError(result.getErrorMessage());
+      }
+    }
 
     ScimUser.Builder userBuilder = ScimUser.builder()
       .buildName(dto.getGivenname(), dto.getFamilyname())
@@ -165,24 +196,24 @@ public class DefaultRegistrationRequestService
     accountEntity.setActive(false);
 
     createAupSignatureForAccountIfNeeded(accountEntity);
-    
+
     IamRegistrationRequest requestEntity = new IamRegistrationRequest();
     requestEntity.setUuid(UUID.randomUUID().toString());
-    requestEntity.setCreationTime(new Date());
+    requestEntity.setCreationTime(Date.from(clock.instant()));
 
     requestEntity.setStatus(NEW);
     requestEntity.setNotes(dto.getNotes());
 
     requestEntity.setAccount(accountEntity);
     accountEntity.setRegistrationRequest(requestEntity);
-    
+
     if (!isNull(dto.getLabels())) {
-      Set<IamLabel> labels = dto.getLabels().stream().map(labelConverter::entityFromDto)
-          .collect(Collectors.toSet());
-      
+      Set<IamLabel> labels =
+          dto.getLabels().stream().map(labelConverter::entityFromDto).collect(Collectors.toSet());
+
       requestEntity.setLabels(labels);
     }
-    
+
     requestRepository.save(requestEntity);
 
     eventPublisher.publishEvent(new RegistrationRequestEvent(this, requestEntity,
@@ -199,8 +230,9 @@ public class DefaultRegistrationRequestService
     List<IamRegistrationRequest> result = new ArrayList<>();
 
     if (status != null) {
-      result = requestRepository.findByStatus(status).orElseThrow(
-          () -> new IllegalStateException("No request found with status: " + status.name()));
+      result = requestRepository.findByStatus(status)
+        .orElseThrow(
+            () -> new IllegalStateException("No request found with status: " + status.name()));
 
     } else {
       Sort srt = new Sort(Sort.Direction.ASC, "creationTime");
@@ -242,7 +274,7 @@ public class DefaultRegistrationRequestService
     IamRegistrationRequest request = requestRepository.findByAccountConfirmationKey(confirmationKey)
       .orElseThrow(() -> new ScimResourceNotFoundException(String
         .format("No registration request found for registration_key [%s]", confirmationKey)));
-    
+
     return handleConfirm(request);
   }
 
@@ -264,17 +296,26 @@ public class DefaultRegistrationRequestService
     return allowedStateTransitions.contains(currentStatus, newStatus);
   }
 
+
+
   private RegistrationRequestDto handleApprove(IamRegistrationRequest request) {
     IamAccount account = request.getAccount();
     account.setActive(true);
     account.setResetKey(tokenGenerator.generateToken());
-    account.setLastUpdateTime(new Date());
+    account.setLastUpdateTime(Date.from(clock.instant()));
     account.setLabels(request.getLabels());
-    
+
+    if (!isNull(lifecycleProperties.getAccount().getAccountLifetimeDays())
+        && lifecycleProperties.getAccount().getAccountLifetimeDays() > 0) {
+      Instant endTime = clock.instant()
+        .plus(lifecycleProperties.getAccount().getAccountLifetimeDays(), ChronoUnit.DAYS);
+      account.setEndTime(Date.from(endTime));
+    }
+
     notificationFactory.createAccountActivatedMessage(request);
 
     request.setStatus(APPROVED);
-    request.setLastUpdateTime(new Date());
+    request.setLastUpdateTime(Date.from(clock.instant()));
     requestRepository.save(request);
 
     eventPublisher.publishEvent(new RegistrationApproveEvent(this, request,
@@ -285,20 +326,21 @@ public class DefaultRegistrationRequestService
 
   private RegistrationRequestDto handleConfirm(IamRegistrationRequest request) {
     request.setStatus(CONFIRMED);
-    request.setLastUpdateTime(new Date());
+    request.setLastUpdateTime(Date.from(clock.instant()));
     request.getAccount().getUserInfo().setEmailVerified(true);
     request.getAccount().setConfirmationKey(null);
     requestRepository.save(request);
 
     notificationFactory.createAdminHandleRequestMessage(request);
-    
-    eventPublisher.publishEvent(new RegistrationConfirmEvent(this, request,
-        String.format("User %s confirmed registration request", request.getAccount().getUsername())));
+
+    eventPublisher.publishEvent(new RegistrationConfirmEvent(this, request, String
+      .format("User %s confirmed registration request", request.getAccount().getUsername())));
 
     return converter.fromEntity(request);
   }
 
-  private RegistrationRequestDto handleReject(IamRegistrationRequest request, Optional<String> motivation) {
+  private RegistrationRequestDto handleReject(IamRegistrationRequest request,
+      Optional<String> motivation) {
     request.setStatus(REJECTED);
     notificationFactory.createRequestRejectedMessage(request, motivation);
     RegistrationRequestDto retval = converter.fromEntity(request);
@@ -314,11 +356,11 @@ public class DefaultRegistrationRequestService
   private void notesSanityChecks(final String notes) {
 
     if (notes == null) {
-      throw new IllegalArgumentException("Notes field cannot be null");
+      throw new RegistrationRequestValidatorError("Notes field cannot be null");
     }
 
     if (notes.trim().isEmpty()) {
-      throw new IllegalArgumentException("Notes field cannot be the empty string");
+      throw new RegistrationRequestValidatorError("Notes field cannot be the empty string");
     }
   }
 
@@ -328,28 +370,36 @@ public class DefaultRegistrationRequestService
 
   @Override
   public RegistrationRequestDto rejectRequest(String requestUuid, Optional<String> motivation) {
-    
+
     IamRegistrationRequest request = findRequestById(requestUuid);
-    
+
     if (!checkStatusTransition(request.getStatus(), REJECTED)) {
       throw new IllegalArgumentException(
           String.format("Bad status transition from [%s] to [%s]", request.getStatus(), APPROVED));
     }
-    
+
     return handleReject(request, motivation);
   }
-  
+
   @Override
   public RegistrationRequestDto approveRequest(String requestUuid) {
-    
+
     IamRegistrationRequest request = findRequestById(requestUuid);
 
     if (!checkStatusTransition(request.getStatus(), APPROVED)) {
       throw new IllegalArgumentException(
           String.format("Bad status transition from [%s] to [%s]", request.getStatus(), APPROVED));
     }
-    
+
     return handleApprove(request);
+  }
+
+  public void setValidationService(RegistrationRequestValidationService validationService) {
+    this.validationService = validationService;
+  }
+
+  public RegistrationRequestValidationService getValidationService() {
+    return validationService;
   }
 
 }

@@ -22,8 +22,10 @@
     </h2>
     <div class="ext-authn-info" ng-show="extAuthInfo != null">
         <p>
-            You have been succesfully authenticated with
-            <strong> {{extAuthProviderName}}</strong>, but your credentials are
+            This is the <strong>{{organisationName}}</strong> registration page.
+        </p>
+        <p>
+            You have been succesfully authenticated, but your credentials are
             <strong>not</strong> yet linked to an
             <strong>{{organisationName}}</strong> account.
         </p>
@@ -32,14 +34,14 @@
         </p>
         <p>
             To abort this registration click
-            <a href="#" ng-click="rc.clearSessionCookies();">here</a>.
+            <a href="/reset-session">here</a>.
         </p>
     </div>
     <div class="ext-authn-info" ng-show="extAuthInfo == null">
         <p>
             This is the {{organisationName}} registration page.
         </p>
-        <p>
+        <p ng-show="getExternablAuthenticationEnabled()">
             If you want to register using an external identity provider, like Google or your institution identity
             provider, head back to the
             <a href="/login">login page</a> and click the "Sign in with" button of your preferred identity provider.
@@ -48,8 +50,7 @@
             To proceed with the registration please fill in your personal information below.
         </p>
     </div>
-    <div class="box box-default no-border">
-
+    <div class="box box-default no-border registration-box">
         <form name="registrationForm" id="registration-form">
             <div ng-show="operationResult != null">
                 <div class="alert"
@@ -62,13 +63,13 @@
                 ng-class="{'has-error': rc.fieldInvalid('name'), 'has-success': rc.fieldValid('name')}">
                 <label class="control-label" for="name">Given name</label>
                 <input class="form-control" name="name" id="name" type="text" ng-model="request.givenname"
-                    placeholder="Your first name" required ng-minlength="2" />
+                    placeholder="Your first name" required ng-minlength="2" ng-readonly="rc.fieldReadonly('name')" />
                 <span class="help-block"
                     ng-show="registrationForm.name.$dirty && registrationForm.name.$error.required">
                     Please provide a name
                 </span>
                 <span class="help-block"
-                    ng-show="registrationForm.name.$dirty &&registrationForm.name.$error.minlength">
+                    ng-show="registrationForm.name.$dirty && registrationForm.name.$error.minlength">
                     Name must be at least 2 characters long
                 </span>
             </div>
@@ -76,7 +77,8 @@
                 ng-class="{'has-error': rc.fieldInvalid('surname'), 'has-success': rc.fieldValid('surname')}">
                 <label class="control-label" for="surname">Family name</label>
                 <input class="form-control" name="surname" id="surname" type="text" ng-model="request.familyname"
-                    placeholder="Your family name" required ng-minlength="2" />
+                    placeholder="Your family name" required ng-minlength="2"
+                    ng-readonly="rc.fieldReadonly('surname')" />
                 <span class="help-block"
                     ng-show="registrationForm.surname.$dirty && registrationForm.surname.$error.required">Please provide
                     a
@@ -91,7 +93,7 @@
                 <label class="control-label" for="email">Email</label>
                 <input class="form-control" name="email" id="email" type="email" ng-model="request.email"
                     placeholder="Your email address" required ng-minlength="3" iam-email-available-validator
-                    ng-model-options="{ debounce : { 'default' : 500 } }" />
+                    ng-model-options="{ debounce : { 'default' : 500 } }" ng-readonly="rc.fieldReadonly('email')" />
                 <span class="help-block"
                     ng-show="registrationForm.email.$dirty && registrationForm.email.$error.required">
                     Please provide an email
@@ -109,7 +111,7 @@
                 <label class="control-label" for="username">Username</label>
                 <input class="form-control" id="username" name="username" type="text" ng-model="request.username"
                     placeholder="Choose a username" required ng-minlength="3" iam-username-available-validator
-                    ng-model-options="{ debounce : { 'default' : 500 } }" />
+                    ng-model-options="{ debounce : { 'default' : 500 } }" ng-readonly="rc.fieldReadonly('username')" />
                 <span class="help-block"
                     ng-show="registrationForm.username.$dirty && registrationForm.username.$error.required">
                     Please choose a username</span>
@@ -133,16 +135,7 @@
                     Please provide a reason for your registration request
                 </span>
             </div>
-            <div ng-show="extAuthInfo != null">
-                <div class="form-group">
-                    <label class="control-label">External authentication type</label>
-                    <div>{{extAuthInfo.type}}</div>
-                    <label class="control-label">External authentication provider</label>
-                    <div>{{extAuthInfo.issuer}}</div>
-                    <label class="control-label">Subject</label>
-                    <div>{{extAuthInfo.subject}}</div>
-                </div>
-            </div>
+
             <div ng-if="!aup && privacyPolicy.url">
                 <p>
                     By submitting this registration request, you declare that you agree

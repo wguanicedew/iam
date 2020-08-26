@@ -13,20 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-(function() {
+(function () {
   'use strict';
 
-  function UserEditController(toaster, Utils, $uibModal) {
+  function UserEditController(toaster, Utils, $uibModal, scimFactory) {
     var self = this;
 
-    self.$onInit = function() {
+    self.$onInit = function () {
       console.log('userEditController onInit');
       self.enabled = true;
     };
 
-    self.handleSuccess = function() {
+    self.handleSuccess = function () {
       self.enabled = true;
-      self.userCtrl.loadUser().then(function(user) {
+      self.userCtrl.loadUser().then(function (user) {
         toaster.pop({
           type: 'success',
           body: `User '${user.name.formatted}' updated succesfully.`
@@ -34,13 +34,20 @@
       });
     };
 
-    self.openDialog = function() {
+    self.openDialog = function () {
       self.enabled = false;
       var modalInstance = $uibModal.open({
-        templateUrl: '/resources/iam/apps/dashboard-app/templates/user/edituser.html',
+        templateUrl: '/resources/iam/apps/dashboard-app/components/user/edit/edit-user.dialog.html',
         controller: 'EditUserController',
-        controllerAs: 'editUserCtrl',
-        resolve: {user: function() { return self.user; }}
+        controllerAs: '$ctrl',
+        resolve: {
+          user: function () {
+            return self.user;
+          },
+          userProfileProperties: function () {
+            return scimFactory.getUserProfileConfig();
+          }
+        }
       });
 
       modalInstance.result.then(self.handleSuccess);
@@ -49,10 +56,13 @@
   }
 
   angular.module('dashboardApp').component('userEdit', {
-    require: {userCtrl: '^user'},
-    templateUrl:
-        '/resources/iam/apps/dashboard-app/components/user/edit/user.edit.component.html',
-    bindings: {user: '='},
-    controller: ['toaster', 'Utils', '$uibModal', UserEditController]
+    require: {
+      userCtrl: '^user'
+    },
+    templateUrl: '/resources/iam/apps/dashboard-app/components/user/edit/user.edit.component.html',
+    bindings: {
+      user: '='
+    },
+    controller: ['toaster', 'Utils', '$uibModal', 'scimFactory', UserEditController]
   });
 })();
