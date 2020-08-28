@@ -99,7 +99,8 @@ public class RegistrationUsernameTests extends TestSupport {
 
     @Test
     public void nonUnixUsernames() throws Exception {
-        final String[] nonUnixUsernames = {"£$%^&*(", ".,", "-test", "1test", "test$$", "username@example.com", "username@domain"};
+        final String[] nonUnixUsernames = {"£$%^&*(", ".,", "-test", "1test", "test$$", "username@example.com", "username@domain",
+                "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
 
         for (String u : nonUnixUsernames) {
             RegistrationRequestDto r = createRegistrationRequest(u);
