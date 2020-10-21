@@ -59,10 +59,10 @@ import it.infn.mw.iam.test.util.oidc.TokenResponse;
     classes = {IamLoginService.class, RCAuthTestSupport.class, ProxyOAuthIntegrationTests.class})
 @WebAppConfiguration
 @Transactional
-@TestPropertySource(
-    properties = {"rcauth.enabled=true", "rcauth.client-id=" + RCAuthTestSupport.CLIENT_ID,
-        "rcauth.client-secret=" + RCAuthTestSupport.CLIENT_SECRET,
-        "rcauth.issuer=" + RCAuthTestSupport.ISSUER})
+@TestPropertySource(properties = {"proxycert.enabled=true", "rcauth.enabled=true",
+    "rcauth.client-id=" + RCAuthTestSupport.CLIENT_ID,
+    "rcauth.client-secret=" + RCAuthTestSupport.CLIENT_SECRET,
+    "rcauth.issuer=" + RCAuthTestSupport.ISSUER})
 public class ProxyOAuthIntegrationTests extends ProxyCertificateTestSupport {
 
   @Autowired
@@ -87,10 +87,8 @@ public class ProxyOAuthIntegrationTests extends ProxyCertificateTestSupport {
 
   @Before
   public void setup() {
-    mvc = MockMvcBuilders.webAppContextSetup(context)
-      .apply(springSecurity())
-      .alwaysDo(log())
-      .build();
+    mvc =
+        MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).alwaysDo(log()).build();
   }
 
   private void linkProxyToTestAccount() throws Exception {

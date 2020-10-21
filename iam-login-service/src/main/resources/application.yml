@@ -180,5 +180,6 @@ rcauth:
   cert-lifetime-seconds: ${IAM_RCAUTH_CERT_LIFETIME_SECONDS:259200}
 
 proxycert:
+  enabled: ${IAM_PROXYCERT_ENABLED:true}
   key-size: ${IAM_PROXYCERT_KEY_SIZE:2048}
   max-lifetime-seconds: ${IAM_PROXYCERT_MAX_LIFETIME_SECONDS:43200}

@@ -24,18 +24,21 @@ import org.springframework.stereotype.Component;
 
 import it.infn.mw.iam.api.account.AccountUtils;
 import it.infn.mw.iam.api.requests.GroupRequestUtils;
+import it.infn.mw.iam.core.userinfo.OAuth2AuthenticationScopeResolver;
 
 @Component
 public class IamMethodSecurityExpressionHandler extends OAuth2MethodSecurityExpressionHandler {
 
   private final AccountUtils accountUtils;
   private final GroupRequestUtils groupRequestUtils;
+  private final OAuth2AuthenticationScopeResolver scopeResolver;
 
   @Autowired
   public IamMethodSecurityExpressionHandler(AccountUtils accountUtils,
-      GroupRequestUtils groupRequestUtils) {
+      GroupRequestUtils groupRequestUtils, OAuth2AuthenticationScopeResolver scopeResolver) {
     this.accountUtils = accountUtils;
     this.groupRequestUtils = groupRequestUtils;
+    this.scopeResolver = scopeResolver;
   }
 
   @Override
@@ -43,8 +46,8 @@ public class IamMethodSecurityExpressionHandler extends OAuth2MethodSecurityExpr
       MethodInvocation mi) {
 
     StandardEvaluationContext ec = super.createEvaluationContextInternal(authentication, mi);
-    ec.setVariable("iam",
-        new IamSecurityExpressionMethods(authentication, accountUtils, groupRequestUtils));
+    ec.setVariable("iam", new IamSecurityExpressionMethods(authentication, accountUtils,
+        groupRequestUtils, scopeResolver));
     return ec;
   }
 
