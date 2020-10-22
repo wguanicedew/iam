@@ -93,6 +93,14 @@ public class AccountProxyCertificatesController {
     X509Certificate eec = ProxyUtils.getEndUserCertificate(proxyCredential.getCertificateChain());
     final String eecSubject = X500NameUtils.getReadableForm(eec.getSubjectX500Principal());
 
+    if (account.getX509Certificates()
+      .stream()
+      .noneMatch(c -> c.getSubjectDn().equals(eecSubject))) {
+
+      throw new InvalidProxyRequestError(
+          format("Invalid proxy: user '%s' does not own certificate '%s'", account.getUsername(),
+              eecSubject));
+    }
 
     IamX509AuthenticationCredential cred = IamX509AuthenticationCredential.builder()
       .certificateChain(new X509Certificate[] {eec})
@@ -100,14 +108,6 @@ public class AccountProxyCertificatesController {
       .issuer(X500NameUtils.getReadableForm(eec.getIssuerX500Principal()))
       .verificationResult(X509CertificateVerificationResult.success())
       .build();
-
-    account.getX509Certificates()
-      .stream()
-      .filter(c -> c.getSubjectDn().equals(cred.getSubject()))
-      .findAny()
-      .orElseThrow(() -> new InvalidProxyRequestError(
-          format("Invalid proxy: user '%s' does not own certificate '%s'", account.getUsername(),
-              cred.getSubject())));
 
     linkingService.linkX509ProxyCertificate(authenticatedUser, cred,
         proxyCert.getCertificateChain());
