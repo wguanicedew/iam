@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
@@ -14,7 +15,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-    <java.version>1.8</java.version>
+    <java.version>8</java.version>
     <voms.version>3.3.1.v20190827</voms.version>
     <jvm.test.args>-Xmx2500m</jvm.test.args>
     <eclipselink.version>2.5.2</eclipselink.version>
@@ -45,6 +46,9 @@
     <jacoco-plugin.version>0.8.3</jacoco-plugin.version>
 
     <maven-enforcer-plugin.version>3.0.0-M2</maven-enforcer-plugin.version>
+    <jsr250-api.version>1.0</jsr250-api.version>
+    <jakarta.xml.bind-api.version>2.3.2</jakarta.xml.bind-api.version>
+    <jaxb-runtime.version>2.3.2</jaxb-runtime.version>
     <resource.delimiter>@</resource.delimiter>
     <sonar.coverage.exclusions>iam-persistence/**/*,iam-test-client/**/*,iam-test-protected-resource/**/*</sonar.coverage.exclusions>
   </properties>
@@ -213,6 +217,25 @@
         <groupId>cz.jirutka.validator</groupId>
         <artifactId>validator-collection</artifactId>
         <version>${validator-collection.version}</version>
+      </dependency>
+      
+      <!-- JSR APIs (for Java 11 compatibility) -->
+      <dependency>
+        <groupId>javax.annotation</groupId>
+        <artifactId>jsr250-api</artifactId>
+        <version>${jsr250-api.version}</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>jakarta.xml.bind</groupId>
+        <artifactId>jakarta.xml.bind-api</artifactId>
+        <version>${jakarta.xml.bind-api.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.glassfish.jaxb</groupId>
+        <artifactId>jaxb-runtime</artifactId>
+        <version>${jaxb-runtime.version}</version>
       </dependency>
 
     </dependencies>
@@ -401,7 +424,7 @@
       </plugin>
     </plugins>
   </build>
-  
+
   <distributionManagement>
     <repository>
       <id>cnaf-releases</id>
