@@ -7,7 +7,8 @@
 [![sonarqube-maintainability](https://sonarcloud.io/api/project_badges/measure?project=indigo-iam_iam&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=indigo-iam_iam)
 
 The INDIGO IAM is an Identity and Access Management service first developed in the
-context of the [INDIGO-Datacloud H2020 project][indigo-datacloud].
+context of the INDIGO-Datacloud Horizon 2020 project, and currently maintained and
+developed by [INFN][infn].
 
 ## Main features
 
@@ -43,3 +44,4 @@ Grant number 777536.
 [token-exchange]: https://tools.ietf.org/html/draft-ietf-oauth-token-exchange-09
 [iam-doc]: https://indigo-iam.github.io/docs
 [eosc-hub]: https://www.eosc-hub.eu/
+[infn]: https://home.infn.it/it/
