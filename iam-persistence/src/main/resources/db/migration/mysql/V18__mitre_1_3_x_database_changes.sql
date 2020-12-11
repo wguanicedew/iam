@@ -12,8 +12,8 @@ CREATE INDEX suaa_oi_idx ON saved_user_auth_authority(owner_id);
 ALTER TABLE access_token add UNIQUE(token_value(766));
 
 -- Add new fields to client details
-ALTER TABLE client_details ADD software_id VARCHAR(2048);
-ALTER TABLE client_details ADD software_version VARCHAR(2048);
+ALTER TABLE client_details ADD software_id TEXT;
+ALTER TABLE client_details ADD software_version TEXT;
 ALTER TABLE client_details ADD device_code_validity_seconds BIGINT;
 
 -- Device code

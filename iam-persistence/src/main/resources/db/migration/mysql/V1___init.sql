@@ -133,7 +133,7 @@ CREATE TABLE IF NOT EXISTS client_details (
   id_token_validity_seconds BIGINT DEFAULT 600 NOT NULL,
   
   client_id VARCHAR(256),
-  client_secret VARCHAR(2048),
+  client_secret TEXT,
   access_token_validity_seconds BIGINT,
   refresh_token_validity_seconds BIGINT,
   
@@ -142,14 +142,14 @@ CREATE TABLE IF NOT EXISTS client_details (
   token_endpoint_auth_method VARCHAR(256),
   subject_type VARCHAR(256),
   
-  logo_uri VARCHAR(2048),
-  policy_uri VARCHAR(2048),
-  client_uri VARCHAR(2048),
-  tos_uri VARCHAR(2048),
+  logo_uri TEXT,
+  policy_uri TEXT,
+  client_uri TEXT,
+  tos_uri TEXT,
 
-  jwks_uri VARCHAR(2048),
-  jwks VARCHAR(8192),
-  sector_identifier_uri VARCHAR(2048),
+  jwks_uri TEXT,
+  jwks TEXT,
+  sector_identifier_uri TEXT,
   
   request_object_signing_alg VARCHAR(256),
   
