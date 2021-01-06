@@ -198,6 +198,7 @@ public class CernHrLifecycleHandler implements Runnable, SchedulingConfigurer {
   }
 
   public void handleAccount(IamAccount account) {
+    LOG.debug("Handling account: {}", account);
     Instant checkTime = clock.instant();
     account.getLabels().add(buildTimestampLabel(checkTime));
     Optional<IamLabel> cernPersonId = getPersonIdLabel(account);
@@ -224,13 +225,14 @@ public class CernHrLifecycleHandler implements Runnable, SchedulingConfigurer {
 
   @Override
   public void run() {
-    LOG.debug("Starting...");
 
     Pageable pageRequest = new PageRequest(0, cernProperties.getTask().getPageSize());
 
     while (true) {
       Page<IamAccount> accountsPage = accountRepo.findByLabelPrefixAndName(
           LABEL_CERN_PREFIX, cernProperties.getPersonIdClaim(), pageRequest);
+
+      LOG.debug("accountsPage: {}", accountsPage);
 
       if (accountsPage.hasContent()) {
         for (IamAccount account : accountsPage.getContent()) {
