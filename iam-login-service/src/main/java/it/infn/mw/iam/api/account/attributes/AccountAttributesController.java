@@ -44,22 +44,24 @@ import it.infn.mw.iam.api.common.AttributeDTOConverter;
 import it.infn.mw.iam.api.common.ErrorDTO;
 import it.infn.mw.iam.api.common.NoSuchAccountError;
 import it.infn.mw.iam.api.common.error.InvalidAttributeError;
+import it.infn.mw.iam.core.user.IamAccountService;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamAttribute;
-import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
 @RestController
 public class AccountAttributesController {
 
   public static final String INVALID_ATTRIBUTE_TEMPLATE = "Invalid attribute: %s";
 
-  final IamAccountRepository repo;
+
+  final IamAccountService accountService;
   final AttributeDTOConverter converter;
 
   @Autowired
-  public AccountAttributesController(IamAccountRepository repo, AttributeDTOConverter converter) {
-    this.repo = repo;
+  public AccountAttributesController(IamAccountService accountService,
+      AttributeDTOConverter converter) {
     this.converter = converter;
+    this.accountService = accountService;
   }
   
   private void handleValidationError(BindingResult result) {
@@ -73,7 +75,8 @@ public class AccountAttributesController {
   @PreAuthorize("hasRole('ADMIN') or #iam.isUser(#id)")
   public List<AttributeDTO> getAttributes(@PathVariable String id) {
 
-    IamAccount account = repo.findByUuid(id).orElseThrow(() -> NoSuchAccountError.forUuid(id));
+    IamAccount account =
+        accountService.findByUuid(id).orElseThrow(() -> NoSuchAccountError.forUuid(id));
 
     List<AttributeDTO> results = Lists.newArrayList();
     account.getAttributes().forEach(a -> results.add(converter.dtoFromEntity(a)));
@@ -87,12 +90,12 @@ public class AccountAttributesController {
       final BindingResult validationResult) {
 
     handleValidationError(validationResult);
-    IamAccount account = repo.findByUuid(id).orElseThrow(() -> NoSuchAccountError.forUuid(id));
+    IamAccount account =
+        accountService.findByUuid(id).orElseThrow(() -> NoSuchAccountError.forUuid(id));
     
     IamAttribute attr = converter.entityFromDto(attribute);
     
-    account.getAttributes().remove(attr);
-    account.getAttributes().add(attr);
+    accountService.setAttribute(account, attr);
   }
   
   @RequestMapping(value = "/iam/account/{id}/attributes", method= DELETE)
@@ -102,10 +105,11 @@ public class AccountAttributesController {
       final BindingResult validationResult) {
     
     handleValidationError(validationResult);
-    IamAccount account = repo.findByUuid(id).orElseThrow(() -> NoSuchAccountError.forUuid(id));
+    IamAccount account =
+        accountService.findByUuid(id).orElseThrow(() -> NoSuchAccountError.forUuid(id));
     IamAttribute attr = converter.entityFromDto(attribute);
     
-    account.getAttributes().remove(attr);
+    accountService.deleteAttribute(account, attr);
   }
 
   @ResponseStatus(code = HttpStatus.BAD_REQUEST)

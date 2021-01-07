@@ -40,12 +40,15 @@ import it.infn.mw.iam.audit.events.account.AccountDisabledEvent;
 import it.infn.mw.iam.audit.events.account.AccountEndTimeUpdatedEvent;
 import it.infn.mw.iam.audit.events.account.AccountRemovedEvent;
 import it.infn.mw.iam.audit.events.account.AccountRestoredEvent;
+import it.infn.mw.iam.audit.events.account.attribute.AccountAttributeRemovedEvent;
+import it.infn.mw.iam.audit.events.account.attribute.AccountAttributeSetEvent;
 import it.infn.mw.iam.audit.events.account.label.AccountLabelRemovedEvent;
 import it.infn.mw.iam.audit.events.account.label.AccountLabelSetEvent;
 import it.infn.mw.iam.core.user.exception.CredentialAlreadyBoundException;
 import it.infn.mw.iam.core.user.exception.InvalidCredentialException;
 import it.infn.mw.iam.core.user.exception.UserAlreadyExistsException;
 import it.infn.mw.iam.persistence.model.IamAccount;
+import it.infn.mw.iam.persistence.model.IamAttribute;
 import it.infn.mw.iam.persistence.model.IamAuthority;
 import it.infn.mw.iam.persistence.model.IamLabel;
 import it.infn.mw.iam.persistence.model.IamOidcId;
@@ -83,6 +86,14 @@ public class DefaultIamAccountService implements IamAccountService {
 
   private void labelRemovedEvent(IamAccount account, IamLabel label) {
     eventPublisher.publishEvent(new AccountLabelRemovedEvent(this, account, label));
+  }
+
+  private void attributeSetEvent(IamAccount account, IamAttribute attribute) {
+    eventPublisher.publishEvent(new AccountAttributeSetEvent(this, account, attribute));
+  }
+
+  private void attributeRemovedEvent(IamAccount account, IamAttribute attribute) {
+    eventPublisher.publishEvent(new AccountAttributeRemovedEvent(this, account, attribute));
   }
 
   @Override
@@ -306,6 +317,8 @@ public class DefaultIamAccountService implements IamAccountService {
     account.getLabels().remove(label);
     account.getLabels().add(label);
 
+    account.touch();
+
     accountRepo.save(account);
 
     labelSetEvent(account, label);
@@ -315,10 +328,13 @@ public class DefaultIamAccountService implements IamAccountService {
 
   @Override
   public IamAccount deleteLabel(IamAccount account, IamLabel label) {
-    account.getLabels().remove(label);
+    boolean labelRemoved = account.getLabels().remove(label);
 
-    accountRepo.save(account);
-    labelRemovedEvent(account, label);
+    if (labelRemoved) {
+      account.touch();
+      accountRepo.save(account);
+      labelRemovedEvent(account, label);
+    }
 
     return account;
   }
@@ -357,6 +373,30 @@ public class DefaultIamAccountService implements IamAccountService {
     account.touch();
     accountRepo.save(account);
     eventPublisher.publishEvent(new AccountRestoredEvent(this, account));
+    return account;
+  }
+
+  @Override
+  public IamAccount setAttribute(IamAccount account, IamAttribute attribute) {
+    account.getAttributes().remove(attribute);
+    account.getAttributes().add(attribute);
+    account.touch();
+
+    accountRepo.save(account);
+    attributeSetEvent(account, attribute);
+    return account;
+  }
+
+  @Override
+  public IamAccount deleteAttribute(IamAccount account, IamAttribute attribute) {
+    boolean attributeRemoved = account.getAttributes().remove(attribute);
+
+    if (attributeRemoved) {
+      account.touch();
+      accountRepo.save(account);
+      attributeRemovedEvent(account, attribute);
+    }
+
     return account;
   }
 }
