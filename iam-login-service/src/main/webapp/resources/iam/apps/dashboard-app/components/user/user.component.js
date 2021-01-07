@@ -120,7 +120,8 @@
         bindings: {
             user: '<',
             aup: '<',
-            labels: '<'
+            labels: '<',
+            attrs: '<'
         },
         controller: [
             '$timeout', '$cookies', '$rootScope', '$uibModal', 'ModalService',

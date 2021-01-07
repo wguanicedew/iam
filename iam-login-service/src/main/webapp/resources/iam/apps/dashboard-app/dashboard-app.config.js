@@ -19,9 +19,6 @@ angular
     .module('dashboardApp')
     .config(
         function ($stateProvider, $urlRouterProvider, $httpProvider) {
-
-
-
             $httpProvider.interceptors.push('gatewayErrorInterceptor');
             $httpProvider.interceptors.push('sessionExpiredInterceptor');
 
@@ -35,7 +32,9 @@ angular
                     resolve: {
                         user: loadLoggedUser,
                         aup: loadAup,
-                        labels: loadAccountLabelsAuthUser
+                        attrs: loadAccountAttributesAuthUser,
+                        labels: loadAccountLabelsAuthUser,
+                        
                     },
                     views: {
                         content: {
@@ -48,7 +47,8 @@ angular
                     resolve: {
                         user: loadUser,
                         aup: loadAup,
-                        labels: loadAccountLabels
+                        attrs: loadAccountAttributes,
+                        labels: loadAccountLabels,
                     },
                     views: {
                         content: {
@@ -144,5 +144,13 @@ angular
 
             function loadAccountLabelsAuthUser(LabelsService) {
                 return LabelsService.getAccountLabelsForAuthenticatedUser();
+            }
+
+            function loadAccountAttributes(AttributesService, $stateParams){
+                return AttributesService.getAccountAttributes($stateParams.id);
+            }
+
+            function loadAccountAttributesAuthUser(AttributesService){
+                return AttributesService.getAccountAttributesForAuthenticatedUser();
             }
         });

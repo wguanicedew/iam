@@ -103,7 +103,7 @@
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/services/group-requests.service.js"></script>
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/services/labels.service.js"></script>
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/services/account-lifecycle.service.js"></script>
-  
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/services/attributes.service.js"></script>
   
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/controllers/registration.controller.js"></script>
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/controllers/account-privileges.controller.js"></script>
@@ -134,6 +134,7 @@
     src="/resources/iam/apps/dashboard-app/components/user/linked-accounts/user.linked-accounts.component.js"></script>
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/user/x509/user.x509.component.js"></script>
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/user/labels/user.labels.component.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/user/attributes/user.attributes.component.js"></script>
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/user/end-time/user.end-time.component.js"></script>
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/components/user/user.component.js"></script>
   

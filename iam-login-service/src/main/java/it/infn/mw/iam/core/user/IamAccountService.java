@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 
 import it.infn.mw.iam.persistence.model.IamAccount;
+import it.infn.mw.iam.persistence.model.IamAttribute;
 import it.infn.mw.iam.persistence.model.IamLabel;
 
 /**
@@ -102,4 +103,23 @@ public interface IamAccountService {
    */
   IamAccount restoreAccount(IamAccount account);
   
+  /**
+   * Sets an attribute for the account
+   * 
+   * @param account
+   * @param attribute
+   * @return the updated account
+   */
+  IamAccount setAttribute(IamAccount account, IamAttribute attribute);
+
+  /**
+   * Deletes an attribute for the account
+   * 
+   * @param account
+   * @param attribute
+   * @return the updated account
+   */
+  IamAccount deleteAttribute(IamAccount account, IamAttribute attribute);
+
+
 }
