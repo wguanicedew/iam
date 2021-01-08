@@ -48,10 +48,8 @@ public class EndpointsTestUtils {
   protected MockMvc mvc;
 
   protected void buildMockMvc() {
-    mvc = MockMvcBuilders.webAppContextSetup(context)
-      .apply(springSecurity())
-      .alwaysDo(log())
-      .build();
+    mvc =
+        MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).alwaysDo(log()).build();
   }
 
   public AccessTokenGetter buildAccessTokenGetter() {
@@ -63,7 +61,7 @@ public class EndpointsTestUtils {
   }
 
   protected String getPasswordAccessToken(String scope) throws Exception {
-    
+
     AccessTokenGetter tg = buildAccessTokenGetter().scope(scope);
     return tg.getAccessTokenValue();
   }
@@ -120,11 +118,11 @@ public class EndpointsTestUtils {
       MockHttpServletRequestBuilder req = post("/token").param("grant_type", grantType)
         .param("client_id", clientId)
         .param("client_secret", clientSecret);
-      
+
       if (!isNullOrEmpty(scope)) {
         req.param("scope", scope);
       }
-        
+
       if ("password".equals(grantType)) {
         req.param("username", username).param("password", password);
       }
@@ -133,13 +131,11 @@ public class EndpointsTestUtils {
         req.param("aud", audience);
       }
 
-      //@formatter:off
-          String response = mvc.perform(req)
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString();
-          //@formatter:on
+      String response = mvc.perform(req)
+        .andExpect(status().isOk())
+        .andReturn()
+        .getResponse()
+        .getContentAsString();
 
       return response;
     }

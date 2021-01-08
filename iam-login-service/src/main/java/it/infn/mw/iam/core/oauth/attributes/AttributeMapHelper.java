@@ -13,20 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.core.userinfo;
+package it.infn.mw.iam.core.oauth.attributes;
 
 import java.util.Map;
+import java.util.Set;
 
-import org.mitre.openid.connect.model.UserInfo;
+import org.springframework.stereotype.Component;
 
-public interface DecoratedUserInfo extends UserInfo {
+import com.google.common.collect.Maps;
 
-  String getOrganisationName();
+import it.infn.mw.iam.persistence.model.IamAttribute;
+import it.infn.mw.iam.persistence.model.IamUserInfo;
 
-  void setOrganisationName(String name);
+@Component
+public class AttributeMapHelper {
 
-  Map<String, String> getAuthenticationInfo();
+  public static final String ATTR_SCOPE = "attr";
 
-  void setAuthenticationInfo(Map<String, String> info);
+  public Map<String, String> getAttributeMapFromUserInfo(IamUserInfo info) {
+
+    Map<String, String> result = Maps.newHashMap();
+
+    Set<IamAttribute> attrs = info.getIamAccount().getAttributes();
+
+    for (IamAttribute a : attrs) {
+      result.put(a.getName(), a.getValue());
+    }
+
+    return result;
+  }
 
 }

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2019
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,20 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.core.userinfo;
+(function () {
+    'use strict';
+    angular.module('dashboardApp').factory('ProxyCertService', ProxyCertService);
 
-import java.util.Map;
+    ProxyCertService.$inject = ['$q', '$http', 'Utils'];
 
-import org.mitre.openid.connect.model.UserInfo;
+    function ProxyCertService($q, $http, Utils) {
 
-public interface DecoratedUserInfo extends UserInfo {
+        var service = {
+            addProxyCertificate: addProxyCertificate
+        };
 
-  String getOrganisationName();
+        return service;
 
-  void setOrganisationName(String name);
+        function addProxyCertificate(proxycert){
+            return $http.put("/iam/account/me/proxycert", proxycert).then(function (res) {
+                return res.data;
+            }).catch(function (res) {
+                return $q.reject(res);
+            });
+        }
+    }
 
-  Map<String, String> getAuthenticationInfo();
-
-  void setAuthenticationInfo(Map<String, String> info);
-
-}
+})();

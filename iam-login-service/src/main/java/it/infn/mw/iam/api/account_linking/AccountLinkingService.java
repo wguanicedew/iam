@@ -16,6 +16,7 @@
 package it.infn.mw.iam.api.account_linking;
 
 import java.security.Principal;
+import java.util.Date;
 
 import it.infn.mw.iam.authn.AbstractExternalAuthenticationToken;
 import it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo.ExternalAuthenticationType;
@@ -24,7 +25,8 @@ import it.infn.mw.iam.authn.x509.IamX509AuthenticationCredential;
 public interface AccountLinkingService {
 
   void linkX509ProxyCertificate(Principal authenticatedUser, 
-      IamX509AuthenticationCredential x509Credential, String proxyCertificatePemString);
+      IamX509AuthenticationCredential x509Credential, String proxyCertificatePemString,
+      Date proxyCertificateExpirationTime);
   
   void linkX509Certificate(Principal authenticatedUser,
       IamX509AuthenticationCredential x509Credential);

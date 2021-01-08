@@ -26,12 +26,12 @@ import com.google.gson.JsonObject;
 public class IamDecoratedUserInfo extends DelegateUserInfoAdapter implements DecoratedUserInfo {
 
   public static final String ORGANISATION_NAME_CLAIM = "organisation_name";
-  public static final String EXTERNAL_AUTHN_CLAIM = "external_authn"; 
-  
+  public static final String EXTERNAL_AUTHN_CLAIM = "external_authn";
+
   private static final long serialVersionUID = 1L;
-  
+
   private String organisationName;
-  
+
   private Map<String, String> authenticationInfo;
 
   private IamDecoratedUserInfo(UserInfo delegate) {
@@ -42,9 +42,9 @@ public class IamDecoratedUserInfo extends DelegateUserInfoAdapter implements Dec
   public JsonObject toJson() {
 
     JsonObject userInfo = super.toJson();
-    
+
     userInfo.addProperty(ORGANISATION_NAME_CLAIM, organisationName);
-    
+
     if (!isNull(authenticationInfo)) {
       JsonObject extAuthn = new JsonObject();
       for (Map.Entry<String, String> e : authenticationInfo.entrySet()) {
@@ -52,7 +52,7 @@ public class IamDecoratedUserInfo extends DelegateUserInfoAdapter implements Dec
       }
       userInfo.add(EXTERNAL_AUTHN_CLAIM, extAuthn);
     }
-    
+
     return userInfo;
 
   }
@@ -66,8 +66,8 @@ public class IamDecoratedUserInfo extends DelegateUserInfoAdapter implements Dec
   public Map<String, String> getAuthenticationInfo() {
     return authenticationInfo;
   }
-  
-  
+
+
   public static IamDecoratedUserInfo forUser(UserInfo u) {
     return new IamDecoratedUserInfo(u);
   }
@@ -79,5 +79,5 @@ public class IamDecoratedUserInfo extends DelegateUserInfoAdapter implements Dec
   public void setAuthenticationInfo(Map<String, String> authenticationInfo) {
     this.authenticationInfo = authenticationInfo;
   }
-  
+
 }

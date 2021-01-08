@@ -51,7 +51,8 @@
                                     ng-if="$ctrl.userCtrl.canManageLinkedAccounts()">
                                     <i class="fa fa-times"></i> Remove
                                 </button>
-                                <button id="unlink-{{cert.display}}" class="btn btn-xs btn-danger" ng-click="$ctrl.openUnlinkCertificateDialog(cert)"
+                                <button id="unlink-{{cert.display}}" class="btn btn-xs btn-danger"
+                                    ng-click="$ctrl.openUnlinkCertificateDialog(cert)"
                                     ng-if="$ctrl.userCtrl.canLinkAccounts()">
                                     <i class="fa fa-times"></i> Unlink
                                 </button>
@@ -63,15 +64,21 @@
         </div>
     </div>
     <div class="box-footer" ng-if="$ctrl.userCtrl.canManageLinkedAccounts() || $ctrl.userCtrl.canLinkAccounts()">
-        <button class="btn btn-success btn-sm" name="btn-add-cert" ng-click="$ctrl.openAddCertificateDialog()" ng-if="$ctrl.userCtrl.canManageLinkedAccounts()">
+        <button class="btn btn-success btn-sm" name="btn-add-cert" ng-click="$ctrl.openAddCertificateDialog()"
+            ng-if="$ctrl.userCtrl.canManageLinkedAccounts()">
             <i class="fa fa-plus"></i> Add certificate
         </button>
-        <button class="btn btn-success btn-sm" name="btn-link-cert" ng-click="$ctrl.openLinkCertificateDialog()" ng-if="$ctrl.userCtrl.canLinkAccounts() && $ctrl.getUserCertSubject()">
+        <button class="btn btn-success btn-sm" name="btn-link-cert" ng-click="$ctrl.openLinkCertificateDialog()"
+            ng-if="$ctrl.userCtrl.canLinkAccounts() && $ctrl.getUserCertSubject()">
             <i class="fa fa-link"></i> Link certificate
         </button>
         <button class="btn btn-success btn-sm" name="btn-req-cert" ng-click="$ctrl.openRequestCertificateDialog()"
             ng-if="$ctrl.rcauthEnabled && $ctrl.isLoggedUser()">
             <i class="fa fa-plus"></i> Request certificate
+        </button>
+        <button class="btn btn-success btn-sm" name="btn-add-proxy" ng-click="$ctrl.addProxyCertificate()"
+            ng-if="$ctrl.isLoggedUser() && $ctrl.hasCertificates()">
+            <i class="fa fa-plus"></i> Add managed proxy certificate
         </button>
     </div>
 </div>

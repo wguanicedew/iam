@@ -95,6 +95,50 @@
         };
     }
 
+    function AddProxyCertController ($uibModalInstance, ProxyCertService) {
+        
+        var self = this;
+        
+        self.enabled = true;
+        self.certVal = {
+            certificate_chain: ""
+        };
+        self.error = undefined;
+
+        self.reset = reset;
+        self.cancel = cancel;
+        self.addProxy = addProxy;
+
+        function reset(){
+            self.certVal = {
+                certificate_chain: ""
+            }
+            self.error = undefined;
+        }
+        
+        function cancel(){
+            $uibModalInstance.dismiss('Dismissed');
+        }
+
+        function handleSuccess(res) {
+            $uibModalInstance.close(res);
+        }
+
+        function handleFailure(res) {
+            if (res.data) {
+                self.error = res.data.error;
+            } else {
+                self.error = res.statusText;
+            }
+            self.enabled = true;
+        }
+
+        function addProxy(){
+            self.enabled = false;
+            ProxyCertService.addProxyCertificate(self.certVal).then(handleSuccess).catch(handleFailure);
+        }
+    }
+
     function LinkCertificateController(
         AccountLinkingService, $uibModalInstance, action, cert) {
         var self = this;
@@ -128,13 +172,15 @@
         };
     }
 
-    function UserX509Controller(toaster, $uibModal, Utils) {
+    function UserX509Controller(toaster, $uibModal, Utils, $state) {
         var self = this;
 
         self.accountLinkingEnabled = getAccountLinkingEnabled();
         self.rcauthEnabled = getRcauthEnabled();
 
         self.isLoggedUser = isLoggedUser;
+
+        self.addProxyCertificate = addProxyCertificate;
 
         function isLoggedUser() {
             return Utils.isMe(self.user.id);
@@ -184,8 +230,37 @@
             });
         };
 
-        self.openRequestCertificateDialog = function () {
+        function addProxyCertificate(){
             var modalInstance = $uibModal.open({
+                templateUrl: '/resources/iam/apps/dashboard-app/components/user/x509/proxy-cert.add.dialog.html',
+                controller: AddProxyCertController,
+                controllerAs: '$ctrl',
+                resolve: {
+                    user: function () {
+                        return self.user;
+                    }
+                }
+            });
+            
+            modalInstance.result.then(function (r) {
+                $state.reload();
+                toaster.pop({
+                    type: 'success',
+                    body: 'Managed proxy certificate added'
+                });
+            }).catch(function (r) {
+                if (r != 'escape key press' && r != 'Dismissed') {
+                    $state.reload();
+                    toaster.pop({
+                        type: 'error',
+                        body: 'Error adding managed proxy certificate'
+                    });
+                }
+            });
+        }
+
+        self.openRequestCertificateDialog = function () {
+            $uibModal.open({
                 templateUrl: '/resources/iam/apps/dashboard-app/components/user/x509/cert.req.dialog.html',
                 controller: RequestCertificateController,
                 controllerAs: '$ctrl',
@@ -289,7 +364,7 @@
         },
         templateUrl: '/resources/iam/apps/dashboard-app/components/user/x509/user.x509.component.html',
         controller: [
-            'toaster', '$uibModal', 'Utils', UserX509Controller
+            'toaster', '$uibModal', 'Utils', '$state', UserX509Controller
         ]
     });
 })();

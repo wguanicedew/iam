@@ -104,6 +104,7 @@
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/services/labels.service.js"></script>
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/services/account-lifecycle.service.js"></script>
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/services/attributes.service.js"></script>
+  <script type="text/javascript" src="/resources/iam/apps/dashboard-app/services/proxycert.service.js"></script>
   
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/controllers/registration.controller.js"></script>
   <script type="text/javascript" src="/resources/iam/apps/dashboard-app/controllers/account-privileges.controller.js"></script>

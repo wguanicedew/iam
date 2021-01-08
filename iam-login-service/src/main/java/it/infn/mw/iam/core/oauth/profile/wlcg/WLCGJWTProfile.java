@@ -20,6 +20,7 @@ import org.mitre.openid.connect.service.UserInfoService;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 
 import it.infn.mw.iam.config.IamProperties;
+import it.infn.mw.iam.core.oauth.attributes.AttributeMapHelper;
 import it.infn.mw.iam.core.oauth.profile.IDTokenCustomizer;
 import it.infn.mw.iam.core.oauth.profile.IntrospectionResultHelper;
 import it.infn.mw.iam.core.oauth.profile.JWTAccessTokenBuilder;
@@ -42,8 +43,10 @@ public class WLCGJWTProfile implements JWTProfile, RequestValidator {
 
   public WLCGJWTProfile(IamProperties properties, UserInfoService userInfoService,
       IamAccountRepository accountRepo, WLCGGroupHelper groupHelper,
+      AttributeMapHelper attributeHelper,
       IntrospectionResultAssembler defaultAssembler, ScopeMatcherRegistry registry) {
-    accessTokenBuilder = new WLCGProfileAccessTokenBuilder(properties, groupHelper);
+    accessTokenBuilder =
+        new WLCGProfileAccessTokenBuilder(properties, groupHelper, attributeHelper);
     idTokenCustomizer = new WLCGIdTokenCustomizer(accountRepo);
     userInfoHelper = new WLCGUserinfoHelper(properties, userInfoService);
     introspectionHelper =

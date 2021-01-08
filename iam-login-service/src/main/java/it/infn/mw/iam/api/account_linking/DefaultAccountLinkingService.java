@@ -215,7 +215,8 @@ public class DefaultAccountLinkingService
 
   @Override
   public void linkX509ProxyCertificate(Principal authenticatedUser,
-      IamX509AuthenticationCredential x509Credential, String proxyCertificatePemString) {
+      IamX509AuthenticationCredential x509Credential, String proxyCertificatePemString,
+      Date proxyCertificateExpirationTime) {
 
     linkX509Certificate(authenticatedUser, x509Credential);
     IamAccount userAccount = findAccount(authenticatedUser);
@@ -227,10 +228,11 @@ public class DefaultAccountLinkingService
       .orElseThrow(() -> new IllegalStateException(
           "Expected certificate not found: " + x509Credential.getSubject()));
 
+
     IamX509ProxyCertificate proxy = new IamX509ProxyCertificate();
     proxy.setChain(proxyCertificatePemString);
     proxy.setCertificate(cert);
-    proxy.setExpirationTime(x509Credential.getCertificateChain()[0].getNotAfter());
+    proxy.setExpirationTime(proxyCertificateExpirationTime);
     cert.setProxy(proxy);
 
     userAccount.touch();

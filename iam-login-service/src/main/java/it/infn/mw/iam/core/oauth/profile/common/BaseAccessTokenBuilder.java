@@ -50,6 +50,7 @@ public abstract class BaseAccessTokenBuilder implements JWTAccessTokenBuilder {
   public static final String AUDIENCE = "audience";
   public static final String AUD_KEY = "aud";
   public static final String SCOPE_CLAIM_NAME = "scope";
+
   public static final String ACT_CLAIM_NAME = "act";
   public static final String CLIENT_ID_CLAIM_NAME = "client_id";
   public static final String SPACE = " ";
