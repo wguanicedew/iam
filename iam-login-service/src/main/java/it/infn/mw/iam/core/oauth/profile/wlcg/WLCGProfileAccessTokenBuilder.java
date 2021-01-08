@@ -15,6 +15,7 @@
  */
 package it.infn.mw.iam.core.oauth.profile.wlcg;
 
+import static it.infn.mw.iam.core.oauth.attributes.AttributeMapHelper.ATTR_SCOPE;
 import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.joining;
 
@@ -30,6 +31,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTClaimsSet.Builder;
 
 import it.infn.mw.iam.config.IamProperties;
+import it.infn.mw.iam.core.oauth.attributes.AttributeMapHelper;
 import it.infn.mw.iam.core.oauth.profile.common.BaseAccessTokenBuilder;
 import it.infn.mw.iam.persistence.repository.UserInfoAdapter;
 
@@ -40,11 +42,13 @@ public class WLCGProfileAccessTokenBuilder extends BaseAccessTokenBuilder {
   public static final String ALL_AUDIENCES_VALUE = "https://wlcg.cern.ch/jwt/v1/any";
 
   final WLCGGroupHelper groupHelper;
+  final AttributeMapHelper attributeHelper;
 
-  public WLCGProfileAccessTokenBuilder(IamProperties properties,
-      WLCGGroupHelper groupHelper) {
+  public WLCGProfileAccessTokenBuilder(IamProperties properties, WLCGGroupHelper groupHelper,
+      AttributeMapHelper attributeHelper) {
     super(properties);
     this.groupHelper = groupHelper;
+    this.attributeHelper = attributeHelper;
   }
 
 
@@ -73,6 +77,11 @@ public class WLCGProfileAccessTokenBuilder extends BaseAccessTokenBuilder {
 
     if (!hasAudienceRequest(authentication) && !hasRefreshTokenAudienceRequest(authentication)) {
       builder.audience(ALL_AUDIENCES_VALUE);
+    }
+
+    if (token.getScope().contains(ATTR_SCOPE)) {
+      builder.claim(ATTR_SCOPE,
+          attributeHelper.getAttributeMapFromUserInfo(((UserInfoAdapter) userInfo).getUserinfo()));
     }
 
     return builder.build();

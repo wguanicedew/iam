@@ -16,6 +16,7 @@
 package it.infn.mw.iam.core.oauth.profile;
 
 import java.time.Clock;
+import java.time.Instant;
 import java.util.Date;
 
 import org.mitre.oauth2.model.ClientDetailsEntity;
@@ -80,14 +81,15 @@ public class IamTokenEnhancer extends ConnectTokenEnhancer {
 
     scopeFilter.filterScopes(accessToken.getScope(), authentication);
 
-    Date issueTime = new Date();
+    Instant tokenIssueInstant = clock.instant();
+
     OAuth2AccessTokenEntity accessTokenEntity = (OAuth2AccessTokenEntity) accessToken;
 
     JWTProfile profile =
         profileResolver.resolveProfile(authentication.getOAuth2Request().getClientId());
     
     JWTClaimsSet atClaims = profile.getAccessTokenBuilder()
-      .buildAccessToken(accessTokenEntity, authentication, userInfo, clock.instant());
+      .buildAccessToken(accessTokenEntity, authentication, userInfo, tokenIssueInstant);
 
     accessTokenEntity.setJwt(signClaims(atClaims));
 
@@ -105,7 +107,8 @@ public class IamTokenEnhancer extends ConnectTokenEnhancer {
 
       ClientDetailsEntity client = getClientService().loadClientByClientId(clientId);
 
-      JWT idToken = connectTokenService.createIdToken(client, originalAuthRequest, issueTime,
+      JWT idToken = connectTokenService.createIdToken(client, originalAuthRequest,
+          Date.from(tokenIssueInstant),
           userInfo.getSub(), accessTokenEntity);
 
       accessTokenEntity.setIdToken(idToken);

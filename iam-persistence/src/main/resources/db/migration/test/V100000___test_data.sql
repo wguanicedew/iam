@@ -65,6 +65,7 @@ INSERT INTO client_scope (owner_id, scope) VALUES
   (5, 'storage.read:/'),
   (5, 'storage.modify:/'),
   (5, 'storage.create:/'),
+  (5, 'attr'),
   (6, 'openid'),
   (6, 'profile'),
   (6, 'email'),

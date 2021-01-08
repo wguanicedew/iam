@@ -197,4 +197,8 @@ public class DelegateUserInfoAdapter implements UserInfo {
   public JsonObject getSource() {
     return delegate.getSource();
   }
+
+  protected UserInfo getDelegate() {
+    return getDelegate();
+  }
 }

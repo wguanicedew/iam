@@ -21,6 +21,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
 import java.security.Principal;
 import java.security.cert.X509Certificate;
+import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -91,6 +92,7 @@ public class AccountProxyCertificatesController {
         proxyHelperService.credentialFromPemString(proxyCert.getCertificateChain());
 
     X509Certificate eec = ProxyUtils.getEndUserCertificate(proxyCredential.getCertificateChain());
+
     final String eecSubject = X500NameUtils.getReadableForm(eec.getSubjectX500Principal());
 
     if (account.getX509Certificates()
@@ -102,6 +104,14 @@ public class AccountProxyCertificatesController {
               eecSubject));
     }
 
+    Date proxyCertificateExpiration = eec.getNotAfter();
+
+    // The chain expiration time is the expiration time of the "shorter" proxy in the chain
+    for (X509Certificate c : proxyCredential.getCertificateChain()) {
+      if (ProxyUtils.isProxy(c) && c.getNotAfter().before(proxyCertificateExpiration)) {
+        proxyCertificateExpiration = c.getNotAfter();
+      }
+    }
     IamX509AuthenticationCredential cred = IamX509AuthenticationCredential.builder()
       .certificateChain(new X509Certificate[] {eec})
       .subject(eecSubject)
@@ -110,7 +120,7 @@ public class AccountProxyCertificatesController {
       .build();
 
     linkingService.linkX509ProxyCertificate(authenticatedUser, cred,
-        proxyCert.getCertificateChain());
+        proxyCert.getCertificateChain(), proxyCertificateExpiration);
   }
 
   @ResponseStatus(code = HttpStatus.BAD_REQUEST)

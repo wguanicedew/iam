@@ -52,6 +52,7 @@ import it.infn.mw.iam.api.account.AccountUtils;
 import it.infn.mw.iam.api.aup.AUPSignatureCheckService;
 import it.infn.mw.iam.authn.ExternalAuthenticationInfoProcessor;
 import it.infn.mw.iam.core.oauth.IamIntrospectionResultAssembler;
+import it.infn.mw.iam.core.oauth.attributes.AttributeMapHelper;
 import it.infn.mw.iam.core.oauth.profile.IamTokenEnhancer;
 import it.infn.mw.iam.core.oauth.profile.JWTProfile;
 import it.infn.mw.iam.core.oauth.profile.JWTProfileResolver;
@@ -172,12 +173,12 @@ public class IamConfig {
 
   @Bean(name = "wlcgJwtProfile")
   JWTProfile wlcgJwtProfile(IamProperties props, IamAccountRepository accountRepo,
-      ScopeClaimTranslationService converter, ClaimValueHelper claimHelper,
+      ScopeClaimTranslationService converter, AttributeMapHelper attributeMapHelper,
       UserInfoService userInfoService, ExternalAuthenticationInfoProcessor proc,
       ScopeMatcherRegistry registry) {
 
     return new WLCGJWTProfile(props, userInfoService, accountRepo, new WLCGGroupHelper(),
-        new DefaultIntrospectionResultAssembler(), registry);
+        attributeMapHelper, new DefaultIntrospectionResultAssembler(), registry);
   }
 
   @Bean

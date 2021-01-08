@@ -163,7 +163,7 @@ public class PoliteJsonMessageSource extends AbstractMessageSource {
 
           Resource r = getBaseDirectory().createRelative(filename);
 
-          LOG.info("No locale loaded, trying to load from {}" , r);
+          LOG.debug("No locale loaded, trying to load from {}", r);
 
           JsonParser parser = new JsonParser();
           JsonObject obj =

@@ -38,6 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 import org.junit.After;
 import org.junit.Before;
@@ -67,6 +68,10 @@ import com.nimbusds.jwt.JWTParser;
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.core.oauth.granters.TokenExchangeTokenGranter;
+import it.infn.mw.iam.core.user.IamAccountService;
+import it.infn.mw.iam.persistence.model.IamAccount;
+import it.infn.mw.iam.persistence.model.IamAttribute;
+import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 import it.infn.mw.iam.test.oauth.EndpointsTestUtils;
 import it.infn.mw.iam.test.util.WithAnonymousUser;
@@ -96,6 +101,10 @@ import net.minidev.json.JSONObject;
     // @formatter:on
 })
 public class WLCGProfileIntegrationTests extends EndpointsTestUtils {
+
+  private static final String TEST_USER = "test";
+  private static final String EXPECTED_USER_NOT_FOUND = "Expected user not found";
+  public static final IamAttribute TEST_ATTR = IamAttribute.newInstance(TEST_USER, TEST_USER);
 
   private static final String CLIENT_CREDENTIALS_GRANT_TYPE = "client_credentials";
   private static final String PASSWORD_GRANT_TYPE = "password";
@@ -128,6 +137,12 @@ public class WLCGProfileIntegrationTests extends EndpointsTestUtils {
   IamProperties iamProperties;
 
   @Autowired
+  IamAccountRepository repo;
+
+  @Autowired
+  IamAccountService accountService;
+
+  @Autowired
   MockOAuth2Filter oauth2Filter;
 
   @Before
@@ -139,6 +154,10 @@ public class WLCGProfileIntegrationTests extends EndpointsTestUtils {
   @After
   public void teardown() {
     oauth2Filter.cleanupSecurityContext();
+  }
+
+  private Supplier<AssertionError> assertionError(String message) {
+    return () -> new AssertionError(message);
   }
 
 
@@ -641,7 +660,60 @@ public class WLCGProfileIntegrationTests extends EndpointsTestUtils {
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.*", hasSize(1)))
       .andExpect(jsonPath("$.sub").exists());
-
-
   }
+
+  @Test
+  public void attributesAreNotIncludedInAccessTokenWhenNotRequested() throws Exception {
+    IamAccount testAccount =
+        repo.findByUsername(TEST_USER).orElseThrow(assertionError(EXPECTED_USER_NOT_FOUND));
+
+    accountService.setAttribute(testAccount, TEST_ATTR);
+
+    String tokenResponseJson = mvc
+      .perform(post("/token").param("grant_type", "password")
+        .param("client_id", CLIENT_ID)
+        .param("client_secret", CLIENT_SECRET)
+        .param("username", "test")
+        .param("password", "password")
+        .param("scope", "openid profile"))
+      .andExpect(status().isOk())
+      .andReturn()
+      .getResponse()
+      .getContentAsString();
+
+    JWTClaimsSet claims =
+        JWTParser.parse(mapper.readTree(tokenResponseJson).get("access_token").asText())
+          .getJWTClaimsSet();
+
+    assertThat(claims.getJSONObjectClaim("attr"), nullValue());
+  }
+
+  @Test
+  public void attributesAreIncludedInAccessTokenWhenNotRequested() throws Exception {
+    IamAccount testAccount =
+        repo.findByUsername(TEST_USER).orElseThrow(assertionError(EXPECTED_USER_NOT_FOUND));
+
+    accountService.setAttribute(testAccount, TEST_ATTR);
+
+    String tokenResponseJson = mvc
+      .perform(post("/token").param("grant_type", "password")
+        .param("client_id", CLIENT_ID)
+        .param("client_secret", CLIENT_SECRET)
+        .param("username", "test")
+        .param("password", "password")
+        .param("scope", "openid profile attr"))
+      .andExpect(status().isOk())
+      .andReturn()
+      .getResponse()
+      .getContentAsString();
+
+    JWTClaimsSet claims =
+        JWTParser.parse(mapper.readTree(tokenResponseJson).get("access_token").asText())
+          .getJWTClaimsSet();
+
+    assertThat(claims.getJSONObjectClaim("attr"), notNullValue());
+    assertThat(claims.getJSONObjectClaim("attr").getAsString("test"), is("test"));
+  }
+
+
 }

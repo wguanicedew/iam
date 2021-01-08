@@ -16,6 +16,7 @@
 package it.infn.mw.iam.core.userinfo;
 
 public enum UserInfoClaim {
+  ATTR,
   SUB,
   NAME,
   PREFERRED_USERNAME,
