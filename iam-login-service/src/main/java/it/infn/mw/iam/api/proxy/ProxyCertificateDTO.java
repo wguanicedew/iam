@@ -17,11 +17,19 @@ package it.infn.mw.iam.api.proxy;
 
 import java.util.Date;
 
+import javax.validation.groups.Default;
+
+import org.hibernate.validator.constraints.Length;
+import org.hibernate.validator.constraints.NotBlank;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ProxyCertificateDTO {
+
+  public interface AddProxyCertValidation extends Default {
+  }
 
   private String subject;
   private String issuer;
@@ -30,6 +38,8 @@ public class ProxyCertificateDTO {
  
   private Date notAfter;
 
+  @NotBlank(groups = {AddProxyCertValidation.class})
+  @Length(max = 8192, groups = {AddProxyCertValidation.class})
   private String certificateChain;
 
   public String getSubject() {
@@ -74,5 +84,4 @@ public class ProxyCertificateDTO {
     this.certificateChain = certificateChain;
   }
 
-  
 }

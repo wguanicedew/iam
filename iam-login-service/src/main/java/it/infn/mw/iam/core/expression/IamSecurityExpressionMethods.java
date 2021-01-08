@@ -19,12 +19,18 @@ import static it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport.EXT_AUTH
 
 import java.util.Optional;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.common.exceptions.InsufficientScopeException;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
+
+import com.google.common.collect.Sets;
 
 import it.infn.mw.iam.api.account.AccountUtils;
 import it.infn.mw.iam.api.requests.GroupRequestUtils;
 import it.infn.mw.iam.authn.AbstractExternalAuthenticationToken;
 import it.infn.mw.iam.core.IamGroupRequestStatus;
+import it.infn.mw.iam.core.userinfo.OAuth2AuthenticationScopeResolver;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamGroupRequest;
 
@@ -33,13 +39,14 @@ public class IamSecurityExpressionMethods {
   private final Authentication authentication;
   private final AccountUtils accountUtils;
   private final GroupRequestUtils groupRequestUtils;
-
+  private final OAuth2AuthenticationScopeResolver scopeResolver;
 
   public IamSecurityExpressionMethods(Authentication authentication, AccountUtils accountUtils,
-      GroupRequestUtils groupRequestUtils) {
+      GroupRequestUtils groupRequestUtils, OAuth2AuthenticationScopeResolver scopeResolver) {
     this.authentication = authentication;
     this.accountUtils = accountUtils;
     this.groupRequestUtils = groupRequestUtils;
+    this.scopeResolver = scopeResolver;
   }
 
   public boolean isExternallyAuthenticatedWithIssuer(String issuer) {
@@ -93,5 +100,20 @@ public class IamSecurityExpressionMethods {
     return groupRequest.isPresent() && ((canAccessGroupRequest(requestId)
         && IamGroupRequestStatus.PENDING.equals(groupRequest.get().getStatus()))
         || canManageGroupRequest(requestId));
+  }
+
+  public boolean hasScope(String scope) {
+
+    if (authentication instanceof OAuth2Authentication) {
+      OAuth2Authentication oauth = (OAuth2Authentication) authentication;
+      boolean result = scopeResolver.resolveScope(oauth).stream().anyMatch(s -> s.equals(scope));
+      if (!result) {
+        Throwable failure = new InsufficientScopeException("Insufficient scope for this resource",
+            Sets.newHashSet(scope));
+        throw new AccessDeniedException(failure.getMessage(), failure);
+      }
+      return result;
+    } else
+      return false;
   }
 }

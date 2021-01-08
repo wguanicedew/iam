@@ -62,10 +62,10 @@ import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
     CoreControllerTestSupport.class, ProxyServiceIntegrationTests.class})
 @WebAppConfiguration
 @Transactional
-@TestPropertySource(
-    properties = {"rcauth.enabled=true", "rcauth.client-id=" + RCAuthTestSupport.CLIENT_ID,
-        "rcauth.client-secret=" + RCAuthTestSupport.CLIENT_SECRET,
-        "rcauth.issuer=" + RCAuthTestSupport.ISSUER})
+@TestPropertySource(properties = {"proxycert.enabled=true", "rcauth.enabled=true",
+    "rcauth.client-id=" + RCAuthTestSupport.CLIENT_ID,
+    "rcauth.client-secret=" + RCAuthTestSupport.CLIENT_SECRET,
+    "rcauth.issuer=" + RCAuthTestSupport.ISSUER})
 public class ProxyServiceIntegrationTests extends ProxyCertificateTestSupport {
 
   @Autowired
@@ -91,10 +91,8 @@ public class ProxyServiceIntegrationTests extends ProxyCertificateTestSupport {
 
   @Before
   public void setup() {
-    mvc = MockMvcBuilders.webAppContextSetup(context)
-      .apply(springSecurity())
-      .alwaysDo(log())
-      .build();
+    mvc =
+        MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).alwaysDo(log()).build();
   }
 
   @After
@@ -184,5 +182,5 @@ public class ProxyServiceIntegrationTests extends ProxyCertificateTestSupport {
       .andExpect(jsonPath("$.identity", is(TEST_0_SUBJECT)))
       .andExpect(jsonPath("$.certificate_chain").exists());
 
-  } 
+  }
 }

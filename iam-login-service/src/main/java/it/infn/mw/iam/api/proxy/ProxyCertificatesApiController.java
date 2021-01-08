@@ -36,7 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 import it.infn.mw.iam.api.common.ErrorDTO;
 
 @RestController
-@ConditionalOnProperty(name="rcauth.enabled", havingValue="true")
+@ConditionalOnProperty(name = "proxycert.enabled", havingValue = "true")
 public class ProxyCertificatesApiController {
 
   public static final String PROXY_API_PATH = "/iam/proxycert";
@@ -55,7 +55,7 @@ public class ProxyCertificatesApiController {
   }
 
   @RequestMapping(method=POST, value=PROXY_API_PATH)
-  @PreAuthorize("#oauth2.hasScope('proxy:generate') and hasRole('USER')")
+  @PreAuthorize("#iam.hasScope('proxy:generate') and hasRole('USER')")
   public ProxyCertificateDTO generateProxy(Principal authenticatedUser,
       @Valid ProxyCertificateRequestDTO request, BindingResult bindingResult) {
 
