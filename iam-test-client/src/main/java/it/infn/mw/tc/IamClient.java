@@ -7,6 +7,7 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -124,7 +125,6 @@ public class IamClient {
     return new StaticAuthRequestOptionsService();
   }
 
-  @Bean
   public X509CertChainValidatorExt certificateValidator() {
     NamespaceCheckingMode namespaceChecks = CertificateValidatorBuilder.DEFAULT_NS_CHECKS;
 
@@ -134,12 +134,11 @@ public class IamClient {
 
     return new CertificateValidatorBuilder().lazyAnchorsLoading(false)
       .namespaceChecks(namespaceChecks)
+      .trustAnchorsUpdateInterval(TimeUnit.HOURS.toMillis(1))
       .build();
   }
 
 
-
-  @Bean
   public SSLContext sslContext() throws NoSuchAlgorithmException {
 
     SecureRandom r = new SecureRandom();
@@ -158,7 +157,6 @@ public class IamClient {
 
   }
 
-  @Bean
   public HttpClient httpClient() throws NoSuchAlgorithmException {
 
     SSLConnectionSocketFactory sf = new SSLConnectionSocketFactory(sslContext());
