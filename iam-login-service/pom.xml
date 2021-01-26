@@ -16,7 +16,8 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
@@ -191,11 +192,11 @@
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-taglibs</artifactId>
     </dependency>
-    
+
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-data</artifactId>
-    </dependency>   
+    </dependency>
 
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -280,7 +281,7 @@
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
     </dependency>
-    
+
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-configuration-processor</artifactId>
@@ -366,7 +367,8 @@
             <configuration>
               <tasks>
                 <echo>Project Base Path (WEB):: ${project.basedir}</echo>
-                <echo>Jacoco exec target path (WEB):: ${sonar.jacoco.reportPath}</echo>
+                <echo>Jacoco exec target path (WEB)::
+                  ${sonar.jacoco.reportPath}</echo>
               </tasks>
             </configuration>
           </execution>
@@ -393,47 +395,52 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>com.mycila</groupId>
-        <artifactId>license-maven-plugin</artifactId>
-        <configuration>
-          <header>${project.parent.basedir}/LICENSE</header>
-          <excludes>
-            <exclude>.jslintrc</exclude>
-            <exclude>**/*.vm</exclude>
-            <exclude>**/*.tag</exclude>
-            <exclude>**/Dockerfile</exclude>
-            <exclude>**/Dockerfile.prod</exclude>
-            <exclude>**/resources/iam/js/datepicker/*.js</exclude>
-            <exclude>**/resources/js/lib/*.js</exclude>
-            <exclude>**/resources/js/*.js</exclude>
-            <exclude>**/resources/template/*.html</exclude>
-            <exclude>**/resources/iam-banner.txt</exclude>
-            <exclude>**/resources/css/*.css</exclude>
-            <exclude>**/resources/iam/css/ionicons/ionicons.min.css</exclude>
-            <exclude>**/*.template.html</exclude>
-            <exclude>**/WEB-INF/views/*.jsp</exclude>
-            <exclude>**/*.jks</exclude>
-            <exclude>**/*.pem</exclude>
-            <exclude>**/*.p12</exclude>
-            <exclude>**/*.crt</exclude>
-            <exclude>**/*.key</exclude>
-            <exclude>**/*.jwks</exclude>
-            <exclude>**/*.factorypath</exclude>
-            <exclude>**/ddl.sql</exclude>
-          </excludes>
-          <useDefaultExcludes>true</useDefaultExcludes>
-        </configuration>
-        <executions>
-          <execution>
-            <id>check-headers</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
+    
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>com.mycila</groupId>
+          <artifactId>license-maven-plugin</artifactId>
+          <configuration>
+            <header>${project.parent.basedir}/LICENSE</header>
+            <excludes>
+              <exclude>.jslintrc</exclude>
+              <exclude>**/*.vm</exclude>
+              <exclude>**/*.tag</exclude>
+              <exclude>**/Dockerfile</exclude>
+              <exclude>**/Dockerfile.prod</exclude>
+              <exclude>**/resources/iam/js/datepicker/*.js</exclude>
+              <exclude>**/resources/js/lib/*.js</exclude>
+              <exclude>**/resources/js/*.js</exclude>
+              <exclude>**/resources/template/*.html</exclude>
+              <exclude>**/resources/iam-banner.txt</exclude>
+              <exclude>**/resources/css/*.css</exclude>
+              <exclude>**/resources/iam/css/ionicons/ionicons.min.css</exclude>
+              <exclude>**/*.template.html</exclude>
+              <exclude>**/WEB-INF/views/*.jsp</exclude>
+              <exclude>**/*.jks</exclude>
+              <exclude>**/*.pem</exclude>
+              <exclude>**/*.p12</exclude>
+              <exclude>**/*.crt</exclude>
+              <exclude>**/*.key</exclude>
+              <exclude>**/*.jwks</exclude>
+              <exclude>**/*.factorypath</exclude>
+              <exclude>**/ddl.sql</exclude>
+            </excludes>
+            <useDefaultExcludes>true</useDefaultExcludes>
+          </configuration>
+          <executions>
+            <execution>
+              <id>check-headers</id>
+              <phase>validate</phase>
+              <goals>
+                <goal>check</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
 </project>
