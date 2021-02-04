@@ -145,9 +145,9 @@ public class SamlDecryptUtil {
   public SamlDecryptUtil() throws Exception {
     initializeOpenSAML();
 
-    String xmlResponsePath = "/tmp/saml-response.xml";
-    String ksPath = "/Users/cecco/git/iam-k8s/utils/saml/certs/iam-virgo.cloud.cnaf.infn.it.jks";
-    String ksAlias = "iam-virgo";
+    String xmlResponsePath = System.getenv("SAML_RESPONSE_PATH");
+    String ksPath = System.getenv("KS_PATH");
+    String ksAlias = System.getenv("KS_ALIAS");
     String ksPassword = System.getenv("KS_PASSWORD");
 
     KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
