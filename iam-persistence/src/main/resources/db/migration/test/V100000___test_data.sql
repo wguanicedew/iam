@@ -36,6 +36,7 @@ INSERT INTO client_scope (owner_id, scope) VALUES
   (1, 'write-tasks'),
   (1, 'read:/'),
   (1, 'write:/'),
+  (1, 'attr'),
   (2, 'openid'),
   (2, 'profile'),
   (2, 'read-tasks'),

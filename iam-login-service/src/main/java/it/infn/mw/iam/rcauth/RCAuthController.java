@@ -25,6 +25,8 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 import java.security.Principal;
 import java.security.cert.X509Certificate;
+import java.time.Clock;
+import java.util.Date;
 
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -56,13 +58,15 @@ public class RCAuthController {
   public static final String RCAUTH_SUCCESS_TEMPLATE =
       "Proxy certificate with subject '%s' linked succesfully";
 
+  final Clock clock;
   final RCAuthRequestService requestService;
   final ProxyHelperService proxyHelper;
   final DefaultAccountLinkingService linkingService;
 
   @Autowired
-  public RCAuthController(RCAuthRequestService service, ProxyHelperService proxyHelper,
+  public RCAuthController(Clock clock, RCAuthRequestService service, ProxyHelperService proxyHelper,
       DefaultAccountLinkingService ls) {
+    this.clock = clock;
     this.requestService = service;
     this.proxyHelper = proxyHelper;
     this.linkingService = ls;
@@ -104,7 +108,9 @@ public class RCAuthController {
           .verificationResult(success())
           .build();
 
-        linkingService.linkX509ProxyCertificate(authenticatedUser, cred, proxyPem);
+        linkingService.linkX509ProxyCertificate(authenticatedUser, cred, proxyPem,
+            Date.from(clock.instant()));
+
         attributes.addFlashAttribute(ACCOUNT_LINKING_DASHBOARD_MESSAGE_KEY,
             format(RCAUTH_SUCCESS_TEMPLATE, certificateSubject));
       } catch (RCAuthError e) {
