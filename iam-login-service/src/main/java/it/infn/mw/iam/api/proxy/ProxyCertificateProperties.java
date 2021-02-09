@@ -24,6 +24,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ProxyCertificateProperties {
 
+  private boolean enabled = true;
   private int keySize = 2048;
   private long maxLifetimeSeconds = TimeUnit.HOURS.toSeconds(12);
 
@@ -41,5 +42,13 @@ public class ProxyCertificateProperties {
 
   public void setKeySize(int keySize) {
     this.keySize = keySize;
+  }
+
+  public boolean isEnabled() {
+    return enabled;
+  }
+
+  public void setEnabled(boolean enabled) {
+    this.enabled = enabled;
   }
 }

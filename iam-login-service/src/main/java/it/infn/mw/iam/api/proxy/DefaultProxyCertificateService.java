@@ -42,7 +42,7 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.rcauth.x509.ProxyHelperService;
 
 @Service
-@ConditionalOnProperty(name="rcauth.enabled", havingValue="true")
+@ConditionalOnProperty(name = "proxycert.enabled", havingValue = "true")
 public class DefaultProxyCertificateService implements ProxyCertificateService {
 
   final Clock clock;

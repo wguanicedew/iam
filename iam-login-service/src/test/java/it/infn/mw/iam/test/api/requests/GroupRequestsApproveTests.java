@@ -78,7 +78,7 @@ public class GroupRequestsApproveTests extends GroupRequestsTestUtils {
       .alwaysDo(log())
       .build();
 
-
+    emailRepository.deleteAll();
   }
 
   @Test
