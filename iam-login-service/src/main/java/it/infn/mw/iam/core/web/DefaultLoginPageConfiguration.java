@@ -171,4 +171,10 @@ public class DefaultLoginPageConfiguration implements LoginPageConfiguration, En
   public boolean isShowLinkToLocalAuthenticationPage() {
     return showLinkToLocalAuthn;
   }
+
+
+  @Override
+  public boolean isShowRegistrationButton() {
+    return iamProperties.getRegistration().isShowRegistrationButtonInLoginPage();
+  }
 }
