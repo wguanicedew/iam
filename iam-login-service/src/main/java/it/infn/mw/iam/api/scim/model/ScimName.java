@@ -34,12 +34,12 @@ public class ScimName {
   private final String formatted;
 
   @NotBlank(groups = {NewUserValidation.class})
-  @Length(min = 3, max = 64)
+  @Length(min = 2, max = 64)
   @NoSpecialCharacters
   private final String familyName;
 
   @NotBlank(groups = {NewUserValidation.class})
-  @Length(min = 3, max = 64)
+  @Length(min = 2, max = 64)
   @NoSpecialCharacters
   private final String givenName;
 

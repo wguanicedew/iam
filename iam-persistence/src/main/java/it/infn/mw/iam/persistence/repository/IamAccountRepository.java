@@ -108,4 +108,10 @@ public interface IamAccountRepository
   Page<IamAccount> findByLabelNameAndValue(@Param("name") String name, @Param("value") String value,
       Pageable op);
 
+  @Query("select a from IamAccount a where a.active = FALSE")
+  Page<IamAccount> findInactiveAccounts(Pageable op);
+
+  @Query("select a from IamAccount a where a.active = TRUE")
+  Page<IamAccount> findActiveAccounts(Pageable op);
+
 }

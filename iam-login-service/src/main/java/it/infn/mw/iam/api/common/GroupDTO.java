@@ -38,10 +38,12 @@ public class GroupDTO {
   public interface CreateGroup extends UpdateGroup {
     
   }
-  
+
   @Size(max=512, message="name cannot be longer than 512 chars", groups=CreateGroup.class)
   @GroupNameAssigned(message="name is already assigned", groups=CreateGroup.class)
-  @Pattern(regexp=NAME_REGEXP, message="invalid name (does not match with regexp: '"+NAME_REGEXP+"')", groups=CreateGroup.class)
+  @Pattern(regexp = NAME_REGEXP,
+      message = "invalid name (does not match with regexp: '" + NAME_REGEXP + "')",
+      groups = CreateGroup.class)
   final String name;
   
   @Size(max=512, message="description cannot be longer than 512 chars", groups= {UpdateGroup.class})

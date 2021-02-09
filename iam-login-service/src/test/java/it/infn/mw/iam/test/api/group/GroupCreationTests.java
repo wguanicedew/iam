@@ -310,4 +310,7 @@ public class GroupCreationTests {
       .andExpect(status().isNotFound())
       .andExpect(jsonPath("$.error", containsString("Group not found")));
   }
+
+
+
 }

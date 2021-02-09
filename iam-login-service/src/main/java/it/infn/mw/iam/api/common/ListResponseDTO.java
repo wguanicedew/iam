@@ -15,14 +15,18 @@
  */
 package it.infn.mw.iam.api.common;
 
+import java.util.Collections;
 import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.collect.Lists;
 
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -76,10 +80,10 @@ public class ListResponseDTO<T> {
 
   public static class Builder<T> {
 
-    private Long totalResults = null;
-    private Integer itemsPerPage = null;
-    private Integer startIndex = null;
-    private List<T> resources = null;
+    private Long totalResults = 0L;
+    private Integer itemsPerPage = 10;
+    private Integer startIndex = 1;
+    private List<T> resources = Collections.emptyList();
 
     public <S> Builder<T> fromPage(Page<S> page, Pageable op) {
       this.totalResults = page.getTotalElements();
@@ -105,6 +109,14 @@ public class ListResponseDTO<T> {
 
     public Builder<T> resources(List<T> resources) {
       this.resources = resources;
+      return this;
+    }
+
+    public Builder<T> singleResource(T element) {
+      this.resources = Lists.newArrayList(element);
+      this.totalResults = 1L;
+      this.itemsPerPage = 10;
+      this.startIndex = 1;
       return this;
     }
 

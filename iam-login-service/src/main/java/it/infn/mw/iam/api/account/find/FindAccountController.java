@@ -1,0 +1,53 @@
+package it.infn.mw.iam.api.account.find;
+
+import static it.infn.mw.iam.api.common.PagingUtils.buildPageRequest;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import it.infn.mw.iam.api.common.ListResponseDTO;
+import it.infn.mw.iam.api.scim.model.ScimConstants;
+import it.infn.mw.iam.api.scim.model.ScimUser;
+
+@RestController
+@PreAuthorize("hasRole('ADMIN')")
+public class FindAccountController {
+
+  public static final String FIND_BY_LABEL_RESOURCE = "/iam/account/find/bylabel";
+  public static final String FIND_BY_EMAIL_RESOURCE = "/iam/account/find/byemail";
+  public static final String FIND_BY_USERNAME_RESOURCE = "/iam/account/find/byusername";
+
+  final FindAccountService service;
+
+  @Autowired
+  public FindAccountController(FindAccountService service) {
+    this.service = service;
+  }
+
+  @RequestMapping(method = GET, value = FIND_BY_LABEL_RESOURCE,
+      produces = ScimConstants.SCIM_CONTENT_TYPE)
+  public ListResponseDTO<ScimUser> findByLabel(@RequestParam(required = true) String name,
+      @RequestParam(required = false) String value,
+      @RequestParam(required = false) final Integer count,
+      @RequestParam(required = false) final Integer startIndex) {
+
+    return service.findAccountByLabel(name, value, buildPageRequest(count, startIndex, 100));
+  }
+
+  @RequestMapping(method = GET, value = FIND_BY_EMAIL_RESOURCE,
+      produces = ScimConstants.SCIM_CONTENT_TYPE)
+  public ListResponseDTO<ScimUser> findByEmail(@RequestParam(required = true) String email) {
+    return service.findAccountByEmail(email);
+  }
+
+  @RequestMapping(method = GET, value = FIND_BY_USERNAME_RESOURCE,
+      produces = ScimConstants.SCIM_CONTENT_TYPE)
+  public ListResponseDTO<ScimUser> findByUsername(@RequestParam(required = true) String username) {
+    return service.findAccountByUsername(username);
+  }
+
+}
