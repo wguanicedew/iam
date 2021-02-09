@@ -27,7 +27,10 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
+import org.opensaml.saml2.core.Attribute;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.providers.ExpiringUsernameAuthenticationToken;
 import org.springframework.security.saml.SAMLCredential;
@@ -117,10 +120,20 @@ public class SamlExternalAuthenticationToken
 
     authnInfo.put("idpEntityId", cred.getRemoteEntityID());
 
-    for (Saml2Attribute attr : Saml2Attribute.values()) {
-      String attrVal = cred.getAttributeAsString(attr.getAttributeName());
-      if (attrVal != null) {
-        authnInfo.put(attr.name(), attrVal);
+    for (Attribute attr : cred.getAttributes()) {
+
+      Optional<Saml2Attribute> maybeKnownAttr = Saml2Attribute.byName(attr.getName());
+      if (maybeKnownAttr.isPresent()) {
+        String attrVal = cred.getAttributeAsString(attr.getName());
+        if (!Objects.isNull(attrVal)) {
+          authnInfo.put(maybeKnownAttr.get().name(), attrVal);
+        }
+      } else {
+        String attrVal = cred.getAttributeAsString(attr.getName());
+
+        if (!Objects.isNull(attrVal)) {
+          authnInfo.put(attr.getName(), attrVal);
+        }
       }
     }
 
