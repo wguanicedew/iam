@@ -15,6 +15,8 @@
  */
 package it.infn.mw.iam.authn.saml.util;
 
+import java.util.Optional;
+
 public enum Saml2Attribute {
 
   EPUID("eduPersonUniqueId", "urn:oid:1.3.6.1.4.1.5923.1.1.1.13"),
@@ -22,6 +24,10 @@ public enum Saml2Attribute {
   EPPN("eduPersonPrincipalName", "urn:oid:1.3.6.1.4.1.5923.1.1.1.6"),
   EPORCID("eduPersonOrcid", "urn:oid:1.3.6.1.4.1.5923.1.1.1.16"),
   MAIL("mail", "urn:oid:0.9.2342.19200300.100.1.3"),
+  UID("uid",
+      "urn:oid:0.9.2342.19200300.100.1.1 "),
+  ORGANIZATION_NAME("organizationName", "urn:oid:2.5.4.10"), EPSA("eduPersonScopedAffiliation",
+      "urn:oid:1.3.6.1.4.1.5923.1.1.1.9"),
   GIVEN_NAME("givenName", "urn:oid:2.5.4.42"),
   SN("sn", "urn:oid:2.5.4.4"),
   CN("cn", "urn:oid:2.5.4.3"),
@@ -57,6 +63,16 @@ public enum Saml2Attribute {
     return attributeName;
   }
   
+  public static Optional<Saml2Attribute> byName(String name) {
+    for (Saml2Attribute a : Saml2Attribute.values()) {
+      if (a.getAttributeName().equals(name)) {
+        return Optional.of(a);
+      }
+    }
+
+    return Optional.empty();
+  }
+
   public static Saml2Attribute byAlias(String alias) {
     for (Saml2Attribute a: Saml2Attribute.values()) {
       if (a.getAlias().equals(alias)) {
