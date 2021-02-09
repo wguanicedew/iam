@@ -46,10 +46,10 @@ import it.infn.mw.iam.test.TestUtils;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = IamLoginService.class)
-@WebIntegrationTest
+@WebIntegrationTest(randomPort = true)
 public class PasswordUpdateTests {
 
-  @Value("${server.port}")
+  @Value("${local.server.port}")
   private Integer iamPort;
 
   private ScimUser testUser;
@@ -131,13 +131,17 @@ public class PasswordUpdateTests {
     String newPassword = "secure_password";
 
 
-    String accessToken = passwordTokenGetter().username(testUser.getUserName())
+    String accessToken = passwordTokenGetter().port(iamPort)
+      .username(testUser.getUserName())
       .password(currentPassword)
       .getAccessToken();
 
     doPost(accessToken, currentPassword, newPassword).statusCode(HttpStatus.OK.value());
 
-    passwordTokenGetter().username(testUser.getUserName()).password(newPassword).getAccessToken();
+    passwordTokenGetter().port(iamPort)
+      .username(testUser.getUserName())
+      .password(newPassword)
+      .getAccessToken();
   }
 
   @Test
@@ -157,12 +161,14 @@ public class PasswordUpdateTests {
 
     String currentPassword = "password";
     String newPassword = "secure_password";
-    String accessToken = passwordTokenGetter().username(testUser.getUserName())
+    String accessToken = passwordTokenGetter().port(iamPort)
+      .username(testUser.getUserName())
       .password(currentPassword)
       .getAccessToken();
 
     doPost(accessToken, "thisisnotthecurrentpassword", newPassword)
-      .statusCode(HttpStatus.BAD_REQUEST.value()).body(equalTo("Wrong password provided"));
+      .statusCode(HttpStatus.BAD_REQUEST.value())
+      .body(equalTo("Wrong password provided"));
   }
 
   @Test
@@ -170,7 +176,7 @@ public class PasswordUpdateTests {
 
     String currentPassword = "password";
     String newPassword = "secure_password";
-    String accessToken = TestUtils.clientCredentialsTokenGetter().getAccessToken();
+    String accessToken = TestUtils.clientCredentialsTokenGetter().port(iamPort).getAccessToken();
 
     doPost(accessToken, currentPassword, newPassword).statusCode(HttpStatus.FORBIDDEN.value());
   }
@@ -180,7 +186,8 @@ public class PasswordUpdateTests {
 
     String currentPassword = "password";
     String newPassword = null;
-    String accessToken = passwordTokenGetter().username(testUser.getUserName())
+    String accessToken = passwordTokenGetter().port(iamPort)
+      .username(testUser.getUserName())
       .password(currentPassword)
       .getAccessToken();
 
@@ -193,7 +200,8 @@ public class PasswordUpdateTests {
 
     String currentPassword = "password";
     String newPassword = "";
-    String accessToken = passwordTokenGetter().username(testUser.getUserName())
+    String accessToken = passwordTokenGetter().port(iamPort)
+      .username(testUser.getUserName())
       .password(currentPassword)
       .getAccessToken();
 
@@ -206,7 +214,8 @@ public class PasswordUpdateTests {
 
     String currentPassword = "password";
     String newPassword = "pass";
-    String accessToken = passwordTokenGetter().username(testUser.getUserName())
+    String accessToken = passwordTokenGetter().port(iamPort)
+      .username(testUser.getUserName())
       .password(currentPassword)
       .getAccessToken();
 
@@ -219,14 +228,15 @@ public class PasswordUpdateTests {
 
     String currentPassword = "password";
     String newPassword = "newPassword";
-    String accessToken = passwordTokenGetter().username(testUser.getUserName())
+    String accessToken = passwordTokenGetter().port(iamPort)
+      .username(testUser.getUserName())
       .password(currentPassword)
       .getAccessToken();
 
     IamAccount account = accountRepository.findByUsername(testUser.getUserName())
-        .orElseThrow(() -> new Exception("Test user not found"));
-      account.setActive(false);
-      accountRepository.save(account);
+      .orElseThrow(() -> new Exception("Test user not found"));
+    account.setActive(false);
+    accountRepository.save(account);
 
     doPost(accessToken, currentPassword, newPassword).statusCode(HttpStatus.CONFLICT.value())
       .body(containsString("Account is not active or email is not verified"));

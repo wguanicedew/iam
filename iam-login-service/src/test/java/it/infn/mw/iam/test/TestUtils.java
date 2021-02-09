@@ -156,6 +156,11 @@ public class TestUtils {
       return this;
     }
 
+    public AccessTokenGetter port(int port) {
+      this.port = port;
+      return this;
+    }
+
     public String getAccessToken() {
 
       RequestSpecification req = given().port(port)

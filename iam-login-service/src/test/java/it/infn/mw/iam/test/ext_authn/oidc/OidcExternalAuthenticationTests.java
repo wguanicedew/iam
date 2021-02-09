@@ -51,7 +51,7 @@ import it.infn.mw.iam.test.util.oidc.MockRestTemplateFactory;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {IamLoginService.class, OidcTestConfig.class})
-@WebIntegrationTest("server.port:0")
+@WebIntegrationTest(randomPort = true)
 @Transactional
 public class OidcExternalAuthenticationTests extends OidcExternalAuthenticationTestsSupport {
 

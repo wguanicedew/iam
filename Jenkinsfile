@@ -45,17 +45,7 @@ pipeline {
           label "${kubeLabel}"
           cloud 'Kube mwdevel'
           defaultContainer 'runner'
-          inheritFrom 'ci-template'
-          containerTemplate {
-                name 'runner'
-                image 'cloud-vm114.cloud.cnaf.infn.it/cnafsd/centos7-jenkins-slave:latest'
-                ttyEnabled true
-                command 'cat'
-                resourceRequestCpu '2'
-                resourceLimitCpu '4'
-                resourceRequestMemory '3200Mi'
-                resourceLimitMemory '3200Mi'
-          }
+          inheritFrom 'iam-template'
         }
       }
 

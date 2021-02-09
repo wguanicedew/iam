@@ -127,7 +127,7 @@
         </div>
         
 
-        <c:if test="${loginPageConfiguration.registrationEnabled}">
+        <c:if test="${loginPageConfiguration.registrationEnabled && loginPageConfiguration.showRegistrationButton}">
             
             <div id="login-registration">
                 <div class="registration-preamble text-muted">
