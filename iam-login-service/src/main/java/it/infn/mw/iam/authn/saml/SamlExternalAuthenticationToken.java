@@ -96,7 +96,7 @@ public class SamlExternalAuthenticationToken
 
     Map<String, String> additionalAttrs = Maps.newHashMap();
     additionalAttrs.putAll(buildAuthnInfoMap());
-    
+
     return ri;
   }
 
@@ -123,17 +123,17 @@ public class SamlExternalAuthenticationToken
     for (Attribute attr : cred.getAttributes()) {
 
       Optional<Saml2Attribute> maybeKnownAttr = Saml2Attribute.byName(attr.getName());
-      if (maybeKnownAttr.isPresent()) {
-        String attrVal = cred.getAttributeAsString(attr.getName());
-        if (!Objects.isNull(attrVal)) {
-          authnInfo.put(maybeKnownAttr.get().name(), attrVal);
-        }
-      } else {
-        String attrVal = cred.getAttributeAsString(attr.getName());
 
-        if (!Objects.isNull(attrVal)) {
-          authnInfo.put(attr.getName(), attrVal);
-        }
+      String attrName = attr.getName();
+
+      if (maybeKnownAttr.isPresent()) {
+        attrName = maybeKnownAttr.get().name();
+      }
+
+      String attrVal = cred.getAttributeAsString(attr.getName());
+
+      if (!Objects.isNull(attrVal)) {
+        authnInfo.put(attrName, attrVal);
       }
     }
 
