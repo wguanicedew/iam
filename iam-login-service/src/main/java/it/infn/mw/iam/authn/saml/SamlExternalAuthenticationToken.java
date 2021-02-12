@@ -97,6 +97,8 @@ public class SamlExternalAuthenticationToken
     Map<String, String> additionalAttrs = Maps.newHashMap();
     additionalAttrs.putAll(buildAuthnInfoMap());
 
+    ri.setAdditionalAttributes(additionalAttrs);
+
     return ri;
   }
 

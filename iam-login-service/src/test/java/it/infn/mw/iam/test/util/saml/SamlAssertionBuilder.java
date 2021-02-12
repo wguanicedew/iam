@@ -143,6 +143,12 @@ public class SamlAssertionBuilder {
     return this;
   }
 
+  public SamlAssertionBuilder singleStringValuedAttribute(String name, String value) {
+    this.attributes.add(buildStringAttribute(name, value));
+    return this;
+  }
+
+
   private AudienceRestriction buildAudienceRestriction() {
     AudienceRestrictionBuilder arb = (AudienceRestrictionBuilder) builderFactory
       .getBuilder(AudienceRestriction.DEFAULT_ELEMENT_NAME);
