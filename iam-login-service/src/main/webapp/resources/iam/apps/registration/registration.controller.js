@@ -93,9 +93,19 @@ function RegistrationController(
     return getUserAuthorities().indexOf(EXT_AUTHN_ROLE) > -1;
   }
 
+  function lookupAuthInfo(info, propertyName){
+    if (typeof info[propertyName] != 'undefined'){
+      return info[propertyName];
+    } else if (typeof info['additional_attributes'][propertyName] != 'undefined') {
+      return info.additional_attributes[propertyName];
+    } else {
+      return undefined;
+    }
+  }
+
   function populateValue(info, name) {
-    if ($scope.config.fields[name].externalAuthAttribute) {
-      return info[$scope.config.fields[name].externalAuthAttribute];
+    if (typeof $scope.config.fields != 'undefined' && typeof $scope.config.fields[name] != 'undefined' && typeof $scope.config.fields[name].externalAuthAttribute != 'undefined'){
+      return lookupAuthInfo(info, $scope.config.fields[name].externalAuthAttribute);
     }
   }
 
