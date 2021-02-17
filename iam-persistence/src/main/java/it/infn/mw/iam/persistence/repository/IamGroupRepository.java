@@ -18,11 +18,13 @@ package it.infn.mw.iam.persistence.repository;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
+
 import it.infn.mw.iam.persistence.model.IamGroup;
 
 public interface IamGroupRepository extends PagingAndSortingRepository<IamGroup, Long> {
@@ -50,4 +52,11 @@ public interface IamGroupRepository extends PagingAndSortingRepository<IamGroup,
 
   long countByNameIgnoreCaseContainingOrUuidIgnoreCaseContaining(@Param("name") String name,
       @Param("uuid") String uuid);
+
+  @Query("select g from IamGroup g join g.labels label where label.prefix is null and label.name = :name")
+  Page<IamGroup> findByLabelName(@Param("name") String name, Pageable op);
+
+  @Query("select g from IamGroup g join g.labels label where label.prefix is null and label.name = :name and label.value = :value")
+  Page<IamGroup> findByLabelNameAndValue(@Param("name") String name, @Param("value") String value,
+      Pageable op);
 }

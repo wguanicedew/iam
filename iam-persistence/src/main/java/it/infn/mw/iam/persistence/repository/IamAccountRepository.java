@@ -73,6 +73,12 @@ public interface IamAccountRepository
   @Query("select a from IamAccount a join a.groups ag where ag.id = :groupId")
   List<IamAccount> findByGroupId(@Param("groupId") Long groupId);
 
+  @Query("select a from IamAccount a join a.groups ag where ag.uuid = :groupUuid")
+  Page<IamAccount> findByGroupUuid(@Param("groupUuid") String uuid, Pageable op);
+
+  @Query("select a from IamAccount a join a.groups ag where ag.name = :groupName")
+  Page<IamAccount> findByGroupName(@Param("groupName") String name, Pageable op);
+
   Optional<IamAccount> findByConfirmationKey(@Param("confirmationKey") String confirmationKey);
 
   Optional<IamAccount> findByResetKey(@Param("resetKey") String resetKey);

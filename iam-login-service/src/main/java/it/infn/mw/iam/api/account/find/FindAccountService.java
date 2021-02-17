@@ -17,4 +17,8 @@ public interface FindAccountService {
 
   ScimListResponse<ScimUser> findActiveAccounts(Pageable pageable);
 
+  ScimListResponse<ScimUser> findAccountByGroupName(String groupName, Pageable pageable);
+
+  ScimListResponse<ScimUser> findAccountByGroupUuid(String groupUuid, Pageable pageable);
+
 }

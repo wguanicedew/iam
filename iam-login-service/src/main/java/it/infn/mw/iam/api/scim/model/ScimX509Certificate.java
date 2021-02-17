@@ -34,10 +34,10 @@ public class ScimX509Certificate {
 
   private final Boolean primary;
   
-  @Length(max = 128)
+  @Length(max = 256)
   private final String subjectDn;
 
-  @Length(max = 128)
+  @Length(max = 256)
   private final String issuerDn;
 
   private final String pemEncodedCertificate;

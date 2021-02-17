@@ -1,8 +1,9 @@
 package it.infn.mw.iam.api.account.find;
 
-import java.util.ArrayList;
-import java.util.List;
+import static it.infn.mw.iam.api.utils.FindUtils.responseFromPage;
+
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -11,35 +12,29 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import it.infn.mw.iam.api.scim.converter.UserConverter;
+import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
 import it.infn.mw.iam.api.scim.model.ScimListResponse;
 import it.infn.mw.iam.api.scim.model.ScimListResponse.ScimListResponseBuilder;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.persistence.model.IamAccount;
+import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
+import it.infn.mw.iam.persistence.repository.IamGroupRepository;
 
 @Transactional
 @Service
 public class DefaultFindAccountService implements FindAccountService {
 
   private final IamAccountRepository repo;
+  private final IamGroupRepository groupRepo;
   private final UserConverter converter;
 
   @Autowired
-  public DefaultFindAccountService(IamAccountRepository repo, UserConverter converter) {
+  public DefaultFindAccountService(IamAccountRepository repo, IamGroupRepository groupRepo,
+      UserConverter converter) {
     this.repo = repo;
+    this.groupRepo = groupRepo;
     this.converter = converter;
-  }
-
-  private ScimListResponse<ScimUser> responseFromPage(Page<IamAccount> results, Pageable pageable) {
-    ScimListResponseBuilder<ScimUser> builder = ScimListResponse.builder();
-    List<ScimUser> resources = new ArrayList<>();
-
-    results.getContent().forEach(a -> resources.add(converter.dtoFromEntity(a)));
-
-    builder.resources(resources);
-    builder.fromPage(results, pageable);
-
-    return builder.build();
   }
 
   @Override
@@ -47,7 +42,7 @@ public class DefaultFindAccountService implements FindAccountService {
       Pageable pageable) {
 
     Page<IamAccount> results = repo.findByLabelNameAndValue(labelName, labelValue, pageable);
-    return responseFromPage(results, pageable);
+    return responseFromPage(results, converter, pageable);
 
   }
 
@@ -73,15 +68,33 @@ public class DefaultFindAccountService implements FindAccountService {
   public ScimListResponse<ScimUser> findInactiveAccounts(Pageable pageable) {
 
     Page<IamAccount> results = repo.findInactiveAccounts(pageable);
-    return responseFromPage(results, pageable);
+    return responseFromPage(results, converter, pageable);
   }
 
   @Override
   public ScimListResponse<ScimUser> findActiveAccounts(Pageable pageable) {
 
     Page<IamAccount> results = repo.findActiveAccounts(pageable);
-    return responseFromPage(results, pageable);
+    return responseFromPage(results, converter, pageable);
 
+  }
+
+  @Override
+  public ScimListResponse<ScimUser> findAccountByGroupName(String groupName, Pageable pageable) {
+    IamGroup group = groupRepo.findByName(groupName).orElseThrow(groupNotFoundError(groupName));
+    Page<IamAccount> results = repo.findByGroupUuid(group.getUuid(), pageable);
+    return responseFromPage(results, converter, pageable);
+  }
+
+  @Override
+  public ScimListResponse<ScimUser> findAccountByGroupUuid(String groupUuid, Pageable pageable) {
+    IamGroup group = groupRepo.findByUuid(groupUuid).orElseThrow(groupNotFoundError(groupUuid));
+    Page<IamAccount> results = repo.findByGroupUuid(group.getUuid(), pageable);
+    return responseFromPage(results, converter, pageable);
+  }
+
+  private Supplier<IllegalArgumentException> groupNotFoundError(String groupNameOrUuid) {
+    return () -> new IllegalArgumentException("Group does not exist: " + groupNameOrUuid);
   }
 
 }
