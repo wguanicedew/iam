@@ -252,8 +252,8 @@
                         return 'link';
                     },
                     cert: {
-                        subjectDn: self.getUserCertSubject(),
-                        issuerDn: self.getUserCertIssuer()
+                        subjectDn: unescape(self.getUserCertSubject()),
+                        issuerDn: unescape(self.getUserCertIssuer())
                     }
                 }
             });

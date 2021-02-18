@@ -52,11 +52,11 @@ var _accountLinkingMessage = "${accountLinkingMessage}";
 var _accountLinkingError = "${accountLinkingError}";
 
 function getUserX509CertficateSubject() {
-	return '${sessionScope.IAM_X509_CRED.subject}';
+	return escape("${sessionScope.IAM_X509_CRED.subject}");
 }
 
 function getUserX509CertficateIssuer() {
-	  return '${sessionScope.IAM_X509_CRED.issuer}';
+	  return escape("${sessionScope.IAM_X509_CRED.issuer}");
 }
 
 //get the info of the currently authenticated user, if available (null otherwise)
