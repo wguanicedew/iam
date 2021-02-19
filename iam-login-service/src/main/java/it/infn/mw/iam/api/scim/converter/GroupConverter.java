@@ -18,6 +18,7 @@ package it.infn.mw.iam.api.scim.converter;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -27,10 +28,12 @@ import org.springframework.stereotype.Service;
 import it.infn.mw.iam.api.scim.model.ScimGroup;
 import it.infn.mw.iam.api.scim.model.ScimGroupRef;
 import it.infn.mw.iam.api.scim.model.ScimIndigoGroup;
+import it.infn.mw.iam.api.scim.model.ScimLabel;
 import it.infn.mw.iam.api.scim.model.ScimMemberRef;
 import it.infn.mw.iam.api.scim.model.ScimMeta;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamGroup;
+import it.infn.mw.iam.persistence.model.IamLabel;
 
 @Service
 public class GroupConverter implements Converter<ScimGroup, IamGroup> {
@@ -57,8 +60,9 @@ public class GroupConverter implements Converter<ScimGroup, IamGroup> {
     IamGroup group = new IamGroup();
 
     group.setName(scimGroup.getDisplayName());
-    
-    if (scimGroup.getIndigoGroup() != null && StringUtils.isNotBlank(scimGroup.getIndigoGroup().getDescription())) {
+
+    if (scimGroup.getIndigoGroup() != null
+        && StringUtils.isNotBlank(scimGroup.getIndigoGroup().getDescription())) {
       group.setDescription(scimGroup.getIndigoGroup().getDescription());
     }
 
@@ -95,19 +99,33 @@ public class GroupConverter implements Converter<ScimGroup, IamGroup> {
     ScimIndigoGroup.Builder scimIndigoGroup = ScimIndigoGroup.getBuilder();
 
     if (iamParentGroup != null) {
-      
+
       ScimGroupRef parentGroupRef = ScimGroupRef.builder()
         .display(iamParentGroup.getName())
         .value(iamParentGroup.getUuid())
         .ref(resourceLocationProvider.groupLocation(iamParentGroup.getUuid()))
         .build();
-      
+
       scimIndigoGroup.parentGroup(parentGroupRef);
-    } 
-    
+    }
+
     if (isNotBlank(entity.getDescription())) {
       scimIndigoGroup.description(entity.getDescription());
     }
+
+    if (!entity.getLabels().isEmpty()) {
+      Set<ScimLabel> labels = new LinkedHashSet<>();
+
+      for (IamLabel l : entity.getLabels()) {
+        labels.add(ScimLabel.builder()
+          .withName(l.getName())
+          .withPrefix(l.getPrefix())
+          .withVaule(l.getValue())
+          .build());
+      }
+      scimIndigoGroup.labels(labels);
+    }
+
     return ScimGroup.builder(entity.getName())
       .id(entity.getUuid())
       .meta(meta)

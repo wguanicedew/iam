@@ -16,7 +16,9 @@
 package it.infn.mw.iam.test.scim.group;
 
 import static it.infn.mw.iam.api.scim.model.ScimConstants.SCIM_CONTENT_TYPE;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -144,7 +146,7 @@ public class ScimGroupProvisioningListTests {
       .andExpect(jsonPath("$.itemsPerPage").doesNotExist())
       .andExpect(jsonPath("$.startIndex").doesNotExist())
       .andExpect(jsonPath("$.schemas", contains(ScimListResponse.SCHEMA)))
-      .andExpect(jsonPath("$.Resources").doesNotExist());
+      .andExpect(jsonPath("$.Resources", is(empty())));
     //@formatter:on
   }
 

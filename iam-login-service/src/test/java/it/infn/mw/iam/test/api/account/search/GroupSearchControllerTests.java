@@ -17,8 +17,10 @@ package it.infn.mw.iam.test.api.account.search;
 
 import static it.infn.mw.iam.api.account.search.AbstractSearchController.DEFAULT_ITEMS_PER_PAGE;
 import static it.infn.mw.iam.api.account.search.GroupSearchController.GROUP_SEARCH_ENDPOINT;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -166,9 +168,9 @@ public class GroupSearchControllerTests {
         .andExpect(status().isOk()).andReturn().getResponse().getContentAsString(),
         new TypeReference<ListResponseDTO<ScimGroup>>() {});
     assertThat(response.getTotalResults(), equalTo(expectedSize));
-    assertThat(response.getResources(), equalTo(null));
-    assertThat(response.getStartIndex(), equalTo(null));
-    assertThat(response.getItemsPerPage(), equalTo(null));
+    assertThat(response.getResources(), is(empty()));
+    assertThat(response.getStartIndex(), nullValue());
+    assertThat(response.getItemsPerPage(), nullValue());
   }
 
   @Test
@@ -210,9 +212,9 @@ public class GroupSearchControllerTests {
                 .getResponse().getContentAsString(),
             new TypeReference<ListResponseDTO<ScimGroup>>() {});
     assertThat(response.getTotalResults(), equalTo(expectedSize));
-    assertThat(response.getResources(), equalTo(null));
-    assertThat(response.getStartIndex(), equalTo(null));
-    assertThat(response.getItemsPerPage(), equalTo(null));
+    assertThat(response.getResources(), is(empty()));
+    assertThat(response.getStartIndex(), nullValue());
+    assertThat(response.getItemsPerPage(), nullValue());
   }
 
   @Test

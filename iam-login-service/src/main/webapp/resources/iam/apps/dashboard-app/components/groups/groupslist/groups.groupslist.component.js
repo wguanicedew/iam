@@ -145,6 +145,8 @@
 
         var self = this;
 
+        self.labelName = labelName;
+
         // pagination controls
         self.currentPage = 1;
         self.currentOffset = 1;
@@ -179,6 +181,15 @@
                 $rootScope.groupsCount = responseValue;
             }
         };
+
+        
+        function labelName(label){
+            if (label.prefix) {
+                return label.prefix + "/" + label.name;
+            }
+
+            return label.name;
+        }
 
         self.resetFilter = function() {
             self.filter = undefined;

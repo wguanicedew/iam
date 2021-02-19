@@ -19,7 +19,8 @@
 <div class="box box-primary" id="groups-list">
     <div class="box-header with-border">
         <div class="input-group">
-            <input placeholder="Search.." ng-model="$ctrl.filter" class="form-control" ng-change="$ctrl.searchGroups(1)" ng-model-options="{debounce: 250}" />
+            <input placeholder="Search.." ng-model="$ctrl.filter" class="form-control" ng-change="$ctrl.searchGroups(1)"
+                ng-model-options="{debounce: 250}" />
             <div class="input-group-btn">
                 <button type="button" class="btn btn-default" ng-click="$ctrl.resetFilter()">Show all</button>
             </div>
@@ -28,7 +29,8 @@
     <div class="box-body">
 
         <div class="text-center" ng-if="$ctrl.filter">
-            <p>Found <span id="groups_filtered"><strong>{{$ctrl.totalResults}}</strong></span> groups matching filter (out of <strong>{{$root.groupsCount}}</strong>)</p>
+            <p>Found <span id="groups_filtered"><strong>{{$ctrl.totalResults}}</strong></span> groups matching filter
+                (out of <strong>{{$root.groupsCount}}</strong>)</p>
         </div>
 
         <div ng-if="!$ctrl.groups.length">No groups found
@@ -39,24 +41,50 @@
                 <thead>
                     <tr>
                         <th>
-                            <span style="cursor: pointer" ng-click="$ctrl.sortBy('name', 'asc')" ng-if="$ctrl.sortDirection == 'desc'">Name</span>
-                            <span style="cursor: pointer" ng-click="$ctrl.sortBy('name', 'desc')" ng-if="$ctrl.sortDirection == 'asc'">Name</span> &nbsp;
-                            <i class="fa fa-angle-down" ng-if="$ctrl.sortDirection == 'desc' && $ctrl.sortByValue == 'name'"></i>
-                            <i class="fa fa-angle-up" ng-if="$ctrl.sortDirection == 'asc' && $ctrl.sortByValue == 'name'"></i>
+                            <span style="cursor: pointer" ng-click="$ctrl.sortBy('name', 'asc')"
+                                ng-if="$ctrl.sortDirection == 'desc'">Name</span>
+                            <span style="cursor: pointer" ng-click="$ctrl.sortBy('name', 'desc')"
+                                ng-if="$ctrl.sortDirection == 'asc'">Name</span> &nbsp;
+                            <i class="fa fa-angle-down"
+                                ng-if="$ctrl.sortDirection == 'desc' && $ctrl.sortByValue == 'name'"></i>
+                            <i class="fa fa-angle-up"
+                                ng-if="$ctrl.sortDirection == 'asc' && $ctrl.sortByValue == 'name'"></i>
                         </th>
+                        <th>Labels</th>
                         <th class="text-right">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr ng-repeat="group in $ctrl.groups">
                         <!-- name -->
-                        <td class="col-md-8"><a ui-sref="group({id: group.id})">{{group.displayName}}</a></td>
+                        <td class="col-md-6">
+                            <div><a ui-sref="group({id:
+                        group.id})">{{group.displayName}}</a></div>
+                            <div class="group-description">
+                                {{group['urn:indigo-dc:scim:schemas:IndigoGroup'].description}}
+                            </div>
+                        </td>
+                        <!-- Labels -->
+                        <td>
+                            <span class="label-pair"
+                                ng-repeat="l in group['urn:indigo-dc:scim:schemas:IndigoGroup'].labels">
+                                <span class="label-key label">
+                                    {{$ctrl.labelName(l)}}
+                                </span>
+                                <span class="label-value label" ng-if="l.value">
+                                    {{l.value}}
+                                </span>
+                            </span>
+                        </td>
                         <!-- actions -->
                         <td class="text-right">
-                            <button id="add_subgroup_{{group.id}}" title="Add Subgroup" class="btn btn-success btn-xs" ng-click="$ctrl.openAddSubgroupDialog(group)" ng-show="$ctrl.voAdmin">
+                            <button id="add_subgroup_{{group.id}}" title="Add Subgroup" class="btn btn-success btn-xs"
+                                ng-click="$ctrl.openAddSubgroupDialog(group)" ng-show="$ctrl.voAdmin">
                                 <i class="fa fa-plus"></i>
                             </button>
-                            <button ng-if="!group.members" ng-show="$ctrl.voAdmin" title="Delete group" id="delete_group_{{group.id}}" class="btn btn-danger btn-xs" ng-click="$ctrl.openDeleteGroupDialog(group)">
+                            <button ng-if="!group.members" ng-show="$ctrl.voAdmin" title="Delete group"
+                                id="delete_group_{{group.id}}" class="btn btn-danger btn-xs"
+                                ng-click="$ctrl.openDeleteGroupDialog(group)">
                                 <i class="fa fa-times"></i>
                             </button>
                         </td>
@@ -65,13 +93,16 @@
             </table>
 
             <div class="text-center">
-                <ul id="groups_pagination_bottom" uib-pagination ng-model="$ctrl.currentPage" items-per-page="$ctrl.itemsPerPage" total-items="$ctrl.totalResults" max-size="3" boundary-links="true" ng-change="$ctrl.searchGroups($ctrl.currentPage)" previous-text="&lsaquo;"
+                <ul id="groups_pagination_bottom" uib-pagination ng-model="$ctrl.currentPage"
+                    items-per-page="$ctrl.itemsPerPage" total-items="$ctrl.totalResults" max-size="3"
+                    boundary-links="true" ng-change="$ctrl.searchGroups($ctrl.currentPage)" previous-text="&lsaquo;"
                     next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;" rotate="true">
                 </ul>
             </div>
         </div>
     </div>
     <div class="box-footer" ng-if="$ctrl.voAdmin">
-        <button class="btn btn-success" ng-click="$ctrl.openAddParentGroupDialog()"><i class="fa fa-plus"></i> Add Root Group</button>
+        <button class="btn btn-success" ng-click="$ctrl.openAddParentGroupDialog()"><i class="fa fa-plus"></i> Add Root
+            Group</button>
     </div>
 </div>

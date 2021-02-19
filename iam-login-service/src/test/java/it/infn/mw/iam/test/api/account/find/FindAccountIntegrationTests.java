@@ -146,7 +146,7 @@ public class FindAccountIntegrationTests extends TestSupport {
 
     mvc.perform(get(FIND_BY_EMAIL_RESOURCE).param("email", "not_found@example"))
       .andExpect(OK)
-      .andExpect(jsonPath("$.totalResults", is(0)))
+      .andExpect(jsonPath("$.totalResults").doesNotExist())
       .andExpect(jsonPath("$.Resources", emptyIterable()));
 
   }
@@ -164,7 +164,7 @@ public class FindAccountIntegrationTests extends TestSupport {
 
     mvc.perform(get(FIND_BY_USERNAME_RESOURCE).param("username", "unknown_username"))
       .andExpect(OK)
-      .andExpect(jsonPath("$.totalResults", is(0)))
+      .andExpect(jsonPath("$.totalResults").doesNotExist())
       .andExpect(jsonPath("$.Resources", emptyIterable()));
 
   }

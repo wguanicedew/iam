@@ -31,7 +31,9 @@ public class DefaultFindGroupService implements FindGroupService {
   @Override
   public ScimListResponse<ScimGroup> findGroupByName(String name) {
     Optional<IamGroup> maybeGroup = repo.findByName(name);
+
     ScimListResponseBuilder<ScimGroup> builder = ScimListResponse.builder();
+
     maybeGroup.ifPresent(a -> builder.singleResource(converter.dtoFromEntity(a)));
     return builder.build();
   }

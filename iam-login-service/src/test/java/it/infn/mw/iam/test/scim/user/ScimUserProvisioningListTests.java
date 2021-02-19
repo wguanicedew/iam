@@ -19,10 +19,13 @@ import static it.infn.mw.iam.api.scim.model.ScimListResponse.SCHEMA;
 import static it.infn.mw.iam.test.TestUtils.TOTAL_USERS_COUNT;
 import static it.infn.mw.iam.test.scim.ScimUtils.SCIM_CLIENT_ID;
 import static it.infn.mw.iam.test.scim.ScimUtils.SCIM_READ_SCOPE;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
+
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.scim.model.ScimListResponse;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
@@ -59,55 +63,56 @@ public class ScimUserProvisioningListTests {
   @Test
   public void testNoParameterListRequest() throws Exception {
 
-    scimUtils.getUsers().andExpect(jsonPath("$.totalResults", equalTo(TOTAL_USERS_COUNT)))
-        .andExpect(jsonPath("$.itemsPerPage", equalTo(100)))
-        .andExpect(jsonPath("$.startIndex", equalTo(1)))
-        .andExpect(jsonPath("$.schemas", contains(ScimListResponse.SCHEMA)))
-        .andExpect(jsonPath("$.Resources", hasSize(equalTo(100))));
+    scimUtils.getUsers()
+      .andExpect(jsonPath("$.totalResults", equalTo(TOTAL_USERS_COUNT)))
+      .andExpect(jsonPath("$.itemsPerPage", equalTo(100)))
+      .andExpect(jsonPath("$.startIndex", equalTo(1)))
+      .andExpect(jsonPath("$.schemas", contains(ScimListResponse.SCHEMA)))
+      .andExpect(jsonPath("$.Resources", hasSize(equalTo(100))));
   }
 
   @Test
   public void testCountAs10Returns10Items() throws Exception {
 
     scimUtils.getUsers(ParamsBuilder.builder().count(10).build())
-        .andExpect(jsonPath("$.totalResults", equalTo(TOTAL_USERS_COUNT)))
-        .andExpect(jsonPath("$.itemsPerPage", equalTo(10)))
-        .andExpect(jsonPath("$.startIndex", equalTo(1)))
-        .andExpect(jsonPath("$.schemas", contains(ScimListResponse.SCHEMA)))
-        .andExpect(jsonPath("$.Resources", hasSize(equalTo(10))));
+      .andExpect(jsonPath("$.totalResults", equalTo(TOTAL_USERS_COUNT)))
+      .andExpect(jsonPath("$.itemsPerPage", equalTo(10)))
+      .andExpect(jsonPath("$.startIndex", equalTo(1)))
+      .andExpect(jsonPath("$.schemas", contains(ScimListResponse.SCHEMA)))
+      .andExpect(jsonPath("$.Resources", hasSize(equalTo(10))));
   }
 
   @Test
   public void testCount1Returns1Item() throws Exception {
 
     scimUtils.getUsers(ParamsBuilder.builder().count(1).build())
-        .andExpect(jsonPath("$.totalResults", equalTo(TOTAL_USERS_COUNT)))
-        .andExpect(jsonPath("$.itemsPerPage", equalTo(1)))
-        .andExpect(jsonPath("$.startIndex", equalTo(1)))
-        .andExpect(jsonPath("$.schemas", contains(ScimListResponse.SCHEMA)))
-        .andExpect(jsonPath("$.Resources", hasSize(equalTo(1))));
+      .andExpect(jsonPath("$.totalResults", equalTo(TOTAL_USERS_COUNT)))
+      .andExpect(jsonPath("$.itemsPerPage", equalTo(1)))
+      .andExpect(jsonPath("$.startIndex", equalTo(1)))
+      .andExpect(jsonPath("$.schemas", contains(ScimListResponse.SCHEMA)))
+      .andExpect(jsonPath("$.Resources", hasSize(equalTo(1))));
   }
 
   @Test
   public void testCountShouldBeLimitedToOneHundred() throws Exception {
 
     scimUtils.getUsers(ParamsBuilder.builder().count(1000).build())
-        .andExpect(jsonPath("$.totalResults", equalTo(TOTAL_USERS_COUNT)))
-        .andExpect(jsonPath("$.itemsPerPage", equalTo(100)))
-        .andExpect(jsonPath("$.startIndex", equalTo(1)))
-        .andExpect(jsonPath("$.schemas", contains(ScimListResponse.SCHEMA)))
-        .andExpect(jsonPath("$.Resources", hasSize(equalTo(100))));
+      .andExpect(jsonPath("$.totalResults", equalTo(TOTAL_USERS_COUNT)))
+      .andExpect(jsonPath("$.itemsPerPage", equalTo(100)))
+      .andExpect(jsonPath("$.startIndex", equalTo(1)))
+      .andExpect(jsonPath("$.schemas", contains(ScimListResponse.SCHEMA)))
+      .andExpect(jsonPath("$.Resources", hasSize(equalTo(100))));
   }
 
   @Test
   public void testNegativeCountBecomesZero() throws Exception {
 
     scimUtils.getUsers(ParamsBuilder.builder().count(-10).build())
-        .andExpect(jsonPath("$.totalResults", equalTo(TOTAL_USERS_COUNT)))
-        .andExpect(jsonPath("$.itemsPerPage").doesNotExist())
-        .andExpect(jsonPath("$.startIndex").doesNotExist())
-        .andExpect(jsonPath("$.schemas", contains(ScimListResponse.SCHEMA)))
-        .andExpect(jsonPath("$.Resources").doesNotExist());
+      .andExpect(jsonPath("$.totalResults", equalTo(TOTAL_USERS_COUNT)))
+      .andExpect(jsonPath("$.itemsPerPage").doesNotExist())
+      .andExpect(jsonPath("$.startIndex").doesNotExist())
+      .andExpect(jsonPath("$.schemas", contains(ScimListResponse.SCHEMA)))
+      .andExpect(jsonPath("$.Resources", is(empty())));
   }
 
   @Test
@@ -115,11 +120,11 @@ public class ScimUserProvisioningListTests {
 
     int startIndex = Long.valueOf(TOTAL_USERS_COUNT).intValue() + 1;
     scimUtils.getUsers(ParamsBuilder.builder().startIndex(startIndex).build())
-        .andExpect(jsonPath("$.totalResults", equalTo(TOTAL_USERS_COUNT)))
-        .andExpect(jsonPath("$.itemsPerPage", equalTo(0)))
-        .andExpect(jsonPath("$.startIndex", equalTo(TOTAL_USERS_COUNT + 1)))
-        .andExpect(jsonPath("$.schemas", contains(SCHEMA)))
-        .andExpect(jsonPath("$.Resources", hasSize(equalTo(0))));
+      .andExpect(jsonPath("$.totalResults", equalTo(TOTAL_USERS_COUNT)))
+      .andExpect(jsonPath("$.itemsPerPage", equalTo(0)))
+      .andExpect(jsonPath("$.startIndex", equalTo(TOTAL_USERS_COUNT + 1)))
+      .andExpect(jsonPath("$.schemas", contains(SCHEMA)))
+      .andExpect(jsonPath("$.Resources").isEmpty());
   }
 
   @Test
@@ -127,11 +132,11 @@ public class ScimUserProvisioningListTests {
 
     int startIndex = Long.valueOf(TOTAL_USERS_COUNT).intValue() - 5;
     scimUtils.getUsers(ParamsBuilder.builder().startIndex(startIndex).count(10).build())
-        .andExpect(jsonPath("$.totalResults", equalTo(TOTAL_USERS_COUNT)))
-        .andExpect(jsonPath("$.itemsPerPage", equalTo(6)))
-        .andExpect(jsonPath("$.startIndex", equalTo(TOTAL_USERS_COUNT - 5)))
-        .andExpect(jsonPath("$.schemas", contains(SCHEMA)))
-        .andExpect(jsonPath("$.Resources", hasSize(equalTo(6))));
+      .andExpect(jsonPath("$.totalResults", equalTo(TOTAL_USERS_COUNT)))
+      .andExpect(jsonPath("$.itemsPerPage", equalTo(6)))
+      .andExpect(jsonPath("$.startIndex", equalTo(TOTAL_USERS_COUNT - 5)))
+      .andExpect(jsonPath("$.schemas", contains(SCHEMA)))
+      .andExpect(jsonPath("$.Resources", hasSize(equalTo(6))));
   }
 
   @Test
@@ -139,21 +144,21 @@ public class ScimUserProvisioningListTests {
 
     int startIndex = Long.valueOf(TOTAL_USERS_COUNT).intValue();
     scimUtils.getUsers(ParamsBuilder.builder().startIndex(startIndex).count(2).build())
-        .andExpect(jsonPath("$.totalResults", equalTo(TOTAL_USERS_COUNT)))
-        .andExpect(jsonPath("$.itemsPerPage", equalTo(1)))
-        .andExpect(jsonPath("$.startIndex", equalTo(TOTAL_USERS_COUNT)))
-        .andExpect(jsonPath("$.schemas", contains(SCHEMA)))
-        .andExpect(jsonPath("$.Resources", hasSize(equalTo(1))));
+      .andExpect(jsonPath("$.totalResults", equalTo(TOTAL_USERS_COUNT)))
+      .andExpect(jsonPath("$.itemsPerPage", equalTo(1)))
+      .andExpect(jsonPath("$.startIndex", equalTo(TOTAL_USERS_COUNT)))
+      .andExpect(jsonPath("$.schemas", contains(SCHEMA)))
+      .andExpect(jsonPath("$.Resources", hasSize(equalTo(1))));
   }
 
   @Test
   public void testFirstElementPagination() throws Exception {
 
     scimUtils.getUsers(ParamsBuilder.builder().startIndex(1).count(5).build())
-        .andExpect(jsonPath("$.totalResults", equalTo(TOTAL_USERS_COUNT)))
-        .andExpect(jsonPath("$.itemsPerPage", equalTo(5)))
-        .andExpect(jsonPath("$.startIndex", equalTo(1)))
-        .andExpect(jsonPath("$.schemas", contains(SCHEMA)))
-        .andExpect(jsonPath("$.Resources", hasSize(equalTo(5))));
+      .andExpect(jsonPath("$.totalResults", equalTo(TOTAL_USERS_COUNT)))
+      .andExpect(jsonPath("$.itemsPerPage", equalTo(5)))
+      .andExpect(jsonPath("$.startIndex", equalTo(1)))
+      .andExpect(jsonPath("$.schemas", contains(SCHEMA)))
+      .andExpect(jsonPath("$.Resources", hasSize(equalTo(5))));
   }
 }

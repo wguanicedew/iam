@@ -66,6 +66,7 @@ public class ScimUserValidationTests extends ScimUserTestSupport {
   private final String STRING_65 = random(65, true, false);
   private final String STRING_64 = random(64, true, false);
   private final String STRING_2 = random(2, true, false);
+  private final String STRING_1 = "A";
 
   private final String[] VALID_EMAILS = {"abc@def.gh", "abc@def"};
   private final String[] INVALID_EMAILS = {"abc.de", "abc@de<com"};
@@ -92,10 +93,10 @@ public class ScimUserValidationTests extends ScimUserTestSupport {
   @Test
   public void testReplaceWithTooShortGivenName() throws Exception {
 
-    ScimUser updates = ScimUser.builder().buildName(STRING_2, STRING_64).build();
+    ScimUser updates = ScimUser.builder().buildName(STRING_2, STRING_1).build();
 
     scimUtils.patchUser(lennon.getId(), replace, updates, HttpStatus.BAD_REQUEST)
-      .andExpect(jsonPath("$.detail", containsString("length must be between 3 and 64")));
+      .andExpect(jsonPath("$.detail", containsString("length must be between 2 and 64")));
   }
 
   @Test
@@ -104,7 +105,7 @@ public class ScimUserValidationTests extends ScimUserTestSupport {
     ScimUser updates = ScimUser.builder().buildName(STRING_65, STRING_64).build();
 
     scimUtils.patchUser(lennon.getId(), replace, updates, HttpStatus.BAD_REQUEST)
-      .andExpect(jsonPath("$.detail", containsString("length must be between 3 and 64")));
+      .andExpect(jsonPath("$.detail", containsString("length must be between 2 and 64")));
   }
 
   @Test
@@ -119,10 +120,10 @@ public class ScimUserValidationTests extends ScimUserTestSupport {
   @Test
   public void testReplaceWithTooShortFamilyName() throws Exception {
 
-    ScimUser updates = ScimUser.builder().buildName(STRING_64, STRING_2).build();
+    ScimUser updates = ScimUser.builder().buildName(STRING_64, STRING_1).build();
 
     scimUtils.patchUser(lennon.getId(), replace, updates, HttpStatus.BAD_REQUEST)
-      .andExpect(jsonPath("$.detail", containsString("length must be between 3 and 64")));
+      .andExpect(jsonPath("$.detail", containsString("length must be between 2 and 64")));
   }
 
   @Test
@@ -131,7 +132,7 @@ public class ScimUserValidationTests extends ScimUserTestSupport {
     ScimUser updates = ScimUser.builder().buildName(STRING_64, STRING_65).build();
 
     scimUtils.patchUser(lennon.getId(), replace, updates, HttpStatus.BAD_REQUEST)
-      .andExpect(jsonPath("$.detail", containsString("length must be between 3 and 64")));
+      .andExpect(jsonPath("$.detail", containsString("length must be between 2 and 64")));
   }
 
   @Test

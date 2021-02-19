@@ -53,7 +53,7 @@ function AddUserGroupController(
 
   function loadGroups() {
     addGroupCtrl.loadingGroupsProgress = 30;
-    addGroupCtrl.getAllGroups(1, 10);
+    addGroupCtrl.getAllGroups(1, 100);
   }
 
   function cancel() {

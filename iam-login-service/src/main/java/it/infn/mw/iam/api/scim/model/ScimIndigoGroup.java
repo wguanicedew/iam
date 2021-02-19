@@ -15,26 +15,33 @@
  */
 package it.infn.mw.iam.api.scim.model;
 
+import java.util.Set;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 
 public class ScimIndigoGroup {
 
-  private ScimGroupRef parentGroup;
-  
-  private String description;
+  private final ScimGroupRef parentGroup;
+
+  private final String description;
+
+  private final Set<ScimLabel> labels;
 
   @JsonCreator
   private ScimIndigoGroup(@JsonProperty("parentGroup") ScimGroupRef parentGroup,
-      @JsonProperty("description") String description) {
+      @JsonProperty("description") String description,
+      @JsonProperty("labels") Set<ScimLabel> labels) {
     this.parentGroup = parentGroup;
     this.description = description;
+    this.labels = labels;
   }
 
   private ScimIndigoGroup(Builder builder) {
     this.parentGroup = builder.parentGroup;
     this.description = builder.description;
+    this.labels = builder.labels;
   }
 
   public ScimGroupRef getParentGroup() {
@@ -44,23 +51,34 @@ public class ScimIndigoGroup {
   public String getDescription() {
     return description;
   }
-  
+
+  public Set<ScimLabel> getLabels() {
+    return labels;
+  }
+
   public static Builder getBuilder() {
     return new Builder();
   }
 
   public static class Builder {
     private ScimGroupRef parentGroup = null;
-    
+
     private String description;
+
+    private Set<ScimLabel> labels;
 
     public Builder parentGroup(ScimGroupRef parentGroup) {
       this.parentGroup = parentGroup;
       return this;
     }
-    
+
     public Builder description(String desc) {
       this.description = desc;
+      return this;
+    }
+
+    public Builder labels(Set<ScimLabel> labels) {
+      this.labels = labels;
       return this;
     }
 

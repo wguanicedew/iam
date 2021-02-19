@@ -80,9 +80,9 @@ public class ListResponseDTO<T> {
 
   public static class Builder<T> {
 
-    private Long totalResults = 0L;
-    private Integer itemsPerPage = 10;
-    private Integer startIndex = 1;
+    private Long totalResults;
+    private Integer itemsPerPage;
+    private Integer startIndex;
     private List<T> resources = Collections.emptyList();
 
     public <S> Builder<T> fromPage(Page<S> page, Pageable op) {

@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import it.infn.mw.iam.api.common.ListResponseDTO;
 
 public class ScimListResponse<T> extends ListResponseDTO<T> {
@@ -49,6 +50,7 @@ public class ScimListResponse<T> extends ListResponseDTO<T> {
 
     @Override
     public ScimListResponse<T> build() {
+
       return new ScimListResponse<>(this);
     }
   }

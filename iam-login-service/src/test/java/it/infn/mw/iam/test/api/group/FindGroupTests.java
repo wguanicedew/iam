@@ -111,7 +111,7 @@ public class FindGroupTests extends TestSupport {
 
     mvc.perform(get(FIND_BY_NAME_RESOURCE).param("name", "unknown_group"))
       .andExpect(OK)
-      .andExpect(jsonPath("$.totalResults", is(0)))
+      .andExpect(jsonPath("$.totalResults").doesNotExist())
       .andExpect(jsonPath("$.Resources", emptyIterable()));
 
   }

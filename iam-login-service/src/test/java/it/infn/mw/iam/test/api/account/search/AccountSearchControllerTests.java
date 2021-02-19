@@ -17,6 +17,8 @@ package it.infn.mw.iam.test.api.account.search;
 
 import static it.infn.mw.iam.api.account.search.AbstractSearchController.DEFAULT_ITEMS_PER_PAGE;
 import static it.infn.mw.iam.api.account.search.AccountSearchController.ACCOUNT_SEARCH_ENDPOINT;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -165,7 +167,7 @@ public class AccountSearchControllerTests {
         .andExpect(status().isOk()).andReturn().getResponse().getContentAsString(),
         new TypeReference<ListResponseDTO<ScimUser>>() {});
     assertThat(response.getTotalResults(), equalTo(expectedSize));
-    assertThat(response.getResources(), equalTo(null));
+    assertThat(response.getResources(), is(empty()));
     assertThat(response.getStartIndex(), equalTo(null));
     assertThat(response.getItemsPerPage(), equalTo(null));
   }
@@ -208,7 +210,7 @@ public class AccountSearchControllerTests {
                 .andReturn().getResponse().getContentAsString(),
             new TypeReference<ListResponseDTO<ScimUser>>() {});
     assertThat(response.getTotalResults(), equalTo(expectedSize));
-    assertThat(response.getResources(), equalTo(null));
+    assertThat(response.getResources(), is(empty()));
     assertThat(response.getStartIndex(), equalTo(null));
     assertThat(response.getItemsPerPage(), equalTo(null));
   }
