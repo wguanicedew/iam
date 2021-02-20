@@ -24,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -47,16 +46,16 @@ import it.infn.mw.iam.api.scim.model.ScimConstants;
 import it.infn.mw.iam.api.scim.model.ScimGroup;
 import it.infn.mw.iam.api.scim.model.ScimGroupPatchRequest;
 import it.infn.mw.iam.api.scim.model.ScimListResponse;
+import it.infn.mw.iam.api.scim.model.ScimMemberRef;
 import it.infn.mw.iam.api.scim.provisioning.ScimGroupProvisioning;
 import it.infn.mw.iam.api.scim.provisioning.paging.ScimPageRequest;
 
 @RestController
 @RequestMapping("/scim/Groups")
-@Transactional
-public class ScimGroupController extends ScimControllerSupport{
-  
+public class ScimGroupController extends ScimControllerSupport {
+
   public static final String INVALID_GROUP_MSG = "Invalid Scim Group";
-  
+
   private Set<String> parseAttributes(final String attributesParameter) {
 
     Set<String> result = new HashSet<>();
@@ -148,5 +147,28 @@ public class ScimGroupController extends ScimControllerSupport{
   public void deleteGroup(@PathVariable final String id) {
 
     groupProvisioningService.delete(id);
+  }
+
+
+  @PreAuthorize("#oauth2.hasScope('scim:read') or hasRole('ADMIN') or #iam.isGroupManager(#id)")
+  @RequestMapping(value = "/{id}/members", method = RequestMethod.GET,
+      produces = ScimConstants.SCIM_CONTENT_TYPE)
+  public ScimListResponse<ScimMemberRef> listMembers(@PathVariable final String id,
+      @RequestParam(required = false) final Integer count,
+      @RequestParam(required = false) final Integer startIndex) {
+
+    return groupProvisioningService.listAccountMembers(id,
+        buildPageRequest(count, startIndex, SCIM_MEMBERS_MAX_PAGE_SIZE));
+  }
+
+  @PreAuthorize("#oauth2.hasScope('scim:read') or hasRole('ADMIN') or #iam.isGroupManager(#id)")
+  @RequestMapping(value = "/{id}/subgroups", method = RequestMethod.GET,
+      produces = ScimConstants.SCIM_CONTENT_TYPE)
+  public ScimListResponse<ScimMemberRef> listSubgroups(@PathVariable final String id,
+      @RequestParam(required = false) final Integer count,
+      @RequestParam(required = false) final Integer startIndex) {
+
+    return groupProvisioningService.listGroupMembers(id,
+        buildPageRequest(count, startIndex, SCIM_MEMBERS_MAX_PAGE_SIZE));
   }
 }

@@ -21,6 +21,7 @@ import it.infn.mw.iam.api.scim.provisioning.paging.ScimPageRequest;
 public class ScimControllerSupport {
 
   protected static final int SCIM_USER_MAX_PAGE_SIZE = 100;
+  protected static final int SCIM_MEMBERS_MAX_PAGE_SIZE = 100;
   protected static final int SCIM_GROUP_MAX_PAGE_SIZE = 10;
 
   protected ScimPageRequest buildUserPageRequest(Integer count, Integer startIndex) {
@@ -31,7 +32,7 @@ public class ScimControllerSupport {
     return buildPageRequest(count, startIndex, SCIM_GROUP_MAX_PAGE_SIZE);
   }
 
-  private ScimPageRequest buildPageRequest(Integer count, Integer startIndex, int maxPageSize) {
+  protected ScimPageRequest buildPageRequest(Integer count, Integer startIndex, int maxPageSize) {
 
     int validCount = 0;
     int validStartIndex = 1;

@@ -36,6 +36,7 @@ import com.google.common.collect.Sets;
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.core.oauth.scope.pdp.ScopePolicyPDP;
 import it.infn.mw.iam.persistence.model.IamAccount;
+import it.infn.mw.iam.persistence.model.IamAccountGroupMembership;
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.model.IamScopePolicy;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
@@ -112,9 +113,9 @@ public class ScopePolicyPdpTests extends ScopePolicyTestUtils {
   public void testGroupPolicyIsEnforced() {
     IamAccount testAccount = findTestAccount();
 
-    Iterator<IamGroup> groupsIter = testAccount.getGroups().iterator();
+    Iterator<IamAccountGroupMembership> groupsIter = testAccount.getGroups().iterator();
 
-    IamGroup firstGroup = groupsIter.next();
+    IamGroup firstGroup = groupsIter.next().getGroup();
 
 
     IamScopePolicy up = initDenyScopePolicy();
@@ -134,9 +135,9 @@ public class ScopePolicyPdpTests extends ScopePolicyTestUtils {
   public void testChainedOverrideAtGroupIsEnforced() {
     IamAccount testAccount = findTestAccount();
 
-    Iterator<IamGroup> groupsIter = testAccount.getGroups().iterator();
+    Iterator<IamAccountGroupMembership> groupsIter = testAccount.getGroups().iterator();
 
-    IamGroup firstGroup = groupsIter.next();
+    IamGroup firstGroup = groupsIter.next().getGroup();
 
     IamScopePolicy gp = initPermitScopePolicy();
     gp.linkGroup(firstGroup);
@@ -157,9 +158,9 @@ public class ScopePolicyPdpTests extends ScopePolicyTestUtils {
   public void testChainedOverrideIsEnforced() {
     IamAccount testAccount = findTestAccount();
 
-    Iterator<IamGroup> groupsIter = testAccount.getGroups().iterator();
+    Iterator<IamAccountGroupMembership> groupsIter = testAccount.getGroups().iterator();
 
-    IamGroup firstGroup = groupsIter.next();
+    IamGroup firstGroup = groupsIter.next().getGroup();
 
     IamScopePolicy gp = initPermitScopePolicy();
     gp.linkGroup(firstGroup);
@@ -184,10 +185,11 @@ public class ScopePolicyPdpTests extends ScopePolicyTestUtils {
   public void testConflictingGroupPolicyDenyOverrides() {
     IamAccount testAccount = findTestAccount();
 
-    Iterator<IamGroup> groupsIter = testAccount.getGroups().iterator();
+    Iterator<IamAccountGroupMembership> groupsIter = testAccount.getGroups().iterator();
 
-    IamGroup firstGroup = groupsIter.next();
-    IamGroup secondGroup = groupsIter.next();
+
+    IamGroup firstGroup = groupsIter.next().getGroup();
+    IamGroup secondGroup = groupsIter.next().getGroup();
 
     IamScopePolicy up = initDenyScopePolicy();
     up.getScopes().add(SCIM_WRITE);
@@ -211,10 +213,11 @@ public class ScopePolicyPdpTests extends ScopePolicyTestUtils {
   public void testConflictingGroupPolicyDenyOverrides2() {
     IamAccount testAccount = findTestAccount();
 
-    Iterator<IamGroup> groupsIter = testAccount.getGroups().iterator();
+    Iterator<IamAccountGroupMembership> groupsIter = testAccount.getGroups().iterator();
 
-    IamGroup firstGroup = groupsIter.next();
-    IamGroup secondGroup = groupsIter.next();
+
+    IamGroup firstGroup = groupsIter.next().getGroup();
+    IamGroup secondGroup = groupsIter.next().getGroup();
 
     IamScopePolicy up = initPermitScopePolicy();
     up.getScopes().add(SCIM_WRITE);

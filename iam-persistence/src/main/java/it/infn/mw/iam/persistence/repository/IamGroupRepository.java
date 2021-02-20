@@ -41,7 +41,7 @@ public interface IamGroupRepository extends PagingAndSortingRepository<IamGroup,
   List<IamGroup> findRootGroups();
 
   @Query("select g from IamGroup g where g.parentGroup = :parentGroup")
-  List<IamGroup> findSubgroups(@Param("parentGroup") IamGroup parentGroup);
+  Page<IamGroup> findSubgroups(@Param("parentGroup") IamGroup parentGroup, Pageable op);
   
   List<IamGroup> findByNameIgnoreCaseContaining(String name);
   
@@ -59,4 +59,19 @@ public interface IamGroupRepository extends PagingAndSortingRepository<IamGroup,
   @Query("select g from IamGroup g join g.labels label where label.prefix is null and label.name = :name and label.value = :value")
   Page<IamGroup> findByLabelNameAndValue(@Param("name") String name, @Param("value") String value,
       Pageable op);
+
+  @Query("select m.group from IamAccountGroupMembership m where m.account.uuid = :accountUuid order by m.group.name ASC")
+  Page<IamGroup> findGroupsByMemberAccountUuid(@Param("accountUuid") String accountUuid,
+      Pageable op);
+
+  @Query("select m.group from IamAccountGroupMembership m where m.account.username = :username order by m.group.name ASC")
+  Page<IamGroup> findGroupsByMemberAccountUsername(@Param("username") String username, Pageable op);
+
+  @Query("select m.group from IamAccountGroupMembership m where m.account.uuid = :accountUuid and m.group.uuid = :groupUuid")
+  Optional<IamGroup> findGroupByMemberAccountUuidAndGroupUuid(
+      @Param("accountUuid") String accountUuid,
+      @Param("groupUuid") String groupUuid);
+
+  @Query("select count(distinct(m)) from IamAccountGroupMembership m where m.group.uuid= :groupUuid")
+  Long countGroupMembersByGroupUuid(@Param("groupUuid") String groupUuid);
 }

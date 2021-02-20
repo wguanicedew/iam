@@ -158,22 +158,6 @@ public class ScimNestedGroupTests {
     // @formatter:on
   }
 
-  @Test
-  @WithMockOAuthUser(clientId = "scim-client-rw", scopes = {"scim:read", "scim:write"})
-  public void testGetParentGroupWithChild() throws Exception {
-    ScimGroup animals = createGroup("animals");
-    ScimGroup mammals = createGroup("mammals", animals);
-
-    // @formatter:off
-    mvc.perform(get("/scim/Groups/{id}", animals.getId()))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$.id", equalTo(animals.getId())))
-      .andExpect(jsonPath("$.displayName", equalTo(animals.getDisplayName())))
-      .andExpect(jsonPath("$.members[0].display", equalTo(mammals.getDisplayName())))
-      .andExpect(jsonPath("$.members[0].value", equalTo(mammals.getId())))
-      .andExpect(jsonPath("$.members[0].$ref", equalTo(mammals.getMeta().getLocation())));
-    // @formatter:on
-  }
 
   @Test
   @WithMockOAuthUser(clientId = "scim-client-rw", scopes = {"scim:read", "scim:write"})

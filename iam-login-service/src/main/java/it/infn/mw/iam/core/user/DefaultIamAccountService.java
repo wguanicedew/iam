@@ -20,6 +20,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static it.infn.mw.iam.core.lifecycle.ExpiredAccountsHandler.LIFECYCLE_STATUS_LABEL;
 
+import java.time.Clock;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -31,6 +32,8 @@ import org.mitre.oauth2.model.OAuth2RefreshTokenEntity;
 import org.mitre.oauth2.service.OAuth2TokenEntityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,14 +45,18 @@ import it.infn.mw.iam.audit.events.account.AccountRemovedEvent;
 import it.infn.mw.iam.audit.events.account.AccountRestoredEvent;
 import it.infn.mw.iam.audit.events.account.attribute.AccountAttributeRemovedEvent;
 import it.infn.mw.iam.audit.events.account.attribute.AccountAttributeSetEvent;
+import it.infn.mw.iam.audit.events.account.group.GroupMembershipAddedEvent;
+import it.infn.mw.iam.audit.events.account.group.GroupMembershipRemovedEvent;
 import it.infn.mw.iam.audit.events.account.label.AccountLabelRemovedEvent;
 import it.infn.mw.iam.audit.events.account.label.AccountLabelSetEvent;
 import it.infn.mw.iam.core.user.exception.CredentialAlreadyBoundException;
 import it.infn.mw.iam.core.user.exception.InvalidCredentialException;
 import it.infn.mw.iam.core.user.exception.UserAlreadyExistsException;
 import it.infn.mw.iam.persistence.model.IamAccount;
+import it.infn.mw.iam.persistence.model.IamAccountGroupMembership;
 import it.infn.mw.iam.persistence.model.IamAttribute;
 import it.infn.mw.iam.persistence.model.IamAuthority;
+import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.model.IamLabel;
 import it.infn.mw.iam.persistence.model.IamOidcId;
 import it.infn.mw.iam.persistence.model.IamSamlId;
@@ -57,23 +64,29 @@ import it.infn.mw.iam.persistence.model.IamSshKey;
 import it.infn.mw.iam.persistence.model.IamX509Certificate;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamAuthoritiesRepository;
+import it.infn.mw.iam.persistence.repository.IamGroupRepository;
 
 @Service
 @Transactional
 public class DefaultIamAccountService implements IamAccountService {
 
+  private final Clock clock;
   private final IamAccountRepository accountRepo;
+  private final IamGroupRepository groupRepo;
   private final IamAuthoritiesRepository authoritiesRepo;
   private final PasswordEncoder passwordEncoder;
   private final ApplicationEventPublisher eventPublisher;
   private final OAuth2TokenEntityService tokenService;
 
   @Autowired
-  public DefaultIamAccountService(IamAccountRepository accountRepo,
-      IamAuthoritiesRepository authoritiesRepo, PasswordEncoder passwordEncoder,
-      ApplicationEventPublisher eventPublisher, OAuth2TokenEntityService tokenService) {
+  public DefaultIamAccountService(Clock clock, IamAccountRepository accountRepo,
+      IamGroupRepository groupRepo, IamAuthoritiesRepository authoritiesRepo,
+      PasswordEncoder passwordEncoder, ApplicationEventPublisher eventPublisher,
+      OAuth2TokenEntityService tokenService) {
 
+    this.clock = clock;
     this.accountRepo = accountRepo;
+    this.groupRepo = groupRepo;
     this.authoritiesRepo = authoritiesRepo;
     this.passwordEncoder = passwordEncoder;
     this.eventPublisher = eventPublisher;
@@ -82,6 +95,15 @@ public class DefaultIamAccountService implements IamAccountService {
 
   private void labelSetEvent(IamAccount account, IamLabel label) {
     eventPublisher.publishEvent(new AccountLabelSetEvent(this, account, label));
+  }
+
+  private void accountAddedToGroupEvent(IamAccount account, IamGroup group) {
+    eventPublisher.publishEvent(new GroupMembershipAddedEvent(this, account, group));
+  }
+
+  private void accountRemovedFromGroupEvent(IamAccount account, IamGroup group) {
+    eventPublisher
+      .publishEvent(new GroupMembershipRemovedEvent(this, account, group));
   }
 
   private void labelRemovedEvent(IamAccount account, IamLabel label) {
@@ -175,7 +197,7 @@ public class DefaultIamAccountService implements IamAccountService {
 
     eventPublisher.publishEvent(new AccountRemovedEvent(this, account,
         "Removed account for user " + account.getUsername()));
-    
+
     return account;
   }
 
@@ -346,9 +368,9 @@ public class DefaultIamAccountService implements IamAccountService {
     final Date previousEndTime = account.getEndTime();
     account.setEndTime(endTime);
     account.touch();
-    
+
     account.removeLabelByName(LIFECYCLE_STATUS_LABEL);
-    
+
     accountRepo.save(account);
 
     eventPublisher
@@ -398,5 +420,47 @@ public class DefaultIamAccountService implements IamAccountService {
     }
 
     return account;
+  }
+
+  @Override
+  public IamAccount addToGroup(IamAccount account, IamGroup group) {
+
+    Optional<IamGroup> maybeGroup =
+        groupRepo.findGroupByMemberAccountUuidAndGroupUuid(account.getUuid(), group.getUuid());
+
+    if (!maybeGroup.isPresent()) {
+      account.getGroups()
+        .add(IamAccountGroupMembership.forAccountAndGroup(clock.instant(), account, group));
+
+      accountRepo.save(account);
+      accountAddedToGroupEvent(account, group);
+    }
+
+    return account;
+  }
+
+  @Override
+  public IamAccount removeFromGroup(IamAccount account, IamGroup group) {
+    Optional<IamGroup> maybeGroup =
+        groupRepo.findGroupByMemberAccountUuidAndGroupUuid(account.getUuid(), group.getUuid());
+
+    if (maybeGroup.isPresent()) {
+      account.getGroups()
+        .remove(IamAccountGroupMembership.forAccountAndGroup(clock.instant(), account, group));
+      accountRepo.save(account);
+      accountRemovedFromGroupEvent(account, group);
+    }
+    return account;
+  }
+
+  @Override
+  public IamAccount saveAccount(IamAccount account) {
+    account.setLastUpdateTime(Date.from(clock.instant()));
+    return accountRepo.save(account);
+  }
+
+  @Override
+  public Page<IamAccount> fingGroupMembers(IamGroup group, Pageable page) {
+    return accountRepo.findByGroupUuid(group.getUuid(), page);
   }
 }

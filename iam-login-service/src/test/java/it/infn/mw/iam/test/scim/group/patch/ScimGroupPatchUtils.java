@@ -16,13 +16,12 @@
 package it.infn.mw.iam.test.scim.group.patch;
 
 import static it.infn.mw.iam.api.scim.model.ScimConstants.SCIM_CONTENT_TYPE;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.CoreMatchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
@@ -30,10 +29,13 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import it.infn.mw.iam.api.scim.model.ScimGroup;
 import it.infn.mw.iam.api.scim.model.ScimGroupPatchRequest;
+import it.infn.mw.iam.api.scim.model.ScimListResponse;
+import it.infn.mw.iam.api.scim.model.ScimMemberRef;
 import it.infn.mw.iam.api.scim.model.ScimResource;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.test.TestUtils;
@@ -41,8 +43,11 @@ import it.infn.mw.iam.test.scim.ScimUtils;
 
 public class ScimGroupPatchUtils {
 
-  public final static String GROUP_URI = ScimUtils.getGroupsLocation();
-  public final static String USER_URI = ScimUtils.getUsersLocation();
+  public static final String GROUP_URI = ScimUtils.getGroupsLocation();
+  public static final String USER_URI = ScimUtils.getUsersLocation();
+
+  public static final TypeReference<ScimListResponse<ScimMemberRef>> SCIM_MEMBER_LIST_TYPE =
+      new TypeReference<ScimListResponse<ScimMemberRef>>() {};
 
   @Autowired
   protected ObjectMapper objectMapper;
@@ -104,16 +109,32 @@ public class ScimGroupPatchUtils {
 
     ScimGroup g = getGroup(group.getMeta().getLocation());
 
-    assertThat(g.getMembers(), hasItem(TestUtils.getMemberRef(members.get(0))));
-    assertThat(g.getMembers(), hasItem(TestUtils.getMemberRef(members.get(1))));
-    assertThat(g.getMembers(), hasItem(TestUtils.getMemberRef(members.get(2))));
+    mvc.perform(get(group.getMeta().getLocation() + "/members"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.totalResults", is(members.size())));
+
+
   }
 
-  protected void assertMembership(ScimUser user, ScimGroup group, boolean isMember) {
+  protected void assertIsGroupMember(ScimUser user, ScimGroup group)
+      throws Exception {
 
-    assertThat(group.getMembers().stream().anyMatch(m -> m.getValue().equals(user.getId())),
-        equalTo(isMember));
+     
+    mvc.perform(get(group.getMeta().getLocation() + "/members"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.Resources[?(@.value=='" + user.getId() + "')]").exists());
+      
   }
+
+  protected void assertIsNotGroupMember(ScimUser user, ScimGroup group) throws Exception {
+
+
+    mvc.perform(get(group.getMeta().getLocation() + "/members"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.Resources[?(@.value=='" + user.getId() + "')]").doesNotExist());
+
+  }
+
 
   protected ScimGroup getGroup(String location) throws Exception {
     String result = mvc.perform(get(location).contentType(SCIM_CONTENT_TYPE))

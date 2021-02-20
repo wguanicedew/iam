@@ -41,6 +41,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.scim.model.ScimListResponse;
+import it.infn.mw.iam.persistence.repository.IamGroupRepository;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 import it.infn.mw.iam.test.scim.ScimUtils;
 import it.infn.mw.iam.test.util.WithMockOAuthUser;
@@ -55,12 +56,16 @@ public class ScimGroupProvisioningListTests {
   @Autowired
   private WebApplicationContext context;
 
+  @Autowired
+  private IamGroupRepository groupRepo;
+
   private MockMvc mvc;
 
   private final static String GROUP_URI = ScimUtils.getGroupsLocation();
 
-  private Integer totalResults = 22;
-  private Integer pageSize = 10;
+  private final Integer pageSize = 10;
+
+  private Integer totalResults = 0;
 
   @Before
   public void setup() {
@@ -68,6 +73,8 @@ public class ScimGroupProvisioningListTests {
       .apply(springSecurity())
       .alwaysDo(log())
       .build();
+    
+    totalResults = (int) groupRepo.count();
   }
 
   @Test

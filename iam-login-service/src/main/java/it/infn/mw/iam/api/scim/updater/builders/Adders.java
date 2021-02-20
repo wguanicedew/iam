@@ -16,7 +16,6 @@
 package it.infn.mw.iam.api.scim.updater.builders;
 
 
-import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_ADD_GROUP_MEMBERSHIP;
 import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_ADD_OIDC_ID;
 import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_ADD_SAML_ID;
 import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_ADD_SSH_KEY;
@@ -36,13 +35,11 @@ import it.infn.mw.iam.api.scim.updater.AccountUpdater;
 import it.infn.mw.iam.api.scim.updater.DefaultAccountUpdater;
 import it.infn.mw.iam.api.scim.updater.util.AccountFinder;
 import it.infn.mw.iam.api.scim.updater.util.IdNotBoundChecker;
-import it.infn.mw.iam.audit.events.account.group.GroupMembershipAddedEvent;
 import it.infn.mw.iam.audit.events.account.oidc.OidcAccountAddedEvent;
 import it.infn.mw.iam.audit.events.account.saml.SamlAccountAddedEvent;
 import it.infn.mw.iam.audit.events.account.ssh.SshKeyAddedEvent;
 import it.infn.mw.iam.audit.events.account.x509.X509CertificateAddedEvent;
 import it.infn.mw.iam.persistence.model.IamAccount;
-import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.model.IamOidcId;
 import it.infn.mw.iam.persistence.model.IamSamlId;
 import it.infn.mw.iam.persistence.model.IamSshKey;
@@ -56,7 +53,6 @@ public class Adders extends Replacers {
   final Predicate<Collection<IamSamlId>> samlIdAddChecks;
   final Predicate<Collection<IamSshKey>> sshKeyAddChecks;
   final Predicate<Collection<IamX509Certificate>> x509CertificateAddChecks;
-  final Predicate<Collection<IamGroup>> addMembersChecks;
 
   final AccountFinder<IamOidcId> findByOidcId;
   final AccountFinder<IamSamlId> findBySamlId;
@@ -75,7 +71,6 @@ public class Adders extends Replacers {
     samlIdAddChecks = buildSamlIdsAddChecks();
     sshKeyAddChecks = buildSshKeyAddChecks();
     x509CertificateAddChecks = buildX509CertificateAddChecks();
-    addMembersChecks = buildAddMembersCheck();
   }
 
 
@@ -174,10 +169,6 @@ public class Adders extends Replacers {
     return x509CertificatesNotBound.and(x509CertificatesNotOwned);
   }
 
-  private Predicate<Collection<IamGroup>> buildAddMembersCheck() {
-    return a -> !account.getGroups().containsAll(a);
-  }
-
   public AccountUpdater oidcId(Collection<IamOidcId> newOidcIds) {
 
     return new DefaultAccountUpdater<Collection<IamOidcId>, OidcAccountAddedEvent>(account,
@@ -206,10 +197,4 @@ public class Adders extends Replacers {
         x509CertificateAddChecks, X509CertificateAddedEvent::new);
   }
 
-  public AccountUpdater group(Collection<IamGroup> groups) {
-
-    return new DefaultAccountUpdater<Collection<IamGroup>, GroupMembershipAddedEvent>(account,
-        ACCOUNT_ADD_GROUP_MEMBERSHIP, account::linkMembers, groups, addMembersChecks,
-        GroupMembershipAddedEvent::new);
-  }
 }

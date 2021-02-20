@@ -40,7 +40,7 @@ import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
 import it.infn.mw.iam.core.oauth.scope.matchers.ScopeMatcher;
 import it.infn.mw.iam.core.oauth.scope.matchers.StructuredPathScopeMatcher;
 import it.infn.mw.iam.persistence.model.IamAccount;
-import it.infn.mw.iam.persistence.model.IamGroup;
+import it.infn.mw.iam.persistence.model.IamAccountGroupMembership;
 import it.infn.mw.iam.persistence.model.IamScopePolicy;
 import it.infn.mw.iam.persistence.repository.IamScopePolicyRepository;
 
@@ -195,9 +195,9 @@ public class DefaultScopePolicyPDP implements ScopePolicyPDP {
 
     Set<IamScopePolicy> groupPolicies = Sets.newHashSet();
 
-    Set<IamGroup> groups = account.getGroups();
-    for (IamGroup g : groups) {
-      groupPolicies.addAll(g.getScopePolicies());
+    Set<IamAccountGroupMembership> groups = account.getGroups();
+    for (IamAccountGroupMembership g : groups) {
+      groupPolicies.addAll(g.getGroup().getScopePolicies());
     }
 
     return groupPolicies;

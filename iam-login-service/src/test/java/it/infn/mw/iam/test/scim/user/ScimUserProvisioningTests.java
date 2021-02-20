@@ -21,7 +21,7 @@ import static it.infn.mw.iam.test.scim.ScimUtils.SCIM_WRITE_SCOPE;
 import static it.infn.mw.iam.test.scim.ScimUtils.buildUser;
 import static it.infn.mw.iam.test.scim.ScimUtils.buildUserWithUUID;
 import static it.infn.mw.iam.test.scim.ScimUtils.getUserLocation;
-import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
@@ -130,7 +130,7 @@ public class ScimUserProvisioningTests extends ScimUserTestSupport {
     assertThat(user.getEmails().get(0).getType(), equalTo(ScimEmailType.work));
     assertThat(user.getEmails().get(0).getPrimary(), equalTo(true));
     assertThat(user.getGroups(), hasSize(equalTo(2)));
-    assertThat(user.getGroups(), contains(analysisRef, productionRef));
+    assertThat(user.getGroups(), hasItems(analysisRef, productionRef));
     assertThat(user.getIndigoUser().getOidcIds(), hasSize(greaterThan(0)));
     assertThat(user.getIndigoUser().getOidcIds().get(0).getIssuer(),
         equalTo("https://accounts.google.com"));

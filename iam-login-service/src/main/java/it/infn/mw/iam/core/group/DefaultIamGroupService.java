@@ -82,7 +82,6 @@ public class DefaultIamGroupService implements IamGroupService, ApplicationEvent
     g.setCreationTime(creationTime);
     g.setLastUpdateTime(creationTime);
 
-    g.setAccounts(newHashSet());
     g.setChildrenGroups(newHashSet());
 
     createGroupManagerAuthority(g);
@@ -110,7 +109,9 @@ public class DefaultIamGroupService implements IamGroupService, ApplicationEvent
   public IamGroup deleteGroup(IamGroup g) {
     checkNotNull(g);
 
-    if (!(g.getAccounts().isEmpty() && g.getChildrenGroups().isEmpty())) {
+    Long membersCount = groupRepo.countGroupMembersByGroupUuid(g.getUuid());
+
+    if (membersCount > 0L || g.getChildrenGroups().size() > 0) {
       throw new InvalidGroupOperationError("Group is not empty");
     }
 
@@ -206,7 +207,6 @@ public class DefaultIamGroupService implements IamGroupService, ApplicationEvent
     newGroup.setId(oldGroup.getId());
     newGroup.setUuid(oldGroup.getUuid());
     newGroup.setCreationTime(oldGroup.getCreationTime());
-    newGroup.setAccounts(oldGroup.getAccounts());
 
     newGroup.setDescription(oldGroup.getDescription());
     newGroup.setParentGroup(oldGroup.getParentGroup());
@@ -271,6 +271,11 @@ public class DefaultIamGroupService implements IamGroupService, ApplicationEvent
     labelRemovedEvent(g, l);
     groupRepo.save(g);
     return g;
+  }
+
+  @Override
+  public Page<IamGroup> findSubgroups(IamGroup group, Pageable page) {
+    return groupRepo.findSubgroups(group, page);
   }
 
 }

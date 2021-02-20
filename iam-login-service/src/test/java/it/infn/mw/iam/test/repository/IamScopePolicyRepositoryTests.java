@@ -36,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.google.common.collect.Sets;
 
 import it.infn.mw.iam.IamLoginService;
+import it.infn.mw.iam.core.group.IamGroupService;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.model.IamScopePolicy;
@@ -60,6 +61,9 @@ public class IamScopePolicyRepositoryTests extends ScopePolicyTestUtils {
 
   @Autowired
   IamAccountRepository accountRepo;
+
+  @Autowired
+  IamGroupService groupService;
 
   @Before
   public void cleanupPolicies() {
@@ -140,28 +144,34 @@ public class IamScopePolicyRepositoryTests extends ScopePolicyTestUtils {
   @Test
   public void testGroupPolicyIsRemovedWhenGroupIsRemoved() {
 
-    IamGroup analysisGroup = groupRepo.findByName("Analysis")
-      .orElseThrow(() -> new AssertionError("Expected Analysis group not found"));
+    IamGroup emptyGroup = new IamGroup();
+    emptyGroup.setName("empty");
+    emptyGroup = groupService.createGroup(emptyGroup);
 
     IamScopePolicy policy = initDenyScopePolicy();
-    policy.setGroup(analysisGroup);
+    policy.setGroup(emptyGroup);
     policy.setRule(PolicyRule.PERMIT);
     policy.setScopes(Sets.newHashSet(SCIM_WRITE));
 
+    emptyGroup.getScopePolicies().add(policy);
+
     policyRepo.save(policy);
+    groupRepo.save(emptyGroup);
 
     IamScopePolicy policy2 = initDenyScopePolicy();
-    policy2.setGroup(analysisGroup);
+    policy2.setGroup(emptyGroup);
     policy2.setRule(PolicyRule.DENY);
     policy2.setScopes(Sets.newHashSet(WHATEVER));
 
+    emptyGroup.getScopePolicies().add(policy2);
     policyRepo.save(policy2);
+    groupRepo.save(emptyGroup);
 
-    List<IamScopePolicy> policies = policyRepo.findByGroup(analysisGroup);
+    List<IamScopePolicy> policies = policyRepo.findByGroup(emptyGroup);
     assertThat(policies, hasSize(2));
 
-    groupRepo.delete(analysisGroup);
-    policies = policyRepo.findByGroup(analysisGroup);
+    groupRepo.delete(emptyGroup);
+    policies = policyRepo.findByGroup(emptyGroup);
     assertThat(policies, hasSize(0));
 
   }

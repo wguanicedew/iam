@@ -15,8 +15,7 @@
  */
 package it.infn.mw.iam.test.api.account.group;
 
-import static org.hamcrest.CoreMatchers.hasItem;
-import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertThat;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -44,7 +43,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import it.infn.mw.iam.IamLoginService;
+import it.infn.mw.iam.core.user.IamAccountService;
 import it.infn.mw.iam.persistence.model.IamAccount;
+import it.infn.mw.iam.persistence.model.IamAccountGroupMembership;
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamGroupRepository;
@@ -68,6 +69,9 @@ public class GroupMembersIntegrationTests {
   private static final String TEST_001_GROUP_ID = "c617d586-54e6-411d-8e38-649677980001";
 
   private static final String TEST_001_GM = "GM:" + TEST_001_GROUP_ID;
+
+  @Autowired
+  private IamAccountService accountService;
 
   @Autowired
   private IamAccountRepository accountRepo;
@@ -103,10 +107,7 @@ public class GroupMembersIntegrationTests {
   }
 
   private void addAccountToGroup(IamAccount account, IamGroup group) {
-    account.getGroups().add(group);
-    group.getAccounts().add(account);
-    accountRepo.save(account);
-    groupRepo.save(group);
+    accountService.addToGroup(account, group);
   }
 
   @Test
@@ -173,10 +174,17 @@ public class GroupMembersIntegrationTests {
     mvc.perform(post("/iam/account/{account}/groups/{group}", account.getUuid(), group.getUuid()))
       .andExpect(status().isCreated());
 
-    group =
-        groupRepo.findByName(TEST_001_GROUP).orElseThrow(assertionError(EXPECTED_GROUP_NOT_FOUND));
+    account =
+        accountRepo.findByUsername(TEST_USER).orElseThrow(assertionError(EXPECTED_USER_NOT_FOUND));
 
-    assertThat(group.getAccounts(), hasItem(account));
+    assertThat(
+        groupRepo.findGroupByMemberAccountUuidAndGroupUuid(account.getUuid(), group.getUuid())
+          .isPresent(),
+        is(true));
+
+    IamAccountGroupMembership m =
+        IamAccountGroupMembership.forAccountAndGroup(null, account, group);
+    assertThat(account.getGroups().contains(m), is(true));
   }
 
   @Test
@@ -196,7 +204,15 @@ public class GroupMembersIntegrationTests {
     group =
         groupRepo.findByName(TEST_001_GROUP).orElseThrow(assertionError(EXPECTED_GROUP_NOT_FOUND));
 
-    assertThat(group.getAccounts(), not(hasItem(account)));
+    assertThat(
+        groupRepo.findGroupByMemberAccountUuidAndGroupUuid(account.getUuid(), group.getUuid())
+          .isPresent(),
+        is(false));
+
+    IamAccountGroupMembership m =
+        IamAccountGroupMembership.forAccountAndGroup(null, account, group);
+    assertThat(account.getGroups().contains(m), is(false));
+
   }
 
   @Test
@@ -214,7 +230,14 @@ public class GroupMembersIntegrationTests {
     group =
         groupRepo.findByName(TEST_001_GROUP).orElseThrow(assertionError(EXPECTED_GROUP_NOT_FOUND));
 
-    assertThat(group.getAccounts(), hasItem(account));
+    assertThat(
+        groupRepo.findGroupByMemberAccountUuidAndGroupUuid(account.getUuid(), group.getUuid())
+          .isPresent(),
+        is(true));
+
+    IamAccountGroupMembership m =
+        IamAccountGroupMembership.forAccountAndGroup(null, account, group);
+    assertThat(account.getGroups().contains(m), is(true));
   }
 
 
@@ -235,42 +258,19 @@ public class GroupMembersIntegrationTests {
     group =
         groupRepo.findByName(TEST_001_GROUP).orElseThrow(assertionError(EXPECTED_GROUP_NOT_FOUND));
 
-    assertThat(group.getAccounts(), not(hasItem(account)));
-  }
+    assertThat(
+        groupRepo.findGroupByMemberAccountUuidAndGroupUuid(account.getUuid(), group.getUuid())
+          .isPresent(),
+        is(false));
 
-  @Test
-  @WithMockUser(username = ADMIN_USER, roles = {"USER", "ADMIN"})
-  public void cannotAddExistingMember() throws Exception {
-
-    IamAccount account =
-        accountRepo.findByUsername(TEST_USER).orElseThrow(assertionError(EXPECTED_USER_NOT_FOUND));
-
-    IamGroup group =
-        groupRepo.findByName(TEST_001_GROUP).orElseThrow(assertionError(EXPECTED_GROUP_NOT_FOUND));
-
-    addAccountToGroup(account, group);
-    
-    mvc.perform(post("/iam/account/{account}/groups/{group}", account.getUuid(), group.getUuid()))
-      .andExpect(status().isBadRequest())
-      .andExpect(jsonPath("$.error", containsString("is already a member")));
+    IamAccountGroupMembership m =
+        IamAccountGroupMembership.forAccountAndGroup(null, account, group);
+    assertThat(account.getGroups().contains(m), is(false));
 
   }
 
-  @Test
-  @WithMockUser(username = ADMIN_USER, roles = {"USER", "ADMIN"})
-  public void cannotDeleteNonMember() throws Exception {
-
-    IamAccount account =
-        accountRepo.findByUsername(TEST_USER).orElseThrow(assertionError(EXPECTED_USER_NOT_FOUND));
-
-    IamGroup group =
-        groupRepo.findByName(TEST_001_GROUP).orElseThrow(assertionError(EXPECTED_GROUP_NOT_FOUND));
-
-    mvc.perform(delete("/iam/account/{account}/groups/{group}", account.getUuid(), group.getUuid()))
-    .andExpect(status().isBadRequest())
-    .andExpect(jsonPath("$.error", containsString("is not a member")));
-  }
   
+
   @Test
   @WithMockUser(username = ADMIN_USER, roles = {"USER", "ADMIN"})
   public void cannotChangeMembershipForUnknownGroupOrAccount()throws Exception {

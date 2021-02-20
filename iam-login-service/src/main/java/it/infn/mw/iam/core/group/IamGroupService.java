@@ -26,11 +26,15 @@ import it.infn.mw.iam.persistence.model.IamLabel;
 public interface IamGroupService {
   
   long countAllGroups();
+
   Page<IamGroup> findAll(Pageable page);
+
+  Page<IamGroup> findSubgroups(IamGroup group, Pageable page);
   
   Optional<IamGroup> findByNameWithDifferentId(String name, String uuid);
   Optional<IamGroup> findByName(String name);
   Optional<IamGroup> findByUuid(String uuid);
+
   IamGroup save(IamGroup g);
   
   String groupManagerAuthority(IamGroup g);
@@ -48,4 +52,5 @@ public interface IamGroupService {
   IamGroup deleteLabel(IamGroup g, IamLabel l);
 
   void touchGroup(IamGroup g);
+
 }

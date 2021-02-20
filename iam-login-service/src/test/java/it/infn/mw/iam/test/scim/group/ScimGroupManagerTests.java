@@ -29,7 +29,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.After;
@@ -48,6 +47,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.scim.converter.UserConverter;
@@ -194,7 +194,7 @@ public class ScimGroupManagerTests {
       .orElseThrow(() -> new AssertionError("Expected user test not found"));
 
     ScimUser scimTestUser = userConverter.dtoFromEntity(testAccount);
-    List<ScimUser> members = new ArrayList<ScimUser>();
+    List<ScimUser> members = Lists.newArrayList();
     members.add(scimTestUser);
 
     ScimGroupPatchRequest patchAddReq =

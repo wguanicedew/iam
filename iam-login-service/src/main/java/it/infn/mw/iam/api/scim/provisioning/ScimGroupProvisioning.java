@@ -15,6 +15,7 @@
  */
 package it.infn.mw.iam.api.scim.provisioning;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
 
 import java.time.Clock;
@@ -22,6 +23,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Supplier;
+
+import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -33,6 +37,7 @@ import com.google.common.base.Strings;
 
 import it.infn.mw.iam.api.common.OffsetPageable;
 import it.infn.mw.iam.api.scim.converter.GroupConverter;
+import it.infn.mw.iam.api.scim.converter.ScimResourceLocationProvider;
 import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
 import it.infn.mw.iam.api.scim.exception.ScimPatchOperationNotSupported;
 import it.infn.mw.iam.api.scim.exception.ScimResourceExistsException;
@@ -42,15 +47,17 @@ import it.infn.mw.iam.api.scim.model.ScimListResponse;
 import it.infn.mw.iam.api.scim.model.ScimListResponse.ScimListResponseBuilder;
 import it.infn.mw.iam.api.scim.model.ScimMemberRef;
 import it.infn.mw.iam.api.scim.model.ScimPatchOperation;
+import it.infn.mw.iam.api.scim.model.ScimPatchOperation.ScimPatchOperationType;
 import it.infn.mw.iam.api.scim.provisioning.paging.ScimPageRequest;
 import it.infn.mw.iam.api.scim.updater.AccountUpdater;
 import it.infn.mw.iam.api.scim.updater.factory.DefaultGroupMembershipUpdaterFactory;
 import it.infn.mw.iam.core.group.IamGroupService;
+import it.infn.mw.iam.core.user.IamAccountService;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamGroup;
-import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
 @Service
+@Transactional
 public class ScimGroupProvisioning
     implements ScimProvisioning<ScimGroup, List<ScimMemberRef>>, ApplicationEventPublisherAware {
 
@@ -58,37 +65,41 @@ public class ScimGroupProvisioning
   private static final int GROUP_FULLNAME_MAX_LENGTH = 512;
 
   private final IamGroupService groupService;
-  private final IamAccountRepository accountRepository;
+  private final IamAccountService accountService;
   private final Clock clock;
 
   private final GroupConverter converter;
 
   private final DefaultGroupMembershipUpdaterFactory groupUpdaterFactory;
   private ApplicationEventPublisher eventPublisher;
+  private final ScimResourceLocationProvider locationProvider;
 
   @Autowired
-  public ScimGroupProvisioning(IamGroupService groupService, IamAccountRepository accountRepository,
-      GroupConverter converter, Clock clock) {
+  public ScimGroupProvisioning(IamGroupService groupService, IamAccountService accountService,
+      GroupConverter converter, ScimResourceLocationProvider locationProvider, Clock clock) {
 
-    this.accountRepository = accountRepository;
+    this.accountService = accountService;
     this.groupService = groupService;
     this.converter = converter;
     this.clock = clock;
 
-    this.groupUpdaterFactory = new DefaultGroupMembershipUpdaterFactory(accountRepository);
-
+    this.groupUpdaterFactory = new DefaultGroupMembershipUpdaterFactory(accountService);
+    this.locationProvider = locationProvider;
   }
 
-  private void checkUnsupportedPath(ScimPatchOperation<List<ScimMemberRef>> op) {
+  private void patchOperationSanityChecks(ScimPatchOperation<List<ScimMemberRef>> op) {
 
     if (op.getPath() == null || op.getPath().isEmpty()) {
       throw new ScimPatchOperationNotSupported("empty path value is not currently supported");
     }
-    if ("members".equals(op.getPath())) {
-      return;
+    if (!"members".equals(op.getPath())) {
+      throw new ScimPatchOperationNotSupported(
+          "path value " + op.getPath() + " is not currently supported");
     }
-    throw new ScimPatchOperationNotSupported(
-        "path value " + op.getPath() + " is not currently supported");
+
+    if (op.getOp().equals(ScimPatchOperationType.replace)) {
+      throw new ScimPatchOperationNotSupported("'replace' operation is not currently supported");
+    }
   }
 
   @Override
@@ -150,7 +161,7 @@ public class ScimGroupProvisioning
 
   private void executePatchOperation(IamGroup group, ScimPatchOperation<List<ScimMemberRef>> op) {
 
-    checkUnsupportedPath(op);
+    patchOperationSanityChecks(op);
 
     List<AccountUpdater> updaters = groupUpdaterFactory.getUpdatersForPatchOperation(group, op);
     List<AccountUpdater> updatesToPublish = new ArrayList<>();
@@ -160,8 +171,7 @@ public class ScimGroupProvisioning
     for (AccountUpdater u : updaters) {
       if (u.update()) {
         IamAccount a = u.getAccount();
-        a.touch();
-        accountRepository.save(a);
+        accountService.saveAccount(a);
         hasChanged = true;
         updatesToPublish.add(u);
       }
@@ -195,7 +205,7 @@ public class ScimGroupProvisioning
 
     idSanityChecks(id);
 
-    IamGroup group = groupService.findByUuid(id).orElseThrow(() -> noGroupMappedToId(id));
+    IamGroup group = groupService.findByUuid(id).orElseThrow(noGroupMappedToId(id));
 
     return converter.dtoFromEntity(group);
   }
@@ -217,18 +227,18 @@ public class ScimGroupProvisioning
   }
 
   @Override
-  public ScimListResponse<ScimGroup> list(ScimPageRequest params) {
+  public ScimListResponse<ScimGroup> list(ScimPageRequest pageRequest) {
 
     ScimListResponseBuilder<ScimGroup> builder = ScimListResponse.builder();
 
-    if (params.getCount() == 0) {
+    if (pageRequest.getCount() == 0) {
 
       long totalResults = groupService.countAllGroups();
       builder.totalResults(totalResults);
 
     } else {
 
-      OffsetPageable op = new OffsetPageable(params.getStartIndex(), params.getCount());
+      OffsetPageable op = new OffsetPageable(pageRequest.getStartIndex(), pageRequest.getCount());
 
       Page<IamGroup> results = groupService.findAll(op);
 
@@ -244,14 +254,15 @@ public class ScimGroupProvisioning
     return builder.build();
   }
 
-  private ScimResourceNotFoundException noGroupMappedToId(String id) {
-    return new ScimResourceNotFoundException(String.format("No group mapped to id '%s'", id));
+  private Supplier<ScimResourceNotFoundException> noGroupMappedToId(String id) {
+    return () -> new ScimResourceNotFoundException(String.format("No group mapped to id '%s'", id));
   }
+
 
   @Override
   public ScimGroup replace(String id, ScimGroup scimItemToBeReplaced) {
 
-    IamGroup oldGroup = groupService.findByUuid(id).orElseThrow(() -> noGroupMappedToId(id));
+    IamGroup oldGroup = groupService.findByUuid(id).orElseThrow(noGroupMappedToId(id));
 
     String displayName = scimItemToBeReplaced.getDisplayName();
     displayNameSanityChecks(displayName);
@@ -273,9 +284,59 @@ public class ScimGroupProvisioning
   @Override
   public void update(String id, List<ScimPatchOperation<List<ScimMemberRef>>> operations) {
 
-    IamGroup iamGroup = groupService.findByUuid(id).orElseThrow(() -> noGroupMappedToId(id));
+    IamGroup iamGroup = groupService.findByUuid(id).orElseThrow(noGroupMappedToId(id));
 
     operations.forEach(op -> executePatchOperation(iamGroup, op));
+  }
+
+
+  public ScimListResponse<ScimMemberRef> listAccountMembers(String id,
+      ScimPageRequest pageRequest) {
+
+    IamGroup iamGroup = groupService.findByUuid(id).orElseThrow(noGroupMappedToId(id));
+
+    ScimListResponseBuilder<ScimMemberRef> results = new ScimListResponseBuilder<>();
+
+    OffsetPageable pr = new OffsetPageable(pageRequest.getStartIndex(), pageRequest.getCount());
+    Page<IamAccount> accounts = accountService.fingGroupMembers(iamGroup, pr);
+
+    List<ScimMemberRef> resources = newArrayList();
+
+    for (IamAccount a : accounts.getContent()) {
+      resources.add(ScimMemberRef.builder()
+        .value(a.getUuid())
+        .display(a.getUserInfo().getName())
+        .ref(locationProvider.userLocation(a.getUuid()))
+        .build());
+    }
+
+    results.fromPage(accounts, pr);
+    results.resources(resources);
+    return results.build();
+  }
+
+  public ScimListResponse<ScimMemberRef> listGroupMembers(String id,
+      ScimPageRequest pageRequest) {
+
+    IamGroup iamGroup = groupService.findByUuid(id).orElseThrow(noGroupMappedToId(id));
+
+    ScimListResponseBuilder<ScimMemberRef> results = new ScimListResponseBuilder<>();
+    OffsetPageable pr = new OffsetPageable(pageRequest.getStartIndex(), pageRequest.getCount());
+    Page<IamGroup> subgroups = groupService.findSubgroups(iamGroup, pr);
+
+    List<ScimMemberRef> resources = newArrayList();
+    for (IamGroup g : subgroups.getContent()) {
+      resources.add(ScimMemberRef.builder()
+        .value(g.getUuid())
+        .display(g.getName())
+        .ref(locationProvider.groupLocation(g.getUuid()))
+        .build());
+    }
+
+    results.fromPage(subgroups, pr);
+    results.resources(resources);
+    return results.build();
+
   }
 
 }

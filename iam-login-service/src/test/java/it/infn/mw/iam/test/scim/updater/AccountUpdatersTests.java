@@ -38,7 +38,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 import it.infn.mw.iam.api.scim.exception.ScimResourceExistsException;
 import it.infn.mw.iam.api.scim.updater.Updater;
@@ -835,29 +834,6 @@ public class AccountUpdatersTests extends X509TestSupport {
 
   }
 
-  @Test
-  public void testGroupMembershipAdderWorks() {
-
-    Updater u = adder().group(Lists.newArrayList(group));
-
-    assertThat(u.update(), is(true));
-    assertThat(u.update(), is(false));
-
-    assertThat(account.getGroups(), hasSize(1));
-    assertThat(account.getGroups(), hasItems(group));
-  }
-
-  @Test
-  public void testGroupMembershipRemoverWorks() {
-
-    account.setGroups(Sets.newHashSet(group));
-    Updater u = removers().group(Lists.newArrayList(group));
-
-    assertThat(u.update(), is(true));
-    assertThat(u.update(), is(false));
-
-    assertThat(account.getGroups(), hasSize(0));
-  }
 
   @Test
   public void testPictureRemoverWorks() {

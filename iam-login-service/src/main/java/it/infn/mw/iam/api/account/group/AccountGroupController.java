@@ -17,7 +17,6 @@ package it.infn.mw.iam.api.account.group;
 
 import static it.infn.mw.iam.api.account.group.ErrorSuppliers.noSuchAccount;
 import static it.infn.mw.iam.api.account.group.ErrorSuppliers.noSuchGroup;
-import static java.lang.String.format;
 import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
@@ -34,67 +33,49 @@ import org.springframework.web.bind.annotation.RestController;
 
 import it.infn.mw.iam.api.common.ErrorDTO;
 import it.infn.mw.iam.api.common.NoSuchAccountError;
+import it.infn.mw.iam.core.group.IamGroupService;
 import it.infn.mw.iam.core.group.error.NoSuchGroupError;
+import it.infn.mw.iam.core.user.IamAccountService;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamGroup;
-import it.infn.mw.iam.persistence.repository.IamAccountRepository;
-import it.infn.mw.iam.persistence.repository.IamGroupRepository;
 
 @RestController
 public class AccountGroupController {
 
-  final IamAccountRepository accountRepo;
-  final IamGroupRepository groupRepo;
+  private final IamAccountService accountService;
+  private final IamGroupService groupService;
 
   @Autowired
-  public AccountGroupController(IamAccountRepository accountRepo, IamGroupRepository groupRepo) {
-    this.accountRepo = accountRepo;
-    this.groupRepo = groupRepo;
+  public AccountGroupController(IamAccountService accountService, IamGroupService groupService) {
+    this.accountService = accountService;
+    this.groupService = groupService;
   }
-
 
   @RequestMapping(value = "/iam/account/{accountUuid}/groups/{groupUuid}", method = POST)
   @ResponseStatus(value = HttpStatus.CREATED)
   @PreAuthorize("hasRole('ADMIN') or #iam.isGroupManager(#groupUuid)")
   public void addAccountToGroup(@PathVariable String accountUuid, @PathVariable String groupUuid) {
-    IamGroup group = groupRepo.findByUuid(groupUuid).orElseThrow(noSuchGroup(groupUuid));
+    IamGroup group = groupService.findByUuid(groupUuid).orElseThrow(noSuchGroup(groupUuid));
 
     IamAccount account =
-        accountRepo.findByUuid(accountUuid).orElseThrow(noSuchAccount(accountUuid));
+        accountService.findByUuid(accountUuid).orElseThrow(noSuchAccount(accountUuid));
 
-    if (group.getAccounts().contains(account)) {
-      throw new AlreadyMemberError(
-          format("Account %s is already a member of group %s", account.getUuid(), group.getUuid()));
-    }
-
-    account.getGroups().add(group);
-    group.getAccounts().add(account);
-
-    accountRepo.save(account);
-    groupRepo.save(group);
+    accountService.addToGroup(account, group);
   }
 
   @RequestMapping(value = "/iam/account/{accountUuid}/groups/{groupUuid}", method = DELETE)
   @ResponseStatus(value = HttpStatus.NO_CONTENT)
   @PreAuthorize("hasRole('ADMIN') or #iam.isGroupManager(#groupUuid)")
-  public void removeAccountFromGroup(@PathVariable String accountUuid, @PathVariable String groupUuid) {
-    IamGroup group = groupRepo.findByUuid(groupUuid).orElseThrow(noSuchGroup(groupUuid));
+  public void removeAccountFromGroup(@PathVariable String accountUuid,
+      @PathVariable String groupUuid) {
+    IamGroup group = groupService.findByUuid(groupUuid).orElseThrow(noSuchGroup(groupUuid));
 
     IamAccount account =
-        accountRepo.findByUuid(accountUuid).orElseThrow(noSuchAccount(accountUuid));
+        accountService.findByUuid(accountUuid).orElseThrow(noSuchAccount(accountUuid));
 
-    if (!group.getAccounts().contains(account)) {
-      throw new NotAMemberError(
-          format("Account %s is not a member of group %s", account.getUuid(), group.getUuid()));
-    }
-
-    account.getGroups().remove(group);
-    group.getAccounts().remove(account);
-
-    accountRepo.save(account);
-    groupRepo.save(group);
+    accountService.removeFromGroup(account, group);
   }
-  
+
   @ResponseStatus(value = HttpStatus.BAD_REQUEST)
   @ExceptionHandler(NoSuchAccountError.class)
   public ErrorDTO noSuchAccountError(HttpServletRequest req, Exception ex) {
@@ -106,13 +87,13 @@ public class AccountGroupController {
   public ErrorDTO noSuchGroupError(HttpServletRequest req, Exception ex) {
     return ErrorDTO.fromString(ex.getMessage());
   }
-  
+
   @ResponseStatus(value = HttpStatus.BAD_REQUEST)
   @ExceptionHandler(AlreadyMemberError.class)
   public ErrorDTO alreadyMemberError(HttpServletRequest req, Exception ex) {
     return ErrorDTO.fromString(ex.getMessage());
   }
-  
+
   @ResponseStatus(value = HttpStatus.BAD_REQUEST)
   @ExceptionHandler(NotAMemberError.class)
   public ErrorDTO notAMemberError(HttpServletRequest req, Exception ex) {

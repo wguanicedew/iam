@@ -15,7 +15,6 @@
  */
 package it.infn.mw.iam.api.scim.updater.builders;
 
-import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REMOVE_GROUP_MEMBERSHIP;
 import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REMOVE_OIDC_ID;
 import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REMOVE_PICTURE;
 import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REMOVE_SAML_ID;
@@ -28,13 +27,11 @@ import java.util.Collections;
 import it.infn.mw.iam.api.scim.updater.AccountUpdater;
 import it.infn.mw.iam.api.scim.updater.DefaultAccountUpdater;
 import it.infn.mw.iam.audit.events.account.PictureRemovedEvent;
-import it.infn.mw.iam.audit.events.account.group.GroupMembershipRemovedEvent;
 import it.infn.mw.iam.audit.events.account.oidc.OidcAccountRemovedEvent;
 import it.infn.mw.iam.audit.events.account.saml.SamlAccountRemovedEvent;
 import it.infn.mw.iam.audit.events.account.ssh.SshKeyRemovedEvent;
 import it.infn.mw.iam.audit.events.account.x509.X509CertificateRemovedEvent;
 import it.infn.mw.iam.persistence.model.IamAccount;
-import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.model.IamOidcId;
 import it.infn.mw.iam.persistence.model.IamSamlId;
 import it.infn.mw.iam.persistence.model.IamSshKey;
@@ -75,13 +72,6 @@ public class Removers extends AccountBuilderSupport {
         account, ACCOUNT_REMOVE_X509_CERTIFICATE, account::unlinkX509Certificates, toBeRemoved,
         i -> !Collections.disjoint(account.getX509Certificates(), i),
         X509CertificateRemovedEvent::new);
-  }
-
-  public AccountUpdater group(Collection<IamGroup> toBeRemoved) {
-
-    return new DefaultAccountUpdater<Collection<IamGroup>, GroupMembershipRemovedEvent>(account,
-        ACCOUNT_REMOVE_GROUP_MEMBERSHIP, account::unlinkMembers, toBeRemoved,
-        i -> !Collections.disjoint(account.getGroups(), i), GroupMembershipRemovedEvent::new);
   }
 
   public AccountUpdater picture(String picture) {

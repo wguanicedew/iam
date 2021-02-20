@@ -17,7 +17,6 @@ package it.infn.mw.iam.api.scim.converter;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -29,9 +28,7 @@ import it.infn.mw.iam.api.scim.model.ScimGroup;
 import it.infn.mw.iam.api.scim.model.ScimGroupRef;
 import it.infn.mw.iam.api.scim.model.ScimIndigoGroup;
 import it.infn.mw.iam.api.scim.model.ScimLabel;
-import it.infn.mw.iam.api.scim.model.ScimMemberRef;
 import it.infn.mw.iam.api.scim.model.ScimMeta;
-import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.model.IamLabel;
 
@@ -77,24 +74,6 @@ public class GroupConverter implements Converter<ScimGroup, IamGroup> {
       .resourceType(ScimGroup.RESOURCE_TYPE)
       .build();
 
-    Set<ScimMemberRef> members = new HashSet<>();
-
-    for (IamAccount account : entity.getAccounts()) {
-      ScimMemberRef memberRef = new ScimMemberRef.Builder().value(account.getUuid())
-        .display(account.getUserInfo().getName())
-        .ref(resourceLocationProvider.userLocation(account.getUuid()))
-        .build();
-      members.add(memberRef);
-    }
-
-    for (IamGroup subgroup : entity.getChildrenGroups()) {
-      ScimMemberRef memberRef = new ScimMemberRef.Builder().display(subgroup.getName())
-        .value(subgroup.getUuid())
-        .ref(resourceLocationProvider.groupLocation(subgroup.getUuid()))
-        .build();
-      members.add(memberRef);
-    }
-
     IamGroup iamParentGroup = entity.getParentGroup();
     ScimIndigoGroup.Builder scimIndigoGroup = ScimIndigoGroup.getBuilder();
 
@@ -129,7 +108,6 @@ public class GroupConverter implements Converter<ScimGroup, IamGroup> {
     return ScimGroup.builder(entity.getName())
       .id(entity.getUuid())
       .meta(meta)
-      .setMembers(members)
       .indigoGroup(scimIndigoGroup.build())
       .build();
   }

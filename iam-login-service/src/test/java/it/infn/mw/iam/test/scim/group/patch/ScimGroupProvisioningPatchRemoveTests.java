@@ -16,13 +16,16 @@
 package it.infn.mw.iam.test.scim.group.patch;
 
 import static it.infn.mw.iam.api.scim.model.ScimConstants.SCIM_CONTENT_TYPE;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.Assert.assertThat;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
@@ -103,10 +106,10 @@ public class ScimGroupProvisioningPatchRemoveTests extends ScimGroupPatchUtils {
 
     ScimGroup engineersBeforeUpdate = getGroup(engineers.getMeta().getLocation());
 
-    assertThat(engineersBeforeUpdate.getMembers().size(), equalTo(3));
-    assertMembership(lennon, engineersBeforeUpdate, true);
-    assertMembership(lincoln, engineersBeforeUpdate, true);
-    assertMembership(kennedy, engineersBeforeUpdate, true);
+
+    assertIsGroupMember(lennon, engineersBeforeUpdate);
+    assertIsGroupMember(lincoln, engineersBeforeUpdate);
+    assertIsGroupMember(kennedy, engineersBeforeUpdate);
 
     try {
       Thread.sleep(1000);
@@ -122,10 +125,10 @@ public class ScimGroupProvisioningPatchRemoveTests extends ScimGroupPatchUtils {
 
     ScimGroup engineersAfterUpdate = getGroup(engineers.getMeta().getLocation());
 
-    assertThat(engineersAfterUpdate.getMembers().size(), equalTo(2));
-    assertMembership(lennon, engineersAfterUpdate, false);
-    assertMembership(lincoln, engineersAfterUpdate, true);
-    assertMembership(kennedy, engineersAfterUpdate, true);
+
+    assertIsNotGroupMember(lennon, engineersAfterUpdate);
+    assertIsGroupMember(lincoln, engineersAfterUpdate);
+    assertIsGroupMember(kennedy, engineersAfterUpdate);
 
     final long dateBeforeUpdate = engineersBeforeUpdate.getMeta().getLastModified().getTime();
     final long dateAfterUpdate = engineersAfterUpdate.getMeta().getLastModified().getTime();
@@ -151,9 +154,9 @@ public class ScimGroupProvisioningPatchRemoveTests extends ScimGroupPatchUtils {
 
     ScimGroup updatedGroup = getGroup(engineers.getMeta().getLocation());
 
-    assertMembership(kennedy, updatedGroup, true);
-    assertMembership(lennon, updatedGroup, false);
-    assertMembership(lincoln, updatedGroup, false);
+    assertIsGroupMember(kennedy, updatedGroup);
+    assertIsNotGroupMember(lennon, updatedGroup);
+    assertIsNotGroupMember(lincoln, updatedGroup);
   }
 
   @Test
@@ -172,10 +175,13 @@ public class ScimGroupProvisioningPatchRemoveTests extends ScimGroupPatchUtils {
         .content(objectMapper.writeValueAsString(patchReq)))
       .andExpect(status().isNoContent());
     //@formatter:on
-
-    ScimGroup updatedGroup = getGroup(engineers.getMeta().getLocation());
-
-    assertThat(updatedGroup.getMembers().isEmpty(), equalTo(true));
+    
+    mvc
+      .perform(get(engineers.getMeta().getLocation() + "/members").contentType(SCIM_CONTENT_TYPE))
+        .andExpect(status().isOk())
+      .andExpect(jsonPath("$.totalResults", is(0)))
+      .andExpect(jsonPath("$.Resources", empty()));
+  
   }
 
   @Test
@@ -196,7 +202,7 @@ public class ScimGroupProvisioningPatchRemoveTests extends ScimGroupPatchUtils {
   }
 
   @Test
-  public void testGroupPatchRemoveMemberTwice() throws Exception {
+  public void testGroupPatchRemogmveMemberTwice() throws Exception {
 
     ScimGroupPatchRequest patchRemoveRequest =
         getPatchRemoveUsersRequest(Lists.newArrayList(lennon));
@@ -219,7 +225,7 @@ public class ScimGroupProvisioningPatchRemoveTests extends ScimGroupPatchUtils {
 
     ScimGroup engineersAfterUpdate = getGroup(engineers.getMeta().getLocation());
 
-    assertMembership(lennon, engineersAfterUpdate, false);
+    assertIsNotGroupMember(lennon, engineersAfterUpdate);
 
     assertThat(engineersBeforeUpdate.getMeta().getLastModified(),
         equalTo(engineersAfterUpdate.getMeta().getLastModified()));

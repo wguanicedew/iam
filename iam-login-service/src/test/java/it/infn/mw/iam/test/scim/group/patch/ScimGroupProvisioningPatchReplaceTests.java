@@ -16,16 +16,9 @@
 package it.infn.mw.iam.test.scim.group.patch;
 
 import static it.infn.mw.iam.api.scim.model.ScimConstants.SCIM_CONTENT_TYPE;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertThat;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
@@ -46,7 +39,6 @@ import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.scim.model.ScimGroup;
 import it.infn.mw.iam.api.scim.model.ScimGroupPatchRequest;
 import it.infn.mw.iam.api.scim.model.ScimUser;
-import it.infn.mw.iam.test.TestUtils;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 import it.infn.mw.iam.test.util.WithMockOAuthUser;
 import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
@@ -87,121 +79,17 @@ public class ScimGroupProvisioningPatchReplaceTests extends ScimGroupPatchUtils 
   }
 
   @Test
-  public void testGroupPatchReplaceMember() throws Exception {
-
-    List<ScimUser> members = new ArrayList<ScimUser>();
-    members.add(lennon);
-
-    ScimGroupPatchRequest patchReq = getPatchAddUsersRequest(members);
-
-    //@formatter:off
-    mvc.perform(patch(engineers.getMeta().getLocation())
-        .contentType(SCIM_CONTENT_TYPE)
-        .content(objectMapper.writeValueAsString(patchReq)))
-      .andExpect(status().isNoContent());
-    //@formatter:on
-
-    mvc.perform(get(engineers.getMeta().getLocation()).contentType(SCIM_CONTENT_TYPE))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$.id", equalTo(engineers.getId())))
-      .andExpect(jsonPath("$.displayName", equalTo(engineers.getDisplayName())))
-      .andExpect(jsonPath("$.members", hasSize(equalTo(1))))
-      .andExpect(jsonPath("$.members[0].display", equalTo("John Lennon")))
-      .andExpect(jsonPath("$.members[0].value", equalTo(lennon.getId())))
-      .andExpect(jsonPath("$.members[0].$ref", equalTo(lennon.getMeta().getLocation())));
-
-    members.remove(lennon);
-    members.add(lincoln);
-    patchReq = getPatchReplaceUsersRequest(members);
-
-    //@formatter:off
-    mvc.perform(patch(engineers.getMeta().getLocation())
-        .contentType(SCIM_CONTENT_TYPE)
-        .content(objectMapper.writeValueAsString(patchReq)))
-      .andExpect(status().isNoContent());
-    //@formatter:on
-
-    String result =
-        mvc.perform(get(engineers.getMeta().getLocation()).contentType(SCIM_CONTENT_TYPE))
-          .andExpect(status().isOk())
-          .andReturn()
-          .getResponse()
-          .getContentAsString();
-
-    ScimGroup updatedGroup = objectMapper.readValue(result, ScimGroup.class);
-
-    assertThat(updatedGroup.getMembers(), hasSize(1));
-    assertThat(updatedGroup.getMembers(), hasItem(TestUtils.getMemberRef(lincoln)));
-  }
-
-  @Test
-  public void testGroupPatchReplaceSameMember() throws Exception {
-
-    List<ScimUser> members = new ArrayList<ScimUser>();
-    members.add(lennon);
-
-    ScimGroupPatchRequest patchReq = getPatchAddUsersRequest(members);
-
-    //@formatter:off
-    mvc.perform(patch(engineers.getMeta().getLocation())
-        .contentType(SCIM_CONTENT_TYPE)
-        .content(objectMapper.writeValueAsString(patchReq)))
-      .andExpect(status().isNoContent());
-    //@formatter:on
-
-    mvc.perform(get(engineers.getMeta().getLocation()).contentType(SCIM_CONTENT_TYPE))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$.id", equalTo(engineers.getId())))
-      .andExpect(jsonPath("$.displayName", equalTo(engineers.getDisplayName())))
-      .andExpect(jsonPath("$.members", hasSize(equalTo(1))))
-      .andExpect(jsonPath("$.members[0].display", equalTo("John Lennon")))
-      .andExpect(jsonPath("$.members[0].value", equalTo(lennon.getId())))
-      .andExpect(jsonPath("$.members[0].$ref", equalTo(lennon.getMeta().getLocation())));
-
-    patchReq = getPatchReplaceUsersRequest(members);
-
-    //@formatter:off
-    mvc.perform(patch(engineers.getMeta().getLocation())
-        .contentType(SCIM_CONTENT_TYPE)
-        .content(objectMapper.writeValueAsString(patchReq)))
-      .andExpect(status().isNoContent());
-    //@formatter:on
-
-    String result =
-        mvc.perform(get(engineers.getMeta().getLocation()).contentType(SCIM_CONTENT_TYPE))
-          .andExpect(status().isOk())
-          .andReturn()
-          .getResponse()
-          .getContentAsString();
-
-    ScimGroup updatedGroup = objectMapper.readValue(result, ScimGroup.class);
-
-    assertThat(updatedGroup.getMembers(), hasSize(1));
-    assertThat(updatedGroup.getMembers(), hasItem(TestUtils.getMemberRef(lennon)));
-  }
-
-  @Test
-  public void testGroupPatchReplaceWithEmptyMemberList() throws Exception {
+  public void testGroupPatchReplaceRaisesUnsupportedOperationError() throws Exception {
 
     List<ScimUser> members = new ArrayList<ScimUser>();
     ScimGroupPatchRequest patchReq = getPatchReplaceUsersRequest(members);
 
-    //@formatter:off
     mvc.perform(patch(engineers.getMeta().getLocation())
         .contentType(SCIM_CONTENT_TYPE)
         .content(objectMapper.writeValueAsString(patchReq)))
-      .andExpect(status().isNoContent());
-    //@formatter:on
+      .andExpect(status().isBadRequest());
 
-    String result =
-        mvc.perform(get(engineers.getMeta().getLocation()).contentType(SCIM_CONTENT_TYPE))
-          .andExpect(status().isOk())
-          .andReturn()
-          .getResponse()
-          .getContentAsString();
 
-    ScimGroup updatedGroup = objectMapper.readValue(result, ScimGroup.class);
 
-    assertThat(updatedGroup.getMembers(), empty());
   }
 }

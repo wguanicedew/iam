@@ -34,6 +34,7 @@ import it.infn.mw.iam.api.requests.exception.GroupRequestValidationError;
 import it.infn.mw.iam.api.requests.model.GroupRequestDto;
 import it.infn.mw.iam.core.IamGroupRequestStatus;
 import it.infn.mw.iam.persistence.model.IamAccount;
+import it.infn.mw.iam.persistence.model.IamAccountGroupMembership;
 import it.infn.mw.iam.persistence.model.IamAuthority;
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.model.IamGroupRequest;
@@ -97,8 +98,9 @@ public class GroupRequestUtils {
       Optional<IamGroup> group = userAccount.get()
         .getGroups()
         .stream()
-        .filter(g -> g.getName().equals(request.getGroupName()))
-        .findAny();
+        .filter(g -> g.getGroup().getName().equals(request.getGroupName()))
+        .findAny()
+        .map(IamAccountGroupMembership::getGroup);
 
       if (group.isPresent()) {
         throw new GroupRequestValidationError(

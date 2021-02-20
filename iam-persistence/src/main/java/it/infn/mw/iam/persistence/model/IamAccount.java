@@ -18,6 +18,7 @@ package it.infn.mw.iam.persistence.model;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.Serializable;
+import java.time.Clock;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -42,7 +43,6 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -102,12 +102,8 @@ public class IamAccount implements Serializable {
       inverseJoinColumns = @JoinColumn(name = "authority_id", referencedColumnName = "id"))
   private Set<IamAuthority> authorities = new HashSet<>();
 
-  @ManyToMany
-  @JoinTable(name = "iam_account_group",
-      joinColumns = @JoinColumn(name = "account_id", referencedColumnName = "id"),
-      inverseJoinColumns = @JoinColumn(name = "group_id", referencedColumnName = "id"))
-  @OrderBy("name")
-  private Set<IamGroup> groups = new HashSet<>();
+  @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
+  private Set<IamAccountGroupMembership> groups = new HashSet<>();
 
   @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.EAGER,
       orphanRemoval = true)
@@ -218,20 +214,6 @@ public class IamAccount implements Serializable {
     this.authorities = authorities;
   }
 
-  public Set<IamGroup> getGroups() {
-
-    return groups;
-  }
-
-  public void setGroups(Set<IamGroup> groups) {
-
-    this.groups = groups;
-  }
-
-  public boolean isMemberOf(IamGroup group) {
-
-    return groups.contains(group);
-  }
 
   public Date getCreationTime() {
 
@@ -428,32 +410,6 @@ public class IamAccount implements Serializable {
     }
   }
 
-  public void linkMembers(Collection<IamGroup> groupsToAdd) {
-
-    Preconditions.checkNotNull(groupsToAdd);
-    for (IamGroup groupToAdd : groupsToAdd) {
-      if (groupToAdd == null) {
-        continue;
-      }
-      if (!isMemberOf(groupToAdd)) {
-        this.groups.add(groupToAdd);
-      }
-    }
-  }
-
-  public void unlinkMembers(Collection<IamGroup> groupsToRemove) {
-
-    Preconditions.checkNotNull(groupsToRemove);
-    for (IamGroup groupToRemove : groupsToRemove) {
-      if (groupToRemove == null) {
-        continue;
-      }
-      if (isMemberOf(groupToRemove)) {
-        this.groups.remove(groupToRemove);
-      }
-    }
-  }
-
   public String getConfirmationKey() {
 
     return confirmationKey;
@@ -495,6 +451,10 @@ public class IamAccount implements Serializable {
   public void touch() {
 
     setLastUpdateTime(new Date());
+  }
+
+  public void touch(Clock clock) {
+    setLastUpdateTime(Date.from(clock.instant()));
   }
 
   @Override
@@ -556,6 +516,14 @@ public class IamAccount implements Serializable {
     this.groupRequests = groupRequests;
   }
 
+  public Set<IamAccountGroupMembership> getGroups() {
+    return groups;
+  }
+
+  public void setGroups(Set<IamAccountGroupMembership> groupMemberships) {
+    this.groups = groupMemberships;
+  }
+
   public Set<IamAttribute> getAttributes() {
     return attributes;
   }
@@ -572,6 +540,7 @@ public class IamAccount implements Serializable {
     this.labels = labels;
   }
 
+
   public Optional<IamLabel> getLabelByPrefixAndName(String prefix, String name) {
     for (IamLabel l : getLabels()) {
       if (l.getName().equals(name) && prefix.equals(l.getPrefix())) {
@@ -580,7 +549,7 @@ public class IamAccount implements Serializable {
     }
     return Optional.empty();
   }
-  
+
   public Optional<IamLabel> getLabelByName(String name) {
     for (IamLabel l : getLabels()) {
       if (l.getName().equals(name) && Objects.isNull(l.getPrefix())) {
@@ -589,16 +558,16 @@ public class IamAccount implements Serializable {
     }
     return Optional.empty();
   }
-  
+
   public Optional<IamLabel> removeLabelByNameAndPrefix(String prefix, String name) {
-    
+
     Optional<IamLabel> label = getLabelByPrefixAndName(prefix, name);
     if (label.isPresent()) {
       getLabels().remove(label.get());
     }
     return label;
   }
-  
+
   public Optional<IamLabel> removeLabelByName(String name) {
     Optional<IamLabel> label = getLabelByName(name);
     if (label.isPresent()) {
@@ -609,13 +578,8 @@ public class IamAccount implements Serializable {
 
   @Override
   public String toString() {
-    return "IamAccount [id=" + id + ", uuid=" + uuid + ", username=" + username + ", password="
-        + password + ", active=" + active + ", creationTime=" + creationTime + ", lastUpdateTime="
-        + lastUpdateTime + ", provisioned=" + provisioned + ", userInfo=" + userInfo
-        + ", lastLoginTime=" + lastLoginTime + ", authorities=" + authorities + ", groups=" + groups
-        + ", samlIds=" + samlIds + ", oidcIds=" + oidcIds + ", sshKeys=" + sshKeys
-        + ", x509Certificates=" + x509Certificates + ", confirmationKey=" + confirmationKey
-        + ", resetKey=" + resetKey + ", registrationRequest=" + registrationRequest + "]";
+    return "IamAccount [id=" + id + ", uuid=" + uuid + ", username=" + username + ", active="
+        + active + "]";
   }
 
   public static IamAccount newAccount() {

@@ -19,8 +19,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamAttribute;
+import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.model.IamLabel;
 
 /**
@@ -44,6 +48,14 @@ public interface IamAccountService {
    */
   IamAccount createAccount(IamAccount account);
 
+
+  /**
+   * Triggers a save operation for the account
+   * 
+   * @param account the account to be saved
+   * @return the updated account
+   */
+  IamAccount saveAccount(IamAccount account);
 
   /**
    * Deletes a {@link IamAccount}.
@@ -120,6 +132,34 @@ public interface IamAccountService {
    * @return the updated account
    */
   IamAccount deleteAttribute(IamAccount account, IamAttribute attribute);
+
+  /**
+   * Adds an account to a group
+   * 
+   * @param account
+   * @param group
+   * @return the updated account
+   */
+  IamAccount addToGroup(IamAccount account, IamGroup group);
+
+  /**
+   * Removes the account from the group
+   * 
+   * @param account
+   * @param group
+   * @return the updated account
+   */
+  IamAccount removeFromGroup(IamAccount account, IamGroup group);
+
+  /**
+   * Returns group members
+   * 
+   * @param group the group
+   * @param page pagination params
+   * @return the page of accounts that are members of the group
+   */
+  Page<IamAccount> fingGroupMembers(IamGroup group, Pageable page);
+
 
 
 }

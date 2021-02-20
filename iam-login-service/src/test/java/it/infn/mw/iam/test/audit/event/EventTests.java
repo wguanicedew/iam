@@ -20,8 +20,6 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
-import org.springframework.transaction.annotation.Transactional;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Lists;
 
@@ -339,9 +338,8 @@ public class EventTests extends X509TestSupport {
     IamAuditApplicationEvent event = logger.getLastEvent();
     assertThat(event, instanceOf(GroupMembershipAddedEvent.class));
     assertNotNull(event.getMessage());
-    assertThat(event.getMessage(), containsString("Add group to user"));
-    assertThat(event.getMessage(), containsString(USERNAME_MESSAGE_CHECK));
-    assertThat(event.getMessage(), containsString("name=second_group"));
+    assertThat(event.getMessage(),
+        containsString("User 'event_user' was added to group 'second_group'"));
   }
 
   @Test
@@ -355,9 +353,9 @@ public class EventTests extends X509TestSupport {
     IamAuditApplicationEvent event = logger.getLastEvent();
     assertThat(event, instanceOf(GroupMembershipRemovedEvent.class));
     assertNotNull(event.getMessage());
-    assertThat(event.getMessage(), containsString("Remove user from group"));
-    assertThat(event.getMessage(), containsString(USERNAME_MESSAGE_CHECK));
-    assertThat(event.getMessage(), containsString("name=" + GROUPNAME));
+    assertThat(event.getMessage(),
+        containsString("User 'event_user' was removed from group 'event_group'"));
+
   }
 
 }

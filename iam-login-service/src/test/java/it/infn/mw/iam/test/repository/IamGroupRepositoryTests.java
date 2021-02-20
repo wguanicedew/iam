@@ -36,6 +36,7 @@ import org.junit.runner.RunWith;
 import org.mockito.internal.util.collections.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.data.domain.Page;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.TransactionSystemException;
 
@@ -133,12 +134,13 @@ public class IamGroupRepositoryTests {
   @Test
   public void listSubgroups() {
     parent = createGroup(null);
-    List<IamGroup> subgroups = groupRepository.findSubgroups(parent);
-    assertThat(subgroups, empty());
+
+    Page<IamGroup> subgroups = groupRepository.findSubgroups(parent, null);
+    assertThat(subgroups.getContent(), empty());
 
     child = createGroup(parent);
-    subgroups = groupRepository.findSubgroups(parent);
-    assertEquals(1, subgroups.size());
+    subgroups = groupRepository.findSubgroups(parent, null);
+    assertThat(subgroups.getNumberOfElements(), is(1));
   }
   
   @Test

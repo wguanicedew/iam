@@ -31,7 +31,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -56,9 +55,6 @@ public class IamGroup implements Serializable {
 
   @Column(nullable = true, length = 512)
   private String description;
-
-  @ManyToMany(mappedBy = "groups")
-  private Set<IamAccount> accounts = new HashSet<>();
 
   @Temporal(TemporalType.TIMESTAMP)
   @Column(name="creationtime", nullable = false)
@@ -133,15 +129,6 @@ public class IamGroup implements Serializable {
 
   public void setDescription(String description) {
     this.description = description;
-  }
-
-  public Set<IamAccount> getAccounts() {
-
-    return accounts;
-  }
-
-  public void setAccounts(Set<IamAccount> accounts) {
-    this.accounts = accounts;
   }
 
   public Date getCreationTime() {

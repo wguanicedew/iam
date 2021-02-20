@@ -18,6 +18,7 @@ package it.infn.mw.iam.persistence.model;
 import static it.infn.mw.iam.core.NameUtils.getFormatted;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -319,7 +320,11 @@ public class IamUserInfo implements Serializable {
 
   public Set<IamGroup> getGroups() {
 
-    return iamAccount.getGroups();
+    Set<IamGroup> groups = new HashSet<>();
+    for (IamAccountGroupMembership m : iamAccount.getGroups()) {
+      groups.add(m.getGroup());
+    }
+    return groups;
   }
 
   public JsonObject toJson() {

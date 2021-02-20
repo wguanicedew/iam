@@ -29,7 +29,7 @@ public class UpdaterTypeSerializer extends JsonSerializer<UpdaterType> {
   @Override
   public void serialize(UpdaterType value, JsonGenerator gen, SerializerProvider serializers)
       throws IOException, JsonProcessingException {
-      gen.writeString(value.getDescription());
+    gen.writeString(value.name());
   }
 
 }

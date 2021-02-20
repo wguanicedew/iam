@@ -17,9 +17,6 @@ package it.infn.mw.iam.test.scim.group.patch;
 
 import static it.infn.mw.iam.api.scim.model.ScimConstants.SCIM_CONTENT_TYPE;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertThat;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -46,7 +43,6 @@ import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.scim.model.ScimGroup;
 import it.infn.mw.iam.api.scim.model.ScimGroupPatchRequest;
 import it.infn.mw.iam.api.scim.model.ScimUser;
-import it.infn.mw.iam.test.TestUtils;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 import it.infn.mw.iam.test.util.WithMockOAuthUser;
 import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
@@ -59,7 +55,7 @@ public class ScimGroupProvisioningPatchAddTests extends ScimGroupPatchUtils {
 
   @Autowired
   private WebApplicationContext context;
-  
+
   @Autowired
   private MockOAuth2Filter mockOAuth2Filter;
 
@@ -68,10 +64,8 @@ public class ScimGroupProvisioningPatchAddTests extends ScimGroupPatchUtils {
 
   @Before
   public void setup() throws Exception {
-    mvc = MockMvcBuilders.webAppContextSetup(context)
-      .apply(springSecurity())
-      .alwaysDo(log())
-      .build();
+    mvc =
+        MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).alwaysDo(log()).build();
 
     engineers = addTestGroup("engineers");
     lennon = addTestUser("john_lennon", "lennon@email.test", "John", "Lennon");
@@ -101,14 +95,7 @@ public class ScimGroupProvisioningPatchAddTests extends ScimGroupPatchUtils {
       .andExpect(status().isNoContent());
     //@formatter:on
 
-    mvc.perform(get(engineers.getMeta().getLocation()))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$.id", equalTo(engineers.getId())))
-      .andExpect(jsonPath("$.displayName", equalTo(engineers.getDisplayName())))
-      .andExpect(jsonPath("$.members", hasSize(equalTo(1))))
-      .andExpect(jsonPath("$.members[0].display", equalTo("John Lennon")))
-      .andExpect(jsonPath("$.members[0].value", equalTo(lennon.getId())))
-      .andExpect(jsonPath("$.members[0].$ref", equalTo(lennon.getMeta().getLocation())));
+    assertIsGroupMember(lennon, engineers);
   }
 
   @Test
@@ -127,20 +114,17 @@ public class ScimGroupProvisioningPatchAddTests extends ScimGroupPatchUtils {
       .andExpect(status().isNoContent());
     //@formatter:on
 
-    String result =
-        mvc.perform(get(engineers.getMeta().getLocation()).contentType(SCIM_CONTENT_TYPE))
-          .andExpect(status().isOk())
-          .andExpect(jsonPath("$.id", equalTo(engineers.getId())))
-          .andExpect(jsonPath("$.displayName", equalTo(engineers.getDisplayName())))
-          .andReturn()
-          .getResponse()
-          .getContentAsString();
+    mvc.perform(get(engineers.getMeta().getLocation()).contentType(SCIM_CONTENT_TYPE))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.id", equalTo(engineers.getId())))
+      .andExpect(jsonPath("$.displayName", equalTo(engineers.getDisplayName())))
+      .andReturn()
+      .getResponse()
+      .getContentAsString();
 
-    ScimGroup group = objectMapper.readValue(result, ScimGroup.class);
+    assertIsGroupMember(lennon, engineers);
+    assertIsGroupMember(lincoln, engineers);
 
-    assertThat(group.getMembers(), hasSize(2));
-    assertThat(group.getMembers(), hasItem(TestUtils.getMemberRef(lennon)));
-    assertThat(group.getMembers(), hasItem(TestUtils.getMemberRef(lincoln)));
   }
 
   @Test

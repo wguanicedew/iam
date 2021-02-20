@@ -51,11 +51,11 @@ import it.infn.mw.iam.audit.events.group.request.GroupRequestDeletedEvent;
 import it.infn.mw.iam.audit.events.group.request.GroupRequestRejectedEvent;
 import it.infn.mw.iam.core.IamGroupRequestStatus;
 import it.infn.mw.iam.core.time.TimeProvider;
+import it.infn.mw.iam.core.user.IamAccountService;
 import it.infn.mw.iam.notification.NotificationFactory;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.model.IamGroupRequest;
-import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamGroupRepository;
 import it.infn.mw.iam.persistence.repository.IamGroupRequestRepository;
 
@@ -66,10 +66,10 @@ public class DefaultGroupRequestsService implements GroupRequestsService {
   public IamGroupRequestRepository groupRequestRepository;
 
   @Autowired
-  private IamAccountRepository accoutRepository;
+  private IamGroupRepository groupRepository;
 
   @Autowired
-  private IamGroupRepository groupRepository;
+  private IamAccountService accountService;
 
   @Autowired
   private GroupRequestConverter converter;
@@ -143,9 +143,9 @@ public class DefaultGroupRequestsService implements GroupRequestsService {
 
     IamAccount account = request.getAccount();
     IamGroup group = request.getGroup();
-    account.getGroups().add(group);
 
-    accoutRepository.save(account);
+    account = accountService.addToGroup(account, group);
+
     request = updateGroupRequestStatus(request, APPROVED);
     notificationFactory.createGroupMembershipApprovedMessage(request);
     eventPublisher.publishEvent(new GroupRequestApprovedEvent(this, request));

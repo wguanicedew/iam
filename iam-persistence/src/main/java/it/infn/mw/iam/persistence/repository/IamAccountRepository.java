@@ -70,13 +70,13 @@ public interface IamAccountRepository
   @Query("select a from IamAccount a join a.x509Certificates c where c.certificate = :certificate")
   Optional<IamAccount> findByCertificate(@Param("certificate") String certificate);
 
-  @Query("select a from IamAccount a join a.groups ag where ag.id = :groupId")
+  @Query("select a from IamAccount a join a.groups ag where ag.group.id = :groupId order by a.username ASC")
   List<IamAccount> findByGroupId(@Param("groupId") Long groupId);
 
-  @Query("select a from IamAccount a join a.groups ag where ag.uuid = :groupUuid")
+  @Query("select a from IamAccount a join a.groups ag where ag.group.uuid = :groupUuid order by a.username ASC")
   Page<IamAccount> findByGroupUuid(@Param("groupUuid") String uuid, Pageable op);
 
-  @Query("select a from IamAccount a join a.groups ag where ag.name = :groupName")
+  @Query("select a from IamAccount a join a.groups ag where ag.group.name = :groupName order by a.username ASC")
   Page<IamAccount> findByGroupName(@Param("groupName") String name, Pageable op);
 
   Optional<IamAccount> findByConfirmationKey(@Param("confirmationKey") String confirmationKey);

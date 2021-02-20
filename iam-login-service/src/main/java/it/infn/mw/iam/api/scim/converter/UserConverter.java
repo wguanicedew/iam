@@ -188,7 +188,7 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
       builder.addPhoto(picture);
     }
 
-    entity.getGroups().forEach(group -> builder.addGroupRef(getScimGroupRef(group)));
+    entity.getGroups().forEach(group -> builder.addGroupRef(getScimGroupRef(group.getGroup())));
 
     return builder.build();
   }

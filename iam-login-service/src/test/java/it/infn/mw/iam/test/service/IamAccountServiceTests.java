@@ -826,4 +826,5 @@ public class IamAccountServiceTests extends IamAccountServiceTestSupport {
     assertThat(e.getPreviousEndTime(), nullValue());
     assertThat(e.getAccount().getEndTime(), is(newEndTime));
   }
+
 }
