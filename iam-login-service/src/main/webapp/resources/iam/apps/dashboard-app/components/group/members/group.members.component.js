@@ -16,31 +16,60 @@
 (function() {
     'use strict';
 
-    function GroupMembersController($rootScope, $filter, scimFactory, $uibModal, ModalService, toaster) {
+    function GroupMembersController($rootScope, $filter, scimFactory, $uibModal, ModalService, toaster, GroupService) {
 
         var self = this;
         self.members = [];
 
+        self.currentPage = 1;
+        self.itemsPerPage = 10;
+        self.totalResults = 0;
+
         self.deleteMember = deleteMember;
 
-        initMembersDisplay(self.group);
+        self.loadMembers = loadMembers;
+
+        self.loadMembers(self.currentPage);
 
         self.$onInit = function() {
             console.log('GroupMembersController onInit');
         };
 
-        function initMembersDisplay(group) {
-            if (group.members) {
-                group.members = $filter('orderBy')(group.members, "display", false);
-                self.members = group.members.filter(memberIsAnAccount);
-            } else {
-                self.members = [];
-            }
+        function handleSuccess(data){
+            self.members = data.Resources;
+            self.totalResults = data.totalResults;
+            self.loadingModal.close();
         }
 
-        function memberIsAnAccount(member) {
-            return (member.$ref.indexOf('scim/Users') != -1);
+        function handleError(res){
+            console.error('Error loading members: ',res);
+            let error = res.statusText;
+
+            if (res.data) {
+                error =  res.data.error;
+            }
+            
+            toaster.pop({
+                type: 'error',
+                body: `${error}`
+            });
         }
+
+        function loadMembers(page){
+            self.currentPage = page;
+            self.currentOffset = (page - 1) * self.itemsPerPage + 1;
+
+            self.loadingModal = $uibModal.open({
+                animation: false,
+                templateUrl: '/resources/iam/apps/dashboard-app/templates/loading-modal.html'
+            });
+            
+            self.loadingModal.opened.then(function(){
+                GroupService.getGroupMembers(self.group.id, self.currentOffset, self.itemsPerPage ).then(handleSuccess, handleError);
+            });
+
+        }
+        
 
         function deleteMember(member) {
 
@@ -57,7 +86,7 @@
                             member.display)
                         .then(function(response) {
                             self.loadGroup().then(function(group) {
-                                initMembersDisplay(group);
+                                loadMembers(self.currentPage);
                                 toaster.pop({
                                     type: 'success',
                                     body: `Member ${member.display} has been removed successfully`
@@ -77,7 +106,7 @@
         templateUrl: '/resources/iam/apps/dashboard-app/components/group/members/group.members.component.html',
         bindings: { group: '<', loadGroup: '&' },
         controller: [
-            '$rootScope', '$filter', 'scimFactory', '$uibModal', 'ModalService', 'toaster', GroupMembersController
+            '$rootScope', '$filter', 'scimFactory', '$uibModal', 'ModalService', 'toaster', 'GroupService', GroupMembersController
         ]
     });
 })();

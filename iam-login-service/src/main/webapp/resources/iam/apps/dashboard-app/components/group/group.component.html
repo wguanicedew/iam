@@ -18,8 +18,17 @@
 <!-- Content Header (Page header) -user-image -->
 <section class="content-header">
     <h1>
-        {{$ctrl.group.displayName}}
+        {{$ctrl.group.displayName}}<small><a ui-sref="group({id:
+            $ctrl.group['urn:indigo-dc:scim:schemas:IndigoGroup'].parentGroup.value})"
+                ng-if="$ctrl.group['urn:indigo-dc:scim:schemas:IndigoGroup'].parentGroup"><i
+                    class="fa fa-level-up"></i></a></small>
+        <small><a ui-sref="groups" ng-if="!$ctrl.group['urn:indigo-dc:scim:schemas:IndigoGroup'].parentGroup"><i
+                    class="fa fa-level-up"></i></a></small>
+        <br />
+        <small style="padding-left: 0;">{{$ctrl.group.id}}</small>
+
     </h1>
+
     <ol class="breadcrumb">
         <li><a ui-sref="groups"><i class="fa fa-users"></i> Groups</a></li>
         <li class="active"><a ui-sref="group({id: $ctrl.group.id})">{{$ctrl.group.displayName}}</a></li>
@@ -29,6 +38,7 @@
             <group-description group="$ctrl.group" />
         </div>
     </div>
+
     <div class="row">
         <div class="col-xs-12">
             <group-labels group="$ctrl.group" labels="$ctrl.labels" />

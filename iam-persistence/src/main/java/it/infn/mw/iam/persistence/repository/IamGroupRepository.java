@@ -40,7 +40,7 @@ public interface IamGroupRepository extends PagingAndSortingRepository<IamGroup,
   @Query("select g from IamGroup g where g.parentGroup is null")
   List<IamGroup> findRootGroups();
 
-  @Query("select g from IamGroup g where g.parentGroup = :parentGroup")
+  @Query("select g from IamGroup g where g.parentGroup = :parentGroup order by g.name ASC")
   Page<IamGroup> findSubgroups(@Param("parentGroup") IamGroup parentGroup, Pageable op);
   
   List<IamGroup> findByNameIgnoreCaseContaining(String name);

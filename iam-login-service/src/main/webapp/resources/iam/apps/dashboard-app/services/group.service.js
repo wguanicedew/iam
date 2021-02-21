@@ -22,8 +22,12 @@
 
     function GroupService($q, $http, scimFactory) {
 
+        var scimBaseUrl = '/scim/Groups';
+
         var service = {
-            getGroup: getGroup
+            getGroup: getGroup,
+            getGroupMembers: getGroupMembers,
+            getSubgroups: getSubgroups
         };
 
         return service;
@@ -36,6 +40,35 @@
                     console.error('Error loading group: ', error);
                     return $q.reject(error);
                 });
+        }
+
+        function getGroupMembers(groupId, startIndex, count){
+            
+            var url = scimBaseUrl+'/'+groupId+'/members';
+
+            return $http.get(url, {params: {
+                'startIndex': startIndex,
+                'count': count
+            }}).then(function(result){
+                return result.data;
+            }).catch(function(error){
+                console.error("Error loading group members: ", error);
+                return $q.reject(error);
+            });
+        }
+
+        function getSubgroups(groupId, startIndex, count) {
+            var url = scimBaseUrl+'/'+groupId+'/subgroups';
+
+            return $http.get(url, {params: {
+                'startIndex': startIndex,
+                'count': count
+            }}).then(function(result){
+                return result.data;
+            }).catch(function(error){
+                console.error("Error loading group members: ", error);
+                return $q.reject(error);
+            });
         }
     }
 })();

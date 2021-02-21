@@ -29,6 +29,14 @@
                 </button>
             </div>
         </div>
+
+        <div class="text-center">
+            <ul id="subgroups_pagination" uib-pagination ng-model="$ctrl.currentPage"
+                items-per-page="$ctrl.itemsPerPage" total-items="$ctrl.totalResults" max-size="3" boundary-links="true"
+                ng-change="$ctrl.loadSubgroups($ctrl.currentPage)" previous-text="&lsaquo;" next-text="&rsaquo;"
+                first-text="&laquo;" last-text="&raquo;" rotate="true">
+            </ul>
+        </div>
     </div>
 
     <div class="box-footer" ng-show="$ctrl.voAdmin">

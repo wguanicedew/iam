@@ -100,7 +100,6 @@
             return $http.put("/iam/group/" + group.id, group).then(handleSuccess).catch(handleError);
         }
 
-
         function getAllGroups() {
             var results = [];
 

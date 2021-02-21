@@ -25,9 +25,16 @@
             </div>
             <div class="iam-actions col-xs-4 col-sm-4 text-right">
                 <button class="btn btn-danger btn-xs" ng-click="$ctrl.deleteMember(member)">
-                        <i class="fa fa-times"></i>
-                    </button>
+                    <i class="fa fa-times"></i>
+                </button>
             </div>
+        </div>
+        <div class="text-center">
+            <ul id="members_pagination" uib-pagination ng-model="$ctrl.currentPage" items-per-page="$ctrl.itemsPerPage"
+                total-items="$ctrl.totalResults" max-size="3" boundary-links="true"
+                ng-change="$ctrl.loadMembers($ctrl.currentPage)" previous-text="&lsaquo;" next-text="&rsaquo;"
+                first-text="&laquo;" last-text="&raquo;" rotate="true">
+            </ul>
         </div>
     </div>
 </div>
