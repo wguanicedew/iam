@@ -15,14 +15,14 @@
 <!-- javascript
 ================================================== -->
 <!-- Placed at the end of the document so the pages load faster -->
-<script type="text/javascript" src="resources/bootstrap2/js/bootstrap.js"></script>
-<script type="text/javascript" src="resources/js/lib/underscore.js"></script>
-<script type="text/javascript" src="resources/js/lib/backbone.js"></script>
-<script type="text/javascript" src="resources/js/lib/purl.js"></script>
-<script type="text/javascript" src="resources/js/lib/bootstrapx-clickover.js"></script>
-<script type="text/javascript" src="resources/js/lib/bootstrap-sheet.js"></script>
-<script type="text/javascript" src="resources/js/lib/bootpag.js"></script>
-<script type="text/javascript" src="resources/js/lib/retina.js"></script>
+<script type="text/javascript" src="resources/${gitCommitId}/bootstrap2/js/bootstrap.js"></script>
+<script type="text/javascript" src="resources/${gitCommitId}/js/lib/underscore.js"></script>
+<script type="text/javascript" src="resources/${gitCommitId}/js/lib/backbone.js"></script>
+<script type="text/javascript" src="resources/${gitCommitId}/js/lib/purl.js"></script>
+<script type="text/javascript" src="resources/${gitCommitId}/js/lib/bootstrapx-clickover.js"></script>
+<script type="text/javascript" src="resources/${gitCommitId}/js/lib/bootstrap-sheet.js"></script>
+<script type="text/javascript" src="resources/${gitCommitId}/js/lib/bootpag.js"></script>
+<script type="text/javascript" src="resources/${gitCommitId}/js/lib/retina.js"></script>
 <c:if test="${js != null && js != ''}">
 	<script type="text/javascript">
 	
@@ -38,7 +38,7 @@
 	<c:forEach var="file" items="${ ui.jsFiles }">
 		<script type="text/javascript" src="<c:out value="${ file }" />" ></script>
 	</c:forEach>
-	<script type="text/javascript" src="resources/js/admin.js"></script>
+	<script type="text/javascript" src="resources/${gitCommitId}/js/admin.js"></script>
 </c:if>
 <div id="templates" class="hide"></div>
 </body>

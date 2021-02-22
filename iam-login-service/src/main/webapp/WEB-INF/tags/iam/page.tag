@@ -25,36 +25,36 @@
 
 <link
   rel="stylesheet"
-  href="<c:url value='/webjars/bootstrap/css/bootstrap.min.css'/>"></link>
+  href="/webjars/bootstrap/css/bootstrap.min.css"></link>
 
 <link
   rel="stylesheet"
-  href="<c:url value='/webjars/angular-ui-select/select.min.css'/>"></link>
-
-<link
-  rel="stylesheet"
-  href="resources/iam/css/AdminLTE.css"></link>
-
-
-<link
-  rel="stylesheet"
-  href="resources/iam/css/skins/skin-blue.css"></link>
-
-<link
-  rel="stylesheet"
-  href="resources/iam/css/ionicons/ionicons.min.css"></link>
+  href="/webjars/angular-ui-select/select.min.css"></link>
 
 <link
   rel="stylesheet"
   href="/webjars/font-awesome/css/font-awesome.css"></link>
+  
+<link
+  rel="stylesheet"
+  href="resources/${gitCommitId}/iam/css/AdminLTE.css"></link>
 
 <link
   rel="stylesheet"
-  href="resources/iam/css/toaster.min.css" />
+  href="resources/${gitCommitId}/iam/css/skins/skin-blue.css"></link>
 
 <link
   rel="stylesheet"
-  href="resources/iam/css/iam.css"></link>
+  href="resources/${gitCommitId}/iam/css/ionicons/ionicons.min.css"></link>
+
+
+<link
+  rel="stylesheet"
+  href="resources/${gitCommitId}/iam/css/toaster.min.css" />
+
+<link
+  rel="stylesheet"
+  href="resources/${gitCommitId}/iam/css/iam.css"></link>
   
   <style type="text/css">
     #logo-container {

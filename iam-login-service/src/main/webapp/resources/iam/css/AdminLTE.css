@@ -13,7 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@import url(https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic);
+
+/* @import url(https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic); */
+
+@import url("/resources/iam/css/fonts.css");
+
 /*!
  *   AdminLTE v2.3.6
  *   Author: Almsaeed Studio

@@ -18,15 +18,18 @@ package it.infn.mw.iam.config;
 import static com.google.common.base.Strings.isNullOrEmpty;
 
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.http.CacheControl;
 import org.springframework.web.servlet.AsyncHandlerInterceptor;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -36,6 +39,7 @@ import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
+import org.springframework.web.servlet.resource.VersionResourceResolver;
 import org.springframework.web.servlet.view.BeanNameViewResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.JstlView;
@@ -62,6 +66,13 @@ public class MvcConfig extends WebMvcConfigurerAdapter {
   @Autowired
   IamProperties iamProperties;
 
+  @Value("${iam.version}")
+  String iamVersion;
+
+  @Value("${git.commit.id.abbrev}")
+  String gitCommit;
+
+
   @Override
   public void addInterceptors(final InterceptorRegistry registry) {
 
@@ -74,7 +85,13 @@ public class MvcConfig extends WebMvcConfigurerAdapter {
   @Override
   public void addResourceHandlers(final ResourceHandlerRegistry registry) {
 
-    registry.addResourceHandler("/resources/**").addResourceLocations("/resources/");
+    registry.addResourceHandler("/resources/**")
+      .addResourceLocations("/resources/")
+      .setCacheControl(CacheControl.maxAge(30, TimeUnit.DAYS))
+      .resourceChain(false)
+      .addResolver(
+          new VersionResourceResolver().addFixedVersionStrategy(gitCommit, "/**"));
+
 
     if (iamProperties.getLocalResources().isEnable()) {
       if (isNullOrEmpty(iamProperties.getLocalResources().getLocation())) {
