@@ -63,6 +63,7 @@ import it.infn.mw.iam.api.scim.updater.UpdaterType;
 import it.infn.mw.iam.api.scim.updater.factory.DefaultAccountUpdaterFactory;
 import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.config.IamProperties.EditableFields;
+import it.infn.mw.iam.core.user.IamAccountService;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
@@ -85,7 +86,8 @@ public class ScimMeController implements ApplicationEventPublisherAware {
   private final EnumSet<UpdaterType> enabledUpdaters;
 
   @Autowired
-  public ScimMeController(IamAccountRepository accountRepository, UserConverter userConverter,
+  public ScimMeController(IamAccountRepository accountRepository, IamAccountService accountService,
+      UserConverter userConverter,
       PasswordEncoder passwordEncoder, OidcIdConverter oidcIdConverter,
       SamlIdConverter samlIdConverter, SshKeyConverter sshKeyConverter,
       X509CertificateConverter x509CertificateConverter, IamProperties properties) {
@@ -93,7 +95,8 @@ public class ScimMeController implements ApplicationEventPublisherAware {
     this.iamAccountRepository = accountRepository;
     this.userConverter = userConverter;
     this.updatersFactory = new DefaultAccountUpdaterFactory(passwordEncoder, accountRepository,
-        oidcIdConverter, samlIdConverter, sshKeyConverter, x509CertificateConverter);
+        accountService, oidcIdConverter, samlIdConverter, sshKeyConverter,
+        x509CertificateConverter);
 
     enabledUpdaters = EnumSet.noneOf(UpdaterType.class);
 

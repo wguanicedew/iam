@@ -33,6 +33,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -46,7 +49,6 @@ import org.mitre.oauth2.model.OAuth2RefreshTokenEntity;
 import org.mitre.oauth2.service.OAuth2TokenEntityService;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -69,12 +71,18 @@ import it.infn.mw.iam.persistence.model.IamSshKey;
 import it.infn.mw.iam.persistence.model.IamX509Certificate;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamAuthoritiesRepository;
+import it.infn.mw.iam.persistence.repository.IamGroupRepository;
 
 @RunWith(MockitoJUnitRunner.class)
 public class IamAccountServiceTests extends IamAccountServiceTestSupport {
 
+  public static final Instant NOW = Instant.parse("2021-01-01T00:00:00.00Z");
+
   @Mock
   private IamAccountRepository accountRepo;
+
+  @Mock
+  private IamGroupRepository groupRepo;
 
   @Mock
   private IamAuthoritiesRepository authoritiesRepo;
@@ -91,7 +99,8 @@ public class IamAccountServiceTests extends IamAccountServiceTestSupport {
   @Mock
   private OAuth2TokenEntityService tokenService;
 
-  @InjectMocks
+  private Clock clock = Clock.fixed(NOW, ZoneId.systemDefault());
+
   private DefaultIamAccountService accountService;
 
   @Captor
@@ -113,6 +122,9 @@ public class IamAccountServiceTests extends IamAccountServiceTestSupport {
     when(authoritiesRepo.findByAuthority(anyString())).thenReturn(Optional.empty());
     when(authoritiesRepo.findByAuthority("ROLE_USER")).thenReturn(Optional.of(ROLE_USER_AUTHORITY));
     when(passwordEncoder.encode(anyObject())).thenReturn(PASSWORD);
+
+    accountService = new DefaultIamAccountService(clock, accountRepo, groupRepo, authoritiesRepo,
+        passwordEncoder, eventPublisher, tokenService);
   }
 
   @Test(expected = NullPointerException.class)

@@ -57,4 +57,9 @@ public class DefaultAccountUpdater<T, E extends AccountEvent> extends DefaultUpd
     }
   }
 
+  @Override
+  public String toString() {
+
+    return type.name();
+  }
 }

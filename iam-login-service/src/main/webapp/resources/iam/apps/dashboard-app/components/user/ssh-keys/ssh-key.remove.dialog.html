@@ -1,0 +1,26 @@
+<div class="modal-header">
+    <h3 class="modal-title">
+        Remove SSH key from <strong>{{$ctrl.user.name.formatted}}</strong> IAM account?
+    </h3>
+</div>
+
+<div class="modal-body">
+    <p class="text-justify text-wrapped">
+        The following SSH keywill be removed from {{$ctrl.user.name.formatted}} account:
+    </p>
+    <dl>
+        <dt>Label</dt>
+        <dd>{{ $ctrl.key.display }}</dd>
+        <dt>Fingerprint</dt>
+        <dd>{{ $ctrl.key.fingerprint}}</dd>
+        <dt>Value</dt>
+        <dd>{{ $ctrl.key.value}}</dd>
+    </dl>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-primary" type="button" id="modal-btn-confirm" ng-disabled="!$ctrl.enabled"
+        ng-click="$ctrl.removeKey()">Remove key</button>
+
+    <button class="btn btn-danger" type="button" id="modal-btn-cancel" ng-click="$ctrl.cancel()">Cancel</button>
+</div>

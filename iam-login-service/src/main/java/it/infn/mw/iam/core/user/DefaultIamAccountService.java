@@ -122,7 +122,7 @@ public class DefaultIamAccountService implements IamAccountService {
   public IamAccount createAccount(IamAccount account) {
     checkNotNull(account, "Cannot create a null account");
 
-    final Date now = new Date();
+    final Date now = Date.from(clock.instant());
     final String randomUuid = UUID.randomUUID().toString();
 
     newAccountSanityChecks(account);
@@ -159,6 +159,11 @@ public class DefaultIamAccountService implements IamAccountService {
 
     // Set creation time for certificates
     account.getX509Certificates().forEach(c -> {
+      c.setCreationTime(now);
+      c.setLastUpdateTime(now);
+    });
+
+    account.getSshKeys().forEach(c -> {
       c.setCreationTime(now);
       c.setLastUpdateTime(now);
     });
@@ -462,5 +467,61 @@ public class DefaultIamAccountService implements IamAccountService {
   @Override
   public Page<IamAccount> fingGroupMembers(IamGroup group, Pageable page) {
     return accountRepo.findByGroupUuid(group.getUuid(), page);
+  }
+
+  @Override
+  public IamAccount addSshKey(IamAccount account, IamSshKey key) {
+    if (account.getSshKeys().contains(key)) {
+      return account;
+    }
+
+    Optional<IamAccount> maybeAccount = accountRepo.findBySshKeyValue(key.getValue());
+    if (maybeAccount.isPresent()) {
+      IamAccount otherAccount = maybeAccount.get();
+      if (otherAccount.equals(account)) {
+        return account;
+      } else {
+        throw new CredentialAlreadyBoundException(
+            String.format("SSH key 'sha256:%s' already bound to a user", key.getFingerprint()));
+
+      }
+    }
+
+    if (account.getSshKeys().isEmpty()) {
+      key.setPrimary(true);
+    } else if (key.isPrimary()) {
+      account.getSshKeys().forEach(k -> k.setPrimary(false));
+    }
+
+    final Date keyCreationTime = Date.from(clock.instant());
+
+    key.setCreationTime(keyCreationTime);
+    key.setLastUpdateTime(keyCreationTime);
+
+    account.getSshKeys().add(key);
+    key.setAccount(account);
+
+    accountRepo.save(account);
+    return account;
+  }
+
+  @Override
+  public IamAccount removeSshKey(IamAccount account, IamSshKey key) {
+    if (!account.getSshKeys().contains(key)) {
+      return account;
+    }
+
+    account.getSshKeys().remove(key);
+    key.setAccount(null);
+
+    final long primaryCount = account.getSshKeys().stream().filter(IamSshKey::isPrimary).count();
+
+    if (primaryCount == 0 || primaryCount > 1) {
+      account.getSshKeys().forEach(k -> k.setPrimary(false));
+      account.getSshKeys().stream().findFirst().ifPresent(k -> k.setPrimary(true));
+    }
+
+    accountRepo.save(account);
+    return account;
   }
 }

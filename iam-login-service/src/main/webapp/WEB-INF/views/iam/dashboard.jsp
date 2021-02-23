@@ -24,17 +24,17 @@
   <script type="text/ng-template" id="noConnectionTemplate.html">
                             <div class="modal-header">
                                 <h3 class="modal-title">Lost connection to the IAM server</h3>
-                                /div>
-                                <div class="modal-body">
+                            </div>
+                            <div class="modal-body">
                                     <p>The connection was interrupted while the page was loading.</p>
                                     <ul>
                                         <li>The site could be temporarily unavailable or too busy. Try again in a few moments.</li>
                                     </ul>
-                                </div>
+                             </div>
 
-                                <div class="modal-footer" class="text-center">
-                                    <button class="btn btn-primary" data-dismiss="modal" type="button" data-ng-click="$root.refresh()">Retry</button>
-                                </div>
+                             <div class="modal-footer" class="text-center">
+                                <button class="btn btn-primary" data-dismiss="modal" type="button" data-ng-click="$root.refresh()">Retry</button>
+                             </div>
                         </script>
   <div class="wrapper">
     <toaster-container
@@ -134,6 +134,7 @@
   <script type="text/javascript"
     src="/resources/${gitCommitId}/iam/apps/dashboard-app/components/user/linked-accounts/user.linked-accounts.component.js"></script>
   <script type="text/javascript" src="/resources/${gitCommitId}/iam/apps/dashboard-app/components/user/x509/user.x509.component.js"></script>
+  <script type="text/javascript" src="/resources/${gitCommitId}/iam/apps/dashboard-app/components/user/ssh-keys/user.ssh-keys.component.js"></script>
   <script type="text/javascript" src="/resources/${gitCommitId}/iam/apps/dashboard-app/components/user/labels/user.labels.component.js"></script>
   <script type="text/javascript" src="/resources/${gitCommitId}/iam/apps/dashboard-app/components/user/attributes/user.attributes.component.js"></script>
   <script type="text/javascript" src="/resources/${gitCommitId}/iam/apps/dashboard-app/components/user/end-time/user.end-time.component.js"></script>

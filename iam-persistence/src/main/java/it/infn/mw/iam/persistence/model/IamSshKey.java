@@ -16,6 +16,7 @@
 package it.infn.mw.iam.persistence.model;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import javax.annotation.Generated;
 import javax.persistence.Column;
@@ -26,10 +27,12 @@ import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 @Entity
 @Table(name = "iam_ssh_key")
-public class IamSshKey implements IamAccountRef, Serializable{
+public class IamSshKey implements IamAccountRef, Serializable {
 
   /**
    * 
@@ -55,6 +58,14 @@ public class IamSshKey implements IamAccountRef, Serializable{
 
   @ManyToOne
   private IamAccount account;
+
+  @Temporal(TemporalType.TIMESTAMP)
+  @Column(name = "creation_time", nullable = false)
+  Date creationTime;
+
+  @Temporal(TemporalType.TIMESTAMP)
+  @Column(name = "last_update_time", nullable = false)
+  Date lastUpdateTime;
 
   public IamSshKey() {
 
@@ -125,6 +136,22 @@ public class IamSshKey implements IamAccountRef, Serializable{
   public void setPrimary(boolean primary) {
 
     this.primary = primary;
+  }
+
+  public Date getCreationTime() {
+    return creationTime;
+  }
+
+  public void setCreationTime(Date creationTime) {
+    this.creationTime = creationTime;
+  }
+
+  public Date getLastUpdateTime() {
+    return lastUpdateTime;
+  }
+
+  public void setLastUpdateTime(Date lastUpdateTime) {
+    this.lastUpdateTime = lastUpdateTime;
   }
 
   @Override

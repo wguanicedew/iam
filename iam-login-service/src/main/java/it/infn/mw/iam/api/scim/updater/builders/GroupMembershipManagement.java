@@ -17,8 +17,6 @@ import it.infn.mw.iam.persistence.model.IamGroup;
 
 public class GroupMembershipManagement {
 
-
-
   private final IamAccount account;
   private final IamAccountService accountService;
 

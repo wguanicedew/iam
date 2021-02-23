@@ -15,6 +15,8 @@
  */
 package it.infn.mw.iam.api.scim.model;
 
+import java.util.Date;
+
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotBlank;
 
@@ -22,7 +24,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import it.infn.mw.iam.api.scim.controller.utils.JsonDateSerializer;
 import it.infn.mw.iam.api.scim.model.ScimUser.NewUserValidation;
 
 @JsonInclude(Include.NON_EMPTY)
@@ -40,6 +44,12 @@ public class ScimSshKey {
   @NotBlank(groups = {NewUserValidation.class})
   private final String value;
 
+  @JsonSerialize(using = JsonDateSerializer.class)
+  private final Date created;
+
+  @JsonSerialize(using = JsonDateSerializer.class)
+  private final Date lastModified;
+
   @JsonCreator
   private ScimSshKey(@JsonProperty("display") String display,
       @JsonProperty("primary") Boolean primary, @JsonProperty("value") String value,
@@ -49,6 +59,8 @@ public class ScimSshKey {
     this.value = value;
     this.primary = primary;
     this.fingerprint = fingerprint;
+    this.created = null;
+    this.lastModified = null;
   }
 
   public String getDisplay() {
@@ -77,6 +89,8 @@ public class ScimSshKey {
     this.primary = b.primary;
     this.value = b.value;
     this.fingerprint = b.fingerprint;
+    this.created = b.created;
+    this.lastModified = b.lastModified;
   }
 
   public static Builder builder() {
@@ -90,6 +104,18 @@ public class ScimSshKey {
     private String value;
     private Boolean primary;
     private String fingerprint;
+    private Date created;
+    private Date lastModified;
+
+    public Builder created(Date created) {
+      this.created = created;
+      return this;
+    }
+
+    public Builder lastModified(Date lastModified) {
+      this.lastModified = lastModified;
+      return this;
+    }
 
     public Builder display(String display) {
 

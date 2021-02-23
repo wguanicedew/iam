@@ -17,6 +17,7 @@ package it.infn.mw.iam.api.scim.updater.builders;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import it.infn.mw.iam.core.user.IamAccountService;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
@@ -25,18 +26,21 @@ public class AccountUpdaters {
   private AccountUpdaters() {
   }
   
-  public static Adders adders(IamAccountRepository repo, PasswordEncoder encoder,
+  public static Adders adders(IamAccountRepository repo, IamAccountService accountService,
+      PasswordEncoder encoder,
       IamAccount account) {
-    return new Adders(repo, encoder, account);
+    return new Adders(repo, accountService, encoder, account);
   }
 
-  public static Removers removers(IamAccountRepository repo, IamAccount account) {
-    return new Removers(repo, account);
+  public static Removers removers(IamAccountRepository repo, IamAccountService accountService,
+      IamAccount account) {
+    return new Removers(repo, accountService, account);
   }
 
-  public static Replacers replacers(IamAccountRepository repo, PasswordEncoder encoder,
+  public static Replacers replacers(IamAccountRepository repo, IamAccountService accountService,
+      PasswordEncoder encoder,
       IamAccount account) {
-    return new Replacers(repo, encoder, account);
+    return new Replacers(repo, accountService, encoder, account);
   }
   
 

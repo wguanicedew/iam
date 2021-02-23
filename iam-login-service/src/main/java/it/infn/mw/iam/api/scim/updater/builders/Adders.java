@@ -20,9 +20,11 @@ import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_ADD_OIDC_ID;
 import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_ADD_SAML_ID;
 import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_ADD_SSH_KEY;
 import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_ADD_X509_CERTIFICATE;
+import static java.util.Objects.isNull;
 
 import java.util.Collection;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -39,6 +41,7 @@ import it.infn.mw.iam.audit.events.account.oidc.OidcAccountAddedEvent;
 import it.infn.mw.iam.audit.events.account.saml.SamlAccountAddedEvent;
 import it.infn.mw.iam.audit.events.account.ssh.SshKeyAddedEvent;
 import it.infn.mw.iam.audit.events.account.x509.X509CertificateAddedEvent;
+import it.infn.mw.iam.core.user.IamAccountService;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamOidcId;
 import it.infn.mw.iam.persistence.model.IamSamlId;
@@ -59,8 +62,11 @@ public class Adders extends Replacers {
   final AccountFinder<IamSshKey> findBySshKey;
   final AccountFinder<IamX509Certificate> findByX509CertificateSubject;
 
-  public Adders(IamAccountRepository repo, PasswordEncoder encoder, IamAccount account) {
-    super(repo, encoder, account);
+  final Consumer<Collection<IamSshKey>> linkSshKeys;
+
+  public Adders(IamAccountRepository repo, IamAccountService accountService,
+      PasswordEncoder encoder, IamAccount account) {
+    super(repo, accountService, encoder, account);
 
     findByOidcId = id -> repo.findByOidcId(id.getIssuer(), id.getSubject());
     findBySamlId = repo::findBySamlId;
@@ -71,8 +77,15 @@ public class Adders extends Replacers {
     samlIdAddChecks = buildSamlIdsAddChecks();
     sshKeyAddChecks = buildSshKeyAddChecks();
     x509CertificateAddChecks = buildX509CertificateAddChecks();
-  }
 
+    linkSshKeys = (keys) -> {
+      for (IamSshKey k : keys) {
+        if (!isNull(k)) {
+          accountService.addSshKey(account, k);
+        }
+      }
+    };
+  }
 
   private Predicate<Collection<IamOidcId>> buildOidcIdsAddChecks() {
 
@@ -184,9 +197,9 @@ public class Adders extends Replacers {
   }
 
   public AccountUpdater sshKey(Collection<IamSshKey> newSshKeys) {
-
+    
     return new DefaultAccountUpdater<Collection<IamSshKey>, SshKeyAddedEvent>(account,
-        ACCOUNT_ADD_SSH_KEY, account::linkSshKeys, newSshKeys, sshKeyAddChecks,
+        ACCOUNT_ADD_SSH_KEY, linkSshKeys, newSshKeys, sshKeyAddChecks,
         SshKeyAddedEvent::new);
   }
 

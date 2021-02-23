@@ -1,0 +1,49 @@
+<div class="modal-header">
+    <h3 class="modal-title">
+        Add an SSH key to <strong>{{$ctrl.user.name.formatted}}</strong> IAM account?
+    </h3>
+</div>
+
+<div class="modal-body">
+    <div class="form-group">
+        <label>User</label>
+        <p class="form-control-static">{{$ctrl.user.name.formatted}}</p>
+    </div>
+    <form name="addKey">
+        <div class="form-group" ng-class="{'has-error': 
+        addKey.label.$dirty && !addKey.label.$valid }">
+            <label>Label</label> <input name="label" class="form-control" type="text" placeholder="Label..."
+                ng-model="$ctrl.keyVal.display" required="true" ng-minlength="2" ng-maxlength="36">
+            <span class="help-block" ng-if="addKey.label.$dirty && addKey.label.$error.required">
+                Please provide a label
+            </span>
+            <span class="help-block" ng-if="addKey.label.$dirty &&     addKey.label.$error.minlength">
+                Label must be at least 2 characters long
+            </span>
+            <span class="help-block" ng-if="addKey.label.$dirty && addKey.label.$error.maxlength">
+                Label must be at most 36 characters long
+            </span>
+        </div>
+
+        <div class="form-group" ng-class="{'has-error': $ctrl.error || addKey.key.$dirty && !addKey.key.$valid}">
+            <label>SSH key</label>
+            <textarea class="form-control" name="key" type="text" placeholder="Insert key here..."
+                ng-model="$ctrl.keyVal.value" required="true"></textarea>
+            <span class="help-block" ng-if="$ctrl.error">
+                {{ $ctrl.error.data.detail }}
+            </span>
+            <span class="help-block" ng-if="addKey.key.$dirty && addKey.key.$error.required">
+                Please paste here an SSH public key
+            </span>
+        </div>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-primary" type="button" id="modal-btn-confirm" ng-disabled="!$ctrl.keyVal.display || !$ctrl.keyVal.value ||
+    !$ctrl.enabled" ng-click="$ctrl.addKey()">Add SSH key</button>
+
+    <button class="btn btn-warning" type="button" id="modal-btn-reset" ng-click="$ctrl.reset()">Reset form</button>
+
+    <button class="btn btn-danger" type="button" id="modal-btn-cancel" ng-click="$ctrl.cancel()">Cancel</button>
+</div>

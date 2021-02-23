@@ -20,9 +20,11 @@ import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REMOVE_PICTURE
 import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REMOVE_SAML_ID;
 import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REMOVE_SSH_KEY;
 import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REMOVE_X509_CERTIFICATE;
+import static java.util.Objects.isNull;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.function.Consumer;
 
 import it.infn.mw.iam.api.scim.updater.AccountUpdater;
 import it.infn.mw.iam.api.scim.updater.DefaultAccountUpdater;
@@ -31,6 +33,7 @@ import it.infn.mw.iam.audit.events.account.oidc.OidcAccountRemovedEvent;
 import it.infn.mw.iam.audit.events.account.saml.SamlAccountRemovedEvent;
 import it.infn.mw.iam.audit.events.account.ssh.SshKeyRemovedEvent;
 import it.infn.mw.iam.audit.events.account.x509.X509CertificateRemovedEvent;
+import it.infn.mw.iam.core.user.IamAccountService;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamOidcId;
 import it.infn.mw.iam.persistence.model.IamSamlId;
@@ -41,8 +44,17 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
 public class Removers extends AccountBuilderSupport {
   
-  public Removers(IamAccountRepository repo, IamAccount account) {
-    super(repo, account);
+  final Consumer<Collection<IamSshKey>> unlinkSshKeys;
+
+  public Removers(IamAccountRepository repo, IamAccountService accountService, IamAccount account) {
+    super(repo, accountService, account);
+    unlinkSshKeys = (keys) -> {
+      for (IamSshKey k : keys) {
+        if (!isNull(k)) {
+          accountService.removeSshKey(account, k);
+        }
+      }
+    };
   }
 
   public AccountUpdater oidcId(Collection<IamOidcId> toBeRemoved) {
@@ -62,7 +74,7 @@ public class Removers extends AccountBuilderSupport {
   public AccountUpdater sshKey(Collection<IamSshKey> toBeRemoved) {
 
     return new DefaultAccountUpdater<Collection<IamSshKey>, SshKeyRemovedEvent>(account,
-        ACCOUNT_REMOVE_SSH_KEY, account::unlinkSshKeys, toBeRemoved,
+        ACCOUNT_REMOVE_SSH_KEY, unlinkSshKeys, toBeRemoved,
         i -> !Collections.disjoint(account.getSshKeys(), i), SshKeyRemovedEvent::new);
   }
 

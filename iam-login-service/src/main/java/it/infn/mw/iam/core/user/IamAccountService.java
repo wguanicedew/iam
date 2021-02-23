@@ -26,6 +26,7 @@ import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamAttribute;
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.model.IamLabel;
+import it.infn.mw.iam.persistence.model.IamSshKey;
 
 /**
  * This service provides basic functionality used to manage IAM accounts
@@ -161,5 +162,22 @@ public interface IamAccountService {
   Page<IamAccount> fingGroupMembers(IamGroup group, Pageable page);
 
 
+  /**
+   * Links an ssh key to an account
+   * 
+   * @param account
+   * @param key
+   * @return the updated account
+   */
+  IamAccount addSshKey(IamAccount account, IamSshKey key);
+
+  /**
+   * Removes an ssh key from an account
+   * 
+   * @param account
+   * @param key
+   * @return the updated account
+   */
+  IamAccount removeSshKey(IamAccount account, IamSshKey key);
 
 }

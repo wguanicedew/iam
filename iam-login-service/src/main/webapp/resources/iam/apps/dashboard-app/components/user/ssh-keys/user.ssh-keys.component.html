@@ -1,0 +1,46 @@
+<!-- SSH keys box -->
+<div class="box box-primary">
+    <div class="box-header with-border">
+        <h3 class="box-title"><strong>SSH keys</strong></h3>
+        <i class="fa fa-key pull-right"></i>
+    </div>
+
+    <div class="box-body" ng-class="{ 'no-padding': $ctrl.hasKeys() }">
+        <div ng-if="!$ctrl.hasKeys()">No keys found for user</div>
+
+        <div ng-if="$ctrl.hasKeys()" class="table-responsive">
+            <table id="ssh_key_list" class="table no-margin">
+                <tbody>
+
+                    <tr ng-repeat="key in $ctrl.getKeys()">
+                        <td>
+                            <dl>
+                                <dt>Label</dt>
+                                <dd>{{ key.display }}</dd>
+                                <dt>Fingerprint</dt>
+                                <dd>{{ key.fingerprint }}</dd>
+                                <dt>Value</dt>
+                                <dd>{{ key.value}}</dd>
+                            </dl>
+                        </td>
+
+                        <td class="text-right">
+                            <div class="btn-group">
+                                <button class="btn btn-xs btn-danger" ng-click="$ctrl.openRemoveKeyDialog(key)"
+                                    ng-if="$ctrl.canManageKeys()">
+                                    <i class="fa fa-times"></i> Remove
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="box-footer" ng-if="$ctrl.canManageKeys()">
+        <button class="btn btn-success btn-sm" name="btn-add-cert" ng-click="$ctrl.openAddKeyDialog()"
+            ng-if="$ctrl.canManageKeys()">
+            <i class="fa fa-plus"></i> Add ssh key
+        </button>
+    </div>
+</div>

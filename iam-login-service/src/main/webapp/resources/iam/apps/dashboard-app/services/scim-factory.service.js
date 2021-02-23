@@ -355,9 +355,7 @@ angular.module('dashboardApp').factory("scimFactory", ['$q', '$http', '$httpPara
 		return $http.patch(url, data, config);
 	}
 
-	function addSshKey(userId, label, isPrimary, value) {
-
-		console.info("Patch user-id, add ssh-key ", userId, label, value);
+	function addSshKey(userId, key) {
 
 		var config = {
 			headers: {
@@ -370,11 +368,7 @@ angular.module('dashboardApp').factory("scimFactory", ['$q', '$http', '$httpPara
 				op: "add",
 				value: {
 					"urn:indigo-dc:scim:schemas:IndigoUser": {
-						sshKeys: [{
-							"display": label,
-							"primary": isPrimary,
-							"value": value
-						}]
+						sshKeys: [key]
 					}
 				}
 			}]
@@ -382,11 +376,9 @@ angular.module('dashboardApp').factory("scimFactory", ['$q', '$http', '$httpPara
 		var url = urlUsers + '/' + userId;
 
 		return $http.patch(url, data, config);
-	};
+	}
 
-	function removeSshKey(userId, fingerprint) {
-
-		console.info("Patch user-id, remove ssh-key ", userId, fingerprint);
+	function removeSshKey(userId, key) {
 
 		var config = {
 			headers: {
@@ -400,12 +392,13 @@ angular.module('dashboardApp').factory("scimFactory", ['$q', '$http', '$httpPara
 				value: {
 					"urn:indigo-dc:scim:schemas:IndigoUser": {
 						sshKeys: [{
-							"fingerprint": fingerprint
+							"fingerprint": key.fingerprint
 						}]
 					}
 				}
 			}]
 		};
+		
 		var url = urlUsers + '/' + userId;
 
 		return $http.patch(url, data, config);

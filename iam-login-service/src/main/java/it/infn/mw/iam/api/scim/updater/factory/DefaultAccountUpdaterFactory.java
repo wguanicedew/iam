@@ -48,6 +48,7 @@ import it.infn.mw.iam.api.scim.updater.builders.Removers;
 import it.infn.mw.iam.api.scim.updater.builders.Replacers;
 import it.infn.mw.iam.api.scim.updater.util.CollectionHelpers;
 import it.infn.mw.iam.api.scim.updater.util.ScimCollectionConverter;
+import it.infn.mw.iam.core.user.IamAccountService;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamOidcId;
 import it.infn.mw.iam.persistence.model.IamSamlId;
@@ -60,6 +61,7 @@ public class DefaultAccountUpdaterFactory implements AccountUpdaterFactory<IamAc
   final PasswordEncoder encoder;
 
   final IamAccountRepository repo;
+  final IamAccountService accountService;
 
   final OidcIdConverter oidcIdConverter;
   final SamlIdConverter samlIdConverter;
@@ -67,9 +69,11 @@ public class DefaultAccountUpdaterFactory implements AccountUpdaterFactory<IamAc
   final X509CertificateConverter x509CertificateConverter;
 
   public DefaultAccountUpdaterFactory(PasswordEncoder encoder, IamAccountRepository repo,
+      IamAccountService accountService,
       OidcIdConverter oidcIdConverter, SamlIdConverter samlIdConverter,
       SshKeyConverter sshKeyConverter, X509CertificateConverter x509CertificateConverter) {
 
+    this.accountService = accountService;
     this.encoder = encoder;
     this.repo = repo;
     this.oidcIdConverter = oidcIdConverter;
@@ -115,7 +119,7 @@ public class DefaultAccountUpdaterFactory implements AccountUpdaterFactory<IamAc
 
   private void prepareAdders(List<AccountUpdater> updaters, ScimUser user, IamAccount account) {
 
-    Adders add = AccountUpdaters.adders(repo, encoder, account);
+    Adders add = AccountUpdaters.adders(repo, accountService, encoder, account);
 
     if (user.hasName()) {
 
@@ -154,7 +158,7 @@ public class DefaultAccountUpdaterFactory implements AccountUpdaterFactory<IamAc
   }
 
   private void prepareRemovers(List<AccountUpdater> updaters, ScimUser user, IamAccount account) {
-    Removers remove = AccountUpdaters.removers(repo, account);
+    Removers remove = AccountUpdaters.removers(repo, accountService, account);
 
     if (user.hasOidcIds()) {
       addUpdater(updaters, CollectionHelpers::notNullOrEmpty, oidcIdConverter(user),
@@ -183,7 +187,7 @@ public class DefaultAccountUpdaterFactory implements AccountUpdaterFactory<IamAc
 
   private void prepareReplacers(List<AccountUpdater> updaters, ScimUser user, IamAccount account) {
 
-    Replacers replace = AccountUpdaters.replacers(repo, encoder, account);
+    Replacers replace = AccountUpdaters.replacers(repo, accountService, encoder, account);
 
     if (user.hasName()) {
       addUpdater(updaters, Objects::nonNull, user.getName()::getGivenName, replace::givenName);

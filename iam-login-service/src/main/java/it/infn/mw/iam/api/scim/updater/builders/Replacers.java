@@ -40,6 +40,7 @@ import it.infn.mw.iam.audit.events.account.GivenNameReplacedEvent;
 import it.infn.mw.iam.audit.events.account.PasswordReplacedEvent;
 import it.infn.mw.iam.audit.events.account.PictureReplacedEvent;
 import it.infn.mw.iam.audit.events.account.UsernameReplacedEvent;
+import it.infn.mw.iam.core.user.IamAccountService;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamUserInfo;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
@@ -55,9 +56,10 @@ public class Replacers extends AccountBuilderSupport {
   final AccountFinder<String> findByEmail;
   final AccountFinder<String> findByUsername;
 
-  public Replacers(IamAccountRepository repo, PasswordEncoder encoder, IamAccount account) {
+  public Replacers(IamAccountRepository repo, IamAccountService accountService,
+      PasswordEncoder encoder, IamAccount account) {
 
-    super(repo, encoder, account);
+    super(repo, accountService, encoder, account);
     findByEmail = repo::findByEmail;
     findByUsername = repo::findByUsername;
     encodedPasswordSetter = t -> account.setPassword(encoder.encode(t));
