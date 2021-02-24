@@ -16,9 +16,11 @@
 package it.infn.mw.iam.api.scim.controller;
 
 import static it.infn.mw.iam.api.scim.controller.utils.ValidationHelper.handleValidationError;
+import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_ADD_SSH_KEY;
 import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REMOVE_OIDC_ID;
 import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REMOVE_PICTURE;
 import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REMOVE_SAML_ID;
+import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REMOVE_SSH_KEY;
 import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REPLACE_EMAIL;
 import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REPLACE_FAMILY_NAME;
 import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REPLACE_GIVEN_NAME;
@@ -73,7 +75,8 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 public class ScimMeController implements ApplicationEventPublisherAware {
 
   protected static final EnumSet<UpdaterType> ACCOUNT_LINKING_UPDATERS =
-      EnumSet.of(ACCOUNT_REMOVE_OIDC_ID, ACCOUNT_REMOVE_SAML_ID);
+      EnumSet.of(ACCOUNT_REMOVE_OIDC_ID, ACCOUNT_REMOVE_SAML_ID, ACCOUNT_ADD_SSH_KEY,
+          ACCOUNT_REMOVE_SSH_KEY);
 
   private final IamAccountRepository iamAccountRepository;
 

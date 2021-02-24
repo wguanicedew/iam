@@ -5,7 +5,7 @@
         .module('dashboardApp')
         .component('userSshKeys', userSshKeys());
 
-    function ManageSshKeyController($scope, scimFactory, $uibModalInstance, user, key, successHandler){
+    function ManageSshKeyController(Utils, scimFactory, $uibModalInstance, user, key, successHandler){
         var self = this;
         self.key = key;
         self.enabled  = true;
@@ -36,29 +36,50 @@
         function removeKey(){
             self.error = undefined;
             self.enabled = false;
-            scimFactory.removeSshKey(self.user.id, self.key).then(function(res){
+
+            function handleSuccess(res){
                 $uibModalInstance.close();
                 self.successHandler(res.data, 'SSH Key removed succesfully');
                 self.enabled=true;
-            }).catch(function(err){
+            }
+
+            function handleError(res){
                 console.error(err);
                 self.error = err;
                 self.enabled =true;
-            });
+            }
+
+            if (Utils.isMe(self.user.id)){
+                scimFactory.removeSshKeyMe(self.key)
+                .then(handleSuccess).catch(handleError);   
+            } else {
+                scimFactory.removeSshKey(self.user.id, self.key)
+                    .then(handleSuccess).catch(handleError);
+            }
         }
 
         function addKey(){
             self.error = undefined;
             self.enabled = false;
-            scimFactory.addSshKey(self.user.id, self.keyVal).then(function(res){
+
+            function handleSuccess(res){
                 $uibModalInstance.close();
                 self.successHandler(res.data, 'SSH Key added succesfully');
                 self.enabled=true;
-            }).catch(function(err){
+            }
+
+            function handleError(res){
                 console.error(err);
                 self.error = err;
                 self.enabled =true;
-            });
+            }
+
+            if (Utils.isMe(self.user.id)){
+                scimFactory.addSshKeyMe(self.keyVal).then(handleSuccess).catch(handleError);
+                
+            } else {
+                scimFactory.addSshKey(self.user.id, self.keyVal).then(handleSuccess).catch(handleError);
+            }
         }
 
     }

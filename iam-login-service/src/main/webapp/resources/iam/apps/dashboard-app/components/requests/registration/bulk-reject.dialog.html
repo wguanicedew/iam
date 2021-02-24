@@ -39,14 +39,14 @@
     <form name="rejReq">
         <div
             ng-class="{'has-error': rejReq.motivation.$dirty && rejReq.motivation.$invalid, 'has-success': rejReq.motivation.$dirty && rejReq.motivation.$valid}">
-            <input id="rej-req" name="motivation" class="form-control" type="text" required ng-minlength="5"
-                ng-maxlength="50" placeholder="Motivate your decision..." ng-model="$ctrl.motivation">
+            <textarea id="rej-req" name="motivation" class="form-control" type="text" required ng-minlength="5"
+                ng-maxlength="256" placeholder="Motivate your decision..." ng-model="$ctrl.motivation"></textarea>
             <span class="help-block" ng-show="rejReq.motivation.$dirty && rejReq.motivation.$error.minlength">Please
                 provide a motivation that is at least
                 5 characters long</span>
             <span class="help-block" ng-show="rejReq.motivation.$dirty && rejReq.motivation.$error.maxlength">The
                 motivation cannot exceed
-                50 characters</span>
+                256 characters</span>
         </div>
     </form>
 </div>

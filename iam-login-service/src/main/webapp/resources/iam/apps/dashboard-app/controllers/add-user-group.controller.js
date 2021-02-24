@@ -97,8 +97,8 @@ function AddUserGroupController(
               if (response.data.totalResults >=
                   (response.data.startIndex + response.data.itemsPerPage)) {
                 addGroupCtrl.loadingGroupsProgress = Math.floor(
-                    (startIndex + count) * 100 / response.data.totalResults);
-                addGroupCtrl.getAllGroups(startIndex + count, count);
+                    (response.data.startIndex + response.data.itemsPerPage) * 100 / response.data.totalResults);
+                addGroupCtrl.getAllGroups(response.data.startIndex + response.data.itemsPerPage, count);
 
               } else {
                 addGroupCtrl.loadingGroupsProgress = 100;

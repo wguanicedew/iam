@@ -22,7 +22,7 @@ public class ScimControllerSupport {
 
   protected static final int SCIM_USER_MAX_PAGE_SIZE = 100;
   protected static final int SCIM_MEMBERS_MAX_PAGE_SIZE = 100;
-  protected static final int SCIM_GROUP_MAX_PAGE_SIZE = 10;
+  protected static final int SCIM_GROUP_MAX_PAGE_SIZE = 100;
 
   protected ScimPageRequest buildUserPageRequest(Integer count, Integer startIndex) {
     return buildPageRequest(count, startIndex, SCIM_USER_MAX_PAGE_SIZE);

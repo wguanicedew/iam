@@ -23,11 +23,11 @@
         <div
             ng-class="{'has-error': rejReq.motivation.$dirty && rejReq.motivation.$invalid, 'has-success': rejReq.motivation.$dirty && rejReq.motivation.$valid}">
             <input id="rej-req" name="motivation" class="form-control" type="text" required ng-minlength="5"
-                ng-maxlength="50" placeholder="Motivate your decision..." ng-model="$ctrl.motivation">
+                ng-maxlength="256" placeholder="Motivate your decision..." ng-model="$ctrl.motivation">
             <span class="help-block" ng-show="rejReq.motivation.$dirty && rejReq.motivation.$error.minlength">Please
                 express yourself with at least 5 characters</span>
             <span class="help-block" ng-show="rejReq.motivation.$dirty && rejReq.motivation.$error.maxlength">Too
-                verbose, there's a 50 chars limit on the motivation</span>
+                verbose, there's a 256 character limit on the motivation</span>
         </div>
     </form>
     <br>

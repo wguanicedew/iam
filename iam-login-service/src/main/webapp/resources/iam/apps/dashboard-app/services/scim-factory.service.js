@@ -36,7 +36,9 @@ angular.module('dashboardApp').factory("scimFactory", ['$q', '$http', '$httpPara
 		addOpenIDAccount: addOpenIDAccount,
 		removeOpenIDAccount: removeOpenIDAccount,
 		addSshKey: addSshKey,
+		addSshKeyMe: addSshKeyMe,
 		removeSshKey: removeSshKey,
+		removeSshKeyMe: removeSshKeyMe,
 		addX509Certificate: addX509Certificate,
 		removeX509Certificate: removeX509Certificate,
 		addSamlId: addSamlId,
@@ -378,6 +380,49 @@ angular.module('dashboardApp').factory("scimFactory", ['$q', '$http', '$httpPara
 		return $http.patch(url, data, config);
 	}
 
+	function addSshKeyMe(key) {
+
+		var config = {
+			headers: {
+				'Content-Type': 'application/scim+json'
+			}
+		};
+		var data = {
+			schemas: ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
+			operations: [{
+				op: "add",
+				value: {
+					"urn:indigo-dc:scim:schemas:IndigoUser": {
+						sshKeys: [key]
+					}
+				}
+			}]
+		};
+		
+		return $http.patch(urlMe, data, config);
+	}
+
+	function removeSshKeyMe(key) {
+		var config = {
+			headers: {
+				'Content-Type': 'application/scim+json'
+			}
+		};
+		var data = {
+			schemas: ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
+			operations: [{
+				op: "remove",
+				value: {
+					"urn:indigo-dc:scim:schemas:IndigoUser": {
+						sshKeys: [key]
+					}
+				}
+			}]
+		};
+		
+		return $http.patch(urlMe, data, config);
+	}
+
 	function removeSshKey(userId, key) {
 
 		var config = {
@@ -425,7 +470,7 @@ angular.module('dashboardApp').factory("scimFactory", ['$q', '$http', '$httpPara
 		};
 
 		return $http.patch(url, data, config);
-	};
+	}
 
 	function removeX509Certificate(userId, certificate) {
 
