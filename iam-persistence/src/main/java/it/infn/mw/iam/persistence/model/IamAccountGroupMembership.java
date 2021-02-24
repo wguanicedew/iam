@@ -31,7 +31,7 @@ import javax.persistence.TemporalType;
 
 @Entity
 @Table(name = "iam_account_group")
-public class IamAccountGroupMembership {
+public class IamAccountGroupMembership implements Comparable<IamAccountGroupMembership> {
 
   @EmbeddedId
   private IamAccountGroupKey id;
@@ -95,6 +95,7 @@ public class IamAccountGroupMembership {
     this.endTime = endTime;
   }
 
+
   @Override
   @Generated("eclipse")
   public int hashCode() {
@@ -131,6 +132,7 @@ public class IamAccountGroupMembership {
   public static IamAccountGroupMembership forAccountAndGroup(Instant creationInstant, IamAccount a,
       IamGroup g) {
     IamAccountGroupMembership ag = new IamAccountGroupMembership();
+    ag.setId(IamAccountGroupKey.forAccountAndGroup(a, g));
     ag.setAccount(a);
     ag.setGroup(g);
     if (creationInstant != null) {
@@ -141,6 +143,12 @@ public class IamAccountGroupMembership {
 
   public static IamAccountGroupMembership forAccountAndGroup(IamAccount a, IamGroup g) {
     return forAccountAndGroup(null, a, g);
+  }
+
+  @Override
+  public int compareTo(IamAccountGroupMembership that) {
+
+    return getGroup().getName().compareTo(that.getGroup().getName());
   }
 
 }

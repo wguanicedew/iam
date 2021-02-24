@@ -72,6 +72,6 @@ public interface IamGroupRepository extends PagingAndSortingRepository<IamGroup,
       @Param("accountUuid") String accountUuid,
       @Param("groupUuid") String groupUuid);
 
-  @Query("select count(distinct(m)) from IamAccountGroupMembership m where m.group.uuid= :groupUuid")
+  @Query("select count(m) from IamAccountGroupMembership m where m.group.uuid= :groupUuid")
   Long countGroupMembersByGroupUuid(@Param("groupUuid") String groupUuid);
 }

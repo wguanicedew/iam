@@ -15,18 +15,26 @@
  */
 package it.infn.mw.iam.persistence.model;
 
+import java.io.Serializable;
+
 import javax.annotation.Generated;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 @Embeddable
-public class IamAccountGroupKey {
+public class IamAccountGroupKey implements Serializable {
+
+  private static final long serialVersionUID = 1L;
 
   @Column(name = "account_id")
   private Long accountId;
 
   @Column(name = "group_id")
   private Long groupId;
+
+  public IamAccountGroupKey() {
+    // emptyOnPurpose
+  }
 
   public Long getAccountId() {
     return accountId;
@@ -77,4 +85,10 @@ public class IamAccountGroupKey {
     return true;
   }
 
+  public static IamAccountGroupKey forAccountAndGroup(IamAccount a, IamGroup g) {
+    IamAccountGroupKey key = new IamAccountGroupKey();
+    key.setAccountId(a.getId());
+    key.setGroupId(g.getId());
+    return key;
+  }
 }
