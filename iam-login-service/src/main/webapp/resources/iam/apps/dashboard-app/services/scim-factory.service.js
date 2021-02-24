@@ -391,9 +391,7 @@ angular.module('dashboardApp').factory("scimFactory", ['$q', '$http', '$httpPara
 				op: "remove",
 				value: {
 					"urn:indigo-dc:scim:schemas:IndigoUser": {
-						sshKeys: [{
-							"fingerprint": key.fingerprint
-						}]
+						sshKeys: [key]
 					}
 				}
 			}]

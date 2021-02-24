@@ -105,15 +105,16 @@ public class DefaultAccountUpdaterFactory implements AccountUpdaterFactory<IamAc
   }
 
   private static <T> AccountUpdater buildUpdater(AccountUpdaterBuilder<T> factory,
-      Supplier<T> valueSupplier) {
-    return factory.build(valueSupplier.get());
+      T value) {
+    return factory.build(value);
   }
 
   private static <T> void addUpdater(List<AccountUpdater> updaters, Predicate<T> valuePredicate,
       Supplier<T> valueSupplier, AccountUpdaterBuilder<T> factory) {
 
-    if (valuePredicate.test(valueSupplier.get())) {
-      updaters.add(buildUpdater(factory, valueSupplier));
+    T value = valueSupplier.get();
+    if (valuePredicate.test(value)) {
+      updaters.add(buildUpdater(factory, value));
     }
   }
 

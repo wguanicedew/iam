@@ -31,6 +31,7 @@ public class SshKeyConverter implements Converter<ScimSshKey, IamSshKey> {
 
     sshKey.setLabel(scim.getDisplay());
     sshKey.setValue(scim.getValue());
+    sshKey.setFingerprint(scim.getFingerprint());
 
     if (scim.getValue() != null) {
       sshKey.setFingerprint(RSAPublicKeyUtils.getSHA256Fingerprint(scim.getValue()));
@@ -50,6 +51,8 @@ public class SshKeyConverter implements Converter<ScimSshKey, IamSshKey> {
       .primary(entity.isPrimary())
       .value(entity.getValue())
       .fingerprint(entity.getFingerprint())
+      .created(entity.getCreationTime())
+      .lastModified(entity.getLastUpdateTime())
       .build();
   }
 }

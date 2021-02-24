@@ -31,9 +31,9 @@ public class RSAPublicKeyTests {
   public void testMD5Fingerprint() {
 
     String fp = RSAPublicKeyUtils.getMD5Fingerprint(sshKeys.get(0).key);
-    assertThat(fp, equalTo(sshKeys.get(0).fingerprintMDS));
+    assertThat(fp, equalTo(sshKeys.get(0).fingerprintMD5));
     fp = RSAPublicKeyUtils.getMD5Fingerprint(sshKeys.get(1).key);
-    assertThat(fp, equalTo(sshKeys.get(1).fingerprintMDS));
+    assertThat(fp, equalTo(sshKeys.get(1).fingerprintMD5));
   }
 
   @Test

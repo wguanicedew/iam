@@ -59,13 +59,25 @@ public class RSAPublicKeyUtils {
     return fingerprint;
   }
 
-  private static String buildSHA256Fingerprint(String key) throws InvalidSshKeyException {
+  private static String buildSHA256Fingerprint(String keyVal) throws InvalidSshKeyException {
+    
+    final String[] keyParts = keyVal.split("\\s");
+    String encodedKey;
+
+    if (keyParts.length == 0) {
+      encodedKey = keyVal;
+    }
+    if (keyParts.length == 1) {
+      encodedKey = keyParts[0];
+    } else {
+      encodedKey = keyParts[1];
+    }
 
     String fingerprint = null;
 
     try {
 
-      byte[] decodedKey = Base64.getDecoder().decode(key);
+      byte[] decodedKey = Base64.getDecoder().decode(encodedKey);
       byte[] digest = MessageDigest.getInstance(MessageDigestAlgorithms.SHA_256).digest(decodedKey);
       fingerprint = Base64.getEncoder().encodeToString(digest);
 
