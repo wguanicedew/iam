@@ -63,7 +63,7 @@ public class ScimGroupProvisioningListTests {
 
   private final static String GROUP_URI = ScimUtils.getGroupsLocation();
 
-  private final Integer pageSize = 10;
+  private final Integer pageSize = 100;
 
   private Integer totalResults = 0;
 
@@ -83,10 +83,10 @@ public class ScimGroupProvisioningListTests {
     mvc.perform(get(GROUP_URI).contentType(SCIM_CONTENT_TYPE))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.totalResults", equalTo(totalResults)))
-      .andExpect(jsonPath("$.itemsPerPage", equalTo(pageSize)))
+      .andExpect(jsonPath("$.itemsPerPage", equalTo(totalResults)))
       .andExpect(jsonPath("$.startIndex", equalTo(1)))
       .andExpect(jsonPath("$.schemas", contains(ScimListResponse.SCHEMA)))
-      .andExpect(jsonPath("$.Resources", hasSize(equalTo(pageSize))));
+      .andExpect(jsonPath("$.Resources", hasSize(equalTo(totalResults))));
   }
 
   @Test
@@ -120,23 +120,6 @@ public class ScimGroupProvisioningListTests {
       .andExpect(jsonPath("$.startIndex", equalTo(1)))
       .andExpect(jsonPath("$.schemas", contains(ScimListResponse.SCHEMA)))
       .andExpect(jsonPath("$.Resources", hasSize(equalTo(count))));
-    //@formatter:on
-  }
-
-  @Test
-  public void testCountShouldBeLimitedToTen() throws Exception {
-    Integer count = 30;
-
-    //@formatter:off
-    mvc.perform(get(GROUP_URI)
-        .contentType(SCIM_CONTENT_TYPE)
-        .param("count", count.toString()))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$.totalResults", equalTo(totalResults)))
-      .andExpect(jsonPath("$.itemsPerPage", equalTo(pageSize)))
-      .andExpect(jsonPath("$.startIndex", equalTo(1)))
-      .andExpect(jsonPath("$.schemas", contains(ScimListResponse.SCHEMA)))
-      .andExpect(jsonPath("$.Resources", hasSize(equalTo(pageSize))));
     //@formatter:on
   }
 

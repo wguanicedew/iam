@@ -16,6 +16,7 @@
 package it.infn.mw.iam.persistence.model;
 
 import static it.infn.mw.iam.core.NameUtils.getFormatted;
+import static java.util.Objects.isNull;
 
 import java.io.Serializable;
 import java.util.HashSet;
@@ -378,6 +379,19 @@ public class IamUserInfo implements Serializable {
         }
 
         obj.add("groups", groups);
+      }
+
+      if (!isNull(getIamAccount().getSshKeys())) {
+        JsonArray sshKeys = new JsonArray();
+
+        for (IamSshKey k : getIamAccount().getSshKeys()) {
+          JsonObject sshKey = new JsonObject();
+          sshKey.addProperty("fingerprint", k.getFingerprint());
+          sshKey.addProperty("value", k.getValue());
+          sshKeys.add(sshKey);
+        }
+
+        obj.add("ssh_keys", sshKeys);
       }
 
       return obj;

@@ -15,6 +15,7 @@
  */
 package it.infn.mw.iam.test.oauth;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -38,9 +39,14 @@ import org.springframework.web.context.WebApplicationContext;
 
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo.ExternalAuthenticationType;
+import it.infn.mw.iam.core.user.IamAccountService;
+import it.infn.mw.iam.persistence.model.IamAccount;
+import it.infn.mw.iam.persistence.model.IamSshKey;
+import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 import it.infn.mw.iam.test.util.WithMockOAuthUser;
 import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
+import it.infn.mw.iam.util.ssh.RSAPublicKeyUtils;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class})
@@ -56,6 +62,12 @@ public class UserInfoEndpointTests {
   @Autowired
   private MockOAuth2Filter mockOAuth2Filter;
 
+
+  @Autowired
+  private IamAccountService accountService;
+
+  @Autowired
+  private IamAccountRepository accountRepo;
 
   @Before
   public void setup() throws Exception {
@@ -121,6 +133,50 @@ public class UserInfoEndpointTests {
     mvc.perform(get("/userinfo"))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.updated_at").isNumber());
+  }
+
+
+  @Test
+  @WithMockOAuthUser(clientId = "password-grant", user = "test", authorities = {"ROLE_USER"},
+      scopes = {"openid", "profile"})
+  public void userinfoEndpointDoesNotReturnsSshKeysWithoutScope() throws Exception {
+
+    IamAccount test = accountRepo.findByUsername("test")
+      .orElseThrow(() -> new AssertionError("Expected account not found"));
+
+    IamSshKey key = new IamSshKey();
+    key.setLabel("test");
+    key.setValue("test");
+    key.setFingerprint(RSAPublicKeyUtils.getSHA256Fingerprint("test"));
+
+    accountService.addSshKey(test, key);
+    mvc.perform(get("/userinfo"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.ssh_keys").doesNotExist());
+
+  }
+
+  @Test
+  @WithMockOAuthUser(clientId = "password-grant", user = "test", authorities = {"ROLE_USER"},
+      scopes = {"openid", "profile", "ssh-keys"})
+  public void userinfoEndpointDoesNotReturnsSshKeysWithAppropriateScope() throws Exception {
+    IamAccount test = accountRepo.findByUsername("test")
+      .orElseThrow(() -> new AssertionError("Expected account not found"));
+
+    IamSshKey key = new IamSshKey();
+    key.setLabel("test");
+    key.setValue("test");
+    key.setFingerprint(RSAPublicKeyUtils.getSHA256Fingerprint("test"));
+
+    accountService.addSshKey(test, key);
+    mvc.perform(get("/userinfo"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.ssh_keys").isArray())
+      .andExpect(jsonPath("$.ssh_keys", hasSize(1)))
+      .andExpect(
+          jsonPath("$.ssh_keys[0].fingerprint", is(RSAPublicKeyUtils.getSHA256Fingerprint("test"))))
+      .andExpect(jsonPath("$.ssh_keys[0].value", is("test")));
+
   }
 
 }

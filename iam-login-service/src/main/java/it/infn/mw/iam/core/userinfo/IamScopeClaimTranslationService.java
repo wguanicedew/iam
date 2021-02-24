@@ -37,6 +37,7 @@ import static it.infn.mw.iam.core.userinfo.UserInfoClaim.PHONE_NUMBER_VERIFIED;
 import static it.infn.mw.iam.core.userinfo.UserInfoClaim.PICTURE;
 import static it.infn.mw.iam.core.userinfo.UserInfoClaim.PREFERRED_USERNAME;
 import static it.infn.mw.iam.core.userinfo.UserInfoClaim.PROFILE;
+import static it.infn.mw.iam.core.userinfo.UserInfoClaim.SSH_KEYS;
 import static it.infn.mw.iam.core.userinfo.UserInfoClaim.SUB;
 import static it.infn.mw.iam.core.userinfo.UserInfoClaim.UPDATED_AT;
 import static it.infn.mw.iam.core.userinfo.UserInfoClaim.WEBSITE;
@@ -68,6 +69,7 @@ public class IamScopeClaimTranslationService implements ScopeClaimTranslationSer
   public static final String EDUPERSON_SCOPED_AFFILIATION_SCOPE = "eduperson_scoped_affiliation";
   public static final String EDUPERSON_ENTITLEMENT_SCOPE = "eduperson_entitlement";
   public static final String ATTR_SCOPE = "attr";
+  public static final String SSH_KEYS_SCOPE = "ssh-keys";
 
   protected static final Set<UserInfoClaim> PROFILE_CLAIMS = EnumSet.of(NAME, PREFERRED_USERNAME,
       GIVEN_NAME, FAMILY_NAME, MIDDLE_NAME, NICKNAME, PROFILE, PICTURE, WEBSITE, GENDER, ZONEINFO,
@@ -87,6 +89,7 @@ public class IamScopeClaimTranslationService implements ScopeClaimTranslationSer
     mapScopeToClaim(EDUPERSON_SCOPED_AFFILIATION_SCOPE, EDUPERSON_SCOPED_AFFILIATION);
     mapScopeToClaim(EDUPERSON_ENTITLEMENT_SCOPE, EDUPERSON_ENTITLEMENT);
     mapScopeToClaim(ATTR_SCOPE, ATTR);
+    mapScopeToClaim(SSH_KEYS_SCOPE, SSH_KEYS);
   }
 
   private void mapScopeToClaim(String scope, UserInfoClaim claim) {

@@ -16,6 +16,7 @@
 package it.infn.mw.iam.test.scim.me.patch;
 
 import static it.infn.mw.iam.api.scim.model.ScimPatchOperation.ScimPatchOperationType.add;
+import static it.infn.mw.iam.api.scim.model.ScimPatchOperation.ScimPatchOperationType.remove;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
@@ -144,14 +145,16 @@ public class ScimMeEndpointPatchAddTests extends ScimMeEndpointUtils {
   }
 
   @Test
-  public void testPatchAddSsHKeyNotSupported() throws Exception {
+  public void testPatchAddAndRemoveSsHKeyIsSupported() throws Exception {
 
     ScimSshKey NEW_SSH_KEY =
         ScimSshKey.builder().display("ssh-key").value(SshKeyUtils.sshKeys.get(0).key).build();
 
     ScimUser updates = ScimUser.builder().addSshKey(NEW_SSH_KEY).build();
 
-    scimUtils.patchMe(add, updates, HttpStatus.BAD_REQUEST);
+    scimUtils.patchMe(add, updates, HttpStatus.NO_CONTENT);
+
+    scimUtils.patchMe(remove, updates, HttpStatus.NO_CONTENT);
   }
 
   @Test

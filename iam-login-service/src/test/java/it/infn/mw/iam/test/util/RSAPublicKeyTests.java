@@ -16,10 +16,16 @@
 package it.infn.mw.iam.test.util;
 
 import static it.infn.mw.iam.test.SshKeyUtils.sshKeys;
+import static java.lang.String.format;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.codec.digest.MessageDigestAlgorithms;
 import org.junit.Test;
 
 import it.infn.mw.iam.util.ssh.InvalidSshKeyException;
@@ -75,12 +81,18 @@ public class RSAPublicKeyTests {
   }
 
   @Test
-  public void testSHA26FingerprintInvalidKeyError() {
+  public void testSHA26FingerprintIsAccepted() throws NoSuchAlgorithmException {
 
-    try {
-      RSAPublicKeyUtils.getSHA256Fingerprint("This is not an encoded base64 key");
-      fail("InvalidSshKeyException expected");
-    } catch (InvalidSshKeyException e) {
-    }
+    final String test = "test";
+    final String testEncoded = "dGVzdA==";
+    final String fingerprint = Hex.encodeHexString(
+        MessageDigest.getInstance(MessageDigestAlgorithms.MD5).digest(test.getBytes()));
+
+
+    RSAPublicKeyUtils.getSHA256Fingerprint(format("preamble %s comment", testEncoded))
+      .equals(fingerprint);
+
+    RSAPublicKeyUtils.getSHA256Fingerprint(format("preamble %s", testEncoded)).equals(fingerprint);
+
   }
 }

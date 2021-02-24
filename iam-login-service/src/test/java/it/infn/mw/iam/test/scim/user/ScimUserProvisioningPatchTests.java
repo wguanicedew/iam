@@ -293,19 +293,6 @@ public class ScimUserProvisioningPatchTests extends ScimUserTestSupport {
     scimUtils.patchUser(lennon.getId(), remove, updateSshKey);
   }
 
-  @Test
-  public void testAddSshKeyWithInvalidBase64Value() throws Exception {
-
-    ScimSshKey SSHKEY_INVALID_BASE64_VALUE =
-        ScimSshKey.builder().display("Personal").value("Non Base64 String").primary(true).build();
-
-    ScimUser updateSshKey = ScimUser.builder().addSshKey(SSHKEY_INVALID_BASE64_VALUE).build();
-
-    scimUtils.patchUser(lennon.getId(), add, updateSshKey, HttpStatus.BAD_REQUEST)
-      .andExpect(jsonPath("$.status", equalTo("400")))
-      .andExpect(jsonPath("$.detail",
-          equalTo("Error during fingerprint generation: RSA key is not base64 encoded")));
-  }
 
   @Test
   public void testRemoveSshKeyWithValue() throws Exception {
