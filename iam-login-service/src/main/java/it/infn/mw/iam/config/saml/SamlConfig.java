@@ -153,6 +153,7 @@ import it.infn.mw.iam.authn.saml.util.SamlIdResolvers;
 import it.infn.mw.iam.authn.saml.util.SamlUserIdentifierResolver;
 import it.infn.mw.iam.authn.saml.util.metadata.ResearchAndScholarshipMetadataFilter;
 import it.infn.mw.iam.authn.saml.util.metadata.SirtfiAttributeMetadataFilter;
+import it.infn.mw.iam.authn.util.SamlMetadataFetchTimer;
 import it.infn.mw.iam.authn.util.SessionTimeoutHelper;
 import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.config.saml.SamlConfig.ServerProperties;
@@ -324,9 +325,9 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
 
   }
 
-  @Bean(destroyMethod = "cancel")
+  @Bean
   public Timer samlMetadataFetchTimer() {
-    return new Timer("metadata-fetch", Boolean.TRUE);
+    return new SamlMetadataFetchTimer();
   }
   
   @Bean
@@ -598,6 +599,9 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
         ResourceBackedMetadataProvider metadataProvider =
             new ResourceBackedMetadataProvider(metadataFetchTimer, cpMetadataResources);
 
+        metadataProvider.setMinRefreshDelay((int) TimeUnit.HOURS.toMillis(12) - 1);
+        metadataProvider.setMaxRefreshDelay(TimeUnit.HOURS.toMillis(12));
+
         metadataProvider.setParserPool(parserPool);
         providers.add(metadataDelegate(metadataProvider, p));
 
@@ -625,8 +629,8 @@ public class SamlConfig extends WebSecurityConfigurerAdapter implements Scheduli
 
         metadataProvider.setParserPool(parserPool);
 
-
         long mdRefreshSecs = samlProperties.getMetadataRefreshPeriodSec();
+
         if (mdRefreshSecs <= 0L) {
           mdRefreshSecs = HOURS.toSeconds(12);
           LOG.warn(
