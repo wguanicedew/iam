@@ -87,7 +87,7 @@ pipeline {
           }
 
           steps {
-            sh 'mvn -B test'
+            sh 'mvn -X -B test'
           }
         }
 
