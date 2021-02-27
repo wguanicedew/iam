@@ -75,9 +75,6 @@ pipeline {
           when{
             allOf{
               not {
-                triggeredBy 'TimerTrigger'
-              }
-              not {
                 expression { return params.RUN_SONAR }
               }
               not {
@@ -95,7 +92,6 @@ pipeline {
           when{
             allOf{
               anyOf {
-                triggeredBy 'TimerTrigger'
                 expression { return params.RUN_SONAR }
               }
               expression{ env.CHANGE_URL }
@@ -147,7 +143,6 @@ pipeline {
           when{
             allOf{
               anyOf {
-                triggeredBy 'TimerTrigger'
                 expression { return params.RUN_SONAR }
               }
               expression{ !env.CHANGE_URL }
@@ -194,7 +189,6 @@ pipeline {
           when{
             allOf{
               anyOf {
-                triggeredBy 'TimerTrigger'
                 expression { return params.RUN_SONAR }
               }
               not {
