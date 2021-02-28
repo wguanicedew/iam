@@ -15,12 +15,13 @@
  */
 package db.migration.tasks;
 
-import org.flywaydb.core.api.migration.spring.SpringJdbcMigration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-public class RemoveOrphanTokens implements SpringJdbcMigration {
+import it.infn.mw.iam.persistence.migrations.BaseJdbcTemplateFlywayMigration;
+
+public class RemoveOrphanTokens extends BaseJdbcTemplateFlywayMigration {
 
   public static final Logger LOG = LoggerFactory.getLogger(RemoveOrphanTokens.class);
 

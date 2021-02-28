@@ -18,13 +18,14 @@ package db.migration.mysql;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.flywaydb.core.api.migration.spring.SpringJdbcMigration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
-public class V10_2___CheckDuplicateEmails implements SpringJdbcMigration {
+import it.infn.mw.iam.persistence.migrations.BaseJdbcTemplateFlywayMigration;
+
+public class V10_2___CheckDuplicateEmails extends BaseJdbcTemplateFlywayMigration {
 
   public static final Logger LOG = LoggerFactory.getLogger(V10_2___CheckDuplicateEmails.class);
 

@@ -15,9 +15,9 @@
  */
 package db.migration.h2;
 
-import org.flywaydb.core.api.migration.spring.SpringJdbcMigration;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import it.infn.mw.iam.persistence.migrations.BaseJdbcTemplateFlywayMigration;
 import it.infn.mw.iam.persistence.migrations.CreateGroupManagerAuthorities;
 
 /**
@@ -26,7 +26,7 @@ import it.infn.mw.iam.persistence.migrations.CreateGroupManagerAuthorities;
  * will never be groups to migrate. See the test folder for the actual migration
  *
  */
-public class V23___CreateGroupManagerAuthorities implements SpringJdbcMigration {
+public class V23___CreateGroupManagerAuthorities extends BaseJdbcTemplateFlywayMigration {
 
   @Override
   public void migrate(JdbcTemplate jdbcTemplate) throws Exception {

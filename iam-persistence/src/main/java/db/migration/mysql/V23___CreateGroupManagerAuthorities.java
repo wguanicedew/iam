@@ -15,14 +15,14 @@
  */
 package db.migration.mysql;
 
-import org.flywaydb.core.api.migration.spring.SpringJdbcMigration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import it.infn.mw.iam.persistence.migrations.BaseJdbcTemplateFlywayMigration;
 import it.infn.mw.iam.persistence.migrations.CreateGroupManagerAuthorities;
 
-public class V23___CreateGroupManagerAuthorities implements SpringJdbcMigration {
+public class V23___CreateGroupManagerAuthorities extends BaseJdbcTemplateFlywayMigration {
 
   public static final Logger LOG =
       LoggerFactory.getLogger(V23___CreateGroupManagerAuthorities.class);

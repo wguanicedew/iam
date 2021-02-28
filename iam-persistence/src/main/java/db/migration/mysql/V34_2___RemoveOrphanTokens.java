@@ -15,12 +15,12 @@
  */
 package db.migration.mysql;
 
-import org.flywaydb.core.api.migration.spring.SpringJdbcMigration;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import db.migration.tasks.RemoveOrphanTokens;
+import it.infn.mw.iam.persistence.migrations.BaseJdbcTemplateFlywayMigration;
 
-public class V34_2___RemoveOrphanTokens implements SpringJdbcMigration {
+public class V34_2___RemoveOrphanTokens extends BaseJdbcTemplateFlywayMigration {
 
   @Override
   public void migrate(JdbcTemplate jdbcTemplate) throws Exception {

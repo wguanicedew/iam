@@ -15,13 +15,12 @@
  */
 package it.infn.mw.iam.persistence.migrations;
 
-import org.flywaydb.core.api.migration.spring.SpringJdbcMigration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
-public class CreateGroupManagerAuthorities implements SpringJdbcMigration {
+public class CreateGroupManagerAuthorities extends BaseJdbcTemplateFlywayMigration {
 
   public static final Logger LOG = LoggerFactory.getLogger(CreateGroupManagerAuthorities.class);
 

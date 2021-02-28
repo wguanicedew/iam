@@ -15,14 +15,16 @@
  */
 package db.migration.h2;
 
-import org.flywaydb.core.api.migration.spring.SpringJdbcMigration;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-public class V10_1__Password_Update implements SpringJdbcMigration {
+import it.infn.mw.iam.persistence.migrations.BaseJdbcTemplateFlywayMigration;
 
+public class V10_1__Password_Update extends BaseJdbcTemplateFlywayMigration {
+
+  @Override
   public void migrate(JdbcTemplate jdbcTemplate) throws Exception {
 
     PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
