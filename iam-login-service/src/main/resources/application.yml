@@ -48,6 +48,9 @@ spring:
   velocity:
     enabled: false
 
+  freemarker:
+    template-loader-path: ${IAM_CUSTOM_TEMPLATE_LOCATION:classpath:templates/}
+
 iam:
   host: ${IAM_HOST:localhost}
   baseUrl: ${IAM_BASE_URL:http://${iam.host}:8080}
@@ -132,7 +135,6 @@ notification:
   adminAddress: ${IAM_NOTIFICATION_ADMIN_ADDRESS:indigo-alerts@localhost}
   admin-notification-policy: ${IAM_NOTIFICATION_ADMIN_NOTIFICATION_POLICY:notify-address}
   group-manager-notification-policy: ${IAM_NOTIFICATION_GROUP_MANAGER_NOTIFICATION_POLICY:notify-gms-and-admins}
-  
   subject:
     confirmation: Confirm your ${iam.organisation.name} registration request
     activated: Your ${iam.organisation.name} account is now active

@@ -18,7 +18,7 @@ spring:
   profiles:
     include: saml,registration
   mail:
-    port: 8125
+    port: ${IAM_MAIL_PORT:8125}
   datasource:
     driverClassName: org.h2.Driver
     url: jdbc:h2:mem:iam;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
@@ -31,7 +31,7 @@ spring:
     min-evictable-idle-time-millis: 10000
   
 notification:
-  disable: true
+  disable: ${IAM_NOTIFICATION_DISABLE:true}
 
 flyway:
   locations:

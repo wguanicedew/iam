@@ -26,3 +26,6 @@ _book
 *.pdf
 travis/travis-build.out
 travis/travis-mitre-build.out
+
+*.iml
+.idea

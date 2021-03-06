@@ -17,6 +17,7 @@ package it.infn.mw.iam.notification;
 
 import static java.util.Arrays.asList;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -25,12 +26,12 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.apache.velocity.app.VelocityEngine;
+import freemarker.template.Configuration;
+import freemarker.template.TemplateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.ui.velocity.VelocityEngineUtils;
 
 import it.infn.mw.iam.api.account.password_reset.PasswordResetController;
 import it.infn.mw.iam.core.IamDeliveryStatus;
@@ -42,6 +43,8 @@ import it.infn.mw.iam.persistence.model.IamEmailNotification;
 import it.infn.mw.iam.persistence.model.IamGroupRequest;
 import it.infn.mw.iam.persistence.model.IamNotificationReceiver;
 import it.infn.mw.iam.persistence.model.IamRegistrationRequest;
+import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
+import freemarker.template.Template;
 
 public class TransientNotificationFactory implements NotificationFactory {
 
@@ -58,15 +61,14 @@ public class TransientNotificationFactory implements NotificationFactory {
   @Value("${iam.organisation.name}")
   private String organisationName;
 
-  private final VelocityEngine velocityEngine;
   private final NotificationProperties properties;
   private final AdminNotificationDeliveryStrategy adminNotificationDeliveryStrategy;
   private final GroupManagerNotificationDeliveryStrategy groupManagerDeliveryStrategy;
+  private final Configuration freeMarkerConfiguration;
 
   @Autowired
-  public TransientNotificationFactory(VelocityEngine ve, NotificationProperties np,
-      AdminNotificationDeliveryStrategy ands, GroupManagerNotificationDeliveryStrategy gmds) {
-    this.velocityEngine = ve;
+  public TransientNotificationFactory(Configuration fm, NotificationProperties np, AdminNotificationDeliveryStrategy ands, GroupManagerNotificationDeliveryStrategy gmds) {
+    this.freeMarkerConfiguration = fm;
     this.properties = np;
     this.adminNotificationDeliveryStrategy = ands;
     this.groupManagerDeliveryStrategy = gmds;
@@ -84,7 +86,7 @@ public class TransientNotificationFactory implements NotificationFactory {
     model.put("confirmURL", confirmURL);
     model.put(ORGANISATION_NAME, organisationName);
 
-    IamEmailNotification notification = createMessage("confirmRegistration.vm", model,
+    IamEmailNotification notification = createMessage("confirmRegistration.ftl", model,
         IamNotificationType.CONFIRMATION, properties.getSubject().get("confirmation"),
         asList(request.getAccount().getUserInfo().getEmail()));
 
@@ -110,7 +112,7 @@ public class TransientNotificationFactory implements NotificationFactory {
     model.put(ORGANISATION_NAME, organisationName);
     model.put(USERNAME_FIELD, request.getAccount().getUsername());
 
-    IamEmailNotification notification = createMessage("accountActivated.vm", model,
+    IamEmailNotification notification = createMessage("accountActivated.ftl", model,
         IamNotificationType.ACTIVATED, properties.getSubject().get("activated"),
         asList(request.getAccount().getUserInfo().getEmail()));
 
@@ -134,7 +136,7 @@ public class TransientNotificationFactory implements NotificationFactory {
       model.put(MOTIVATION_FIELD, motivation.get());
     }
 
-    return createMessage("requestRejected.vm", model, IamNotificationType.REJECTED,
+    return createMessage("requestRejected.ftl", model, IamNotificationType.REJECTED,
         properties.getSubject().get("rejected"),
         asList(request.getAccount().getUserInfo().getEmail()));
   }
@@ -153,7 +155,7 @@ public class TransientNotificationFactory implements NotificationFactory {
     model.put(ORGANISATION_NAME, organisationName);
     model.put("notes", request.getNotes());
 
-    return createMessage("adminHandleRequest.vm", model, IamNotificationType.CONFIRMATION,
+    return createMessage("adminHandleRequest.ftl", model, IamNotificationType.CONFIRMATION,
         properties.getSubject().get("adminHandleRequest"),
         adminNotificationDeliveryStrategy.resolveAdminEmailAddresses());
   }
@@ -172,7 +174,7 @@ public class TransientNotificationFactory implements NotificationFactory {
     model.put(USERNAME_FIELD, account.getUsername());
 
     IamEmailNotification notification =
-        createMessage("resetPassword.vm", model, IamNotificationType.RESETPASSWD,
+        createMessage("resetPassword.ftl", model, IamNotificationType.RESETPASSWD,
             properties.getSubject().get("resetPassword"), asList(account.getUserInfo().getEmail()));
 
     LOG.debug("Created reset password message for account {}. Reset password URL: {}",
@@ -196,9 +198,8 @@ public class TransientNotificationFactory implements NotificationFactory {
     String subject = String.format("New membership request for group %s", groupName);
 
     LOG.debug("Create group membership admin notification for request {}", groupRequest.getUuid());
-    return createMessage("adminHandleGroupRequest.vm", model, IamNotificationType.GROUP_MEMBERSHIP,
-        subject,
-        groupManagerDeliveryStrategy.resolveGroupManagersEmailAddresses(groupRequest.getGroup()));
+    return createMessage("adminHandleGroupRequest.ftl", model, IamNotificationType.GROUP_MEMBERSHIP,
+        subject, groupManagerDeliveryStrategy.resolveGroupManagersEmailAddresses(groupRequest.getGroup()));
   }
 
   @Override
@@ -217,7 +218,7 @@ public class TransientNotificationFactory implements NotificationFactory {
         String.format("Membership request for group %s has been %s", groupName, status);
 
     IamEmailNotification notification =
-        createMessage("groupMembershipApproved.vm", model, IamNotificationType.GROUP_MEMBERSHIP,
+        createMessage("groupMembershipApproved.ftl", model, IamNotificationType.GROUP_MEMBERSHIP,
             subject, asList(groupRequest.getAccount().getUserInfo().getEmail()));
 
     LOG.debug("Create group membership approved message for request {}", groupRequest.getUuid());
@@ -241,31 +242,36 @@ public class TransientNotificationFactory implements NotificationFactory {
         String.format("Membership request for group %s has been %s", groupName, status);
 
     IamEmailNotification notification =
-        createMessage("groupMembershipRejected.vm", model, IamNotificationType.GROUP_MEMBERSHIP,
+        createMessage("groupMembershipRejected.ftl", model, IamNotificationType.GROUP_MEMBERSHIP,
             subject, asList(groupRequest.getAccount().getUserInfo().getEmail()));
 
     LOG.debug("Create group membership approved message for request {}", groupRequest.getUuid());
     return notification;
   }
 
-  protected IamEmailNotification createMessage(String template, Map<String, Object> model,
+  protected IamEmailNotification createMessage(String templateName, Map<String, Object> model,
       IamNotificationType messageType, String subject, List<String> receiverAddress) {
 
-    String body =
-        VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, template, "UTF-8", model);
+    try {
+      Template template = freeMarkerConfiguration.getTemplate(templateName);
+      String body = FreeMarkerTemplateUtils.processTemplateIntoString(template, model);
 
-    IamEmailNotification message = new IamEmailNotification();
+      IamEmailNotification message = new IamEmailNotification();
 
-    message.setUuid(UUID.randomUUID().toString());
-    message.setType(messageType);
-    message.setSubject(subject);
-    message.setBody(body);
-    message.setCreationTime(new Date());
-    message.setDeliveryStatus(IamDeliveryStatus.PENDING);
-    message.setReceivers(receiverAddress.stream()
-      .map(a -> IamNotificationReceiver.forAddress(message, a))
-      .collect(Collectors.toList()));
+      message.setUuid(UUID.randomUUID().toString());
+      message.setType(messageType);
+      message.setSubject(subject);
+      message.setBody(body);
+      message.setCreationTime(new Date());
+      message.setDeliveryStatus(IamDeliveryStatus.PENDING);
+      message.setReceivers(receiverAddress.stream()
+              .map(a -> IamNotificationReceiver.forAddress(message, a))
+              .collect(Collectors.toList()));
 
-    return message;
+      return message;
+    } catch (IOException | TemplateException e) {
+      LOG.error("Exception encountered when attempting to create message: {}", e.toString());
+      return null;
+    }
   }
 }
