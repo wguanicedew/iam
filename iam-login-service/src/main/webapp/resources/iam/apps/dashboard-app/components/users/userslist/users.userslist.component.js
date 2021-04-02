@@ -50,7 +50,7 @@
     self.$onInit = function () {
       self.enabled = true;
       self.reset();
-    }
+    };
 
     self.reset = function () {
       self.user = {
@@ -63,7 +63,7 @@
         $scope.userCreationForm.$setPristine();
       }
       self.enabled = true;
-    }
+    };
 
     self.submit = function () {
 
@@ -104,11 +104,11 @@
           self.error = error;
           self.enabled = true;
         });
-    }
+    };
 
     self.cancel = function () {
       $uibModalInstance.dismiss("cancel");
-    }
+    };
   }
 
   function UsersListController($q, $scope, $rootScope, $uibModal, ModalService,
