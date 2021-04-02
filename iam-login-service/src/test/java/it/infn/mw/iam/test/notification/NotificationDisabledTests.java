@@ -107,7 +107,7 @@ public class NotificationDisabledTests {
     req.setGivenname("testDisableNotificationOption");
     req.setFamilyname("User");
     req.setEmail("testDisableNotificationOption@example.org");
-    req.setUsername("testDisableNotificationOption");
+    req.setUsername("testdisablenotificationoption");
     req.setNotes("testDisableNotificationOption");
 
     String jsonReq = mapper.writeValueAsString(req);

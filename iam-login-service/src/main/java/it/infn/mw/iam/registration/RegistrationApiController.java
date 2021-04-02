@@ -32,6 +32,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -51,6 +53,8 @@ import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.config.IamProperties.RegistrationProperties;
 import it.infn.mw.iam.core.IamRegistrationRequestStatus;
 import it.infn.mw.iam.registration.validation.RegistrationRequestValidatorError;
+import static it.infn.mw.iam.api.utils.ValidationErrorUtils.stringifyValidationError;
+import static java.lang.String.format;
 
 @RestController
 @Transactional
@@ -62,6 +66,8 @@ public class RegistrationApiController {
 
   private final RegistrationRequestService service;
   private final RegistrationProperties registrationProperties;
+
+  private static final String INVALID_REGISTRATION_TEMPLATE = "Invalid registration request: %s";
 
   @Autowired
   public RegistrationApiController(RegistrationRequestService registrationService,
@@ -109,8 +115,8 @@ public class RegistrationApiController {
   @RequestMapping(value = "/registration/create", method = RequestMethod.POST,
       consumes = "application/json")
   public RegistrationRequestDto createRegistrationRequest(
-      @RequestBody RegistrationRequestDto request) {
-
+      @RequestBody @Validated RegistrationRequestDto request, final BindingResult validationResult) {
+    handleValidationError(validationResult);
     return service.createRequest(request, getExternalAuthenticationInfo());
 
   }
@@ -178,5 +184,12 @@ public class RegistrationApiController {
   @ExceptionHandler(RegistrationRequestValidatorError.class)
   public ErrorDTO handleValidationError(RegistrationRequestValidatorError e) {
     return ErrorDTO.fromString(e.getMessage());
+  }
+
+  private void handleValidationError(BindingResult result) {
+    if (result.hasErrors()) {
+      throw new RegistrationRequestValidatorError(
+              format(INVALID_REGISTRATION_TEMPLATE, stringifyValidationError(result)));
+    }
   }
 }
