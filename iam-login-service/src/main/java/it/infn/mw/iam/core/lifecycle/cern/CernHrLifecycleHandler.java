@@ -75,6 +75,7 @@ public class CernHrLifecycleHandler implements Runnable, SchedulingConfigurer {
   public static final String LABEL_MESSAGE = "message";
   public static final String LABEL_ACTION = "action";
   public static final String LABEL_IGNORE = "ignore";
+  public static final String LABEL_SKIP_EMAIL_SYNCH = "skip-email-synch";
 
   private final Clock clock;
   private final CernProperties cernProperties;
@@ -134,10 +135,23 @@ public class CernHrLifecycleHandler implements Runnable, SchedulingConfigurer {
     IamLabel cernPersonId = getPersonIdLabel(account).orElseThrow(personIdNotFound(account));
 
     VOPersonDTO voPerson = hrDb.getHrDbPersonRecord(cernPersonId.getValue());
+    LOG.debug("Syncing IAM account {} information against CERN HR db record {}",
+        account.getUsername(), voPerson.getId());
 
     account.getUserInfo().setGivenName(voPerson.getFirstName());
     account.getUserInfo().setFamilyName((voPerson.getName()));
-    account.getUserInfo().setEmail(voPerson.getEmail());
+
+    Optional<IamLabel> skipEmailSyncLabel =
+        account.getLabelByPrefixAndName(LABEL_CERN_PREFIX, LABEL_SKIP_EMAIL_SYNCH);
+
+    if (skipEmailSyncLabel.isPresent()) {
+      LOG.info(
+          "Skipping email synchronization for account '{} ({})' as requested by the label '{}'",
+          account.getUsername(), account.getUuid(), skipEmailSyncLabel.get().qualifiedName());
+    } else {
+      account.getUserInfo().setEmail(voPerson.getEmail());
+    }
+
   }
 
   private boolean accountWasSuspendedByUs(IamAccount account) {
@@ -193,8 +207,7 @@ public class CernHrLifecycleHandler implements Runnable, SchedulingConfigurer {
   }
 
   private Optional<IamLabel> getPersonIdLabel(IamAccount account) {
-    return account.getLabelByPrefixAndName(LABEL_CERN_PREFIX,
-        cernProperties.getPersonIdClaim());
+    return account.getLabelByPrefixAndName(LABEL_CERN_PREFIX, cernProperties.getPersonIdClaim());
   }
 
   public void handleAccount(IamAccount account) {
@@ -229,8 +242,8 @@ public class CernHrLifecycleHandler implements Runnable, SchedulingConfigurer {
     Pageable pageRequest = new PageRequest(0, cernProperties.getTask().getPageSize());
 
     while (true) {
-      Page<IamAccount> accountsPage = accountRepo.findByLabelPrefixAndName(
-          LABEL_CERN_PREFIX, cernProperties.getPersonIdClaim(), pageRequest);
+      Page<IamAccount> accountsPage = accountRepo.findByLabelPrefixAndName(LABEL_CERN_PREFIX,
+          cernProperties.getPersonIdClaim(), pageRequest);
 
       LOG.debug("accountsPage: {}", accountsPage);
 

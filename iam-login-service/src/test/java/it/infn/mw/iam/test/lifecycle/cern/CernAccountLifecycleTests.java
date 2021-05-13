@@ -425,4 +425,33 @@ public class CernAccountLifecycleTests extends TestSupport implements LifecycleT
     }
   }
 
+  @Test
+  public void testEmailNotSynchronizedIfSkipEmailSyncIsPresent() {
+
+    VOPersonDTO voPerson = voPerson("988211");
+
+    when(hrDb.hasValidExperimentParticipation(anyString())).thenReturn(true);
+    when(hrDb.getHrDbPersonRecord(anyString())).thenReturn(voPerson);
+
+    IamAccount testAccount =
+        repo.findByUuid(TEST_USER_UUID).orElseThrow(assertionError(EXPECTED_ACCOUNT_NOT_FOUND));
+
+    final String preSyncEmail = testAccount.getUserInfo().getEmail();
+
+    assertThat(testAccount.isActive(), is(true));
+
+    service.setLabel(testAccount, cernPersonIdLabel());
+    service.setLabel(testAccount, skipEmailSyncLabel());
+    repo.save(testAccount);
+
+    handler.run();
+
+    testAccount =
+        repo.findByUuid(TEST_USER_UUID).orElseThrow(assertionError(EXPECTED_ACCOUNT_NOT_FOUND));
+
+    assertThat(testAccount.getUserInfo().getGivenName(), is(voPerson.getFirstName()));
+    assertThat(testAccount.getUserInfo().getFamilyName(), is(voPerson.getName()));
+    assertThat(testAccount.getUserInfo().getEmail(), is(preSyncEmail));
+  }
+
 }

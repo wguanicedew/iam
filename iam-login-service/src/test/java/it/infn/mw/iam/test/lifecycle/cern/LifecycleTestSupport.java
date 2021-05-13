@@ -18,6 +18,7 @@ package it.infn.mw.iam.test.lifecycle.cern;
 import static it.infn.mw.iam.core.lifecycle.cern.CernHrLifecycleHandler.LABEL_ACTION;
 import static it.infn.mw.iam.core.lifecycle.cern.CernHrLifecycleHandler.LABEL_CERN_PREFIX;
 import static it.infn.mw.iam.core.lifecycle.cern.CernHrLifecycleHandler.LABEL_IGNORE;
+import static it.infn.mw.iam.core.lifecycle.cern.CernHrLifecycleHandler.LABEL_SKIP_EMAIL_SYNCH;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -48,6 +49,11 @@ public interface LifecycleTestSupport {
       .prefix(LABEL_CERN_PREFIX)
       .name(LABEL_IGNORE)
       .build();
+  }
+
+
+  default IamLabel skipEmailSyncLabel() {
+    return IamLabel.builder().prefix(LABEL_CERN_PREFIX).name(LABEL_SKIP_EMAIL_SYNCH).build();
   }
 
   default IamLabel cernPersonIdLabel() {

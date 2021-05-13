@@ -28,7 +28,7 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class CernProperties {
 
-  public static class TaskProperties {
+  public static class HrSynchTaskProperties {
 
     boolean enabled = true;
 
@@ -61,6 +61,7 @@ public class CernProperties {
     public void setPageSize(int pageSize) {
       this.pageSize = pageSize;
     }
+
   }
 
   public static class HrDbApiProperties {
@@ -112,7 +113,7 @@ public class CernProperties {
   private HrDbApiProperties hrApi = new HrDbApiProperties();
 
   @Valid
-  private TaskProperties task = new TaskProperties();
+  private HrSynchTaskProperties task = new HrSynchTaskProperties();
 
   public HrDbApiProperties getHrApi() {
     return hrApi;
@@ -146,11 +147,11 @@ public class CernProperties {
     this.personIdClaim = personIdClaim;
   }
 
-  public TaskProperties getTask() {
+  public HrSynchTaskProperties getTask() {
     return task;
   }
 
-  public void setTask(TaskProperties task) {
+  public void setTask(HrSynchTaskProperties task) {
     this.task = task;
   }
 }
