@@ -149,7 +149,15 @@ public class CernHrLifecycleHandler implements Runnable, SchedulingConfigurer {
           "Skipping email synchronization for account '{} ({})' as requested by the label '{}'",
           account.getUsername(), account.getUuid(), skipEmailSyncLabel.get().qualifiedName());
     } else {
-      account.getUserInfo().setEmail(voPerson.getEmail());
+      Optional<IamAccount> otherAccount =
+          accountRepo.findByEmailWithDifferentUUID(voPerson.getEmail(), account.getUuid());
+      if (otherAccount.isPresent()) {
+        LOG.error(
+            "Email for VO person {} is already mapped to another account: '{}-{}'. Will skip syncing against that email",
+            voPerson.getId(), otherAccount.get().getUsername(), otherAccount.get().getUuid());
+      } else {
+        account.getUserInfo().setEmail(voPerson.getEmail());
+      }
     }
 
   }
