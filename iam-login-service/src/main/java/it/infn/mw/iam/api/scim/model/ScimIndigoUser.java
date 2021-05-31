@@ -38,7 +38,8 @@ public class ScimIndigoUser {
     OIDC_IDS(ScimConstants.INDIGO_USER_SCHEMA + ".oidcIds"),
     SAML_IDS(ScimConstants.INDIGO_USER_SCHEMA + ".samlIds"),
     X509_CERTS(ScimConstants.INDIGO_USER_SCHEMA + ".x509Certificates"),
-    AUP_SIGNATURE_TIME(ScimConstants.INDIGO_USER_SCHEMA + ".aupSignatureTime");
+    AUP_SIGNATURE_TIME(ScimConstants.INDIGO_USER_SCHEMA + ".aupSignatureTime"),
+    LABELS(ScimConstants.INDIGO_USER_SCHEMA + ".labels");
 
     private final String text;
 
@@ -54,6 +55,8 @@ public class ScimIndigoUser {
 
   private final List<ScimSshKey> sshKeys;
   private final List<ScimOidcId> oidcIds;
+
+  private final List<ScimLabel> labels;
 
   @Valid
   private final List<ScimSamlId> samlIds;
@@ -81,6 +84,7 @@ public class ScimIndigoUser {
     this.certificates = certs != null ? certs : new LinkedList<>();
     this.aupSignatureTime = aupSignatureTime;
     this.endTime = endTime;
+    this.labels = null;
   }
 
   private ScimIndigoUser(Builder b) {
@@ -90,6 +94,7 @@ public class ScimIndigoUser {
     this.certificates = b.certificates;
     this.aupSignatureTime = b.aupSignatureTime;
     this.endTime = b.endTime;
+    this.labels = b.labels;
   }
 
   @JsonIgnore
@@ -121,6 +126,10 @@ public class ScimIndigoUser {
     return aupSignatureTime;
   }
 
+  public List<ScimLabel> getLabels() {
+    return labels;
+  }
+
   public static Builder builder() {
 
     return new Builder();
@@ -132,6 +141,7 @@ public class ScimIndigoUser {
     private List<ScimOidcId> oidcIds = new LinkedList<>();
     private List<ScimSamlId> samlIds = new LinkedList<>();
     private List<ScimX509Certificate> certificates = new LinkedList<>();
+    private List<ScimLabel> labels = new LinkedList<>();
 
     private Date aupSignatureTime;
     private Date endTime;
@@ -166,6 +176,16 @@ public class ScimIndigoUser {
 
     public Builder endTime(Date endTime) {
       this.endTime = endTime;
+      return this;
+    }
+
+    public Builder labels(List<ScimLabel> labels) {
+      this.labels = labels;
+      return this;
+    }
+
+    public Builder addLabel(ScimLabel label) {
+      labels.add(label);
       return this;
     }
 
