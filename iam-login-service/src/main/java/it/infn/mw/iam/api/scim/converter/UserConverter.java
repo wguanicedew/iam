@@ -22,10 +22,13 @@ import it.infn.mw.iam.api.scim.exception.ScimException;
 import it.infn.mw.iam.api.scim.model.ScimAddress;
 import it.infn.mw.iam.api.scim.model.ScimGroupRef;
 import it.infn.mw.iam.api.scim.model.ScimIndigoUser;
+import it.infn.mw.iam.api.scim.model.ScimLabel;
 import it.infn.mw.iam.api.scim.model.ScimMeta;
 import it.infn.mw.iam.api.scim.model.ScimName;
 import it.infn.mw.iam.api.scim.model.ScimPhoto;
 import it.infn.mw.iam.api.scim.model.ScimUser;
+import it.infn.mw.iam.config.scim.ScimProperties;
+import it.infn.mw.iam.config.scim.ScimProperties.LabelDescriptor;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.model.IamOidcId;
@@ -48,13 +51,15 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
   private final SamlIdConverter samlIdConverter;
   private final X509CertificateConverter x509CertificateIamConverter;
 
+  private final ScimProperties properties;
 
   @Autowired
-  public UserConverter(ScimResourceLocationProvider rlp, AddressConverter ac, 
-      OidcIdConverter oidc, SshKeyConverter sshc, SamlIdConverter samlc,
+  public UserConverter(ScimProperties properties, ScimResourceLocationProvider rlp,
+      AddressConverter ac, OidcIdConverter oidc, SshKeyConverter sshc, SamlIdConverter samlc,
       X509CertificateConverter x509Iamcc) {
 
     this.resourceLocationProvider = rlp;
+    this.properties = properties;
     this.addressConverter = ac;
     this.oidcIdConverter = oidc;
     this.sshKeyConverter = sshc;
@@ -79,7 +84,7 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
 
       account.setPassword(scimUser.getPassword());
     }
-    
+
     if (scimUser.hasOidcIds()) {
 
       scimUser.getIndigoUser().getOidcIds().forEach(oidcId -> {
@@ -102,7 +107,7 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
           try {
             iamSshKey.setFingerprint(RSAPublicKeyUtils.getSHA256Fingerprint(iamSshKey.getValue()));
           } catch (InvalidSshKeyException e) {
-            throw new ScimException(e.getMessage(),e);
+            throw new ScimException(e.getMessage(), e);
           }
         }
 
@@ -127,7 +132,7 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
 
       });
     }
-    
+
     if (scimUser.hasX509Certificates()) {
       scimUser.getIndigoUser().getCertificates().forEach(c -> {
         IamX509Certificate cert = x509CertificateIamConverter.entityFromDto(c);
@@ -147,7 +152,7 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
     }
 
     if (scimUser.hasAddresses()) {
-      
+
       userInfo.setAddress(addressConverter.entityFromDto(scimUser.getAddresses().get(0)));
     }
 
@@ -223,14 +228,25 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
       .forEach(samlId -> indigoUserBuilder.addSamlId(samlIdConverter.dtoFromEntity(samlId)));
 
     entity.getX509Certificates()
-      .forEach(cert -> indigoUserBuilder.addCertificate(x509CertificateIamConverter.dtoFromEntity(cert)));
-    
+      .forEach(cert -> indigoUserBuilder
+        .addCertificate(x509CertificateIamConverter.dtoFromEntity(cert)));
+
     if (entity.getAupSignature() != null) {
       indigoUserBuilder.aupSignatureTime(entity.getAupSignature().getSignatureTime());
     }
-    
+
+    for (LabelDescriptor ld : properties.getIncludeLabels()) {
+      entity.getLabelByPrefixAndName(ld.getPrefix(), ld.getName()).ifPresent(el -> {
+        indigoUserBuilder.addLabel(ScimLabel.builder()
+          .withPrefix(el.getPrefix())
+          .withName(el.getName())
+          .withVaule(el.getValue())
+          .build());
+      });
+    }
+
     indigoUserBuilder.endTime(entity.getEndTime());
-    
+
     ScimIndigoUser indigoUser = indigoUserBuilder.build();
 
     return indigoUser.isEmpty() ? null : indigoUser;
