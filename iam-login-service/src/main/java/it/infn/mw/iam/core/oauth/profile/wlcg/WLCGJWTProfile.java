@@ -47,7 +47,7 @@ public class WLCGJWTProfile implements JWTProfile, RequestValidator {
       IntrospectionResultAssembler defaultAssembler, ScopeMatcherRegistry registry) {
     accessTokenBuilder =
         new WLCGProfileAccessTokenBuilder(properties, groupHelper, attributeHelper);
-    idTokenCustomizer = new WLCGIdTokenCustomizer(accountRepo);
+    idTokenCustomizer = new WLCGIdTokenCustomizer(accountRepo, properties);
     userInfoHelper = new WLCGUserinfoHelper(properties, userInfoService);
     introspectionHelper =
         new WLCGIntrospectionHelper(properties, defaultAssembler, registry, groupHelper);

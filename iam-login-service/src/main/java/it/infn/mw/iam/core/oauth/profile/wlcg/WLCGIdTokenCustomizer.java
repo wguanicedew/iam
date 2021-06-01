@@ -24,6 +24,7 @@ import org.springframework.security.oauth2.provider.OAuth2Request;
 import com.nimbusds.jwt.JWTClaimsSet.Builder;
 
 import it.infn.mw.iam.api.account.password_reset.error.UserNotFoundError;
+import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.core.oauth.profile.common.BaseIdTokenCustomizer;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamUserInfo;
@@ -33,8 +34,8 @@ public class WLCGIdTokenCustomizer extends BaseIdTokenCustomizer {
 
   private final WLCGGroupHelper groupHelper = new WLCGGroupHelper();
 
-  public WLCGIdTokenCustomizer(IamAccountRepository accountRepo) {
-    super(accountRepo);
+  public WLCGIdTokenCustomizer(IamAccountRepository accountRepo, IamProperties properties) {
+    super(accountRepo, properties);
   }
 
   @Override
@@ -51,6 +52,7 @@ public class WLCGIdTokenCustomizer extends BaseIdTokenCustomizer {
       idClaims.claim(WLCGGroupHelper.WLCG_GROUPS_SCOPE, groupNames);
     }
 
+    customizeAccountIdTokenClaims(idClaims, client, request, account, accessToken);
   }
 
 }
