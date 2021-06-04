@@ -15,41 +15,53 @@
  */
 package it.infn.mw.iam.core.oauth.profile.wlcg;
 
+import static it.infn.mw.iam.core.oauth.profile.wlcg.WLCGProfileAccessTokenBuilder.PROFILE_VERSION;
+import static it.infn.mw.iam.core.oauth.profile.wlcg.WLCGProfileAccessTokenBuilder.WLCG_VER_CLAIM;
+
 import java.util.Set;
 
 import org.mitre.oauth2.model.ClientDetailsEntity;
 import org.mitre.oauth2.model.OAuth2AccessTokenEntity;
+import org.mitre.openid.connect.service.ScopeClaimTranslationService;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 
 import com.nimbusds.jwt.JWTClaimsSet.Builder;
 
-import it.infn.mw.iam.api.account.password_reset.error.UserNotFoundError;
-import it.infn.mw.iam.core.oauth.profile.common.BaseIdTokenCustomizer;
+import it.infn.mw.iam.core.oauth.profile.iam.ClaimValueHelper;
+import it.infn.mw.iam.core.oauth.profile.iam.IamJWTProfileIdTokenCustomizer;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamUserInfo;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
-public class WLCGIdTokenCustomizer extends BaseIdTokenCustomizer {
+public class WLCGIdTokenCustomizer extends IamJWTProfileIdTokenCustomizer {
 
-  private final WLCGGroupHelper groupHelper = new WLCGGroupHelper();
+  public static final String GROUPS_CLAIM = "groups";
+  private final WLCGGroupHelper groupHelper;
 
-  public WLCGIdTokenCustomizer(IamAccountRepository accountRepo) {
-    super(accountRepo);
+  public WLCGIdTokenCustomizer(IamAccountRepository accountRepo,
+      ScopeClaimTranslationService scopeClaimConverter, ClaimValueHelper claimValueHelper,
+      WLCGGroupHelper groupHelper) {
+    super(accountRepo, scopeClaimConverter, claimValueHelper);
+    this.groupHelper = groupHelper;
   }
 
   @Override
   public void customizeIdTokenClaims(Builder idClaims, ClientDetailsEntity client,
-      OAuth2Request request, String sub, OAuth2AccessTokenEntity accessToken) {
+      OAuth2Request request, String sub, OAuth2AccessTokenEntity accessToken, IamAccount account) {
 
-    IamAccount account = getAccountRepo().findByUuid(sub)
-      .orElseThrow(() -> new UserNotFoundError(String.format("No user found for uuid %s", sub)));
+    super.customizeIdTokenClaims(idClaims, client, request, sub, accessToken, account);
+
     IamUserInfo info = account.getUserInfo();
-
     Set<String> groupNames = groupHelper.resolveGroupNames(accessToken, info);
-    
+
     if (!groupNames.isEmpty()) {
       idClaims.claim(WLCGGroupHelper.WLCG_GROUPS_SCOPE, groupNames);
     }
+
+    // Drop group claims as set by IAM JWT profile
+    idClaims.claim(GROUPS_CLAIM, null);
+
+    idClaims.claim(WLCG_VER_CLAIM, PROFILE_VERSION);
 
   }
 

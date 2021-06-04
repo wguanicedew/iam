@@ -21,9 +21,11 @@ import org.springframework.security.oauth2.provider.OAuth2Request;
 
 import com.nimbusds.jwt.JWTClaimsSet.Builder;
 
+import it.infn.mw.iam.persistence.model.IamAccount;
+
 @FunctionalInterface
 public interface IDTokenCustomizer {
   void customizeIdTokenClaims(Builder idClaims, ClientDetailsEntity client,
-      OAuth2Request request, String sub, OAuth2AccessTokenEntity accessToken);
+      OAuth2Request request, String sub, OAuth2AccessTokenEntity accessToken, IamAccount account);
   
 }

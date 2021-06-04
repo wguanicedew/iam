@@ -85,7 +85,7 @@ import net.minidev.json.JSONObject;
 @WebAppConfiguration
 @Transactional
 @TestPropertySource(properties = {
-    // @formatter:off
+// @formatter:off
     "iam.jwt-profile.default-profile=wlcg",
     "scope.matchers[0].name=storage.read",
     "scope.matchers[0].type=path",
@@ -202,6 +202,35 @@ public class WLCGProfileIntegrationTests extends EndpointsTestUtils {
     assertThat(token.getJWTClaimsSet().getClaim("wlcg.groups"), nullValue());
     assertThat(token.getJWTClaimsSet().getAudience(), hasSize(1));
     assertThat(token.getJWTClaimsSet().getAudience(), hasItem(ALL_AUDIENCES_VALUE));
+  }
+
+  @Test
+  @WithAnonymousUser
+  public void testWlcgProfileIdToken() throws Exception {
+
+    String idTokenString = (String) new AccessTokenGetter().grantType("password")
+      .clientId(CLIENT_ID)
+      .clientSecret(CLIENT_SECRET)
+      .username(USERNAME)
+      .password(PASSWORD)
+      .scope("openid profile wlcg.groups")
+      .getTokenResponseObject()
+      .getAdditionalInformation()
+      .get("id_token");
+
+    JWT idToken = JWTParser.parse(idTokenString);
+    assertThat(idToken.getJWTClaimsSet().getClaim("wlcg.ver"), is("1.0"));
+    assertThat(idToken.getJWTClaimsSet().getClaim("groups"), nullValue());
+    assertThat(idToken.getJWTClaimsSet().getClaim("wlcg.groups"), notNullValue());
+    assertThat(idToken.getJWTClaimsSet().getStringListClaim("wlcg.groups"),
+        hasItems("/Analysis", "/Production"));
+    assertThat(idToken.getJWTClaimsSet().getClaim("name"), is("Test User"));
+    assertThat(idToken.getJWTClaimsSet().getClaim("preferred_username"), is("test"));
+    assertThat(idToken.getJWTClaimsSet().getClaim("organisation_name"), is("indigo-dc"));
+    assertThat(idToken.getJWTClaimsSet().getClaim("auth_time"), notNullValue());
+    assertThat(idToken.getJWTClaimsSet().getClaim("jti"), notNullValue());
+    assertThat(idToken.getJWTClaimsSet().getAudience(), hasSize(1));
+    assertThat(idToken.getJWTClaimsSet().getAudience(), hasItem("password-grant"));
   }
 
   @Test

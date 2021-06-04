@@ -175,10 +175,12 @@ public class IamConfig {
   JWTProfile wlcgJwtProfile(IamProperties props, IamAccountRepository accountRepo,
       ScopeClaimTranslationService converter, AttributeMapHelper attributeMapHelper,
       UserInfoService userInfoService, ExternalAuthenticationInfoProcessor proc,
-      ScopeMatcherRegistry registry) {
+      ScopeMatcherRegistry registry, ScopeClaimTranslationService claimTranslationService,
+      ClaimValueHelper claimValueHelper) {
 
     return new WLCGJWTProfile(props, userInfoService, accountRepo, new WLCGGroupHelper(),
-        attributeMapHelper, new DefaultIntrospectionResultAssembler(), registry);
+        attributeMapHelper, new DefaultIntrospectionResultAssembler(), registry,
+        claimTranslationService, claimValueHelper);
   }
 
   @Bean
