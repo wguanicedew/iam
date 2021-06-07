@@ -427,6 +427,8 @@ public class IamProperties {
 
   private LocalAuthenticationProperties localAuthn = new LocalAuthenticationProperties();
 
+  private IamTokenEnhancerProperties tokenEnhancer = new IamTokenEnhancerProperties();
+
   public String getBaseUrl() {
     return baseUrl;
   }
@@ -593,6 +595,14 @@ public class IamProperties {
 
   public void setLocalAuthn(LocalAuthenticationProperties localAuthn) {
     this.localAuthn = localAuthn;
+  }
+
+  public IamTokenEnhancerProperties getTokenEnhancer() {
+    return tokenEnhancer;
+  }
+
+  public void setTokenEnhancer(IamTokenEnhancerProperties tokenEnhancer) {
+    this.tokenEnhancer = tokenEnhancer;
   }
 
 }

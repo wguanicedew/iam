@@ -15,21 +15,60 @@
  */
 package it.infn.mw.iam.core.oauth.profile.common;
 
+import static it.infn.mw.iam.config.IamTokenEnhancerProperties.TokenContext.ID_TOKEN;
+import static java.util.Objects.isNull;
+
+import java.util.Optional;
+
+import org.mitre.oauth2.model.ClientDetailsEntity;
+import org.mitre.oauth2.model.OAuth2AccessTokenEntity;
+import org.springframework.security.oauth2.provider.OAuth2Request;
+
+import com.nimbusds.jwt.JWTClaimsSet.Builder;
+
+import it.infn.mw.iam.config.IamProperties;
+import it.infn.mw.iam.config.IamTokenEnhancerProperties.IncludeLabelProperties;
 import it.infn.mw.iam.core.oauth.profile.IDTokenCustomizer;
+import it.infn.mw.iam.persistence.model.IamAccount;
+import it.infn.mw.iam.persistence.model.IamLabel;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
 public abstract class BaseIdTokenCustomizer implements IDTokenCustomizer {
 
   private final IamAccountRepository accountRepo;
-  
-  public BaseIdTokenCustomizer(IamAccountRepository accountRepo) {
+  private final IamProperties properties;
+
+  public BaseIdTokenCustomizer(IamAccountRepository accountRepo, IamProperties properties) {
     this.accountRepo = accountRepo;
+    this.properties = properties;
   }
 
   public IamAccountRepository getAccountRepo() {
     return accountRepo;
   }
 
+  protected final void includeLabelsInIdToken(Builder idClaims, ClientDetailsEntity client,
+      OAuth2Request request, IamAccount account, OAuth2AccessTokenEntity accessToken) {
 
+    if (isNull(account)) {
+      return;
+    }
+
+    if (isNull(properties.getTokenEnhancer())
+        || isNull(properties.getTokenEnhancer().getIncludeLabels())) {
+      return;
+    }
+
+    for (IncludeLabelProperties includeLabel : properties.getTokenEnhancer().getIncludeLabels()) {
+      if (includeLabel.getContext().contains(ID_TOKEN)) {
+        Optional<IamLabel> label = account.getLabelByPrefixAndName(
+            includeLabel.getLabel().getPrefix(), includeLabel.getLabel().getName());
+
+        if (label.isPresent()) {
+          idClaims.claim(includeLabel.getClaimName(), label.get().getValue());
+        }
+      }
+    }
+  }
 
 }

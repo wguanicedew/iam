@@ -26,6 +26,7 @@ import org.springframework.security.oauth2.provider.OAuth2Request;
 
 import com.nimbusds.jwt.JWTClaimsSet.Builder;
 
+import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.core.oauth.profile.common.BaseIdTokenCustomizer;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamUserInfo;
@@ -37,8 +38,9 @@ public class IamJWTProfileIdTokenCustomizer extends BaseIdTokenCustomizer {
   protected final ClaimValueHelper claimValueHelper;
 
   public IamJWTProfileIdTokenCustomizer(IamAccountRepository accountRepo,
-      ScopeClaimTranslationService scopeClaimConverter, ClaimValueHelper claimValueHelper) {
-    super(accountRepo);
+      ScopeClaimTranslationService scopeClaimConverter, ClaimValueHelper claimValueHelper,
+      IamProperties properties) {
+    super(accountRepo, properties);
     this.scopeClaimConverter = scopeClaimConverter;
     this.claimValueHelper = claimValueHelper;
   }
@@ -55,6 +57,8 @@ public class IamJWTProfileIdTokenCustomizer extends BaseIdTokenCustomizer {
     requiredClaims.stream()
       .filter(ADDITIONAL_CLAIMS::contains)
       .forEach(c -> idClaims.claim(c, claimValueHelper.getClaimValueFromUserInfo(c, info)));
+
+    includeLabelsInIdToken(idClaims, client, request, account, accessToken);
   }
 
 }

@@ -27,6 +27,7 @@ import org.springframework.security.oauth2.provider.OAuth2Request;
 
 import com.nimbusds.jwt.JWTClaimsSet.Builder;
 
+import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.core.oauth.profile.iam.ClaimValueHelper;
 import it.infn.mw.iam.core.oauth.profile.iam.IamJWTProfileIdTokenCustomizer;
 import it.infn.mw.iam.persistence.model.IamAccount;
@@ -40,8 +41,8 @@ public class WLCGIdTokenCustomizer extends IamJWTProfileIdTokenCustomizer {
 
   public WLCGIdTokenCustomizer(IamAccountRepository accountRepo,
       ScopeClaimTranslationService scopeClaimConverter, ClaimValueHelper claimValueHelper,
-      WLCGGroupHelper groupHelper) {
-    super(accountRepo, scopeClaimConverter, claimValueHelper);
+      WLCGGroupHelper groupHelper, IamProperties properties) {
+    super(accountRepo, scopeClaimConverter, claimValueHelper, properties);
     this.groupHelper = groupHelper;
   }
 
@@ -60,8 +61,9 @@ public class WLCGIdTokenCustomizer extends IamJWTProfileIdTokenCustomizer {
 
     // Drop group claims as set by IAM JWT profile
     idClaims.claim(GROUPS_CLAIM, null);
-
     idClaims.claim(WLCG_VER_CLAIM, PROFILE_VERSION);
+
+    includeLabelsInIdToken(idClaims, client, request, account, accessToken);
 
   }
 

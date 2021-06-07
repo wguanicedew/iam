@@ -35,6 +35,7 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 @Primary
 public class IamOIDCTokenService extends DefaultOIDCTokenService {
 
+
   public static final Logger LOG = LoggerFactory.getLogger(IamOIDCTokenService.class);
 
   @Autowired
@@ -43,8 +44,10 @@ public class IamOIDCTokenService extends DefaultOIDCTokenService {
   @Autowired
   private IamAccountRepository accountRepository;
 
-  public IamOIDCTokenService() {
-    // empty on purpose
+  @Autowired
+  public IamOIDCTokenService(JWTProfileResolver resolver, IamAccountRepository accountRepository) {
+    this.profileResolver = resolver;
+    this.accountRepository = accountRepository;
   }
 
   @Override
