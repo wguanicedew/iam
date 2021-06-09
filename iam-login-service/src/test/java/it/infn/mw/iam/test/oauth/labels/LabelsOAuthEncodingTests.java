@@ -16,6 +16,7 @@
 package it.infn.mw.iam.test.oauth.labels;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 import java.util.function.Supplier;
@@ -47,11 +48,9 @@ import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 @SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class})
 @WebAppConfiguration
 @Transactional
-@TestPropertySource(properties = {
-    "iam.token-enhancer.include-labels[0].label.name=test",
+@TestPropertySource(properties = {"iam.token-enhancer.include-labels[0].label.name=test",
     "iam.token-enhancer.include-labels[0].label.prefix=iam",
-    "iam.token-enhancer.include-labels[0].claim-name=test_label",
-})
+    "iam.token-enhancer.include-labels[0].claim-name=test_label",})
 public class LabelsOAuthEncodingTests extends EndpointsTestUtils {
   public static final String TEST_USER = "test";
   public static final String EXPECTED_USER_NOT_FOUND = "Expected user not found";
@@ -102,11 +101,25 @@ public class LabelsOAuthEncodingTests extends EndpointsTestUtils {
     AccessTokenGetter tg = buildAccessTokenGetter();
     tg.scope("openid profile");
 
-    JWT idToken =
-        JWTParser
-          .parse((String) tg.getTokenResponseObject().getAdditionalInformation().get("id_token"));
+    JWT idToken = JWTParser
+      .parse((String) tg.getTokenResponseObject().getAdditionalInformation().get("id_token"));
 
     assertThat(idToken.getJWTClaimsSet().getStringClaim(CLAIM_NAME), is(TEST_LABEL_VALUE));
+
+  }
+
+  @Test
+  public void getTokenSucceedsForUserWithoutLabel() throws Exception {
+
+    repo.findByUsername(TEST_USER).orElseThrow(assertionError(EXPECTED_USER_NOT_FOUND));
+
+    AccessTokenGetter tg = buildAccessTokenGetter();
+    tg.scope("openid profile");
+
+    JWT idToken = JWTParser
+      .parse((String) tg.getTokenResponseObject().getAdditionalInformation().get("id_token"));
+
+    assertThat(idToken.getJWTClaimsSet().getStringClaim(CLAIM_NAME), nullValue());
 
   }
 }
