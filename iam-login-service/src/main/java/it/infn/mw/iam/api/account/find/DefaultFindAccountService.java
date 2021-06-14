@@ -112,4 +112,12 @@ public class DefaultFindAccountService implements FindAccountService {
     return () -> new IllegalArgumentException("Group does not exist: " + groupNameOrUuid);
   }
 
+  @Override
+  public ScimListResponse<ScimUser> findAccountByCertificateSubject(String certSubject) {
+    Optional<IamAccount> account = repo.findByCertificateSubject(certSubject);
+    ScimListResponseBuilder<ScimUser> builder = ScimListResponse.builder();
+    account.ifPresent(a -> builder.singleResource(converter.dtoFromEntity(a)));
+    return builder.build();
+  }
+
 }
