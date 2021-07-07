@@ -22,7 +22,17 @@
         self.$onInit = function() {
             console.log('UserGroupsController onInit');
             self.enabled = true;
-        };
+
+            self.userGroupLabels = {};
+
+            angular.forEach(self.user.groups, function(g){
+                var gl = [];
+                self.groupLabels(g.value).then(function(res){
+                    gl = res;
+                    self.userGroupLabels[g.value] = gl;
+                });
+            });  
+    };
 
         self.isVoAdmin = function() { return self.userCtrl.isVoAdmin(); };
 
@@ -36,6 +46,17 @@
             });
         };
 
+        // conoscendo l'id di un gruppo vado dal servizio e mi faccio dare le etichette
+        
+        self.groupLabels = function(groupId){
+            
+                return scimFactory.getGroup(groupId).then(function(res){     //'then' chiamata asincrona --> non termina
+                   var r = res.data;
+                   var labels = r['urn:indigo-dc:scim:schemas:IndigoGroup'].labels;
+                   return labels;
+            });
+        };
+        
         self.openAddGroupDialog = function() {
             var modalInstance = $uibModal.open({
                 templateUrl: '/resources/iam/apps/dashboard-app/templates/user/addusergroup.html',
