@@ -29,13 +29,16 @@
                 <span ng-if="!$ctrl.isVoAdmin()">{{group.display}}</span>
             </div>
 
-            <div class="iam-user-group-labels col-xs-2 col-sm-2">
-                <div ng-repeat="label in $ctrl.userGroupLabels[group.value]">
-                {{label.name}}
+            <style type="text/css">div.allinea { float:left; margin-left: .5em; margin-top: 10px }</style> 
+            <div class="iam-user-group-labels col-xs-4 col-sm-4">
+                <div class="allinea" ng-repeat="label in $ctrl.userGroupLabels[group.value]">
+                    <span style="background-color:#bee1f4; padding: 4px 7.2px 4px 7.2px; font-size: 12px">
+                    <b><font color="#00659c">{{label.name}}</font></b>
+                    </span>
                 </div> 
             </div>
                 
-            <div class="iam-user-group-actions col-xs-4 col-sm-4 text-right">
+            <div class="iam-user-group-actions col-xs-2 col-sm-2 text-right">
                 <div class="btn-group">
                     <button class="btn btn-xs btn-danger" ng-click="$ctrl.openRemoveGroupDialog(group)" ng-if="$ctrl.isVoAdmin()">
                     <i class="fa fa-times"></i> Remove

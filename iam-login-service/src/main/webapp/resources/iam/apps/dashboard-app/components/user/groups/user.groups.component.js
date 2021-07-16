@@ -22,7 +22,6 @@
         self.$onInit = function() {
             console.log('UserGroupsController onInit');
             self.enabled = true;
-
             self.userGroupLabels = {};
 
             angular.forEach(self.user.groups, function(g){
@@ -46,11 +45,11 @@
             });
         };
 
-        // conoscendo l'id di un gruppo vado dal servizio e mi faccio dare le etichette
+        // Knowing the group id I recover its labels calling the appropriate service
         
         self.groupLabels = function(groupId){
             
-                return scimFactory.getGroup(groupId).then(function(res){     //'then' chiamata asincrona --> non termina
+                return scimFactory.getGroup(groupId).then(function(res){     
                    var r = res.data;
                    var labels = r['urn:indigo-dc:scim:schemas:IndigoGroup'].labels;
                    return labels;
