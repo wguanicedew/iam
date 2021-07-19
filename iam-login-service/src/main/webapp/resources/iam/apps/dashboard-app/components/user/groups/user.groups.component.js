@@ -45,8 +45,6 @@
                 });
             });
         };
-
-        // By knowing the group id and by calling the appropriate service I can recover group labels
         
         self.groupLabels = function(groupId){
             
