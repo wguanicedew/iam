@@ -23,6 +23,7 @@
             console.log('UserGroupsController onInit');
             self.enabled = true;
             self.userGroupLabels = {};
+            self.labelName = labelName;
 
             angular.forEach(self.user.groups, function(g){
                 var gl = [];
@@ -45,7 +46,7 @@
             });
         };
 
-        // Knowing the group id I recover its labels calling the appropriate service
+        // By knowing the group id and by calling the appropriate service I can recover group labels
         
         self.groupLabels = function(groupId){
             
@@ -55,6 +56,13 @@
                    return labels;
             });
         };
+
+        function labelName(label) {
+            if (label.prefix) {
+                return label.prefix + "/" + label.name;
+            }
+            return label.name;
+        }
         
         self.openAddGroupDialog = function() {
             var modalInstance = $uibModal.open({

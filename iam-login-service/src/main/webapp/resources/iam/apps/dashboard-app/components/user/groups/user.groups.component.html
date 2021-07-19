@@ -29,13 +29,33 @@
                 <span ng-if="!$ctrl.isVoAdmin()">{{group.display}}</span>
             </div>
 
+            <!--
             <style type="text/css">div.allinea { float:left; margin-left: .5em; margin-top: 10px }</style> 
             <div class="iam-user-group-labels col-xs-4 col-sm-4">
                 <div class="allinea" ng-repeat="label in $ctrl.userGroupLabels[group.value]">
-                    <span style="background-color:#bee1f4; padding: 4px 7.2px 4px 7.2px; font-size: 12px">
+                    <span style="background-color:#bee1f4; padding: 4px 7.2px 4px 7.2px; font-size: 12px" ng-if="!label.prefix">
                     <b><font color="#00659c">{{label.name}}</font></b>
                     </span>
+                    <span style="background-color:#bee1f4; padding: 4px 7.2px 4px 7.2px; font-size: 12px" ng-if="label.prefix">
+                        <b><font color="#00659c">{{label.prefix + "/" + label.name}}</font></b>
+                        </span>
+                    <span style="background-color:#7dc3e8; padding: 4px 7.2px 4px 7.2px; font-size: 12px" ng-if="label.value">
+                        <b><font color="#FFF">{{label.value}}</font></b>
+                    </span>
                 </div> 
+            </div>
+            -->
+
+            <!-- By using CSS classes -->
+            <div class="iam-user-group-labels col-xs-4 col-sm-4">
+                <span class="label-pair" ng-repeat="label in $ctrl.userGroupLabels[group.value]">
+                    <span class="label-key label">
+                        {{$ctrl.labelName(label)}}
+                    </span>
+                    <span class="label-value label" ng-if="label.value">
+                        {{label.value}}
+                    </span>
+                </span>        
             </div>
                 
             <div class="iam-user-group-actions col-xs-2 col-sm-2 text-right">
