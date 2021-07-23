@@ -26,10 +26,8 @@
             self.labelName = labelName;
 
             angular.forEach(self.user.groups, function(g){
-                var gl = [];
                 self.groupLabels(g.value).then(function(res){
-                    gl = res;
-                    self.userGroupLabels[g.value] = gl;
+                    self.userGroupLabels[g.value] = res;
                 });
             });  
     };
