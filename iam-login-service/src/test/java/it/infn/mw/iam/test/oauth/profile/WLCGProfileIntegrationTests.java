@@ -744,36 +744,4 @@ public class WLCGProfileIntegrationTests extends EndpointsTestUtils {
     assertThat(claims.getJSONObjectClaim("attr").getAsString("test"), is("test"));
   }
 
-=======
-  }
-
-  @Test
-  public void attributesAreIncludedInAccessTokenWhenNotRequested() throws Exception {
-    IamAccount testAccount =
-        repo.findByUsername(TEST_USER).orElseThrow(assertionError(EXPECTED_USER_NOT_FOUND));
-
-    accountService.setAttribute(testAccount, TEST_ATTR);
-
-    String tokenResponseJson = mvc
-      .perform(post("/token").param("grant_type", "password")
-        .param("client_id", CLIENT_ID)
-        .param("client_secret", CLIENT_SECRET)
-        .param("username", "test")
-        .param("password", "password")
-        .param("scope", "openid profile attr"))
-      .andExpect(status().isOk())
-      .andReturn()
-      .getResponse()
-      .getContentAsString();
-
-    JWTClaimsSet claims =
-        JWTParser.parse(mapper.readTree(tokenResponseJson).get("access_token").asText())
-          .getJWTClaimsSet();
-
-    assertThat(claims.getJSONObjectClaim("attr"), notNullValue());
-    assertThat(claims.getJSONObjectClaim("attr").getAsString("test"), is("test"));
-  }
-
->>>>>>> proxy-cert-upload-dashboard-support
-
 }
