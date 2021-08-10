@@ -23,6 +23,7 @@ import com.google.common.collect.Sets;
 
 import it.infn.mw.iam.persistence.model.IamClientMatchingPolicy;
 import it.infn.mw.iam.persistence.model.IamClientMatchingPolicy.ClientMatchingPolicyType;
+import it.infn.mw.iam.persistence.model.IamScopePolicy.MatchingPolicy;
 import it.infn.mw.iam.persistence.model.IamTokenExchangePolicyEntity;
 import it.infn.mw.iam.persistence.model.IamTokenExchangeScopePolicy;
 import it.infn.mw.iam.persistence.model.PolicyRule;
@@ -88,6 +89,15 @@ public class TokenExchangePdpTestSupport {
     policy.setType(EQ);
     policy.setMatchParam(scope);
     
+    return policy;
+  }
+
+  public IamTokenExchangeScopePolicy buildRegexpAllScopePolicy(PolicyRule rule) {
+    IamTokenExchangeScopePolicy policy = new IamTokenExchangeScopePolicy();
+    policy.setRule(rule);
+    policy.setType(MatchingPolicy.REGEXP);
+    policy.setMatchParam(".*");
+
     return policy;
   }
 

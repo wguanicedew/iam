@@ -28,6 +28,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
 
@@ -286,6 +288,18 @@ public class ScopePolicyApiIntegrationTests extends ScopePolicyTestUtils {
       .andExpect(status().isBadRequest())
       .andExpect(jsonPath("$.error").value(Matchers
         .equalTo("Invalid scope policy: scope length must be >= 1 and < 255 characters")));
+  }
+
+  @Test
+  @WithMockOAuthUser(user = "admin", authorities = {"ROLE_USER", "ROLE_ADMIN"})
+  public void invalidScopePolicyRepresentationTest() throws Exception {
+    final String INVALID_POLICY = new String(
+        Files.readAllBytes(Paths.get("src/test/resources/api/scope_policy/invalid_policy.json")));
+
+    mvc.perform(post("/iam/scope_policies").content(INVALID_POLICY).contentType(APPLICATION_JSON))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.error").value(Matchers
+        .equalTo("Invalid scope policy: could not parse the policy JSON representation")));
   }
 
   @Test

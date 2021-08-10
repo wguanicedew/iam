@@ -13,16 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.core.oauth.exchange;
+package it.infn.mw.iam.api.exchange_policy;
 
-import org.springframework.security.oauth2.provider.ClientDetails;
-import org.springframework.security.oauth2.provider.TokenRequest;
+import java.util.Optional;
 
-public interface TokenExchangePdp {
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-  public void reloadPolicies();
 
-  TokenExchangePdpResult validateTokenExchange(TokenRequest request, ClientDetails originClient,
-      ClientDetails destinationClient);
 
+public interface ExchangePolicyService {
+
+  Page<ExchangePolicyDTO> findExchangePolicies(Pageable page);
+
+  Optional<ExchangePolicyDTO> findExchangePolicyById(Long id);
+
+  void deleteExchangePolicy(Long id);
+
+  ExchangePolicyDTO createExchangePolicy(ExchangePolicyDTO policy);
+
+  void deleteAllPolicies();
 }

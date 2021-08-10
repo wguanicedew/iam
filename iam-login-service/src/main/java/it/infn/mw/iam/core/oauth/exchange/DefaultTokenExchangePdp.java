@@ -22,10 +22,12 @@ import static java.util.Comparator.comparing;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.TokenRequest;
@@ -39,17 +41,22 @@ import it.infn.mw.iam.persistence.model.IamTokenExchangePolicyEntity;
 import it.infn.mw.iam.persistence.repository.IamTokenExchangePolicyRepository;
 
 @Service
-public class DefaultTokenExchangePdp implements TokenExchangePdp {
+public class DefaultTokenExchangePdp implements TokenExchangePdp, InitializingBean {
+
   public static final Logger LOG = LoggerFactory.getLogger(DefaultTokenExchangePdp.class);
 
   public static final String NOT_APPLICABLE_ERROR_TEMPLATE =
       "No applicable policies found for clients: %s -> %s";
 
-  final IamTokenExchangePolicyRepository repo;
+  private final IamTokenExchangePolicyRepository repo;
 
-  final ScopeMatcherRegistry scopeMatcherRegistry;
+  private final ScopeMatcherRegistry scopeMatcherRegistry;
 
-  List<TokenExchangePolicy> policies = Lists.newArrayList();
+  private List<TokenExchangePolicy> policies = Lists.newArrayList();
+
+  private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+  private final ReentrantReadWriteLock.ReadLock readLock = lock.readLock();
+  private final ReentrantReadWriteLock.WriteLock writeLock = lock.writeLock();
 
   @Autowired
   public DefaultTokenExchangePdp(IamTokenExchangePolicyRepository repo,
@@ -58,22 +65,32 @@ public class DefaultTokenExchangePdp implements TokenExchangePdp {
     this.scopeMatcherRegistry = scopeMatcherRegistry;
   }
 
-
-  void loadPolicies() {
-    policies.clear();
-
-    for (IamTokenExchangePolicyEntity p : repo.findAll()) {
-      policies.add(TokenExchangePolicy.builder().fromEntity(p).build());
-    }
-  }
-
   Set<TokenExchangePolicy> applicablePolicies(ClientDetails origin, ClientDetails destination) {
-    loadPolicies();
     return policies.stream()
       .filter(p -> p.appicableFor(origin, destination))
       .collect(Collectors.toSet());
   }
 
+  /**
+   * In an exchange of scopes between the origin and destination client, the destination client is
+   * the client that issued the token request. The scope verification at this stage checks that the
+   * requested scopes are allowed by the origin client configuration, as the destination client is
+   * impersonating the origin client.
+   * 
+   * After this checks, the scope policies linked to the exchange policy are applied for each
+   * requested scope. If there's a policy that does not allow one of the requested scope, an
+   * invalidScope result is returned providing detail on which scope is not allowed by the policy.
+   * 
+   * Checks on whether the requested scopes are also allowed by the destination client configuration
+   * are implemented elsewhere in the chain (e.g., in the token exchange granter), and not
+   * replicated here
+   * 
+   * @param p the policy for which scope policies should be applied
+   * @param request the token request
+   * @param origin, the origin client
+   * @param destination the destination client
+   * @return a decision result
+   */
   private TokenExchangePdpResult verifyScopes(TokenExchangePolicy p, TokenRequest request,
       ClientDetails origin, ClientDetails destination) {
 
@@ -88,7 +105,7 @@ public class DefaultTokenExchangePdp implements TokenExchangePdp {
     for (String scope : request.getScope()) {
       // Check requested scope is permitted by client configuration
       if (originClientMatchers.stream().noneMatch(m -> m.matches(scope))) {
-        return invalidScope(p, scope, "scope not allowed by client configuration");
+        return invalidScope(p, scope, "scope not allowed by origin client configuration");
       }
 
       // Check requested scope is compliant with policies
@@ -104,14 +121,43 @@ public class DefaultTokenExchangePdp implements TokenExchangePdp {
   }
 
 
+
   @Override
   public TokenExchangePdpResult validateTokenExchange(TokenRequest request, ClientDetails origin,
       ClientDetails destination) {
 
-    return applicablePolicies(origin, destination).stream()
-      .max(comparing(TokenExchangePolicy::rank).thenComparing(TokenExchangePolicy::getRule))
-      .map(p -> verifyScopes(p, request, origin, destination))
-      .orElse(notApplicable());
+    try {
+      readLock.lock();
+      return applicablePolicies(origin, destination).stream()
+        .max(comparing(TokenExchangePolicy::rank).thenComparing(TokenExchangePolicy::getRule))
+        .map(p -> verifyScopes(p, request, origin, destination))
+        .orElse(notApplicable());
+    } finally {
+      readLock.unlock();
+    }
+  }
+
+  @Override
+  public void reloadPolicies() {
+
+    try {
+      LOG.debug("Token exchange policy reload started");
+      writeLock.lock();
+      policies.clear();
+
+      for (IamTokenExchangePolicyEntity p : repo.findAll()) {
+        policies.add(TokenExchangePolicy.builder().fromEntity(p).build());
+      }
+
+    } finally {
+      writeLock.unlock();
+      LOG.debug("Token exchange policy reload done");
+    }
+  }
+
+  @Override
+  public void afterPropertiesSet() throws Exception {
+    reloadPolicies();
   }
 
 }

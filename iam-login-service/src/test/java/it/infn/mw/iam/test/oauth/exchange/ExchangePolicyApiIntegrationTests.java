@@ -20,6 +20,9 @@ import static it.infn.mw.iam.api.exchange_policy.ClientMatchingPolicyDTO.clientB
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -34,8 +37,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -50,20 +57,36 @@ import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.exchange_policy.ClientMatchingPolicyDTO;
 import it.infn.mw.iam.api.exchange_policy.ExchangePolicyDTO;
 import it.infn.mw.iam.api.exchange_policy.ExchangeScopePolicyDTO;
+import it.infn.mw.iam.core.oauth.exchange.DefaultTokenExchangePdp;
+import it.infn.mw.iam.core.oauth.exchange.TokenExchangePdp;
+import it.infn.mw.iam.core.oauth.scope.matchers.ScopeMatcherRegistry;
 import it.infn.mw.iam.persistence.model.IamScopePolicy.MatchingPolicy;
 import it.infn.mw.iam.persistence.model.PolicyRule;
 import it.infn.mw.iam.persistence.repository.IamTokenExchangePolicyRepository;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
+import it.infn.mw.iam.test.oauth.exchange.ExchangePolicyApiIntegrationTests.TestBeans;
 import it.infn.mw.iam.test.util.WithAnonymousUser;
 import it.infn.mw.iam.test.util.WithMockOAuthUser;
 import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class})
+@SpringApplicationConfiguration(
+    classes = {IamLoginService.class, CoreControllerTestSupport.class, TestBeans.class})
 @WebAppConfiguration
 @Transactional
 @WithAnonymousUser
 public class ExchangePolicyApiIntegrationTests {
+
+  @Configuration
+  public static class TestBeans {
+    @Bean
+    @Primary
+    public TokenExchangePdp tokenExchangePdp(IamTokenExchangePolicyRepository repo,
+        ScopeMatcherRegistry registry) {
+      DefaultTokenExchangePdp pdp = new DefaultTokenExchangePdp(repo, registry);
+      return Mockito.spy(pdp);
+    }
+  }
 
   public static final String ENDPOINT = "/iam/api/exchange/policies";
 
@@ -79,12 +102,16 @@ public class ExchangePolicyApiIntegrationTests {
   @Autowired
   IamTokenExchangePolicyRepository repo;
 
+  @Autowired
+  TokenExchangePdp pdp;
+
   private MockMvc mvc;
 
   @Before
   public void setup() throws Exception {
     mvc =
         MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).alwaysDo(log()).build();
+    reset(pdp);
   }
 
 
@@ -143,6 +170,7 @@ public class ExchangePolicyApiIntegrationTests {
   public void deletePolicyWorks() throws Exception {
     mvc.perform(delete(ENDPOINT + "/1")).andExpect(status().isNoContent());
     mvc.perform(delete(ENDPOINT + "/1")).andExpect(status().isNotFound());
+    verify(pdp, times(1)).reloadPolicies();
   }
 
 
@@ -180,6 +208,9 @@ public class ExchangePolicyApiIntegrationTests {
 
     mvc.perform(post(ENDPOINT).content(policy).contentType(APPLICATION_JSON))
       .andExpect(status().isCreated());
+
+
+    verify(pdp, times(2)).reloadPolicies();
 
     mvc.perform(get(ENDPOINT))
       .andExpect(status().isOk())
