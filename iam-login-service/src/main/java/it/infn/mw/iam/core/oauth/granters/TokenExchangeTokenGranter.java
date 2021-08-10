@@ -21,6 +21,7 @@ import static it.infn.mw.iam.core.oauth.exchange.TokenExchangePdpResult.Decision
 import static java.lang.String.format;
 import static java.util.Objects.isNull;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -80,6 +81,12 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
     String audience = tokenRequest.getRequestParameters().get(AUDIENCE_FIELD);
     ClientDetailsEntity subjectClient = subjectToken.getClient();
     Set<String> requestedScopes = tokenRequest.getScope();
+
+    if (Objects.isNull(requestedScopes) || requestedScopes.isEmpty()) {
+      LOG.debug(
+          "No scope parameter found in token exchange request, defaulting to scopes linked to the suject token");
+      requestedScopes = subjectToken.getScope();
+    }
 
     if (!isNull(subjectToken.getAuthenticationHolder().getUserAuth())) {
       LOG.info(

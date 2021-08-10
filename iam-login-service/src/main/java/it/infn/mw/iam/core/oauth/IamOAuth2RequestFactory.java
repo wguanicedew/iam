@@ -15,6 +15,8 @@
  */
 package it.infn.mw.iam.core.oauth;
 
+import static it.infn.mw.iam.core.oauth.granters.TokenExchangeTokenGranter.TOKEN_EXCHANGE_GRANT_TYPE;
+
 import java.util.Map;
 import java.util.Set;
 
@@ -26,6 +28,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
+import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.ClientDetails;
@@ -50,10 +54,12 @@ public class IamOAuth2RequestFactory extends ConnectOAuth2RequestFactory {
   private final JWTProfileResolver profileResolver;
 
   private final Joiner joiner = Joiner.on(' ');
+  private final ClientDetailsEntityService clientDetailsService;
 
   public IamOAuth2RequestFactory(ClientDetailsEntityService clientDetailsService,
       IamScopeFilter scopeFilter, JWTProfileResolver profileResolver) {
     super(clientDetailsService);
+    this.clientDetailsService = clientDetailsService;
     this.scopeFilter = scopeFilter;
     this.profileResolver = profileResolver;
   }
@@ -71,15 +77,15 @@ public class IamOAuth2RequestFactory extends ConnectOAuth2RequestFactory {
       scopeFilter.filterScopes(requestedScopes, authn);
       inputParams.put(OAuth2Utils.SCOPE, joiner.join(requestedScopes));
     }
-    
+
     AuthorizationRequest authzRequest = super.createAuthorizationRequest(inputParams);
-    
+
     for (String audienceKey : AUDIENCE_KEYS) {
       if (inputParams.containsKey(audienceKey)) {
         if (!authzRequest.getExtensions().containsKey(AUD)) {
           authzRequest.getExtensions().put(AUD, inputParams.get(audienceKey));
         }
-        
+
         break;
       }
     }
@@ -124,6 +130,37 @@ public class IamOAuth2RequestFactory extends ConnectOAuth2RequestFactory {
       .validateRequest(request);
 
     return request;
+  }
+
+
+  @Override
+  public TokenRequest createTokenRequest(Map<String, String> requestParameters,
+      ClientDetails authenticatedClient) {
+
+    String clientId = requestParameters.get(OAuth2Utils.CLIENT_ID);
+    if (clientId == null) {
+      clientId = authenticatedClient.getClientId();
+    } else {
+      if (!clientId.equals(authenticatedClient.getClientId())) {
+        throw new InvalidClientException("Given client ID does not match authenticated client");
+      }
+    }
+
+    String grantType = requestParameters.get(OAuth2Utils.GRANT_TYPE);
+
+    Set<String> scopes = OAuth2Utils.parseParameterList(requestParameters.get(OAuth2Utils.SCOPE));
+
+    if (scopes == null || scopes.isEmpty()) {
+      if (TOKEN_EXCHANGE_GRANT_TYPE.equals(grantType)) {
+        throw new InvalidRequestException(
+            "The scope parameter is required for a token exchange request!");
+      } else {
+        ClientDetails clientDetails = clientDetailsService.loadClientByClientId(clientId);
+        scopes = clientDetails.getScope();
+      }
+    }
+
+    return new TokenRequest(requestParameters, clientId, scopes, grantType);
   }
 
 }

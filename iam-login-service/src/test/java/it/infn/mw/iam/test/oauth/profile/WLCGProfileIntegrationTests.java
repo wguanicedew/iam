@@ -433,7 +433,7 @@ public class WLCGProfileIntegrationTests extends EndpointsTestUtils {
 
 
   @Test
-  public void testWlcgProfileUserIdentityTokenExchangeNoScopes() throws Exception {
+  public void testWlcgProfileUserIdentityTokenExchangeNoScopeParameter() throws Exception {
     String subjectToken = new AccessTokenGetter().grantType(PASSWORD_GRANT_TYPE)
       .clientId(SUBJECT_CLIENT_ID)
       .clientSecret(SUBJECT_CLIENT_SECRET)
@@ -443,36 +443,14 @@ public class WLCGProfileIntegrationTests extends EndpointsTestUtils {
       .audience(ACTOR_CLIENT_ID)
       .getAccessTokenValue();
 
-    String tokenResponse =
-        mvc
-          .perform(post("/token").with(httpBasic(ACTOR_CLIENT_ID, ACTOR_CLIENT_SECRET))
-            .param("grant_type", TOKEN_EXCHANGE_GRANT_TYPE)
-            .param("subject_token", subjectToken)
-            .param("subject_token_type", "urn:ietf:params:oauth:token-type:jwt"))
-          .andExpect(status().isOk())
-          .andExpect(jsonPath("$.access_token").exists())
-          .andExpect(jsonPath("$.refresh_token").exists())
-          .andExpect(jsonPath("$.scope",
-              allOf(containsString("profile"), containsString("openid"))))
-          .andReturn()
-          .getResponse()
-          .getContentAsString();
-
-    DefaultOAuth2AccessToken tokenResponseObject =
-        mapper.readValue(tokenResponse, DefaultOAuth2AccessToken.class);
-
-    JWT exchangedToken = JWTParser.parse(tokenResponseObject.getValue());
-    assertThat(exchangedToken.getJWTClaimsSet().getSubject(), is(USER_SUBJECT));
-
-    assertThat(exchangedToken.getJWTClaimsSet().getJSONObjectClaim("act").getAsString("sub"),
-        is(ACTOR_CLIENT_ID));
-
-    // Check that token can be introspected properly
     mvc
-      .perform(post("/introspect").with(httpBasic(CLIENT_ID, CLIENT_SECRET))
-        .param("token", tokenResponseObject.getValue()))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$.active", equalTo(true)));
+      .perform(post("/token").with(httpBasic(ACTOR_CLIENT_ID, ACTOR_CLIENT_SECRET))
+        .param("grant_type", TOKEN_EXCHANGE_GRANT_TYPE)
+        .param("subject_token", subjectToken)
+        .param("subject_token_type", "urn:ietf:params:oauth:token-type:jwt"))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.error").value("invalid_request"))
+      .andExpect(jsonPath("$.error_description", containsString("scope parameter is required")));
   }
 
   @Test
