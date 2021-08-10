@@ -136,10 +136,6 @@ public class AccountUpdatersTests extends X509TestSupport {
     return groupService.createGroup(group);
   }
 
-  private Adders otherAdders() {
-    return AccountUpdaters.adders(accountRepo, accountService, encoder, other);
-  }
-
   private Adders accountAdders() {
     return AccountUpdaters.adders(accountRepo, accountService, encoder, account);
   }
