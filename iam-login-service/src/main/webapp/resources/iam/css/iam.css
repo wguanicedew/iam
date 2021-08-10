@@ -253,6 +253,13 @@ body.skin-blue {
     text-align: center;
 }
 
+#login-custom-content {
+    max-width: 600px;
+    margin: 0 auto;
+    margin-top: 2em;
+    text-align: center;
+}
+
 .saml-icon {
     font-weight: bolder;
 }

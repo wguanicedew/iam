@@ -43,6 +43,28 @@ public class IamProperties {
     VISIBLE, HIDDEN, HIDDEN_WITH_LINK
   }
 
+  public static class CustomizationProperties {
+    boolean includeCustomLoginPageContent = false;
+
+    String customLoginPageContentUrl;
+
+    public boolean isIncludeCustomLoginPageContent() {
+      return includeCustomLoginPageContent;
+    }
+
+    public void setIncludeCustomLoginPageContent(boolean includeCustomLoginPageContent) {
+      this.includeCustomLoginPageContent = includeCustomLoginPageContent;
+    }
+
+    public String getCustomLoginPageContentUrl() {
+      return customLoginPageContentUrl;
+    }
+
+    public void setCustomLoginPageContentUrl(String customLoginPageContentUrl) {
+      this.customLoginPageContentUrl = customLoginPageContentUrl;
+    }
+  }
+
   public static class LocalAuthenticationProperties {
 
     LocalAuthenticationLoginPageMode loginPageVisibility;
@@ -429,6 +451,8 @@ public class IamProperties {
 
   private IamTokenEnhancerProperties tokenEnhancer = new IamTokenEnhancerProperties();
 
+  private CustomizationProperties customization = new CustomizationProperties();
+
   public String getBaseUrl() {
     return baseUrl;
   }
@@ -603,6 +627,14 @@ public class IamProperties {
 
   public void setTokenEnhancer(IamTokenEnhancerProperties tokenEnhancer) {
     this.tokenEnhancer = tokenEnhancer;
+  }
+
+  public CustomizationProperties getCustomization() {
+    return customization;
+  }
+
+  public void setCustomization(CustomizationProperties customization) {
+    this.customization = customization;
   }
 
 }
