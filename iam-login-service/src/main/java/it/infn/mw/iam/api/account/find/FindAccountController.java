@@ -35,6 +35,7 @@ public class FindAccountController {
   public static final String FIND_BY_LABEL_RESOURCE = "/iam/account/find/bylabel";
   public static final String FIND_BY_EMAIL_RESOURCE = "/iam/account/find/byemail";
   public static final String FIND_BY_USERNAME_RESOURCE = "/iam/account/find/byusername";
+  public static final String FIND_BY_CERT_SUBJECT_RESOURCE = "/iam/account/find/bycertsubject";
 
   final FindAccountService service;
 
@@ -63,6 +64,13 @@ public class FindAccountController {
       produces = ScimConstants.SCIM_CONTENT_TYPE)
   public ListResponseDTO<ScimUser> findByUsername(@RequestParam(required = true) String username) {
     return service.findAccountByUsername(username);
+  }
+
+  @RequestMapping(method = GET, value = FIND_BY_CERT_SUBJECT_RESOURCE,
+      produces = ScimConstants.SCIM_CONTENT_TYPE)
+  public ListResponseDTO<ScimUser> findByCertSubject(
+      @RequestParam(required = true) String certificateSubject) {
+    return service.findAccountByCertificateSubject(certificateSubject);
   }
 
 }
