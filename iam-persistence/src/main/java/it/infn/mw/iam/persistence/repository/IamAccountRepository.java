@@ -21,6 +21,7 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
@@ -119,5 +120,10 @@ public interface IamAccountRepository
 
   @Query("select a from IamAccount a where a.active = TRUE")
   Page<IamAccount> findActiveAccounts(Pageable op);
+
+
+  @Modifying
+  @Query("delete from IamAccountGroupMembership")
+  void deleteAllAccountGroupMemberships();
 
 }

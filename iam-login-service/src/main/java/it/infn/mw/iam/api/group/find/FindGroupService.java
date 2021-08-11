@@ -15,6 +15,8 @@
  */
 package it.infn.mw.iam.api.group.find;
 
+import java.util.Optional;
+
 import org.springframework.data.domain.Pageable;
 
 import it.infn.mw.iam.api.scim.model.ScimGroup;
@@ -26,5 +28,8 @@ public interface FindGroupService {
 
   ScimListResponse<ScimGroup> findGroupByLabel(String labelName, String labelValue,
       Pageable pageable);
+
+  ScimListResponse<ScimGroup> findUnsubscribedGroupsForAccount(String accountUuid,
+      Optional<String> nameFilter, Pageable pageable);
 
 }

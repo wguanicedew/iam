@@ -32,8 +32,6 @@ import java.util.UUID;
 import org.mitre.oauth2.model.OAuth2AccessTokenEntity;
 import org.mitre.oauth2.model.OAuth2RefreshTokenEntity;
 import org.mitre.oauth2.service.OAuth2TokenEntityService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
@@ -74,8 +72,6 @@ import it.infn.mw.iam.persistence.repository.IamGroupRepository;
 @Service
 @Transactional
 public class DefaultIamAccountService implements IamAccountService, ApplicationEventPublisherAware {
-
-  private static final Logger LOG = LoggerFactory.getLogger(DefaultIamAccountService.class);
 
   private final Clock clock;
   private final IamAccountRepository accountRepo;

@@ -18,9 +18,12 @@ package it.infn.mw.iam.api.group.find;
 import static it.infn.mw.iam.api.common.PagingUtils.buildPageRequest;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -39,6 +42,8 @@ public class FindGroupController {
 
   public static final String FIND_BY_LABEL_RESOURCE = "/iam/group/find/bylabel";
   public static final String FIND_BY_NAME_RESOURCE = "/iam/group/find/byname";
+  public static final String FIND_UNSUBSCRIBED_GROUPS_FOR_ACCOUNT =
+      "/iam/group/find/unsubscribed/{accountUuid}";
 
   final FindGroupService service;
 
@@ -75,6 +80,18 @@ public class FindGroupController {
   public MappingJacksonValue findByName(@RequestParam(required = true) String name) {
 
     return filterOutMembers(service.findGroupByName(name));
+  }
+
+  @RequestMapping(method = GET, value = FIND_UNSUBSCRIBED_GROUPS_FOR_ACCOUNT,
+      produces = ScimConstants.SCIM_CONTENT_TYPE)
+  public MappingJacksonValue findUnsubscribedGroupsForAccount(@PathVariable String accountUuid,
+      @RequestParam(required = false) String nameFilter,
+      @RequestParam(required = false) final Integer count,
+      @RequestParam(required = false) final Integer startIndex) {
+
+    return filterOutMembers(service.findUnsubscribedGroupsForAccount(accountUuid,
+        Optional.ofNullable(nameFilter),
+        buildPageRequest(count, startIndex, 100)));
   }
 
 }

@@ -25,6 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import it.infn.mw.iam.api.scim.converter.GroupConverter;
+import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
 import it.infn.mw.iam.api.scim.model.ScimGroup;
 import it.infn.mw.iam.api.scim.model.ScimListResponse;
 import it.infn.mw.iam.api.scim.model.ScimListResponse.ScimListResponseBuilder;
@@ -58,6 +59,35 @@ public class DefaultFindGroupService implements FindGroupService {
       Pageable pageable) {
 
     Page<IamGroup> results = repo.findByLabelNameAndValue(labelName, labelValue, pageable);
+    return responseFromPage(results, converter, pageable);
+  }
+
+  // I did not find a nice way to do this validation using JSR...
+  private String validatedNameFilter(String nameFilter) {
+    String trimmedFilter = nameFilter.trim();
+
+    if (trimmedFilter.length() < 2 || trimmedFilter.length() > 255) {
+      throw new IllegalArgumentException(
+          "Invalid name filter: it should be a string with length between 2 and 255 chars");
+    }
+
+    return trimmedFilter;
+  }
+
+  @Override
+  public ScimListResponse<ScimGroup> findUnsubscribedGroupsForAccount(String accountUuid,
+      Optional<String> nameFilter, Pageable pageable) {
+
+    Page<IamGroup> results;
+
+    if (nameFilter.isPresent()) {
+      results = repo.findUnsubscribedGroupsForAccountWithNameLike(accountUuid,
+          validatedNameFilter(nameFilter.get()),
+          pageable);
+    } else {
+      results = repo.findUnsubscribedGroupsForAccount(accountUuid, pageable);
+    }
+
     return responseFromPage(results, converter, pageable);
   }
 
