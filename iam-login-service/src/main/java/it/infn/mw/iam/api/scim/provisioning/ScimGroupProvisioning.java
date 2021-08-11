@@ -21,7 +21,6 @@ import static java.lang.String.format;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 
@@ -126,11 +125,11 @@ public class ScimGroupProvisioning
       String fullName = String.format("%s/%s", parentGroupName, group.getDisplayName());
       fullNameSanityChecks(fullName);
 
-      iamGroup.setParentGroup(iamParentGroup);
       iamGroup.setName(fullName);
 
-      Set<IamGroup> children = iamParentGroup.getChildrenGroups();
-      children.add(iamGroup);
+      iamGroup.setParentGroup(iamParentGroup);
+      iamParentGroup.getChildrenGroups().add(iamGroup);
+
     }
 
     groupService.createGroup(iamGroup);

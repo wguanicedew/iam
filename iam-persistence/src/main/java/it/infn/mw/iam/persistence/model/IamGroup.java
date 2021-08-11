@@ -37,6 +37,8 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import com.google.common.base.Preconditions;
+
 @Entity
 @Table(name = "iam_group")
 public class IamGroup implements Serializable {
@@ -57,14 +59,14 @@ public class IamGroup implements Serializable {
   private String description;
 
   @Temporal(TemporalType.TIMESTAMP)
-  @Column(name="creationtime", nullable = false)
+  @Column(name = "creationtime", nullable = false)
   Date creationTime;
 
   @Temporal(TemporalType.TIMESTAMP)
-  @Column(name="lastupdatetime", nullable = false)
+  @Column(name = "lastupdatetime", nullable = false)
   Date lastUpdateTime;
-  
-  @Column(name="default_group", nullable = false)
+
+  @Column(name = "default_group", nullable = false)
   boolean defaultGroup;
 
   @ManyToOne
@@ -79,21 +81,18 @@ public class IamGroup implements Serializable {
 
   @OneToMany(mappedBy = "group", cascade = CascadeType.REMOVE)
   private Set<IamGroupRequest> groupRequests = new HashSet<>();
-  
+
   @ElementCollection
-  @CollectionTable(
-      indexes= {@Index(columnList="name"), @Index(columnList="name,val")},
-      name="iam_group_attrs",
-     joinColumns=@JoinColumn(name="group_id"))
+  @CollectionTable(indexes = {@Index(columnList = "name"), @Index(columnList = "name,val")},
+      name = "iam_group_attrs", joinColumns = @JoinColumn(name = "group_id"))
   private Set<IamAttribute> attributes = new HashSet<>();
 
   @ElementCollection
   @CollectionTable(
-      indexes= {@Index(columnList="prefix,name,val"), @Index(columnList="prefix,name")},
-      name="iam_group_labels",
-     joinColumns=@JoinColumn(name="group_id"))
+      indexes = {@Index(columnList = "prefix,name,val"), @Index(columnList = "prefix,name")},
+      name = "iam_group_labels", joinColumns = @JoinColumn(name = "group_id"))
   private Set<IamLabel> labels = new HashSet<>();
-  
+
   public IamGroup() {
     // empty constructor
   }
@@ -178,9 +177,29 @@ public class IamGroup implements Serializable {
   public void setGroupRequests(Set<IamGroupRequest> groupRequests) {
     this.groupRequests = groupRequests;
   }
-  
+
   public boolean isDefaultGroup() {
     return defaultGroup;
+  }
+
+  public boolean isSubgroupOf(IamGroup otherGroup) {
+    Preconditions.checkNotNull(otherGroup, "Cannot check subgroup status of a null group");
+
+    if (this.equals(otherGroup)) {
+      return false;
+    }
+    
+    IamGroup aParentGroup = this.getParentGroup();
+
+    while (aParentGroup != null) {
+      if (aParentGroup.equals(otherGroup)) {
+        return true;
+      } else {
+        aParentGroup = aParentGroup.getParentGroup();
+      }
+    }
+
+    return false;
   }
 
   public void setDefaultGroup(boolean defaultGroup) {
@@ -194,11 +213,11 @@ public class IamGroup implements Serializable {
   public void setAttributes(Set<IamAttribute> attributes) {
     this.attributes = attributes;
   }
-  
+
   public Set<IamLabel> getLabels() {
     return labels;
   }
-  
+
   public void setLabels(Set<IamLabel> labels) {
     this.labels = labels;
   }
@@ -207,7 +226,7 @@ public class IamGroup implements Serializable {
     setLastUpdateTime(Date.from(c.instant()));
   }
 
-  
+
   @Override
   public int hashCode() {
 

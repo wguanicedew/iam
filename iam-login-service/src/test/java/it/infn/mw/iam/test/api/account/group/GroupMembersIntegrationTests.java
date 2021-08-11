@@ -43,6 +43,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import it.infn.mw.iam.IamLoginService;
+import it.infn.mw.iam.core.group.IamGroupService;
 import it.infn.mw.iam.core.user.IamAccountService;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamAccountGroupMembership;
@@ -74,6 +75,9 @@ public class GroupMembersIntegrationTests {
   private IamAccountService accountService;
 
   @Autowired
+  private IamGroupService groupService;
+
+  @Autowired
   private IamAccountRepository accountRepo;
 
   @Autowired
@@ -90,10 +94,8 @@ public class GroupMembersIntegrationTests {
   @Before
   public void setup() {
     mockOAuth2Filter.cleanupSecurityContext();
-    mvc = MockMvcBuilders.webAppContextSetup(context)
-      .apply(springSecurity())
-      .alwaysDo(log())
-      .build();
+    mvc =
+        MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).alwaysDo(log()).build();
     mockOAuth2Filter.cleanupSecurityContext();
   }
 
@@ -269,12 +271,10 @@ public class GroupMembersIntegrationTests {
 
   }
 
-  
-
   @Test
   @WithMockUser(username = ADMIN_USER, roles = {"USER", "ADMIN"})
-  public void cannotChangeMembershipForUnknownGroupOrAccount()throws Exception {
-    
+  public void cannotChangeMembershipForUnknownGroupOrAccount() throws Exception {
+
     IamAccount account =
         accountRepo.findByUsername(TEST_USER).orElseThrow(assertionError(EXPECTED_USER_NOT_FOUND));
 
@@ -282,22 +282,221 @@ public class GroupMembersIntegrationTests {
         groupRepo.findByName(TEST_001_GROUP).orElseThrow(assertionError(EXPECTED_GROUP_NOT_FOUND));
 
     String randomUuid = UUID.randomUUID().toString();
-    
+
     mvc.perform(post("/iam/account/{account}/groups/{group}", randomUuid, group.getUuid()))
-    .andExpect(status().isBadRequest())
-    .andExpect(jsonPath("$.error", containsString("Account not found")));
-    
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.error", containsString("Account not found")));
+
     mvc.perform(post("/iam/account/{account}/groups/{group}", account.getUuid(), randomUuid))
-    .andExpect(status().isBadRequest())
-    .andExpect(jsonPath("$.error", containsString("Group not found")));
-    
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.error", containsString("Group not found")));
+
     mvc.perform(delete("/iam/account/{account}/groups/{group}", randomUuid, group.getUuid()))
-    .andExpect(status().isBadRequest())
-    .andExpect(jsonPath("$.error", containsString("Account not found")));
-    
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.error", containsString("Account not found")));
+
     mvc.perform(delete("/iam/account/{account}/groups/{group}", account.getUuid(), randomUuid))
-    .andExpect(status().isBadRequest())
-    .andExpect(jsonPath("$.error", containsString("Group not found")));
-    
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.error", containsString("Group not found")));
+
   }
+
+  @Test
+  @WithMockUser(username = ADMIN_USER, roles = {"USER", "ADMIN"})
+  public void intermediateGroupMembershipIsEnforcedOnAdd() throws Exception {
+
+    // Create group hierarchy
+    IamGroup rootGroup = new IamGroup();
+    rootGroup.setName("root");
+
+    rootGroup = groupService.createGroup(rootGroup);
+
+    IamGroup subgroup = new IamGroup();
+    subgroup.setName("root/subgroup");
+    subgroup.setParentGroup(rootGroup);
+
+    subgroup = groupService.createGroup(subgroup);
+
+    IamGroup subsubgroup = new IamGroup();
+    subsubgroup.setName("root/subgroup/subsubgroup");
+    subsubgroup.setParentGroup(subgroup);
+
+    subsubgroup = groupService.createGroup(subsubgroup);
+
+    IamGroup sibling = new IamGroup();
+    sibling.setName("root/sibling");
+    sibling.setParentGroup(rootGroup);
+    sibling = groupService.createGroup(sibling);
+
+    IamAccount account =
+        accountRepo.findByUsername(TEST_USER).orElseThrow(assertionError(EXPECTED_USER_NOT_FOUND));
+
+    mvc
+      .perform(
+          post("/iam/account/{account}/groups/{group}", account.getUuid(), subsubgroup.getUuid()))
+      .andExpect(status().isCreated());
+
+    assertThat(
+        groupRepo.findGroupByMemberAccountUuidAndGroupUuid(account.getUuid(), subgroup.getUuid())
+          .isPresent(),
+        is(true));
+
+    assertThat(
+        groupRepo.findGroupByMemberAccountUuidAndGroupUuid(account.getUuid(), rootGroup.getUuid())
+          .isPresent(),
+        is(true));
+
+    assertThat(
+        groupRepo.findGroupByMemberAccountUuidAndGroupUuid(account.getUuid(), sibling.getUuid())
+          .isPresent(),
+        is(false));
+
+
+    IamAccountGroupMembership m =
+        IamAccountGroupMembership.forAccountAndGroup(null, account, subsubgroup);
+
+    assertThat(account.getGroups().contains(m), is(true));
+
+    m = IamAccountGroupMembership.forAccountAndGroup(null, account, subgroup);
+
+    assertThat(account.getGroups().contains(m), is(true));
+
+    m = IamAccountGroupMembership.forAccountAndGroup(null, account, rootGroup);
+
+    assertThat(account.getGroups().contains(m), is(true));
+
+  }
+
+  @Test
+  @WithMockUser(username = ADMIN_USER, roles = {"USER", "ADMIN"})
+  public void intermediateGroupMembershipIsEnforcedOnRemove() throws Exception {
+
+    // Create group hierarchy
+    IamGroup rootGroup = new IamGroup();
+    rootGroup.setName("root");
+
+    rootGroup = groupService.createGroup(rootGroup);
+
+    IamGroup subgroup = new IamGroup();
+    subgroup.setName("root/subgroup");
+    subgroup.setParentGroup(rootGroup);
+
+    subgroup = groupService.createGroup(subgroup);
+
+    IamGroup subsubgroup = new IamGroup();
+    subsubgroup.setName("root/subgroup/subsubgroup");
+    subsubgroup.setParentGroup(subgroup);
+
+    subsubgroup = groupService.createGroup(subsubgroup);
+
+    IamGroup sibling = new IamGroup();
+    sibling.setName("root/sibling");
+    sibling.setParentGroup(rootGroup);
+    sibling = groupService.createGroup(sibling);
+
+    IamAccount account =
+        accountRepo.findByUsername(TEST_USER).orElseThrow(assertionError(EXPECTED_USER_NOT_FOUND));
+
+    // Add test user to /root/subgroup and /root/sibling
+    mvc
+      .perform(post("/iam/account/{account}/groups/{group}", account.getUuid(), subgroup.getUuid()))
+      .andExpect(status().isCreated());
+
+    mvc.perform(post("/iam/account/{account}/groups/{group}", account.getUuid(), sibling.getUuid()))
+      .andExpect(status().isCreated());
+
+    assertThat(
+        groupRepo.findGroupByMemberAccountUuidAndGroupUuid(account.getUuid(), subgroup.getUuid())
+          .isPresent(),
+        is(true));
+
+    assertThat(
+        groupRepo.findGroupByMemberAccountUuidAndGroupUuid(account.getUuid(), sibling.getUuid())
+          .isPresent(),
+        is(true));
+
+    assertThat(
+        groupRepo.findGroupByMemberAccountUuidAndGroupUuid(account.getUuid(), rootGroup.getUuid())
+          .isPresent(),
+        is(true));
+
+
+    IamAccountGroupMembership m =
+        IamAccountGroupMembership.forAccountAndGroup(null, account, subgroup);
+
+    assertThat(account.getGroups().contains(m), is(true));
+
+    m = IamAccountGroupMembership.forAccountAndGroup(null, account, rootGroup);
+
+    assertThat(account.getGroups().contains(m), is(true));
+
+    m = IamAccountGroupMembership.forAccountAndGroup(null, account, sibling);
+
+    assertThat(account.getGroups().contains(m), is(true));
+
+    // Remove test user from /root
+    mvc
+      .perform(
+          delete("/iam/account/{account}/groups/{group}", account.getUuid(), rootGroup.getUuid()))
+      .andExpect(status().isNoContent());
+
+    assertThat(
+        groupRepo.findGroupByMemberAccountUuidAndGroupUuid(account.getUuid(), rootGroup.getUuid())
+          .isPresent(),
+        is(false));
+
+    assertThat(
+        groupRepo.findGroupByMemberAccountUuidAndGroupUuid(account.getUuid(), subgroup.getUuid())
+          .isPresent(),
+        is(false));
+
+    assertThat(
+        groupRepo.findGroupByMemberAccountUuidAndGroupUuid(account.getUuid(), sibling.getUuid())
+          .isPresent(),
+        is(false));
+
+    // Add test user to /root/subgroup/subsubgroup
+    mvc
+      .perform(
+          post("/iam/account/{account}/groups/{group}", account.getUuid(), subsubgroup.getUuid()))
+      .andExpect(status().isCreated());
+
+    assertThat(
+        groupRepo.findGroupByMemberAccountUuidAndGroupUuid(account.getUuid(), subgroup.getUuid())
+          .isPresent(),
+        is(true));
+
+    assertThat(
+        groupRepo.findGroupByMemberAccountUuidAndGroupUuid(account.getUuid(), subsubgroup.getUuid())
+          .isPresent(),
+        is(true));
+
+    assertThat(
+        groupRepo.findGroupByMemberAccountUuidAndGroupUuid(account.getUuid(), rootGroup.getUuid())
+          .isPresent(),
+        is(true));
+
+    // Remove test user from /root/subgroup/subsubgroup
+    mvc
+      .perform(
+          delete("/iam/account/{account}/groups/{group}", account.getUuid(), subsubgroup.getUuid()))
+      .andExpect(status().isNoContent());
+
+    assertThat(
+        groupRepo.findGroupByMemberAccountUuidAndGroupUuid(account.getUuid(), subsubgroup.getUuid())
+          .isPresent(),
+        is(false));
+
+    assertThat(
+        groupRepo.findGroupByMemberAccountUuidAndGroupUuid(account.getUuid(), subgroup.getUuid())
+          .isPresent(),
+        is(true));
+
+    assertThat(
+        groupRepo.findGroupByMemberAccountUuidAndGroupUuid(account.getUuid(), rootGroup.getUuid())
+          .isPresent(),
+        is(true));
+  }
+
+
 }

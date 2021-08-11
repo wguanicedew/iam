@@ -19,9 +19,11 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static it.infn.mw.iam.core.lifecycle.ExpiredAccountsHandler.LIFECYCLE_STATUS_LABEL;
+import static java.util.Objects.isNull;
 
 import java.time.Clock;
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -30,8 +32,11 @@ import java.util.UUID;
 import org.mitre.oauth2.model.OAuth2AccessTokenEntity;
 import org.mitre.oauth2.model.OAuth2RefreshTokenEntity;
 import org.mitre.oauth2.service.OAuth2TokenEntityService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -68,14 +73,16 @@ import it.infn.mw.iam.persistence.repository.IamGroupRepository;
 
 @Service
 @Transactional
-public class DefaultIamAccountService implements IamAccountService {
+public class DefaultIamAccountService implements IamAccountService, ApplicationEventPublisherAware {
+
+  private static final Logger LOG = LoggerFactory.getLogger(DefaultIamAccountService.class);
 
   private final Clock clock;
   private final IamAccountRepository accountRepo;
   private final IamGroupRepository groupRepo;
   private final IamAuthoritiesRepository authoritiesRepo;
   private final PasswordEncoder passwordEncoder;
-  private final ApplicationEventPublisher eventPublisher;
+  private ApplicationEventPublisher eventPublisher;
   private final OAuth2TokenEntityService tokenService;
 
   @Autowired
@@ -102,8 +109,7 @@ public class DefaultIamAccountService implements IamAccountService {
   }
 
   private void accountRemovedFromGroupEvent(IamAccount account, IamGroup group) {
-    eventPublisher
-      .publishEvent(new GroupMembershipRemovedEvent(this, account, group));
+    eventPublisher.publishEvent(new GroupMembershipRemovedEvent(this, account, group));
   }
 
   private void labelRemovedEvent(IamAccount account, IamLabel label) {
@@ -441,6 +447,11 @@ public class DefaultIamAccountService implements IamAccountService {
       accountAddedToGroupEvent(account, group);
     }
 
+    // Also add the user to any intermediate groups up to the root
+    if (!isNull(group.getParentGroup())) {
+      account = addToGroup(account, group.getParentGroup());
+    }
+
     return account;
   }
 
@@ -450,11 +461,25 @@ public class DefaultIamAccountService implements IamAccountService {
         groupRepo.findGroupByMemberAccountUuidAndGroupUuid(account.getUuid(), group.getUuid());
 
     if (maybeGroup.isPresent()) {
-      account.getGroups()
-        .remove(IamAccountGroupMembership.forAccountAndGroup(clock.instant(), account, group));
-      accountRepo.save(account);
-      accountRemovedFromGroupEvent(account, group);
+
+      Set<IamGroup> toBeDeleted = new LinkedHashSet<>();
+
+      for (IamAccountGroupMembership gm : account.getGroups()) {
+        if (gm.getGroup().isSubgroupOf(maybeGroup.get())) {
+          toBeDeleted.add(gm.getGroup());
+        }
+      }
+
+      toBeDeleted.add(maybeGroup.get());
+
+      for (IamGroup dg : toBeDeleted) {
+        account.getGroups()
+          .remove(IamAccountGroupMembership.forAccountAndGroup(clock.instant(), account, dg));
+        accountRepo.save(account);
+        accountRemovedFromGroupEvent(account, dg);
+      }
     }
+
     return account;
   }
 
@@ -523,5 +548,10 @@ public class DefaultIamAccountService implements IamAccountService {
 
     accountRepo.save(account);
     return account;
+  }
+
+  @Override
+  public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
+    eventPublisher = applicationEventPublisher;
   }
 }
