@@ -41,6 +41,7 @@
                 component: 'groupMembershipAdder',
                 controllerAs: '$ctrl',
                 keyboard: false,
+                backdrop: 'static',
                 size: 'lg',
                 resolve: { user: function () { return self.user; } }
             });

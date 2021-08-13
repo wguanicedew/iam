@@ -35,7 +35,7 @@
             var url = "/iam/group/find/unsubscribed/" + accountId;
             return $http.get(url, {
                 params: {
-                    'nameFilter': nameFilter,
+                    'filter': nameFilter,
                     'startIndex': startIndex,
                     'count': count
                 }
