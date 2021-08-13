@@ -439,7 +439,12 @@ public class DefaultIamAccountService implements IamAccountService, ApplicationE
       account.getGroups()
         .add(IamAccountGroupMembership.forAccountAndGroup(clock.instant(), account, group));
 
+      group.touch(clock);
+      account.touch(clock);
+
+      groupRepo.save(group);
       accountRepo.save(account);
+
       accountAddedToGroupEvent(account, group);
     }
 
@@ -471,7 +476,10 @@ public class DefaultIamAccountService implements IamAccountService, ApplicationE
       for (IamGroup dg : toBeDeleted) {
         account.getGroups()
           .remove(IamAccountGroupMembership.forAccountAndGroup(clock.instant(), account, dg));
+        account.touch(clock);
+        dg.touch(clock);
         accountRepo.save(account);
+        groupRepo.save(dg);
         accountRemovedFromGroupEvent(account, dg);
       }
     }

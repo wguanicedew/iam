@@ -42,8 +42,12 @@ public class TestSupport {
   public static final String TEST_001_GROUP_UUID = "c617d586-54e6-411d-8e38-649677980001";
   public static final String TEST_002_GROUP_UUID = "c617d586-54e6-411d-8e38-649677980002";
   
+  public static final String ADMIN_USER = "admin";
+  public static final String ADMIN_USER_UUID = "73f16d93-2441-4a50-88ff-85360d78c6b5";
+
   public static final String TEST_USER = "test";
   public static final String TEST_USER_UUID = "80e5fb8d-b7c8-451a-89ba-346ae278a66f";
+
   public static final String TEST_100_USER = "test_100";
   public static final String TEST_100_USER_UUID = "f2ce8cb2-a1db-4884-9ef0-d8842cc02b4a";
 

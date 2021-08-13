@@ -77,6 +77,26 @@ public interface IamAccountRepository
   @Query("select a from IamAccount a join a.groups ag where ag.group.uuid = :groupUuid order by a.username ASC")
   Page<IamAccount> findByGroupUuid(@Param("groupUuid") String uuid, Pageable op);
 
+  @Query("select a from IamAccount a join a.groups ag join a.userInfo ui where ag.group.uuid = :groupUuid"
+      + " and lower(ui.email) LIKE lower(concat('%', :filter, '%'))"
+      + " or lower(a.username) LIKE lower(concat('%', :filter, '%'))"
+      + " or lower(concat(ui.givenName, ' ', ui.familyName)) LIKE lower(concat('%', :filter, '%'))"
+      + " order by a.username ASC")
+  Page<IamAccount> findByGroupUuidWithFilter(@Param("groupUuid") String uuid,
+      @Param("filter") String filter,
+      Pageable op);
+
+  @Query("select a from IamAccount a where not exists (select m from IamAccountGroupMembership m where m.account = a and m.group.uuid = :groupUuid ) order by a.username ASC")
+  Page<IamAccount> findNotInGroup(@Param("groupUuid") String uuid, Pageable op);
+
+  @Query("select a from IamAccount a join a.userInfo ui where not exists (select m from IamAccountGroupMembership m where m.account = a and m.group.uuid = :groupUuid )"
+      + " and lower(ui.email) LIKE lower(concat('%', :filter, '%'))"
+      + " or lower(a.username) LIKE lower(concat('%', :filter, '%'))"
+      + " or lower(concat(ui.givenName, ' ', ui.familyName)) LIKE lower(concat('%', :filter, '%'))"
+      + " order by a.username ASC")
+  Page<IamAccount> findNotInGroupWithFilter(@Param("groupUuid") String uuid,
+      @Param("filter") String filter, Pageable op);
+
   @Query("select a from IamAccount a join a.groups ag where ag.group.name = :groupName order by a.username ASC")
   Page<IamAccount> findByGroupName(@Param("groupName") String name, Pageable op);
 

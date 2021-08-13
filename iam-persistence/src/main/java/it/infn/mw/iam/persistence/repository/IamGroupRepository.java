@@ -80,7 +80,7 @@ public interface IamGroupRepository extends PagingAndSortingRepository<IamGroup,
       Pageable op);
 
 
-  @Query("select g from IamGroup g where g.name LIKE %:groupName% and g not in (select m.group from IamAccountGroupMembership m where m.account.uuid = :accountUuid) order by g.name ASC")
+  @Query("select g from IamGroup g where lower(g.name) LIKE lower(concat('%', :groupName, '%')) and g not in (select m.group from IamAccountGroupMembership m where m.account.uuid = :accountUuid) order by g.name ASC")
   Page<IamGroup> findUnsubscribedGroupsForAccountWithNameLike(
       @Param("accountUuid") String accountUuid, @Param("groupName") String groupName, Pageable op);
 

@@ -48,7 +48,6 @@ import it.infn.mw.iam.api.scim.model.ScimMemberRef;
 import it.infn.mw.iam.api.scim.model.ScimPatchOperation;
 import it.infn.mw.iam.api.scim.model.ScimPatchOperation.ScimPatchOperationType;
 import it.infn.mw.iam.api.scim.provisioning.paging.ScimPageRequest;
-import it.infn.mw.iam.api.scim.updater.AccountUpdater;
 import it.infn.mw.iam.api.scim.updater.factory.DefaultGroupMembershipUpdaterFactory;
 import it.infn.mw.iam.core.group.IamGroupService;
 import it.infn.mw.iam.core.user.IamAccountService;
@@ -161,29 +160,8 @@ public class ScimGroupProvisioning
   private void executePatchOperation(IamGroup group, ScimPatchOperation<List<ScimMemberRef>> op) {
 
     patchOperationSanityChecks(op);
+    groupUpdaterFactory.getUpdatersForPatchOperation(group, op).forEach(u -> u.update());
 
-    List<AccountUpdater> updaters = groupUpdaterFactory.getUpdatersForPatchOperation(group, op);
-    List<AccountUpdater> updatesToPublish = new ArrayList<>();
-
-    boolean hasChanged = false;
-
-    for (AccountUpdater u : updaters) {
-      if (u.update()) {
-        IamAccount a = u.getAccount();
-        accountService.saveAccount(a);
-        hasChanged = true;
-        updatesToPublish.add(u);
-      }
-    }
-
-    if (hasChanged) {
-
-      group.touch(clock);
-      groupService.save(group);
-      for (AccountUpdater u : updatesToPublish) {
-        u.publishUpdateEvent(this, eventPublisher);
-      }
-    }
   }
 
 

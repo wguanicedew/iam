@@ -13,21 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.api.group.find;
+package it.infn.mw.iam.api.common.form;
 
-import org.springframework.data.domain.Pageable;
+import javax.validation.constraints.Size;
 
-import it.infn.mw.iam.api.scim.model.ScimGroup;
-import it.infn.mw.iam.api.scim.model.ScimListResponse;
+import it.infn.mw.iam.api.common.validator.NullableNonBlankString;
 
-public interface FindGroupService {
+public class PaginatedRequestWithFilterForm extends PaginatedRequestForm {
 
-  ScimListResponse<ScimGroup> findGroupByName(String name);
+  @NullableNonBlankString(message = "Please provide a non-blank filter string")
+  @Size(min = 2, max = 64, message = "Please provide a filter that is between 2 and 64 chars long")
+  private String filter;
 
-  ScimListResponse<ScimGroup> findGroupByLabel(String labelName, String labelValue,
-      Pageable pageable);
+  public String getFilter() {
+    return filter;
+  }
 
-  ScimListResponse<ScimGroup> findUnsubscribedGroupsForAccount(String accountUuid,
-      String nameFilter, Pageable pageable);
+  public void setFilter(String filter) {
+    this.filter = filter;
+  }
 
 }

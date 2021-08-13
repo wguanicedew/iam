@@ -21,7 +21,7 @@
   
 <link
   rel="stylesheet"
-  href="resources/${gitCommitId}/iam/css/AdminLTE.css"></link>
+  href="${resourcesPrefix}/iam/css/AdminLTE.css"></link>
 
 <link
   rel="stylesheet"
@@ -29,19 +29,19 @@
 
 <link
   rel="stylesheet"
-  href="resources/${gitCommitId}/iam/css/skins/skin-blue.css"></link>
+  href="${resourcesPrefix}/iam/css/skins/skin-blue.css"></link>
 
 <link
   rel="stylesheet"
-  href="resources/${gitCommitId}/iam/css/ionicons/ionicons.min.css"></link>
+  href="${resourcesPrefix}/iam/css/ionicons/ionicons.min.css"></link>
 
 <link 
   rel="stylesheet"
-  href="resources/${gitCommitId}/iam/css/toaster.min.css" />
+  href="${resourcesPrefix}/iam/css/toaster.min.css" />
 
 <link
   rel="stylesheet"
-  href="resources/${gitCommitId}/iam/css/iam.css"></link>
+  href="${resourcesPrefix}/iam/css/iam.css"></link>
 
 </head>
 

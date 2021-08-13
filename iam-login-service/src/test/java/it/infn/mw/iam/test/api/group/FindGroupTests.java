@@ -197,27 +197,27 @@ public class FindGroupTests extends TestSupport {
     accountRepo.deleteAllAccountGroupMemberships();
 
     mvc
-      .perform(get(FIND_UNSUBSCRIBED_GROUPS_FOR_ACCOUNT, TEST_USER_UUID).param("nameFilter", "sib"))
+      .perform(get(FIND_UNSUBSCRIBED_GROUPS_FOR_ACCOUNT, TEST_USER_UUID).param("filter", "sib"))
       .andExpect(OK)
       .andExpect(jsonPath("$.totalResults", is(1)))
       .andExpect(jsonPath("$.Resources[0].displayName", is("sibling")));
 
-    mvc.perform(get(FIND_UNSUBSCRIBED_GROUPS_FOR_ACCOUNT, TEST_USER_UUID).param("nameFilter", ""))
+    mvc.perform(get(FIND_UNSUBSCRIBED_GROUPS_FOR_ACCOUNT, TEST_USER_UUID).param("filter", ""))
       .andExpect(BAD_REQUEST)
       .andExpect(jsonPath("$.status", is("400")))
-      .andExpect(jsonPath("$.detail", containsString("Invalid name filter")));
+      .andExpect(jsonPath("$.detail", containsString("Invalid find group request")));
 
-    mvc.perform(get(FIND_UNSUBSCRIBED_GROUPS_FOR_ACCOUNT, TEST_USER_UUID).param("nameFilter", "a"))
+    mvc.perform(get(FIND_UNSUBSCRIBED_GROUPS_FOR_ACCOUNT, TEST_USER_UUID).param("filter", "a"))
       .andExpect(BAD_REQUEST)
       .andExpect(jsonPath("$.status", is("400")))
-      .andExpect(jsonPath("$.detail", containsString("Invalid name filter")));
+      .andExpect(jsonPath("$.detail", containsString("Invalid find group request")));
 
     mvc
-      .perform(get(FIND_UNSUBSCRIBED_GROUPS_FOR_ACCOUNT, TEST_USER_UUID).param("nameFilter",
-          randomAlphabetic(256)))
+      .perform(get(FIND_UNSUBSCRIBED_GROUPS_FOR_ACCOUNT, TEST_USER_UUID).param("filter",
+          randomAlphabetic(65)))
       .andExpect(BAD_REQUEST)
       .andExpect(jsonPath("$.status", is("400")))
-      .andExpect(jsonPath("$.detail", containsString("Invalid name filter")));
+      .andExpect(jsonPath("$.detail", containsString("Invalid find group request")));
       
   }
 

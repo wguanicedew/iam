@@ -38,4 +38,12 @@ public interface FindAccountService {
 
   ScimListResponse<ScimUser> findAccountByGroupUuid(String groupUuid, Pageable pageable);
 
+  ScimListResponse<ScimUser> findAccountByGroupUuidWithFilter(String groupUuid, String filter,
+      Pageable pageable);
+
+  ScimListResponse<ScimUser> findAccountNotInGroup(String groupUuid, Pageable pageable);
+
+  ScimListResponse<ScimUser> findAccountNotInGroupWithFilter(String groupUuid, String filter,
+      Pageable pageable);
+
 }
