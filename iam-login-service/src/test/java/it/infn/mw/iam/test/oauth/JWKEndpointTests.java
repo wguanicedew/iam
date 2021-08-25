@@ -22,6 +22,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import static org.hamcrest.Matchers.*;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,7 +46,7 @@ import it.infn.mw.iam.core.web.jwk.IamJWKSetPublishingEndpoint;
 @Transactional
 public class JWKEndpointTests {
 
-  private String endpoint = "/" + IamJWKSetPublishingEndpoint.URL;
+  private static final String ENDPOINT = "/" + IamJWKSetPublishingEndpoint.URL;
 
   @Autowired
   private WebApplicationContext context;
@@ -61,9 +63,10 @@ public class JWKEndpointTests {
   public void testKeys() throws Exception {
 
     // @formatter:off
-    mvc.perform(get(endpoint))
+    mvc.perform(get(ENDPOINT))
     .andExpect(status().isOk())
     .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+    .andExpect(jsonPath("$.keys", hasSize(1)))
     .andExpect(jsonPath("$.keys[0].kty").value("RSA"))
     .andExpect(jsonPath("$.keys[0].e").value("AQAB"))
     .andExpect(jsonPath("$.keys[0].kid").value("rsa1"))
