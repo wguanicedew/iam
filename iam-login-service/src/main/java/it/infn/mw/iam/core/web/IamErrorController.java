@@ -31,25 +31,25 @@ public class IamErrorController implements ErrorController {
   private static final String IAM_ERROR_VIEW = "iam/error";
   private static final String PATH = "/error";
 
-  @RequestMapping(method=RequestMethod.GET, path=PATH)
+  @RequestMapping(method = RequestMethod.GET, path = PATH)
   public ModelAndView error(HttpServletRequest request) {
 
     ModelAndView errorPage = new ModelAndView(IAM_ERROR_VIEW);
-    
+
     HttpStatus status = HttpStatus.valueOf(getErrorCode(request));
-    
-    errorPage.addObject("errorMessage", String.format("%d. %s", status.value(), 
-        status.getReasonPhrase()));
-      
+
+    errorPage.addObject("errorMessage",
+        String.format("%d. %s", status.value(), status.getReasonPhrase()));
+
     Exception exception = getRequestException(request);
-    
-    if (exception != null){
+
+    if (exception != null) {
       errorPage.addObject("exceptionMessage", exception.getMessage());
       errorPage.addObject("exceptionStackTrace", ExceptionUtils.getStackTrace(exception).trim());
     }
     return errorPage;
   }
-  
+
   private int getErrorCode(HttpServletRequest httpRequest) {
     return (Integer) httpRequest.getAttribute("javax.servlet.error.status_code");
   }
