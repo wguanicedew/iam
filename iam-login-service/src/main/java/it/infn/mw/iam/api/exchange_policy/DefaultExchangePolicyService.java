@@ -32,7 +32,7 @@ import it.infn.mw.iam.persistence.repository.IamTokenExchangePolicyRepository;
 
 @Service
 @Transactional
-public class DefaultExchangePolicyService implements ExchangePolicyService {
+public class DefaultExchangePolicyService implements TokenExchangePolicyService {
 
   private final IamTokenExchangePolicyRepository repo;
   private final ExchangePolicyConverter converter;

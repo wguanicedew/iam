@@ -37,7 +37,7 @@ import org.springframework.web.context.WebApplicationContext;
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.exchange_policy.ClientMatchingPolicyDTO;
 import it.infn.mw.iam.api.exchange_policy.ExchangePolicyDTO;
-import it.infn.mw.iam.api.exchange_policy.ExchangePolicyService;
+import it.infn.mw.iam.api.exchange_policy.TokenExchangePolicyService;
 import it.infn.mw.iam.api.exchange_policy.ExchangeScopePolicyDTO;
 import it.infn.mw.iam.persistence.model.IamScopePolicy.MatchingPolicy;
 import it.infn.mw.iam.persistence.model.PolicyRule;
@@ -62,7 +62,7 @@ public class TokenExchangeWithPdpIntegrationTests extends EndpointsTestUtils {
   private WebApplicationContext context;
 
   @Autowired
-  private ExchangePolicyService service;
+  private TokenExchangePolicyService service;
 
   @Before
   public void setup() throws Exception {

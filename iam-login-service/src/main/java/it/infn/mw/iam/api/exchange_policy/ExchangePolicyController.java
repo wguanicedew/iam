@@ -41,7 +41,7 @@ import it.infn.mw.iam.api.common.ErrorDTO;
 @PreAuthorize("hasRole('ADMIN')")
 public class ExchangePolicyController {
 
-  private final ExchangePolicyService service;
+  private final TokenExchangePolicyService service;
 
   private static final int UNPAGED_PAGE_SIZE = 1000;
 
@@ -55,7 +55,7 @@ public class ExchangePolicyController {
 
 
   @Autowired
-  public ExchangePolicyController(ExchangePolicyService service) {
+  public ExchangePolicyController(TokenExchangePolicyService service) {
     this.service = service;
   }
 
