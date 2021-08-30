@@ -87,7 +87,7 @@ public class TokenExchangeWithPdpIntegrationTests extends EndpointsTestUtils {
       .scope("openid profile")
       .getAccessTokenValue();
 
-    service.deleteAllPolicies();
+    service.deleteAllTokenExchangePolicies();
 
     mvc.perform(post(TOKEN_ENDPOINT)
         .with(httpBasic(actorClientId, actorClientSecret))
@@ -120,7 +120,7 @@ public class TokenExchangeWithPdpIntegrationTests extends EndpointsTestUtils {
     policyDto.setOriginClient(ClientMatchingPolicyDTO.anyClient());
     policyDto.setDestinationClient(ClientMatchingPolicyDTO.clientById(actorClientId));
 
-    service.createExchangePolicy(policyDto);
+    service.createTokenExchangePolicy(policyDto);
 
     mvc
       .perform(post(TOKEN_ENDPOINT).with(httpBasic(actorClientId, actorClientSecret))

@@ -20,17 +20,15 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-
-
 public interface TokenExchangePolicyService {
 
-  Page<ExchangePolicyDTO> findExchangePolicies(Pageable page);
+  Page<ExchangePolicyDTO> getTokenExchangePolicies(Pageable page);
 
-  Optional<ExchangePolicyDTO> findExchangePolicyById(Long id);
+  Optional<ExchangePolicyDTO> getTokenExchangePolicyById(Long id);
 
-  void deleteExchangePolicy(Long id);
+  ExchangePolicyDTO createTokenExchangePolicy(ExchangePolicyDTO policy);
 
-  ExchangePolicyDTO createExchangePolicy(ExchangePolicyDTO policy);
+  void deleteTokenExchangePolicyById(Long id);
 
-  void deleteAllPolicies();
+  void deleteAllTokenExchangePolicies();
 }

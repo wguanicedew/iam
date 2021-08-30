@@ -53,12 +53,12 @@ public class DefaultExchangePolicyService implements TokenExchangePolicyService 
   }
 
   @Override
-  public Page<ExchangePolicyDTO> findExchangePolicies(Pageable page) {
+  public Page<ExchangePolicyDTO> getTokenExchangePolicies(Pageable page) {
     return repo.findAll(page).map(converter::dtoFromEntity);
   }
 
   @Override
-  public void deleteExchangePolicy(Long id) {
+  public void deleteTokenExchangePolicyById(Long id) {
     IamTokenExchangePolicyEntity policy =
         Optional.ofNullable(repo.findOne(id)).orElseThrow(notFoundError(id));
 
@@ -68,12 +68,12 @@ public class DefaultExchangePolicyService implements TokenExchangePolicyService 
   }
 
   @Override
-  public Optional<ExchangePolicyDTO> findExchangePolicyById(Long id) {
+  public Optional<ExchangePolicyDTO> getTokenExchangePolicyById(Long id) {
     return Optional.ofNullable(repo.findOne(id)).map(converter::dtoFromEntity);
   }
 
   @Override
-  public ExchangePolicyDTO createExchangePolicy(ExchangePolicyDTO policy) {
+  public ExchangePolicyDTO createTokenExchangePolicy(ExchangePolicyDTO policy) {
 
     Date now = Date.from(clock.instant());
     IamTokenExchangePolicyEntity policyEntity = converter.entityFromDto(policy);
@@ -89,7 +89,7 @@ public class DefaultExchangePolicyService implements TokenExchangePolicyService 
   }
 
   @Override
-  public void deleteAllPolicies() {
+  public void deleteAllTokenExchangePolicies() {
     repo.deleteAll();
     pdp.reloadPolicies();
   }

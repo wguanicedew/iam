@@ -66,7 +66,7 @@ public class ExchangePolicyController {
 
   @RequestMapping(value = "/policies", method = RequestMethod.GET)
   public List<ExchangePolicyDTO> getExchangePolicies() {
-    Page<ExchangePolicyDTO> resultsPage = service.findExchangePolicies(UNPAGED);
+    Page<ExchangePolicyDTO> resultsPage = service.getTokenExchangePolicies(UNPAGED);
     if (resultsPage.hasNext()) {
       throw new IllegalStateException(UNPAGED_ERROR_MSG);
     }
@@ -77,7 +77,7 @@ public class ExchangePolicyController {
   @RequestMapping(value = "/policies/{id}", method = RequestMethod.DELETE)
   @ResponseStatus(code = HttpStatus.NO_CONTENT)
   public void deleteExchangePolicy(@PathVariable Long id) {
-    service.deleteExchangePolicy(id);
+    service.deleteTokenExchangePolicyById(id);
   }
 
   @RequestMapping(value = "/policies", method = RequestMethod.POST)
@@ -89,7 +89,7 @@ public class ExchangePolicyController {
       throw buildValidationError(validationResult);
     }
 
-    service.createExchangePolicy(dto);
+    service.createTokenExchangePolicy(dto);
   }
 
 
