@@ -502,7 +502,46 @@ public class TokenExchangeTests extends EndpointsTestUtils {
       .andExpect(jsonPath("$.scope",
           allOf(containsString("read-tasks"), containsString("offline_access"))));
   }
-  
+
+
+  @Test
+  public void testTokenExchangeForbiddenWhenActorClientIsSubjectClient() throws Exception {
+
+
+    String clientId = "token-exchange-actor";
+    String clientSecret = "secret";
+
+
+    String accessToken = new AccessTokenGetter().grantType("password")
+      .clientId(clientId)
+      .clientSecret(clientSecret)
+      .username(TEST_USER_USERNAME)
+      .password(TEST_USER_PASSWORD)
+      .scope("openid profile offline_access")
+      .getAccessTokenValue();
+
+
+    mvc.perform(post(TOKEN_ENDPOINT).with(httpBasic(clientId, clientSecret))
+        .param("grant_type", GRANT_TYPE)
+        .param("subject_token", accessToken)
+        .param("subject_token_type", TOKEN_TYPE)
+        .param("scope", "openid offline_access"))
+      .andExpect(status().isForbidden());
+
+
+    mvc
+      .perform(post(TOKEN_ENDPOINT).with(httpBasic(clientId, clientSecret))
+        .param("grant_type", GRANT_TYPE)
+        .param("subject_token", accessToken)
+        .param("subject_token_type", TOKEN_TYPE)
+        .param("scope", "openid"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.scope", equalTo("openid")))
+      .andExpect(jsonPath("$.id_token", notNullValue()))
+      .andExpect(jsonPath("$.access_token", notNullValue()))
+      .andExpect(jsonPath("$.refresh_token").doesNotExist());
+  }
+
   @Test
   public void testActClaimSetting() throws Exception {
 
