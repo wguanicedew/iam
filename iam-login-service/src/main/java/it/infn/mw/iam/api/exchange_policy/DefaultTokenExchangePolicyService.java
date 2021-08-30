@@ -32,7 +32,7 @@ import it.infn.mw.iam.persistence.repository.IamTokenExchangePolicyRepository;
 
 @Service
 @Transactional
-public class DefaultExchangePolicyService implements TokenExchangePolicyService {
+public class DefaultTokenExchangePolicyService implements TokenExchangePolicyService {
 
   private final IamTokenExchangePolicyRepository repo;
   private final ExchangePolicyConverter converter;
@@ -40,7 +40,7 @@ public class DefaultExchangePolicyService implements TokenExchangePolicyService 
   private final TokenExchangePdp pdp;
 
   @Autowired
-  public DefaultExchangePolicyService(IamTokenExchangePolicyRepository repo,
+  public DefaultTokenExchangePolicyService(IamTokenExchangePolicyRepository repo,
       ExchangePolicyConverter converter, Clock clock, TokenExchangePdp pdp) {
     this.repo = repo;
     this.converter = converter;
