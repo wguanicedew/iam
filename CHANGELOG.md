@@ -408,3 +408,4 @@ GitBook manual][gitbook-manual] or on [Github][github-doc].
 [gitbook-manual]: https://www.gitbook.com/book/andreaceccanti/iam/details
 [github-doc]: https://github.com/indigo-iam/iam/blob/master/SUMMARY.md
 [jira-v0.4.0]: https://issues.infn.it/jira/browse/INDIAM/fixforversion/13811 
+[docsy]: https://github.com/google/docsy
