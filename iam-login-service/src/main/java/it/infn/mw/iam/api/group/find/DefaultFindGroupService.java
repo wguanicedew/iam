@@ -61,4 +61,22 @@ public class DefaultFindGroupService implements FindGroupService {
     return responseFromPage(results, converter, pageable);
   }
 
+  @Override
+  public ScimListResponse<ScimGroup> findUnsubscribedGroupsForAccount(String accountUuid,
+      String filter, Pageable pageable) {
+
+    Page<IamGroup> results;
+
+    Optional<String> nameFilter = Optional.ofNullable(filter);
+
+    if (nameFilter.isPresent()) {
+      results = repo.findUnsubscribedGroupsForAccountWithNameLike(accountUuid, nameFilter.get(),
+          pageable);
+    } else {
+      results = repo.findUnsubscribedGroupsForAccount(accountUuid, pageable);
+    }
+
+    return responseFromPage(results, converter, pageable);
+  }
+
 }

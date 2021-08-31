@@ -16,9 +16,14 @@
 package it.infn.mw.iam.test.api.account.find;
 
 import static it.infn.mw.iam.api.account.find.FindAccountController.FIND_BY_EMAIL_RESOURCE;
+import static it.infn.mw.iam.api.account.find.FindAccountController.FIND_BY_GROUP_RESOURCE;
 import static it.infn.mw.iam.api.account.find.FindAccountController.FIND_BY_LABEL_RESOURCE;
 import static it.infn.mw.iam.api.account.find.FindAccountController.FIND_BY_USERNAME_RESOURCE;
+import static it.infn.mw.iam.api.account.find.FindAccountController.FIND_NOT_IN_GROUP_RESOURCE;
+import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.emptyIterable;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -42,10 +47,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import it.infn.mw.iam.IamLoginService;
+import it.infn.mw.iam.core.group.IamGroupService;
 import it.infn.mw.iam.core.user.IamAccountService;
 import it.infn.mw.iam.persistence.model.IamAccount;
+import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.model.IamLabel;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
+import it.infn.mw.iam.persistence.repository.IamGroupRepository;
 import it.infn.mw.iam.test.api.TestSupport;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 import it.infn.mw.iam.test.util.WithAnonymousUser;
@@ -59,7 +67,13 @@ import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 public class FindAccountIntegrationTests extends TestSupport {
 
   @Autowired
-  private IamAccountRepository repo;
+  private IamAccountRepository accountRepo;
+
+  @Autowired
+  private IamGroupRepository groupRepo;
+
+  @Autowired
+  private IamGroupService groupService;
 
   @Autowired
   private IamAccountService accountService;
@@ -97,6 +111,8 @@ public class FindAccountIntegrationTests extends TestSupport {
       .andExpect(UNAUTHORIZED);
     mvc.perform(get(FIND_BY_EMAIL_RESOURCE).param("email", "test@example")).andExpect(UNAUTHORIZED);
     mvc.perform(get(FIND_BY_USERNAME_RESOURCE).param("username", "test")).andExpect(UNAUTHORIZED);
+    mvc.perform(get(FIND_BY_GROUP_RESOURCE, TEST_001_GROUP_UUID)).andExpect(UNAUTHORIZED);
+    mvc.perform(get(FIND_NOT_IN_GROUP_RESOURCE, TEST_001_GROUP_UUID)).andExpect(UNAUTHORIZED);
 
   }
 
@@ -109,14 +125,16 @@ public class FindAccountIntegrationTests extends TestSupport {
 
     mvc.perform(get(FIND_BY_EMAIL_RESOURCE).param("email", "test@example")).andExpect(FORBIDDEN);
     mvc.perform(get(FIND_BY_USERNAME_RESOURCE).param("username", "test")).andExpect(FORBIDDEN);
+    mvc.perform(get(FIND_BY_GROUP_RESOURCE, TEST_001_GROUP_UUID)).andExpect(FORBIDDEN);
+    mvc.perform(get(FIND_NOT_IN_GROUP_RESOURCE, TEST_001_GROUP_UUID)).andExpect(FORBIDDEN);
 
   }
 
   @Test
   public void findByLabelWorks() throws Exception {
 
-    IamAccount testAccount =
-        repo.findByUsername(TEST_USER).orElseThrow(assertionError(EXPECTED_ACCOUNT_NOT_FOUND));
+    IamAccount testAccount = accountRepo.findByUsername(TEST_USER)
+      .orElseThrow(assertionError(EXPECTED_ACCOUNT_NOT_FOUND));
 
     mvc.perform(get(FIND_BY_LABEL_RESOURCE).param("name", "test").param("value", "test"))
       .andExpect(OK)
@@ -149,8 +167,8 @@ public class FindAccountIntegrationTests extends TestSupport {
   @Test
   public void findByEmailWorks() throws Exception {
 
-    IamAccount testAccount =
-        repo.findByUsername(TEST_USER).orElseThrow(assertionError(EXPECTED_ACCOUNT_NOT_FOUND));
+    IamAccount testAccount = accountRepo.findByUsername(TEST_USER)
+      .orElseThrow(assertionError(EXPECTED_ACCOUNT_NOT_FOUND));
 
     String email = testAccount.getUserInfo().getEmail();
 
@@ -169,8 +187,8 @@ public class FindAccountIntegrationTests extends TestSupport {
   @Test
   public void findByUsernameWorks() throws Exception {
 
-    IamAccount testAccount =
-        repo.findByUsername(TEST_USER).orElseThrow(assertionError(EXPECTED_ACCOUNT_NOT_FOUND));
+    IamAccount testAccount = accountRepo.findByUsername(TEST_USER)
+      .orElseThrow(assertionError(EXPECTED_ACCOUNT_NOT_FOUND));
 
     mvc.perform(get(FIND_BY_USERNAME_RESOURCE).param("username", testAccount.getUsername()))
       .andExpect(OK)
@@ -183,4 +201,103 @@ public class FindAccountIntegrationTests extends TestSupport {
       .andExpect(jsonPath("$.Resources", emptyIterable()));
 
   }
+
+  @Test
+  public void findByGroupWorks() throws Exception {
+
+    IamAccount testAccount = accountRepo.findByUsername(TEST_USER)
+      .orElseThrow(assertionError(EXPECTED_ACCOUNT_NOT_FOUND));
+
+    // Cleanup all group memberships and groups
+    accountRepo.deleteAllAccountGroupMemberships();
+    groupRepo.deleteAll();
+
+    // Create group hierarchy
+    IamGroup rootGroup = new IamGroup();
+    rootGroup.setName("root");
+
+    rootGroup = groupService.createGroup(rootGroup);
+
+    IamGroup subgroup = new IamGroup();
+    subgroup.setName("root/subgroup");
+    subgroup.setParentGroup(rootGroup);
+
+    subgroup = groupService.createGroup(subgroup);
+
+    IamGroup sibling = new IamGroup();
+    sibling.setName("sibling");
+
+    sibling = groupService.createGroup(sibling);
+
+    mvc.perform(get(FIND_BY_GROUP_RESOURCE, rootGroup.getUuid()))
+      .andExpect(OK)
+      .andExpect(jsonPath("$.totalResults", is(0)))
+      .andExpect(jsonPath("$.Resources", emptyIterable()));
+
+    accountService.addToGroup(testAccount, rootGroup);
+
+    mvc.perform(get(FIND_BY_GROUP_RESOURCE, rootGroup.getUuid()))
+      .andExpect(OK)
+      .andExpect(jsonPath("$.totalResults", is(1)))
+      .andExpect(jsonPath("$.Resources[0].id", is(testAccount.getUuid())));
+
+    mvc.perform(get(FIND_BY_GROUP_RESOURCE, rootGroup.getUuid()).param("filter", ""))
+      .andExpect(BAD_REQUEST)
+      .andExpect(jsonPath("$.detail", allOf(containsString("Invalid find account request"),
+          containsString("Please provide a non-blank"), containsString("between 2 and 64"))));
+
+    mvc.perform(get(FIND_BY_GROUP_RESOURCE, rootGroup.getUuid()).param("filter", "  "))
+      .andExpect(BAD_REQUEST)
+      .andExpect(jsonPath("$.detail", allOf(containsString("Invalid find account request"),
+          containsString("Please provide a non-blank"), not(containsString("between 2 and 64")))));
+
+    mvc.perform(get(FIND_BY_GROUP_RESOURCE, rootGroup.getUuid()).param("filter", "no_match"))
+      .andExpect(OK)
+      .andExpect(jsonPath("$.totalResults", is(0)))
+      .andExpect(jsonPath("$.Resources", emptyIterable()));
+
+    mvc.perform(get(FIND_BY_GROUP_RESOURCE, rootGroup.getUuid()).param("filter", "est"))
+      .andExpect(OK)
+      .andExpect(jsonPath("$.totalResults", is(1)))
+      .andExpect(jsonPath("$.Resources[0].id", is(testAccount.getUuid())));
+  }
+
+  @Test
+  public void findNotInGroupWorks() throws Exception {
+    IamAccount adminAccount =
+        accountRepo.findByUsername(ADMIN_USER)
+      .orElseThrow(assertionError(EXPECTED_ACCOUNT_NOT_FOUND));
+
+    // Cleanup all group memberships and groups
+    accountRepo.deleteAllAccountGroupMemberships();
+    groupRepo.deleteAll();
+
+    // Create group hierarchy
+    IamGroup rootGroup = new IamGroup();
+    rootGroup.setName("root");
+
+    rootGroup = groupService.createGroup(rootGroup);
+
+    IamGroup subgroup = new IamGroup();
+    subgroup.setName("root/subgroup");
+    subgroup.setParentGroup(rootGroup);
+
+    subgroup = groupService.createGroup(subgroup);
+
+    IamGroup sibling = new IamGroup();
+    sibling.setName("sibling");
+
+    sibling = groupService.createGroup(sibling);
+
+    mvc.perform(get(FIND_NOT_IN_GROUP_RESOURCE, rootGroup.getUuid()).param("count", "10"))
+      .andExpect(OK)
+      .andExpect(jsonPath("$.totalResults", is(253)));
+
+    mvc.perform(get(FIND_NOT_IN_GROUP_RESOURCE, rootGroup.getUuid()).param("filter", "admin"))
+      .andExpect(OK)
+      .andExpect(jsonPath("$.totalResults", is(2)))
+      .andExpect(jsonPath("$.Resources[0].id", is(adminAccount.getUuid())))
+      .andExpect(jsonPath("$.Resources[1].id", is("bffc67b7-47fe-410c-a6a0-cf00173a8fbb")));
+  }
+
 }

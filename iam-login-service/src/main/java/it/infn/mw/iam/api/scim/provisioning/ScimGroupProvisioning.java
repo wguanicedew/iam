@@ -21,7 +21,6 @@ import static java.lang.String.format;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 
@@ -49,7 +48,6 @@ import it.infn.mw.iam.api.scim.model.ScimMemberRef;
 import it.infn.mw.iam.api.scim.model.ScimPatchOperation;
 import it.infn.mw.iam.api.scim.model.ScimPatchOperation.ScimPatchOperationType;
 import it.infn.mw.iam.api.scim.provisioning.paging.ScimPageRequest;
-import it.infn.mw.iam.api.scim.updater.AccountUpdater;
 import it.infn.mw.iam.api.scim.updater.factory.DefaultGroupMembershipUpdaterFactory;
 import it.infn.mw.iam.core.group.IamGroupService;
 import it.infn.mw.iam.core.user.IamAccountService;
@@ -126,11 +124,11 @@ public class ScimGroupProvisioning
       String fullName = String.format("%s/%s", parentGroupName, group.getDisplayName());
       fullNameSanityChecks(fullName);
 
-      iamGroup.setParentGroup(iamParentGroup);
       iamGroup.setName(fullName);
 
-      Set<IamGroup> children = iamParentGroup.getChildrenGroups();
-      children.add(iamGroup);
+      iamGroup.setParentGroup(iamParentGroup);
+      iamParentGroup.getChildrenGroups().add(iamGroup);
+
     }
 
     groupService.createGroup(iamGroup);
@@ -162,29 +160,8 @@ public class ScimGroupProvisioning
   private void executePatchOperation(IamGroup group, ScimPatchOperation<List<ScimMemberRef>> op) {
 
     patchOperationSanityChecks(op);
+    groupUpdaterFactory.getUpdatersForPatchOperation(group, op).forEach(u -> u.update());
 
-    List<AccountUpdater> updaters = groupUpdaterFactory.getUpdatersForPatchOperation(group, op);
-    List<AccountUpdater> updatesToPublish = new ArrayList<>();
-
-    boolean hasChanged = false;
-
-    for (AccountUpdater u : updaters) {
-      if (u.update()) {
-        IamAccount a = u.getAccount();
-        accountService.saveAccount(a);
-        hasChanged = true;
-        updatesToPublish.add(u);
-      }
-    }
-
-    if (hasChanged) {
-
-      group.touch(clock);
-      groupService.save(group);
-      for (AccountUpdater u : updatesToPublish) {
-        u.publishUpdateEvent(this, eventPublisher);
-      }
-    }
   }
 
 

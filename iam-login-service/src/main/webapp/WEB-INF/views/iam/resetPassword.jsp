@@ -23,10 +23,10 @@
     <script type="text/javascript" src="/webjars/angularjs/angular-animate.js"></script>
     <script type="text/javascript" src="/webjars/angularjs/angular-cookies.js"></script>
     <script type="text/javascript" src="/webjars/angular-ui-bootstrap/ui-bootstrap-tpls.min.js"></script>
-    <script type="text/javascript" src="/resources/${gitCommitId}/iam/js/passwordreset.app.js"></script>
-    <script type="text/javascript" src="/resources/${gitCommitId}/iam/js/service/passwordreset.service.js"></script>
-    <script type="text/javascript" src="/resources/${gitCommitId}/iam/js/controller/passwordreset.controller.js"></script>
-    <script type="text/javascript" src="/resources/${gitCommitId}/iam/js/directive/passwordreset.directive.js"></script>
+    <script type="text/javascript" src="${resourcesPrefix}/iam/js/passwordreset.app.js"></script>
+    <script type="text/javascript" src="${resourcesPrefix}/iam/js/service/passwordreset.service.js"></script>
+    <script type="text/javascript" src="${resourcesPrefix}/iam/js/controller/passwordreset.controller.js"></script>
+    <script type="text/javascript" src="${resourcesPrefix}/iam/js/directive/passwordreset.directive.js"></script>
   </jsp:attribute>
   <jsp:body>
       <c:choose>        

@@ -13,21 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.api.group.find;
+package it.infn.mw.iam.api.common.validator;
 
-import org.springframework.data.domain.Pageable;
+import static java.util.Objects.isNull;
 
-import it.infn.mw.iam.api.scim.model.ScimGroup;
-import it.infn.mw.iam.api.scim.model.ScimListResponse;
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
 
-public interface FindGroupService {
+public class NullableNonBlankStringValidator
+    implements ConstraintValidator<NullableNonBlankString, String> {
 
-  ScimListResponse<ScimGroup> findGroupByName(String name);
+  public NullableNonBlankStringValidator() {
+  }
 
-  ScimListResponse<ScimGroup> findGroupByLabel(String labelName, String labelValue,
-      Pageable pageable);
+  @Override
+  public void initialize(NullableNonBlankString constraintAnnotation) {
+  }
 
-  ScimListResponse<ScimGroup> findUnsubscribedGroupsForAccount(String accountUuid,
-      String nameFilter, Pageable pageable);
+  @Override
+  public boolean isValid(String value, ConstraintValidatorContext context) {
+    return isNull(value) || value.trim().length() > 0;
+  }
 
 }

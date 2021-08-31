@@ -43,6 +43,19 @@ public class IamProperties {
     VISIBLE, HIDDEN, HIDDEN_WITH_LINK
   }
 
+
+  public static class VersionedStaticResourcesProperties {
+    boolean enableVersioning = true;
+
+    public boolean isEnableVersioning() {
+      return enableVersioning;
+    }
+
+    public void setEnableVersioning(boolean enableVersioning) {
+      this.enableVersioning = enableVersioning;
+    }
+  }
+
   public static class CustomizationProperties {
     boolean includeCustomLoginPageContent = false;
 
@@ -453,6 +466,9 @@ public class IamProperties {
 
   private CustomizationProperties customization = new CustomizationProperties();
 
+  private VersionedStaticResourcesProperties versionedStaticResources =
+      new VersionedStaticResourcesProperties();
+
   public String getBaseUrl() {
     return baseUrl;
   }
@@ -635,6 +651,15 @@ public class IamProperties {
 
   public void setCustomization(CustomizationProperties customization) {
     this.customization = customization;
+  }
+
+  public VersionedStaticResourcesProperties getVersionedStaticResources() {
+    return versionedStaticResources;
+  }
+
+  public void setVersionedStaticResources(
+      VersionedStaticResourcesProperties versionedStaticResources) {
+    this.versionedStaticResources = versionedStaticResources;
   }
 
 }

@@ -13,21 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.api.group.find;
+package it.infn.mw.iam.api.common.form;
 
-import org.springframework.data.domain.Pageable;
+import javax.validation.constraints.Min;
 
-import it.infn.mw.iam.api.scim.model.ScimGroup;
-import it.infn.mw.iam.api.scim.model.ScimListResponse;
+public class PaginatedRequestForm {
 
-public interface FindGroupService {
+  @Min(value = 0, message = "must be >=0")
+  private Integer count;
 
-  ScimListResponse<ScimGroup> findGroupByName(String name);
+  @Min(value = 1, message = "must be >=1")
+  private Integer startIndex;
 
-  ScimListResponse<ScimGroup> findGroupByLabel(String labelName, String labelValue,
-      Pageable pageable);
+  public Integer getCount() {
+    return count;
+  }
 
-  ScimListResponse<ScimGroup> findUnsubscribedGroupsForAccount(String accountUuid,
-      String nameFilter, Pageable pageable);
+  public void setCount(Integer count) {
+    this.count = count;
+  }
 
+  public Integer getStartIndex() {
+    return startIndex;
+  }
+
+  public void setStartIndex(Integer startIndex) {
+    this.startIndex = startIndex;
+  }
 }

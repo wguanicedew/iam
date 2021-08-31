@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-(function() {
+(function () {
     'use strict';
 
     function JoinGroupRequest($uibModalInstance, $q, GroupRequestsService, toaster, $sanitize, user, groups) {
@@ -61,14 +61,14 @@
         function cancel() {
             $uibModalInstance.dismiss('Dismissed');
         }
-        
+
         function submit() {
             var sanitizedNotes = $sanitize(self.req.notes);
             var promises = [];
 
             self.enabled = false;
 
-            self.selectedGroups.forEach(function(g){
+            self.selectedGroups.forEach(function (g) {
                 var req = {
                     notes: sanitizedNotes,
                     username: self.user.userName,
@@ -80,6 +80,15 @@
             return $q.all(promises).then(handleSuccess);
         }
 
+
+        self.labelName = function (label) {
+            if (label.prefix) {
+                return label.prefix + "/" + label.name;
+            }
+
+            return label.name;
+        };
+
     }
 
     function UserGroupRequestsController(GroupsService, GroupRequestsService, Utils, toaster, $uibModal) {
@@ -87,30 +96,30 @@
 
         self.joinGroup = joinGroup;
 
-        self.$onInit = function() {
+        self.$onInit = function () {
             self.voAdmin = Utils.isAdmin();
         };
 
         function loadGroupRequests() {
-            return GroupRequestsService.getAllPendingGroupRequestsForAuthenticatedUser().then(function(reqs) {
+            return GroupRequestsService.getAllPendingGroupRequestsForAuthenticatedUser().then(function (reqs) {
                 self.groupRequests = reqs;
             });
         }
 
-        function applicableGroup(g){
-            
-            var matchingGroupRequests = self.groupRequests.filter(function(el){
+        function applicableGroup(g) {
+
+            var matchingGroupRequests = self.groupRequests.filter(function (el) {
                 return el.groupUuid == g.id;
             });
-            
+
             var userGroups = [];
 
             if (self.user.groups) {
-                userGroups = self.user.groups.filter(function(el){
+                userGroups = self.user.groups.filter(function (el) {
                     return el.value == g.id;
                 });
             }
-            
+
             return matchingGroupRequests.length === 0 && userGroups.length === 0;
         }
 
@@ -121,18 +130,18 @@
                 controllerAs: '$ctrl',
                 size: 'lg',
                 resolve: {
-                    user: function(){
+                    user: function () {
                         return self.user;
                     },
-                    groups: function(){
-                        return GroupsService.getAllGroups().then(function(res){
+                    groups: function () {
+                        return GroupsService.getAllGroups().then(function (res) {
                             return res.filter(applicableGroup);
                         });
                     }
                 }
             });
 
-            modalInstance.result.then(function(r) {
+            modalInstance.result.then(function (r) {
                 loadGroupRequests();
                 toaster.pop({
                     type: 'success',
@@ -145,9 +154,9 @@
     angular
         .module('dashboardApp')
         .component('joinGroup', {
-            bindings: { user: '<' , groupRequests: '='},
+            bindings: { user: '<', groupRequests: '=' },
             templateUrl: '/resources/iam/apps/dashboard-app/components/user/group-requests/join-group.component.html',
-            controller: ['GroupsService','GroupRequestsService', 'Utils', 'toaster', '$uibModal', UserGroupRequestsController],
+            controller: ['GroupsService', 'GroupRequestsService', 'Utils', 'toaster', '$uibModal', UserGroupRequestsController],
             controllerAs: '$ctrl'
         });
 }());
