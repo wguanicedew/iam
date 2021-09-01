@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
+import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.config.saml.IamSamlProperties;
 import it.infn.mw.iam.rcauth.RCAuthProperties;
 
@@ -37,6 +38,8 @@ public class IamViewInfoInterceptor extends HandlerInterceptorAdapter {
   public static final String GIT_COMMIT_ID_KEY = "gitCommitId";
   public static final String SIMULATE_NETWORK_LATENCY_KEY = "simulateNetworkLatency";
   public static final String RCAUTH_ENABLED_KEY = "iamRcauthEnabled";
+
+  public static final String RESOURCES_PATH_KEY = "resourcesPrefix";
 
   @Value("${iam.version}")
   String iamVersion;
@@ -56,6 +59,9 @@ public class IamViewInfoInterceptor extends HandlerInterceptorAdapter {
   @Autowired
   RCAuthProperties rcAuthProperties;
 
+  @Autowired
+  IamProperties iamProperties;
+
   @Override
   public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
       throws Exception {
@@ -71,6 +77,13 @@ public class IamViewInfoInterceptor extends HandlerInterceptorAdapter {
     
     request.setAttribute(RCAUTH_ENABLED_KEY, rcAuthProperties.isEnabled());
     
+
+    if (iamProperties.getVersionedStaticResources().isEnableVersioning()) {
+      request.setAttribute(RESOURCES_PATH_KEY, String.format("/resources/%s", gitCommitId));
+    } else {
+      request.setAttribute(RESOURCES_PATH_KEY, "/resources");
+    }
+
     return true;
   }
 

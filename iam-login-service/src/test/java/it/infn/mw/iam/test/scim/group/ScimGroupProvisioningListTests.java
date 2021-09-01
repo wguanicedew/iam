@@ -63,8 +63,6 @@ public class ScimGroupProvisioningListTests {
 
   private final static String GROUP_URI = ScimUtils.getGroupsLocation();
 
-  private final Integer pageSize = 100;
-
   private Integer totalResults = 0;
 
   @Before

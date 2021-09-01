@@ -15,15 +15,13 @@
  */
 package it.infn.mw.iam.test.notification;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import freemarker.template.TemplateException;
-import it.infn.mw.iam.IamLoginService;
-import it.infn.mw.iam.notification.NotificationProperties;
-import it.infn.mw.iam.registration.RegistrationRequestDto;
-import it.infn.mw.iam.test.core.CoreControllerTestSupport;
-import it.infn.mw.iam.test.util.WithAnonymousUser;
-import it.infn.mw.iam.test.util.notification.MockNotificationDelivery;
-import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.assertThat;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,93 +34,89 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.util.NestedServletException;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThat;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import it.infn.mw.iam.IamLoginService;
+import it.infn.mw.iam.registration.RegistrationRequestDto;
+import it.infn.mw.iam.test.core.CoreControllerTestSupport;
+import it.infn.mw.iam.test.util.WithAnonymousUser;
+import it.infn.mw.iam.test.util.notification.MockNotificationDelivery;
+import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {IamLoginService.class, NotificationTestConfig.class,
-        CoreControllerTestSupport.class})
+    CoreControllerTestSupport.class})
 @WebAppConfiguration
 @Transactional
 @WithAnonymousUser
-@TestPropertySource(properties = {
-        "notification.disable=false",
-        "spring.freemarker.template-loader-path=/invalid/"
-})
+@TestPropertySource(
+    properties = {"notification.disable=false", "spring.freemarker.template-loader-path=/invalid/"})
 public class RegistrationFlowFailTests {
 
-    @Autowired
-    private NotificationProperties properties;
+  @Value("${spring.mail.host}")
+  private String mailHost;
 
-    @Value("${spring.mail.host}")
-    private String mailHost;
+  @Value("${spring.mail.port}")
+  private Integer mailPort;
 
-    @Value("${spring.mail.port}")
-    private Integer mailPort;
+  @Value("${iam.organisation.name}")
+  private String organisationName;
 
-    @Value("${iam.organisation.name}")
-    private String organisationName;
+  @Value("${iam.baseUrl}")
+  private String baseUrl;
 
-    @Value("${iam.baseUrl}")
-    private String baseUrl;
+  @Autowired
+  private MockNotificationDelivery notificationDelivery;
 
-    @Autowired
-    private MockNotificationDelivery notificationDelivery;
+  @Autowired
+  private MockOAuth2Filter mockOAuth2Filter;
 
-    @Autowired
-    private MockOAuth2Filter mockOAuth2Filter;
+  @Autowired
+  private WebApplicationContext context;
 
-    @Autowired
-    private WebApplicationContext context;
+  @Autowired
+  private ObjectMapper mapper;
 
-    @Autowired
-    private ObjectMapper mapper;
+  private MockMvc mvc;
 
-    private MockMvc mvc;
+  @Before
+  public void setUp() throws InterruptedException {
+    mvc =
+        MockMvcBuilders.webAppContextSetup(context).alwaysDo(log()).apply(springSecurity()).build();
+  }
 
-    @Before
-    public void setUp() throws InterruptedException {
-        mvc = MockMvcBuilders.webAppContextSetup(context).alwaysDo(log()).apply(springSecurity()).build();
-    }
+  @After
+  public void tearDown() throws InterruptedException {
+    mockOAuth2Filter.cleanupSecurityContext();
+    notificationDelivery.clearDeliveredNotifications();
+  }
 
-    @After
-    public void tearDown() throws InterruptedException {
-        mockOAuth2Filter.cleanupSecurityContext();
-        notificationDelivery.clearDeliveredNotifications();
-    }
+  @Test
+  public void testSendWithEmptyQueue() {
+    notificationDelivery.sendPendingNotifications();
+    assertThat(notificationDelivery.getDeliveredNotifications(), hasSize(0));
+  }
 
-    @Test
-    public void testSendWithEmptyQueue() {
-        notificationDelivery.sendPendingNotifications();
-        assertThat(notificationDelivery.getDeliveredNotifications(), hasSize(0));
-    }
+  @Test(expected = NestedServletException.class)
+  public void testBadTemplateDir() throws Exception {
+    String username = "baddir_flow";
 
-    @Test(expected = NestedServletException.class)
-    public void testBadDir() throws Exception {
-        String username = "baddir_flow";
+    RegistrationRequestDto request = new RegistrationRequestDto();
+    request.setGivenname("Badddir flow");
+    request.setFamilyname("Test");
+    request.setEmail("Baddir@example.com");
+    request.setUsername(username);
+    request.setNotes("Some short notes...");
 
-        RegistrationRequestDto request = new RegistrationRequestDto();
-        request.setGivenname("Badddir flow");
-        request.setFamilyname("Test");
-        request.setEmail("Baddir@example.com");
-        request.setUsername(username);
-        request.setNotes("Some short notes...");
+    mvc
+      .perform(post("/registration/create").contentType(MediaType.APPLICATION_JSON)
+        .content(mapper.writeValueAsString(request)))
+      .andExpect(status().isInternalServerError());
 
-        String responseJson = mvc
-                .perform(post("/registration/create").contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(request)))
-                .andExpect(MockMvcResultMatchers.status().isInternalServerError())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-    }
+  }
 }

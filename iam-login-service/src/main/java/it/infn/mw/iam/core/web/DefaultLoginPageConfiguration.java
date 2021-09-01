@@ -177,4 +177,13 @@ public class DefaultLoginPageConfiguration implements LoginPageConfiguration, En
   public boolean isShowRegistrationButton() {
     return iamProperties.getRegistration().isShowRegistrationButtonInLoginPage();
   }
+
+  public boolean isIncludeCustomContent() {
+    return iamProperties.getCustomization().isIncludeCustomLoginPageContent();
+  }
+
+  @Override
+  public String getCustomContentUrl() {
+    return iamProperties.getCustomization().getCustomLoginPageContentUrl();
+  }
 }

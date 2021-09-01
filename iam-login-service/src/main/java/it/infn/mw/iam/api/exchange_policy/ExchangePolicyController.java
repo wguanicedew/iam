@@ -15,17 +15,13 @@
  */
 package it.infn.mw.iam.api.exchange_policy;
 
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
-
-import java.time.Clock;
-import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -39,28 +35,28 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import it.infn.mw.iam.api.common.ErrorDTO;
-import it.infn.mw.iam.persistence.model.IamTokenExchangePolicyEntity;
-import it.infn.mw.iam.persistence.repository.IamTokenExchangePolicyRepository;
 
 @RestController
 @RequestMapping("/iam/api/exchange")
 @PreAuthorize("hasRole('ADMIN')")
 public class ExchangePolicyController {
 
-  final IamTokenExchangePolicyRepository repo;
-  final ExchangePolicyConverter converter;
-  final Clock clock;
+  private final TokenExchangePolicyService service;
+
+  private static final int UNPAGED_PAGE_SIZE = 1000;
+
+  // Unfortunately the version of spring data used by IAM does not still support
+  // unpaged, so we mock an upaged request with a limit of UNPAGED_PAGE_SIZE results per page.
+  private static final PageRequest UNPAGED = new PageRequest(0, UNPAGED_PAGE_SIZE);
+
+  private static final String UNPAGED_ERROR_MSG = String.format(
+      "More than %d exchange policies found, but only the first %d will be returned. it's time to properly implement pagination",
+      UNPAGED_PAGE_SIZE, UNPAGED_PAGE_SIZE);
+
 
   @Autowired
-  public ExchangePolicyController(Clock clock, IamTokenExchangePolicyRepository repo,
-      ExchangePolicyConverter converter) {
-    this.clock = clock;
-    this.repo = repo;
-    this.converter = converter;
-  }
-
-  private ExchangePolicyNotFoundError notFoundError(Long id) {
-    return new ExchangePolicyNotFoundError("Exchange policy not found for id: " + id);
+  public ExchangePolicyController(TokenExchangePolicyService service) {
+    this.service = service;
   }
 
   protected InvalidExchangePolicyError buildValidationError(BindingResult result) {
@@ -70,16 +66,18 @@ public class ExchangePolicyController {
 
   @RequestMapping(value = "/policies", method = RequestMethod.GET)
   public List<ExchangePolicyDTO> getExchangePolicies() {
-    return stream(repo.findAll().spliterator(), false).map(converter::dtoFromEntity)
-      .collect(toList());
+    Page<ExchangePolicyDTO> resultsPage = service.getTokenExchangePolicies(UNPAGED);
+    if (resultsPage.hasNext()) {
+      throw new IllegalStateException(UNPAGED_ERROR_MSG);
+    }
+
+    return resultsPage.getContent();
   }
 
   @RequestMapping(value = "/policies/{id}", method = RequestMethod.DELETE)
   @ResponseStatus(code = HttpStatus.NO_CONTENT)
   public void deleteExchangePolicy(@PathVariable Long id) {
-    IamTokenExchangePolicyEntity p =
-        Optional.ofNullable(repo.findOne(id)).orElseThrow(() -> notFoundError(id));
-    repo.delete(p.getId());
+    service.deleteTokenExchangePolicyById(id);
   }
 
   @RequestMapping(value = "/policies", method = RequestMethod.POST)
@@ -91,14 +89,14 @@ public class ExchangePolicyController {
       throw buildValidationError(validationResult);
     }
 
-    Date now = Date.from(clock.instant());
+    service.createTokenExchangePolicy(dto);
+  }
 
-    IamTokenExchangePolicyEntity policy = converter.entityFromDto(dto);
 
-    policy.setCreationTime(now);
-    policy.setLastUpdateTime(now);
-
-    repo.save(policy);
+  @ResponseStatus(value = HttpStatus.NOT_IMPLEMENTED)
+  @ExceptionHandler(IllegalStateException.class)
+  public ErrorDTO notImplementedError(Exception ex) {
+    return ErrorDTO.fromString(ex.getMessage());
   }
 
   @ResponseStatus(value = HttpStatus.NOT_FOUND)

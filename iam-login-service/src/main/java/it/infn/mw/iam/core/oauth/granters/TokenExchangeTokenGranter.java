@@ -21,6 +21,7 @@ import static it.infn.mw.iam.core.oauth.exchange.TokenExchangePdpResult.Decision
 import static java.lang.String.format;
 import static java.util.Objects.isNull;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -56,6 +57,7 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
       "urn:ietf:params:oauth:grant-type:token-exchange";
   private static final String TOKEN_TYPE = "urn:ietf:params:oauth:token-type:jwt";
   private static final String AUDIENCE_FIELD = "audience";
+  private static final String OFFLINE_ACCESS_SCOPE = "offline_access";
 
   private final OAuth2TokenEntityService tokenServices;
 
@@ -81,6 +83,12 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
     ClientDetailsEntity subjectClient = subjectToken.getClient();
     Set<String> requestedScopes = tokenRequest.getScope();
 
+    if (Objects.isNull(requestedScopes) || requestedScopes.isEmpty()) {
+      LOG.debug(
+          "No scope parameter found in token exchange request, defaulting to scopes linked to the suject token");
+      requestedScopes = subjectToken.getScope();
+    }
+
     if (!isNull(subjectToken.getAuthenticationHolder().getUserAuth())) {
       LOG.info(
           "Client '{}' requests token exchange from client '{}' to impersonate user '{}' on audience '{}' with scopes '{}'",
@@ -91,6 +99,11 @@ public class TokenExchangeTokenGranter extends AbstractTokenGranter {
       LOG.info(
           "Client '{}' requests token exchange from client '{}' on audience '{}' with scopes '{}'",
           actorClient.getClientId(), subjectClient.getClientId(), audience, requestedScopes);
+    }
+
+    if (subjectClient.equals(actorClient) && requestedScopes.contains(OFFLINE_ACCESS_SCOPE)) {
+      throw new OAuth2AccessDeniedException(
+          "Token exchange not allowed: the actor and the subject are the same client and offline_access is in the requested scopes");
     }
 
     TokenExchangePdpResult result =

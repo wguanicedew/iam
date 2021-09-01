@@ -20,8 +20,11 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -39,6 +42,8 @@ import it.infn.mw.iam.persistence.model.IamScopePolicy;
 @RestController
 @PreAuthorize("hasRole('ADMIN')")
 public class ScopePolicyController {
+
+  private static final Logger LOG = LoggerFactory.getLogger(ScopePolicyController.class);
 
   private final ScopePolicyService policyService;
   private final IamScopePolicyConverter converter;
@@ -124,6 +129,16 @@ public class ScopePolicyController {
   @ExceptionHandler(DuplicateScopePolicyError.class)
   public ErrorDTO duplicatePolicyError(Exception ex) {
     return ErrorDTO.fromString(ex.getMessage());
+  }
+
+  @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(HttpMessageNotReadableException.class)
+  public ErrorDTO invalidRequestBody(Exception ex) {
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("Error parsing scope policy JSON: {}", ex.getMessage(), ex);
+    }
+    return ErrorDTO
+      .fromString("Invalid scope policy: could not parse the policy JSON representation");
   }
 
   protected InvalidScopePolicyError buildValidationError(BindingResult result) {

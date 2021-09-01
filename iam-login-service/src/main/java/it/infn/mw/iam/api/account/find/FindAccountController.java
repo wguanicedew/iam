@@ -16,15 +16,22 @@
 package it.infn.mw.iam.api.account.find;
 
 import static it.infn.mw.iam.api.common.PagingUtils.buildPageRequest;
+import static it.infn.mw.iam.api.utils.ValidationErrorUtils.handleValidationError;
+import static java.util.Objects.isNull;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import it.infn.mw.iam.api.common.ListResponseDTO;
+import it.infn.mw.iam.api.common.form.PaginatedRequestWithFilterForm;
 import it.infn.mw.iam.api.scim.model.ScimConstants;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 
@@ -32,9 +39,15 @@ import it.infn.mw.iam.api.scim.model.ScimUser;
 @PreAuthorize("hasRole('ADMIN')")
 public class FindAccountController {
 
+  public static final String INVALID_FIND_ACCOUNT_REQUEST = "Invalid find account request";
+
   public static final String FIND_BY_LABEL_RESOURCE = "/iam/account/find/bylabel";
   public static final String FIND_BY_EMAIL_RESOURCE = "/iam/account/find/byemail";
   public static final String FIND_BY_USERNAME_RESOURCE = "/iam/account/find/byusername";
+  public static final String FIND_BY_CERT_SUBJECT_RESOURCE = "/iam/account/find/bycertsubject";
+  public static final String FIND_BY_GROUP_RESOURCE = "/iam/account/find/bygroup/{groupUuid}";
+  public static final String FIND_NOT_IN_GROUP_RESOURCE =
+      "/iam/account/find/notingroup/{groupUuid}";
 
   final FindAccountService service;
 
@@ -63,6 +76,49 @@ public class FindAccountController {
       produces = ScimConstants.SCIM_CONTENT_TYPE)
   public ListResponseDTO<ScimUser> findByUsername(@RequestParam(required = true) String username) {
     return service.findAccountByUsername(username);
+  }
+
+  @RequestMapping(method = GET, value = FIND_BY_CERT_SUBJECT_RESOURCE,
+      produces = ScimConstants.SCIM_CONTENT_TYPE)
+  public ListResponseDTO<ScimUser> findByCertSubject(
+      @RequestParam(required = true) String certificateSubject) {
+    return service.findAccountByCertificateSubject(certificateSubject);
+  }
+
+
+  @RequestMapping(method = GET, value = FIND_BY_GROUP_RESOURCE,
+      produces = ScimConstants.SCIM_CONTENT_TYPE)
+  public ListResponseDTO<ScimUser> findByGroup(@PathVariable String groupUuid,
+      @Validated PaginatedRequestWithFilterForm form,
+      BindingResult formValidationResult) {
+
+
+    handleValidationError(INVALID_FIND_ACCOUNT_REQUEST, formValidationResult);
+
+    Pageable pr = buildPageRequest(form.getCount(), form.getStartIndex(), 100);
+
+    if (isNull(form.getFilter())) {
+      return service.findAccountByGroupUuid(groupUuid, pr);
+    } else {
+      return service.findAccountByGroupUuidWithFilter(groupUuid, form.getFilter(), pr);
+    }
+  }
+
+
+  @RequestMapping(method = GET, value = FIND_NOT_IN_GROUP_RESOURCE,
+      produces = ScimConstants.SCIM_CONTENT_TYPE)
+  public ListResponseDTO<ScimUser> findNotInGroup(@PathVariable String groupUuid,
+      @Validated PaginatedRequestWithFilterForm form, BindingResult formValidationResult) {
+
+    handleValidationError(INVALID_FIND_ACCOUNT_REQUEST, formValidationResult);
+
+    Pageable pr = buildPageRequest(form.getCount(), form.getStartIndex(), 100);
+
+    if (isNull(form.getFilter())) {
+      return service.findAccountNotInGroup(groupUuid, pr);
+    } else {
+      return service.findAccountNotInGroupWithFilter(groupUuid, form.getFilter(), pr);
+    }
   }
 
 }

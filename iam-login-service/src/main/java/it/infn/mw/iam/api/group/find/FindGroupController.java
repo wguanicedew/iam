@@ -16,11 +16,15 @@
 package it.infn.mw.iam.api.group.find;
 
 import static it.infn.mw.iam.api.common.PagingUtils.buildPageRequest;
+import static it.infn.mw.iam.api.utils.ValidationErrorUtils.handleValidationError;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,6 +34,7 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 
 import it.infn.mw.iam.api.common.ListResponseDTO;
+import it.infn.mw.iam.api.common.form.PaginatedRequestWithFilterForm;
 import it.infn.mw.iam.api.scim.model.ScimConstants;
 import it.infn.mw.iam.api.scim.model.ScimGroup;
 
@@ -37,8 +42,14 @@ import it.infn.mw.iam.api.scim.model.ScimGroup;
 @PreAuthorize("hasRole('ADMIN')")
 public class FindGroupController {
 
+  public static final int PAGE_SIZE = 200;
+
   public static final String FIND_BY_LABEL_RESOURCE = "/iam/group/find/bylabel";
   public static final String FIND_BY_NAME_RESOURCE = "/iam/group/find/byname";
+  public static final String FIND_UNSUBSCRIBED_GROUPS_FOR_ACCOUNT =
+      "/iam/group/find/unsubscribed/{accountUuid}";
+
+  public static final String INVALID_FIND_GROUP_REQUEST = "Invalid find group request";
 
   final FindGroupService service;
 
@@ -66,7 +77,7 @@ public class FindGroupController {
       @RequestParam(required = false) final Integer startIndex) {
 
     return filterOutMembers(
-        service.findGroupByLabel(name, value, buildPageRequest(count, startIndex, 100)));
+        service.findGroupByLabel(name, value, buildPageRequest(count, startIndex, PAGE_SIZE)));
 
   }
 
@@ -75,6 +86,17 @@ public class FindGroupController {
   public MappingJacksonValue findByName(@RequestParam(required = true) String name) {
 
     return filterOutMembers(service.findGroupByName(name));
+  }
+
+  @RequestMapping(method = GET, value = FIND_UNSUBSCRIBED_GROUPS_FOR_ACCOUNT,
+      produces = ScimConstants.SCIM_CONTENT_TYPE)
+  public MappingJacksonValue findUnsubscribedGroupsForAccount(@PathVariable String accountUuid,
+      @Validated PaginatedRequestWithFilterForm form, BindingResult formValidationResult) {
+
+    handleValidationError(INVALID_FIND_GROUP_REQUEST, formValidationResult);
+
+    return filterOutMembers(service.findUnsubscribedGroupsForAccount(accountUuid, form.getFilter(),
+        buildPageRequest(form.getCount(), form.getStartIndex(), PAGE_SIZE)));
   }
 
 }

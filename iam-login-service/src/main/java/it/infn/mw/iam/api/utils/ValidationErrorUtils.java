@@ -20,12 +20,21 @@ import java.util.stream.Collectors;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
+import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
+
 public class ValidationErrorUtils {
   
   private ValidationErrorUtils() {
     // prevent instantiation
   }
 
+  public static void handleValidationError(String prefix, BindingResult result) {
+
+    if (result.hasErrors()) {
+      throw new IllegalArgumentException(
+          String.format("%s: [%s]", prefix, stringifyValidationError(result)));
+    }
+  }
   
   public static String stringifyValidationError(BindingResult result) {
     StringBuilder sb = new StringBuilder();

@@ -24,9 +24,9 @@
         <script type="text/javascript" src="/webjars/angularjs/angular.min.js"></script>
         <script type="text/javascript" src="/webjars/angularjs/angular-animate.js"></script>
         <script type="text/javascript" src="/webjars/angular-ui-bootstrap/ui-bootstrap-tpls.min.js"></script>
-        <script type="text/javascript" src="/resources/${gitCommitId}/iam/js/passwordreset.app.js"></script>
-        <script type="text/javascript" src="/resources/${gitCommitId}/iam/js/service/passwordreset.service.js"></script>
-        <script type="text/javascript" src="/resources/${gitCommitId}/iam/js/controller/passwordreset.controller.js"></script>
+        <script type="text/javascript" src="${resourcesPrefix}/iam/js/passwordreset.app.js"></script>
+        <script type="text/javascript" src="${resourcesPrefix}/iam/js/service/passwordreset.service.js"></script>
+        <script type="text/javascript" src="${resourcesPrefix}/iam/js/controller/passwordreset.controller.js"></script>
         <script type="text/javascript">
 									angular
 											.element(document)
@@ -54,7 +54,9 @@
 
             <c:if test="${ param.error != null }">
                 <div class="alert alert-danger">
-                    <strong><spring:message code="login.error" /></strong>
+                    <strong>
+            <spring:message code="login.error" />
+          </strong>
                     <div>${SPRING_SECURITY_LAST_EXCEPTION.message}</div>
                 </div>
             </c:if>
@@ -155,6 +157,12 @@
               This certificate is not linked to any account in this organization
               </p>
             </c:if>
+          </div>
+        </c:if>
+        
+        <c:if test="${loginPageConfiguration.includeCustomContent}">
+          <div id="login-custom-content">
+            <c:import url="${loginPageConfiguration.customContentUrl}" />
           </div>
         </c:if>
     </jsp:body>

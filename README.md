@@ -42,6 +42,6 @@ Grant number 777536.
 [mitreid]: https://github.com/mitreid-connect/OpenID-Connect-Java-Spring-Server
 [scim]: http://www.simplecloud.info/
 [token-exchange]: https://tools.ietf.org/html/draft-ietf-oauth-token-exchange-09
-[iam-doc]: https://indigo-iam.github.io/docs
+[iam-doc]: https://indigo-iam.github.io
 [eosc-hub]: https://www.eosc-hub.eu/
 [infn]: https://home.infn.it/it/

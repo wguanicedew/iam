@@ -1,0 +1,6 @@
+{
+   "description": "Invalid policy (scopes is a string instead of a list of strings)",
+    "rule": "DENY",
+    "scopes": "openid",
+    "matchingPolicy": "EQ"
+}

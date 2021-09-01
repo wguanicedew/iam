@@ -27,4 +27,7 @@ public interface FindGroupService {
   ScimListResponse<ScimGroup> findGroupByLabel(String labelName, String labelValue,
       Pageable pageable);
 
+  ScimListResponse<ScimGroup> findUnsubscribedGroupsForAccount(String accountUuid,
+      String nameFilter, Pageable pageable);
+
 }

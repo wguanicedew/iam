@@ -20,6 +20,8 @@ import org.springframework.security.oauth2.provider.TokenRequest;
 
 public interface TokenExchangePdp {
 
+  public void reloadPolicies();
+
   TokenExchangePdpResult validateTokenExchange(TokenRequest request, ClientDetails originClient,
       ClientDetails destinationClient);
 

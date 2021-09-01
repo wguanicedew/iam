@@ -16,26 +16,26 @@
     <meta name="author" content="">
 
     <!-- stylesheets -->
-    <link href="resources/${gitCommitId}/bootstrap2/css/bootstrap.css" rel="stylesheet">
-    <link href="resources/${gitCommitId}/css/bootstrap-sheet.css" rel="stylesheet">
-    <link href="resources/${gitCommitId}/css/mitreid-connect.css" rel="stylesheet">
-    <link href="resources/${gitCommitId}/css/mitreid-connect-local.css" rel="stylesheet">
-    <link href="resources/${gitCommitId}/bootstrap2/css/bootstrap-responsive.css" rel="stylesheet">
-    <link href="resources/${gitCommitId}/css/mitreid-connect-responsive.css" rel="stylesheet">
-    <link href="resources/${gitCommitId}/css/mitreid-connect-responsive-local.css" rel="stylesheet">
+    <link href="${resourcesPrefix}/bootstrap2/css/bootstrap.css" rel="stylesheet">
+    <link href="${resourcesPrefix}/css/bootstrap-sheet.css" rel="stylesheet">
+    <link href="${resourcesPrefix}/css/mitreid-connect.css" rel="stylesheet">
+    <link href="${resourcesPrefix}/css/mitreid-connect-local.css" rel="stylesheet">
+    <link href="${resourcesPrefix}/bootstrap2/css/bootstrap-responsive.css" rel="stylesheet">
+    <link href="${resourcesPrefix}/css/mitreid-connect-responsive.css" rel="stylesheet">
+    <link href="${resourcesPrefix}/css/mitreid-connect-responsive-local.css" rel="stylesheet">
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
-    <script src="resources/${gitCommitId}/js/lib/html5.js"></script>
+    <script src="${resourcesPrefix}/js/lib/html5.js"></script>
     <![endif]-->
 
     <!-- favico -->
-    <link rel="shortcut icon" href="resources/${gitCommitId}/images/mitreid-connect.ico">
+    <link rel="shortcut icon" href="${resourcesPrefix}/images/mitreid-connect.ico">
 
     <!-- Load jQuery up here so that we can use in-page functions -->
-    <script type="text/javascript" src="resources/${gitCommitId}/js/lib/jquery.js"></script>
-    <script type="text/javascript" charset="UTF-8" src="resources/${gitCommitId}/js/lib/moment-with-locales.js"></script>
-    <script type="text/javascript" src="resources/${gitCommitId}/js/lib/i18next.js"></script>
+    <script type="text/javascript" src="${resourcesPrefix}/js/lib/jquery.js"></script>
+    <script type="text/javascript" charset="UTF-8" src="${resourcesPrefix}/js/lib/moment-with-locales.js"></script>
+    <script type="text/javascript" src="${resourcesPrefix}/js/lib/i18next.js"></script>
     <script type="text/javascript">
         $.i18n.init({
             fallbackLng: "en",

@@ -27,8 +27,8 @@
     <script type="text/javascript" src="/webjars/angularjs/angular-animate.js"></script>
     <script type="text/javascript" src="/webjars/angularjs/angular-cookies.js"></script>
     <script type="text/javascript" src="/webjars/angular-ui-bootstrap/ui-bootstrap-tpls.min.js"></script>
-    <script type="text/javascript" src="/resources/${gitCommitId}/iam/apps/saml-discovery/discovery.app.js"></script>
-    <script type="text/javascript" src="/resources/${gitCommitId}/iam/apps/saml-discovery/discovery.component.js"></script>
+    <script type="text/javascript" src="${resourcesPrefix}/iam/apps/saml-discovery/discovery.app.js"></script>
+    <script type="text/javascript" src="${resourcesPrefix}/iam/apps/saml-discovery/discovery.component.js"></script>
   </jsp:attribute>
   <jsp:body>
       <div class="row" ng-app="discoveryApp">

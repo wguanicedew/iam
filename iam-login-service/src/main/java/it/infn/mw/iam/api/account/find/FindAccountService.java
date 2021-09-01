@@ -30,10 +30,20 @@ public interface FindAccountService {
 
   ScimListResponse<ScimUser> findInactiveAccounts(Pageable pageable);
 
+  ScimListResponse<ScimUser> findAccountByCertificateSubject(String certSubject);
+
   ScimListResponse<ScimUser> findActiveAccounts(Pageable pageable);
 
   ScimListResponse<ScimUser> findAccountByGroupName(String groupName, Pageable pageable);
 
   ScimListResponse<ScimUser> findAccountByGroupUuid(String groupUuid, Pageable pageable);
+
+  ScimListResponse<ScimUser> findAccountByGroupUuidWithFilter(String groupUuid, String filter,
+      Pageable pageable);
+
+  ScimListResponse<ScimUser> findAccountNotInGroup(String groupUuid, Pageable pageable);
+
+  ScimListResponse<ScimUser> findAccountNotInGroupWithFilter(String groupUuid, String filter,
+      Pageable pageable);
 
 }

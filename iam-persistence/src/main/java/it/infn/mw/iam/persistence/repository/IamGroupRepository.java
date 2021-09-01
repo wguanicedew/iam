@@ -42,9 +42,9 @@ public interface IamGroupRepository extends PagingAndSortingRepository<IamGroup,
 
   @Query("select g from IamGroup g where g.parentGroup = :parentGroup order by g.name ASC")
   Page<IamGroup> findSubgroups(@Param("parentGroup") IamGroup parentGroup, Pageable op);
-  
+
   List<IamGroup> findByNameIgnoreCaseContaining(String name);
-  
+
   List<IamGroup> findByUuidNotIn(Set<String> uuids);
 
   Page<IamGroup> findByNameIgnoreCaseContainingOrUuidIgnoreCaseContaining(
@@ -69,9 +69,19 @@ public interface IamGroupRepository extends PagingAndSortingRepository<IamGroup,
 
   @Query("select m.group from IamAccountGroupMembership m where m.account.uuid = :accountUuid and m.group.uuid = :groupUuid")
   Optional<IamGroup> findGroupByMemberAccountUuidAndGroupUuid(
-      @Param("accountUuid") String accountUuid,
-      @Param("groupUuid") String groupUuid);
+      @Param("accountUuid") String accountUuid, @Param("groupUuid") String groupUuid);
 
   @Query("select count(m) from IamAccountGroupMembership m where m.group.uuid= :groupUuid")
   Long countGroupMembersByGroupUuid(@Param("groupUuid") String groupUuid);
+
+
+  @Query("select g from IamGroup g where g not in (select m.group from IamAccountGroupMembership m where m.account.uuid = :accountUuid) order by g.name ASC")
+  Page<IamGroup> findUnsubscribedGroupsForAccount(@Param("accountUuid") String accountUuid,
+      Pageable op);
+
+
+  @Query("select g from IamGroup g where lower(g.name) LIKE lower(concat('%', :groupName, '%')) and g not in (select m.group from IamAccountGroupMembership m where m.account.uuid = :accountUuid) order by g.name ASC")
+  Page<IamGroup> findUnsubscribedGroupsForAccountWithNameLike(
+      @Param("accountUuid") String accountUuid, @Param("groupName") String groupName, Pageable op);
+
 }

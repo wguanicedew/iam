@@ -1,5 +1,55 @@
 # Changelog
 
+
+## 1.7.0 (2021-09-02)
+
+### Added
+
+- IAM now enforces intermediate group membership (#400)
+
+- Support for X.509 managed proxies (#356)
+
+- Characters allowed in username are now restricted to the UNIX valid username
+  characters (#347)
+
+- Support for including custom HTML content at the bottom of the login page has
+  been added (#341)
+
+- Improved token exchange flexibility (#306)
+
+- CI has been migrated from travis to Github actions (#340)
+
+- IAM now allows to link ssh keys to an account (#374)
+
+### Fixed
+
+- A problem that prevented the deletion of dynamically registered clients under
+  certains conditions has been fixed (#397)
+
+- Token exchange is no longer allowed for single-client exchanges that involve
+  the `offline_access` scope (#392)
+
+- More flexibility in populating registration fields from SAML authentication
+  assertion attributes (#371)
+
+- A problem with the userinfo endpoint disclosing too much information has been
+  fixed (#348)
+
+- A problem which allowed to submit multiple group requests for the same group
+  has been fixed (#351)
+
+- A problem with the escaping of certificate subjects in the IAM dashboard has
+  been fixed (#373)
+
+- A problem with the refresh of CRLs on the test client application has been
+  fixed (#368)
+
+### Documentation
+
+- The IAM website and documentation has been migrated to a site based on
+  [Google Docsy][docsy], including improved documentation for the SCIM, Scope
+  policy and Token exchange IAM APIs (#410)
+
 ## 1.6.0 (2020-07-31)
 
 ### Added
@@ -358,3 +408,4 @@ GitBook manual][gitbook-manual] or on [Github][github-doc].
 [gitbook-manual]: https://www.gitbook.com/book/andreaceccanti/iam/details
 [github-doc]: https://github.com/indigo-iam/iam/blob/master/SUMMARY.md
 [jira-v0.4.0]: https://issues.infn.it/jira/browse/INDIAM/fixforversion/13811 
+[docsy]: https://github.com/google/docsy

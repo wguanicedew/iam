@@ -111,7 +111,11 @@ iam:
   local-authn:
     login-page-visibility: ${IAM_LOCAL_AUTHN_LOGIN_PAGE_VISIBILITY:visible}
     enabled-for: ${IAM_LOCAL_AUTHN_ENABLED_FOR:all}
-    
+  
+  customization:
+    custom-login-page-content-url: ${IAM_CUSTOMIZATION_CUSTOM_LOGIN_PAGE_CONTENT_URL}
+    include-custom-login-page-content: ${IAM_CUSTOMIZATION_INCLUDE_CUSTOM_LOGIN_PAGE_CONTENT:false}
+  
   user-profile:
     editable-fields:
     - email

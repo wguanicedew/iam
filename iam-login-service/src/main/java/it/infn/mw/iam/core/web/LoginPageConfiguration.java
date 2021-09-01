@@ -26,11 +26,11 @@ public interface LoginPageConfiguration {
   boolean isShowRegistrationButton();
 
   boolean isLocalAuthenticationVisible();
-  
+
   boolean isShowLinkToLocalAuthenticationPage();
-  
+
   boolean isExternalAuthenticationEnabled();
-  
+
   boolean isOidcEnabled();
 
   boolean isGithubEnabled();
@@ -41,6 +41,10 @@ public interface LoginPageConfiguration {
 
   boolean isAccountLinkingEnabled();
 
+  boolean isIncludeCustomContent();
+
+  String getCustomContentUrl();
+
   Optional<String> getPrivacyPolicyUrl();
 
   String getPrivacyPolicyText();
@@ -48,7 +52,7 @@ public interface LoginPageConfiguration {
   String getLoginButtonText();
 
   List<OidcProvider> getOidcProviders();
-  
+
   Logo getLogo();
 
 }

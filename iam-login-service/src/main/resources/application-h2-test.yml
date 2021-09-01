@@ -37,3 +37,7 @@ flyway:
   locations:
     - classpath:db/migration/h2
     - classpath:db/migration/test
+
+iam:
+  versioned-static-resources:
+    enable-versioning: false 

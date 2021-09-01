@@ -26,17 +26,17 @@
                         <script type="text/javascript" src="/webjars/angularjs/angular-animate.js"></script>
                         <script type="text/javascript" src="/webjars/angularjs/angular-cookies.js"></script>
                         <script type="text/javascript" src="/webjars/angular-ui-bootstrap/ui-bootstrap-tpls.min.js"></script>
-                        <script type="text/javascript" src="/resources/${gitCommitId}/iam/apps/registration/registration.app.js"></script>
-                        <script type="text/javascript" src="/resources/${gitCommitId}/iam/apps/registration/registration.controller.js"></script>
-                        <script type="text/javascript" src="/resources/${gitCommitId}/iam/apps/registration/registration.directive.js"></script>
-                        <script type="text/javascript" src="/resources/${gitCommitId}/iam/apps/registration/registration.service.js"></script>
-                        <script type="text/javascript" src="/resources/${gitCommitId}/iam/apps/registration/authn-info.service.js"></script>
-                        <script type="text/javascript" src="/resources/${gitCommitId}/iam/apps/registration/aup.service.js"></script>
-                        <script type="text/javascript" src="/resources/${gitCommitId}/iam/apps/registration/privacy-policy.service.js"></script>
+                        <script type="text/javascript" src="${resourcesPrefix}/iam/apps/registration/registration.app.js"></script>
+                        <script type="text/javascript" src="${resourcesPrefix}/iam/apps/registration/registration.controller.js"></script>
+                        <script type="text/javascript" src="${resourcesPrefix}/iam/apps/registration/registration.directive.js"></script>
+                        <script type="text/javascript" src="${resourcesPrefix}/iam/apps/registration/registration.service.js"></script>
+                        <script type="text/javascript" src="${resourcesPrefix}/iam/apps/registration/authn-info.service.js"></script>
+                        <script type="text/javascript" src="${resourcesPrefix}/iam/apps/registration/aup.service.js"></script>
+                        <script type="text/javascript" src="${resourcesPrefix}/iam/apps/registration/privacy-policy.service.js"></script>
                     </jsp:attribute>
                     <jsp:body>
                         <div ng-app="registrationApp">
-                            <div ng-include src="'resources/${gitCommitId}/iam/apps/registration/registration.html'">
+                            <div ng-include src="'${resourcesPrefix}/iam/apps/registration/registration.html'">
                             </div>
                         </div>
                     </jsp:body>

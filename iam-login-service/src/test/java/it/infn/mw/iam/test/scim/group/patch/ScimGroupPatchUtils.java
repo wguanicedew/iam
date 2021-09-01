@@ -107,7 +107,7 @@ public class ScimGroupPatchUtils {
     mvc.perform(patch(group.getMeta().getLocation()).contentType(SCIM_CONTENT_TYPE)
       .content(objectMapper.writeValueAsString(patchAddReq))).andExpect(status().isNoContent());
 
-    ScimGroup g = getGroup(group.getMeta().getLocation());
+    getGroup(group.getMeta().getLocation());
 
     mvc.perform(get(group.getMeta().getLocation() + "/members"))
       .andExpect(status().isOk())

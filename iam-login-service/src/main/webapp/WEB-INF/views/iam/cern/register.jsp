@@ -25,16 +25,16 @@
     <script type="text/javascript" src="/webjars/angularjs/angular-animate.js"></script>
     <script type="text/javascript" src="/webjars/angularjs/angular-cookies.js"></script>
     <script type="text/javascript" src="/webjars/angular-ui-bootstrap/ui-bootstrap-tpls.min.js"></script>
-    <script type="text/javascript" src="/resources/${gitCommitId}/iam/apps/cern-registration/registration.app.js"></script>
-    <script type="text/javascript" src="/resources/${gitCommitId}/iam/apps/cern-registration/registration.controller.js"></script>
-    <script type="text/javascript" src="/resources/${gitCommitId}/iam/apps/cern-registration/registration.directive.js"></script>
-    <script type="text/javascript" src="/resources/${gitCommitId}/iam/apps/cern-registration/registration.service.js"></script>
-    <script type="text/javascript" src="/resources/${gitCommitId}/iam/apps/cern-registration/authn-info.service.js"></script>
-    <script type="text/javascript" src="/resources/${gitCommitId}/iam/apps/cern-registration/aup.service.js"></script>
+    <script type="text/javascript" src="${resourcesPrefix}/iam/apps/cern-registration/registration.app.js"></script>
+    <script type="text/javascript" src="${resourcesPrefix}/iam/apps/cern-registration/registration.controller.js"></script>
+    <script type="text/javascript" src="${resourcesPrefix}/iam/apps/cern-registration/registration.directive.js"></script>
+    <script type="text/javascript" src="${resourcesPrefix}/iam/apps/cern-registration/registration.service.js"></script>
+    <script type="text/javascript" src="${resourcesPrefix}/iam/apps/cern-registration/authn-info.service.js"></script>
+    <script type="text/javascript" src="${resourcesPrefix}/iam/apps/cern-registration/aup.service.js"></script>
   </jsp:attribute>
   <jsp:body>
     <div ng-app="registrationApp">
-        <div ng-include src="'resources/${gitCommitId}/iam/apps/cern-registration/registration.html'"></div>
+        <div ng-include src="'${resourcePrefix}/iam/apps/cern-registration/registration.html'"></div>
     </div>
   </jsp:body>
 </t:page>

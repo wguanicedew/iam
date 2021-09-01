@@ -112,4 +112,35 @@ public class DefaultFindAccountService implements FindAccountService {
     return () -> new IllegalArgumentException("Group does not exist: " + groupNameOrUuid);
   }
 
+  @Override
+  public ScimListResponse<ScimUser> findAccountByCertificateSubject(String certSubject) {
+    Optional<IamAccount> account = repo.findByCertificateSubject(certSubject);
+    ScimListResponseBuilder<ScimUser> builder = ScimListResponse.builder();
+    account.ifPresent(a -> builder.singleResource(converter.dtoFromEntity(a)));
+    return builder.build();
+  }
+
+  @Override
+  public ScimListResponse<ScimUser> findAccountNotInGroup(String groupUuid,
+      Pageable pageable) {
+    IamGroup group = groupRepo.findByUuid(groupUuid).orElseThrow(groupNotFoundError(groupUuid));
+    Page<IamAccount> results = repo.findNotInGroup(group.getUuid(), pageable);
+    return responseFromPage(results, converter, pageable);
+  }
+
+  @Override
+  public ScimListResponse<ScimUser> findAccountNotInGroupWithFilter(String groupUuid, String filter,
+      Pageable pageable) {
+    IamGroup group = groupRepo.findByUuid(groupUuid).orElseThrow(groupNotFoundError(groupUuid));
+    Page<IamAccount> results = repo.findNotInGroupWithFilter(group.getUuid(), filter, pageable);
+    return responseFromPage(results, converter, pageable);
+  }
+
+  @Override
+  public ScimListResponse<ScimUser> findAccountByGroupUuidWithFilter(String groupUuid,
+      String filter, Pageable pageable) {
+    IamGroup group = groupRepo.findByUuid(groupUuid).orElseThrow(groupNotFoundError(groupUuid));
+    Page<IamAccount> results = repo.findByGroupUuidWithFilter(group.getUuid(), filter, pageable);
+    return responseFromPage(results, converter, pageable);
+  }
 }

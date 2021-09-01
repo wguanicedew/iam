@@ -253,6 +253,13 @@ body.skin-blue {
     text-align: center;
 }
 
+#login-custom-content {
+    max-width: 600px;
+    margin: 0 auto;
+    margin-top: 2em;
+    text-align: center;
+}
+
 .saml-icon {
     font-weight: bolder;
 }
@@ -609,4 +616,22 @@ body.skin-blue {
 
 .bs-callout-info h4 {
     color: #5bc0de;
+}
+
+.group-select-name {
+    font-size: 16pt;
+}
+
+.group-select-description {
+
+}
+
+.group-select-labels {
+    margin-top: 1em;
+    margin-bottom: 1em;
+    border-bottom: 1px;
+}
+
+.add-group-form{
+    
 }
