@@ -39,7 +39,7 @@ public class RegistrationRequestDto {
   private Date lastUpdateTime;
   @Size(max = 32, message = "username cannot be longer than 32 chars")
   @Pattern(regexp = USERNAME_REGEXP,
-          message = "invalid username (the provided username is not a valid UNIX username)")
+      message = "invalid username (the provided username is not a valid UNIX username)")
   private String username;
   private String password;
   private String givenname;
