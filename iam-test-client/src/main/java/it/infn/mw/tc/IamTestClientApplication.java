@@ -2,6 +2,7 @@ package it.infn.mw.tc;
 
 import java.io.IOException;
 import java.security.Principal;
+import java.text.ParseException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -53,6 +54,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.WebUtils;
 
 import com.google.common.base.Strings;
+import com.nimbusds.jwt.JWTParser;
 
 @SpringBootApplication
 @EnableAutoConfiguration(exclude = {ErrorMvcAutoConfiguration.class})
@@ -69,7 +71,7 @@ public class IamTestClientApplication extends WebSecurityConfigurerAdapter {
 
   @Autowired
   ClientHttpRequestFactory requestFactory;
-  
+
   @Value("${iam.extAuthnHint}")
   String extAuthnHint;
 
@@ -89,15 +91,15 @@ public class IamTestClientApplication extends WebSecurityConfigurerAdapter {
     }
 
   }
-  
-  public class ExtAuthnRequestOptionsService implements AuthRequestOptionsService{
+
+  public class ExtAuthnRequestOptionsService implements AuthRequestOptionsService {
 
     final String authnHint;
-    
+
     public ExtAuthnRequestOptionsService(String hint) {
       this.authnHint = hint;
     }
-    
+
     @Override
     public Map<String, String> getOptions(ServerConfiguration server, RegisteredClient client,
         HttpServletRequest request) {
@@ -111,16 +113,16 @@ public class IamTestClientApplication extends WebSecurityConfigurerAdapter {
         HttpServletRequest request) {
       return Collections.emptyMap();
     }
-    
+
   }
 
   @Override
   protected void configure(HttpSecurity http) throws Exception {
-    
+
     if (!Strings.isNullOrEmpty(extAuthnHint)) {
       oidcFilter.setAuthRequestOptionsService(new ExtAuthnRequestOptionsService(extAuthnHint));
     }
-    
+
     // @formatter:off
     http.antMatcher("/**").authorizeRequests()
         .antMatchers("/", "/user", "/error", "/openid_connect_login**", "/webjars/**").permitAll()
@@ -172,7 +174,32 @@ public class IamTestClientApplication extends WebSecurityConfigurerAdapter {
 
     if (principal instanceof OIDCAuthenticationToken) {
       OIDCAuthenticationToken token = (OIDCAuthenticationToken) principal;
-      OpenIDAuthentication auth = new OpenIDAuthentication(token);
+      OpenIDAuthentication auth = new OpenIDAuthentication();
+
+      auth.setIssuer(token.getIssuer());
+      auth.setSub(token.getSub());
+
+      if (!clientConfig.isHideTokens()) {
+        auth.setAccessToken(token.getAccessTokenValue());
+        auth.setIdToken(token.getIdToken().getParsedString());
+        auth.setRefreshToken(token.getRefreshTokenValue());
+      }
+
+      try {
+        auth.setAccessTokenClaims(JWTParser.parse(token.getAccessTokenValue())
+          .getJWTClaimsSet()
+          .toJSONObject()
+          .toString());
+
+        auth.setIdTokenClaims(token.getIdToken().getJWTClaimsSet().toJSONObject().toString());
+      } catch (ParseException e) {
+        LOG.error(e.getMessage(), e);
+      }
+
+      auth.setName(token.getUserInfo().getName());
+      auth.setFamilyName(token.getUserInfo().getFamilyName());
+      auth.setUserInfo(token.getUserInfo().toJson().toString());
+
       return auth;
     }
 

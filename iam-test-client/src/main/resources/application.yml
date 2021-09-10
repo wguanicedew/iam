@@ -9,9 +9,12 @@ server:
   use-forward-headers: ${IAM_CLIENT_USE_FORWARD_HEADERS:false}
 
 iam:
+    
     issuer: ${IAM_CLIENT_ISSUER:http://localhost:8080/}
     organizationName: ${IAM_CLIENT_ORGANIZATION_NAME:indigo-dc}
     extAuthnHint: ${IAM_CLIENT_EXT_AUTHN_HINT:}
+    
+    hide-tokens: ${IAM_CLIENT_HIDE_TOKENS:false}
     
     tls:
       version: ${IAM_CLIENT_TLS_VERSION:TLSv1.2}
