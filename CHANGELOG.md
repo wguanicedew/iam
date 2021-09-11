@@ -2,14 +2,14 @@
 
 ## 1.7.1 (2021-09-13)
 
-This release provides only changes and bug fixes to the IAM test client
-application.
+This release provides changes and bug fixes to the IAM test client application.
 
 ### Added
 
-- It's now possible to configure the test client application so that tokens 
-  are not exposed to those accessing the test client app page, but only the
-  claims contained in tokens are presented (#414)
+- The IAM test client application, in its default configuration, no longer
+  exposes tokens, but only the claims contained in tokens. It's possible to
+  revert to the previous behavior by setting the `IAM_CLIENT_HIDE_TOKENS=false`
+  environment variable (#414)
 
 ### Fixed
 
