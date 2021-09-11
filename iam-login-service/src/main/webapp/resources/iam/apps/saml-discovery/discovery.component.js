@@ -48,8 +48,11 @@
     };
 
     self.storeIdpChoice = function(){
+      var today = new Date();
+      var exp = today;
+      exp.setMonth(today.getMonth() + 12); 
       if ($scope.rememberChoice === 'y'){
-        $cookies.putObject(COOKIE_KEY, $scope.idpSelected);
+        $cookies.putObject(COOKIE_KEY, $scope.idpSelected, { expires: exp });
       }
     };
 
