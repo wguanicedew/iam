@@ -39,29 +39,35 @@
     <p>This is an example OpenID Connect client application for IAM hosted at:
       <pre th:text="${iamIssuer}"></pre>
     </p>
-    <p>
-      The authorization request will include the following scopes:
-      <pre th:text="${scopes}"></pre>
-    </p>
-    <div>
-      <a href="/openid_connect_login" class="btn btn-primary" th:href="@{/openid_connect_login}">Login</a>
-    </div>
-  </div>
-
-  <div class="container" ng-show="home.authenticated">
-    <p>You're now logged in as: {{home.user}}</p>
-    <p>The authorization request included the following scopes:
-      <pre th:text="${scopes}"></pre>
-    </p>
-    <p ng-if="!home.access_token_jwt" class="alert alert-danger">
+    <p th:if="${hidesTokens}">
     	This IAM test client application has been configured
     	to not disclose access, id and refresh tokens. 
     	
-    	Below you will only see the	claims contained in the tokens returned to the test client application.
+    	After a successful login you will only see the claims contained in the tokens returned to the test client application.
     	
     	To get direct access to 
     	tokens, consider <a href="https://indigo-iam.github.io/v/current/docs/tasks/user/client-registration/">registering a client application</a>. 
     </p>
+    <form th:action="@{/openid_connect_login}">
+    
+    <div class="form-group">
+    	<label for="scope">Requested scopes</label>
+    	<input class="form-control" type="text" th:value="${scopes}" id="scope" name="scope"/>
+    	<p class="help-block">
+    	  Select, among the above scopes, which ones will be included in the authorization request. Note
+      	  that an empty scope value will be replaced by the full list of allowed scopes.
+      	</p>			
+    </div>
+    
+   	<div class="form-group">
+   	  <input type="submit" class="form-control btn btn-primary" value="Login"/>
+    </div>
+    </form>    
+  </div>
+
+  <div class="container" ng-show="home.authenticated">
+    <p>You're now logged in as: {{home.user}}</p>
+    
     <p>This application has received the following information:</p>
     <ul>
       <li ng-if="home.access_token_jwt">access_token (JWT):
@@ -126,7 +132,12 @@
 
           self.authenticated = true;
 
-          self.user = response.data.name;
+          if (response.data.name) {
+        	  self.user = response.data.name;	  
+          } else {
+        	  self.user = response.data.sub;
+          }
+          
           self.sub = response.data.sub;
           self.issuer = response.data.issuer;
           
