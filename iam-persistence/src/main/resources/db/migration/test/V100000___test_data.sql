@@ -25,6 +25,30 @@ INSERT INTO client_details (id, client_id, client_secret, client_name, dynamical
 (13, 'implicit-flow-client', null, 'Implicit Flow client', false, null, 3600, 600, 600, false, null, false),
 (14, 'public-dc-client', null, 'Public Device Code client', false, null, 3600, 600, 600, false, null, false);
 
+INSERT INTO client_details (id, client_id, client_secret, client_name, dynamically_registered,
+  refresh_token_validity_seconds, access_token_validity_seconds, id_token_validity_seconds, allow_introspection,
+  token_endpoint_auth_method, require_auth_time, token_endpoint_auth_signing_alg, jwks) VALUES
+  (15, 'jwt-auth-client_secret_jwt', 'c8e9eed0-e6e4-4a66-b16e-6f37096356a7', 'JWT Bearer Auth Client (client_secret_jwt)', 
+  false, null, 3600, 600, true, 'SECRET_JWT', false, 'HS256', null),
+  (16, 'jwt-auth-private_key_jwt', 'secret', 'JWT Bearer Auth Client (private_key_jwt)', 
+  false, null, 3600, 600, true,'SECRET_JWT', false, 'RS256',
+  '{
+  "keys": [
+    {
+      "p": "7FhhHX--icA3yKaihMZVOJbiB2bQcs_p3HLHolTo31v_IADBrXPdxTtDQwtiM7p17yl290o-MaWS-aboa5GNpuYbNImkLDxKqk2YSQIuU_ZebMaq4CXWXVYvgAmWFAvHf6yCYXxJYSt1RqKbm-loYgaqn5K3iSwnWeEO4I9qDcM",
+      "kty": "RSA",
+      "q": "6RI38CT9BSnU6N4jY9gUO5_5F_XLKG3RgEUiExk8-6WnGCiIOAsmkeDLjT_o7xqvtx7vLpAYVgU1dtez1rRBug9q1nhTH9gbZ8YOk2XjubWIyAaYje8qmWCviGvQIK2c2QCoFBr6bAoTUs2o_eJQRRtNpPn_JSeEymY6xqcDKWk",
+      "d": "OANMD3sVYqk5MFTGnZnIhr2RqWYtxzr_wrcj7J8lBK5tlksvZ1bil8sHHsufXejBGLO2Ulok_pMDx-IrSt9gm1U8nkJSNMLX54XlSdi2Q39QIy2pn3nEtT-sWpkIUWRZjczRHJm7gtySWtKmQVUbLnOyowWWxIM7H9P-7bpHXs88R6MDvNhnq2csdNW9Wph0SDqousmp3uFIuKUsjCYwqxse3sIgdsUdDQ7ULdV_DjsxY-HAQ8yE93NeAeBtqPV8fA6y_VLlkR0iSPd4xqhy6SiukwLCexWhRqIREdbz_FI8ZXk3WOerLdfpe5SGKkVbIEjcync-rTBaArjWOEzFQQ",
+      "e": "AQAB",
+      "kid": "rsa1",
+      "qi": "M1CjStmDrWjcOI2T2P8bPj42c4iav4Dyu5x-Mc3LOTUwx2iVToHg5bZHFEf7d2H91y-EUjDzmRopuNk7dV4Fy5QWTflRCYUGvMfrgL-7rUUDBMDhl96ujmAoZrmpvlGcrsae1R_qXduU00FjCNCqGk96vgnmF77lJPNCEB7xq6k",
+      "dp": "ZTxWHPSjAQ481s3Jv2XVCzBWESWRFBzK54qiyH3mYgZd-a9ZRpri26DO5uDxZ4bvDUqNks9SZKGvmxBLbggizOKztIVgtTH-KYSjPmKYxY46VA2lE-4hLEnGfumcR2nkQmP6VRePtveOfHsafGY2OAby_vcxdqhbEry8SqQjoVE",
+      "dq": "JtImBxXiHw4MrIzzkBnZpOTMdLU4FY_VKWxadJvrkG7TGi8GIW-aCQpMXUab4desFPBOHo9Zvlo3wYfEKKr1l6whu39nORKh3fMbUmnSOIiIM-kFV_7SNaHpGuv6SrcgPPTjChZER-KVvWEMGN2tSRV3JVeOq_2dHKlSeOwwlqE",
+      "n": "1y1CP181zqPNPlV1JDM7Xv0QnGswhSTHe8_XPZHxDTJkykpk_1BmgA3ovP62QRE2ORgsv5oSBI_Z_RaOc4Zx2FonjEJF2oBHtBjsAiF-pxGkM5ZPjFNgFTGp1yUUBjFDcEeIGCwPEyYSt93sQIP_0DRbViMUnpyn3xgM_a1dO5brEWR2n1Uqff1yA5NXfLS03qpl2dpH4HFY5-Zs4bvtJykpAOhoHuIQbz-hmxb9MZ3uTAwsx2HiyEJtz-suyTBHO3BM2o8UcCeyfa34ShPB8i86-sf78fOk2KeRIW1Bju3ANmdV3sxL0j29cesxKCZ06u2ZiGR3Srbft8EdLPzf-w"
+    }
+  ]
+}');
+
 INSERT INTO client_scope (owner_id, scope) VALUES
   (1, 'openid'),
   (1, 'profile'),
