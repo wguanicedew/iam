@@ -1,3 +1,18 @@
+/**
+ * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2019
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package it.infn.mw.iam.core.oauth.assertion;
 
 import static java.lang.String.format;
@@ -47,6 +62,7 @@ public class IAMJWTBearerAuthenticationProvider implements AuthenticationProvide
   private final ClientDetailsEntityService clientService;
   private final ClientKeyCacheService validators;
 
+
   private final String TOKEN_ENDPOINT;
 
   public IAMJWTBearerAuthenticationProvider(Clock clock, IamProperties iamProperties,
@@ -71,7 +87,8 @@ public class IAMJWTBearerAuthenticationProvider implements AuthenticationProvide
         || client.getTokenEndpointAuthMethod().equals(AuthMethod.SECRET_BASIC)
         || client.getTokenEndpointAuthMethod().equals(AuthMethod.SECRET_POST)) {
 
-      throw new AuthenticationServiceException("Unsupported authentication method.");
+      throw new AuthenticationServiceException(
+          "Client does not support JWT-based client autentication");
     }
 
     JWSAlgorithm alg = jws.getHeader().getAlgorithm();
@@ -82,7 +99,7 @@ public class IAMJWTBearerAuthenticationProvider implements AuthenticationProvide
     }
 
     if (client.getTokenEndpointAuthMethod().equals(AuthMethod.PRIVATE_KEY)) {
-      if (!JWSAlgorithm.Family.RSA.contains(alg) && !JWSAlgorithm.Family.EC.contains(alg)) {
+      if (!JWSAlgorithm.Family.SIGNATURE.contains(alg)) {
         invalidBearerAssertion("Invalid signature algorithm: " + alg.getName());
       }
     } else if (client.getTokenEndpointAuthMethod().equals(AuthMethod.SECRET_JWT)) {
@@ -171,6 +188,10 @@ public class IAMJWTBearerAuthenticationProvider implements AuthenticationProvide
 
 
       final JWT jwt = jwtAuth.getJwt();
+
+      if (isNull(jwt)) {
+        invalidBearerAssertion("Null JWT in authentication token");
+      }
 
       if (!(jwt instanceof SignedJWT)) {
         invalidBearerAssertion("Unsupported JWT type: " + jwt.getClass().getName());

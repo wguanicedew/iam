@@ -21,7 +21,6 @@ import static org.springframework.http.HttpMethod.OPTIONS;
 import java.time.Clock;
 
 import org.mitre.jwt.signer.service.impl.ClientKeyCacheService;
-import org.mitre.oauth2.service.impl.DefaultClientUserDetailsService;
 import org.mitre.oauth2.web.CorsFilter;
 import org.mitre.openid.connect.assertion.JWTBearerClientAssertionTokenEndpointFilter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +42,7 @@ import org.springframework.security.web.context.SecurityContextPersistenceFilter
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import it.infn.mw.iam.config.IamProperties;
+import it.infn.mw.iam.core.client.ClientUserDetailsService;
 import it.infn.mw.iam.core.oauth.assertion.IAMJWTBearerAuthenticationProvider;
 
 @Configuration
@@ -59,7 +59,7 @@ public class IamTokenEndointSecurityConfig extends WebSecurityConfigurerAdapter 
 
   @Autowired
   @Qualifier("clientUserDetailsService")
-  private DefaultClientUserDetailsService userDetailsService;
+  private ClientUserDetailsService userDetailsService;
 
   @Autowired
   private Clock clock;
