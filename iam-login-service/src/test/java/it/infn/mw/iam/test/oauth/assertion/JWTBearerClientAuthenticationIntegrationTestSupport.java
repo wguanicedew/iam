@@ -17,8 +17,16 @@ package it.infn.mw.iam.test.oauth.assertion;
 
 import static java.util.Collections.singletonList;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.time.Instant;
 import java.util.Date;
+import java.util.UUID;
+
+import org.mitre.jwt.signer.service.JWTSigningAndValidationService;
+import org.mitre.jwt.signer.service.impl.DefaultJWTSigningAndValidationService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ResourceLoader;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -29,8 +37,9 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 
 import it.infn.mw.iam.test.oauth.EndpointsTestUtils;
+import it.infn.mw.iam.util.JWKKeystoreLoader;
 
-public class JWTBearerClientAuthenticationTestSupport extends EndpointsTestUtils {
+public class JWTBearerClientAuthenticationIntegrationTestSupport extends EndpointsTestUtils {
 
   public static final String CLIENT_ID_SECRET_JWT = "jwt-auth-client_secret_jwt";
   public static final String CLIENT_ID_SECRET_JWT_SECRET = "c8e9eed0-e6e4-4a66-b16e-6f37096356a7";
@@ -39,7 +48,14 @@ public class JWTBearerClientAuthenticationTestSupport extends EndpointsTestUtils
   public static final String JWT_BEARER_ASSERTION_TYPE =
       "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
 
-  public SignedJWT createClientAuthToken(String clientId, Instant expirationTime)
+  public static final String TEST_KEYSTORE_LOCATION = "classpath:/client_auth/client-keys.jwk";
+
+  public static final String CLIENT_ID_PRIVATE_KEY_JWT = "jwt-auth-private_key_jwt";
+
+  @Autowired
+  ResourceLoader loader;
+
+  public SignedJWT createSymmetricClientAuthToken(String clientId, Instant expirationTime)
       throws JOSEException {
 
     JWSSigner signer = new MACSigner(CLIENT_ID_SECRET_JWT_SECRET);
@@ -47,6 +63,7 @@ public class JWTBearerClientAuthenticationTestSupport extends EndpointsTestUtils
       .issuer(clientId)
       .expirationTime(Date.from(expirationTime))
       .audience(singletonList(TOKEN_ENDPOINT_AUDIENCE))
+      .jwtID(UUID.randomUUID().toString())
       .build();
 
     SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), claimsSet);
@@ -55,5 +72,20 @@ public class JWTBearerClientAuthenticationTestSupport extends EndpointsTestUtils
 
     return signedJWT;
   }
+
+  public JWTSigningAndValidationService loadSignerService()
+      throws NoSuchAlgorithmException, InvalidKeySpecException {
+
+    JWKKeystoreLoader keystoreLoader = new JWKKeystoreLoader(loader);
+
+    DefaultJWTSigningAndValidationService svc = new DefaultJWTSigningAndValidationService(
+        keystoreLoader.loadKeystoreFromLocation(TEST_KEYSTORE_LOCATION));
+
+    svc.setDefaultSignerKeyId("rsa1");
+    svc.setDefaultSigningAlgorithmName(JWSAlgorithm.RS256.getName());
+
+    return svc;
+  }
+
 
 }

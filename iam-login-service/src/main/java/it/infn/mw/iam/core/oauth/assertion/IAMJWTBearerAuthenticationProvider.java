@@ -62,7 +62,6 @@ public class IAMJWTBearerAuthenticationProvider implements AuthenticationProvide
   private final ClientDetailsEntityService clientService;
   private final ClientKeyCacheService validators;
 
-
   private final String TOKEN_ENDPOINT;
 
   public IAMJWTBearerAuthenticationProvider(Clock clock, IamProperties iamProperties,
@@ -169,6 +168,11 @@ public class IAMJWTBearerAuthenticationProvider implements AuthenticationProvide
       if (!jwtClaims.getAudience().contains(TOKEN_ENDPOINT)) {
         invalidBearerAssertion("invalid audience");
       }
+    }
+
+    if (isNull(jwtClaims.getJWTID())) {
+      invalidBearerAssertion("jti is null");
+      // no further jti validation is implemented currently
     }
   }
 

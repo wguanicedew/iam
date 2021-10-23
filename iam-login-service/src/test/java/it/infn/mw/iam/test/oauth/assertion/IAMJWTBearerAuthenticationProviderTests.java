@@ -27,6 +27,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -417,6 +418,31 @@ public class IAMJWTBearerAuthenticationProviderTests
   }
 
   @Test
+  public void testJTIRequired() {
+
+    when(validators.getValidator(Mockito.any(), Mockito.any())).thenReturn(validator);
+    when(validator.validateSignature(Mockito.any())).thenReturn(true);
+
+    testForAllAlgos(client, a -> {
+      JWSHeader header = new JWSHeader(a);
+      JWTClaimsSet claimSet = new JWTClaimsSet.Builder().issuer(JWT_AUTH_NAME)
+        .subject(JWT_AUTH_NAME)
+        .expirationTime(Date.from(clock.instant().plusSeconds(1800)))
+        .audience(singletonList(ISSUER_TOKEN_ENDPOINT))
+        .build();
+      SignedJWT jws = new SignedJWT(header, claimSet);
+      when(authentication.getJwt()).thenReturn(jws);
+
+      try {
+        provider.authenticate(authentication);
+      } catch (AuthenticationServiceException e) {
+        assertThat(e.getMessage(), containsString("jti is null"));
+      }
+
+    });
+  }
+
+  @Test
   public void testValidAssertion() {
 
     when(validators.getValidator(Mockito.any(), Mockito.any())).thenReturn(validator);
@@ -428,6 +454,7 @@ public class IAMJWTBearerAuthenticationProviderTests
         .subject(JWT_AUTH_NAME)
         .expirationTime(Date.from(clock.instant().plusSeconds(1800)))
         .audience(singletonList(ISSUER_TOKEN_ENDPOINT))
+        .jwtID(UUID.randomUUID().toString())
         .build();
       SignedJWT jws = new SignedJWT(header, claimSet);
       when(authentication.getJwt()).thenReturn(jws);
