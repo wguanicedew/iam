@@ -34,6 +34,7 @@ public class WLCGUserInfoAdapter extends DelegateUserInfoAdapter {
     JsonObject json = super.toJson();
 
     json.remove("groups");
+    json.remove("organisation_name");
 
     return json;
   }
