@@ -30,7 +30,7 @@ import org.mitre.openid.connect.client.service.IssuerService;
 import org.mitre.openid.connect.client.service.impl.StaticClientConfigurationService;
 import org.mitre.openid.connect.client.service.impl.StaticSingleIssuerService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.embedded.FilterRegistrationBean;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestFactory;
