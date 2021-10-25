@@ -121,9 +121,9 @@ public class IamX509PreauthenticationProcessingFilter
     request.setAttribute(X509_CAN_LOGIN_KEY, Boolean.TRUE);
     
     if (x509AuthenticationRequested(request)) {
-      super.successfulAuthentication(request, response, authentication);
       
       try {
+        super.successfulAuthentication(request, response, authentication);
         successHandler.onAuthenticationSuccess(request, response, authentication);
         
       } catch (IOException | ServletException e) {
