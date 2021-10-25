@@ -21,7 +21,6 @@ import static org.springframework.http.HttpMethod.OPTIONS;
 import java.time.Clock;
 
 import org.mitre.jwt.signer.service.impl.ClientKeyCacheService;
-import org.mitre.oauth2.web.CorsFilter;
 import org.mitre.openid.connect.assertion.JWTBearerClientAssertionTokenEndpointFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -38,7 +37,6 @@ import org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHand
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-import org.springframework.security.web.context.SecurityContextPersistenceFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import it.infn.mw.iam.config.IamProperties;
@@ -50,9 +48,6 @@ import it.infn.mw.iam.core.oauth.assertion.IAMJWTBearerAuthenticationProvider;
 public class IamTokenEndointSecurityConfig extends WebSecurityConfigurerAdapter {
 
   public static final String TOKEN_ENDPOINT = "/token";
-
-  @Autowired
-  private CorsFilter corsFilter;
 
   @Autowired
   private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
@@ -113,14 +108,15 @@ public class IamTokenEndointSecurityConfig extends WebSecurityConfigurerAdapter 
             .antMatchers(TOKEN_ENDPOINT).authenticated()
             .and()
             .addFilterBefore(jwtBearerFilter(), AbstractPreAuthenticatedProcessingFilter.class)
-            .addFilterBefore(ccFilter(), BasicAuthenticationFilter.class)   
-        .addFilterBefore(corsFilter, SecurityContextPersistenceFilter.class)
+            .addFilterBefore(ccFilter(), BasicAuthenticationFilter.class)
         .exceptionHandling()
             .authenticationEntryPoint(authenticationEntryPoint)
             .accessDeniedHandler(new OAuth2AccessDeniedHandler())
             .and()
         .sessionManagement()
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        .and()
+          .cors()
         .and()
           .csrf()
             .disable();

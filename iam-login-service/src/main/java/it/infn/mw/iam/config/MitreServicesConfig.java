@@ -32,7 +32,6 @@ import org.mitre.oauth2.service.impl.BlacklistAwareRedirectResolver;
 import org.mitre.oauth2.service.impl.DefaultDeviceCodeService;
 import org.mitre.oauth2.service.impl.DefaultOAuth2ClientDetailsEntityService;
 import org.mitre.oauth2.service.impl.DefaultOAuth2ProviderTokenService;
-import org.mitre.oauth2.web.CorsFilter;
 import org.mitre.openid.connect.config.ConfigurationPropertiesBean;
 import org.mitre.openid.connect.config.UIConfiguration;
 import org.mitre.openid.connect.filter.AuthorizationRequestFilter;
@@ -70,7 +69,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.OAuth2RequestValidator;
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
@@ -228,20 +226,22 @@ public class MitreServicesConfig {
     return new Http403ForbiddenEntryPoint();
   }
 
-  @Bean
-  public FilterRegistrationBean disabledCorsFilterRegistration(CorsFilter c) {
+  // @Bean
+  // public FilterRegistrationBean disabledCorsFilterRegistration(CorsFilter c) {
+  //
+  // FilterRegistrationBean b = new FilterRegistrationBean(c);
+  // b.setEnabled(false);
+  // return b;
+  // }
 
-    FilterRegistrationBean b = new FilterRegistrationBean(c);
-    b.setEnabled(false);
-    return b;
-  }
-
-  @Primary
-  @Bean
-  public CorsFilter corsFilter() {
-
-    return new CorsFilter();
-  }
+  // @Primary
+  // @Bean
+  // public CorsFilter corsFilter() {
+  //
+  //
+  // CorsFilter filter = new CorsFilter()
+  // return new CorsFilter();
+  // }
 
   @Bean
   public OAuth2AuthenticationEntryPoint oauth2AuthenticationEntryPoint() {

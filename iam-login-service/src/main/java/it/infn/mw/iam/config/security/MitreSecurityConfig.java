@@ -18,7 +18,6 @@ package it.infn.mw.iam.config.security;
 import static org.springframework.security.config.http.SessionCreationPolicy.NEVER;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
-import org.mitre.oauth2.web.CorsFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
@@ -34,7 +33,6 @@ import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEn
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.context.SecurityContextPersistenceFilter;
-import org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter;
 
 import it.infn.mw.iam.config.client_registration.ClientRegistrationProperties;
 
@@ -52,16 +50,12 @@ public class MitreSecurityConfig {
     @Autowired
     private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
 
-    @Autowired
-    private CorsFilter corsFilter;
-
     @Override
     public void configure(final HttpSecurity http) throws Exception {
 
       // @formatter:off
       http.antMatcher("/api/**")
           .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
-          .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
           .exceptionHandling()
             .authenticationEntryPoint(authenticationEntryPoint)
           .and()
@@ -84,11 +78,7 @@ public class MitreSecurityConfig {
     @Autowired
     private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
 
-    @Autowired
-    private CorsFilter corsFilter;
-
     @Override
-
     public void configure(final HttpSecurity http) throws Exception {
 
       // @formatter:off
@@ -96,14 +86,14 @@ public class MitreSecurityConfig {
         .exceptionHandling()
           .authenticationEntryPoint(authenticationEntryPoint).and()
         .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
-        .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
         .sessionManagement()
           .sessionCreationPolicy(STATELESS)
         .and()
           .authorizeRequests()
             .antMatchers("/resource/**").permitAll()
         .and()
-          .csrf().disable();
+          .csrf().disable()
+        .cors();
       // @formatter:on
     }
   }
@@ -121,9 +111,6 @@ public class MitreSecurityConfig {
     private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
 
     @Autowired
-    private CorsFilter corsFilter;
-
-    @Autowired
     private ClientRegistrationProperties clientRegProps;
 
     @Override
@@ -135,7 +122,6 @@ public class MitreSecurityConfig {
         .authenticationEntryPoint(authenticationEntryPoint)
         .and()
         .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
-        .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
         .sessionManagement()
         .sessionCreationPolicy(STATELESS);
 
@@ -162,9 +148,6 @@ public class MitreSecurityConfig {
     @Autowired
     private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
 
-    @Autowired
-    private CorsFilter corsFilter;
-
     @Override
     public void configure(final HttpSecurity http) throws Exception {
 
@@ -174,7 +157,6 @@ public class MitreSecurityConfig {
           .authenticationEntryPoint(authenticationEntryPoint)
         .and()
           .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
-          .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
         .sessionManagement()
           .sessionCreationPolicy(STATELESS)
         .and()
@@ -194,9 +176,6 @@ public class MitreSecurityConfig {
     @Qualifier("clientUserDetailsService")
     private UserDetailsService userDetailsService;
 
-    @Autowired
-    private CorsFilter corsFilter;
-
     @Override
     protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
 
@@ -211,7 +190,6 @@ public class MitreSecurityConfig {
         .httpBasic()
           .authenticationEntryPoint(authenticationEntryPoint)
         .and()
-          .addFilterBefore(corsFilter, SecurityContextPersistenceFilter.class)
             .exceptionHandling()
           .authenticationEntryPoint(authenticationEntryPoint)
         .and()
@@ -237,9 +215,6 @@ public class MitreSecurityConfig {
     @Qualifier("clientUserDetailsService")
     private UserDetailsService userDetailsService;
 
-    @Autowired
-    private CorsFilter corsFilter;
-
     @Override
     protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
 
@@ -263,7 +238,6 @@ public class MitreSecurityConfig {
         .httpBasic()
           .authenticationEntryPoint(authenticationEntryPoint)
         .and()
-          .addFilterBefore(corsFilter, SecurityContextPersistenceFilter.class)
           .addFilterBefore(clientCredentialsEndpointFilter(), BasicAuthenticationFilter.class)
         .exceptionHandling()
           .authenticationEntryPoint(authenticationEntryPoint)

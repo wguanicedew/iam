@@ -18,7 +18,6 @@ package it.infn.mw.iam.config.security;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
 
-import org.mitre.oauth2.web.CorsFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,7 +33,6 @@ import org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHand
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandlerImpl;
 import org.springframework.security.web.context.SecurityContextPersistenceFilter;
-import org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter;
 
 import it.infn.mw.iam.api.proxy.ProxyCertificatesApiController;
 import it.infn.mw.iam.config.CustomAuthenticationEntryPoint;
@@ -59,9 +57,6 @@ public class IamApiSecurityConfig {
     @Autowired
     private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
 
-    @Autowired
-    private CorsFilter corsFilter;
-
     @Override
     protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
       auth.userDetailsService(userDetailsService);
@@ -84,7 +79,8 @@ public class IamApiSecurityConfig {
         .and()
           .addFilterBefore(ccFilter, SecurityContextPersistenceFilter.class)
           .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
-          .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
+        .cors()
+        .and()
         .sessionManagement()
           .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .and()
@@ -108,9 +104,6 @@ public class IamApiSecurityConfig {
     @Autowired
     private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
     
-    @Autowired
-    private CorsFilter corsFilter;
-
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
       // @formatter:off
@@ -124,7 +117,8 @@ public class IamApiSecurityConfig {
             .accessDeniedHandler(new OAuth2AccessDeniedHandler())
         .and()
           .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
-          .addFilterBefore(corsFilter, WebAsyncManagerIntegrationFilter.class)
+        .cors()
+        .and()
         .sessionManagement()
           .sessionCreationPolicy(SessionCreationPolicy.NEVER)
         .and()
