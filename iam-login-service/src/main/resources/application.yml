@@ -45,9 +45,6 @@ spring:
     username: ${IAM_MAIL_USERNAME:}
     password: ${IAM_MAIL_PASSWORD:}
 
-  velocity:
-    enabled: false
-
   freemarker:
     template-loader-path: ${IAM_CUSTOM_TEMPLATE_LOCATION:classpath:templates/}
 
@@ -171,7 +168,7 @@ accountLinking:
 
 clientRegistration:
   allow-for: ${IAM_CLIENT_REGISTRATION_ALLOW_FOR:ANYONE}
-  
+
 endpoints:
   enabled: false
   info:

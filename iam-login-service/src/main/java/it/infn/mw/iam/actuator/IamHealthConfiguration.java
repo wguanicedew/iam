@@ -38,10 +38,10 @@ public class IamHealthConfiguration {
   private HealthAggregator healthAggregator = new OrderedHealthAggregator();
 
   @Autowired
-  DataSource dataSource;
+  private DataSource dataSource;
 
   @Autowired
-  DiskSpaceHealthIndicatorProperties properties;
+  private DiskSpaceHealthIndicatorProperties properties;
 
   @Bean
   public HealthEndpoint healthEndpoint() {

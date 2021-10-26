@@ -33,23 +33,27 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.context.WebApplicationContext;
 
+import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.test.util.annotation.IamMockMvcIntegrationTest;
 
 @RunWith(SpringRunner.class)
 @IamMockMvcIntegrationTest
-@TestPropertySource(properties= {"endpoints.env.enabled=true", 
+@TestPropertySource(properties = {
+// @formatter:off
+    "endpoints.env.enabled=true", 
     "endpoints.configprops.enabled=true",
     "endpoints.mappings.enabled=true",
     "endpoints.flyway.enabled=true",
     "endpoints.autoconfig.enabled=true",
     "endpoints.beans.enabled=true",
     "endpoints.dump.enabled=true",
-    "endpoints.trace.enabled=true"})
+    "endpoints.trace.enabled=true"
+    // @formatter:on
+})
 public class ActuatorEndpointsTests extends ActuatorTestSupport {
 
-  
+
   @Value("${health.mailProbe.path}")
   private String mailHealthEndpoint;
 
@@ -59,14 +63,8 @@ public class ActuatorEndpointsTests extends ActuatorTestSupport {
   @Value("${spring.mail.port}")
   private Integer mailPort;
 
-  @Value("${iam.superuser.username}")
-  private String basicUsername;
-
-  @Value("${iam.superuser.password}")
-  private String basicPassword;
-
   @Autowired
-  private WebApplicationContext context;
+  private IamProperties iamProperties;
 
   @Autowired
   private MockMvc mvc;
@@ -98,7 +96,7 @@ public class ActuatorEndpointsTests extends ActuatorTestSupport {
   }
 
   @Test
-  @WithMockUser(username = ADMIN_USERNAME, roles = {ADMIN_ROLE})
+  @WithMockUser(username = ADMIN_USERNAME, roles = {ACTUATOR_ROLE})
   public void testHealthEndpointAsAdmin() throws Exception {
     // @formatter:off
     mvc.perform(get("/health"))
@@ -113,7 +111,8 @@ public class ActuatorEndpointsTests extends ActuatorTestSupport {
   @Test
   public void testHealthEndpointAsSuperUser() throws Exception {
     // @formatter:off
-    mvc.perform(get("/health").with(httpBasic(basicUsername, basicPassword)))
+    mvc.perform(get("/health").with(httpBasic(iamProperties.getSuperuser().getUsername(), 
+        iamProperties.getSuperuser().getPassword())))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.status", equalTo(STATUS_UP)))
       .andExpect(jsonPath("$.diskSpace.status", equalTo(STATUS_UP)))
@@ -146,7 +145,7 @@ public class ActuatorEndpointsTests extends ActuatorTestSupport {
   }
 
   @Test
-  @WithMockUser(username = ADMIN_USERNAME, roles = {ADMIN_ROLE})
+  @WithMockUser(username = ADMIN_USERNAME, roles = {ACTUATOR_ROLE})
   public void testInfoEndpointAsAdmin() throws Exception {
     // @formatter:off
     mvc.perform(get("/info"))
@@ -179,7 +178,7 @@ public class ActuatorEndpointsTests extends ActuatorTestSupport {
   }
 
   @Test
-  @WithMockUser(username = ADMIN_USERNAME, roles = {ADMIN_ROLE})
+  @WithMockUser(username = ADMIN_USERNAME, roles = {ACTUATOR_ROLE})
   public void testSensitiveEndpointsAsAdmin() throws Exception {
     for (String endpoint : SENSITIVE_ENDPOINTS) {
       // @formatter:off
@@ -193,7 +192,9 @@ public class ActuatorEndpointsTests extends ActuatorTestSupport {
   public void testSensitiveEndpointsAsSuperUser() throws Exception {
     for (String endpoint : SENSITIVE_ENDPOINTS) {
       // @formatter:off
-      mvc.perform(get(endpoint).with(httpBasic(basicUsername, basicPassword)))
+      mvc.perform(get(endpoint)
+          .with(httpBasic(iamProperties.getSuperuser().getUsername(), 
+              iamProperties.getSuperuser().getPassword())))
         .andExpect(status().isOk());
       // @formatter:on
     }
@@ -221,7 +222,7 @@ public class ActuatorEndpointsTests extends ActuatorTestSupport {
   }
 
   @Test
-  @WithMockUser(username = ADMIN_USERNAME, roles = {ADMIN_ROLE})
+  @WithMockUser(username = ADMIN_USERNAME, roles = {ACTUATOR_ROLE})
   public void testMailHealthEndpointWithoutSmtpAsAdmin() throws Exception {
     // @formatter:off
     mvc.perform(get(mailHealthEndpoint))
@@ -259,7 +260,8 @@ public class ActuatorEndpointsTests extends ActuatorTestSupport {
   @Test
   public void testPrivilegedEndopointsAsSuperUser() throws Exception {
     for (String endpoint : PRIVILEGED_ENDPOINTS) {
-      mvc.perform(get(endpoint).with(httpBasic(basicUsername, basicPassword)))
+      mvc.perform(get(endpoint).with(httpBasic(iamProperties.getSuperuser().getUsername(),
+          iamProperties.getSuperuser().getPassword())))
         .andExpect(status().isOk());
     }
   }

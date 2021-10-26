@@ -20,7 +20,6 @@ import static org.springframework.http.HttpMethod.POST;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -36,6 +35,7 @@ import org.springframework.security.web.context.SecurityContextPersistenceFilter
 
 import it.infn.mw.iam.api.proxy.ProxyCertificatesApiController;
 import it.infn.mw.iam.config.CustomAuthenticationEntryPoint;
+import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.core.oauth.FormClientCredentialsAuthenticationFilter;
 
 @Configuration
@@ -68,9 +68,9 @@ public class IamApiSecurityConfig {
       FormClientCredentialsAuthenticationFilter ccFilter =
           new FormClientCredentialsAuthenticationFilter(PROXY_API_MATCHER,
               authenticationEntryPoint);
-      
+
       ccFilter.setAuthenticationManager(authenticationManager());
-      
+
       // @formatter:off
       http.antMatcher(PROXY_API_MATCHER)
           .exceptionHandling()
@@ -103,7 +103,7 @@ public class IamApiSecurityConfig {
 
     @Autowired
     private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
-    
+
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
       // @formatter:off
@@ -145,11 +145,8 @@ public class IamApiSecurityConfig {
   @Order(25)
   public static class ActuatorEndpointsConfig extends WebSecurityConfigurerAdapter {
 
-    @Value("${iam.superuser.username}")
-    private String basicUsername;
-
-    @Value("${iam.superuser.password}")
-    private String basicPassword;
+    @Autowired
+    private IamProperties properties;
 
     @Autowired
     private OAuth2AuthenticationProcessingFilter resourceFilter;
@@ -161,8 +158,8 @@ public class IamApiSecurityConfig {
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
       // @formatter:off
       auth.inMemoryAuthentication()
-        .withUser(basicUsername).password(basicPassword)
-        .roles("SUPERUSER", "ADMIN");
+        .withUser(properties.getSuperuser().getUsername()).password(properties.getSuperuser().getPassword())
+        .roles("ACTUATOR");
       // @formatter:on
     }
 
@@ -186,9 +183,9 @@ public class IamApiSecurityConfig {
         .and()
           .authorizeRequests()
             .antMatchers(GET, "/info", "/health", "/health/mail", "/health/external").permitAll()
-            .antMatchers(GET, "/metrics").hasRole("ADMIN")
+            .antMatchers(GET, "/metrics").hasAnyRole("ADMIN", "ACTUATOR")
             .antMatchers(GET, "/configprops", "/env", "/mappings", 
-                "/flyway", "/autoconfig", "/beans", "/dump", "/trace").hasRole("SUPERUSER");
+                "/flyway", "/autoconfig", "/beans", "/dump", "/trace").hasRole("ACTUATOR");
       // @formatter:on
     }
   }

@@ -62,7 +62,8 @@ public class MitreSecurityConfig {
             .sessionManagement()
             .sessionCreationPolicy(SessionCreationPolicy.NEVER)
           .and()
-            .csrf().disable();
+            .csrf().disable()
+          .cors();
       // @formatter:on
 
     }
@@ -157,8 +158,10 @@ public class MitreSecurityConfig {
           .authenticationEntryPoint(authenticationEntryPoint)
         .and()
           .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
-        .sessionManagement()
-          .sessionCreationPolicy(STATELESS)
+        .cors()
+        .and()
+          .sessionManagement()
+            .sessionCreationPolicy(STATELESS)
         .and()
           .csrf().disable();
       // @formatter:on
@@ -190,8 +193,10 @@ public class MitreSecurityConfig {
         .httpBasic()
           .authenticationEntryPoint(authenticationEntryPoint)
         .and()
+          .cors()
+        .and()
             .exceptionHandling()
-          .authenticationEntryPoint(authenticationEntryPoint)
+              .authenticationEntryPoint(authenticationEntryPoint)
         .and()
           .sessionManagement()
             .sessionCreationPolicy(STATELESS).and()
@@ -239,6 +244,8 @@ public class MitreSecurityConfig {
           .authenticationEntryPoint(authenticationEntryPoint)
         .and()
           .addFilterBefore(clientCredentialsEndpointFilter(), BasicAuthenticationFilter.class)
+        .cors()
+        .and()
         .exceptionHandling()
           .authenticationEntryPoint(authenticationEntryPoint)
         .and()
@@ -262,6 +269,8 @@ public class MitreSecurityConfig {
       http.antMatcher("/jwk**")
         .exceptionHandling()
           .authenticationEntryPoint(http403ForbiddenEntryPoint)
+        .and()
+          .cors()
         .and()
           .sessionManagement()
           .sessionCreationPolicy(STATELESS)

@@ -50,14 +50,11 @@ import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 public class ActuatorEndpointsWithTokenAuthTests {
 
   private static final String ADMIN_USERNAME = "admin";
-  private static final String ADMIN_AUTORITY = "ROLE_ADMIN";
+  private static final String ACTUATOR_AUTORITY = "ROLE_ACTUATOR";
 
   private static final String STATUS_UP = "UP";
 
   private static final Set<String> SENSITIVE_ENDPOINTS = Sets.newHashSet("/metrics");
-
-  private static final Set<String> PRIVILEGED_ENDPOINTS = Sets.newHashSet("/configprops", "/env",
-      "/mappings", "/flyway", "/autoconfig", "/beans", "/dump", "/trace");
 
   @Value("${spring.mail.host}")
   private String mailHost;
@@ -102,7 +99,7 @@ public class ActuatorEndpointsWithTokenAuthTests {
   @Test
   @WithMockOAuthUser(clientId = "client-cred",
       scopes = {"openid", "profile", "read-tasks", "write-tasks"}, user = ADMIN_USERNAME,
-      authorities = {ADMIN_AUTORITY})
+      authorities = ACTUATOR_AUTORITY)
   public void testHealthEndpointWithTokenAsAdmin() throws Exception {
     // @formatter:off
     mvc.perform(get("/health"))
@@ -131,7 +128,7 @@ public class ActuatorEndpointsWithTokenAuthTests {
   @Test
   @WithMockOAuthUser(clientId = "client-cred",
       scopes = {"openid", "profile", "read-tasks", "write-tasks"}, user = ADMIN_USERNAME,
-      authorities = {ADMIN_AUTORITY})
+      authorities = {ACTUATOR_AUTORITY})
   public void testSensitiveEndpointWithTokenAsAdmin() throws Exception {
     for (String endpoint : SENSITIVE_ENDPOINTS) {
       // @formatter:off
@@ -142,30 +139,4 @@ public class ActuatorEndpointsWithTokenAuthTests {
     }
   }
 
-  @Test
-  @WithMockOAuthUser(clientId = "client-cred",
-      scopes = {"openid", "profile", "read-tasks", "write-tasks"})
-  public void testPrivilegedEndpointWithTokenAsUser() throws Exception {
-    for (String endpoint : PRIVILEGED_ENDPOINTS) {
-      // @formatter:off
-      mvc.perform(get(endpoint))
-        .andExpect(status().isForbidden())
-        ;
-      // @formatter:on
-    }
-  }
-
-  @Test
-  @WithMockOAuthUser(clientId = "client-cred",
-      scopes = {"openid", "profile", "read-tasks", "write-tasks"}, user = ADMIN_USERNAME,
-      authorities = {ADMIN_AUTORITY})
-  public void testPrivilegedEndpointWithTokenAsAdmin() throws Exception {
-    for (String endpoint : PRIVILEGED_ENDPOINTS) {
-      // @formatter:off
-      mvc.perform(get(endpoint))
-        .andExpect(status().isForbidden())
-        ;
-      // @formatter:on
-    }
-  }
 }

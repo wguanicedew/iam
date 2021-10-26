@@ -267,4 +267,5 @@ public class IamConfig {
   VelocityEngine velocityEngine() {
     return new VelocityEngine();
   }
+
 }

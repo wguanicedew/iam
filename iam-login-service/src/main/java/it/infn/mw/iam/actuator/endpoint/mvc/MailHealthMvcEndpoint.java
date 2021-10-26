@@ -74,15 +74,17 @@ public class MailHealthMvcEndpoint extends AbstractEndpointMvcAdapter<MailHealth
   private Health getHealth(AbstractAuthenticationToken auth) {
     Health health = getDelegate().invoke();
 
-    if (auth != null && isAdmin(auth.getAuthorities())) {
+    if (auth != null && isAdminOrActuator(auth.getAuthorities())) {
       return health;
     }
     return Health.status(health.getStatus()).build();
   }
 
-  private boolean isAdmin(Collection<GrantedAuthority> authorities) {
+  private boolean isAdminOrActuator(Collection<GrantedAuthority> authorities) {
+
     for (GrantedAuthority authority : authorities) {
-      if ("ROLE_ADMIN".equals(authority.getAuthority())) {
+      if ("ROLE_ACTUATOR".equals(authority.getAuthority())
+          || "ROLE_ADMIN".equals(authority.getAuthority())) {
         return true;
       }
     }

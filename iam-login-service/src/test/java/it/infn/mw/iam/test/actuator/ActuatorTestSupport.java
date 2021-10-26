@@ -24,6 +24,8 @@ public class ActuatorTestSupport {
   static final String ADMIN_USERNAME = "admin";
   static final String ADMIN_ROLE = "ADMIN";
 
+  static final String ACTUATOR_ROLE = "ACTUATOR";
+
   static final String USER_USERNAME = "test";
   static final String USER_ROLE = "USER";
 
