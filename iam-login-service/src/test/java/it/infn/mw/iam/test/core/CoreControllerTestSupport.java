@@ -49,7 +49,4 @@ public class CoreControllerTestSupport {
   ApplicationEventPublisher mockApplicationEventPublisher() {
     return Mockito.mock(ApplicationEventPublisher.class);
   }
-  
-
-  
 }

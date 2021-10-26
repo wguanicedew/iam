@@ -21,19 +21,15 @@ import static org.springframework.security.test.web.servlet.response.SecurityMoc
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
-import it.infn.mw.iam.IamLoginService;
-import it.infn.mw.iam.test.core.CoreControllerTestSupport;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class})
-@WebAppConfiguration
+import it.infn.mw.iam.test.util.annotation.IamMockMvcIntegrationTest;
+
+@RunWith(SpringRunner.class)
+@IamMockMvcIntegrationTest
 public class RefreshTokenAnonymousTests extends TestTokensUtils {
 
   private static final int FAKE_TOKEN_ID = 12345;
@@ -41,7 +37,6 @@ public class RefreshTokenAnonymousTests extends TestTokensUtils {
   @Before
   public void setup() {
     clearAllTokens();
-    initMvc();
   }
 
   @Test

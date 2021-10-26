@@ -25,18 +25,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
 
-import it.infn.mw.iam.IamLoginService;
-import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 import it.infn.mw.iam.test.util.WithMockOAuthUser;
+import it.infn.mw.iam.test.util.annotation.IamMockMvcIntegrationTest;
 import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class})
-@WebAppConfiguration
+@RunWith(SpringRunner.class)
+@IamMockMvcIntegrationTest
 public class AccessTokenAuthenticatedTests extends TestTokensUtils {
 
   private static final String TESTUSER_USERNAME = "test_102";
@@ -47,7 +43,7 @@ public class AccessTokenAuthenticatedTests extends TestTokensUtils {
 
   @Before
   public void setup() {
-    initMvc();
+    mockOAuth2Filter.cleanupSecurityContext();
   }
   
   @After
