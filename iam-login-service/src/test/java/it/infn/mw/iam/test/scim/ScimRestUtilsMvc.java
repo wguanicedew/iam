@@ -27,22 +27,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import it.infn.mw.iam.api.scim.model.ScimPatchOperation.ScimPatchOperationType;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.api.scim.model.ScimUserPatchRequest;
-import it.infn.mw.iam.api.scim.model.ScimPatchOperation.ScimPatchOperationType;
 
 @Component
 public class ScimRestUtilsMvc extends RestUtils {
 
   @Autowired
-  public ScimRestUtilsMvc(WebApplicationContext context, ObjectMapper mapper) {
-    super(context, mapper);
+  public ScimRestUtilsMvc(MockMvc mvc, ObjectMapper mapper) {
+    super(mvc, mapper);
   }
 
   public ScimUser postUser(ScimUser user) throws Exception {

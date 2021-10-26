@@ -22,7 +22,7 @@ import it.infn.mw.iam.api.scim.model.ScimUser;
 
 public class ScimUtils {
 
-  public static String SCIM_CONTENT_TYPE = "application/scim+json";
+  public static String SCIM_CONTENT_TYPE = "application/scim+json;charset=UTF-8";
 
   public static final String SCIM_CLIENT_ID = "scim-client-rw";
   public static final String SCIM_CLIENT_SECRET = "secret";

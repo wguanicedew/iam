@@ -16,13 +16,11 @@
 package it.infn.mw.iam.test.scim;
 
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -31,9 +29,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -44,12 +40,8 @@ public class RestUtils {
   protected final ObjectMapper mapper;
 
   @Autowired
-  public RestUtils(WebApplicationContext context, ObjectMapper mapper) {
-
-    mvc = MockMvcBuilders.webAppContextSetup(context)
-      .apply(springSecurity())
-      .alwaysDo(log())
-      .build();
+  public RestUtils(MockMvc mvc, ObjectMapper mapper) {
+    this.mvc = mvc;
     this.mapper = mapper;
   }
 

@@ -25,14 +25,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import com.google.common.collect.Lists;
 
-import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.scim.converter.ScimResourceLocationProvider;
 import it.infn.mw.iam.api.scim.converter.UserConverter;
 import it.infn.mw.iam.api.scim.model.ScimGroup;
@@ -63,11 +59,11 @@ import it.infn.mw.iam.core.user.IamAccountService;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.test.SshKeyUtils;
 import it.infn.mw.iam.test.ext_authn.x509.X509TestSupport;
+import it.infn.mw.iam.test.util.annotation.IamMockMvcIntegrationTest;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = {IamLoginService.class})
-@WebAppConfiguration
-@Transactional
+
+@RunWith(SpringRunner.class)
+@IamMockMvcIntegrationTest
 public class EventTests extends X509TestSupport {
 
   private static final String USERNAME = "event_user";

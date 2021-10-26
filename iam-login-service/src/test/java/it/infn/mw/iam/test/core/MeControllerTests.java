@@ -26,22 +26,26 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.test.scim.ScimRestUtilsMvc;
 import it.infn.mw.iam.test.util.WithMockOAuthUser;
+import it.infn.mw.iam.test.util.annotation.IamMockMvcIntegrationTest;
 import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(
-    classes = {IamLoginService.class, CoreControllerTestSupport.class, ScimRestUtilsMvc.class})
-@WebAppConfiguration
+
+@RunWith(SpringRunner.class)
+@IamMockMvcIntegrationTest
+@SpringBootTest(
+    classes = {IamLoginService.class, CoreControllerTestSupport.class, ScimRestUtilsMvc.class},
+    webEnvironment = WebEnvironment.MOCK)
 public class MeControllerTests {
 
   private final static String TESTUSER_USERNAME = "test_101";
@@ -52,6 +56,12 @@ public class MeControllerTests {
 
   @Autowired
   private MockOAuth2Filter mockOAuth2Filter;
+
+
+  @Before
+  public void setup() {
+    mockOAuth2Filter.cleanupSecurityContext();
+  }
 
   @After
   public void teardown() {
