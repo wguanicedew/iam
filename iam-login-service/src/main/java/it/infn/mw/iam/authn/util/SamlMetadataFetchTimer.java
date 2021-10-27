@@ -82,6 +82,7 @@ public class SamlMetadataFetchTimer extends Timer implements DisposableBean {
   @Override
   public void destroy() throws Exception {
     LOG.debug("in destroy");
+    delegate.purge();
     delegate.cancel();
   }
 

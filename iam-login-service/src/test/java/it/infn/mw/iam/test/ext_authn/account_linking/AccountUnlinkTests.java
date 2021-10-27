@@ -16,7 +16,6 @@
 package it.infn.mw.iam.test.ext_authn.account_linking;
 
 import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.EPUID;
-
 import static it.infn.mw.iam.test.ext_authn.saml.SamlAuthenticationTestSupport.DEFAULT_IDP_ID;
 import static it.infn.mw.iam.test.ext_authn.saml.SamlAuthenticationTestSupport.T2_EPUID;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -25,7 +24,6 @@ import static org.hamcrest.Matchers.isIn;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -33,19 +31,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Date;
 import java.util.UUID;
 
-import org.springframework.transaction.annotation.Transactional;
-
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo.ExternalAuthenticationType;
@@ -53,19 +46,18 @@ import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamOidcId;
 import it.infn.mw.iam.persistence.model.IamSamlId;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
+import it.infn.mw.iam.test.util.annotation.IamMockMvcIntegrationTest;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = {IamLoginService.class})
-@WebAppConfiguration
-@Transactional
+
+@RunWith(SpringRunner.class)
+@IamMockMvcIntegrationTest
+@SpringBootTest(classes = {IamLoginService.class}, webEnvironment = WebEnvironment.MOCK)
 public class AccountUnlinkTests {
-
-  @Autowired
-  private WebApplicationContext context;
 
   @Autowired
   private IamAccountRepository iamAccountRepo;
 
+  @Autowired
   private MockMvc mvc;
   
   public static final String SAML_ATTRIBUTE_ID = EPUID.getAttributeName();
@@ -91,11 +83,6 @@ public class AccountUnlinkTests {
   public static final IamOidcId LINKED_OIDC_ID =
       new IamOidcId(OIDC_LINKED_ISSUER, OIDC_LINKED_SUBJECT);
 
-  @Before
-  public void setup() {
-    mvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
-  }
-
   private String accountLinkingResource(ExternalAuthenticationType type) {
     return String.format("/iam/account-linking/%s", type.name());
   }
@@ -107,7 +94,6 @@ public class AccountUnlinkTests {
   private String accountLinkingResourceSaml() {
     return accountLinkingResource(ExternalAuthenticationType.SAML);
   }
-
 
   @Test
   public void accountUnlinkEndpointFailsForUnauthenticatedUsers() throws Exception {

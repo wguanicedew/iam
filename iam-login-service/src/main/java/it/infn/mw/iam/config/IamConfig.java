@@ -23,7 +23,6 @@ import java.time.Clock;
 import java.util.Arrays;
 import java.util.Map;
 
-import org.apache.velocity.app.VelocityEngine;
 import org.h2.server.web.WebServlet;
 import org.mitre.oauth2.service.IntrospectionResultAssembler;
 import org.mitre.oauth2.service.impl.DefaultIntrospectionResultAssembler;
@@ -260,12 +259,6 @@ public class IamConfig {
   ServletRegistrationBean h2Console() {
     WebServlet h2Servlet = new WebServlet();
     return new ServletRegistrationBean(h2Servlet, "/h2-console/*");
-  }
-
-  @Bean
-  @Profile("saml")
-  VelocityEngine velocityEngine() {
-    return new VelocityEngine();
   }
 
 }

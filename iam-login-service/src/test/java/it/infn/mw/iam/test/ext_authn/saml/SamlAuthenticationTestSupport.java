@@ -15,9 +15,6 @@
  */
 package it.infn.mw.iam.test.ext_authn.saml;
 
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.KeyStore;
@@ -27,7 +24,6 @@ import java.security.cert.CertificateException;
 import java.util.Map;
 
 import org.joda.time.DateTime;
-import org.junit.Before;
 import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.AuthnRequest;
 import org.opensaml.saml2.core.Response;
@@ -41,8 +37,6 @@ import org.springframework.security.saml.key.JKSKeyManager;
 import org.springframework.security.saml.metadata.MetadataGenerator;
 import org.springframework.security.saml.parser.SAMLObject;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
@@ -93,17 +87,7 @@ public class SamlAuthenticationTestSupport {
   protected ObjectMapper objectMapper;
 
   @Autowired
-  protected WebApplicationContext context;
-
   protected MockMvc mvc;
-
-  @Before
-  public void setup() {
-    mvc = MockMvcBuilders.webAppContextSetup(context)
-      .apply(springSecurity())
-      .alwaysDo(log())
-      .build();
-  }
 
   public String samlDefaultIdpLoginUrl() throws UnsupportedEncodingException {
 
