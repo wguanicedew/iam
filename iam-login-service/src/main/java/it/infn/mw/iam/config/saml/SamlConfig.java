@@ -104,6 +104,7 @@ import org.springframework.security.saml.processor.SAMLProcessorImpl;
 import org.springframework.security.saml.trust.httpclient.TLSProtocolConfigurer;
 import org.springframework.security.saml.trust.httpclient.TLSProtocolSocketFactory;
 import org.springframework.security.saml.userdetails.SAMLUserDetailsService;
+import org.springframework.security.saml.util.VelocityFactory;
 import org.springframework.security.saml.websso.ArtifactResolutionProfile;
 import org.springframework.security.saml.websso.ArtifactResolutionProfileImpl;
 import org.springframework.security.saml.websso.SingleLogoutProfile;
@@ -124,7 +125,6 @@ import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuc
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.ui.velocity.VelocityEngineFactory;
 
 import com.google.common.base.Strings;
 
@@ -838,11 +838,9 @@ public class SamlConfig extends WebSecurityConfigurerAdapter
     return new SAMLProcessorImpl(bindings);
   }
 
-  @SuppressWarnings("deprecation")
   @Bean
   public VelocityEngine velocityEngine() throws VelocityException, IOException {
-    VelocityEngineFactory factory = new VelocityEngineFactory();
-    return factory.createVelocityEngine();
+    return VelocityFactory.getEngine();
   }
 
   @Bean

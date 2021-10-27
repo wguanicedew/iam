@@ -55,13 +55,12 @@ import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamSamlId;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.test.ext_authn.saml.SamlAuthenticationTestSupport;
-import it.infn.mw.iam.test.ext_authn.saml.SamlTestConfig;
 import it.infn.mw.iam.test.util.annotation.IamMockMvcIntegrationTest;
 import it.infn.mw.iam.test.util.saml.SamlUtils;
 
 @RunWith(SpringRunner.class)
 @IamMockMvcIntegrationTest
-@SpringBootTest(classes = {IamLoginService.class, SamlTestConfig.class},
+@SpringBootTest(classes = {IamLoginService.class},
     webEnvironment = WebEnvironment.MOCK)
 public class SamlAccountLinkingTests extends SamlAuthenticationTestSupport {
 

@@ -46,7 +46,7 @@ spring:
     password: ${IAM_MAIL_PASSWORD:}
 
   freemarker:
-    template-loader-path: ${IAM_CUSTOM_TEMPLATE_LOCATION:classpath:templates/}
+    template-loader-path: ${IAM_CUSTOM_TEMPLATE_LOCATION:classpath:/email-templates}
 
 iam:
   host: ${IAM_HOST:localhost}
