@@ -19,7 +19,9 @@ import static java.lang.Boolean.FALSE;
 
 import org.hibernate.validator.constraints.NotBlank;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
 
+@Validated
 @ConfigurationProperties(prefix = "saml.idp-metadata")
 public class IamSamlIdpMetadataProperties {
 

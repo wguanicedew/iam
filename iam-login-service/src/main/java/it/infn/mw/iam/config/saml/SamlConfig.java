@@ -38,7 +38,6 @@ import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.exception.VelocityException;
 import org.opensaml.saml2.metadata.provider.FileBackedHTTPMetadataProvider;
 import org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider;
 import org.opensaml.saml2.metadata.provider.MetadataFilter;
@@ -594,6 +593,11 @@ public class SamlConfig extends WebSecurityConfigurerAdapter
     HttpClient httpClient = httpClient();
 
     for (IamSamlIdpMetadataProperties p : samlProperties.getIdpMetadata()) {
+
+      if (Strings.isNullOrEmpty(p.getMetadataUrl())) {
+        throw new IllegalStateException("Null or empty metadata url");
+      }
+
       String trimmedMedataUrl = p.getMetadataUrl().trim();
 
       if (trimmedMedataUrl.startsWith("classpath:")) {
@@ -839,7 +843,7 @@ public class SamlConfig extends WebSecurityConfigurerAdapter
   }
 
   @Bean
-  public VelocityEngine velocityEngine() throws VelocityException, IOException {
+  public VelocityEngine velocityEngine() {
     return VelocityFactory.getEngine();
   }
 
