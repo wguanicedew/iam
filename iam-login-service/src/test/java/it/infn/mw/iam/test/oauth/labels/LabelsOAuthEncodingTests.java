@@ -26,28 +26,23 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
 
-import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.core.user.IamAccountService;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamLabel;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
-import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 import it.infn.mw.iam.test.oauth.EndpointsTestUtils;
+import it.infn.mw.iam.test.util.annotation.IamMockMvcIntegrationTest;
 import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class})
-@WebAppConfiguration
-@Transactional
+
+@RunWith(SpringRunner.class)
+@IamMockMvcIntegrationTest
 @TestPropertySource(properties = {"iam.token-enhancer.include-labels[0].label.name=test",
     "iam.token-enhancer.include-labels[0].label.prefix=iam",
     "iam.token-enhancer.include-labels[0].claim-name=test_label",})
@@ -81,7 +76,6 @@ public class LabelsOAuthEncodingTests extends EndpointsTestUtils {
 
   @Before
   public void setup() {
-    buildMockMvc();
     mockOAuth2Filter.cleanupSecurityContext();
   }
 

@@ -74,6 +74,7 @@ public class IamTokenEndointSecurityConfig extends WebSecurityConfigurerAdapter 
   public ClientCredentialsTokenEndpointFilter ccFilter() throws Exception {
     ClientCredentialsTokenEndpointFilter filter =
         new ClientCredentialsTokenEndpointFilter(TOKEN_ENDPOINT);
+    filter.setAllowOnlyPost(true);
     filter.setAuthenticationManager(authenticationManager());
     return filter;
   }
@@ -108,7 +109,7 @@ public class IamTokenEndointSecurityConfig extends WebSecurityConfigurerAdapter 
             .antMatchers(TOKEN_ENDPOINT).authenticated()
             .and()
             .addFilterBefore(jwtBearerFilter(), AbstractPreAuthenticatedProcessingFilter.class)
-            .addFilterBefore(ccFilter(), BasicAuthenticationFilter.class)
+            .addFilterAfter(ccFilter(), BasicAuthenticationFilter.class)
         .exceptionHandling()
             .authenticationEntryPoint(authenticationEntryPoint)
             .accessDeniedHandler(new OAuth2AccessDeniedHandler())

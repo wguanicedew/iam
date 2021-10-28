@@ -30,22 +30,20 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Sets;
 
-import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.core.group.IamGroupService;
 import it.infn.mw.iam.core.oauth.profile.aarc.AarcClaimValueHelper;
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.model.IamUserInfo;
-import it.infn.mw.iam.test.core.CoreControllerTestSupport;
+import it.infn.mw.iam.test.util.annotation.IamMockMvcIntegrationTest;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class})
+@RunWith(SpringRunner.class)
+@IamMockMvcIntegrationTest
 @TestPropertySource(properties = {
   // @formatter:off
   "iam.host=example.org",
@@ -69,7 +67,6 @@ public class AarcClaimValueHelperTests {
   public void setup() {
     when(userInfo.getGroups()).thenReturn(Collections.emptySet());
   }
-
 
 
   @Test

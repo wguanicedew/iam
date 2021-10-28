@@ -24,11 +24,9 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -39,21 +37,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.exchange_policy.ClientMatchingPolicyDTO;
 import it.infn.mw.iam.api.exchange_policy.ExchangePolicyDTO;
 import it.infn.mw.iam.api.exchange_policy.ExchangeScopePolicyDTO;
@@ -63,21 +55,17 @@ import it.infn.mw.iam.core.oauth.scope.matchers.ScopeMatcherRegistry;
 import it.infn.mw.iam.persistence.model.IamScopePolicy.MatchingPolicy;
 import it.infn.mw.iam.persistence.model.PolicyRule;
 import it.infn.mw.iam.persistence.repository.IamTokenExchangePolicyRepository;
-import it.infn.mw.iam.test.core.CoreControllerTestSupport;
-import it.infn.mw.iam.test.oauth.exchange.ExchangePolicyApiIntegrationTests.TestBeans;
 import it.infn.mw.iam.test.util.WithAnonymousUser;
 import it.infn.mw.iam.test.util.WithMockOAuthUser;
+import it.infn.mw.iam.test.util.annotation.IamMockMvcIntegrationTest;
 import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(
-    classes = {IamLoginService.class, CoreControllerTestSupport.class, TestBeans.class})
-@WebAppConfiguration
-@Transactional
+@RunWith(SpringRunner.class)
+@IamMockMvcIntegrationTest
 @WithAnonymousUser
 public class ExchangePolicyApiIntegrationTests {
 
-  @Configuration
+  @TestConfiguration
   public static class TestBeans {
     @Bean
     @Primary
@@ -91,9 +79,6 @@ public class ExchangePolicyApiIntegrationTests {
   public static final String ENDPOINT = "/iam/api/exchange/policies";
 
   @Autowired
-  private WebApplicationContext context;
-
-  @Autowired
   MockOAuth2Filter filter;
 
   @Autowired
@@ -105,21 +90,12 @@ public class ExchangePolicyApiIntegrationTests {
   @Autowired
   TokenExchangePdp pdp;
 
+  @Autowired
   private MockMvc mvc;
 
   @Before
   public void setup() throws Exception {
-    mvc =
-        MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).alwaysDo(log()).build();
     reset(pdp);
-  }
-
-
-  protected ExchangePolicyDTO denyAllExchangesPolicy() {
-    ExchangePolicyDTO policy = ExchangePolicyDTO.denyPolicy("Deny all exchanges");
-    policy.setOriginClient(anyClient());
-    policy.setDestinationClient(anyClient());
-    return policy;
   }
 
   @After
@@ -127,6 +103,12 @@ public class ExchangePolicyApiIntegrationTests {
     filter.cleanupSecurityContext();
   }
 
+  protected ExchangePolicyDTO denyAllExchangesPolicy() {
+    ExchangePolicyDTO policy = ExchangePolicyDTO.denyPolicy("Deny all exchanges");
+    policy.setOriginClient(anyClient());
+    policy.setDestinationClient(anyClient());
+    return policy;
+  }
 
   @Test
   public void listPoliciesRequiresAuthenticatedUser() throws Exception {

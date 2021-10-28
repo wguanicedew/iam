@@ -28,16 +28,16 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mitre.jwt.signer.service.impl.JWKSetCacheService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.client.response.MockRestResponseCreators;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -45,22 +45,25 @@ import com.nimbusds.jose.JOSEException;
 
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.authn.oidc.RestTemplateFactory;
+import it.infn.mw.iam.test.util.annotation.IamMockMvcIntegrationTest;
 import it.infn.mw.iam.test.util.oidc.MockRestTemplateFactory;
 
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = {IamLoginService.class, JWKCacheSetServiceTests.class})
-@WebAppConfiguration
-@Transactional
+@RunWith(SpringRunner.class)
+@IamMockMvcIntegrationTest
+@SpringBootTest(classes = {IamLoginService.class}, webEnvironment = WebEnvironment.MOCK)
 public class JWKCacheSetServiceTests {
 
   public static final String JWK_URL = "https://iam.example/jwk";
   public static final String JKS_PATH = "oidc/mock_jwk.jks";
 
-  @Bean
-  @Primary
-  public RestTemplateFactory mockRestTemplateFactory() {
-    return new MockRestTemplateFactory();
+  @TestConfiguration
+  public static class TestConfig {
+    @Bean
+    @Primary
+    public RestTemplateFactory mockRestTemplateFactory() {
+      return new MockRestTemplateFactory();
+    }
   }
 
   @Autowired

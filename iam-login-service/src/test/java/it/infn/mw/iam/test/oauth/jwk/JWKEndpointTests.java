@@ -21,31 +21,21 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.context.junit4.SpringRunner;
 
-import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.core.web.jwk.IamJWKSetPublishingEndpoint;
 import it.infn.mw.iam.test.oauth.EndpointsTestUtils;
+import it.infn.mw.iam.test.util.annotation.IamMockMvcIntegrationTest;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = IamLoginService.class)
-@WebAppConfiguration
-@Transactional
+
+@RunWith(SpringRunner.class)
+@IamMockMvcIntegrationTest
 public class JWKEndpointTests extends EndpointsTestUtils {
 
   private static final String ENDPOINT = "/" + IamJWKSetPublishingEndpoint.URL;
-
-  @Before
-  public void setup() throws Exception {
-    buildMockMvc();
-  }
 
   @Test
   public void testKeys() throws Exception {
@@ -53,7 +43,7 @@ public class JWKEndpointTests extends EndpointsTestUtils {
     // @formatter:off
     mvc.perform(get(ENDPOINT))
     .andExpect(status().isOk())
-    .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+    .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
     .andExpect(jsonPath("$.keys", hasSize(1)))
     .andExpect(jsonPath("$.keys[0].kty").value("RSA"))
     .andExpect(jsonPath("$.keys[0].e").value("AQAB"))
