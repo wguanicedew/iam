@@ -15,20 +15,7 @@
  */
 package it.infn.mw.iam.test.rcauth;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
-
 import org.mitre.jose.keystore.JWKSetKeyStore;
-import org.mitre.jwt.signer.service.JWTSigningAndValidationService;
-import org.mitre.jwt.signer.service.impl.DefaultJWTSigningAndValidationService;
-import org.mitre.jwt.signer.service.impl.JWKSetCacheService;
-import org.mitre.openid.connect.client.service.ServerConfigurationService;
-import org.mitre.openid.connect.config.ServerConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.ClassPathResource;
 
 import com.nimbusds.jose.JWSAlgorithm;
@@ -73,32 +60,6 @@ public class RCAuthTestSupport extends X509TestSupport {
   protected JWSAlgorithm jwsAlgo = JWSAlgorithm.RS256;
 
   protected IdTokenBuilder tokenBuilder = new IdTokenBuilder(rcAuthKeyStore, jwsAlgo);
-
-  @Bean
-  @Primary
-  public ServerConfigurationService serverConfigService() {
-
-    ServerConfigurationService scs = mock(ServerConfigurationService.class);
-    ServerConfiguration sc = mock(ServerConfiguration.class);
-    when(sc.getAuthorizationEndpointUri()).thenReturn(AUTHORIZATION_URI);
-    when(sc.getTokenEndpointUri()).thenReturn(TOKEN_URI);
-    when(sc.getJwksUri()).thenReturn(JWK_URI);
-
-    when(scs.getServerConfiguration(RCAuthTestSupport.ISSUER)).thenReturn(sc);
-    return scs;
-  }
-
-  @Bean
-  @Primary
-  public JWKSetCacheService mockjwkSetCacheService() throws NoSuchAlgorithmException, InvalidKeySpecException {
-
-    JWTSigningAndValidationService signatureValidator = new DefaultJWTSigningAndValidationService(rcAuthKeyStore());
-
-    JWKSetCacheService mockCacheService = mock(JWKSetCacheService.class);
-    when(mockCacheService.getValidator(JWK_URI)).thenReturn(signatureValidator);
-
-    return mockCacheService;
-  }
 
   public JWKSetKeyStore rcAuthKeyStore() {
     JWKSetKeyStore ks = new JWKSetKeyStore();

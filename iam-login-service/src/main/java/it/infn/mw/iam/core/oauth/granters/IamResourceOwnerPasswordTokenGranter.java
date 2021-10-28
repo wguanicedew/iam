@@ -59,7 +59,7 @@ public class IamResourceOwnerPasswordTokenGranter extends ResourceOwnerPasswordT
 
     if (user.isPresent() && signatureCheckService.needsAupSignature(user.get())) {
       throw new InvalidGrantException(
-          format("User '%s' needs to sign AUP for this organization in order to proceed.",
+          format("User %s needs to sign AUP for this organization in order to proceed.",
               user.get().getUsername()));
     }
 

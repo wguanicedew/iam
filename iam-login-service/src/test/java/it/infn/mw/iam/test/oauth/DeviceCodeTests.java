@@ -35,19 +35,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.io.UnsupportedEncodingException;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mitre.oauth2.model.ClientDetailsEntity;
-import org.mitre.oauth2.service.ClientDetailsEntityService;
 import org.mitre.openid.connect.ClientDetailsEntityJsonProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.mock.web.MockHttpSession;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -57,11 +54,12 @@ import com.nimbusds.jwt.JWTParser;
 
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.test.oauth.ClientRegistrationTestSupport.ClientJsonStringBuilder;
+import it.infn.mw.iam.test.util.annotation.IamMockMvcIntegrationTest;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = IamLoginService.class)
-@WebAppConfiguration
-@Transactional
+
+@RunWith(SpringRunner.class)
+@IamMockMvcIntegrationTest
+@SpringBootTest(classes = {IamLoginService.class}, webEnvironment = WebEnvironment.MOCK)
 public class DeviceCodeTests extends EndpointsTestUtils {
 
   public static final String DEVICE_CODE_ENDPOINT = "/devicecode";
@@ -86,15 +84,7 @@ public class DeviceCodeTests extends EndpointsTestUtils {
   public static final String TEST_PASSWORD = "password";
 
   @Autowired
-  ObjectMapper mapper;
-
-  @Autowired
-  ClientDetailsEntityService clientService;
-
-  @Before
-  public void setup() throws Exception {
-    buildMockMvc();
-  }
+  private ObjectMapper mapper;
 
   @Test
   public void testDeviceCodeEndpointRequiresClientWithDeviceCodeGrantEnabled() throws Exception {
