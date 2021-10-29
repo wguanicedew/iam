@@ -38,7 +38,6 @@
     <rest-assured.version>2.9.0</rest-assured.version>
     <json-path.version>2.2.0</json-path.version>
 
-    <flyway-test.version>4.0</flyway-test.version>
     <validator-collection.version>2.2.0</validator-collection.version>
 
     <license-maven-plugin.version>3.0</license-maven-plugin.version>
@@ -163,15 +162,6 @@
 
       <!-- SAML -->
 
-      <!-- Keep it to 2.6.4. Moving to 2.6.6 breaks metadata fetching -->
-      <!--
-      <dependency>
-        <groupId>org.opensaml</groupId>
-        <artifactId>opensaml</artifactId>
-        <version>2.6.4</version>
-      </dependency>
-      -->
-
       <dependency>
         <groupId>org.bouncycastle</groupId>
         <artifactId>bcpkix-jdk15on</artifactId>
@@ -200,21 +190,6 @@
         <groupId>org.springframework.security.extensions</groupId>
         <artifactId>spring-security-saml2-core</artifactId>
         <version>${spring-security-saml.version}</version>
-        <!--
-        <exclusions>
-          <exclusion>
-            <groupId>org.opensaml</groupId>
-            <artifactId>opensaml</artifactId>
-          </exclusion>
-        </exclusions>
-        -->
-      </dependency>
-
-      <dependency>
-        <groupId>org.flywaydb.flyway-test-extensions</groupId>
-        <artifactId>flyway-spring-test</artifactId>
-        <version>${flyway-test.version}</version>
-        <scope>test</scope>
       </dependency>
 
       <dependency>
