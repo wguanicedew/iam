@@ -18,23 +18,17 @@ package it.infn.mw.iam.config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Bean;
-import org.springframework.session.MapSessionRepository;
-import org.springframework.session.SessionRepository;
-import org.springframework.session.config.annotation.web.http.EnableSpringHttpSession;
+import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
 
-@ConditionalOnProperty(name = "iam.externalized-session.enabled", havingValue = "false",
-    matchIfMissing = true)
-@EnableSpringHttpSession
-public class HttpSessionConfig {
 
-  private static final Logger LOG = LoggerFactory.getLogger(HttpSessionConfig.class);
+@ConditionalOnProperty(name = "iam.externalized-session.enabled", havingValue = "true")
+@EnableRedisHttpSession
+public class RedisSessionConfig {
 
-  @Bean
-  public SessionRepository<?> sessionRepository() {
+  private static final Logger LOG = LoggerFactory.getLogger(RedisSessionConfig.class);
 
-    LOG.info("Http session store strategy: local session");
-    return new MapSessionRepository();
+  public RedisSessionConfig() {
+    LOG.info("Http session store strategy: external redis-managed session");
   }
 
 }

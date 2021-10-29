@@ -52,6 +52,8 @@ import it.infn.mw.iam.test.TestUtils;
 @Transactional
 public class AuthorizationCodeIntegrationTests {
 
+  private static final String SESSION_COOKIE_NAME = "SESSION";
+
   @Value("${local.server.port}")
   private Integer iamPort;
 
@@ -120,7 +122,7 @@ public class AuthorizationCodeIntegrationTests {
         .formParam("username", "test")
         .formParam("password", "password")
         .formParam("submit", "Login")
-        .cookie(resp1.extract().detailedCookie("JSESSIONID"))
+        .cookie(resp1.extract().detailedCookie(SESSION_COOKIE_NAME))
         .redirects().follow(false)
       .when()
         .post(loginUrl)
@@ -130,7 +132,7 @@ public class AuthorizationCodeIntegrationTests {
 
       // @formatter:off
       RestAssured.given()
-        .cookie(resp2.extract().detailedCookie("JSESSIONID"))
+        .cookie(resp2.extract().detailedCookie(SESSION_COOKIE_NAME))
         .queryParam("response_type", RESPONSE_TYPE_CODE)
         .queryParam("client_id", TEST_CLIENT_ID)
         .queryParam("redirect_uri", TEST_CLIENT_REDIRECT_URI)
@@ -148,7 +150,7 @@ public class AuthorizationCodeIntegrationTests {
 
       // @formatter:off
       ValidatableResponse resp4 = RestAssured.given()
-        .cookie(resp2.extract().detailedCookie("JSESSIONID"))
+        .cookie(resp2.extract().detailedCookie(SESSION_COOKIE_NAME))
         .formParam("user_oauth_approval", "true")
         .formParam("authorize", "Authorize")
         .formParam("scope_openid", "openid")

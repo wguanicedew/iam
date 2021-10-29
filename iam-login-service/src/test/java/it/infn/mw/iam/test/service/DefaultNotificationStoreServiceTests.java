@@ -26,11 +26,12 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -63,26 +64,28 @@ public class DefaultNotificationStoreServiceTests {
   public static final String IAM_MAIL_FROM = "iam@test.example";
   public static final String IAM_ADMIN_ADDRESS = "admin@test.example";
 
-  @Mock
-  IamEmailNotificationRepository notificationRepo;
+  public static final Instant NOW = Instant.parse("2021-01-01T00:00:00.00Z");
 
   @Mock
-  TimeProvider timeProvider;
+  private IamEmailNotificationRepository notificationRepo;
 
   @Mock
-  NotificationProperties properties;
+  private TimeProvider timeProvider;
+
+  @Mock
+  private NotificationProperties properties;
 
   @InjectMocks
-  DefaultNotificationStoreService service;
+  private DefaultNotificationStoreService service;
 
   @Captor
-  ArgumentCaptor<Date> dateArgumentCaptor;
+  private ArgumentCaptor<Date> dateArgumentCaptor;
 
   @Captor
-  ArgumentCaptor<IamDeliveryStatus> statusArgumentCaptor;
+  private ArgumentCaptor<IamDeliveryStatus> statusArgumentCaptor;
 
   @Captor
-  ArgumentCaptor<Iterable<IamEmailNotification>> notificationCaptor;
+  private ArgumentCaptor<Iterable<IamEmailNotification>> notificationCaptor;
 
   @Before
   public void setup() {
@@ -108,9 +111,8 @@ public class DefaultNotificationStoreServiceTests {
   @Test
   public void clearExpiredNotificationsClearsTheRightNotifications() {
 
-    Date now = new Date();
-    Date oneDayAfterNow = new Date(now.getTime() + TimeUnit.DAYS.toMillis(1));
-    Date twoDaysAfterNow = new Date(now.getTime() + TimeUnit.DAYS.toMillis(2));
+    Date oneDayAfterNow = Date.from(NOW.plus(1L, ChronoUnit.DAYS));
+    Date twoDaysAfterNow = Date.from(NOW.plus(2L, ChronoUnit.DAYS));
     String randomUuid = UUID.randomUUID().toString();
 
 
@@ -150,11 +152,9 @@ public class DefaultNotificationStoreServiceTests {
   
   @Test
   public void clearExpiredNotificationsDoesNotClearAnythingWhenThereAreNoExpiredNotifications() {
-
-    Date now = new Date();
-    Date oneDayAfterNow = new Date(now.getTime() + TimeUnit.DAYS.toMillis(1));
-    Date twoDaysAfterNow = new Date(now.getTime() + TimeUnit.DAYS.toMillis(2));
     
+    Date oneDayAfterNow = Date.from(NOW.plus(1L, ChronoUnit.DAYS));
+    Date twoDaysAfterNow = Date.from(NOW.plus(2L, ChronoUnit.DAYS));
 
     when(notificationRepo.findByStatusWithUpdateTime(Mockito.any(), Mockito.any()))
       .thenReturn(emptyList());

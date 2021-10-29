@@ -30,7 +30,8 @@ server:
   session:
     timeout: ${IAM_SESSION_TIMEOUT_SECS:1800}
 
-spring: 
+spring:
+     
   profiles:
     active: h2-test
   application:
@@ -51,12 +52,20 @@ spring:
   freemarker:
     template-loader-path: ${IAM_CUSTOM_TEMPLATE_LOCATION:classpath:templates/}
 
+  redis:
+    host: ${IAM_SPRING_REDIS_HOST:localhost}
+    password: ${IAM_SPRING_REDIS_PASSWORD:}
+    port: ${IAM_SPRING_REDIS_PORT:6379}
+
 iam:
   host: ${IAM_HOST:localhost}
   baseUrl: ${IAM_BASE_URL:http://${iam.host}:8080}
   issuer: ${IAM_ISSUER:http://${iam.host}:8080}
   topbarTitle: ${IAM_TOPBAR_TITLE:INDIGO IAM for ${iam.organisation.name}}
   
+  externalized-session:
+    enabled: ${IAM_EXTERNALIZED_SESSION_ENABLED:false}
+    
   jwk:
     keystore-location: ${IAM_KEY_STORE_LOCATION:classpath:keystore.jwks}
     default-key-id: ${IAM_JWK_DEFAULT_KEY_ID:rsa1}

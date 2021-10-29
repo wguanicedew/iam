@@ -14,8 +14,6 @@
 # limitations under the License.
 #
 
-spring:
-  redis:
-    host: ${IAM_SPRING_REDIS_HOST:localhost}
-    password: ${IAM_SPRING_REDIS_PASSWORD:}
-    port: ${IAM_SPRING_REDIS_PORT:6379}
+iam:
+  externalized-session:
+    enabled: true
