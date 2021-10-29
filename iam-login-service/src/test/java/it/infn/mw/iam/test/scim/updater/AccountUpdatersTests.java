@@ -32,15 +32,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import com.google.common.collect.Lists;
 
-import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.scim.exception.ScimResourceExistsException;
 import it.infn.mw.iam.api.scim.updater.Updater;
 import it.infn.mw.iam.api.scim.updater.builders.AccountUpdaters;
@@ -58,15 +54,12 @@ import it.infn.mw.iam.persistence.model.IamSamlId;
 import it.infn.mw.iam.persistence.model.IamSshKey;
 import it.infn.mw.iam.persistence.model.IamUserInfo;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
-import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 import it.infn.mw.iam.test.ext_authn.x509.X509TestSupport;
-import it.infn.mw.iam.test.scim.ScimRestUtilsMvc;
+import it.infn.mw.iam.test.util.annotation.IamNoMvcTest;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(
-    classes = {IamLoginService.class, CoreControllerTestSupport.class, ScimRestUtilsMvc.class})
-@WebAppConfiguration
-@Transactional
+
+@RunWith(SpringRunner.class)
+@IamNoMvcTest
 public class AccountUpdatersTests extends X509TestSupport {
 
   public static final String OLD = "old";
@@ -100,20 +93,20 @@ public class AccountUpdatersTests extends X509TestSupport {
   }
 
   @Autowired
-  IamAccountRepository accountRepo;
+  private IamAccountRepository accountRepo;
 
   @Autowired
-  IamAccountService accountService;
+  private IamAccountService accountService;
 
   @Autowired
-  IamGroupService groupService;
+  private IamGroupService groupService;
 
   @Autowired
-  PasswordEncoder encoder;
+  private PasswordEncoder encoder;
 
-  IamAccount account;
-  IamAccount other;
-  IamGroup group;
+  private IamAccount account;
+  private IamAccount other;
+  private IamGroup group;
 
   private IamAccount newAccount(String username) {
     IamAccount account = new IamAccount();

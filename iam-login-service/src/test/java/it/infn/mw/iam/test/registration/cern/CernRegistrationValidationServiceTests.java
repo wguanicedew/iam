@@ -40,24 +40,20 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
 
-import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.registration.cern.CernHrDBApiService;
 import it.infn.mw.iam.api.registration.cern.CernHrDbApiError;
 import it.infn.mw.iam.api.registration.cern.dto.InstituteDTO;
@@ -67,21 +63,18 @@ import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamLabel;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.registration.RegistrationRequestDto;
-import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 import it.infn.mw.iam.test.util.WithAnonymousUser;
 import it.infn.mw.iam.test.util.WithMockOIDCUser;
+import it.infn.mw.iam.test.util.annotation.IamMockMvcIntegrationTest;
 
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class,
-    CernRegistrationValidationServiceTests.TestConfig.class})
-@WebAppConfiguration
-@Transactional
+@RunWith(SpringRunner.class)
+@IamMockMvcIntegrationTest
 @ActiveProfiles({"h2-test", "cern"})
 @TestPropertySource(properties = {"cern.task.enabled=false"})
 public class CernRegistrationValidationServiceTests {
 
-  @Configuration
+  @TestConfiguration
   public static class TestConfig {
     @Bean
     @Primary

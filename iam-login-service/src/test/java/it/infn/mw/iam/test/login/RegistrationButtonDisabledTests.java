@@ -31,11 +31,11 @@ import com.jayway.restassured.RestAssured;
 
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.test.TestUtils;
-import it.infn.mw.iam.test.util.annotation.IamMockMvcIntegrationTest;
+import it.infn.mw.iam.test.util.annotation.IamRandomPortIntegrationTest;
 
 
 @RunWith(SpringRunner.class)
-@IamMockMvcIntegrationTest
+@IamRandomPortIntegrationTest
 @SpringBootTest(classes = {IamLoginService.class},
     webEnvironment = WebEnvironment.RANDOM_PORT)
 @TestPropertySource(properties = {"iam.registration.show-registration-button-in-login-page=false"})

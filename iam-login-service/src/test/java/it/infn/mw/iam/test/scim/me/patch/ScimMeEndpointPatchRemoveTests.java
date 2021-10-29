@@ -26,10 +26,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import com.google.common.collect.Lists;
 
@@ -43,13 +42,15 @@ import it.infn.mw.iam.api.scim.provisioning.ScimUserProvisioning;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 import it.infn.mw.iam.test.scim.ScimRestUtilsMvc;
 import it.infn.mw.iam.test.util.WithMockOAuthUser;
+import it.infn.mw.iam.test.util.annotation.IamMockMvcIntegrationTest;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(
-    classes = {IamLoginService.class, CoreControllerTestSupport.class, ScimRestUtilsMvc.class})
-@WebAppConfiguration
+
+@RunWith(SpringRunner.class)
+@IamMockMvcIntegrationTest
+@SpringBootTest(
+    classes = {IamLoginService.class, CoreControllerTestSupport.class, ScimRestUtilsMvc.class},
+    webEnvironment = WebEnvironment.MOCK)
 @WithMockOAuthUser(user = "test_104", authorities = {"ROLE_USER"})
-@Transactional
 public class ScimMeEndpointPatchRemoveTests {
 
   @Autowired

@@ -24,6 +24,7 @@ import org.hibernate.validator.constraints.NotBlank;
 import org.opensaml.saml2.core.NameIDType;
 import org.opensaml.xml.signature.SignatureConstants;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
 
 import com.google.common.collect.Lists;
 
@@ -33,8 +34,10 @@ import it.infn.mw.iam.config.login.LoginButtonProperties;
 import it.infn.mw.iam.config.saml.IamSamlJITAccountProvisioningProperties.AttributeMappingProperties;
 
 @ConfigurationProperties(prefix = "saml")
+@Validated
 public class IamSamlProperties {
   
+  @Validated
   public static class IssuerValidationProperties {
     
     @NotBlank

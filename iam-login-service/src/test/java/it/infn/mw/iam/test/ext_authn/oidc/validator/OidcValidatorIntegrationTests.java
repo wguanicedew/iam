@@ -50,12 +50,12 @@ import it.infn.mw.iam.authn.common.Fail;
 import it.infn.mw.iam.authn.common.ValidatorResolver;
 import it.infn.mw.iam.test.ext_authn.oidc.OidcExternalAuthenticationTestsSupport;
 import it.infn.mw.iam.test.ext_authn.oidc.OidcTestConfig;
-import it.infn.mw.iam.test.util.annotation.IamMockMvcIntegrationTest;
+import it.infn.mw.iam.test.util.annotation.IamRandomPortIntegrationTest;
 import it.infn.mw.iam.test.util.oidc.CodeRequestHolder;
 import it.infn.mw.iam.test.util.oidc.MockRestTemplateFactory;
 
 @RunWith(SpringRunner.class)
-@IamMockMvcIntegrationTest
+@IamRandomPortIntegrationTest
 @SpringBootTest(classes = {IamLoginService.class, OidcTestConfig.class,
     OidcValidatorIntegrationTests.Config.class}, webEnvironment = WebEnvironment.RANDOM_PORT)
 public class OidcValidatorIntegrationTests extends OidcExternalAuthenticationTestsSupport {

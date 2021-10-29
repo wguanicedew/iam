@@ -35,19 +35,19 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.internal.util.collections.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.data.domain.Page;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.TransactionSystemException;
 
 import com.google.common.collect.Lists;
 
-import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.repository.IamGroupRepository;
+import it.infn.mw.iam.test.util.annotation.IamNoMvcTest;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = {IamLoginService.class})
+
+@RunWith(SpringRunner.class)
+@IamNoMvcTest
 public class IamGroupRepositoryTests {
 
   @Autowired

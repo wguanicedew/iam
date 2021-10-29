@@ -24,11 +24,10 @@ import static org.junit.Assert.assertThat;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.scim.model.ScimOidcId;
@@ -41,13 +40,15 @@ import it.infn.mw.iam.test.X509Utils;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 import it.infn.mw.iam.test.scim.ScimRestUtilsMvc;
 import it.infn.mw.iam.test.util.WithMockOAuthUser;
+import it.infn.mw.iam.test.util.annotation.IamMockMvcIntegrationTest;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(
-    classes = {IamLoginService.class, CoreControllerTestSupport.class, ScimRestUtilsMvc.class})
-@WebAppConfiguration
+
+@RunWith(SpringRunner.class)
+@IamMockMvcIntegrationTest
+@SpringBootTest(
+    classes = {IamLoginService.class, CoreControllerTestSupport.class, ScimRestUtilsMvc.class},
+    webEnvironment = WebEnvironment.MOCK)
 @WithMockOAuthUser(user = ScimMeEndpointPatchAddTests.TEST_USERNAME, authorities = {"ROLE_USER"})
-@Transactional
 public class ScimMeEndpointPatchAddTests extends ScimMeEndpointUtils {
 
   final static String TEST_USERNAME = "test_103";

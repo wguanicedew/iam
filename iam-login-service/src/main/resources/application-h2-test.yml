@@ -15,23 +15,36 @@
 #
 
 spring:
+    
   profiles:
     include: saml,registration
+  
   mail:
     port: ${IAM_MAIL_PORT:8125}
+  
   datasource:
+    
+    type: org.apache.tomcat.jdbc.pool.DataSource
     driverClassName: org.h2.Driver
     url: jdbc:h2:mem:iam;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     username: sa
     password:
-    test-while-idle: true
-    test-on-borrow: true
-    validation-query: SELECT 1
-    time-between-eviction-runs-millis: 5000
-    min-evictable-idle-time-millis: 10000
+    
+    tomcat:
+      initial-size: 2
+      max-active: 5 
+      min-idle: 1
+      max-idle: 1
+      max-wait: 2000
+      test-while-idle: true
+      test-on-borrow: true
+      validation-query: SELECT 1
+      
+   
   
 notification:
   disable: ${IAM_NOTIFICATION_DISABLE:true}
+
 
 flyway:
   locations:
@@ -40,4 +53,4 @@ flyway:
 
 iam:
   versioned-static-resources:
-    enable-versioning: false 
+    enable-versioning: false

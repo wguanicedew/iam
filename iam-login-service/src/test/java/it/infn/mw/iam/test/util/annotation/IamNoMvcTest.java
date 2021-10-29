@@ -22,12 +22,14 @@ import java.lang.annotation.Target;
 
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.transaction.annotation.Transactional;
 
 import it.infn.mw.iam.IamLoginService;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@SpringBootTest(classes = {IamLoginService.class}, webEnvironment = WebEnvironment.RANDOM_PORT)
-public @interface IamRandomPortIntegrationTest {
+@SpringBootTest(classes = {IamLoginService.class}, webEnvironment = WebEnvironment.NONE)
+@Transactional
+public @interface IamNoMvcTest {
 
 }

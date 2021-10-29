@@ -32,18 +32,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.transaction.annotation.Transactional;
-
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.scim.model.ScimIndigoUser;
@@ -57,13 +56,14 @@ import it.infn.mw.iam.test.X509Utils;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 import it.infn.mw.iam.test.scim.ScimRestUtilsMvc;
 import it.infn.mw.iam.test.util.WithMockOAuthUser;
+import it.infn.mw.iam.test.util.annotation.IamMockMvcIntegrationTest;
 import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(
-    classes = {IamLoginService.class, CoreControllerTestSupport.class, ScimRestUtilsMvc.class})
-@WebAppConfiguration
-@Transactional
+@RunWith(SpringRunner.class)
+@IamMockMvcIntegrationTest
+@SpringBootTest(
+    classes = {IamLoginService.class, CoreControllerTestSupport.class, ScimRestUtilsMvc.class},
+    webEnvironment = WebEnvironment.MOCK)
 public class ScimUserCreationTests extends ScimUserTestSupport {
 
   @Autowired
@@ -78,6 +78,11 @@ public class ScimUserCreationTests extends ScimUserTestSupport {
   @Autowired
   private MockOAuth2Filter mockOAuth2Filter;
   
+  @Before
+  public void setup() {
+    mockOAuth2Filter.cleanupSecurityContext();
+  }
+
   @After
   public void teardown() {
     mockOAuth2Filter.cleanupSecurityContext();

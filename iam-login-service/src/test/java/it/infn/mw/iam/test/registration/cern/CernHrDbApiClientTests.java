@@ -32,14 +32,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -50,12 +50,13 @@ import it.infn.mw.iam.api.registration.cern.CernHrDbApiError;
 import it.infn.mw.iam.api.registration.cern.dto.ErrorDTO;
 import it.infn.mw.iam.api.registration.cern.dto.VOPersonDTO;
 import it.infn.mw.iam.authn.oidc.RestTemplateFactory;
+import it.infn.mw.iam.test.util.annotation.IamMockMvcIntegrationTest;
 import it.infn.mw.iam.test.util.oidc.MockRestTemplateFactory;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = {IamLoginService.class, CernHrDbApiClientTests.class})
-@WebAppConfiguration
-@Transactional
+
+@RunWith(SpringRunner.class)
+@IamMockMvcIntegrationTest
+@SpringBootTest(classes = {IamLoginService.class}, webEnvironment = WebEnvironment.MOCK)
 @TestPropertySource(properties = {"cern.hr-api.username=" + CernTestSupport.HR_API_USERNAME,
     "cern.hr-api.password=" + CernTestSupport.HR_API_PASSWORD,
     "cern.hr-api.url=" + CernTestSupport.HR_API_URL,
@@ -63,22 +64,25 @@ import it.infn.mw.iam.test.util.oidc.MockRestTemplateFactory;
 @ActiveProfiles({"h2-test", "cern"})
 public class CernHrDbApiClientTests extends CernTestSupport {
 
-  @Bean
-  @Primary
-  public RestTemplateFactory mockRestTemplateFactory() {
-    return new MockRestTemplateFactory();
+  @TestConfiguration
+  public static class TestConfig {
+    @Bean
+    @Primary
+    public RestTemplateFactory mockRestTemplateFactory() {
+      return new MockRestTemplateFactory();
+    }
   }
 
   @Autowired
-  RestTemplateFactory rtf;
+  private RestTemplateFactory rtf;
 
   @Autowired
-  ObjectMapper mapper;
+  private ObjectMapper mapper;
 
-  MockRestTemplateFactory mockRtf;
+  private MockRestTemplateFactory mockRtf;
 
   @Autowired
-  CernHrDBApiService hrDbService;
+  private CernHrDBApiService hrDbService;
 
   @Before
   public void setup() {

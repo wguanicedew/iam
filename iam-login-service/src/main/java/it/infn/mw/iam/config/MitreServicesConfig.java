@@ -62,7 +62,6 @@ import org.mitre.openid.connect.token.ConnectTokenEnhancer;
 import org.mitre.openid.connect.token.TofuUserApprovalHandler;
 import org.mitre.openid.connect.web.AuthenticationTimeStamper;
 import org.mitre.openid.connect.web.ServerConfigInterceptor;
-import org.mitre.openid.connect.web.UserInfoInterceptor;
 import org.mitre.uma.service.ResourceSetService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -91,6 +90,7 @@ import it.infn.mw.iam.core.oauth.scope.matchers.ScopeMatcherOAuthRequestValidato
 import it.infn.mw.iam.core.oauth.scope.matchers.ScopeMatcherRegistry;
 import it.infn.mw.iam.core.oauth.scope.pdp.IamScopeFilter;
 import it.infn.mw.iam.core.oidc.IamClientValidationService;
+import it.infn.mw.iam.core.userinfo.IamUserInfoInterceptor;
 
 @Configuration
 public class MitreServicesConfig {
@@ -189,9 +189,9 @@ public class MitreServicesConfig {
 
 
   @Bean(name = "mitreUserInfoInterceptor")
-  public AsyncHandlerInterceptor userInfoInterceptor() {
+  public AsyncHandlerInterceptor userInfoInterceptor(UserInfoService service) {
 
-    return new UserInfoInterceptor();
+    return new IamUserInfoInterceptor(service);
   }
 
   @Bean(name = "mitreServerConfigInterceptor")

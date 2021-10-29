@@ -36,8 +36,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import it.infn.mw.iam.persistence.model.IamAup;
 import it.infn.mw.iam.persistence.repository.IamAupRepository;
 import it.infn.mw.iam.test.util.annotation.IamMockMvcIntegrationTest;
@@ -64,9 +62,6 @@ public class AuthorizationCodeTests {
 
   public static final String TEST_USER_ID = "test";
   public static final String TEST_USER_PASSWORD = "password";
-
-  @Autowired
-  private ObjectMapper objectMapper;
 
   @Autowired
   private IamAupRepository aupRepo;

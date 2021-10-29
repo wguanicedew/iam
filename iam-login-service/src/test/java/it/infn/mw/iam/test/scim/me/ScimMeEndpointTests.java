@@ -17,9 +17,7 @@ package it.infn.mw.iam.test.scim.me;
 
 import static it.infn.mw.iam.api.scim.model.ScimConstants.SCIM_CONTENT_TYPE;
 import static org.hamcrest.Matchers.equalTo;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -28,41 +26,29 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.WebApplicationContext;
 
-import it.infn.mw.iam.IamLoginService;
-import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 import it.infn.mw.iam.test.util.WithMockOAuthUser;
+import it.infn.mw.iam.test.util.annotation.IamMockMvcIntegrationTest;
 import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 
+
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = {IamLoginService.class, CoreControllerTestSupport.class})
-@WebAppConfiguration
-@Transactional
+@IamMockMvcIntegrationTest
 public class ScimMeEndpointTests {
 
   private final static String ME_ENDPOINT = "/scim/Me";
 
   @Autowired
-  private WebApplicationContext context;
-
-  @Autowired
   private MockOAuth2Filter mockOAuth2Filter;
   
+  @Autowired
   private MockMvc mvc;
 
   @Before
   public void setup() throws Exception {
-    mvc = MockMvcBuilders.webAppContextSetup(context)
-      .apply(springSecurity())
-      .alwaysDo(log())
-      .build();
+    mockOAuth2Filter.cleanupSecurityContext();
   }
 
   @After

@@ -25,7 +25,7 @@ public class X509Utils {
   static {
 
     X509Cert x509Cert = new X509Cert();
-    x509Cert.display = "Personal Certificate";
+    x509Cert.display = "Personal Certificate (Test 0)";
     x509Cert.certificate = new StringBuilder("-----BEGIN CERTIFICATE-----\n")
       .append("MIIEWDCCA0CgAwIBAgIDAII4MA0GCSqGSIb3DQEBCwUAMC4xCzAJBgNVBAYTAklU\n")
       .append("MQ0wCwYDVQQKEwRJTkZOMRAwDgYDVQQDEwdJTkZOIENBMB4XDTE1MDUxODEzNTQx\n")
@@ -56,7 +56,7 @@ public class X509Utils {
     x509Certs.add(x509Cert);
 
     x509Cert = new X509Cert();
-    x509Cert.display = "Personal Certificate";
+    x509Cert.display = "Personal Certificate (Test 1)";
     x509Cert.certificate = new StringBuilder("-----BEGIN CERTIFICATE-----\n")
       .append("MIIDnjCCAoagAwIBAgIBCTANBgkqhkiG9w0BAQUFADAtMQswCQYDVQQGEwJJVDE\n")
       .append("MMAoGA1UECgwDSUdJMRAwDgYDVQQDDAdUZXN0IENBMB4XDTEyMDkyNjE1MzkzNF\n")

@@ -223,12 +223,6 @@
     </dependency>
 
     <dependency>
-      <groupId>org.flywaydb.flyway-test-extensions</groupId>
-      <artifactId>flyway-spring-test</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
       <groupId>mysql</groupId>
       <artifactId>mysql-connector-java</artifactId>
       <scope>runtime</scope>

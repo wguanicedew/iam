@@ -52,6 +52,7 @@ public class ScimGroupPatchUtils {
   @Autowired
   protected ObjectMapper objectMapper;
 
+  @Autowired
   protected MockMvc mvc;
 
   protected ScimGroupPatchRequest getPatchAddUsersRequest(List<ScimUser> users) {

@@ -23,12 +23,9 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.context.junit4.SpringRunner;
 
-import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.scim.model.ScimEmail;
 import it.infn.mw.iam.api.scim.model.ScimName;
 import it.infn.mw.iam.api.scim.model.ScimOidcId;
@@ -43,11 +40,11 @@ import it.infn.mw.iam.persistence.model.IamSamlId;
 import it.infn.mw.iam.persistence.model.IamSshKey;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.test.SshKeyUtils;
+import it.infn.mw.iam.test.util.annotation.IamNoMvcTest;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = IamLoginService.class)
-@Transactional
-public class ScimUserProvisioningTests {
+@RunWith(SpringRunner.class)
+@IamNoMvcTest
+public class ScimUserServiceTests {
 
   @Autowired
   private ScimUserProvisioning userService;

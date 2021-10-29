@@ -19,19 +19,22 @@ spring:
     include: mysql,flyway-repair
   
   datasource:
-    dataSourceClassName: com.mysql.jdbc.jdbc2.optional.MysqlDataSource
+    type: org.apache.tomcat.jdbc.pool.DataSource
     url: jdbc:mysql://${IAM_DB_HOST:dev.local.io}:${IAM_DB_PORT:3306}/${IAM_DB_NAME:iam}?useSSL=${IAM_DB_USE_SSL:false}
     username: ${IAM_DB_USERNAME:iam}
     password: ${IAM_DB_PASSWORD:pwd}
-    max-active: ${IAM_DB_MAX_ACTIVE:10}
-    min-idle: ${IAM_DB_MIN_IDLE:5}
-    max-idle:  ${IAM_DB_MAX_IDLE:5}
-    initial-size: ${IAM_DB_INITIAL_SIZE:2}
-    test-while-idle: ${IAM_DB_TEST_WHILE_IDLE:true}
-    test-on-borrow: ${IAM_DB_TEST_ON_BORROW:true}
-    validation-query: ${IAM_DB_VALIDATION_QUERY:SELECT 1}
-    time-between-eviction-runs-millis: ${IAM_DB_TIME_BETWEEN_EVICTION_RUNS_MILLIS:5000}
-    min-evictable-idle-time-millis: ${IAM_DB_MIN_EVICTABLE_IDLE_TIME_MILLIS:60000}
+    
+    tomcat:
+      initial-size: ${IAM_DB_INITIAL_SIZE:15}
+      max-active: ${IAM_DB_MAX_ACTIVE:50} 
+      min-idle: ${IAM_DB_MIN_IDLE:8}
+      max-idle: ${IAM_DB_MAX_IDLE:15}
+      max-wait: ${IAM_DB_MAX_WAIT:20000}
+      test-while-idle: ${IAM_DB_TEST_WHILE_IDLE:true}
+      test-on-borrow: ${IAM_DB_TEST_ON_BORROW:true}
+      validation-query: ${IAM_DB_VALIDATION_QUERY:SELECT 1}
+      time-between-eviction-runs-millis: ${IAM_DB_TIME_BETWEEN_EVICTION_RUNS_MILLIS:5000}
+      min-evictable-idle-time-millis: ${IAM_DB_MIN_EVICTABLE_IDLE_TIME_MILLIS:60000}
     
 flyway:
   locations:

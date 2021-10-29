@@ -35,6 +35,8 @@ import org.junit.runner.RunWith;
 import org.mitre.oauth2.model.SystemScope;
 import org.mitre.oauth2.service.SystemScopeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.test.context.TestPropertySource;
@@ -43,11 +45,13 @@ import org.springframework.test.context.junit4.SpringRunner;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.test.oauth.EndpointsTestUtils;
 import it.infn.mw.iam.test.util.annotation.IamMockMvcIntegrationTest;
 
 @RunWith(SpringRunner.class)
 @IamMockMvcIntegrationTest
+@SpringBootTest(classes = {IamLoginService.class}, webEnvironment = WebEnvironment.MOCK)
 @TestPropertySource(
     properties = {"scope.matchers[0].name=storage.read", "scope.matchers[0].type=path",
         "scope.matchers[0].prefix=storage.read", "scope.matchers[0].path=/",

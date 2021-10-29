@@ -45,12 +45,12 @@ import com.nimbusds.jose.JOSEException;
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo;
 import it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo.ExternalAuthenticationType;
-import it.infn.mw.iam.test.util.annotation.IamMockMvcIntegrationTest;
+import it.infn.mw.iam.test.util.annotation.IamRandomPortIntegrationTest;
 import it.infn.mw.iam.test.util.oidc.CodeRequestHolder;
 import it.infn.mw.iam.test.util.oidc.MockRestTemplateFactory;
 
 @RunWith(SpringRunner.class)
-@IamMockMvcIntegrationTest
+@IamRandomPortIntegrationTest
 @SpringBootTest(classes = {IamLoginService.class, OidcTestConfig.class},
     webEnvironment = WebEnvironment.RANDOM_PORT)
 public class OidcExternalAuthenticationTests extends OidcExternalAuthenticationTestsSupport {

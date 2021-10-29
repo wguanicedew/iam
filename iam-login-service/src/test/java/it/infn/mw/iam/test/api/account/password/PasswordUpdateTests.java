@@ -26,15 +26,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.response.ValidatableResponse;
 
-import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.account.password_reset.PasswordUpdateController;
 import it.infn.mw.iam.api.scim.model.ScimEmail;
 import it.infn.mw.iam.api.scim.model.ScimName;
@@ -43,13 +40,10 @@ import it.infn.mw.iam.api.scim.provisioning.ScimUserProvisioning;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.test.TestUtils;
-import it.infn.mw.iam.test.util.WithAnonymousUser;
-import it.infn.mw.iam.test.util.annotation.IamMockMvcIntegrationTest;
+import it.infn.mw.iam.test.util.annotation.IamRandomPortIntegrationTest;
 
 @RunWith(SpringRunner.class)
-@IamMockMvcIntegrationTest
-@SpringBootTest(classes = {IamLoginService.class}, webEnvironment = WebEnvironment.RANDOM_PORT)
-@WithAnonymousUser
+@IamRandomPortIntegrationTest
 public class PasswordUpdateTests {
 
   @Value("${local.server.port}")

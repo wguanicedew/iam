@@ -22,31 +22,24 @@ import static org.junit.Assert.assertThat;
 import java.util.Date;
 import java.util.Optional;
 
-import javax.persistence.EntityManager;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.context.junit4.SpringRunner;
 
-import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.persistence.model.IamAup;
 import it.infn.mw.iam.persistence.repository.IamAupRepository;
 import it.infn.mw.iam.test.api.aup.AupTestSupport;
 import it.infn.mw.iam.test.util.DateEqualModulo1Second;
+import it.infn.mw.iam.test.util.annotation.IamNoMvcTest;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = {IamLoginService.class})
-@Transactional
+
+@RunWith(SpringRunner.class)
+@IamNoMvcTest
 public class IamAupRepositoryTests extends AupTestSupport{
 
   @Autowired
-  EntityManager em;
-
-  @Autowired
-  IamAupRepository aupRepo;
+  private IamAupRepository aupRepo;
   
   @Test
   public void defaultAupIsNotDefinedAtStartup() {
@@ -88,7 +81,4 @@ public class IamAupRepositoryTests extends AupTestSupport{
     
     assertThat(aupRepo.findByName(DEFAULT_AUP_NAME).isPresent(), is(false)); 
   }
-
-
-
 }

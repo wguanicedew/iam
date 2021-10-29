@@ -33,16 +33,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -56,13 +55,11 @@ import it.infn.mw.iam.persistence.repository.IamAupSignatureRepository;
 import it.infn.mw.iam.registration.PersistentUUIDTokenGenerator;
 import it.infn.mw.iam.registration.RegistrationRequestDto;
 import it.infn.mw.iam.test.api.aup.AupTestSupport;
-import it.infn.mw.iam.test.util.WithAnonymousUser;
+import it.infn.mw.iam.test.util.annotation.IamMockMvcIntegrationTest;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = {IamLoginService.class})
-@WebAppConfiguration
-@WithAnonymousUser
-@Transactional
+@RunWith(SpringRunner.class)
+@IamMockMvcIntegrationTest
+@SpringBootTest(classes = {IamLoginService.class}, webEnvironment = WebEnvironment.MOCK)
 public class RegistrationUnprivilegedTests extends AupTestSupport {
 
   @Autowired
@@ -87,10 +84,8 @@ public class RegistrationUnprivilegedTests extends AupTestSupport {
 
   @Before
   public void setup() {
-    mvc = MockMvcBuilders.webAppContextSetup(context)
-      .apply(springSecurity())
-      .alwaysDo(log())
-      .build();
+    mvc =
+        MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).alwaysDo(log()).build();
   }
 
   @Test
@@ -239,14 +234,16 @@ public class RegistrationUnprivilegedTests extends AupTestSupport {
       .andExpect(status().isBadRequest());
     // @formatter:on
   }
-  
+
   @Test
   public void testEmailAvailableEndpoint() throws Exception {
-    mvc.perform(get("/registration/email-available/email@example.org")).andExpect(status().isOk())
+    mvc.perform(get("/registration/email-available/email@example.org"))
+      .andExpect(status().isOk())
       .andExpect(jsonPath("$").value(true));
-    
-    mvc.perform(get("/registration/email-available/test@iam.test")).andExpect(status().isOk())
-    .andExpect(jsonPath("$").value(false));
+
+    mvc.perform(get("/registration/email-available/test@iam.test"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$").value(false));
   }
 
 
@@ -286,6 +283,6 @@ public class RegistrationUnprivilegedTests extends AupTestSupport {
       .andExpect(jsonPath("$.status", equalTo(CONFIRMED.name())));
     // @formatter:on
   }
-  
-  
+
+
 }
