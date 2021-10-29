@@ -7,9 +7,17 @@ def maybeArchiveJUnitReports(){
   def hasJunitReports = fileExists 'iam-login-service/target/surefire-reports'
   if (hasJunitReports) {
     junit '**/target/surefire-reports/TEST-*.xml'
+  }
+}
+
+def maybeArchiveJUnitReportsWithJacoco(){
+  def hasJunitReports = fileExists 'iam-login-service/target/surefire-reports'
+  if (hasJunitReports) {
+    junit '**/target/surefire-reports/TEST-*.xml'
     step( [ $class: 'JacocoPublisher' ] )
   }
 }
+
 
 pipeline {
 
@@ -86,6 +94,14 @@ pipeline {
           steps {
             sh 'mvn -B test'
           }
+
+          post {
+            always {
+              script {
+                maybeArchiveJUnitReports()
+              }
+            }
+          }
         }
 
         stage('PR analysis'){
@@ -128,7 +144,7 @@ pipeline {
           post {
             always {
               script {
-                maybeArchiveJUnitReports()
+                maybeArchiveJUnitReportsWithJacoco()
               }
             }
             unsuccessful {
