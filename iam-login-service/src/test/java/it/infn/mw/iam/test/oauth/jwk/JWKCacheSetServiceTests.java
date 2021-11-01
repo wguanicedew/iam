@@ -51,7 +51,8 @@ import it.infn.mw.iam.test.util.oidc.MockRestTemplateFactory;
 
 @RunWith(SpringRunner.class)
 @IamMockMvcIntegrationTest
-@SpringBootTest(classes = {IamLoginService.class}, webEnvironment = WebEnvironment.MOCK)
+@SpringBootTest(classes = {IamLoginService.class, JWKCacheSetServiceTests.TestConfig.class},
+    webEnvironment = WebEnvironment.MOCK)
 public class JWKCacheSetServiceTests {
 
   public static final String JWK_URL = "https://iam.example/jwk";
