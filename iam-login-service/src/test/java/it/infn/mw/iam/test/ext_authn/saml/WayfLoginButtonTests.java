@@ -26,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.context.WebApplicationContext;
 
 import it.infn.mw.iam.test.util.WithAnonymousUser;
 import it.infn.mw.iam.test.util.annotation.IamMockMvcIntegrationTest;
@@ -38,9 +37,6 @@ import it.infn.mw.iam.test.util.annotation.IamMockMvcIntegrationTest;
 })
 @WithAnonymousUser
 public class WayfLoginButtonTests {
-  @Autowired
-  private WebApplicationContext context;
-
 
   @Autowired
   private MockMvc mvc;

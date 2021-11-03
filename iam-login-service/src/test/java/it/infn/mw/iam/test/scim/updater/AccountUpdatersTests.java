@@ -106,7 +106,6 @@ public class AccountUpdatersTests extends X509TestSupport {
 
   private IamAccount account;
   private IamAccount other;
-  private IamGroup group;
 
   private IamAccount newAccount(String username) {
     IamAccount account = new IamAccount();
@@ -145,7 +144,7 @@ public class AccountUpdatersTests extends X509TestSupport {
   public void before() {
     account = newAccount("account");
     other = newAccount("other");
-    group = newGroup("group");
+
 
   }
 

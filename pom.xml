@@ -38,7 +38,9 @@
     <rest-assured.version>2.9.0</rest-assured.version>
     <json-path.version>2.2.0</json-path.version>
 
+    <!--
     <validator-collection.version>2.2.0</validator-collection.version>
+    -->
 
     <license-maven-plugin.version>3.0</license-maven-plugin.version>
     <jacoco-plugin.version>0.8.3</jacoco-plugin.version>
@@ -192,11 +194,13 @@
         <version>${spring-security-saml.version}</version>
       </dependency>
 
+      <!--
       <dependency>
         <groupId>cz.jirutka.validator</groupId>
         <artifactId>validator-collection</artifactId>
         <version>${validator-collection.version}</version>
       </dependency>
+      -->
       
       <!-- JSR APIs (for Java 11 compatibility) -->
       <dependency>

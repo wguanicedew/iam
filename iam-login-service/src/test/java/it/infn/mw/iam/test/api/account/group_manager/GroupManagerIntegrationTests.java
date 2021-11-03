@@ -36,7 +36,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.web.context.WebApplicationContext;
 
 import com.google.common.collect.Lists;
 
@@ -56,9 +55,6 @@ import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 public class GroupManagerIntegrationTests {
 
   private static final String TEST_001_GROUP_ID = "c617d586-54e6-411d-8e38-649677980001";
-
-  @Autowired
-  private WebApplicationContext context;
 
   @Autowired
   private IamAccountRepository accountRepo;

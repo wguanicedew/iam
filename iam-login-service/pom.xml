@@ -258,6 +258,12 @@
     <dependency>
       <groupId>org.springframework.security.extensions</groupId>
       <artifactId>spring-security-saml2-core</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>xml-apis</groupId>
+          <artifactId>xml-apis</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
@@ -293,10 +299,12 @@
       <artifactId>spring-boot-starter-freemarker</artifactId>
     </dependency>
 
+    <!--
     <dependency>
       <groupId>cz.jirutka.validator</groupId>
       <artifactId>validator-collection</artifactId>
     </dependency>
+    -->
 
     <dependency>
       <groupId>org.subethamail</groupId>

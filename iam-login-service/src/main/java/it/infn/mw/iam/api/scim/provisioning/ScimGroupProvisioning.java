@@ -64,7 +64,6 @@ public class ScimGroupProvisioning
 
   private final IamGroupService groupService;
   private final IamAccountService accountService;
-  private final Clock clock;
 
   private final GroupConverter converter;
 
@@ -79,7 +78,6 @@ public class ScimGroupProvisioning
     this.accountService = accountService;
     this.groupService = groupService;
     this.converter = converter;
-    this.clock = clock;
 
     this.groupUpdaterFactory = new DefaultGroupMembershipUpdaterFactory(accountService);
     this.locationProvider = locationProvider;

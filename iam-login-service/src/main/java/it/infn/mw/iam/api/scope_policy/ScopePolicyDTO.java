@@ -28,7 +28,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-import cz.jirutka.validator.collection.constraints.EachSize;
 import it.infn.mw.iam.api.scim.controller.utils.JsonDateSerializer;
 import it.infn.mw.iam.api.scope_policy.validation.ScopePolicy;
 
@@ -63,8 +62,6 @@ public class ScopePolicyDTO {
   @Valid
   private GroupRefDTO group;
 
-  @EachSize(min = 1, max = 255,
-      message = "Invalid scope policy: scope length must be >= 1 and < 255 characters")
   private Set<String> scopes;
 
   public ScopePolicyDTO() {}
