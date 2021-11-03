@@ -1,9 +1,9 @@
-FROM openjdk:8
+FROM openjdk:11
 
 RUN mkdir /app
 WORKDIR /app
 
-CMD java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap ${IAM_CLIENT_JAVA_OPTS} -jar $IAM_CLIENT_JAR
+CMD java ${IAM_CLIENT_JAVA_OPTS} -jar $IAM_CLIENT_JAR
 
 # Embed TINI since compose v3 syntax do not support the init
 # option to run docker --init

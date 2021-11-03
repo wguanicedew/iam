@@ -1,8 +1,8 @@
-FROM openjdk:8
+FROM openjdk:11
 
 RUN mkdir /indigo-iam
 WORKDIR /indigo-iam
-CMD java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap ${IAM_JAVA_OPTS} -jar ${IAM_JAR}
+CMD java ${IAM_JAVA_OPTS} -jar ${IAM_JAR}
 
 # Embed TINI since compose v3 syntax do not support the init 
 # option to run docker --init

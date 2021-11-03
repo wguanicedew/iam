@@ -1,10 +1,10 @@
-FROM openjdk:8
+FROM openjdk:11
 
 RUN mkdir /indigo-iam
 WORKDIR /indigo-iam
 COPY iam-login-service.war /indigo-iam/
 
-CMD java -XX:MaxRAMFraction=1 -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap ${IAM_JAVA_OPTS} -jar iam-login-service.war 
+CMD java -XX:MaxRAMFraction=1 ${IAM_JAVA_OPTS} -jar iam-login-service.war 
 
 # Embed TINI since compose v3 syntax do not support the init 
 # option to run docker --init
