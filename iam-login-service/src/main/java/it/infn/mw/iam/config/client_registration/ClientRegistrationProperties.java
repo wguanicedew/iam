@@ -20,7 +20,7 @@ import static it.infn.mw.iam.config.client_registration.ClientRegistrationProper
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-@ConfigurationProperties("clientRegistration")
+@ConfigurationProperties("client-registration")
 @Configuration
 public class ClientRegistrationProperties {
 

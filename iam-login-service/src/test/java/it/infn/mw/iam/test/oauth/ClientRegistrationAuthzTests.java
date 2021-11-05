@@ -32,7 +32,7 @@ import it.infn.mw.iam.test.util.annotation.IamMockMvcIntegrationTest;
 
 @RunWith(SpringRunner.class)
 @IamMockMvcIntegrationTest
-@TestPropertySource(properties= {"clientRegistration.allowFor=REGISTERED_USERS"})
+@TestPropertySource(properties = {"client-registration.allow-for=REGISTERED_USERS"})
 public class ClientRegistrationAuthzTests extends ClientRegistrationTestSupport {
 
   @Autowired

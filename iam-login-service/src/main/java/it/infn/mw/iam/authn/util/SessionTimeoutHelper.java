@@ -34,7 +34,7 @@ public class SessionTimeoutHelper {
   final long timeoutInSecs;
 
   @Autowired
-  public SessionTimeoutHelper(Clock clock, @Value("${server.session.timeout}")long timeoutInSecs) {
+  public SessionTimeoutHelper(Clock clock, @Value("${spring.session.timeout}") long timeoutInSecs) {
     this.clock = clock;
     this.timeoutInSecs = timeoutInSecs;
   }

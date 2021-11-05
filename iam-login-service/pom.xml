@@ -33,7 +33,7 @@
   <description>The INDIGO IAM login service</description>
 
   <properties>
-    <eclipselink.version>2.5.2</eclipselink.version>
+    <eclipselink.version>2.7.9</eclipselink.version>
 
     <!-- Sonar Jacoco massaging -->
     <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
