@@ -15,10 +15,6 @@
 #
 
 spring:
-    
-  profiles:
-    include: saml,registration
-  
   mail:
     port: ${IAM_MAIL_PORT:8125}
   

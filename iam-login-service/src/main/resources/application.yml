@@ -28,7 +28,9 @@ server:
   use-forward-headers: ${IAM_USE_FORWARDED_HEADERS:false}
   
 spring:
-
+  application:
+    name: INDIGO IAM
+  
   session:
     timeout: ${IAM_SESSION_TIMEOUT_SECS:1800}
      
@@ -37,9 +39,9 @@ spring:
       order: 1
        
   profiles:
-    active: h2-test
-  application:
-    name: INDIGO IAM
+    default: h2-test
+    group:
+     "h2-test": "h2-test,saml,registration"
     
   jpa:
     generate-ddl: true
