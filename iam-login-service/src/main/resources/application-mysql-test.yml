@@ -35,16 +35,10 @@ spring:
       time-between-eviction-runs-millis: 5000
       min-evictable-idle-time-millis: 5000
      
+  flyway:
+    locations:
+      - classpath:db/migration/mysql
+      - classpath:db/migration/test
+
 notification:
   disable: true
-
- 
-flyway:
-  locations:
-    - classpath:db/migration/mysql
-    - classpath:db/migration/test
-
-management:
-  health:
-    mail:
-      enabled: false

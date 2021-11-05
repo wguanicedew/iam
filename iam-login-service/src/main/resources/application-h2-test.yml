@@ -22,8 +22,12 @@ spring:
   mail:
     port: ${IAM_MAIL_PORT:8125}
   
+  flyway:
+    locations:
+      - classpath:db/migration/h2
+      - classpath:db/migration/test
+  
   datasource:
-    
     url: jdbc:h2:mem:iam;DB_CLOSE_ON_EXIT=FALSE;DB_CLOSE_DELAY=-1
     username: sa
     password:
@@ -38,16 +42,9 @@ spring:
       test-on-borrow: true
       validation-query: SELECT 1
       
-   
-  
 notification:
   disable: ${IAM_NOTIFICATION_DISABLE:true}
 
-
-flyway:
-  locations:
-    - classpath:db/migration/h2
-    - classpath:db/migration/test
 
 iam:
   versioned-static-resources:

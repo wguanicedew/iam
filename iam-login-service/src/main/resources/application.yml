@@ -43,6 +43,7 @@ spring:
     
   jpa:
     generate-ddl: true
+    open-in-view: false
 
   mail:
     host: ${IAM_MAIL_HOST:localhost}
