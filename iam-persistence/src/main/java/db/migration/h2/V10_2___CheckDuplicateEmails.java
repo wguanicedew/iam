@@ -23,9 +23,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
-import it.infn.mw.iam.persistence.migrations.BaseJdbcTemplateFlywayMigration;
+import it.infn.mw.iam.persistence.migrations.BaseFlywayJavaMigrationAdapter;
 
-public class V10_2___CheckDuplicateEmails extends BaseJdbcTemplateFlywayMigration {
+public class V10_2___CheckDuplicateEmails extends BaseFlywayJavaMigrationAdapter {
 
   public static final Logger LOG = LoggerFactory.getLogger(V10_2___CheckDuplicateEmails.class);
 

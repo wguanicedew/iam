@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
-public class CreateGroupManagerAuthorities extends BaseJdbcTemplateFlywayMigration {
+public class CreateGroupManagerAuthorities extends BaseFlywayJavaMigrationAdapter {
 
   public static final Logger LOG = LoggerFactory.getLogger(CreateGroupManagerAuthorities.class);
 

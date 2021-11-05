@@ -20,9 +20,9 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import it.infn.mw.iam.persistence.migrations.BaseJdbcTemplateFlywayMigration;
+import it.infn.mw.iam.persistence.migrations.BaseFlywayJavaMigrationAdapter;
 
-public class V10_1__Password_Update extends BaseJdbcTemplateFlywayMigration {
+public class V10_1__Password_Update extends BaseFlywayJavaMigrationAdapter {
 
   @Override
   public void migrate(JdbcTemplate jdbcTemplate) throws Exception {
