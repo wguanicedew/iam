@@ -19,7 +19,7 @@ import static it.infn.mw.iam.notification.service.resolver.DefaultAddressResolut
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -28,7 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import it.infn.mw.iam.notification.NotificationProperties;
 import it.infn.mw.iam.notification.service.resolver.AddressResolutionService;

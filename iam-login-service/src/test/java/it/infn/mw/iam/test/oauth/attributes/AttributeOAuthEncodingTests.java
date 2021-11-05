@@ -18,7 +18,7 @@ package it.infn.mw.iam.test.oauth.attributes;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.function.Supplier;
 
@@ -101,6 +101,6 @@ public class AttributeOAuthEncodingTests extends EndpointsTestUtils {
 
     JWT token = JWTParser.parse(tg.getAccessTokenValue());
     assertThat(token.getJWTClaimsSet().getJSONObjectClaim("attr"), notNullValue());
-    assertThat(token.getJWTClaimsSet().getJSONObjectClaim("attr").getAsString("test"), is("test"));
+    assertThat(token.getJWTClaimsSet().getJSONObjectClaim("attr").get("test"), is("test"));
   }
 }

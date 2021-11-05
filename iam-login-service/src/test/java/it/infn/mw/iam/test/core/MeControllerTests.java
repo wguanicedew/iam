@@ -19,7 +19,7 @@ import static it.infn.mw.iam.test.scim.ScimUtils.SCIM_CLIENT_ID;
 import static it.infn.mw.iam.test.scim.ScimUtils.SCIM_READ_SCOPE;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.NOT_FOUND;

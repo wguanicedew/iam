@@ -17,10 +17,10 @@ package it.infn.mw.iam.test.service;
 
 import static java.util.Collections.emptyList;
 import static org.hamcrest.CoreMatchers.hasItem;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -41,7 +41,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.google.common.collect.Lists;
 
@@ -142,7 +142,7 @@ public class DefaultNotificationStoreServiceTests {
     assertThat(statusArgumentCaptor.getValue(), is(IamDeliveryStatus.DELIVERED));
     assertThat(dateArgumentCaptor.getValue(), equalTo(oneDayAfterNow));
 
-    verify(notificationRepo).delete(notificationCaptor.capture());
+    verify(notificationRepo).deleteAll(notificationCaptor.capture());
 
     List<IamEmailNotification> removedNotifications = Lists.newArrayList(notificationCaptor.getValue());
     assertThat(removedNotifications, hasSize(1));
@@ -169,7 +169,7 @@ public class DefaultNotificationStoreServiceTests {
     assertThat(statusArgumentCaptor.getValue(), is(IamDeliveryStatus.DELIVERED));
     assertThat(dateArgumentCaptor.getValue(), equalTo(oneDayAfterNow));
 
-    verify(notificationRepo, never()).delete(notificationCaptor.capture());
+    verify(notificationRepo, never()).deleteAll(notificationCaptor.capture());
     
     
   }

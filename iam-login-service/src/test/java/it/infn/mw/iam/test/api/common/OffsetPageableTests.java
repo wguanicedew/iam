@@ -17,7 +17,7 @@ package it.infn.mw.iam.test.api.common;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import org.junit.Test;
 import it.infn.mw.iam.api.common.OffsetPageable;
 

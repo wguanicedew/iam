@@ -19,7 +19,7 @@ import static it.infn.mw.iam.api.tokens.TokensControllerSupport.TOKENS_MAX_PAGE_
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.Date;
 import java.util.List;

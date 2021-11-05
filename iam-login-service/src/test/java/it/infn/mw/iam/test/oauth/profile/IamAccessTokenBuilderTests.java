@@ -17,7 +17,7 @@ package it.infn.mw.iam.test.oauth.profile;
 
 import static it.infn.mw.iam.core.oauth.granters.TokenExchangeTokenGranter.TOKEN_EXCHANGE_GRANT_TYPE;
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
 import java.time.Clock;
@@ -33,7 +33,7 @@ import org.mitre.openid.connect.model.UserInfo;
 import org.mitre.openid.connect.service.ScopeClaimTranslationService;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.oauth2.common.exceptions.InvalidRequestException;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 

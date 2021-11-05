@@ -57,7 +57,7 @@ public class DefaultNotificationStoreService implements NotificationStoreService
         repo.findByStatusWithUpdateTime(IamDeliveryStatus.DELIVERED, threshold);
 
     if (!messageList.isEmpty()) {
-      repo.delete(messageList);
+      repo.deleteAll(messageList);
       LOG.info("Deleted {} messages in status {} older than {}", messageList.size(),
           IamDeliveryStatus.DELIVERED, threshold);
     }

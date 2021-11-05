@@ -14,10 +14,10 @@
 # limitations under the License.
 #
 
-security:
-  filter-order: 1
-
 server:
+  error:
+    path: /error
+    
   port: ${IAM_PORT:8080}
   tomcat:
     accesslog:
@@ -27,10 +27,15 @@ server:
 
   use-forward-headers: ${IAM_USE_FORWARDED_HEADERS:false}
   
+spring:
+
   session:
     timeout: ${IAM_SESSION_TIMEOUT_SECS:1800}
-
-spring: 
+     
+  security:
+    filter:
+      order: 1
+       
   profiles:
     active: h2-test
   application:
@@ -169,15 +174,18 @@ accountLinking:
 clientRegistration:
   allow-for: ${IAM_CLIENT_REGISTRATION_ALLOW_FOR:ANYONE}
 
-endpoints:
-  enabled: false
-  info:
-    enabled: true
-  health:
-    enabled: true
-  metrics:
-    enabled: true
-
+management:
+  endpoints:
+    enabled-by-default: false
+  
+  endpoint:
+    info:
+      enabled: true
+    health:
+      enabled: true 
+    metrics:
+      enabled: true
+    
 rcauth:
   enabled: ${IAM_RCAUTH_ENABLED:false}
   label: ${IAM_RCAUTH_LABEL:RCAuth.eu online CA}

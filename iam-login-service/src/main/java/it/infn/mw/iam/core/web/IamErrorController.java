@@ -18,7 +18,7 @@ package it.infn.mw.iam.core.web;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.springframework.boot.autoconfigure.web.ErrorController;
+import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -56,11 +56,6 @@ public class IamErrorController implements ErrorController {
 
   private Exception getRequestException(HttpServletRequest httpRequest) {
     return (Exception) httpRequest.getAttribute("javax.servlet.error.exception");
-  }
-
-  @Override
-  public String getErrorPath() {
-    return PATH;
   }
 
 }

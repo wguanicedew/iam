@@ -19,7 +19,7 @@ import static it.infn.mw.iam.core.lifecycle.ExpiredAccountsHandler.LIFECYCLE_STA
 import static it.infn.mw.iam.core.lifecycle.ExpiredAccountsHandler.LIFECYCLE_TIMESTAMP_LABEL;
 import static java.lang.String.valueOf;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.time.Clock;
 import java.time.ZoneId;
@@ -156,7 +156,7 @@ public class AccountLifecycleTests extends TestSupport implements LifecycleTestS
 
     long accountBefore = repo.count();
 
-    Page<IamAccount> accountsPage = repo.findAll(new PageRequest(0, 20));
+    Page<IamAccount> accountsPage = repo.findAll(PageRequest.of(0, 20));
 
     long touchedAccounts = 0;
     

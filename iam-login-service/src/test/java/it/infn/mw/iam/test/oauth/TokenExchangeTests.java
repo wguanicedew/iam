@@ -17,6 +17,7 @@ package it.infn.mw.iam.test.oauth;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
@@ -24,7 +25,6 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -34,6 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.text.ParseException;
 import java.util.Date;
+import java.util.Map;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -339,11 +340,11 @@ public class TokenExchangeTests extends EndpointsTestUtils {
     JWT exchangedToken = JWTParser.parse(responseToken.getValue());
     assertThat(exchangedToken.getJWTClaimsSet().getSubject(), is(TEST_USER_SUB));
     
-    JSONObject actClaim = exchangedToken.getJWTClaimsSet().getJSONObjectClaim("act");
+    Map<String, Object> actClaim = exchangedToken.getJWTClaimsSet().getJSONObjectClaim("act");
     
     assertThat(actClaim, notNullValue());
-    assertThat(actClaim.getAsString("sub"), is("token-exchange-actor"));
-    assertThat(actClaim.getAsString("act"), nullValue());
+    assertThat(actClaim.get("sub"), is("token-exchange-actor"));
+    assertThat(actClaim.get("act"), nullValue());
 
     String refreshToken = responseToken.getRefreshToken().getValue();
 
@@ -368,8 +369,8 @@ public class TokenExchangeTests extends EndpointsTestUtils {
     actClaim = refreshedTokenJwt.getJWTClaimsSet().getJSONObjectClaim("act");
     
     assertThat(actClaim, notNullValue());
-    assertThat(actClaim.getAsString("sub"), is("token-exchange-actor"));
-    assertThat(actClaim.getAsString("act"), nullValue());
+    assertThat(actClaim.get("sub"), is("token-exchange-actor"));
+    assertThat(actClaim.get("act"), nullValue());
     
     mvc
       .perform(post("/introspect").with(httpBasic("password-grant", "secret"))
@@ -573,11 +574,11 @@ public class TokenExchangeTests extends EndpointsTestUtils {
     JWT exchangedToken = JWTParser.parse(responseToken.getValue());
     assertThat(exchangedToken.getJWTClaimsSet().getSubject(), is(TEST_USER_SUB));
     
-    JSONObject actClaim = exchangedToken.getJWTClaimsSet().getJSONObjectClaim("act");
+    Map<String, Object> actClaim = exchangedToken.getJWTClaimsSet().getJSONObjectClaim("act");
     
     assertThat(actClaim, notNullValue());
-    assertThat(actClaim.getAsString("sub"), is("token-exchange-actor"));
-    assertThat(actClaim.getAsString("act"), nullValue());
+    assertThat(actClaim.get("sub"), is("token-exchange-actor"));
+    assertThat(actClaim.get("act"), nullValue());
 
     String refreshToken = responseToken.getRefreshToken().getValue();
 
@@ -602,8 +603,8 @@ public class TokenExchangeTests extends EndpointsTestUtils {
     actClaim = refreshedTokenJwt.getJWTClaimsSet().getJSONObjectClaim("act");
     
     assertThat(actClaim, notNullValue());
-    assertThat(actClaim.getAsString("sub"), is("token-exchange-actor"));
-    assertThat(actClaim.getAsString("act"), nullValue());
+    assertThat(actClaim.get("sub"), is("token-exchange-actor"));
+    assertThat(actClaim.get("act"), nullValue());
     
     mvc
       .perform(post("/introspect").with(httpBasic("password-grant", "secret"))
@@ -639,7 +640,7 @@ public class TokenExchangeTests extends EndpointsTestUtils {
     actClaim = secondExchangeJwt.getJWTClaimsSet().getJSONObjectClaim("act");
     
     assertThat(actClaim, notNullValue());
-    assertThat(actClaim.getAsString("sub"), is("token-lookup-client"));
+    assertThat(actClaim.get("sub"), is("token-lookup-client"));
     
     JSONObject innerActClaim = (JSONObject) actClaim.get("act");
     assertThat(innerActClaim.getAsString("sub"), is("token-exchange-actor"));

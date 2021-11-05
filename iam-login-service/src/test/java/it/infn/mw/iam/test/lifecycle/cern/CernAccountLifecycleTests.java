@@ -25,8 +25,8 @@ import static it.infn.mw.iam.core.lifecycle.cern.CernHrLifecycleHandler.LABEL_TI
 import static it.infn.mw.iam.core.lifecycle.cern.CernHrLifecycleHandler.Action.DISABLE_ACCOUNT;
 import static java.lang.String.valueOf;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.anyString;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
@@ -383,7 +383,7 @@ public class CernAccountLifecycleTests extends TestSupport implements LifecycleT
   public void testPaginationWorks() {
     when(hrDb.hasValidExperimentParticipation(anyString())).thenReturn(false);
 
-    Pageable pageRequest = new PageRequest(0, 10, Direction.ASC, "username");
+    Pageable pageRequest = PageRequest.of(0, 10, Direction.ASC, "username");
     Page<IamAccount> accountPage = repo.findAll(pageRequest);
 
     for (IamAccount account : accountPage.getContent()) {

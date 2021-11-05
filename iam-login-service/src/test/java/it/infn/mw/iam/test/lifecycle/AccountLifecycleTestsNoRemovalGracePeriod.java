@@ -19,7 +19,7 @@ package it.infn.mw.iam.test.lifecycle;
 import static it.infn.mw.iam.test.api.TestSupport.EXPECTED_ACCOUNT_NOT_FOUND;
 import static it.infn.mw.iam.test.api.TestSupport.TEST_USER_UUID;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.time.Clock;
 import java.time.ZoneId;

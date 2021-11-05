@@ -18,7 +18,7 @@ package it.infn.mw.iam.test.api.account.search.service;
 import static it.infn.mw.iam.api.account.search.GroupSearchController.getSortByName;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

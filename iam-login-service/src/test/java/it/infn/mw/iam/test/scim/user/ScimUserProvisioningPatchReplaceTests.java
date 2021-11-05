@@ -22,7 +22,7 @@ import static it.infn.mw.iam.test.scim.ScimUtils.SCIM_WRITE_SCOPE;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;

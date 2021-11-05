@@ -17,7 +17,7 @@ package it.infn.mw.iam.test.ext_authn.saml.jit_account_provisioning;
 
 
 import static java.util.Arrays.asList;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.when;
@@ -35,7 +35,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import it.infn.mw.iam.authn.saml.CleanInactiveProvisionedAccounts;
 import it.infn.mw.iam.core.time.TimeProvider;

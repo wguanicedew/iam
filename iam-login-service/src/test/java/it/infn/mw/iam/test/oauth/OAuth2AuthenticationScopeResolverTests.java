@@ -17,7 +17,7 @@ package it.infn.mw.iam.test.oauth;
 
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
 import java.util.Set;
@@ -29,7 +29,7 @@ import org.mitre.oauth2.model.OAuth2AccessTokenEntity;
 import org.mitre.oauth2.repository.OAuth2TokenRepository;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;

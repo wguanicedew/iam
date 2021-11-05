@@ -88,7 +88,7 @@ public class ListResponseDTO<T> {
     public <S> Builder<T> fromPage(Page<S> page, Pageable op) {
       this.totalResults = page.getTotalElements();
       this.itemsPerPage = page.getNumberOfElements();
-      this.startIndex = op.getOffset() + 1;
+      this.startIndex = (int) op.getOffset() + 1;
       return this;
     }
 

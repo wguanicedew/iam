@@ -45,6 +45,38 @@ public class IamProperties {
     VISIBLE, HIDDEN, HIDDEN_WITH_LINK
   }
 
+  public static class ExternalServiceProbeProperties {
+    
+    private boolean enabled = true;
+
+    private String endpoint = "https://www.google.com";
+    private int timeoutInSecs = 10;
+
+
+    public boolean isEnabled() {
+      return enabled;
+    }
+    
+    public void setEnabled(boolean enabled) {
+      this.enabled = enabled;
+    }
+
+    public String getEndpoint() {
+      return endpoint;
+    }
+
+    public int getTimeoutInSecs() {
+      return timeoutInSecs;
+    }
+
+    public void setEndpoint(String endpoint) {
+      this.endpoint = endpoint;
+    }
+
+    public void setTimeoutInSecs(int timeoutInSecs) {
+      this.timeoutInSecs = timeoutInSecs;
+    }
+  }
 
   public static class VersionedStaticResourcesProperties {
     boolean enableVersioning = true;
@@ -513,6 +545,10 @@ public class IamProperties {
   private VersionedStaticResourcesProperties versionedStaticResources =
       new VersionedStaticResourcesProperties();
 
+  private ExternalServiceProbeProperties externalServiceProbe =
+      new ExternalServiceProbeProperties();
+
+
   public String getBaseUrl() {
     return baseUrl;
   }
@@ -704,6 +740,14 @@ public class IamProperties {
   public void setVersionedStaticResources(
       VersionedStaticResourcesProperties versionedStaticResources) {
     this.versionedStaticResources = versionedStaticResources;
+  }
+
+  public ExternalServiceProbeProperties getExternalServiceProbe() {
+    return externalServiceProbe;
+  }
+
+  public void setExternalServiceProbe(ExternalServiceProbeProperties externalServiceProbe) {
+    this.externalServiceProbe = externalServiceProbe;
   }
 
 }

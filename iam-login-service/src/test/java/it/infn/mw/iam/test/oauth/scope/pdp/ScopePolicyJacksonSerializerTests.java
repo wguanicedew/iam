@@ -16,7 +16,7 @@
 package it.infn.mw.iam.test.oauth.scope.pdp;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.IOException;
 import java.io.StringWriter;

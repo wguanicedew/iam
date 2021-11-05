@@ -17,11 +17,11 @@ package it.infn.mw.iam.test.ext_authn.validator;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import it.infn.mw.iam.authn.common.Conjunction;
 import it.infn.mw.iam.authn.common.Disjunction;

@@ -16,7 +16,10 @@
 package it.infn.mw.iam.api.common;
 
 import static com.google.common.base.Preconditions.checkArgument;
+
 import javax.annotation.Generated;
+
+import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
@@ -64,7 +67,7 @@ public class OffsetPageable implements Pageable {
   }
 
   @Override
-  public int getOffset() {
+  public long getOffset() {
 
     return offset;
   }
@@ -133,9 +136,16 @@ public class OffsetPageable implements Pageable {
   }
 
   @Override
+  public Pageable withPage(int pageNumber) {
+    throw new NotImplementedException();
+  }
+
+  @Override
   public String toString() {
 
     return "OffsetPageable [offset=" + offset + ", count=" + count + "]";
   }
+
+
 
 }

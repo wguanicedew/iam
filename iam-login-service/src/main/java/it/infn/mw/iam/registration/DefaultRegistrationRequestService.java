@@ -235,7 +235,7 @@ public class DefaultRegistrationRequestService
             () -> new IllegalStateException("No request found with status: " + status.name()));
 
     } else {
-      Sort srt = new Sort(Sort.Direction.ASC, "creationTime");
+      Sort srt = Sort.by(Sort.Direction.ASC, "creationTime");
       Iterable<IamRegistrationRequest> iter = requestRepository.findAll(srt);
       for (IamRegistrationRequest elem : iter) {
         result.add(elem);

@@ -21,7 +21,7 @@ import static it.infn.mw.iam.test.api.TestSupport.EXPECTED_ACCOUNT_NOT_FOUND;
 import static it.infn.mw.iam.test.api.TestSupport.TEST_USER_UUID;
 import static java.lang.String.valueOf;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.time.Clock;
 import java.time.ZoneId;

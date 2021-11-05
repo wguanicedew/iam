@@ -21,7 +21,7 @@ import static it.infn.mw.iam.core.oauth.scope.matchers.StructuredPathScopeMatche
 import static java.util.Collections.emptySet;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mitre.oauth2.model.ClientDetailsEntity.AuthMethod.SECRET_BASIC;
 import static org.mockito.Mockito.when;
 
@@ -39,7 +39,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.google.common.collect.Sets;
 

@@ -24,7 +24,7 @@ import static it.infn.mw.iam.rcauth.RCAuthController.GETCERT_PATH;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.springframework.http.MediaType.TEXT_PLAIN;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;

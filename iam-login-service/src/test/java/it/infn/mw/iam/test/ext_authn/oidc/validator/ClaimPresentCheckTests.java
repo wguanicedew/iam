@@ -17,7 +17,7 @@ package it.infn.mw.iam.test.ext_authn.oidc.validator;
 
 import static it.infn.mw.iam.authn.oidc.validator.check.ClaimPresentCheck.hasClaim;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
 import java.text.ParseException;

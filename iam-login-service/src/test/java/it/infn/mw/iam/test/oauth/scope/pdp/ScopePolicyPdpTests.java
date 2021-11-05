@@ -19,7 +19,7 @@ package it.infn.mw.iam.test.oauth.scope.pdp;
 import static it.infn.mw.iam.persistence.model.IamScopePolicy.MatchingPolicy.PATH;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.Iterator;
 import java.util.Set;

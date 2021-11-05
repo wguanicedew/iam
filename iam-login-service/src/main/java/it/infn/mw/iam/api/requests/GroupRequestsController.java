@@ -61,7 +61,7 @@ public class GroupRequestsController {
       @RequestParam(required = false) String status, @RequestParam(required = false) Integer count,
       @RequestParam(required = false) Integer startIndex) {
 
-    final Sort sort = new Sort("account.username", "group.name","creationTime");
+    final Sort sort = Sort.by("account.username", "group.name", "creationTime");
     
     OffsetPageable pageRequest =
         PagingUtils.buildPageRequest(count, startIndex, GROUP_REQUEST_MAX_PAGE_SIZE, sort);

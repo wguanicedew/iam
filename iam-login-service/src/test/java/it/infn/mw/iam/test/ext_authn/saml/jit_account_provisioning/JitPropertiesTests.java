@@ -18,7 +18,7 @@ package it.infn.mw.iam.test.ext_authn.saml.jit_account_provisioning;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.isIn;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Optional;

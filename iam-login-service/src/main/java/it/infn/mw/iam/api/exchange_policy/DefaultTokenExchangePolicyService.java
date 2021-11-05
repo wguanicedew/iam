@@ -59,8 +59,7 @@ public class DefaultTokenExchangePolicyService implements TokenExchangePolicySer
 
   @Override
   public void deleteTokenExchangePolicyById(Long id) {
-    IamTokenExchangePolicyEntity policy =
-        Optional.ofNullable(repo.findOne(id)).orElseThrow(notFoundError(id));
+    IamTokenExchangePolicyEntity policy = repo.findById(id).orElseThrow(notFoundError(id));
 
     repo.delete(policy);
 
@@ -69,7 +68,7 @@ public class DefaultTokenExchangePolicyService implements TokenExchangePolicySer
 
   @Override
   public Optional<ExchangePolicyDTO> getTokenExchangePolicyById(Long id) {
-    return Optional.ofNullable(repo.findOne(id)).map(converter::dtoFromEntity);
+    return repo.findById(id).map(converter::dtoFromEntity);
   }
 
   @Override

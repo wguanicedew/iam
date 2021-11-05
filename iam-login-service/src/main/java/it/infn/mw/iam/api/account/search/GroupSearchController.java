@@ -83,7 +83,6 @@ public class GroupSearchController extends AbstractSearchController<ScimGroup, I
   }
 
   public static Sort getSortByName(Sort.Direction direction) {
-
-    return new Sort(new Order(direction, "name").ignoreCase());
+    return Sort.by(new Order(direction, "name").ignoreCase());
   }
 }

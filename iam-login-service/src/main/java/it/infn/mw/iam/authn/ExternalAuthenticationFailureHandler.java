@@ -16,7 +16,6 @@
 package it.infn.mw.iam.authn;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 
 import javax.servlet.ServletException;
@@ -45,11 +44,7 @@ public class ExternalAuthenticationFailureHandler extends ExternalAuthentication
   private String buildRedirectURL(AuthenticationException exception) {
     String errorMessage = helper.buildErrorMessage(exception);
 
-    try {
-      errorMessage = UriUtils.encode(errorMessage, StandardCharsets.UTF_8.toString());
-    } catch (UnsupportedEncodingException uex) {
-      LOG.error(uex.getMessage(), uex);
-    }
+    errorMessage = UriUtils.encode(errorMessage, StandardCharsets.UTF_8.toString());
 
     return UriComponentsBuilder.fromPath("/login")
       .queryParam("error", "true")

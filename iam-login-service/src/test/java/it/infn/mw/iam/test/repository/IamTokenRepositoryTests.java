@@ -16,7 +16,7 @@
 package it.infn.mw.iam.test.repository;
 
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.Calendar;
 import java.util.Date;

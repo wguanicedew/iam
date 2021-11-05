@@ -18,7 +18,7 @@ package it.infn.mw.iam.test.ext_authn.x509;
 import static org.hamcrest.Matchers.emptyArray;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.security.cert.X509Certificate;
 

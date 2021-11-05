@@ -20,13 +20,13 @@ import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
@@ -372,7 +372,7 @@ public class WLCGProfileIntegrationTests extends EndpointsTestUtils {
     JWT exchangedToken = JWTParser.parse(tokenResponseObject.getValue());
     assertThat(exchangedToken.getJWTClaimsSet().getSubject(), is(SUBJECT_CLIENT_ID));
 
-    assertThat(exchangedToken.getJWTClaimsSet().getJSONObjectClaim("act").getAsString("sub"),
+    assertThat(exchangedToken.getJWTClaimsSet().getJSONObjectClaim("act").get("sub"),
         is(ACTOR_CLIENT_ID));
 
     String atScopes = exchangedToken.getJWTClaimsSet().getStringClaim("scope");
@@ -488,7 +488,7 @@ public class WLCGProfileIntegrationTests extends EndpointsTestUtils {
     JWT exchangedToken = JWTParser.parse(tokenResponseObject.getValue());
     assertThat(exchangedToken.getJWTClaimsSet().getSubject(), is(USER_SUBJECT));
 
-    assertThat(exchangedToken.getJWTClaimsSet().getJSONObjectClaim("act").getAsString("sub"),
+    assertThat(exchangedToken.getJWTClaimsSet().getJSONObjectClaim("act").get("sub"),
         is(ACTOR_CLIENT_ID));
 
     // Check that token can be introspected properly
@@ -523,7 +523,7 @@ public class WLCGProfileIntegrationTests extends EndpointsTestUtils {
     JWT exchangedToken2 = JWTParser.parse(tokenResponseObject2.getValue());
     assertThat(exchangedToken2.getJWTClaimsSet().getSubject(), is(USER_SUBJECT));
 
-    assertThat(exchangedToken2.getJWTClaimsSet().getJSONObjectClaim("act").getAsString("sub"),
+    assertThat(exchangedToken2.getJWTClaimsSet().getJSONObjectClaim("act").get("sub"),
         is(ACTOR_CLIENT_ID));
 
 
@@ -759,7 +759,7 @@ public class WLCGProfileIntegrationTests extends EndpointsTestUtils {
           .getJWTClaimsSet();
 
     assertThat(claims.getJSONObjectClaim("attr"), notNullValue());
-    assertThat(claims.getJSONObjectClaim("attr").getAsString("test"), is("test"));
+    assertThat(claims.getJSONObjectClaim("attr").get("test"), is("test"));
   }
 
 }

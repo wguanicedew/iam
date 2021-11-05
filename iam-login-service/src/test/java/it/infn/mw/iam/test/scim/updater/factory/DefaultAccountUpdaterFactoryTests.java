@@ -33,11 +33,11 @@ import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REPLACE_USERNA
 import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.EPUID;
 import static it.infn.mw.iam.test.X509Utils.x509Certs;
 import static org.hamcrest.CoreMatchers.hasItem;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.isIn;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -50,7 +50,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -210,8 +210,8 @@ public class DefaultAccountUpdaterFactoryTests {
       .thenAnswer(new Answer<IamAccount>() {
         @Override
         public IamAccount answer(InvocationOnMock invocation) throws Throwable {
-          IamAccount account = invocation.getArgumentAt(0, IamAccount.class);
-          IamSshKey key = invocation.getArgumentAt(1, IamSshKey.class);
+          IamAccount account = invocation.getArgument(0, IamAccount.class);
+          IamSshKey key = invocation.getArgument(1, IamSshKey.class);
           account.getSshKeys().add(key);
           key.setAccount(account);
           when(repo.findBySshKeyValue(key.getValue())).thenReturn(Optional.of(account));
@@ -260,8 +260,8 @@ public class DefaultAccountUpdaterFactoryTests {
       .thenAnswer(new Answer<IamAccount>() {
         @Override
         public IamAccount answer(InvocationOnMock invocation) throws Throwable {
-          IamAccount account = invocation.getArgumentAt(0, IamAccount.class);
-          IamSshKey key = invocation.getArgumentAt(1, IamSshKey.class);
+          IamAccount account = invocation.getArgument(0, IamAccount.class);
+          IamSshKey key = invocation.getArgument(1, IamSshKey.class);
           account.getSshKeys().add(key);
           key.setAccount(account);
           when(repo.findBySshKeyValue(key.getValue())).thenReturn(Optional.of(account));
@@ -381,8 +381,8 @@ public class DefaultAccountUpdaterFactoryTests {
       .thenAnswer(new Answer<IamAccount>() {
         @Override
         public IamAccount answer(InvocationOnMock invocation) throws Throwable {
-          IamAccount account = invocation.getArgumentAt(0, IamAccount.class);
-          IamSshKey key = invocation.getArgumentAt(1, IamSshKey.class);
+          IamAccount account = invocation.getArgument(0, IamAccount.class);
+          IamSshKey key = invocation.getArgument(1, IamSshKey.class);
           account.getSshKeys().remove(key);
           key.setAccount(null);
           when(repo.findBySshKeyValue(key.getValue())).thenReturn(Optional.empty());

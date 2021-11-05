@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.web.ErrorController;
+import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Controller;
@@ -59,11 +59,5 @@ public class LocalController implements ErrorController {
     }
 
     return "index";
-  }
-
-  @Override
-  public String getErrorPath() {
-
-    return "/error";
   }
 }

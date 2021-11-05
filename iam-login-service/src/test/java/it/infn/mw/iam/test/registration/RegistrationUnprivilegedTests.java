@@ -19,7 +19,7 @@ import static it.infn.mw.iam.core.IamRegistrationRequestStatus.APPROVED;
 import static it.infn.mw.iam.core.IamRegistrationRequestStatus.CONFIRMED;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;

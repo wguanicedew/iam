@@ -61,7 +61,6 @@
     <module>iam-persistence</module>
     <module>iam-login-service</module>
     <module>iam-test-client</module>
-    <module>iam-test-protected-resource</module>
   </modules>
 
   <dependencyManagement>

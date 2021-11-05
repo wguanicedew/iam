@@ -247,7 +247,7 @@ public class CernHrLifecycleHandler implements Runnable, SchedulingConfigurer {
   @Override
   public void run() {
 
-    Pageable pageRequest = new PageRequest(0, cernProperties.getTask().getPageSize());
+    Pageable pageRequest = PageRequest.of(0, cernProperties.getTask().getPageSize());
 
     while (true) {
       Page<IamAccount> accountsPage = accountRepo.findByLabelPrefixAndName(LABEL_CERN_PREFIX,
