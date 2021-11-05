@@ -20,7 +20,8 @@ import org.flywaydb.core.api.migration.Context;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
-public abstract class BaseFlywayJavaMigrationAdapter extends BaseJavaMigration {
+public abstract class BaseFlywayJavaMigrationAdapter extends BaseJavaMigration
+    implements SpringJdbcFlywayMigration {
 
   protected JdbcTemplate templateFromContext(Context context) {
     return new JdbcTemplate(new SingleConnectionDataSource(context.getConnection(), true));
@@ -30,7 +31,5 @@ public abstract class BaseFlywayJavaMigrationAdapter extends BaseJavaMigration {
   public void migrate(Context context) throws Exception {
     migrate(templateFromContext(context));
   }
-
-  public abstract void migrate(JdbcTemplate jdbcTemplate) throws Exception;
 
 }

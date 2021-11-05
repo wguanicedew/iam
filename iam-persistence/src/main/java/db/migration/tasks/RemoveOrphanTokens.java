@@ -19,9 +19,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import it.infn.mw.iam.persistence.migrations.BaseFlywayJavaMigrationAdapter;
+import it.infn.mw.iam.persistence.migrations.SpringJdbcFlywayMigration;
 
-public class RemoveOrphanTokens extends BaseFlywayJavaMigrationAdapter {
+public class RemoveOrphanTokens implements SpringJdbcFlywayMigration {
 
   public static final Logger LOG = LoggerFactory.getLogger(RemoveOrphanTokens.class);
 

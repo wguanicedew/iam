@@ -19,7 +19,10 @@ server:
     path: /error
     
   port: ${IAM_PORT:8080}
+  
   tomcat:
+    additional-tld-skip-patterns:
+    - "*.jar"
     accesslog:
       enabled: ${IAM_TOMCAT_ACCESS_LOG_ENABLED:false}
       directory: ${IAM_TOMCAT_ACCESS_LOG_DIRECTORY:/tmp}

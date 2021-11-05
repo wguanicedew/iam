@@ -13,14 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.persistence.migrations;
+package db.migration.tasks;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
-public class CreateGroupManagerAuthorities extends BaseFlywayJavaMigrationAdapter {
+import it.infn.mw.iam.persistence.migrations.SpringJdbcFlywayMigration;
+
+public class CreateGroupManagerAuthorities implements SpringJdbcFlywayMigration {
 
   public static final Logger LOG = LoggerFactory.getLogger(CreateGroupManagerAuthorities.class);
 
