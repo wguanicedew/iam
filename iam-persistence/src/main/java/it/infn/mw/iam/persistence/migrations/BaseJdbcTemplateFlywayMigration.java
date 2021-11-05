@@ -15,9 +15,9 @@
  */
 package it.infn.mw.iam.persistence.migrations;
 
-import org.flywaydb.core.api.migration.spring.SpringJdbcMigration;
+import org.flywaydb.core.api.migration.BaseJavaMigration;
 
-public abstract class BaseJdbcTemplateFlywayMigration implements SpringJdbcMigration {
+public abstract class BaseJdbcTemplateFlywayMigration extends BaseJavaMigration {
 
 
 
