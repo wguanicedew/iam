@@ -31,10 +31,6 @@
   <name>IAM Persistence Module</name>
   <description>The INDIGO IAM persistence classes</description>
 
-  <properties>
-    <hibernate.version></hibernate.version>
-  </properties>
-
   <dependencies>
 
     <dependency>
@@ -59,7 +55,7 @@
     </dependency>
 
     <dependency>
-      <groupId>org.hibernate</groupId>
+      <groupId>org.hibernate.validator</groupId>
       <artifactId>hibernate-validator</artifactId>
     </dependency>
 
