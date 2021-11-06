@@ -15,6 +15,10 @@
 #
 
 spring:
+  
+  main:
+    allow-bean-definition-overriding: true
+  
   mail:
     port: ${IAM_MAIL_PORT:8125}
   
@@ -24,23 +28,13 @@ spring:
       - classpath:db/migration/test
   
   datasource:
+    type: org.h2.jdbcx.JdbcDataSource
     url: jdbc:h2:mem:iam;DB_CLOSE_ON_EXIT=FALSE;DB_CLOSE_DELAY=-1
     username: sa
     password:
-    
-    tomcat:
-      initial-size: 2
-      max-active: 5 
-      min-idle: 1
-      max-idle: 1
-      max-wait: 2000
-      test-while-idle: true
-      test-on-borrow: true
-      validation-query: SELECT 1
       
 notification:
   disable: ${IAM_NOTIFICATION_DISABLE:true}
-
 
 iam:
   versioned-static-resources:
