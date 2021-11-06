@@ -24,6 +24,7 @@ import it.infn.mw.iam.core.oauth.profile.JWTProfile;
 import it.infn.mw.iam.core.oauth.profile.RequestValidator;
 import it.infn.mw.iam.core.oauth.profile.UserInfoHelper;
 
+@SuppressWarnings("deprecation")
 public class IamJWTProfile implements JWTProfile, RequestValidator {
 
   public static final String PROFILE_NAME = "IAM JWT profile";

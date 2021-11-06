@@ -30,6 +30,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationProcessingFilter;
 
+@SuppressWarnings("deprecation")
 public class MockOAuth2Filter extends OAuth2AuthenticationProcessingFilter {
 
   SecurityContext securityContext;

@@ -19,6 +19,7 @@ import java.util.Set;
 
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
+@SuppressWarnings("deprecation")
 @FunctionalInterface
 public interface OAuth2AuthenticationScopeResolver {
   Set<String> resolveScope(OAuth2Authentication auth);

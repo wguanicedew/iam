@@ -19,6 +19,7 @@ import java.util.Set;
 
 import org.springframework.security.oauth2.provider.ClientDetails;
 
+@SuppressWarnings("deprecation")
 public interface ScopeMatcherRegistry {
   Set<ScopeMatcher> findMatchersForClient(ClientDetails client);
   ScopeMatcher findMatcherForScope(String scope);

@@ -49,6 +49,7 @@ import it.infn.mw.iam.core.oauth.exchange.TokenExchangePdp;
 import it.infn.mw.iam.core.oauth.exchange.TokenExchangePdpResult;
 import it.infn.mw.iam.persistence.model.IamAccount;
 
+@SuppressWarnings("deprecation")
 public class TokenExchangeTokenGranter extends AbstractTokenGranter {
 
   public static final Logger LOG = LoggerFactory.getLogger(TokenExchangeTokenGranter.class);

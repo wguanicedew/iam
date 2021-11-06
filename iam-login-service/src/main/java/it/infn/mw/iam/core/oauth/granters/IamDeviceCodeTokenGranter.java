@@ -30,6 +30,7 @@ import org.springframework.security.oauth2.provider.TokenRequest;
 import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 
+@SuppressWarnings("deprecation")
 public class IamDeviceCodeTokenGranter extends AbstractTokenGranter {
 
   public static final String GRANT_TYPE = "urn:ietf:params:oauth:grant-type:device_code";

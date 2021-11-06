@@ -17,6 +17,7 @@ package it.infn.mw.iam.core.oauth.exchange;
 
 import org.springframework.security.oauth2.provider.ClientDetails;
 
+@SuppressWarnings("deprecation")
 public interface ClientMatcher {
   
   boolean matchesClient(ClientDetails client);

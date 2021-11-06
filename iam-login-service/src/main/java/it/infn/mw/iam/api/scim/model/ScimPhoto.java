@@ -18,7 +18,7 @@ package it.infn.mw.iam.api.scim.model;
 import javax.annotation.Generated;
 import javax.validation.constraints.NotNull;
 
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 import org.hibernate.validator.constraints.URL;
 
 import com.fasterxml.jackson.annotation.JsonCreator;

@@ -31,6 +31,7 @@ import org.springframework.security.oauth2.common.exceptions.InvalidClientExcept
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 
+@SuppressWarnings("deprecation")
 public class IAMClientUserDetailsService implements ClientUserDetailsService {
   private static GrantedAuthority ROLE_CLIENT = new SimpleGrantedAuthority("ROLE_CLIENT");
 

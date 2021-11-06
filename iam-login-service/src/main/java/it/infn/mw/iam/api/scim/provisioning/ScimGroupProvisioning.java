@@ -27,8 +27,6 @@ import java.util.function.Supplier;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
@@ -57,7 +55,7 @@ import it.infn.mw.iam.persistence.model.IamGroup;
 @Service
 @Transactional
 public class ScimGroupProvisioning
-    implements ScimProvisioning<ScimGroup, List<ScimMemberRef>>, ApplicationEventPublisherAware {
+    implements ScimProvisioning<ScimGroup, List<ScimMemberRef>> {
 
   private static final int GROUP_NAME_MAX_LENGTH = 50;
   private static final int GROUP_FULLNAME_MAX_LENGTH = 512;
@@ -68,7 +66,7 @@ public class ScimGroupProvisioning
   private final GroupConverter converter;
 
   private final DefaultGroupMembershipUpdaterFactory groupUpdaterFactory;
-  private ApplicationEventPublisher eventPublisher;
+
   private final ScimResourceLocationProvider locationProvider;
 
   @Autowired
@@ -252,9 +250,6 @@ public class ScimGroupProvisioning
     return converter.dtoFromEntity(newGroup);
   }
 
-  public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
-    this.eventPublisher = publisher;
-  }
 
   @Override
   public void update(String id, List<ScimPatchOperation<List<ScimMemberRef>>> operations) {

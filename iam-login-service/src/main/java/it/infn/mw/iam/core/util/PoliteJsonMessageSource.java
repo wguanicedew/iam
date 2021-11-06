@@ -40,6 +40,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 
+@SuppressWarnings("deprecation")
 /**
  * This is a more polite {@link org.mitre.openid.connect.config.JsonMessageSource} that does not log
  * errors for unsupported locales.

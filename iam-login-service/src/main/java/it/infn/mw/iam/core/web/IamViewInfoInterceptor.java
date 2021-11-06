@@ -21,14 +21,14 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+import org.springframework.web.servlet.HandlerInterceptor;
 
 import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.config.saml.IamSamlProperties;
 import it.infn.mw.iam.rcauth.RCAuthProperties;
 
 @Component
-public class IamViewInfoInterceptor extends HandlerInterceptorAdapter {
+public class IamViewInfoInterceptor implements HandlerInterceptor {
 
   public static final String LOGIN_PAGE_CONFIGURATION_KEY = "loginPageConfiguration";
   public static final String ORGANISATION_NAME_KEY = "iamOrganisationName";

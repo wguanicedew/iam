@@ -15,9 +15,8 @@
  */
 package it.infn.mw.iam.api.account.password_reset;
 
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
-
-import org.hibernate.validator.constraints.Email;
 
 public class EmailDTO {
 

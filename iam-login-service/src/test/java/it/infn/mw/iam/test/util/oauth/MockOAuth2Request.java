@@ -23,6 +23,7 @@ import org.springframework.security.oauth2.provider.OAuth2Request;
 
 import com.google.common.collect.Sets;
 
+@SuppressWarnings("deprecation")
 public class MockOAuth2Request extends OAuth2Request {
 
   private static final long serialVersionUID = -8547059375050883345L;

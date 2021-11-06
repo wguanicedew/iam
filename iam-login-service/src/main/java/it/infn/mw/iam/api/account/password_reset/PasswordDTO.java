@@ -15,8 +15,9 @@
  */
 package it.infn.mw.iam.api.account.password_reset;
 
+import javax.validation.constraints.NotEmpty;
+
 import org.hibernate.validator.constraints.Length;
-import org.hibernate.validator.constraints.NotEmpty;
 
 public class PasswordDTO {
 

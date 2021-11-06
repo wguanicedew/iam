@@ -28,6 +28,7 @@ import it.infn.mw.iam.persistence.model.IamTokenExchangePolicyEntity;
 import it.infn.mw.iam.persistence.model.IamTokenExchangeScopePolicy;
 import it.infn.mw.iam.persistence.model.PolicyRule;
 
+@SuppressWarnings("deprecation")
 public class TokenExchangePolicy {
   private final Long id;
 

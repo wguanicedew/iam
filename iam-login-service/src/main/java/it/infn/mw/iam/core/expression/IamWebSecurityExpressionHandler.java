@@ -26,6 +26,7 @@ import it.infn.mw.iam.api.account.AccountUtils;
 import it.infn.mw.iam.api.requests.GroupRequestUtils;
 import it.infn.mw.iam.core.userinfo.OAuth2AuthenticationScopeResolver;
 
+@SuppressWarnings("deprecation")
 @Component
 public class IamWebSecurityExpressionHandler extends OAuth2WebSecurityExpressionHandler {
 

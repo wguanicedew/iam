@@ -38,6 +38,7 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
+@SuppressWarnings("deprecation")
 public class IamUserInfoInterceptor extends HandlerInterceptorAdapter {
 
   public static final String USERINFO_ATTR_NAME = "userInfo";

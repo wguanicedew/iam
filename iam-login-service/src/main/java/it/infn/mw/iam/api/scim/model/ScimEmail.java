@@ -20,9 +20,9 @@ import static it.infn.mw.iam.api.scim.model.ScimEmail.ScimEmailType.work;
 import javax.annotation.Generated;
 import javax.validation.constraints.NotNull;
 
-import org.hibernate.validator.constraints.Email;
+import javax.validation.constraints.Email;
 import org.hibernate.validator.constraints.Length;
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

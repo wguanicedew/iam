@@ -138,8 +138,7 @@ public class IdTokenBuilder {
       idClaims.claim(k, v);
     });
 
-    JWSHeader header = new JWSHeader(signingAlgo, null, null, null, null, null, null, null, null,
-	null, keyId, null, null);
+    JWSHeader header = new JWSHeader.Builder(signingAlgo).keyID(keyId).build();
 
     idToken = new SignedJWT(header, idClaims.build());
 

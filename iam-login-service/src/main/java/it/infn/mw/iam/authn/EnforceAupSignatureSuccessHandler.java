@@ -37,6 +37,7 @@ import it.infn.mw.iam.core.util.IamAuthenticationLogger;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
+@SuppressWarnings("deprecation")
 public class EnforceAupSignatureSuccessHandler implements AuthenticationSuccessHandler {
 
   private final AuthenticationSuccessHandler delegate;

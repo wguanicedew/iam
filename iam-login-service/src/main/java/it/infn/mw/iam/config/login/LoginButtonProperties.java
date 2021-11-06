@@ -17,7 +17,7 @@ package it.infn.mw.iam.config.login;
 
 import javax.validation.Valid;
 
-import org.hibernate.validator.constraints.NotBlank;
+import javax.validation.constraints.NotBlank;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;

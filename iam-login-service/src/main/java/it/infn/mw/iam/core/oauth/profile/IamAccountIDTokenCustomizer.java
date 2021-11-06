@@ -23,7 +23,9 @@ import com.nimbusds.jwt.JWTClaimsSet.Builder;
 
 import it.infn.mw.iam.persistence.model.IamAccount;
 
+@SuppressWarnings("deprecation")
 public interface IamAccountIDTokenCustomizer {
+
 
   void customizeIdTokenClaims(Builder idClaims, ClientDetailsEntity client, OAuth2Request request,
       IamAccount account, OAuth2AccessTokenEntity accessToken);

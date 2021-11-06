@@ -35,6 +35,7 @@ import it.infn.mw.iam.core.oauth.attributes.AttributeMapHelper;
 import it.infn.mw.iam.core.oauth.profile.common.BaseAccessTokenBuilder;
 import it.infn.mw.iam.persistence.repository.UserInfoAdapter;
 
+@SuppressWarnings("deprecation")
 public class WLCGProfileAccessTokenBuilder extends BaseAccessTokenBuilder {
 
   public static final String WLCG_VER_CLAIM = "wlcg.ver";

@@ -29,6 +29,7 @@ import org.springframework.stereotype.Component;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
+@SuppressWarnings("deprecation")
 @Component
 public class AccountUtils {
   

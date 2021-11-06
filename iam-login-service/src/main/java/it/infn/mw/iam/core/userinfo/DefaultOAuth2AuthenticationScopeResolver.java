@@ -29,6 +29,7 @@ import org.springframework.stereotype.Component;
 import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
 
 @Component
+@SuppressWarnings("deprecation")
 public class DefaultOAuth2AuthenticationScopeResolver implements OAuth2AuthenticationScopeResolver {
 
   private final OAuth2TokenRepository tokenRepo;

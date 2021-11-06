@@ -27,6 +27,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Sets;
 
+@SuppressWarnings("deprecation")
 public class DefaultScopeMatcherRegistry implements ScopeMatcherRegistry {
 
   public static final int DEFAULT_CACHE_SIZE = 10;

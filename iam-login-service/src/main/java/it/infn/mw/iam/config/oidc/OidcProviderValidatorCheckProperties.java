@@ -17,7 +17,7 @@ package it.infn.mw.iam.config.oidc;
 
 import java.util.Map;
 
-import org.hibernate.validator.constraints.NotBlank;
+import javax.validation.constraints.NotBlank;
 
 import com.google.common.collect.Maps;
 

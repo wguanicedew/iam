@@ -43,6 +43,7 @@ import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.core.client.ClientUserDetailsService;
 import it.infn.mw.iam.core.oauth.assertion.IAMJWTBearerAuthenticationProvider;
 
+@SuppressWarnings("deprecation")
 @Configuration
 @Order(-1)
 public class IamTokenEndointSecurityConfig extends WebSecurityConfigurerAdapter {

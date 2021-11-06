@@ -60,6 +60,7 @@ import it.infn.mw.iam.core.oauth.granters.IamResourceOwnerPasswordTokenGranter;
 import it.infn.mw.iam.core.oauth.granters.TokenExchangeTokenGranter;
 import it.infn.mw.iam.core.util.IamAuthenticationEventPublisher;
 
+@SuppressWarnings("deprecation")
 @Configuration
 @EnableAuthorizationServer
 public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
@@ -103,7 +104,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
   private TokenExchangePdp tokenExchangePdp;
 
   @Bean
-  WebResponseExceptionTranslator webResponseExceptionTranslator() {
+  WebResponseExceptionTranslator<?> webResponseExceptionTranslator() {
 
     return new DefaultWebResponseExceptionTranslator();
   }

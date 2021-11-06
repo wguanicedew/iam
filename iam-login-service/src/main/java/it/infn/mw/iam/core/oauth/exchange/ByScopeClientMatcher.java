@@ -20,6 +20,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 
 import org.springframework.security.oauth2.provider.ClientDetails;
 
+@SuppressWarnings("deprecation")
 public class ByScopeClientMatcher implements ClientMatcher {
 
   final String scope;

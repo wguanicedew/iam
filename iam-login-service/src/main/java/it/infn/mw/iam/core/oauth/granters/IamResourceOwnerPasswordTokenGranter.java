@@ -33,6 +33,7 @@ import it.infn.mw.iam.api.account.AccountUtils;
 import it.infn.mw.iam.api.aup.AUPSignatureCheckService;
 import it.infn.mw.iam.persistence.model.IamAccount;
 
+@SuppressWarnings("deprecation")
 public class IamResourceOwnerPasswordTokenGranter extends ResourceOwnerPasswordTokenGranter {
 
   private AUPSignatureCheckService signatureCheckService;

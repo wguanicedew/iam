@@ -29,6 +29,7 @@ import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.core.oauth.profile.common.BaseUserinfoHelper;
 import it.infn.mw.iam.core.userinfo.IamDecoratedUserInfo;
 
+@SuppressWarnings("deprecation")
 public class IamJWTProfileUserinfoHelper extends BaseUserinfoHelper {
 
   private final ExternalAuthenticationInfoProcessor extAuthnProcessor;

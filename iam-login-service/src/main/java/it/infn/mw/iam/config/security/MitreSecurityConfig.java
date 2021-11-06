@@ -36,6 +36,7 @@ import org.springframework.security.web.context.SecurityContextPersistenceFilter
 
 import it.infn.mw.iam.config.client_registration.ClientRegistrationProperties;
 
+@SuppressWarnings("deprecation")
 @Configuration
 public class MitreSecurityConfig {
 

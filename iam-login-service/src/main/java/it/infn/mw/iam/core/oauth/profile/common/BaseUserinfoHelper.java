@@ -22,6 +22,7 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.core.oauth.profile.UserInfoHelper;
 
+@SuppressWarnings("deprecation")
 public abstract class BaseUserinfoHelper implements UserInfoHelper {
 
   private final IamProperties properties;

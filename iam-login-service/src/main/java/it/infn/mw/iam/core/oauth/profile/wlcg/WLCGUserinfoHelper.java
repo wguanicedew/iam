@@ -34,6 +34,7 @@ import com.nimbusds.jwt.JWTParser;
 import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.core.oauth.profile.common.BaseUserinfoHelper;
 
+@SuppressWarnings("deprecation")
 public class WLCGUserinfoHelper extends BaseUserinfoHelper {
 
   public static final Logger LOG = LoggerFactory.getLogger(WLCGUserinfoHelper.class);

@@ -41,6 +41,7 @@ import com.google.common.base.Joiner;
 import it.infn.mw.iam.core.oauth.profile.JWTProfileResolver;
 import it.infn.mw.iam.core.oauth.scope.pdp.IamScopeFilter;
 
+@SuppressWarnings("deprecation")
 public class IamOAuth2RequestFactory extends ConnectOAuth2RequestFactory {
 
   public static final Logger LOG = LoggerFactory.getLogger(IamOAuth2RequestFactory.class);

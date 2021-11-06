@@ -27,6 +27,7 @@ import it.infn.mw.iam.core.userinfo.AarcDecoratedUserInfo;
 import it.infn.mw.iam.persistence.model.IamUserInfo;
 import it.infn.mw.iam.persistence.repository.UserInfoAdapter;
 
+@SuppressWarnings("deprecation")
 public class AarcJWTProfileUserinfoHelper extends BaseUserinfoHelper {
 
   protected final AarcClaimValueHelper claimValueHelper;

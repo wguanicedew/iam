@@ -94,9 +94,10 @@ public class OidcConfiguration {
   public static final String DEFINE_ME_PLEASE = "define_me_please";
 
   @Bean
-  public FilterRegistrationBean disabledAutomaticOidcFilterRegistration(OidcClientFilter f) {
+  public FilterRegistrationBean<OidcClientFilter> disabledAutomaticOidcFilterRegistration(
+      OidcClientFilter f) {
 
-    FilterRegistrationBean b = new FilterRegistrationBean(f);
+    FilterRegistrationBean<OidcClientFilter> b = new FilterRegistrationBean<OidcClientFilter>(f);
     b.setEnabled(false);
     return b;
   }

@@ -27,6 +27,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
+@SuppressWarnings("deprecation")
 public class ScopeMatcherOAuthRequestValidator implements OAuth2RequestValidator {
 
   public static final int DEFAULT_CACHE_SIZE = 10;

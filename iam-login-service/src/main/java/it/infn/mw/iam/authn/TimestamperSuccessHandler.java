@@ -34,6 +34,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import it.infn.mw.iam.core.util.IamAuthenticationLogger;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
+@SuppressWarnings("deprecation")
 public class TimestamperSuccessHandler implements AuthenticationSuccessHandler {
 
   public static final Logger LOG = getLogger(TimestamperSuccessHandler.class);

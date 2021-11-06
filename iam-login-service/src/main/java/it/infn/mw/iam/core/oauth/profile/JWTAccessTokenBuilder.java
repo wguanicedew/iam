@@ -24,6 +24,7 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import com.nimbusds.jwt.JWTClaimsSet;
 
 @FunctionalInterface
+@SuppressWarnings("deprecation")
 public interface JWTAccessTokenBuilder {
 
   JWTClaimsSet buildAccessToken(OAuth2AccessTokenEntity token, OAuth2Authentication authentication,

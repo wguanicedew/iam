@@ -18,6 +18,7 @@ package it.infn.mw.iam.core.oauth.exchange;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.TokenRequest;
 
+@SuppressWarnings("deprecation")
 public interface TokenExchangePdp {
 
   public void reloadPolicies();

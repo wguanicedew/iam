@@ -43,6 +43,7 @@ import com.nimbusds.jwt.JWTParser;
 import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.core.oauth.profile.JWTAccessTokenBuilder;
 
+@SuppressWarnings("deprecation")
 public abstract class BaseAccessTokenBuilder implements JWTAccessTokenBuilder {
 
   public static final Logger LOG = LoggerFactory.getLogger(BaseAccessTokenBuilder.class);

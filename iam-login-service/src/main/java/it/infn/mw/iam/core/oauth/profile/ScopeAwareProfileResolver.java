@@ -28,6 +28,7 @@ import java.util.Set;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 
+@SuppressWarnings("deprecation")
 public class ScopeAwareProfileResolver implements JWTProfileResolver {
 
   public static final String AARC_PROFILE_ID = "aarc";

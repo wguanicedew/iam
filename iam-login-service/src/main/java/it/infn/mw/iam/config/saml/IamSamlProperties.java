@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.validation.Valid;
 
-import org.hibernate.validator.constraints.NotBlank;
+import javax.validation.constraints.NotBlank;
 import org.opensaml.saml2.core.NameIDType;
 import org.opensaml.xml.signature.SignatureConstants;
 import org.springframework.boot.context.properties.ConfigurationProperties;

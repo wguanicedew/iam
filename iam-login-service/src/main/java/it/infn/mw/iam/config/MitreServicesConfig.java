@@ -92,6 +92,7 @@ import it.infn.mw.iam.core.oauth.scope.pdp.IamScopeFilter;
 import it.infn.mw.iam.core.oidc.IamClientValidationService;
 import it.infn.mw.iam.core.userinfo.IamUserInfoInterceptor;
 
+@SuppressWarnings("deprecation")
 @Configuration
 public class MitreServicesConfig {
 
@@ -201,9 +202,11 @@ public class MitreServicesConfig {
   }
 
   @Bean
-  public FilterRegistrationBean disabledMitreFilterRegistration(AuthorizationRequestFilter f) {
+  public FilterRegistrationBean<AuthorizationRequestFilter> disabledMitreFilterRegistration(
+      AuthorizationRequestFilter f) {
 
-    FilterRegistrationBean b = new FilterRegistrationBean(f);
+    FilterRegistrationBean<AuthorizationRequestFilter> b =
+        new FilterRegistrationBean<AuthorizationRequestFilter>(f);
     b.setEnabled(false);
     return b;
   }

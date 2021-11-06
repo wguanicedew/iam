@@ -17,7 +17,7 @@ package it.infn.mw.iam.api.scope_policy;
 
 import javax.validation.constraints.Size;
 
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import it.infn.mw.iam.api.scope_policy.validation.IamAccountId;
 

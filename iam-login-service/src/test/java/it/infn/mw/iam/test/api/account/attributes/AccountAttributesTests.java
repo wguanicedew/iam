@@ -21,9 +21,9 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
+import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -127,7 +127,7 @@ public class AccountAttributesTests {
     attr.setValue(ATTR_VALUE);
 
     mvc
-      .perform(put(ACCOUNT_ATTR_URL_TEMPLATE, UUID).contentType(APPLICATION_JSON_UTF8)
+      .perform(put(ACCOUNT_ATTR_URL_TEMPLATE, UUID).contentType(APPLICATION_JSON)
         .content(mapper.writeValueAsString(attr)))
       .andExpect(UNAUTHORIZED);
 
@@ -161,7 +161,7 @@ public class AccountAttributesTests {
     attr.setValue(ATTR_VALUE);
 
     mvc
-      .perform(put(ACCOUNT_ATTR_URL_TEMPLATE, UUID).contentType(APPLICATION_JSON_UTF8)
+      .perform(put(ACCOUNT_ATTR_URL_TEMPLATE, UUID).contentType(APPLICATION_JSON)
         .content(mapper.writeValueAsString(attr)))
       .andExpect(FORBIDDEN);
 
@@ -201,7 +201,7 @@ public class AccountAttributesTests {
     attr.setValue(ATTR_VALUE);
 
     mvc
-      .perform(put(ACCOUNT_ATTR_URL_TEMPLATE, UUID).contentType(APPLICATION_JSON_UTF8)
+      .perform(put(ACCOUNT_ATTR_URL_TEMPLATE, UUID).contentType(APPLICATION_JSON)
         .content(mapper.writeValueAsString(attr)))
       .andExpect(OK);
 
@@ -214,7 +214,7 @@ public class AccountAttributesTests {
     attr.setValue(null);
 
     mvc
-      .perform(put(ACCOUNT_ATTR_URL_TEMPLATE, UUID).contentType(APPLICATION_JSON_UTF8)
+      .perform(put(ACCOUNT_ATTR_URL_TEMPLATE, UUID).contentType(APPLICATION_JSON)
         .content(mapper.writeValueAsString(attr)))
       .andExpect(OK);
 
@@ -240,7 +240,7 @@ public class AccountAttributesTests {
     attr.setValue(ATTR_VALUE);
 
     mvc
-      .perform(put(ACCOUNT_ATTR_URL_TEMPLATE, UUID).contentType(APPLICATION_JSON_UTF8)
+      .perform(put(ACCOUNT_ATTR_URL_TEMPLATE, UUID).contentType(APPLICATION_JSON)
         .content(mapper.writeValueAsString(attr)))
       .andExpect(OK);
 
@@ -268,7 +268,7 @@ public class AccountAttributesTests {
       .andExpect(accountNotFound);
 
     mvc
-      .perform(put(ACCOUNT_ATTR_URL_TEMPLATE, randomUuid).contentType(APPLICATION_JSON_UTF8)
+      .perform(put(ACCOUNT_ATTR_URL_TEMPLATE, randomUuid).contentType(APPLICATION_JSON)
         .content(mapper.writeValueAsString(attr)))
       .andExpect(NOT_FOUND)
       .andExpect(accountNotFound);
@@ -301,12 +301,12 @@ public class AccountAttributesTests {
 
     for (AttributeDTO a : attrs) {
       mvc
-        .perform(put(ACCOUNT_ATTR_URL_TEMPLATE, TEST_UUID).contentType(APPLICATION_JSON_UTF8)
+        .perform(put(ACCOUNT_ATTR_URL_TEMPLATE, TEST_UUID).contentType(APPLICATION_JSON)
           .content(mapper.writeValueAsString(a)))
         .andExpect(OK);
 
       mvc
-        .perform(put(ACCOUNT_ATTR_URL_TEMPLATE, TEST_100_UUID).contentType(APPLICATION_JSON_UTF8)
+        .perform(put(ACCOUNT_ATTR_URL_TEMPLATE, TEST_100_UUID).contentType(APPLICATION_JSON)
           .content(mapper.writeValueAsString(a)))
         .andExpect(OK);
     }

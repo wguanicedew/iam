@@ -34,6 +34,7 @@ import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamUserInfo;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
+@SuppressWarnings("deprecation")
 public class WLCGIdTokenCustomizer extends IamJWTProfileIdTokenCustomizer {
 
   public static final String GROUPS_CLAIM = "groups";

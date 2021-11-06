@@ -39,6 +39,7 @@ import com.nimbusds.jwt.SignedJWT;
 
 import it.infn.mw.iam.core.oauth.scope.pdp.IamScopeFilter;
 
+@SuppressWarnings("deprecation")
 public class IamTokenEnhancer extends ConnectTokenEnhancer {
 
   @Autowired

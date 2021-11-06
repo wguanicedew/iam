@@ -89,6 +89,7 @@ import it.infn.mw.iam.notification.service.resolver.NotifyGmsAndAdminsStrategy;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamAupRepository;
 
+@SuppressWarnings("deprecation")
 @Configuration
 public class IamConfig {
   public static final Logger LOG = LoggerFactory.getLogger(IamConfig.class);
@@ -238,10 +239,11 @@ public class IamConfig {
   }
 
   @Bean
-  FilterRegistrationBean aupSignatureCheckFilter(AUPSignatureCheckService service,
+  FilterRegistrationBean<EnforceAupFilter> aupSignatureCheckFilter(AUPSignatureCheckService service,
       AccountUtils utils, IamAupRepository repo) {
     EnforceAupFilter aupFilter = new EnforceAupFilter(service, utils, repo);
-    FilterRegistrationBean frb = new FilterRegistrationBean(aupFilter);
+    FilterRegistrationBean<EnforceAupFilter> frb =
+        new FilterRegistrationBean<EnforceAupFilter>(aupFilter);
     frb.setOrder(Ordered.LOWEST_PRECEDENCE);
     return frb;
   }
@@ -256,9 +258,9 @@ public class IamConfig {
 
   @Bean
   @Profile("dev")
-  ServletRegistrationBean h2Console() {
+  ServletRegistrationBean<WebServlet> h2Console() {
     WebServlet h2Servlet = new WebServlet();
-    return new ServletRegistrationBean(h2Servlet, "/h2-console/*");
+    return new ServletRegistrationBean<WebServlet>(h2Servlet, "/h2-console/*");
   }
 
 }

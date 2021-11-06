@@ -38,6 +38,7 @@ import it.infn.mw.iam.config.CustomAuthenticationEntryPoint;
 import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.core.oauth.FormClientCredentialsAuthenticationFilter;
 
+@SuppressWarnings("deprecation")
 @Configuration
 public class IamApiSecurityConfig {
 

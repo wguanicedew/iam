@@ -17,7 +17,7 @@ package it.infn.mw.iam.config.saml;
 
 import javax.validation.Valid;
 
-import org.hibernate.validator.constraints.NotBlank;
+import javax.validation.constraints.NotBlank;
 
 import it.infn.mw.iam.config.login.LoginButtonProperties;
 

@@ -40,6 +40,7 @@ import it.infn.mw.iam.core.oauth.scope.matchers.ScopeMatcherRegistry;
 import it.infn.mw.iam.persistence.model.IamTokenExchangePolicyEntity;
 import it.infn.mw.iam.persistence.repository.IamTokenExchangePolicyRepository;
 
+@SuppressWarnings("deprecation")
 @Service
 public class DefaultTokenExchangePdp implements TokenExchangePdp, InitializingBean {
 

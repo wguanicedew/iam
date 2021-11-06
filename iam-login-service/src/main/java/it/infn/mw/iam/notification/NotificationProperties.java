@@ -20,7 +20,7 @@ import static it.infn.mw.iam.notification.NotificationProperties.GroupManagerNot
 
 import java.util.Map;
 
-import org.hibernate.validator.constraints.NotBlank;
+import javax.validation.constraints.NotBlank;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;

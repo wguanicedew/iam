@@ -27,6 +27,7 @@ import org.springframework.stereotype.Component;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
+@SuppressWarnings("deprecation")
 @Component
 @ConditionalOnProperty(name = "iam.enableScopeAuthz", havingValue = "true")
 public class IamPDPScopeFilter implements IamScopeFilter {

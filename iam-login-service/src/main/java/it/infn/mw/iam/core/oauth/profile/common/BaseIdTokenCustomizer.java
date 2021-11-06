@@ -33,6 +33,7 @@ import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamLabel;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
+@SuppressWarnings("deprecation")
 public abstract class BaseIdTokenCustomizer implements IDTokenCustomizer {
 
   private final IamAccountRepository accountRepo;

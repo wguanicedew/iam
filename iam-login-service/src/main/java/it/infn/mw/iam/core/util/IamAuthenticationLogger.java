@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
+@SuppressWarnings("deprecation")
 public enum IamAuthenticationLogger implements AuthenticationLogger {
 
   INSTANCE;

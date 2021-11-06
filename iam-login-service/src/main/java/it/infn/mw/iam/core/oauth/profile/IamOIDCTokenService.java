@@ -33,6 +33,7 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
 @Service
 @Primary
+@SuppressWarnings("deprecation")
 public class IamOIDCTokenService extends DefaultOIDCTokenService {
 
 

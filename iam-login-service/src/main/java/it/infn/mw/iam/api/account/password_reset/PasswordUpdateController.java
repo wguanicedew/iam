@@ -40,6 +40,7 @@ import it.infn.mw.iam.api.account.password_reset.error.InvalidPasswordError;
 import it.infn.mw.iam.api.account.password_reset.error.UserNotActiveOrNotVerified;
 import it.infn.mw.iam.api.scim.controller.utils.ValidationErrorMessageHelper;
 
+@SuppressWarnings("deprecation")
 @RestController
 @Transactional
 public class PasswordUpdateController {

@@ -36,6 +36,7 @@ import it.infn.mw.iam.authn.oidc.OidcExternalAuthenticationToken;
 import it.infn.mw.iam.authn.saml.SamlExternalAuthenticationToken;
 import it.infn.mw.iam.test.util.WithMockOAuthUser;
 
+@SuppressWarnings("deprecation")
 public class WithMockOAuth2SecurityContextFactory
     implements WithSecurityContextFactory<WithMockOAuthUser> {
 

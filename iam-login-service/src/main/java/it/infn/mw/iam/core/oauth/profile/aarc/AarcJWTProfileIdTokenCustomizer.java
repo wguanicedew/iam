@@ -32,6 +32,7 @@ import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamUserInfo;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
+@SuppressWarnings("deprecation")
 public class AarcJWTProfileIdTokenCustomizer extends BaseIdTokenCustomizer {
 
   protected final ScopeClaimTranslationService scopeClaimConverter;

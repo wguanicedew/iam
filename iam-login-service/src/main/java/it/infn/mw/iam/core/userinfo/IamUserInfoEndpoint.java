@@ -39,6 +39,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import it.infn.mw.iam.core.oauth.profile.JWTProfile;
 import it.infn.mw.iam.core.oauth.profile.JWTProfileResolver;
 
+@SuppressWarnings("deprecation")
 @Controller
 @RequestMapping("/userinfo")
 public class IamUserInfoEndpoint {

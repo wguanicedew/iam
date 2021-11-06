@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service;
 import it.infn.mw.iam.authn.AbstractExternalAuthenticationToken;
 import it.infn.mw.iam.authn.ExternalAuthenticationInfoBuilder;
 
+@SuppressWarnings("deprecation")
 @Service("authenticationHolderEntityService")
 @Primary
 public class IamAuthenticationHolderEntityService implements AuthenticationHolderEntityService {

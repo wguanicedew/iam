@@ -27,6 +27,7 @@ import it.infn.mw.iam.core.oauth.profile.common.BaseIntrospectionHelper;
 import it.infn.mw.iam.core.oauth.scope.matchers.ScopeMatcherRegistry;
 import it.infn.mw.iam.persistence.repository.UserInfoAdapter;
 
+
 public class WLCGIntrospectionHelper extends BaseIntrospectionHelper {
 
   private final WLCGGroupHelper groupHelper;

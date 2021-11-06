@@ -17,7 +17,7 @@ package it.infn.mw.iam.config.saml;
 
 import static java.lang.Boolean.FALSE;
 
-import org.hibernate.validator.constraints.NotBlank;
+import javax.validation.constraints.NotBlank;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 

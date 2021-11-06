@@ -18,6 +18,7 @@ package it.infn.mw.iam.core.oauth.profile;
 import org.mitre.openid.connect.model.UserInfo;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
+@SuppressWarnings("deprecation")
 public interface UserInfoHelper {
   
   UserInfo resolveUserInfo(OAuth2Authentication authentication);

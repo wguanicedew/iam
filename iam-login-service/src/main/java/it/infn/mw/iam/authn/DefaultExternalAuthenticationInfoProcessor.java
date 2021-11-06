@@ -23,6 +23,7 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Component;
 
 @Component
+@SuppressWarnings("deprecation")
 public class DefaultExternalAuthenticationInfoProcessor
     implements ExternalAuthenticationInfoProcessor {
 

@@ -34,6 +34,7 @@ import it.infn.mw.iam.core.userinfo.OAuth2AuthenticationScopeResolver;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamGroupRequest;
 
+@SuppressWarnings("deprecation")
 public class IamSecurityExpressionMethods {
 
   private final Authentication authentication;

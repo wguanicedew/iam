@@ -32,6 +32,7 @@ import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.model.IamLabel;
 import it.infn.mw.iam.persistence.model.IamUserInfo;
 
+@SuppressWarnings("deprecation")
 public class WLCGGroupHelper {
 
   public static final String WLCG_GROUP_REGEXP_STR = "wlcg\\.groups(?::((?:\\/[a-zA-Z0-9][a-zA-Z0-9_.-]*)+))?$";

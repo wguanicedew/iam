@@ -37,7 +37,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.resource.VersionResourceResolver;
 import org.springframework.web.servlet.view.BeanNameViewResolver;
@@ -47,8 +47,7 @@ import org.springframework.web.servlet.view.JstlView;
 import it.infn.mw.iam.core.util.PoliteJsonMessageSource;
 
 @Configuration
-// @EnableConfigurationProperties({IamProperties.class})
-public class MvcConfig extends WebMvcConfigurerAdapter {
+public class MvcConfig implements WebMvcConfigurer {
 
   public static final Logger LOG = LoggerFactory.getLogger(MvcConfig.class);
 

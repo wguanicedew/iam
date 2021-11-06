@@ -32,6 +32,7 @@ import it.infn.mw.iam.core.oauth.profile.iam.ClaimValueHelper;
 import it.infn.mw.iam.core.oauth.scope.matchers.ScopeMatcherRegistry;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
+@SuppressWarnings("deprecation")
 public class WLCGJWTProfile implements JWTProfile, RequestValidator {
 
   public static final String PROFILE_VERSION = "1.0";

@@ -64,6 +64,7 @@ import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.core.IamLocalAuthenticationProvider;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
+@SuppressWarnings("deprecation")
 @Configuration
 @EnableWebSecurity
 public class IamWebSecurityConfig {

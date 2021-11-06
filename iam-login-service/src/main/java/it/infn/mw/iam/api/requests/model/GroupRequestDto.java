@@ -17,7 +17,7 @@ package it.infn.mw.iam.api.requests.model;
 
 import java.util.Date;
 
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;

@@ -25,6 +25,7 @@ import org.springframework.security.oauth2.provider.authentication.OAuth2Authent
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationProcessingFilter;
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
 
+@SuppressWarnings("deprecation")
 @Configuration
 @Order(9) // This is important! Do not remove
 public class ResourceServerConfig {
@@ -36,10 +37,11 @@ public class ResourceServerConfig {
   private OAuth2TokenEntityService tokenService;
 
   @Bean
-  public FilterRegistrationBean disabledAutomaticFilterRegistration(
+  public FilterRegistrationBean<OAuth2AuthenticationProcessingFilter> disabledAutomaticFilterRegistration(
       final OAuth2AuthenticationProcessingFilter f) {
 
-    FilterRegistrationBean b = new FilterRegistrationBean(f);
+    FilterRegistrationBean<OAuth2AuthenticationProcessingFilter> b =
+        new FilterRegistrationBean<OAuth2AuthenticationProcessingFilter>(f);
     b.setEnabled(false);
     return b;
   }

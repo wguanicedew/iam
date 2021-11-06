@@ -17,7 +17,7 @@ package it.infn.mw.iam.api.requests;
 
 import javax.validation.Valid;
 
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;

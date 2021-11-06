@@ -17,6 +17,7 @@ package it.infn.mw.iam.core.oauth.profile;
 
 import org.springframework.security.oauth2.provider.OAuth2Request;
 
+@SuppressWarnings("deprecation")
 public interface RequestValidator {
 
   public void validateRequest(OAuth2Request request);
