@@ -75,7 +75,6 @@ import org.springframework.security.oauth2.provider.endpoint.RedirectResolver;
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
 import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
-import org.springframework.web.servlet.AsyncHandlerInterceptor;
 
 import com.google.common.collect.Sets;
 
@@ -190,13 +189,13 @@ public class MitreServicesConfig {
 
 
   @Bean(name = "mitreUserInfoInterceptor")
-  public AsyncHandlerInterceptor userInfoInterceptor(UserInfoService service) {
+  public IamUserInfoInterceptor userInfoInterceptor(UserInfoService service) {
 
     return new IamUserInfoInterceptor(service);
   }
 
   @Bean(name = "mitreServerConfigInterceptor")
-  public AsyncHandlerInterceptor serverConfigInterceptor() {
+  public ServerConfigInterceptor serverConfigInterceptor() {
 
     return new ServerConfigInterceptor();
   }

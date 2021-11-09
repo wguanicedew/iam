@@ -20,9 +20,9 @@ import static it.infn.mw.iam.core.oauth.profile.wlcg.WLCGGroupHelper.OPTIONAL_GR
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -98,7 +98,7 @@ public class WLCGGroupHelperTests {
     IamGroup g2 = buildGroup("g2");
     IamGroup g3 = buildOptionalGroup("g3");
 
-    when(userInfo.getGroups()).thenReturn(Sets.newHashSet(g1, g2, g3));
+    // when(userInfo.getGroups()).thenReturn(Sets.newHashSet(g1, g2, g3));
 
     assertThat(helper.resolveGroups(token, userInfo), empty());
   }

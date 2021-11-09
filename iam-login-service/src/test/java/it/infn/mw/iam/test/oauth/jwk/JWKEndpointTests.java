@@ -16,6 +16,7 @@
 package it.infn.mw.iam.test.oauth.jwk;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -23,7 +24,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import it.infn.mw.iam.core.web.jwk.IamJWKSetPublishingEndpoint;
@@ -43,7 +43,7 @@ public class JWKEndpointTests extends EndpointsTestUtils {
     // @formatter:off
     mvc.perform(get(ENDPOINT))
     .andExpect(status().isOk())
-    .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+    .andExpect(content().contentType(APPLICATION_JSON_VALUE))
     .andExpect(jsonPath("$.keys", hasSize(1)))
     .andExpect(jsonPath("$.keys[0].kty").value("RSA"))
     .andExpect(jsonPath("$.keys[0].e").value("AQAB"))

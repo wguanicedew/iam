@@ -13,12 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.persistence.migrations;
+package it.infn.mw.iam.config.security;
 
-import org.springframework.jdbc.core.JdbcTemplate;
+import java.util.function.Predicate;
 
-@FunctionalInterface
-public interface SpringJdbcFlywayMigration {
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.web.firewall.HttpFirewall;
+import org.springframework.security.web.firewall.StrictHttpFirewall;
 
-  void migrate(JdbcTemplate jdbcTemplate) throws Exception;
+@Configuration
+public class SpringHttpFirewallConfig {
+
+  public static final Predicate<String> ANY_VALUE = (s) -> true;
+
+  @Bean
+  HttpFirewall iamHttpFirewall() {
+
+    StrictHttpFirewall httpFirewall = new StrictHttpFirewall();
+    httpFirewall.setAllowedHeaderValues(ANY_VALUE);
+
+    return httpFirewall;
+  }
+
 }

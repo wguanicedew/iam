@@ -16,9 +16,9 @@
 package it.infn.mw.iam.test.oauth.scope.pdp;
 
 import static java.util.Collections.emptyList;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -78,8 +78,8 @@ public class ScopePolicyAuditTests extends ScopePolicyTestUtils {
     converter = new DefaultScopePolicyConverter(new DefaultScimResourceLocationProvider(),
         accountRepo, groupRepo);
 
-    when(scopePolicyRepo.findDefaultPolicies()).thenReturn(emptyList());
-    when(scopePolicyRepo.findEquivalentPolicies(Mockito.anyObject()))
+    // when(scopePolicyRepo.findDefaultPolicies()).thenReturn(emptyList());
+    when(scopePolicyRepo.findEquivalentPolicies(Mockito.any()))
       .thenReturn(emptyList());
     
     when(scopePolicyRepo.save(Mockito.any(IamScopePolicy.class))).thenAnswer(returnsFirstArg());

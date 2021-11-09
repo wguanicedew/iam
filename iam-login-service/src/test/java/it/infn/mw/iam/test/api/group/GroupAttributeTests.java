@@ -19,7 +19,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -105,7 +105,7 @@ public class GroupAttributeTests {
     attr.setValue(ATTR_VALUE);
 
     mvc.perform(
-        put("/iam/group/{id}/attributes", testGroup.getUuid()).contentType(APPLICATION_JSON_UTF8)
+        put("/iam/group/{id}/attributes", testGroup.getUuid()).contentType(APPLICATION_JSON)
           .content(mapper.writeValueAsString(attr)))
       .andExpect(UNAUTHORIZED);
 
@@ -128,7 +128,7 @@ public class GroupAttributeTests {
     attr.setValue(ATTR_VALUE);
 
     mvc.perform(
-        put("/iam/group/{id}/attributes", testGroup.getUuid()).contentType(APPLICATION_JSON_UTF8)
+        put("/iam/group/{id}/attributes", testGroup.getUuid()).contentType(APPLICATION_JSON)
           .content(mapper.writeValueAsString(attr)))
       .andExpect(FORBIDDEN);
 
@@ -161,7 +161,7 @@ public class GroupAttributeTests {
     attr.setValue(ATTR_VALUE);
 
     mvc.perform(
-        put("/iam/group/{id}/attributes", testGroup.getUuid()).contentType(APPLICATION_JSON_UTF8)
+        put("/iam/group/{id}/attributes", testGroup.getUuid()).contentType(APPLICATION_JSON)
           .content(mapper.writeValueAsString(attr)))
       .andExpect(status().isOk());
 
@@ -174,7 +174,7 @@ public class GroupAttributeTests {
     attr.setValue(null);
 
     mvc.perform(
-        put("/iam/group/{id}/attributes", testGroup.getUuid()).contentType(APPLICATION_JSON_UTF8)
+        put("/iam/group/{id}/attributes", testGroup.getUuid()).contentType(APPLICATION_JSON)
           .content(mapper.writeValueAsString(attr)))
       .andExpect(status().isOk());
 
@@ -198,7 +198,7 @@ public class GroupAttributeTests {
     attr.setValue(ATTR_VALUE);
 
     mvc.perform(
-        put("/iam/group/{id}/attributes", testGroup.getUuid()).contentType(APPLICATION_JSON_UTF8)
+        put("/iam/group/{id}/attributes", testGroup.getUuid()).contentType(APPLICATION_JSON)
           .content(mapper.writeValueAsString(attr)))
       .andExpect(status().isOk());
 
@@ -224,7 +224,7 @@ public class GroupAttributeTests {
       .andExpect(jsonPath("$.error", containsString("Group not found")));
 
     mvc
-      .perform(put("/iam/group/{id}/attributes", randomUuid).contentType(APPLICATION_JSON_UTF8)
+      .perform(put("/iam/group/{id}/attributes", randomUuid).contentType(APPLICATION_JSON)
         .content(mapper.writeValueAsString(attr)))
       .andExpect(NOT_FOUND)
       .andExpect(jsonPath("$.error", containsString("Group not found")));

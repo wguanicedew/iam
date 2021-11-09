@@ -29,7 +29,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+import org.springframework.web.servlet.AsyncHandlerInterceptor;
+import org.springframework.web.servlet.HandlerInterceptor;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -39,7 +40,7 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
 @SuppressWarnings("deprecation")
-public class IamUserInfoInterceptor extends HandlerInterceptorAdapter {
+public class IamUserInfoInterceptor implements HandlerInterceptor, AsyncHandlerInterceptor {
 
   public static final String USERINFO_ATTR_NAME = "userInfo";
   public static final String USERINFO_JSON_ATTR_NAME = "userInfoJson";

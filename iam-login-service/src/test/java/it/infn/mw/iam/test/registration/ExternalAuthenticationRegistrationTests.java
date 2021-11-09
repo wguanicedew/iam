@@ -81,7 +81,7 @@ public class ExternalAuthenticationRegistrationTests {
     request.setNotes("Some short notes...");
 
     byte[] requestBytes = mvc
-      .perform(post("/registration/create").contentType(MediaType.APPLICATION_JSON_UTF8)
+      .perform(post("/registration/create").contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsBytes(request)))
       .andExpect(status().isOk())
       .andReturn()
@@ -126,7 +126,7 @@ public class ExternalAuthenticationRegistrationTests {
     request.setNotes("Some short notes...");
 
     byte[] requestBytes = mvc
-      .perform(post("/registration/create").contentType(MediaType.APPLICATION_JSON_UTF8)
+      .perform(post("/registration/create").contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsBytes(request)))
       .andExpect(status().isOk())
       .andReturn()

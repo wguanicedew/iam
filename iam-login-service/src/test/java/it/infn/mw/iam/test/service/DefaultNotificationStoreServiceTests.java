@@ -90,8 +90,8 @@ public class DefaultNotificationStoreServiceTests {
   @Before
   public void setup() {
 
-    when(properties.getMailFrom()).thenReturn(IAM_MAIL_FROM);
-    when(properties.getAdminAddress()).thenReturn(IAM_ADMIN_ADDRESS);
+    // when(properties.getMailFrom()).thenReturn(IAM_MAIL_FROM);
+    // when(properties.getAdminAddress()).thenReturn(IAM_ADMIN_ADDRESS);
     when(properties.getCleanupAge()).thenReturn(1);
   }
 
@@ -119,15 +119,15 @@ public class DefaultNotificationStoreServiceTests {
     IamEmailNotification notification = mock(IamEmailNotification.class);
     IamNotificationReceiver receiver = mock(IamNotificationReceiver.class);
 
-    when(receiver.getIamEmailNotification()).thenReturn(notification);
-    when(receiver.getEmailAddress()).thenReturn(TEST_0_EMAIL);
+    // when(receiver.getIamEmailNotification()).thenReturn(notification);
+    // when(receiver.getEmailAddress()).thenReturn(TEST_0_EMAIL);
 
-    when(notification.getBody()).thenReturn("Body");
-    when(notification.getSubject()).thenReturn("Subject");
-    when(notification.getDeliveryStatus()).thenReturn(IamDeliveryStatus.DELIVERED);
-    when(notification.getCreationTime()).thenReturn(twoDaysAfterNow);
-    when(notification.getLastUpdate()).thenReturn(oneDayAfterNow);
-    when(notification.getUuid()).thenReturn(randomUuid);
+    // when(notification.getBody()).thenReturn("Body");
+    // when(notification.getSubject()).thenReturn("Subject");
+    // when(notification.getDeliveryStatus()).thenReturn(IamDeliveryStatus.DELIVERED);
+    // when(notification.getCreationTime()).thenReturn(twoDaysAfterNow);
+    // when(notification.getLastUpdate()).thenReturn(oneDayAfterNow);
+    // when(notification.getUuid()).thenReturn(randomUuid);
 
     when(notificationRepo.findByStatusWithUpdateTime(Mockito.any(), Mockito.any()))
       .thenReturn(Arrays.asList(notification));

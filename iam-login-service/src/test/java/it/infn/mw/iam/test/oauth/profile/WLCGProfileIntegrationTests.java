@@ -150,6 +150,7 @@ public class WLCGProfileIntegrationTests extends EndpointsTestUtils {
 
     String[] authnScopes = new String[] {"openid"};
 
+    @SuppressWarnings("deprecation")
     OAuth2Authentication authn =
         new OAuth2Authentication(new MockOAuth2Request("password-grant", authnScopes), userAuth);
 
@@ -691,6 +692,7 @@ public class WLCGProfileIntegrationTests extends EndpointsTestUtils {
 
     String[] authnScopes = new String[] {"openid"};
 
+    @SuppressWarnings("deprecation")
     OAuth2Authentication authn =
         new OAuth2Authentication(new MockOAuth2Request("password-grant", authnScopes), userAuth);
 

@@ -17,6 +17,7 @@ package it.infn.mw.iam.test.rcauth;
 
 import org.mitre.jose.keystore.JWKSetKeyStore;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.MediaType;
 
 import com.nimbusds.jose.JWSAlgorithm;
 
@@ -56,6 +57,12 @@ public class RCAuthTestSupport extends X509TestSupport {
   public static final String IAM_ENTITY_ID = "iam-entity-id";
   public static final String CODE_VALUE = "diablocode";
 
+
+  public static final String APPLICATION_FORM_URLENCODED_UTF8_VALUE =
+      MediaType.APPLICATION_FORM_URLENCODED_VALUE + ";charset=UTF-8";
+
+  public static final MediaType APPLICATION_FORM_URLENCODED_UTF8 =
+      MediaType.valueOf(APPLICATION_FORM_URLENCODED_UTF8_VALUE);
   protected JWKSetKeyStore rcAuthKeyStore = rcAuthKeyStore();
   protected JWSAlgorithm jwsAlgo = JWSAlgorithm.RS256;
 

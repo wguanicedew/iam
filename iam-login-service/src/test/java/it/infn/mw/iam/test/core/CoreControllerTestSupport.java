@@ -27,6 +27,7 @@ import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEn
 import it.infn.mw.iam.test.util.MockTimeProvider;
 import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 
+@SuppressWarnings("deprecation")
 @Configuration
 public class CoreControllerTestSupport {
   public static final Instant NOW = Instant.parse("2019-01-01T00:00:00.00Z");

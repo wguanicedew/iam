@@ -15,8 +15,8 @@
  */
 package it.infn.mw.iam.test.repository;
 
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -64,6 +64,7 @@ public class IamTokenRepositoryTests {
   @Autowired
   private DefaultOAuth2ProviderTokenService tokenService;
 
+  @SuppressWarnings("deprecation")
   private OAuth2Authentication oauth2Authentication(ClientDetailsEntity client, String username) {
 
     String[] scopes = {};

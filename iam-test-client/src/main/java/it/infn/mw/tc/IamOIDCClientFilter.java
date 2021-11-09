@@ -202,7 +202,7 @@ public class IamOIDCClientFilter extends OIDCAuthenticationFilter {
 
   private JsonObject jsonStringSanityChecks(String jsonString) {
 
-    JsonElement jsonRoot = new JsonParser().parse(jsonString);
+    JsonElement jsonRoot = JsonParser.parseString(jsonString);
     if (!jsonRoot.isJsonObject()) {
       throw new AuthenticationServiceException(
           "Token Endpoint did not return a JSON object: " + jsonRoot);

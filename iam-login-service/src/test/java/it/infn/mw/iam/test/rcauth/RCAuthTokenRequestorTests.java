@@ -25,7 +25,6 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import java.text.ParseException;
 import java.util.UUID;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -60,7 +59,9 @@ import it.infn.mw.iam.test.util.oidc.TokenResponse;
 
 @RunWith(SpringRunner.class)
 @IamMockMvcIntegrationTest
-@SpringBootTest(classes = {IamLoginService.class, RCAuthTestConfig.class},
+@SpringBootTest(
+    classes = {IamLoginService.class, RCAuthTestConfig.class,
+        RCAuthTokenRequestorTests.TestConfig.class},
     webEnvironment = WebEnvironment.MOCK)
 @TestPropertySource(
     properties = {"rcauth.enabled=true", "rcauth.client-id=" + RCAuthTestSupport.CLIENT_ID,
@@ -119,7 +120,7 @@ public class RCAuthTokenRequestorTests extends RCAuthTestSupport {
     try {
       tokenRequestor.getAccessToken(RANDOM_AUTHZ_CODE);
     } catch (RCAuthError e) {
-      Assert.assertThat(e.getMessage(), containsString("Token request error: invalid_request"));
+      assertThat(e.getMessage(), containsString("Token request error: invalid_request"));
       throw e;
     } finally {
       verifyMockServerCalls();
@@ -133,7 +134,7 @@ public class RCAuthTokenRequestorTests extends RCAuthTestSupport {
     try {
       tokenRequestor.getAccessToken(RANDOM_AUTHZ_CODE);
     } catch (RCAuthError e) {
-      Assert.assertThat(e.getMessage(), containsString("Token request error:"));
+      assertThat(e.getMessage(), containsString("Token request error:"));
       throw e;
     } finally {
       verifyMockServerCalls();
@@ -146,7 +147,7 @@ public class RCAuthTokenRequestorTests extends RCAuthTestSupport {
     try {
       tokenRequestor.getAccessToken(RANDOM_AUTHZ_CODE);
     } catch (RCAuthError e) {
-      Assert.assertThat(e.getMessage(), containsString("Token request error:"));
+      assertThat(e.getMessage(), containsString("Token request error:"));
       throw e;
     } finally {
       verifyMockServerCalls();
@@ -156,7 +157,7 @@ public class RCAuthTokenRequestorTests extends RCAuthTestSupport {
     mockRtf.getMockServer()
     .expect(requestTo(TOKEN_URI))
     .andExpect(method(HttpMethod.POST))
-    .andExpect(content().contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE))
+      .andExpect(content().contentType(APPLICATION_FORM_URLENCODED_UTF8))
     .andRespond(MockRestResponseCreators.withServerError()
       .body("internal server error"));
   }
@@ -166,7 +167,7 @@ public class RCAuthTokenRequestorTests extends RCAuthTestSupport {
     mockRtf.getMockServer()
       .expect(requestTo(TOKEN_URI))
       .andExpect(method(HttpMethod.POST))
-      .andExpect(content().contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE))
+      .andExpect(content().contentType(APPLICATION_FORM_URLENCODED_UTF8))
       .andRespond(MockRestResponseCreators.withBadRequest()
         .body("64372tfgd")
         .contentType(MediaType.APPLICATION_JSON));
@@ -180,7 +181,7 @@ public class RCAuthTokenRequestorTests extends RCAuthTestSupport {
     mockRtf.getMockServer()
       .expect(requestTo(TOKEN_URI))
       .andExpect(method(HttpMethod.POST))
-      .andExpect(content().contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE))
+      .andExpect(content().contentType(APPLICATION_FORM_URLENCODED_UTF8))
       .andRespond(MockRestResponseCreators.withBadRequest()
         .body(mapper.writeValueAsString(response))
         .contentType(MediaType.APPLICATION_JSON));
@@ -199,7 +200,7 @@ public class RCAuthTokenRequestorTests extends RCAuthTestSupport {
     mockRtf.getMockServer()
       .expect(requestTo(TOKEN_URI))
       .andExpect(method(HttpMethod.POST))
-      .andExpect(content().contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE))
+      .andExpect(content().contentType(APPLICATION_FORM_URLENCODED_UTF8))
       .andRespond(MockRestResponseCreators.withSuccess(mapper.writeValueAsString(tr),
           MediaType.APPLICATION_JSON));
   }

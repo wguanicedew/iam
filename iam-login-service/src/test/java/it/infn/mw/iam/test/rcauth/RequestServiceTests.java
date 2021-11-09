@@ -29,9 +29,9 @@ import static it.infn.mw.iam.rcauth.DefaultRcAuthRequestService.STATE_PARAM;
 import static it.infn.mw.iam.rcauth.RCAuthController.CALLBACK_PATH;
 import static java.lang.String.format;
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -176,7 +176,7 @@ public class RequestServiceTests extends RCAuthTestSupport {
   @Test(expected = RCAuthError.class)
   public void testHandleCodeResponseContextNotFound() throws UnsupportedEncodingException {
 
-    when(authzResponse.getState()).thenReturn("76321");
+    // when(authzResponse.getState()).thenReturn("76321");
 
     try {
       service.handleAuthorizationCodeResponse(session, authzResponse);

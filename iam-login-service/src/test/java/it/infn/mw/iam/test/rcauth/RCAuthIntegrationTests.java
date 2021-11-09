@@ -22,9 +22,9 @@ import static it.infn.mw.iam.rcauth.DefaultRcAuthRequestService.RCAUTH_CTXT_SESS
 import static it.infn.mw.iam.rcauth.RCAuthController.CALLBACK_PATH;
 import static it.infn.mw.iam.rcauth.RCAuthController.GETCERT_PATH;
 import static org.hamcrest.CoreMatchers.startsWith;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.springframework.http.MediaType.TEXT_PLAIN;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
@@ -75,7 +75,9 @@ import it.infn.mw.iam.test.util.oidc.TokenResponse;
 
 @RunWith(SpringRunner.class)
 @IamMockMvcIntegrationTest
-@SpringBootTest(classes = {IamLoginService.class, RCAuthTestConfig.class},
+@SpringBootTest(
+    classes = {IamLoginService.class, RCAuthTestConfig.class,
+        RCAuthIntegrationTests.TestConfig.class},
     webEnvironment = WebEnvironment.MOCK)
 @TestPropertySource(
     properties = {"rcauth.enabled=true", "rcauth.client-id=" + RCAuthTestSupport.CLIENT_ID,
@@ -212,7 +214,7 @@ public class RCAuthIntegrationTests extends RCAuthTestSupport {
     mockRtf.getMockServer()
       .expect(requestTo(TOKEN_URI))
       .andExpect(method(HttpMethod.POST))
-      .andExpect(content().contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE))
+      .andExpect(content().contentType(APPLICATION_FORM_URLENCODED_UTF8_VALUE))
       .andRespond(withSuccess(mapper.writeValueAsString(tr), MediaType.APPLICATION_JSON));
   }
 
@@ -220,7 +222,7 @@ public class RCAuthIntegrationTests extends RCAuthTestSupport {
     mockRtf.getMockServer()
       .expect(requestTo(GET_CERT_URI))
       .andExpect(method(HttpMethod.POST))
-      .andExpect(content().contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE))
+      .andExpect(content().contentType(APPLICATION_FORM_URLENCODED_UTF8_VALUE))
       .andRespond(withSuccess(TEST_0_CERT_STRING, TEXT_PLAIN));
   }
 

@@ -16,9 +16,10 @@
 package it.infn.mw.iam.test.oauth.jwk;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.CombinableMatcher.either;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -28,7 +29,6 @@ import java.text.ParseException;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -69,7 +69,7 @@ public class JWKDefaultKeyTests extends EndpointsTestUtils implements JWKTestSup
 
     mvc.perform(get(JWK_ENDPOINT))
       .andExpect(status().isOk())
-      .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+      .andExpect(content().contentType(APPLICATION_JSON))
       .andExpect(jsonPath("$.keys", hasSize(2)))
       .andExpect(jsonPath("$.keys[0].kid", either(is("iam1")).or(is("iam2"))))
       .andExpect(jsonPath("$.keys[1].kid", either(is("iam1")).or(is("iam2"))));

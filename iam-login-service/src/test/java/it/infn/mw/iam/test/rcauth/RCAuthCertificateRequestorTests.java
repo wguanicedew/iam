@@ -52,13 +52,16 @@ import it.infn.mw.iam.test.util.oidc.MockRestTemplateFactory;
 
 @RunWith(SpringRunner.class)
 @IamMockMvcIntegrationTest
-@SpringBootTest(classes = {IamLoginService.class, RCAuthTestConfig.class},
+@SpringBootTest(
+    classes = {IamLoginService.class, RCAuthTestConfig.class,
+        RCAuthCertificateRequestorTests.TestConfig.class},
     webEnvironment = WebEnvironment.MOCK)
 @TestPropertySource(
     properties = {"rcauth.enabled=true", "rcauth.client-id=" + RCAuthTestSupport.CLIENT_ID,
         "rcauth.client-secret=" + RCAuthTestSupport.CLIENT_SECRET,
         "rcauth.issuer=" + RCAuthTestSupport.ISSUER})
 public class RCAuthCertificateRequestorTests extends RCAuthTestSupport {
+
 
   @TestConfiguration
   public static class TestConfig {
@@ -116,7 +119,7 @@ public class RCAuthCertificateRequestorTests extends RCAuthTestSupport {
     mockRtf.getMockServer()
       .expect(requestTo(GET_CERT_URI))
       .andExpect(method(HttpMethod.POST))
-      .andExpect(content().contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE))
+      .andExpect(content().contentType(APPLICATION_FORM_URLENCODED_UTF8_VALUE))
       .andRespond(MockRestResponseCreators.withSuccess(TEST_0_CERT_STRING, MediaType.TEXT_PLAIN));
   }
 
@@ -124,7 +127,7 @@ public class RCAuthCertificateRequestorTests extends RCAuthTestSupport {
     mockRtf.getMockServer()
       .expect(requestTo(GET_CERT_URI))
       .andExpect(method(HttpMethod.POST))
-      .andExpect(content().contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE))
+      .andExpect(content().contentType(APPLICATION_FORM_URLENCODED_UTF8_VALUE))
       .andRespond(withServerError());
   }
 

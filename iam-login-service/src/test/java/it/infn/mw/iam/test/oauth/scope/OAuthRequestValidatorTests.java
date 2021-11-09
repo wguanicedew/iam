@@ -39,6 +39,7 @@ import it.infn.mw.iam.core.oauth.scope.matchers.ScopeMatcherRegistry;
 @RunWith(MockitoJUnitRunner.class)
 public class OAuthRequestValidatorTests {
 
+  @SuppressWarnings("deprecation")
   @Spy
   AuthorizationRequest authzRequest = new AuthorizationRequest();
 
@@ -57,7 +58,7 @@ public class OAuthRequestValidatorTests {
   public void setup() {
 
     when(client.getClientId()).thenReturn("exampleClient");
-    when(client.getScope()).thenReturn(newHashSet("openid", "profile"));
+    // when(client.getScope()).thenReturn(newHashSet("openid", "profile"));
     authzRequest.setScope(Sets.newHashSet("openid"));
     when(registry.findMatchersForClient(client))
       .thenReturn(newHashSet(stringEqualsMatcher("openid"), stringEqualsMatcher("profile")));

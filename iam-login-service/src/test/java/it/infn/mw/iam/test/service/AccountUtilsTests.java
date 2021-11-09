@@ -15,9 +15,9 @@
  */
 package it.infn.mw.iam.test.service;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -39,6 +39,7 @@ import it.infn.mw.iam.api.account.AccountUtils;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
+@SuppressWarnings("deprecation")
 @RunWith(MockitoJUnitRunner.class)
 public class AccountUtilsTests {
 
@@ -78,7 +79,7 @@ public class AccountUtilsTests {
   @Test
   public void isAuthenticatedReturnsTrueForUsernamePasswordAuthenticationToken() {
     UsernamePasswordAuthenticationToken token = Mockito.mock(UsernamePasswordAuthenticationToken.class);
-    when(token.getName()).thenReturn("test");
+
     when(securityContext.getAuthentication()).thenReturn(token);
     SecurityContextHolder.setContext(securityContext);
     assertThat(utils.isAuthenticated(), is(true));
@@ -122,7 +123,7 @@ public class AccountUtilsTests {
     when(token.getName()).thenReturn("test");
     
     OAuth2Authentication oauth = Mockito.mock(OAuth2Authentication.class);
-    when(oauth.getName()).thenReturn("oauth-client-for-test");
+
     when(oauth.getUserAuthentication()).thenReturn(token);
     
     when(securityContext.getAuthentication()).thenReturn(oauth);
@@ -137,7 +138,7 @@ public class AccountUtilsTests {
   @Test
   public void getAuthenticatedUserAccountReturnsEmptyOptionalForClientOAuthToken() {
     OAuth2Authentication oauth = Mockito.mock(OAuth2Authentication.class);
-    when(oauth.getName()).thenReturn("oauth-client-for-test");
+
     when(oauth.getUserAuthentication()).thenReturn(null);
     when(securityContext.getAuthentication()).thenReturn(oauth);
     SecurityContextHolder.setContext(securityContext);

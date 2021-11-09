@@ -19,7 +19,7 @@ package it.infn.mw.iam.test.ext_authn.saml.jit_account_provisioning;
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
@@ -131,7 +131,7 @@ public class JitUserCleanupTests {
 
     IamAccount anAccount = IamAccount.newAccount();
 
-    when(accountService.deleteInactiveProvisionedUsersSinceTime(anyObject()))
+    when(accountService.deleteInactiveProvisionedUsersSinceTime(any()))
       .thenReturn(asList(anAccount));
     
     cleanupTask.run();

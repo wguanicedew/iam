@@ -16,8 +16,8 @@
 package it.infn.mw.iam.test.ext_authn;
 
 import static it.infn.mw.iam.authn.HintAwareAuthenticationEntryPoint.EXT_AUTHN_HINT_PARAM;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -66,7 +66,7 @@ public class HintAwareAuthenticationEntryPointTests {
 
   @Before
   public void before() {
-    when(request.getContextPath()).thenReturn("");
+    // when(request.getContextPath()).thenReturn("");
   }
 
   @Test

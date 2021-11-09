@@ -17,6 +17,8 @@ package it.infn.mw.iam.api.common;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import java.util.Objects;
+
 import javax.annotation.Generated;
 
 import org.apache.commons.lang3.NotImplementedException;
@@ -31,7 +33,7 @@ public class OffsetPageable implements Pageable {
 
   public OffsetPageable(int count) {
 
-    this(0, count, null);
+    this(0, count, Sort.unsorted());
   }
 
   public OffsetPageable(int count, Sort sort) {
@@ -51,7 +53,14 @@ public class OffsetPageable implements Pageable {
 
     this.offset = offset;
     this.count = count;
-    this.sort = sort;
+
+    if (Objects.isNull(sort)) {
+      this.sort = Sort.unsorted();
+    } else {
+      this.sort = sort;
+    }
+
+
   }
 
   @Override

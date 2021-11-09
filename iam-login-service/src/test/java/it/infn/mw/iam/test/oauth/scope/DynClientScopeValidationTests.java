@@ -20,8 +20,8 @@ import static it.infn.mw.iam.core.oauth.scope.matchers.StringEqualsScopeMatcher.
 import static it.infn.mw.iam.core.oauth.scope.matchers.StructuredPathScopeMatcher.structuredPathMatcher;
 import static java.util.Collections.emptySet;
 import static org.hamcrest.CoreMatchers.hasItem;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mitre.oauth2.model.ClientDetailsEntity.AuthMethod.SECRET_BASIC;
 import static org.mockito.Mockito.when;
 
@@ -80,8 +80,8 @@ public class DynClientScopeValidationTests {
 
     when(scopeService.getRestricted()).thenReturn(emptySet());
 
-    when(registry.findMatcherForScope("openid")).thenReturn(stringEqualsMatcher("openid"));
-    when(registry.findMatcherForScope("profile")).thenReturn(stringEqualsMatcher("profile"));
+    // when(registry.findMatcherForScope("openid")).thenReturn(stringEqualsMatcher("openid"));
+    // when(registry.findMatcherForScope("profile")).thenReturn(stringEqualsMatcher("profile"));
     when(registry.findMatcherForScope("restricted")).thenReturn(stringEqualsMatcher("restricted"));
 
     when(clientService.generateClientSecret(Mockito.any())).thenAnswer(i -> i.getArguments()[0]);
@@ -115,7 +115,8 @@ public class DynClientScopeValidationTests {
     when(scopeService.getRestricted()).thenReturn(newHashSet(new SystemScope("read:/")));
     
     when(registry.findMatcherForScope("read:/")).thenReturn(structuredPathMatcher("read", "/"));
-    when(registry.findMatcherForScope("read:/sub/path")).thenReturn(structuredPathMatcher("read", "/"));
+    // when(registry.findMatcherForScope("read:/sub/path")).thenReturn(structuredPathMatcher("read",
+    // "/"));
     
 
     client = clientValidationService.validateClient(client);

@@ -21,9 +21,9 @@ import static it.infn.mw.iam.authn.saml.util.metadata.SirtfiAttributeMetadataFil
 import static it.infn.mw.iam.authn.saml.util.metadata.SirtfiAttributeMetadataFilter.SIRTFI_ATTRIBUTE_VALUE;
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.hasItem;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.opensaml.saml2.core.Attribute.URI_REFERENCE;
@@ -111,7 +111,7 @@ public class AttributeMetadataFilterTests {
 
   @Before
   public void setup() {
-    when(entityDescriptor1.getEntityID()).thenReturn("1");
+    // when(entityDescriptor1.getEntityID()).thenReturn("1");
     when(entityDescriptor2.getEntityID()).thenReturn("2");
     when(entityDescriptor3.getEntityID()).thenReturn("3");
     when(entityDescriptor4.getEntityID()).thenReturn("4");

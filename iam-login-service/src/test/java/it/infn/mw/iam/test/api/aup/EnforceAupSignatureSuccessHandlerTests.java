@@ -91,7 +91,7 @@ public class EnforceAupSignatureSuccessHandlerTests {
   
   @Test
   public void userIsRedirectedToSignAupPageWhenNeeded() throws IOException, ServletException {
-    when(accountUtils.getAuthenticatedUserAccount()).thenReturn(Optional.of(account));
+    // when(accountUtils.getAuthenticatedUserAccount()).thenReturn(Optional.of(account));
     when(accountUtils.getAuthenticatedUserAccount(Mockito.any())).thenReturn(Optional.of(account));
     when(signatureCheckService.needsAupSignature(Mockito.any())).thenReturn(true);
    
@@ -104,7 +104,7 @@ public class EnforceAupSignatureSuccessHandlerTests {
 
   @Test
   public void delegateIsCalledIfNoSignatureIsNeeded()throws IOException, ServletException {
-    when(accountUtils.getAuthenticatedUserAccount()).thenReturn(Optional.of(account));
+    // when(accountUtils.getAuthenticatedUserAccount()).thenReturn(Optional.of(account));
     when(accountUtils.getAuthenticatedUserAccount(Mockito.any())).thenReturn(Optional.of(account));
     when(signatureCheckService.needsAupSignature(Mockito.any())).thenReturn(false); 
     
@@ -121,7 +121,7 @@ public class EnforceAupSignatureSuccessHandlerTests {
     when(oauth.getName()).thenReturn("oauth-client-for-test");
     when(oauth.getUserAuthentication()).thenReturn(auth);
     
-    when(accountUtils.getAuthenticatedUserAccount()).thenReturn(Optional.of(account));
+    // when(accountUtils.getAuthenticatedUserAccount()).thenReturn(Optional.of(account));
     when(accountUtils.getAuthenticatedUserAccount(Mockito.any())).thenReturn(Optional.of(account));
     when(signatureCheckService.needsAupSignature(Mockito.any())).thenReturn(false);
     
@@ -136,10 +136,10 @@ public class EnforceAupSignatureSuccessHandlerTests {
     OAuth2Authentication oauth = Mockito.mock(OAuth2Authentication.class);
     when(oauth.getName()).thenReturn("oauth-client-for-test");
     when(oauth.getUserAuthentication()).thenReturn(null);
-    when(signatureCheckService.needsAupSignature(Mockito.any())).thenReturn(false); 
+    // when(signatureCheckService.needsAupSignature(Mockito.any())).thenReturn(false);
     
-    when(accountUtils.getAuthenticatedUserAccount()).thenReturn(Optional.empty());
-    when(accountUtils.getAuthenticatedUserAccount(Mockito.any())).thenReturn(Optional.empty());
+    // when(accountUtils.getAuthenticatedUserAccount()).thenReturn(Optional.empty());
+    // when(accountUtils.getAuthenticatedUserAccount(Mockito.any())).thenReturn(Optional.empty());
     
     handler.onAuthenticationSuccess(request, response, oauth);
     verify(session).setAttribute(Mockito.eq(AuthenticationTimeStamper.AUTH_TIMESTAMP), Mockito.any());

@@ -20,6 +20,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+import org.mitre.openid.connect.web.ServerConfigInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +31,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.http.CacheControl;
-import org.springframework.web.servlet.AsyncHandlerInterceptor;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -44,7 +44,9 @@ import org.springframework.web.servlet.view.BeanNameViewResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.JstlView;
 
+import it.infn.mw.iam.core.userinfo.IamUserInfoInterceptor;
 import it.infn.mw.iam.core.util.PoliteJsonMessageSource;
+import it.infn.mw.iam.core.web.IamViewInfoInterceptor;
 
 @Configuration
 public class MvcConfig implements WebMvcConfigurer {
@@ -53,14 +55,14 @@ public class MvcConfig implements WebMvcConfigurer {
 
   @Autowired
   @Qualifier("mitreUserInfoInterceptor")
-  AsyncHandlerInterceptor userInfoInterceptor;
+  IamUserInfoInterceptor userInfoInterceptor;
 
   @Autowired
   @Qualifier("mitreServerConfigInterceptor")
-  AsyncHandlerInterceptor serverConfigInterceptor;
+  ServerConfigInterceptor serverConfigInterceptor;
 
   @Autowired
-  AsyncHandlerInterceptor iamViewInfoInterceptor;
+  IamViewInfoInterceptor iamViewInfoInterceptor;
 
   @Autowired
   IamProperties iamProperties;

@@ -21,13 +21,13 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -109,11 +109,11 @@ public class IamAccountServiceTests extends IamAccountServiceTestSupport {
   @Before
   public void setup() {
 
-    when(accountRepo.findProvisionedAccountsWithLastLoginTimeBeforeTimestamp(anyObject()))
+    when(accountRepo.findProvisionedAccountsWithLastLoginTimeBeforeTimestamp(any()))
       .thenReturn(emptyList());
     when(accountRepo.findByCertificateSubject(anyString())).thenReturn(Optional.empty());
     when(accountRepo.findBySshKeyValue(anyString())).thenReturn(Optional.empty());
-    when(accountRepo.findBySamlId(anyObject())).thenReturn(Optional.empty());
+    when(accountRepo.findBySamlId(any())).thenReturn(Optional.empty());
     when(accountRepo.findByOidcId(anyString(), anyString())).thenReturn(Optional.empty());
     when(accountRepo.findByUsername(anyString())).thenReturn(Optional.empty());
     when(accountRepo.findByEmail(anyString())).thenReturn(Optional.empty());
@@ -121,7 +121,7 @@ public class IamAccountServiceTests extends IamAccountServiceTestSupport {
     when(accountRepo.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(TEST_ACCOUNT));
     when(authoritiesRepo.findByAuthority(anyString())).thenReturn(Optional.empty());
     when(authoritiesRepo.findByAuthority("ROLE_USER")).thenReturn(Optional.of(ROLE_USER_AUTHORITY));
-    when(passwordEncoder.encode(anyObject())).thenReturn(PASSWORD);
+    when(passwordEncoder.encode(any())).thenReturn(PASSWORD);
 
     accountService = new DefaultIamAccountService(clock, accountRepo, groupRepo, authoritiesRepo,
         passwordEncoder, eventPublisher, tokenService);
@@ -757,7 +757,7 @@ public class IamAccountServiceTests extends IamAccountServiceTestSupport {
   public void testAccountDeletion() {
     accountService.deleteAccount(CICCIO_ACCOUNT);
     verify(accountRepo, times(1)).delete(CICCIO_ACCOUNT);
-    verify(eventPublisher, times(1)).publishEvent(anyObject());
+    verify(eventPublisher, times(1)).publishEvent(any());
   }
 
   @Test(expected = NullPointerException.class)
@@ -773,14 +773,14 @@ public class IamAccountServiceTests extends IamAccountServiceTestSupport {
   @Test
   public void testDeleteInactiveProvisionedAccountWorks() {
 
-    when(accountRepo.findProvisionedAccountsWithLastLoginTimeBeforeTimestamp(anyObject()))
+    when(accountRepo.findProvisionedAccountsWithLastLoginTimeBeforeTimestamp(any()))
       .thenReturn(Arrays.asList(CICCIO_ACCOUNT, TEST_ACCOUNT));
 
     accountService.deleteInactiveProvisionedUsersSinceTime(new Date());
 
     verify(accountRepo, times(1)).delete(CICCIO_ACCOUNT);
     verify(accountRepo, times(1)).delete(TEST_ACCOUNT);
-    verify(eventPublisher, times(2)).publishEvent(anyObject());
+    verify(eventPublisher, times(2)).publishEvent(any());
   }
 
   @Test

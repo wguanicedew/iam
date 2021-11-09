@@ -81,6 +81,7 @@ public class TestTokensUtils {
   @Autowired
   protected MockMvc mvc;
 
+  @SuppressWarnings("deprecation")
   private OAuth2Authentication oauth2Authentication(ClientDetailsEntity client, String username,
       String[] scopes) {
 

@@ -37,7 +37,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.isIn;
-import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -214,7 +214,6 @@ public class DefaultAccountUpdaterFactoryTests {
           IamSshKey key = invocation.getArgument(1, IamSshKey.class);
           account.getSshKeys().add(key);
           key.setAccount(account);
-          when(repo.findBySshKeyValue(key.getValue())).thenReturn(Optional.of(account));
           return account;
         }
       });
@@ -253,21 +252,21 @@ public class DefaultAccountUpdaterFactoryTests {
     when(repo.findByEmail(NEW)).thenReturn(Optional.empty());
     when(repo.findByOidcId(NEW, NEW)).thenReturn(Optional.empty());
 
-    when(repo.findBySamlId(anyObject())).thenReturn(Optional.empty());
+    when(repo.findBySamlId(any())).thenReturn(Optional.empty());
     when(repo.findBySshKeyValue(NEW)).thenReturn(Optional.empty());
     when(repo.findByCertificate(x509Certs.get(0).certificate)).thenReturn(Optional.empty());
-    when(accountService.addSshKey(Mockito.any(), Mockito.any()))
-      .thenAnswer(new Answer<IamAccount>() {
-        @Override
-        public IamAccount answer(InvocationOnMock invocation) throws Throwable {
-          IamAccount account = invocation.getArgument(0, IamAccount.class);
-          IamSshKey key = invocation.getArgument(1, IamSshKey.class);
-          account.getSshKeys().add(key);
-          key.setAccount(account);
-          when(repo.findBySshKeyValue(key.getValue())).thenReturn(Optional.of(account));
-          return account;
-        }
-      });
+    // when(accountService.addSshKey(Mockito.any(), Mockito.any()))
+    // .thenAnswer(new Answer<IamAccount>() {
+    // @Override
+    // public IamAccount answer(InvocationOnMock invocation) throws Throwable {
+    // IamAccount account = invocation.getArgument(0, IamAccount.class);
+    // IamSshKey key = invocation.getArgument(1, IamSshKey.class);
+    // account.getSshKeys().add(key);
+    // key.setAccount(account);
+    // when(repo.findBySshKeyValue(key.getValue())).thenReturn(Optional.of(account));
+    // return account;
+    // }
+    // });
 
     ScimUser user = ScimUser.builder()
       .buildName(NEW, NEW)
@@ -373,10 +372,10 @@ public class DefaultAccountUpdaterFactoryTests {
 
     IamSamlId oldId = new IamSamlId(OLD, Saml2Attribute.EPUID.getAttributeName(), OLD);
 
-    when(repo.findByOidcId(OLD, OLD)).thenReturn(Optional.of(account));
-    when(repo.findBySamlId(oldId)).thenReturn(Optional.of(account));
+
+
     when(repo.findBySshKeyValue(OLD)).thenReturn(Optional.of(account));
-    when(repo.findByCertificate(x509Certs.get(0).certificate)).thenReturn(Optional.of(account));
+
     when(accountService.removeSshKey(Mockito.any(), Mockito.any()))
       .thenAnswer(new Answer<IamAccount>() {
         @Override
@@ -385,7 +384,6 @@ public class DefaultAccountUpdaterFactoryTests {
           IamSshKey key = invocation.getArgument(1, IamSshKey.class);
           account.getSshKeys().remove(key);
           key.setAccount(null);
-          when(repo.findBySshKeyValue(key.getValue())).thenReturn(Optional.empty());
           return account;
         }
       });

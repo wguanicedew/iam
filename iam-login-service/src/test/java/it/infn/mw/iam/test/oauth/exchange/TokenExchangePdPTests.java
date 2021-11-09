@@ -49,6 +49,7 @@ import it.infn.mw.iam.persistence.model.IamClientMatchingPolicy;
 import it.infn.mw.iam.persistence.model.IamTokenExchangePolicyEntity;
 import it.infn.mw.iam.persistence.repository.IamTokenExchangePolicyRepository;
 
+@SuppressWarnings("deprecation")
 @RunWith(MockitoJUnitRunner.class)
 public class TokenExchangePdPTests extends TokenExchangePdpTestSupport {
 
@@ -70,14 +71,16 @@ public class TokenExchangePdPTests extends TokenExchangePdpTestSupport {
   @InjectMocks
   DefaultTokenExchangePdp pdp;
 
+
   private TokenRequest buildTokenRequest() {
     return new TokenRequest(emptyMap(), "destination", Collections.emptySet(), TOKEN_EXCHANGE_GRANT_TYPE);
   }
 
+
   @Before
   public void before() {
     when(originClient.getClientId()).thenReturn(ORIGIN_CLIENT_ID);
-    when(destinationClient.getClientId()).thenReturn(DESTINATION_CLIENT_ID);
+    // when(destinationClient.getClientId()).thenReturn(DESTINATION_CLIENT_ID);
     
     when(originClient.getScope()).thenReturn(ORIGIN_CLIENT_SCOPES);
     when(destinationClient.getScope()).thenReturn(DESTINATION_CLIENT_SCOPES);

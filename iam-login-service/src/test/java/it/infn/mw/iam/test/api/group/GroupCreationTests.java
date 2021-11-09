@@ -18,7 +18,7 @@ package it.infn.mw.iam.test.api.group;
 import static java.lang.String.format;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
-import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -88,7 +88,7 @@ public class GroupCreationTests {
 
     mvc
       .perform(post("/iam/group").content(mapper.writeValueAsBytes(model))
-        .contentType(APPLICATION_JSON_UTF8))
+        .contentType(APPLICATION_JSON))
       .andExpect(status().isUnauthorized());
   }
 
@@ -101,7 +101,7 @@ public class GroupCreationTests {
 
     mvc
       .perform(post("/iam/group").content(mapper.writeValueAsBytes(model))
-        .contentType(APPLICATION_JSON_UTF8))
+        .contentType(APPLICATION_JSON))
       .andExpect(status().isForbidden());
   }
 
@@ -113,7 +113,7 @@ public class GroupCreationTests {
 
     mvc
       .perform(post("/iam/group").content(mapper.writeValueAsBytes(model))
-        .contentType(APPLICATION_JSON_UTF8))
+        .contentType(APPLICATION_JSON))
       .andExpect(status().isCreated())
       .andExpect(jsonPath("$.id").exists())
       .andExpect(jsonPath("$.name", is(NEW_GROUP_NAME)))
@@ -129,7 +129,7 @@ public class GroupCreationTests {
 
     mvc
       .perform(post("/iam/group").content(mapper.writeValueAsBytes(child))
-        .contentType(APPLICATION_JSON_UTF8))
+        .contentType(APPLICATION_JSON))
       .andExpect(status().isCreated())
       .andExpect(jsonPath("$.id").exists())
       .andExpect(jsonPath("$.name", is(format("%s/%s", NEW_GROUP_NAME, child.getName()))))
@@ -144,7 +144,7 @@ public class GroupCreationTests {
 
     mvc
       .perform(post("/iam/group").content(mapper.writeValueAsBytes(model))
-        .contentType(APPLICATION_JSON_UTF8))
+        .contentType(APPLICATION_JSON))
       .andExpect(status().isBadRequest())
       .andExpect(jsonPath("$.error", containsString("invalid name")));
   }
@@ -156,7 +156,7 @@ public class GroupCreationTests {
     GroupDTO blanky = GroupDTO.builder().name("").build();
     mvc
       .perform(post("/iam/group").content(mapper.writeValueAsBytes(blanky))
-        .contentType(APPLICATION_JSON_UTF8))
+        .contentType(APPLICATION_JSON))
       .andExpect(status().isBadRequest())
       .andExpect(jsonPath("$.error", containsString("invalid name")));
   }
@@ -174,7 +174,7 @@ public class GroupCreationTests {
 
     mvc
       .perform(post("/iam/group").content(mapper.writeValueAsBytes(model))
-        .contentType(APPLICATION_JSON_UTF8))
+        .contentType(APPLICATION_JSON))
       .andExpect(status().isCreated());
 
     IamGroup g =
@@ -186,7 +186,7 @@ public class GroupCreationTests {
 
     mvc
       .perform(post("/iam/group").content(mapper.writeValueAsBytes(child))
-        .contentType(APPLICATION_JSON_UTF8))
+        .contentType(APPLICATION_JSON))
       .andExpect(status().isBadRequest())
       .andExpect(jsonPath("$.error", containsString("group name too long")));
   }
@@ -204,7 +204,7 @@ public class GroupCreationTests {
         GroupDTO.builder().name(NEW_GROUP_NAME).description(longNameBuilder.toString()).build();
     mvc
       .perform(post("/iam/group").content(mapper.writeValueAsBytes(model))
-        .contentType(APPLICATION_JSON_UTF8))
+        .contentType(APPLICATION_JSON))
       .andExpect(status().isBadRequest())
       .andExpect(
           jsonPath("$.error", containsString("description cannot be longer than 512 chars")));
@@ -223,7 +223,7 @@ public class GroupCreationTests {
     GroupDTO model = GroupDTO.builder().name(NEW_GROUP_NAME).build();
     mvc
       .perform(post("/iam/group").content(mapper.writeValueAsBytes(model))
-        .contentType(APPLICATION_JSON_UTF8))
+        .contentType(APPLICATION_JSON))
       .andExpect(status().isCreated());
 
 
@@ -234,7 +234,7 @@ public class GroupCreationTests {
     mvc
       .perform(MockMvcRequestBuilders.put("/iam/group/{id}", g.getUuid())
         .content(mapper.writeValueAsBytes(desc))
-        .contentType(APPLICATION_JSON_UTF8))
+        .contentType(APPLICATION_JSON))
       .andExpect(status().isBadRequest())
       .andExpect(
           jsonPath("$.error", containsString("description cannot be longer than 512 chars")));
@@ -249,7 +249,7 @@ public class GroupCreationTests {
     GroupDTO model = GroupDTO.builder().name(NEW_GROUP_NAME).build();
     mvc
       .perform(post("/iam/group").content(mapper.writeValueAsBytes(model))
-        .contentType(APPLICATION_JSON_UTF8))
+        .contentType(APPLICATION_JSON))
       .andExpect(status().isCreated());
 
 
@@ -259,7 +259,7 @@ public class GroupCreationTests {
     GroupDTO desc = GroupDTO.builder().description(NEW_GROUP_DESC).build();
     mvc
       .perform(put("/iam/group/{id}", g.getUuid()).content(mapper.writeValueAsBytes(desc))
-        .contentType(APPLICATION_JSON_UTF8))
+        .contentType(APPLICATION_JSON))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.description", is(NEW_GROUP_DESC)));
 
@@ -276,7 +276,7 @@ public class GroupCreationTests {
     GroupDTO desc = GroupDTO.builder().description(NEW_GROUP_DESC).build();
 
     mvc.perform(put("/iam/group/{id}", g.getUuid()).content(mapper.writeValueAsBytes(desc))
-      .contentType(APPLICATION_JSON_UTF8)).andExpect(status().isForbidden());
+      .contentType(APPLICATION_JSON)).andExpect(status().isForbidden());
   }
 
 
@@ -289,7 +289,7 @@ public class GroupCreationTests {
     mvc
       .perform(put("/iam/group/{id}", UUID.randomUUID().toString())
         .content(mapper.writeValueAsBytes(desc))
-        .contentType(APPLICATION_JSON_UTF8))
+        .contentType(APPLICATION_JSON))
       .andExpect(status().isNotFound())
       .andExpect(jsonPath("$.error", containsString("Group not found")));
   }

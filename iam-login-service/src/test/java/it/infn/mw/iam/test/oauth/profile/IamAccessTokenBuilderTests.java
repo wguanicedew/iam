@@ -83,9 +83,9 @@ public class IamAccessTokenBuilderTests {
     when(tokenEntity.getExpiration()).thenReturn(null);
     when(tokenEntity.getClient()).thenReturn(client);
     when(client.getClientId()).thenReturn("client");
-    when(authentication.getName()).thenReturn("auth-name");
+    // when(authentication.getName()).thenReturn("auth-name");
     when(authentication.getOAuth2Request()).thenReturn(oauth2Request);
-    when(authentication.isClientOnly()).thenReturn(false);
+    // when(authentication.isClientOnly()).thenReturn(false);
     when(userInfo.getSub()).thenReturn("userinfo-sub");
     when(oauth2Request.getGrantType()).thenReturn(TOKEN_EXCHANGE_GRANT_TYPE);
   }

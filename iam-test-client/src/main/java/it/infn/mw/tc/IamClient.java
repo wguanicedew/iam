@@ -49,9 +49,10 @@ public class IamClient {
   private IamClientConfig iamClientConfig;
 
   @Bean
-  public FilterRegistrationBean disabledAutomaticOidcFilterRegistration(
+  public FilterRegistrationBean<OIDCAuthenticationFilter> disabledAutomaticOidcFilterRegistration(
       OIDCAuthenticationFilter f) {
-    FilterRegistrationBean b = new FilterRegistrationBean(f);
+    FilterRegistrationBean<OIDCAuthenticationFilter> b =
+        new FilterRegistrationBean<OIDCAuthenticationFilter>(f);
     b.setEnabled(false);
     return b;
   }

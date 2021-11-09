@@ -64,7 +64,7 @@ public class IamDynamicServerConfigurationService extends DynamicServerConfigura
     private static final Logger logger = LoggerFactory.getLogger(Fetcher.class);
 
     private ClientHttpRequestFactory factory;
-    private JsonParser parser = new JsonParser();
+    private JsonParser parser;
 
     public Fetcher(ClientHttpRequestFactory factory) {
       this.factory = factory;
