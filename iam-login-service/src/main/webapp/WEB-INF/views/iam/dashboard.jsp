@@ -163,4 +163,8 @@
   
   <script type="text/javascript" src="${resourcesPrefix}/iam/apps/dashboard-app/components/group-membership/adder/group-membership.adder.component.js"></script>
 
+  <script type="text/javascript" src="${resourcesPrefix}/iam/apps/dashboard-app/components/scopes/scopes.component.js"></script>
+  <script type="text/javascript" src="${resourcesPrefix}/iam/apps/dashboard-app/components/scopes/scopeslist/scopes.scopeslist.component.js"></script>
+
+
 </body>
