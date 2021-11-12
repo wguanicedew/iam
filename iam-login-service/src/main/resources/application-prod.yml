@@ -15,8 +15,6 @@
 #
 
 spring:
-  profiles:
-    include: mysql,flyway-repair
   
   flyway:
     locations:

@@ -45,6 +45,17 @@ public class RestUtils {
     this.mapper = mapper;
   }
 
+  public <B extends Object> ResultActions doPost(String location, B contentObj,
+      String requestContentType, String expectedContentType, HttpStatus expectedStatus)
+      throws Exception {
+
+    String contentJson = mapper.writeValueAsString(contentObj);
+
+    return mvc.perform(post(location).contentType(requestContentType).content(contentJson))
+      .andExpect(status().is(expectedStatus.value()))
+      .andExpect(content().contentType(expectedContentType));
+  }
+
   public <B extends Object> ResultActions doPost(String location, B contentObj, String contentType,
       HttpStatus expectedStatus) throws Exception {
 

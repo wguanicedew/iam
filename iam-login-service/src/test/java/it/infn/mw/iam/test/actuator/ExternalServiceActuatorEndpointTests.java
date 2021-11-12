@@ -23,6 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,7 @@ import it.infn.mw.iam.test.util.annotation.IamMockMvcIntegrationTest;
 @IamMockMvcIntegrationTest
 @IfProfileValue(name = "iam.offline", values = {"false", "<null>"})
 @ProfileValueSourceConfiguration(NullSafeSystemProfileValueSource.class)
+@Ignore("We no longer have a dedicated health endpoint for external connectivity tests")
 public class ExternalServiceActuatorEndpointTests {
 
   private static final String ADMIN_USERNAME = "admin";

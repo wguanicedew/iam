@@ -48,7 +48,7 @@ public class JWKEndpointTests extends EndpointsTestUtils {
     .andExpect(jsonPath("$.keys[0].kty").value("RSA"))
     .andExpect(jsonPath("$.keys[0].e").value("AQAB"))
     .andExpect(jsonPath("$.keys[0].kid").value("rsa1"))
-    .andExpect(jsonPath("$.keys[0].n").value("nuvTJO-6RxIbIyYpPvAWeLSZ4o8o9T_lFU0ltiqAlp5eR-ID36aPqMvBGnNOcTVPcoFpfmQL5INgoWNJGTUm7pWTpV1wZjZe7PX6dFBhRe8SQQ0yb5SVc29-sX1QK-Cg7gKTe0l7Wrhve2vazHH1uYEqLUoTVnGsAx1nzL66M-M"));
+    .andExpect(jsonPath("$.keys[0].n").value("4GRvJuFantVV3JdjwQOAkfREnwUFp2znRBTOIJhPamyH4gf4YlI5PQT79415NV4_HrWYzgooH5AK6-7WE-TLLGEAVK5vdk4vv79bG7ukvjvBPxAjEhQn6-Amln88iXtvicEGbh--3CKbQj1jryVU5aWM6jzweaabFSeCILVEd6ZT7ofXaAqan9eLzU5IEtTPy5MfrrOvWw5Q7D2yzMqc5LksmaQSw8XtmhA8gnENnIqjAMmPtRltf93wjtmiamgVENOVPdN-93Nd5w-pnMwEyoO6Q9JqXxV6lD6qBRxI7_5t4_vmVxcbbxcZbSAMoHqA2pbSMJ4Jcw-27Hct9jesLQ"));
     // @formatter:on
 
   }

@@ -53,7 +53,7 @@ import it.infn.mw.iam.test.util.saml.SamlUtils;
 
 @RunWith(SpringRunner.class)
 @IamMockMvcIntegrationTest
-@SpringBootTest(classes = {IamLoginService.class},
+@SpringBootTest(classes = {IamLoginService.class, SamlValidatorIntegrationTests.TestConfig.class},
     webEnvironment = WebEnvironment.MOCK)
 @WebAppConfiguration
 public class SamlValidatorIntegrationTests extends SamlAuthenticationTestSupport {

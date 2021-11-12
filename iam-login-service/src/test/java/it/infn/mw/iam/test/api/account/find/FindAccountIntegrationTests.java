@@ -256,6 +256,8 @@ public class FindAccountIntegrationTests extends TestSupport {
 
     // Cleanup all group memberships and groups
     accountRepo.deleteAllAccountGroupMemberships();
+
+
     groupRepo.deleteAll();
 
     // Create group hierarchy
@@ -275,9 +277,11 @@ public class FindAccountIntegrationTests extends TestSupport {
 
     sibling = groupService.createGroup(sibling);
 
+    final long allUserCount = accountRepo.count();
+
     mvc.perform(get(FIND_NOT_IN_GROUP_RESOURCE, rootGroup.getUuid()).param("count", "10"))
       .andExpect(OK)
-      .andExpect(jsonPath("$.totalResults", is(253)));
+      .andExpect(jsonPath("$.totalResults", is((int) allUserCount)));
 
     mvc.perform(get(FIND_NOT_IN_GROUP_RESOURCE, rootGroup.getUuid()).param("filter", "admin"))
       .andExpect(OK)

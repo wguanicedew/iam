@@ -20,6 +20,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItems;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -86,7 +87,7 @@ public class ScimGroupProvisioningTests {
 
     mvc.perform(get(GROUP_URI + "/{uuid}", randomUuid).contentType(SCIM_CONTENT_TYPE))
       .andExpect(status().isNotFound())
-      .andExpect(content().contentType(SCIM_CONTENT_TYPE))
+      .andExpect(content().contentType(APPLICATION_JSON_VALUE))
       .andExpect(jsonPath("$.status", equalTo("404")))
       .andExpect(jsonPath("$.detail", equalTo("No group mapped to id '" + randomUuid + "'")));
   }
@@ -101,7 +102,7 @@ public class ScimGroupProvisioningTests {
       .perform(put(GROUP_URI + "/{uuid}", randomUuid).contentType(SCIM_CONTENT_TYPE)
         .content(objectMapper.writeValueAsString(group)))
       .andExpect(status().isNotFound())
-      .andExpect(content().contentType(SCIM_CONTENT_TYPE))
+      .andExpect(content().contentType(APPLICATION_JSON_VALUE))
       .andExpect(jsonPath("$.status", equalTo("404")))
       .andExpect(jsonPath("$.detail", equalTo("No group mapped to id '" + randomUuid + "'")));
   }
@@ -188,7 +189,7 @@ public class ScimGroupProvisioningTests {
       .perform(post(GROUP_URI).contentType(SCIM_CONTENT_TYPE)
         .content(objectMapper.writeValueAsString(group)))
       .andExpect(status().isBadRequest())
-      .andExpect(jsonPath("$.detail", containsString("scimGroup.displayName : may not be empty")));
+      .andExpect(jsonPath("$.detail", containsString("scimGroup.displayName : must not be blank")));
   }
 
   @Test

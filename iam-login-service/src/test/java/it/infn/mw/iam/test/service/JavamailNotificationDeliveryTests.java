@@ -28,9 +28,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import java.util.Date;
-import java.util.UUID;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -103,19 +100,16 @@ public class JavamailNotificationDeliveryTests {
   @Test
   public void testMessageIsDelivered() {
 
-    // String randomUuid = UUID.randomUUID().toString();
-    // Date currentTime = new Date();
+    
     IamEmailNotification notification = mock(IamEmailNotification.class);
     IamNotificationReceiver receiver = mock(IamNotificationReceiver.class);
 
-    when(receiver.getIamEmailNotification()).thenReturn(notification);
-    // when(receiver.getEmailAddress()).thenReturn(TEST_0_EMAIL);
+    // when(receiver.getIamEmailNotification()).thenReturn(notification);
+    when(receiver.getEmailAddress()).thenReturn(TEST_0_EMAIL);
 
     when(notification.getBody()).thenReturn("Body");
     when(notification.getSubject()).thenReturn("Subject");
-    when(notification.getDeliveryStatus()).thenReturn(IamDeliveryStatus.PENDING);
-    // when(notification.getCreationTime()).thenReturn(currentTime);
-    // when(notification.getUuid()).thenReturn(randomUuid);
+    // when(notification.getDeliveryStatus()).thenReturn(IamDeliveryStatus.PENDING);
 
 
     when(notification.getReceivers()).thenReturn(asList(receiver));
@@ -139,17 +133,15 @@ public class JavamailNotificationDeliveryTests {
 
   @Test
   public void testDeliveryErrorIsPropagated() {
-    String randomUuid = UUID.randomUUID().toString();
-    Date currentTime = new Date();
     IamEmailNotification notification = Mockito.mock(IamEmailNotification.class);
     IamNotificationReceiver receiver = Mockito.mock(IamNotificationReceiver.class);
 
-    when(receiver.getIamEmailNotification()).thenReturn(notification);
+    // when(receiver.getIamEmailNotification()).thenReturn(notification);
     // when(receiver.getEmailAddress()).thenReturn(TEST_0_EMAIL);
 
     when(notification.getBody()).thenReturn("Body");
     when(notification.getSubject()).thenReturn("Subject");
-    when(notification.getDeliveryStatus()).thenReturn(IamDeliveryStatus.PENDING);
+    // when(notification.getDeliveryStatus()).thenReturn(IamDeliveryStatus.PENDING);
     // when(notification.getCreationTime()).thenReturn(currentTime);
     // when(notification.getUuid()).thenReturn(randomUuid);
 

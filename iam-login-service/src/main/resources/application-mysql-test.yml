@@ -15,8 +15,6 @@
 #
 
 spring:
-  profiles:
-    include: mysql,registration,saml
   datasource:
     
     url: jdbc:mysql://${IAM_DB_HOST:dev.local.io}:${IAM_DB_PORT:3306}/${IAM_DB_NAME:iam}?useSSL=${IAM_DB_USE_SSL:false}

@@ -19,10 +19,10 @@ import static it.infn.mw.iam.api.scim.model.ScimPatchOperation.ScimPatchOperatio
 import static it.infn.mw.iam.test.scim.ScimUtils.SCIM_CLIENT_ID;
 import static it.infn.mw.iam.test.scim.ScimUtils.SCIM_READ_SCOPE;
 import static it.infn.mw.iam.test.scim.ScimUtils.SCIM_WRITE_SCOPE;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -78,7 +78,7 @@ public class ScimUserProvisioningPatchReplaceTests extends ScimUserTestSupport {
     ScimUser updates = ScimUser.builder().buildEmail("").build();
 
     scimUtils.patchUser(testUser.getId(), replace, updates, BAD_REQUEST)
-      .andExpect(jsonPath("$.detail", containsString(": may not be empty")));
+      .andExpect(jsonPath("$.detail", containsString(": must not be empty")));
   }
 
   @Test
@@ -88,7 +88,7 @@ public class ScimUserProvisioningPatchReplaceTests extends ScimUserTestSupport {
     ScimUser updates = ScimUser.builder().buildEmail(null).build();
 
     scimUtils.patchUser(testUser.getId(), replace, updates, BAD_REQUEST)
-      .andExpect(jsonPath("$.detail", containsString(": may not be empty")));
+      .andExpect(jsonPath("$.detail", containsString(": must not be empty")));
   }
 
   @Test

@@ -57,7 +57,8 @@ import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 @RunWith(SpringRunner.class)
 @IamMockMvcIntegrationTest
 @SpringBootTest(
-    classes = {IamLoginService.class, OidcTestConfig.class, CoreControllerTestSupport.class},
+    classes = {IamLoginService.class, OidcTestConfig.class, CoreControllerTestSupport.class,
+        RegistrationLifecycleTests.TestConfig.class},
     webEnvironment = WebEnvironment.MOCK)
 @TestPropertySource(properties = {
     // @formatter:off

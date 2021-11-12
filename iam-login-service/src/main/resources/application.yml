@@ -44,6 +44,8 @@ spring:
     default: h2-test
     group:
      "h2-test": "h2,saml,registration"
+     "mysql-test": "mysql,saml,registration"
+     "prod": "mysql,flyway-repair"
     
   jpa:
     generate-ddl: true

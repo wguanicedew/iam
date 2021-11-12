@@ -18,12 +18,10 @@ package it.infn.mw.iam.test.scim.group;
 import static it.infn.mw.iam.api.scim.model.ScimConstants.INDIGO_GROUP_SCHEMA;
 import static it.infn.mw.iam.api.scim.model.ScimConstants.SCIM_CONTENT_TYPE;
 import static java.lang.String.format;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -106,7 +104,7 @@ public class ScimNestedGroupTests {
         .contentType(SCIM_CONTENT_TYPE)
         .content(objectMapper.writeValueAsString(ScimGroup.builder("mammals").indigoGroup(scimFakeParentGroup).build())))
       .andExpect(status().isNotFound())
-      .andExpect(jsonPath("$.status", equalTo(NOT_FOUND.toString())))
+      .andExpect(jsonPath("$.status", equalTo("404")))
       .andExpect(jsonPath("$.detail", equalTo(format("Parent group '%s' not found", uuid))));
     // @formatter:on
   }
@@ -120,7 +118,7 @@ public class ScimNestedGroupTests {
     // @formatter:off
     mvc.perform(delete(animals.getMeta().getLocation()))
       .andExpect(status().isBadRequest())
-      .andExpect(jsonPath("$.status", equalTo(BAD_REQUEST.toString())))
+      .andExpect(jsonPath("$.status", equalTo("400")))
       .andExpect(jsonPath("$.detail", equalTo("Group is not empty")));
     // @formatter:on
   }

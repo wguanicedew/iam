@@ -16,18 +16,21 @@
 package it.infn.mw.iam.test.scim.user;
 
 import static it.infn.mw.iam.test.scim.ScimUtils.SCIM_CLIENT_ID;
+import static it.infn.mw.iam.test.scim.ScimUtils.SCIM_CONTENT_TYPE;
 import static it.infn.mw.iam.test.scim.ScimUtils.SCIM_READ_SCOPE;
 import static it.infn.mw.iam.test.scim.ScimUtils.SCIM_WRITE_SCOPE;
 import static it.infn.mw.iam.test.scim.ScimUtils.buildUser;
 import static it.infn.mw.iam.test.scim.ScimUtils.buildUserWithPassword;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
 import java.util.Optional;
@@ -40,9 +43,11 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.scim.model.ScimIndigoUser;
@@ -55,6 +60,7 @@ import it.infn.mw.iam.test.SshKeyUtils;
 import it.infn.mw.iam.test.X509Utils;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 import it.infn.mw.iam.test.scim.ScimRestUtilsMvc;
+import it.infn.mw.iam.test.scim.ScimUtils;
 import it.infn.mw.iam.test.util.WithMockOAuthUser;
 import it.infn.mw.iam.test.util.annotation.IamMockMvcIntegrationTest;
 import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
@@ -75,6 +81,12 @@ public class ScimUserCreationTests extends ScimUserTestSupport {
   @Autowired
   private ScimRestUtilsMvc scimUtils;
   
+  @Autowired
+  private MockMvc mvc;
+
+  @Autowired
+  private ObjectMapper mapper;
+
   @Autowired
   private MockOAuth2Filter mockOAuth2Filter;
   
@@ -172,8 +184,13 @@ public class ScimUserCreationTests extends ScimUserTestSupport {
       .active(true)
       .build();
 
-    scimUtils.postUser(anotherUser, HttpStatus.CONFLICT)
+
+    mvc
+      .perform(post(ScimUtils.getUsersLocation()).content(mapper.writeValueAsBytes(anotherUser))
+        .contentType(SCIM_CONTENT_TYPE))
+      .andExpect(status().isConflict())
       .andExpect(jsonPath("$.detail", containsString("already bound to a user")));
+
   }
 
   @Test
@@ -267,8 +284,12 @@ public class ScimUserCreationTests extends ScimUserTestSupport {
       .active(true)
       .build();
 
-    scimUtils.postUser(anotherUser, HttpStatus.CONFLICT)
+    mvc
+      .perform(post(ScimUtils.getUsersLocation()).content(mapper.writeValueAsBytes(anotherUser))
+        .contentType(SCIM_CONTENT_TYPE))
+      .andExpect(status().isConflict())
       .andExpect(jsonPath("$.detail", containsString("already bound to a user")));
+
   }
 
   @Test

@@ -149,7 +149,7 @@ public class ImplicitFlowTests {
        .param("authorize", "Authorize")
        .param("remember", "until-revoked")
        .session(session))
-     .andExpect(status().isFound())
+     .andExpect(status().is3xxRedirection())
      .andReturn().getResponse().getRedirectedUrl();
      
    assertThat(redirectedUrl, startsWith(IMPLICIT_CLIENT_REDIRECT_URL+"#"));

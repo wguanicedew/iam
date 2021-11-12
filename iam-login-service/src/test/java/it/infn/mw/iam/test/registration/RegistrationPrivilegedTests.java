@@ -21,10 +21,10 @@ import static it.infn.mw.iam.core.IamRegistrationRequestStatus.CONFIRMED;
 import static it.infn.mw.iam.core.IamRegistrationRequestStatus.NEW;
 import static it.infn.mw.iam.core.IamRegistrationRequestStatus.REJECTED;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertNotNull;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -47,6 +47,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import it.infn.mw.iam.api.scim.exception.IllegalArgumentException;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
+import it.infn.mw.iam.persistence.repository.IamRegistrationRequestRepository;
 import it.infn.mw.iam.registration.PersistentUUIDTokenGenerator;
 import it.infn.mw.iam.registration.RegistrationRequestDto;
 import it.infn.mw.iam.registration.RegistrationRequestService;
@@ -75,7 +76,22 @@ public class RegistrationPrivilegedTests {
   private RegistrationRequestService registrationService;
 
   @Autowired
+  private IamRegistrationRequestRepository requestRepo;
+
+  @Autowired
   private IamAccountRepository repo;
+
+  @Before
+  public void setup() {
+    requestRepo.deleteAll();
+    mockOAuth2Filter.cleanupSecurityContext();
+  }
+
+  @After
+  public void teardown() {
+    requestRepo.deleteAll();
+    mockOAuth2Filter.cleanupSecurityContext();
+  }
 
   private Supplier<AssertionError> assertionError(String message) {
     return () -> new AssertionError(message);
@@ -125,15 +141,7 @@ public class RegistrationPrivilegedTests {
     return objectMapper.readValue(response, RegistrationRequestDto.class);
   }
 
-  @Before
-  public void setup() {
-    mockOAuth2Filter.cleanupSecurityContext();
-  }
 
-  @After
-  public void teardown() {
-    mockOAuth2Filter.cleanupSecurityContext();
-  }
 
   @Test
   @WithMockOAuthUser(clientId = "registration-client", scopes = {"registration:read"})

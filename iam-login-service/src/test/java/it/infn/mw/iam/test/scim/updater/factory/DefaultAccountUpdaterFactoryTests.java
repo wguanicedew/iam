@@ -31,12 +31,13 @@ import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REPLACE_PASSWO
 import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REPLACE_PICTURE;
 import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REPLACE_USERNAME;
 import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.EPUID;
-import static it.infn.mw.iam.test.X509Utils.x509Certs;
+import static java.lang.String.format;
 import static org.hamcrest.CoreMatchers.hasItem;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.isIn;
+import static org.hamcrest.Matchers.in;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -123,8 +124,7 @@ public class DefaultAccountUpdaterFactoryTests {
   public void init() {
 
     factory = new DefaultAccountUpdaterFactory(encoder, repo, accountService, oidcConverter,
-        samlConverter,
-        sshKeyConverter, x509Converter);
+        samlConverter, sshKeyConverter, x509Converter);
   }
 
   @Test
@@ -254,19 +254,18 @@ public class DefaultAccountUpdaterFactoryTests {
 
     when(repo.findBySamlId(any())).thenReturn(Optional.empty());
     when(repo.findBySshKeyValue(NEW)).thenReturn(Optional.empty());
-    when(repo.findByCertificate(x509Certs.get(0).certificate)).thenReturn(Optional.empty());
-    // when(accountService.addSshKey(Mockito.any(), Mockito.any()))
-    // .thenAnswer(new Answer<IamAccount>() {
-    // @Override
-    // public IamAccount answer(InvocationOnMock invocation) throws Throwable {
-    // IamAccount account = invocation.getArgument(0, IamAccount.class);
-    // IamSshKey key = invocation.getArgument(1, IamSshKey.class);
-    // account.getSshKeys().add(key);
-    // key.setAccount(account);
-    // when(repo.findBySshKeyValue(key.getValue())).thenReturn(Optional.of(account));
-    // return account;
-    // }
-    // });
+
+    when(accountService.addSshKey(Mockito.any(), Mockito.any()))
+      .thenAnswer(new Answer<IamAccount>() {
+        @Override
+        public IamAccount answer(InvocationOnMock invocation) throws Throwable {
+          IamAccount account = invocation.getArgument(0, IamAccount.class);
+          IamSshKey key = invocation.getArgument(1, IamSshKey.class);
+          account.getSshKeys().add(key);
+          key.setAccount(account);
+          return account;
+        }
+      });
 
     ScimUser user = ScimUser.builder()
       .buildName(NEW, NEW)
@@ -289,9 +288,11 @@ public class DefaultAccountUpdaterFactoryTests {
 
     assertThat(updaters.size(), equalTo(expectedUpdatersType.size()));
 
-    updaters.forEach(u -> assertThat(u.getType(), isIn(expectedUpdatersType)));
-    updaters.forEach(u -> assertThat(u.update(), equalTo(true)));
-    updaters.forEach(u -> assertThat(u.update(), equalTo(false)));
+    updaters.forEach(u -> assertThat(u.getType(), is(in(expectedUpdatersType))));
+    updaters.forEach(u -> assertThat(format("%s does not update even if it should", u.getType()),
+        u.update(), equalTo(true)));
+    updaters.forEach(u -> assertThat(format("%s updates even if it should not", u.getType()),
+        u.update(), equalTo(false)));
 
     assertThat(account.getUsername(), equalTo(NEW));
     assertThat(account.isActive(), equalTo(true));
@@ -344,7 +345,7 @@ public class DefaultAccountUpdaterFactoryTests {
 
     assertThat(updaters.size(), equalTo(expectedUpdatersType.size()));
 
-    updaters.forEach(u -> assertThat(u.getType(), isIn(expectedUpdatersType)));
+    updaters.forEach(u -> assertThat(u.getType(), is(in(expectedUpdatersType))));
     updaters.forEach(u -> assertThat(u.update(), equalTo(true)));
     updaters.forEach(u -> assertThat(u.update(), equalTo(false)));
 
@@ -365,16 +366,10 @@ public class DefaultAccountUpdaterFactoryTests {
 
     IamAccount account = newAccount(OLD);
     account.setOidcIds(newHashSet(new IamOidcId(OLD, OLD)));
-    account.setSamlIds(
-        newHashSet(new IamSamlId(OLD, Saml2Attribute.EPUID.getAttributeName(), OLD)));
-        
+    account
+      .setSamlIds(newHashSet(new IamSamlId(OLD, Saml2Attribute.EPUID.getAttributeName(), OLD)));
+
     account.setSshKeys(Sets.newHashSet(new IamSshKey(OLD)));
-
-    IamSamlId oldId = new IamSamlId(OLD, Saml2Attribute.EPUID.getAttributeName(), OLD);
-
-
-
-    when(repo.findBySshKeyValue(OLD)).thenReturn(Optional.of(account));
 
     when(accountService.removeSshKey(Mockito.any(), Mockito.any()))
       .thenAnswer(new Answer<IamAccount>() {
@@ -403,7 +398,7 @@ public class DefaultAccountUpdaterFactoryTests {
 
     assertThat(updaters.size(), equalTo(expectedUpdatersType.size()));
 
-    updaters.forEach(u -> assertThat(u.getType(), isIn(expectedUpdatersType)));
+    updaters.forEach(u -> assertThat(u.getType(), is(in(expectedUpdatersType))));
     updaters.forEach(u -> assertThat(u.update(), equalTo(true)));
     updaters.forEach(u -> assertThat(u.update(), equalTo(false)));
 
