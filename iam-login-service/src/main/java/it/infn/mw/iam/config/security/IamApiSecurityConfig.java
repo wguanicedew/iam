@@ -20,6 +20,9 @@ import static org.springframework.http.HttpMethod.POST;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
+import org.springframework.boot.actuate.health.HealthEndpoint;
+import org.springframework.boot.actuate.info.InfoEndpoint;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -28,14 +31,13 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationProcessingFilter;
 import org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler;
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
-import org.springframework.security.web.access.AccessDeniedHandlerImpl;
 import org.springframework.security.web.context.SecurityContextPersistenceFilter;
 
 import it.infn.mw.iam.api.proxy.ProxyCertificatesApiController;
-import it.infn.mw.iam.config.CustomAuthenticationEntryPoint;
 import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.core.oauth.FormClientCredentialsAuthenticationFilter;
 
@@ -152,44 +154,29 @@ public class IamApiSecurityConfig {
     private IamProperties properties;
 
     @Autowired
-    private OAuth2AuthenticationProcessingFilter resourceFilter;
-
-    @Autowired
-    private CustomAuthenticationEntryPoint customAuthenticationEntyPoint;
+    private PasswordEncoder passwordEncoder;
 
     @Override
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
       // @formatter:off
       auth.inMemoryAuthentication()
-        .withUser(properties.getSuperuser().getUsername()).password(properties.getSuperuser().getPassword())
+        .withUser(properties.getActuatorUser().getUsername()).password(
+            passwordEncoder.encode(
+            properties.getActuatorUser().getPassword()))
         .roles("ACTUATOR");
       // @formatter:on
     }
 
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
-      // @formatter:off
-      http
-        .requestMatchers()
-          .antMatchers("/metrics", "/info", "/health", "/health/mail", "/health/external",
-              "/configprops", "/env", "/mappings", "/flyway", "/autoconfig", "/beans", "/dump", "/trace")
+      http.requestMatcher(EndpointRequest.to(HealthEndpoint.class, InfoEndpoint.class))
+        .httpBasic()
         .and()
-          .httpBasic()
-          .authenticationEntryPoint(customAuthenticationEntyPoint)
-        .and()
-          .exceptionHandling()
-            .accessDeniedHandler(new AccessDeniedHandlerImpl())
-        .and()
-          .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
+        .authorizeRequests((r) -> r.anyRequest().permitAll())
         .sessionManagement()
-          .sessionCreationPolicy(SessionCreationPolicy.NEVER)
+        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .and()
-          .authorizeRequests()
-            .antMatchers(GET, "/info", "/health", "/health/mail", "/health/external").permitAll()
-            .antMatchers(GET, "/metrics").hasAnyRole("ADMIN", "ACTUATOR")
-            .antMatchers(GET, "/configprops", "/env", "/mappings", 
-                "/flyway", "/autoconfig", "/beans", "/dump", "/trace").hasRole("ACTUATOR");
-      // @formatter:on
+        .httpBasic();
     }
   }
 }

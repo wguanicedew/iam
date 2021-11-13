@@ -36,6 +36,7 @@ import it.infn.mw.iam.core.util.IamBanner;
 
 @SpringBootApplication
 @EnableTransactionManagement
+
 // @formatter:off
 @ComponentScan(basePackages = {
     "it.infn.mw.iam.config", 
@@ -68,39 +69,29 @@ excludeFilters = {
     @ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE,
     value=CorsFilter.class)
 })
-// @formatter:on
 
 @EnableAutoConfiguration(
-    exclude = {SecurityAutoConfiguration.class,
-    H2ConsoleAutoConfiguration.class})
+    exclude = {
+        SecurityAutoConfiguration.class,
+        H2ConsoleAutoConfiguration.class
+})
+//@formatter:on
 public class IamLoginService {
 
   public static void main(final String[] args) {
     SpringApplication iamLoginService = new SpringApplication(IamLoginService.class);
-
     iamLoginService.setBanner(new IamBanner(new ClassPathResource("iam-banner.txt")));
-
     iamLoginService.run(args);
 
   }
 
   @Bean
-  static PropertySourcesPlaceholderConfigurer iamVersionPlaceholderConfigurer() {
+  static PropertySourcesPlaceholderConfigurer iamPropertiesPlaceholderConfigurer() {
     PropertySourcesPlaceholderConfigurer propsConfig = new PropertySourcesPlaceholderConfigurer();
 
-    propsConfig.setLocation(new ClassPathResource("iam.version.properties"));
-    propsConfig.setIgnoreResourceNotFound(true);
-    propsConfig.setIgnoreUnresolvablePlaceholders(true);
+    propsConfig.setLocations(new ClassPathResource("iam.version.properties"),
+        new ClassPathResource("git.properties"));
 
-    return propsConfig;
-  }
-
-
-  @Bean
-  static PropertySourcesPlaceholderConfigurer gitCommitPlaceholderConfigurer() {
-    PropertySourcesPlaceholderConfigurer propsConfig = new PropertySourcesPlaceholderConfigurer();
-
-    propsConfig.setLocation(new ClassPathResource("git.properties"));
     propsConfig.setIgnoreResourceNotFound(true);
     propsConfig.setIgnoreUnresolvablePlaceholders(true);
 

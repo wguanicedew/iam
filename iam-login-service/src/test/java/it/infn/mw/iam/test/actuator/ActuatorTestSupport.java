@@ -15,10 +15,6 @@
  */
 package it.infn.mw.iam.test.actuator;
 
-import static com.google.common.collect.Sets.newHashSet;
-
-import java.util.Set;
-
 public class ActuatorTestSupport {
 
   static final String ADMIN_USERNAME = "admin";
@@ -32,9 +28,8 @@ public class ActuatorTestSupport {
   static final String STATUS_UP = "UP";
   static final String STATUS_DOWN = "DOWN";
 
-  static final Set<String> SENSITIVE_ENDPOINTS = newHashSet("/metrics");
+  static final String HEALTH_ENDPOINT = "/actuator/health";
 
-  static final Set<String> PRIVILEGED_ENDPOINTS = newHashSet("/configprops", "/env",
-      "/mappings", "/flyway", "/autoconfig", "/beans", "/dump", "/trace");
+  static final String INFO_ENDPOINT = "/actuator/info";
 
 }

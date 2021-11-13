@@ -15,23 +15,20 @@
 #
 
 spring:
+  main:
+    allow-bean-definition-overriding: true
+    banner-mode: off
+    
   datasource:
     
     url: jdbc:mysql://${IAM_DB_HOST:dev.local.io}:${IAM_DB_PORT:3306}/${IAM_DB_NAME:iam}?useSSL=${IAM_DB_USE_SSL:false}
     username: ${IAM_DB_USERNAME:iam}
     password: ${IAM_DB_PASSWORD:pwd}
     
-    tomcat:
-      initial-size: 2
-      max-active: 5 
-      min-idle: 1
-      max-idle: 1
-      max-wait: 20000
-      test-while-idle: true
-      test-on-borrow: true
-      validation-query: SELECT 1
-      time-between-eviction-runs-millis: 5000
-      min-evictable-idle-time-millis: 5000
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 1
+      connection-test-query: SELECT 1
      
   flyway:
     locations:

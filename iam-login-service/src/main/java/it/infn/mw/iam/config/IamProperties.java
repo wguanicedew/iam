@@ -45,6 +45,30 @@ public class IamProperties {
     VISIBLE, HIDDEN, HIDDEN_WITH_LINK
   }
 
+  public static class ActuatorUserProperties {
+
+    String username;
+    String password;
+
+    public String getUsername() {
+      return username;
+    }
+
+    public void setUsername(String username) {
+      this.username = username;
+    }
+
+    public String getPassword() {
+      return password;
+    }
+
+    public void setPassword(String password) {
+      this.password = password;
+    }
+
+  }
+
+
   public static class ExternalServiceProbeProperties {
     
     private boolean enabled = true;
@@ -323,27 +347,6 @@ public class IamProperties {
     }
   }
 
-
-  public static class SuperUser {
-    String username;
-    String password;
-
-    public String getUsername() {
-      return username;
-    }
-
-    public void setUsername(String username) {
-      this.username = username;
-    }
-
-    public String getPassword() {
-      return password;
-    }
-
-    public void setPassword(String password) {
-      this.password = password;
-    }
-  }
   public static class PrivacyPolicy {
     String url;
     String text = "Privacy policy";
@@ -520,7 +523,7 @@ public class IamProperties {
 
   private PrivacyPolicy privacyPolicy = new PrivacyPolicy();
 
-  private SuperUser superuser = new SuperUser();
+  private ActuatorUserProperties actuatorUser = new ActuatorUserProperties();
 
   private JWTProfile jwtProfile = new JWTProfile();
 
@@ -645,12 +648,12 @@ public class IamProperties {
     this.token = token;
   }
 
-  public SuperUser getSuperuser() {
-    return superuser;
+  public ActuatorUserProperties getActuatorUser() {
+    return actuatorUser;
   }
 
-  public void setSuperuser(SuperUser superuser) {
-    this.superuser = superuser;
+  public void setActuatorUser(ActuatorUserProperties actuatorUser) {
+    this.actuatorUser = actuatorUser;
   }
 
   public JWTProfile getJwtProfile() {

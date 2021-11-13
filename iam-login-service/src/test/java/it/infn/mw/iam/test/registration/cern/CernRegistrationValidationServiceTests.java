@@ -25,9 +25,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -50,8 +48,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
@@ -69,9 +65,11 @@ import it.infn.mw.iam.registration.RegistrationRequestDto;
 import it.infn.mw.iam.test.core.CoreControllerTestSupport;
 import it.infn.mw.iam.test.util.WithAnonymousUser;
 import it.infn.mw.iam.test.util.WithMockOIDCUser;
+import it.infn.mw.iam.test.util.annotation.IamMockMvcIntegrationTest;
 
 
 @RunWith(SpringRunner.class)
+@IamMockMvcIntegrationTest
 @SpringBootTest(
     classes = {IamLoginService.class, CoreControllerTestSupport.class,
         CernRegistrationValidationServiceTests.TestConfig.class},
@@ -93,9 +91,6 @@ public class CernRegistrationValidationServiceTests {
   private ObjectMapper objectMapper;
 
   @Autowired
-  private WebApplicationContext context;
-
-  @Autowired
   private CernHrDBApiService hrDbApi;
 
   @Autowired
@@ -104,12 +99,11 @@ public class CernRegistrationValidationServiceTests {
   @Autowired
   private IamAccountRepository repo;
 
+  @Autowired
   private MockMvc mvc;
 
   @Before
   public void setup() {
-    mvc =
-        MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).alwaysDo(log()).build();
     reset(hrDbApi);
   }
 

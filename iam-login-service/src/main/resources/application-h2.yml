@@ -15,9 +15,10 @@
 #
 
 spring:
-  
+    
   main:
     allow-bean-definition-overriding: true
+    banner-mode: off
   
   mail:
     port: ${IAM_MAIL_PORT:8125}
@@ -39,3 +40,8 @@ notification:
 iam:
   versioned-static-resources:
     enable-versioning: false
+
+management:
+  health:
+      mail:
+        enabled: false
