@@ -45,6 +45,7 @@ import it.infn.mw.iam.core.web.EnforceAupFilter;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
+@SuppressWarnings("deprecation")
 @RunWith(MockitoJUnitRunner.class)
 public class EnforceAupSignatureSuccessHandlerTests {
 

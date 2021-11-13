@@ -16,9 +16,9 @@
 package it.infn.mw.iam.test.scim.group;
 
 import static it.infn.mw.iam.api.scim.model.ScimConstants.SCIM_CONTENT_TYPE;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -30,7 +30,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.List;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -134,7 +133,7 @@ public class ScimGroupManagerTests {
 
     String authority = String.format("ROLE_GM:%s", createdGroup.getId());
 
-    Assert.assertThat(authoritiesRepo.findByAuthority(authority).isPresent(), is(true));
+    assertThat(authoritiesRepo.findByAuthority(authority).isPresent(), is(true));
   }
 
   @Test

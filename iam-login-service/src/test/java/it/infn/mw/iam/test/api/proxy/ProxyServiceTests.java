@@ -133,12 +133,7 @@ public class ProxyServiceTests extends ProxyCertificateTestSupport {
     IamX509Certificate mockedTest0Cert = spy(TEST_0_IAM_X509_CERT);
     when(mockedTest0Cert.getProxy()).thenReturn(proxyCert);
 
-    String pemProxy = generateTest0Proxy(A_WEEK_AGO, AN_HOUR_AGO);
-
-    // when(proxyCert.getCertificate()).thenReturn(mockedTest0Cert);
     when(proxyCert.getExpirationTime()).thenReturn(Date.from(AN_HOUR_AGO));
-    // when(proxyCert.getChain()).thenReturn(pemProxy);
-
 
     when(account.getX509Certificates()).thenReturn(Sets.newHashSet(mockedTest0Cert));
     when(accountRepo.findByUsername(TEST_USER_USERNAME)).thenReturn(Optional.of(account));
@@ -234,16 +229,8 @@ public class ProxyServiceTests extends ProxyCertificateTestSupport {
 
     IamX509Certificate mockedTest0Cert = spy(TEST_0_IAM_X509_CERT);
     when(mockedTest0Cert.getProxy()).thenReturn(proxyCert);
-    // when(request.getLifetimeSecs()).thenReturn(DEFAULT_PROXY_LIFETIME_SECONDS * 2);
+
     when(request.getIssuer()).thenReturn("CN=A custom issuer");
-
-    String pemProxy = generateTest0Proxy(A_WEEK_AGO, ONE_YEAR_FROM_NOW);
-    // when(proxyCert.getExpirationTime()).thenReturn(Date.from(ONE_YEAR_FROM_NOW));
-    // when(proxyCert.getCertificate()).thenReturn(mockedTest0Cert);
-
-    // when(proxyCert.getChain()).thenReturn(pemProxy);
-
-
     when(account.getX509Certificates()).thenReturn(Sets.newHashSet(mockedTest0Cert));
     when(accountRepo.findByUsername(TEST_USER_USERNAME)).thenReturn(Optional.of(account));
 
@@ -257,12 +244,8 @@ public class ProxyServiceTests extends ProxyCertificateTestSupport {
 
     IamX509Certificate mockedTest0Cert = spy(TEST_0_IAM_X509_CERT);
     when(mockedTest0Cert.getProxy()).thenReturn(proxyCert);
-
-    String pemProxy = generateTest0Proxy(A_WEEK_AGO, ONE_YEAR_FROM_NOW);
     when(proxyCert.getExpirationTime()).thenReturn(Date.from(ONE_YEAR_FROM_NOW));
     when(proxyCert.getCertificate()).thenReturn(mockedTest0Cert);
-
-    // when(proxyCert.getChain()).thenReturn(pemProxy);
 
     when(account.getX509Certificates()).thenReturn(Sets.newHashSet(mockedTest0Cert));
     when(accountRepo.findByUsername(TEST_USER_USERNAME)).thenReturn(Optional.of(account));

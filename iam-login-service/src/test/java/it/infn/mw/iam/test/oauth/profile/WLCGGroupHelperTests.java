@@ -46,6 +46,7 @@ import it.infn.mw.iam.core.oauth.profile.wlcg.WLCGGroupHelper;
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.model.IamUserInfo;
 
+@SuppressWarnings("deprecation")
 @RunWith(MockitoJUnitRunner.class)
 public class WLCGGroupHelperTests {
 
@@ -94,12 +95,6 @@ public class WLCGGroupHelperTests {
   @Test
   public void testNoWLCGGroupScopeNoGroups() {
     when(token.getScope()).thenReturn(newLinkedHashSet(asList("openid", "profile")));
-    IamGroup g1 = buildGroup("g1");
-    IamGroup g2 = buildGroup("g2");
-    IamGroup g3 = buildOptionalGroup("g3");
-
-    // when(userInfo.getGroups()).thenReturn(Sets.newHashSet(g1, g2, g3));
-
     assertThat(helper.resolveGroups(token, userInfo), empty());
   }
 

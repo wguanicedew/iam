@@ -36,10 +36,10 @@ import com.google.common.collect.Sets;
 import it.infn.mw.iam.core.oauth.scope.matchers.ScopeMatcherOAuthRequestValidator;
 import it.infn.mw.iam.core.oauth.scope.matchers.ScopeMatcherRegistry;
 
+@SuppressWarnings("deprecation")
 @RunWith(MockitoJUnitRunner.class)
 public class OAuthRequestValidatorTests {
 
-  @SuppressWarnings("deprecation")
   @Spy
   AuthorizationRequest authzRequest = new AuthorizationRequest();
 

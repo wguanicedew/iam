@@ -21,10 +21,10 @@ import static it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport.ACCOUNT_
 import static it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport.ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION;
 import static it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport.EXT_AUTH_ERROR_KEY;
 import static it.infn.mw.iam.authn.saml.util.Saml2Attribute.EPUID;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -36,7 +36,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.hamcrest.Matchers;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opensaml.saml2.core.AuthnRequest;
@@ -129,7 +128,7 @@ public class SamlAccountLinkingTests extends SamlAuthenticationTestSupport {
     IamAccount account = iamAccountRepo.findBySamlId(samlId)
       .orElseThrow(() -> new AssertionError("User not found linked to expected SAML id"));
 
-    Assert.assertThat(account.getUsername(), equalTo(TEST_100_USER));
+    assertThat(account.getUsername(), equalTo(TEST_100_USER));
 
     // Cleanup!
     account.getSamlIds().stream().forEach(i -> i.setAccount(null));

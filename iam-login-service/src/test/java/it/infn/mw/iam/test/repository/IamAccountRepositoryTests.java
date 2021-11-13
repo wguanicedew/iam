@@ -15,9 +15,9 @@
  */
 package it.infn.mw.iam.test.repository;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +46,7 @@ public class IamAccountRepositoryTests {
     IamAccount testUserAccount = repo.findBySamlId(TEST_USER_ID)
       .orElseThrow(() -> new AssertionError("Could not lookup test user by SAML id"));
 
-    Assert.assertThat(testUserAccount.getUsername(), equalTo("test"));
+    assertThat(testUserAccount.getUsername(), equalTo("test"));
   }
 
 }

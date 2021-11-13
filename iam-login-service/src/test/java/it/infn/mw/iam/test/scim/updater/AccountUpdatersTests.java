@@ -18,11 +18,11 @@ package it.infn.mw.iam.test.scim.updater;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singletonList;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.time.Instant;
 import java.util.Date;
@@ -45,10 +45,8 @@ import it.infn.mw.iam.api.scim.updater.builders.Removers;
 import it.infn.mw.iam.api.scim.updater.builders.Replacers;
 import it.infn.mw.iam.api.scim.updater.util.CollectionHelpers;
 import it.infn.mw.iam.authn.saml.util.Saml2Attribute;
-import it.infn.mw.iam.core.group.IamGroupService;
 import it.infn.mw.iam.core.user.IamAccountService;
 import it.infn.mw.iam.persistence.model.IamAccount;
-import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.model.IamOidcId;
 import it.infn.mw.iam.persistence.model.IamSamlId;
 import it.infn.mw.iam.persistence.model.IamSshKey;
@@ -99,9 +97,6 @@ public class AccountUpdatersTests extends X509TestSupport {
   private IamAccountService accountService;
 
   @Autowired
-  private IamGroupService groupService;
-
-  @Autowired
   private PasswordEncoder encoder;
 
   private IamAccount account;
@@ -118,14 +113,6 @@ public class AccountUpdatersTests extends X509TestSupport {
     account.getUserInfo().setGivenName("test");
     account.getUserInfo().setFamilyName("user");
     return accountService.createAccount(account);
-  }
-
-  private IamGroup newGroup(String name) {
-    IamGroup group = new IamGroup();
-    group.setUuid(UUID.randomUUID().toString());
-    group.setName(name);
-
-    return groupService.createGroup(group);
   }
 
   private Adders accountAdders() {

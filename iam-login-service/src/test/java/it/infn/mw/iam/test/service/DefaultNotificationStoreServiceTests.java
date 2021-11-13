@@ -31,7 +31,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -50,7 +49,6 @@ import it.infn.mw.iam.core.time.TimeProvider;
 import it.infn.mw.iam.notification.NotificationProperties;
 import it.infn.mw.iam.notification.service.DefaultNotificationStoreService;
 import it.infn.mw.iam.persistence.model.IamEmailNotification;
-import it.infn.mw.iam.persistence.model.IamNotificationReceiver;
 import it.infn.mw.iam.persistence.repository.IamEmailNotificationRepository;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -113,21 +111,8 @@ public class DefaultNotificationStoreServiceTests {
 
     Date oneDayAfterNow = Date.from(NOW.plus(1L, ChronoUnit.DAYS));
     Date twoDaysAfterNow = Date.from(NOW.plus(2L, ChronoUnit.DAYS));
-    String randomUuid = UUID.randomUUID().toString();
-
 
     IamEmailNotification notification = mock(IamEmailNotification.class);
-    IamNotificationReceiver receiver = mock(IamNotificationReceiver.class);
-
-    // when(receiver.getIamEmailNotification()).thenReturn(notification);
-    // when(receiver.getEmailAddress()).thenReturn(TEST_0_EMAIL);
-
-    // when(notification.getBody()).thenReturn("Body");
-    // when(notification.getSubject()).thenReturn("Subject");
-    // when(notification.getDeliveryStatus()).thenReturn(IamDeliveryStatus.DELIVERED);
-    // when(notification.getCreationTime()).thenReturn(twoDaysAfterNow);
-    // when(notification.getLastUpdate()).thenReturn(oneDayAfterNow);
-    // when(notification.getUuid()).thenReturn(randomUuid);
 
     when(notificationRepo.findByStatusWithUpdateTime(Mockito.any(), Mockito.any()))
       .thenReturn(Arrays.asList(notification));

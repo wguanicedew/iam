@@ -37,6 +37,7 @@ import com.google.common.collect.Sets;
 import it.infn.mw.iam.core.oauth.profile.JWTProfile;
 import it.infn.mw.iam.core.oauth.profile.ScopeAwareProfileResolver;
 
+@SuppressWarnings("deprecation")
 @RunWith(MockitoJUnitRunner.class)
 public class ProfileSelectorTests {
 

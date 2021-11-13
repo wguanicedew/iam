@@ -40,6 +40,7 @@ import it.infn.mw.iam.test.util.annotation.IamNoMvcTest;
 import it.infn.mw.iam.test.util.oauth.MockOAuth2Request;
 
 
+@SuppressWarnings("deprecation")
 @RunWith(SpringRunner.class)
 @IamNoMvcTest
 public class IamTokenRepositoryTests {
@@ -64,7 +65,6 @@ public class IamTokenRepositoryTests {
   @Autowired
   private DefaultOAuth2ProviderTokenService tokenService;
 
-  @SuppressWarnings("deprecation")
   private OAuth2Authentication oauth2Authentication(ClientDetailsEntity client, String username) {
 
     String[] scopes = {};

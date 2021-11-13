@@ -55,6 +55,7 @@ import it.infn.mw.iam.persistence.repository.IamOAuthAccessTokenRepository;
 import it.infn.mw.iam.persistence.repository.IamOAuthRefreshTokenRepository;
 import it.infn.mw.iam.test.util.oauth.MockOAuth2Request;
 
+@SuppressWarnings("deprecation")
 public class TestTokensUtils {
 
   protected static final String REFRESH_TOKENS_BASE_PATH = Constants.REFRESH_TOKENS_ENDPOINT;
@@ -81,7 +82,6 @@ public class TestTokensUtils {
   @Autowired
   protected MockMvc mvc;
 
-  @SuppressWarnings("deprecation")
   private OAuth2Authentication oauth2Authentication(ClientDetailsEntity client, String username,
       String[] scopes) {
 

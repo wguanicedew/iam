@@ -85,6 +85,7 @@ public class LabelsOAuthEncodingTests extends EndpointsTestUtils {
   }
 
 
+  @SuppressWarnings("deprecation")
   @Test
   public void labelsAreProperlyEncodedIfConfigurationAllows() throws Exception {
     IamAccount testAccount =
@@ -102,6 +103,7 @@ public class LabelsOAuthEncodingTests extends EndpointsTestUtils {
 
   }
 
+  @SuppressWarnings("deprecation")
   @Test
   public void getTokenSucceedsForUserWithoutLabel() throws Exception {
 

@@ -15,17 +15,16 @@
  */
 package it.infn.mw.iam.test.ext_authn.x509;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayWithSize;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -65,7 +64,7 @@ public class X509CredentialExtractorTests extends X509TestSupport {
     try {
       extractor.extractX509Credential(request);
     } catch (IllegalArgumentException e) {
-      Assert.assertThat(e.getMessage(), containsString("Required header not found"));
+      assertThat(e.getMessage(), containsString("Required header not found"));
       throw e;
     }
   }

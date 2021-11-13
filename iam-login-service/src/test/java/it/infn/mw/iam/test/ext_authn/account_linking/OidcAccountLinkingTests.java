@@ -21,6 +21,7 @@ import static it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport.ACCOUNT_
 import static it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport.ACCOUNT_LINKING_SESSION_SAVED_AUTHENTICATION;
 import static it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport.EXT_AUTH_ERROR_KEY;
 import static it.infn.mw.iam.test.ext_authn.oidc.OidcTestConfig.TEST_OIDC_CLIENT_ID;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
@@ -37,7 +38,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.hamcrest.Matchers;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -148,7 +148,7 @@ public class OidcAccountLinkingTests {
         iamAccountRepo.findByOidcId(OidcTestConfig.TEST_OIDC_ISSUER, TEST_100_USER)
           .orElseThrow(() -> new UsernameNotFoundException("User not found!"));
 
-    Assert.assertThat(userAccount.getUsername(), Matchers.equalTo(TEST_100_USER));
+    assertThat(userAccount.getUsername(), Matchers.equalTo(TEST_100_USER));
 
     userAccount.getOidcIds().stream().forEach(i -> i.setAccount(null));
     userAccount.getOidcIds().clear();

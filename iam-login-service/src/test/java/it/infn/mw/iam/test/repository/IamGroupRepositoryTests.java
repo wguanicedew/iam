@@ -16,15 +16,15 @@
 package it.infn.mw.iam.test.repository;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.isIn;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.Date;
 import java.util.List;
@@ -91,7 +91,7 @@ public class IamGroupRepositoryTests {
 
     group = groupRepository.findByUuid(parent.getUuid()).get();
     assertThat(group.getChildrenGroups(), not(empty()));
-    assertThat(child, isIn(group.getChildrenGroups()));
+    assertThat(child, is(in(group.getChildrenGroups())));
   }
 
   @Test
