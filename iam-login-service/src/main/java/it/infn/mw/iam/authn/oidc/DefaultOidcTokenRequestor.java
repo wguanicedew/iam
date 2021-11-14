@@ -30,6 +30,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -140,26 +141,22 @@ public class DefaultOidcTokenRequestor implements OidcTokenRequestor {
 
     } catch (HttpClientErrorException e) {
 
-      if (e.getStatusCode() != null && e.getStatusCode().equals(BAD_REQUEST)) {
+      if (e.getStatusCode().equals(BAD_REQUEST)) {
         parseErrorResponse(e).ifPresent(er -> {
-
 
           String errorMessage = String.format("Token request error: %s '%s'", er.getError(),
               er.getErrorDescription());
-          LOG.error(errorMessage);
 
-          throw new OidcClientError(e.getMessage(), er.getError(), er.getErrorDescription(),
+          throw new OidcClientError(errorMessage, er.getError(), er.getErrorDescription(),
               er.getErrorUri());
 
         });
       }
 
       String errorMessage = String.format("Token request error: %s", e.getMessage());
-      LOG.error(errorMessage, e);
       throw new OidcClientError(errorMessage, e);
-    } catch (Exception e) {
+    } catch (RestClientException e) {
       String errorMessage = String.format("Token request error: %s", e.getMessage());
-      LOG.error(errorMessage, e);
       throw new OidcClientError(errorMessage, e);
     }
 

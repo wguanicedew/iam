@@ -34,15 +34,34 @@ import it.infn.mw.iam.config.login.LoginButtonProperties;
 public class IamProperties {
 
   public enum EditableFields {
-    NAME, SURNAME, EMAIL, PICTURE
+    NAME,
+    SURNAME,
+    EMAIL,
+    PICTURE
   }
 
   public enum LocalAuthenticationAllowedUsers {
-    ALL, VO_ADMINS, NONE
+    ALL,
+    VO_ADMINS,
+    NONE
   }
 
   public enum LocalAuthenticationLoginPageMode {
-    VISIBLE, HIDDEN, HIDDEN_WITH_LINK
+    VISIBLE,
+    HIDDEN,
+    HIDDEN_WITH_LINK
+  }
+
+  public static class AccountLinkingProperties {
+    boolean enable = true;
+
+    public void setEnable(boolean enable) {
+      this.enable = enable;
+    }
+
+    public boolean isEnable() {
+      return enable;
+    }
   }
 
   public static class ActuatorUserProperties {
@@ -69,8 +88,8 @@ public class IamProperties {
   }
 
 
-  public static class ExternalServiceProbeProperties {
-    
+  public static class ExternalConnectivityProbeProperties {
+
     private boolean enabled = true;
 
     private String endpoint = "https://www.google.com";
@@ -80,7 +99,7 @@ public class IamProperties {
     public boolean isEnabled() {
       return enabled;
     }
-    
+
     public void setEnabled(boolean enabled) {
       this.enabled = enabled;
     }
@@ -333,7 +352,9 @@ public class IamProperties {
   public static class JWTProfile {
 
     public enum Profile {
-      IAM, WLCG, AARC
+      IAM,
+      WLCG,
+      AARC
     }
 
     Profile defaultProfile = Profile.IAM;
@@ -548,9 +569,10 @@ public class IamProperties {
   private VersionedStaticResourcesProperties versionedStaticResources =
       new VersionedStaticResourcesProperties();
 
-  private ExternalServiceProbeProperties externalServiceProbe =
-      new ExternalServiceProbeProperties();
+  private ExternalConnectivityProbeProperties externalConnectivityProbe =
+      new ExternalConnectivityProbeProperties();
 
+  private AccountLinkingProperties accountLinking = new AccountLinkingProperties();
 
   public String getBaseUrl() {
     return baseUrl;
@@ -745,12 +767,21 @@ public class IamProperties {
     this.versionedStaticResources = versionedStaticResources;
   }
 
-  public ExternalServiceProbeProperties getExternalServiceProbe() {
-    return externalServiceProbe;
+  public ExternalConnectivityProbeProperties getExternalConnectivityProbe() {
+    return externalConnectivityProbe;
   }
 
-  public void setExternalServiceProbe(ExternalServiceProbeProperties externalServiceProbe) {
-    this.externalServiceProbe = externalServiceProbe;
+  public void setExternalConnectivityProbe(
+      ExternalConnectivityProbeProperties externalConnectivityProbe) {
+    this.externalConnectivityProbe = externalConnectivityProbe;
+  }
+
+  public AccountLinkingProperties getAccountLinking() {
+    return accountLinking;
+  }
+
+  public void setAccountLinking(AccountLinkingProperties accountLinking) {
+    this.accountLinking = accountLinking;
   }
 
 }

@@ -37,7 +37,7 @@ import it.infn.mw.iam.test.util.annotation.IamMockMvcIntegrationTest;
 @RunWith(SpringRunner.class)
 @IamMockMvcIntegrationTest
 @SpringBootTest(classes = {IamLoginService.class}, webEnvironment = WebEnvironment.MOCK)
-@TestPropertySource(properties = {"accountLinking.disable=true"})
+@TestPropertySource(properties = {"iam.account-linking.enable=false"})
 public class AccountLinkingDisabledTests {
 
   @Autowired

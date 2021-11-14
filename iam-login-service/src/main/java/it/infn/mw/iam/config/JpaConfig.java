@@ -41,6 +41,9 @@ import org.springframework.transaction.jta.JtaTransactionManager;
 @EnableTransactionManagement
 public class JpaConfig extends JpaBaseConfiguration {
 
+  public static final String ECLIPSELINK_LOGGING_LEVEL = "eclipselink.logging.level";
+  public static final String ECLIPSELINK_LOGGING_LEVEL_SQL = "eclipselink.logging.level.sql";
+
   protected JpaConfig(DataSource dataSource, JpaProperties properties,
       ObjectProvider<JtaTransactionManager> jtaTransactionManager) {
     super(dataSource, properties, jtaTransactionManager);
@@ -61,18 +64,18 @@ public class JpaConfig extends JpaBaseConfiguration {
     Map<String, Object> map = new HashMap<>();
 
     map.put("eclipselink.weaving", "false");
-    map.put("eclipselink.logging.level", "WARNING");
-    map.put("eclipselink.logging.level.sql", "OFF");
+    map.put(ECLIPSELINK_LOGGING_LEVEL, "WARNING");
+    map.put(ECLIPSELINK_LOGGING_LEVEL_SQL, "OFF");
     map.put("eclipselink.cache.shared.default", "false");
 
     if (System.getProperty("iam.show_sql") != null) {
-      map.put("eclipselink.logging.level", "FINE");
-      map.put("eclipselink.logging.level.sql", "FINE");
+      map.put(ECLIPSELINK_LOGGING_LEVEL, "FINE");
+      map.put(ECLIPSELINK_LOGGING_LEVEL_SQL, "FINE");
       map.put("eclipselink.logging.parameters", "true");
     }
 
     if (System.getProperty("iam.generate-ddl-sql-script") != null) {
-      map.put("eclipselink.logging.level", "FINE");
+      map.put(ECLIPSELINK_LOGGING_LEVEL, "FINE");
       map.put("eclipselink.ddl-generation.output-mode", "sql-script");
       map.put("eclipselink.ddl-generation", "create-tables");
       map.put("eclipselink.create-ddl-jdbc-file-name", "ddl.sql");

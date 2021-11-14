@@ -24,10 +24,12 @@ public class NullableNonBlankStringValidator
     implements ConstraintValidator<NullableNonBlankString, String> {
 
   public NullableNonBlankStringValidator() {
+    // Empty on purpose
   }
 
   @Override
   public void initialize(NullableNonBlankString constraintAnnotation) {
+    // Empty on purpose
   }
 
   @Override

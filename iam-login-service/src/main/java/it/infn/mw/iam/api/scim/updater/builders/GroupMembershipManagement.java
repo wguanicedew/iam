@@ -43,10 +43,10 @@ public class GroupMembershipManagement {
     this.account = account;
     this.accountService = accountService;
 
-    groupAdder = (group) -> this.accountService.addToGroup(this.account, group);
-    groupRemover = (group) -> this.accountService.removeFromGroup(this.account, group);
+    groupAdder = group -> this.accountService.addToGroup(this.account, group);
+    groupRemover = group -> this.accountService.removeFromGroup(this.account, group);
 
-    accountIsMember = (group) -> {
+    accountIsMember = group -> {
       for (IamAccountGroupMembership m : this.account.getGroups()) {
         if (m.getGroup().equals(group)) {
           return true;

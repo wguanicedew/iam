@@ -243,7 +243,7 @@ public class IamConfig {
       AccountUtils utils, IamAupRepository repo) {
     EnforceAupFilter aupFilter = new EnforceAupFilter(service, utils, repo);
     FilterRegistrationBean<EnforceAupFilter> frb =
-        new FilterRegistrationBean<EnforceAupFilter>(aupFilter);
+        new FilterRegistrationBean<>(aupFilter);
     frb.setOrder(Ordered.LOWEST_PRECEDENCE);
     return frb;
   }
@@ -260,7 +260,7 @@ public class IamConfig {
   @Profile("dev")
   ServletRegistrationBean<WebServlet> h2Console() {
     WebServlet h2Servlet = new WebServlet();
-    return new ServletRegistrationBean<WebServlet>(h2Servlet, "/h2-console/*");
+    return new ServletRegistrationBean<>(h2Servlet, "/h2-console/*");
   }
 
 }

@@ -44,7 +44,6 @@ import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
 
 import it.infn.mw.iam.authn.saml.model.IdpDescription;
 
@@ -127,7 +126,7 @@ public class DefaultMetadataLookupService implements MetadataLookupService, Obse
 
       EntityDescriptor entityDescriptor = metadataManager.getEntityDescriptor(text);
       if (entityDescriptor != null) {
-        return Optional.of(ImmutableList.of(descriptionFromMetadata(entityDescriptor)));
+        return Optional.of(List.of(descriptionFromMetadata(entityDescriptor)));
       }
 
     } catch (MetadataProviderException e) {
@@ -175,7 +174,6 @@ public class DefaultMetadataLookupService implements MetadataLookupService, Obse
 
       } catch (MetadataProviderException e) {
         LOG.warn("Error accessing metadata for entity: {}", idpName, e);
-        continue;
       }
 
     }

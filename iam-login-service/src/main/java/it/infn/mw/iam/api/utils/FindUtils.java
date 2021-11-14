@@ -27,6 +27,8 @@ import it.infn.mw.iam.api.scim.model.ScimListResponse.ScimListResponseBuilder;
 
 public class FindUtils {
 
+  private FindUtils() {}
+
   public static <D, E> ScimListResponse<D> responseFromPage(Page<E> results,
       Converter<D, E> converter,
       Pageable pageable) {

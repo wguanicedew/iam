@@ -143,7 +143,7 @@ public class DefaultGroupRequestsService implements GroupRequestsService {
     IamAccount account = request.getAccount();
     IamGroup group = request.getGroup();
 
-    account = accountService.addToGroup(account, group);
+    accountService.addToGroup(account, group);
 
     request = updateGroupRequestStatus(request, APPROVED);
     notificationFactory.createGroupMembershipApprovedMessage(request);

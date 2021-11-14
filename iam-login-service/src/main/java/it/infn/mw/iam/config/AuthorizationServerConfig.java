@@ -34,6 +34,7 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
@@ -104,7 +105,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
   private TokenExchangePdp tokenExchangePdp;
 
   @Bean
-  WebResponseExceptionTranslator<?> webResponseExceptionTranslator() {
+  WebResponseExceptionTranslator<OAuth2Exception> webResponseExceptionTranslator() {
 
     return new DefaultWebResponseExceptionTranslator();
   }

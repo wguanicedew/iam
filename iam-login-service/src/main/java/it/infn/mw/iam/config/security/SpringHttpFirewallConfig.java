@@ -25,7 +25,7 @@ import org.springframework.security.web.firewall.StrictHttpFirewall;
 @Configuration
 public class SpringHttpFirewallConfig {
 
-  public static final Predicate<String> ANY_VALUE = (s) -> true;
+  public static final Predicate<String> ANY_VALUE = s -> true;
 
   @Bean
   HttpFirewall iamHttpFirewall() {

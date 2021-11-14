@@ -236,13 +236,12 @@ public class UserConverter implements Converter<ScimUser, IamAccount> {
     }
 
     for (LabelDescriptor ld : properties.getIncludeLabels()) {
-      entity.getLabelByPrefixAndName(ld.getPrefix(), ld.getName()).ifPresent(el -> {
-        indigoUserBuilder.addLabel(ScimLabel.builder()
+      entity.getLabelByPrefixAndName(ld.getPrefix(), ld.getName())
+        .ifPresent(el -> indigoUserBuilder.addLabel(ScimLabel.builder()
           .withPrefix(el.getPrefix())
           .withName(el.getName())
           .withVaule(el.getValue())
-          .build());
-      });
+          .build()));
     }
 
     indigoUserBuilder.endTime(entity.getEndTime());

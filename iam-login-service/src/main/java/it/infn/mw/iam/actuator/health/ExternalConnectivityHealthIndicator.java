@@ -23,39 +23,48 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.boot.actuate.health.Status;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 
 import it.infn.mw.iam.config.IamProperties;
 
 @Component
-@ConditionalOnProperty(name = "iam.external-service-probe.enabled", havingValue = "true")
-public class ExternalServiceReachableHealthIndicator implements HealthIndicator {
+@ConditionalOnProperty(name = "iam.external-connectivity-probe.enabled", havingValue = "true")
+public class ExternalConnectivityHealthIndicator implements HealthIndicator {
+
+  private static final String STATUS_WARNING = "WARNING";
+  private static final String STATUS_WARNING_MSG = "external endpoint unreachable";
+  private static final String ENDPOINT_KEY = "endpoint";
 
   private final String endpoint;
   private final int timeoutInSecs;
 
   @Autowired
-  public ExternalServiceReachableHealthIndicator(IamProperties properties) {
-    this.endpoint = properties.getExternalServiceProbe().getEndpoint();
-    this.timeoutInSecs = properties.getExternalServiceProbe().getTimeoutInSecs();
+  public ExternalConnectivityHealthIndicator(IamProperties properties) {
+    this.endpoint = properties.getExternalConnectivityProbe().getEndpoint();
+    this.timeoutInSecs = properties.getExternalConnectivityProbe().getTimeoutInSecs();
   }
 
   @Override
   public Health health() {
     try {
       HttpURLConnection conn = (HttpURLConnection) new URL(endpoint).openConnection();
-      conn.setRequestMethod("HEAD");
+      conn.setRequestMethod(HttpMethod.HEAD.name());
       conn.setConnectTimeout((int) TimeUnit.SECONDS.toMillis(timeoutInSecs));
 
       int responseCode = conn.getResponseCode();
+
       if (responseCode == 200) {
-        return Health.up().withDetail("endpoint", endpoint).build();
+        return Health.up().withDetail(ENDPOINT_KEY, endpoint).build();
       } else {
-        return Health.down().withDetail("endpoint", endpoint).build();
+        return Health.status(new Status(STATUS_WARNING, STATUS_WARNING_MSG))
+          .withDetail(ENDPOINT_KEY, endpoint)
+          .build();
       }
     } catch (IOException e) {
-      return Health.down(e).build();
+      return Health.status(new Status(STATUS_WARNING, STATUS_WARNING_MSG)).withException(e).build();
     }
   }
 }

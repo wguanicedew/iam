@@ -139,6 +139,14 @@ iam:
    
   aarc-profile:
     urn-namespace: ${IAM_AARC_PROFILE_URN_NAMESPACE:example:iam}
+    
+  external-connectivity-probe:
+    enabled: ${IAM_HEALTH_EXTERNAL_CONNECTIVITY_PROBE_ENABLED:false}
+    endpoint: ${IAM_HEALTH_EXTERNAL_CONNECTIVITY_PROBE_ENDPOINT:https://www.google.it}
+    timeout-in-secs: ${IAM_HEALTH_EXTERNAL_CONNECTIVITY_PROBE_TIMEOUT_IN_SECS:10}
+    
+  account-linking:
+    enable: ${IAM_ACCOUNT_LINKING_ENABLE:true}
 
 x509:
   trustAnchorsDir: ${IAM_X509_TRUST_ANCHORS_DIR:/etc/grid-security/certificates}
@@ -165,15 +173,6 @@ task:
   approvalCleanupPeriodMsec: ${IAM_APPROVAL_CLEANUP_PERIOD_MSEC:300000}
   deviceCodeCleanupPeriodMsec: ${IAM_DEVICE_CODE_CLEANUP_PERIOD_MSEC:300000}
 
-health:
-  externalServiceProbe:
-    enabled: ${IAM_HEALTH_EXTERNAL_SERVICE_PROBE_ENABLED:true}
-    endpoint: ${IAM_HEALTH_EXTERNAL_SERVICE_PROBE_ENDPOINT:http://www.google.it}
-    timeout: ${IAM_HEALTH_EXTERNAL_SERVICE_PROBE_TIMEOUT:5000}
-    path: /health/external
-   
-accountLinking:
-  disable: ${IAM_ACCOUNT_LINKING_DISABLE:false}
 
 clientRegistration:
   allow-for: ${IAM_CLIENT_REGISTRATION_ALLOW_FOR:ANYONE}

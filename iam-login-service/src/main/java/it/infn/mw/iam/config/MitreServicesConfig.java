@@ -205,7 +205,7 @@ public class MitreServicesConfig {
       AuthorizationRequestFilter f) {
 
     FilterRegistrationBean<AuthorizationRequestFilter> b =
-        new FilterRegistrationBean<AuthorizationRequestFilter>(f);
+        new FilterRegistrationBean<>(f);
     b.setEnabled(false);
     return b;
   }
@@ -227,23 +227,6 @@ public class MitreServicesConfig {
 
     return new Http403ForbiddenEntryPoint();
   }
-
-  // @Bean
-  // public FilterRegistrationBean disabledCorsFilterRegistration(CorsFilter c) {
-  //
-  // FilterRegistrationBean b = new FilterRegistrationBean(c);
-  // b.setEnabled(false);
-  // return b;
-  // }
-
-  // @Primary
-  // @Bean
-  // public CorsFilter corsFilter() {
-  //
-  //
-  // CorsFilter filter = new CorsFilter()
-  // return new CorsFilter();
-  // }
 
   @Bean
   public OAuth2AuthenticationEntryPoint oauth2AuthenticationEntryPoint() {
@@ -278,19 +261,19 @@ public class MitreServicesConfig {
   }
 
   @Bean
-  MITREidDataService_1_0 mitreDataService1_0() {
+  MITREidDataService_1_0 mitreDataService10() {
 
     return new MITREidDataService_1_0();
   }
 
   @Bean
-  MITREidDataService_1_1 mitreDataService1_1() {
+  MITREidDataService_1_1 mitreDataService11() {
 
     return new MITREidDataService_1_1();
   }
 
   @Bean
-  MITREidDataService_1_2 mitreDataService1_2() {
+  MITREidDataService_1_2 mitreDataService12() {
 
     return new MITREidDataService_1_2();
   }

@@ -18,7 +18,6 @@ package it.infn.mw.iam.audit.utils;
 import java.io.IOException;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
@@ -28,7 +27,7 @@ public class IamAttributeSerializer extends JsonSerializer<IamAttribute> {
 
   @Override
   public void serialize(IamAttribute value, JsonGenerator gen, SerializerProvider serializers)
-      throws IOException, JsonProcessingException {
+      throws IOException {
 
     gen.writeStartObject();
     gen.writeStringField("name", value.getName());

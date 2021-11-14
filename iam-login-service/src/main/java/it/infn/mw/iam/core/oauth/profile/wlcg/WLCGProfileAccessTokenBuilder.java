@@ -74,15 +74,15 @@ public class WLCGProfileAccessTokenBuilder extends BaseAccessTokenBuilder {
       if (!groupNames.isEmpty()) {
         builder.claim(WLCGGroupHelper.WLCG_GROUPS_SCOPE, groupNames);
       }
+
+      if (token.getScope().contains(ATTR_SCOPE)) {
+        builder.claim(ATTR_SCOPE, attributeHelper
+          .getAttributeMapFromUserInfo(((UserInfoAdapter) userInfo).getUserinfo()));
+      }
     }
 
     if (!hasAudienceRequest(authentication) && !hasRefreshTokenAudienceRequest(authentication)) {
       builder.audience(ALL_AUDIENCES_VALUE);
-    }
-
-    if (token.getScope().contains(ATTR_SCOPE)) {
-      builder.claim(ATTR_SCOPE,
-          attributeHelper.getAttributeMapFromUserInfo(((UserInfoAdapter) userInfo).getUserinfo()));
     }
 
     return builder.build();

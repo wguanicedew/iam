@@ -78,7 +78,7 @@ public class Adders extends Replacers {
     sshKeyAddChecks = buildSshKeyAddChecks();
     x509CertificateAddChecks = buildX509CertificateAddChecks();
 
-    linkSshKeys = (keys) -> {
+    linkSshKeys = keys -> {
       for (IamSshKey k : keys) {
         if (!isNull(k)) {
           accountService.addSshKey(account, k);

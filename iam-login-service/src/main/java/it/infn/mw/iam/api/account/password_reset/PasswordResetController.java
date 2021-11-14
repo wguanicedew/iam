@@ -42,8 +42,21 @@ public class PasswordResetController {
   public static final String BASE_RESOURCE = "/iam/password-reset";
   public static final String BASE_TOKEN_URL = BASE_RESOURCE + "/token";
 
+  private static final String EMAIL_FIELD = "email";
+  private static final String EMAIL_VALIDATION_ERROR_MSG = "invalid email address";
+
   @Autowired
   private PasswordResetService service;
+
+  private String nullSafeValidationErrorMessage(BindingResult validationResult) {
+    
+    if (validationResult.getFieldError(EMAIL_FIELD) == null) {
+      return EMAIL_VALIDATION_ERROR_MSG;
+    } else {
+      return validationResult.getFieldError(EMAIL_FIELD).getDefaultMessage();
+    }
+  }
+
 
   @RequestMapping(value = "/token", method = RequestMethod.POST,
       produces = MediaType.TEXT_PLAIN_VALUE)
@@ -52,7 +65,7 @@ public class PasswordResetController {
 
     if (validationResult.hasErrors()) {
       throw new InvalidEmailAddressError(
-          "validation error: " + validationResult.getFieldError("email").getDefaultMessage());
+          String.format("validation error: %s", nullSafeValidationErrorMessage(validationResult)));
     }
 
     service.createPasswordResetToken(emailDTO.getEmail());

@@ -15,8 +15,6 @@
  */
 package it.infn.mw.iam.core.web;
 
-import static it.infn.mw.iam.api.account_linking.AccountLinkingConstants.ACCOUNT_LINKING_DISABLE_PROPERTY;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -51,8 +49,8 @@ public class DefaultLoginPageConfiguration implements LoginPageConfiguration, En
   private boolean localAuthenticationVisible;
   private boolean showLinkToLocalAuthn;
 
-  @Value(ACCOUNT_LINKING_DISABLE_PROPERTY)
-  private Boolean accountLinkingDisable;
+  @Value("${iam.account-linking.enable}")
+  private Boolean accountLinkingEnabled;
 
   private OidcValidatedProviders providers;
 
@@ -111,7 +109,7 @@ public class DefaultLoginPageConfiguration implements LoginPageConfiguration, En
 
   @Override
   public boolean isAccountLinkingEnabled() {
-    return !accountLinkingDisable.booleanValue();
+    return accountLinkingEnabled.booleanValue();
   }
 
   @Override

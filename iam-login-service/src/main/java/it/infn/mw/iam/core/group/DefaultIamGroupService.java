@@ -111,7 +111,7 @@ public class DefaultIamGroupService implements IamGroupService, ApplicationEvent
 
     Long membersCount = groupRepo.countGroupMembersByGroupUuid(g.getUuid());
 
-    if (membersCount > 0L || g.getChildrenGroups().size() > 0) {
+    if (membersCount > 0L || !g.getChildrenGroups().isEmpty()) {
       throw new InvalidGroupOperationError("Group is not empty");
     }
 

@@ -15,6 +15,8 @@
  */
 package it.infn.mw.iam.api.scim.converter;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 
 import it.infn.mw.iam.api.scim.model.ScimSshKey;
@@ -36,8 +38,7 @@ public class SshKeyConverter implements Converter<ScimSshKey, IamSshKey> {
     if (scim.getValue() != null) {
       sshKey.setFingerprint(RSAPublicKeyUtils.getSHA256Fingerprint(scim.getValue()));
     }
-
-    sshKey.setPrimary(scim.isPrimary() != null ? scim.isPrimary() : false);
+    sshKey.setPrimary(Optional.ofNullable(scim.isPrimary()).orElse(Boolean.FALSE));
     sshKey.setAccount(null);
 
     return sshKey;

@@ -172,7 +172,7 @@ public class IamApiSecurityConfig {
       http.requestMatcher(EndpointRequest.to(HealthEndpoint.class, InfoEndpoint.class))
         .httpBasic()
         .and()
-        .authorizeRequests((r) -> r.anyRequest().permitAll())
+        .authorizeRequests(r -> r.anyRequest().permitAll())
         .sessionManagement()
         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .and()

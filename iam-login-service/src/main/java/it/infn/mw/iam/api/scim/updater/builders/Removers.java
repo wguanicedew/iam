@@ -48,7 +48,7 @@ public class Removers extends AccountBuilderSupport {
 
   public Removers(IamAccountRepository repo, IamAccountService accountService, IamAccount account) {
     super(repo, accountService, account);
-    unlinkSshKeys = (keys) -> {
+    unlinkSshKeys = keys -> {
       for (IamSshKey k : keys) {
         if (!isNull(k)) {
           accountService.removeSshKey(account, k);

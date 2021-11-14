@@ -33,7 +33,7 @@ import com.google.common.collect.Sets;
 
 @SuppressWarnings("deprecation")
 public class IAMClientUserDetailsService implements ClientUserDetailsService {
-  private static GrantedAuthority ROLE_CLIENT = new SimpleGrantedAuthority("ROLE_CLIENT");
+  private static final GrantedAuthority ROLE_CLIENT = new SimpleGrantedAuthority("ROLE_CLIENT");
 
   private final ClientDetailsEntityService clientService;
 

@@ -41,7 +41,7 @@ public class ResourceServerConfig {
       final OAuth2AuthenticationProcessingFilter f) {
 
     FilterRegistrationBean<OAuth2AuthenticationProcessingFilter> b =
-        new FilterRegistrationBean<OAuth2AuthenticationProcessingFilter>(f);
+        new FilterRegistrationBean<>(f);
     b.setEnabled(false);
     return b;
   }

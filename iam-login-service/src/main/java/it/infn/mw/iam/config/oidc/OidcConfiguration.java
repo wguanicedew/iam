@@ -97,7 +97,7 @@ public class OidcConfiguration {
   public FilterRegistrationBean<OidcClientFilter> disabledAutomaticOidcFilterRegistration(
       OidcClientFilter f) {
 
-    FilterRegistrationBean<OidcClientFilter> b = new FilterRegistrationBean<OidcClientFilter>(f);
+    FilterRegistrationBean<OidcClientFilter> b = new FilterRegistrationBean<>(f);
     b.setEnabled(false);
     return b;
   }

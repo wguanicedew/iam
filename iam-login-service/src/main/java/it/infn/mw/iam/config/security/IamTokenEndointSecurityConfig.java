@@ -84,7 +84,7 @@ public class IamTokenEndointSecurityConfig extends WebSecurityConfigurerAdapter 
   }
 
   @Bean
-  public JWTBearerClientAssertionTokenEndpointFilter jwtBearerFilter() throws Exception {
+  public JWTBearerClientAssertionTokenEndpointFilter jwtBearerFilter() {
 
     JWTBearerClientAssertionTokenEndpointFilter filter =
         new JWTBearerClientAssertionTokenEndpointFilter(new AntPathRequestMatcher(TOKEN_ENDPOINT));
