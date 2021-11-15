@@ -69,7 +69,7 @@ public class PasswordResetController {
     }
 
     service.createPasswordResetToken(emailDTO.getEmail());
-    return;
+
   }
 
   @RequestMapping(value = "/token/{token}", method = RequestMethod.HEAD)

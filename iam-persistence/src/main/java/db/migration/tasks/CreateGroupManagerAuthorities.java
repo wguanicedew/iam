@@ -17,6 +17,7 @@ package db.migration.tasks;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
@@ -27,7 +28,7 @@ public class CreateGroupManagerAuthorities implements SpringJdbcFlywayMigration 
   public static final Logger LOG = LoggerFactory.getLogger(CreateGroupManagerAuthorities.class);
 
   @Override
-  public void migrate(JdbcTemplate jdbcTemplate) throws Exception {
+  public void migrate(JdbcTemplate jdbcTemplate) throws DataAccessException {
     SqlRowSet rowSet = jdbcTemplate.queryForRowSet("SELECT id,uuid,name from iam_group");
 
     while (rowSet.next()) {

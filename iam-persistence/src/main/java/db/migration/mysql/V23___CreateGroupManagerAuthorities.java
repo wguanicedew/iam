@@ -17,6 +17,7 @@ package db.migration.mysql;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import db.migration.tasks.CreateGroupManagerAuthorities;
@@ -28,7 +29,7 @@ public class V23___CreateGroupManagerAuthorities extends BaseFlywayJavaMigration
       LoggerFactory.getLogger(V23___CreateGroupManagerAuthorities.class);
 
   @Override
-  public void migrate(JdbcTemplate jdbcTemplate) throws Exception {
+  public void migrate(JdbcTemplate jdbcTemplate) throws DataAccessException {
     CreateGroupManagerAuthorities task = new CreateGroupManagerAuthorities();
     task.migrate(jdbcTemplate);
   }

@@ -15,8 +15,6 @@
  */
 package it.infn.mw.iam.core.userinfo;
 
-import java.lang.reflect.Type;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -34,9 +32,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
 @SuppressWarnings("deprecation")
@@ -49,17 +45,14 @@ public class IamUserInfoInterceptor implements HandlerInterceptor, AsyncHandlerI
   private final UserInfoService userInfoService;
   private final AuthenticationTrustResolver trustResolver = new AuthenticationTrustResolverImpl();
 
+  private static final JsonSerializer<GrantedAuthority> AUTHORITY_SERIALIZER =
+      (src, type, context) -> new JsonPrimitive(src.getAuthority());
+
   @Autowired
   public IamUserInfoInterceptor(UserInfoService userInfoService) {
     this.userInfoService = userInfoService;
     gsonBuilder = new GsonBuilder()
-      .registerTypeHierarchyAdapter(GrantedAuthority.class, new JsonSerializer<GrantedAuthority>() {
-        @Override
-        public JsonElement serialize(GrantedAuthority src, Type typeOfSrc,
-            JsonSerializationContext context) {
-          return new JsonPrimitive(src.getAuthority());
-        }
-      })
+      .registerTypeHierarchyAdapter(GrantedAuthority.class, AUTHORITY_SERIALIZER)
       .create();
   }
 

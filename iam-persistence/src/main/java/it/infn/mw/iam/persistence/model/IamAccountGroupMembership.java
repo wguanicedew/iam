@@ -15,6 +15,7 @@
  */
 package it.infn.mw.iam.persistence.model;
 
+import java.io.Serializable;
 import java.time.Instant;
 import java.util.Date;
 
@@ -31,7 +32,10 @@ import javax.persistence.TemporalType;
 
 @Entity
 @Table(name = "iam_account_group")
-public class IamAccountGroupMembership implements Comparable<IamAccountGroupMembership> {
+public class IamAccountGroupMembership
+    implements Comparable<IamAccountGroupMembership>, Serializable {
+
+  private static final long serialVersionUID = 1L;
 
   @EmbeddedId
   private IamAccountGroupKey id;

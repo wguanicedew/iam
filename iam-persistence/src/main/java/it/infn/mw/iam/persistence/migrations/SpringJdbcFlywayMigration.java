@@ -15,10 +15,11 @@
  */
 package it.infn.mw.iam.persistence.migrations;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 @FunctionalInterface
 public interface SpringJdbcFlywayMigration {
 
-  void migrate(JdbcTemplate jdbcTemplate) throws Exception;
+  void migrate(JdbcTemplate jdbcTemplate) throws DataAccessException;
 }

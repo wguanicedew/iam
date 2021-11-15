@@ -15,6 +15,7 @@
  */
 package db.migration.mysql;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -25,7 +26,7 @@ import it.infn.mw.iam.persistence.migrations.BaseFlywayJavaMigrationAdapter;
 public class V10_1__Password_Update extends BaseFlywayJavaMigrationAdapter {
 
   @Override
-  public void migrate(JdbcTemplate jdbcTemplate) throws Exception {
+  public void migrate(JdbcTemplate jdbcTemplate) throws DataAccessException {
 
     PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 

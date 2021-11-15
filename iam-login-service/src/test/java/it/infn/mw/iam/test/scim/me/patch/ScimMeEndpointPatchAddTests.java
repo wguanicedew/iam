@@ -17,9 +17,10 @@ package it.infn.mw.iam.test.scim.me.patch;
 
 import static it.infn.mw.iam.api.scim.model.ScimPatchOperation.ScimPatchOperationType.add;
 import static it.infn.mw.iam.api.scim.model.ScimPatchOperation.ScimPatchOperationType.remove;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -109,7 +110,7 @@ public class ScimMeEndpointPatchAddTests extends ScimMeEndpointUtils {
 
     assertThat(userAfter.getName().getGivenName(), equalTo(updates.getName().getGivenName()));
     assertThat(userAfter.getName().getFamilyName(), equalTo(updates.getName().getFamilyName()));
-    assertThat(userAfter.getPhotos(), hasSize(equalTo(1)));
+    assertThat(userAfter.getPhotos(), hasSize(1));
     assertThat(userAfter.getPhotos().get(0), equalTo(TESTUSER_NEWPHOTO));
     assertThat(userAfter.getEmails().get(0), equalTo(TESTUSER_NEWEMAIL));
   }
@@ -122,6 +123,8 @@ public class ScimMeEndpointPatchAddTests extends ScimMeEndpointUtils {
     ScimUser updates = ScimUser.builder().password(NEW_PASSWORD).build();
 
     scimUtils.patchMe(add, updates, HttpStatus.BAD_REQUEST);
+    ScimUser userAfter = scimUtils.getMe();
+    assertThat(userAfter.getIndigoUser(), nullValue());
   }
 
   @Test
@@ -133,6 +136,8 @@ public class ScimMeEndpointPatchAddTests extends ScimMeEndpointUtils {
     ScimUser updates = ScimUser.builder().addOidcId(NEW_TESTUSER_OIDCID).build();
 
     scimUtils.patchMe(add, updates, HttpStatus.BAD_REQUEST);
+    ScimUser userAfter = scimUtils.getMe();
+    assertThat(userAfter.getIndigoUser(), nullValue());
   }
 
   @Test
@@ -143,6 +148,9 @@ public class ScimMeEndpointPatchAddTests extends ScimMeEndpointUtils {
     ScimUser updates = ScimUser.builder().addSamlId(TESTUSER_SAMLID).build();
 
     scimUtils.patchMe(add, updates, HttpStatus.BAD_REQUEST);
+    
+    ScimUser userAfter = scimUtils.getMe();
+    assertThat(userAfter.getIndigoUser(), nullValue());
   }
 
   @Test
@@ -155,7 +163,13 @@ public class ScimMeEndpointPatchAddTests extends ScimMeEndpointUtils {
 
     scimUtils.patchMe(add, updates, HttpStatus.NO_CONTENT);
 
+    ScimUser userAfter = scimUtils.getMe();
+    assertThat(userAfter.getIndigoUser().getSshKeys(), hasSize(equalTo(1)));
+
     scimUtils.patchMe(remove, updates, HttpStatus.NO_CONTENT);
+
+    userAfter = scimUtils.getMe();
+    assertThat(userAfter.getIndigoUser(), nullValue());
   }
 
   @Test
@@ -169,5 +183,8 @@ public class ScimMeEndpointPatchAddTests extends ScimMeEndpointUtils {
     ScimUser updates = ScimUser.builder().addX509Certificate(NEW_X509_CERT).build();
 
     scimUtils.patchMe(add, updates, HttpStatus.BAD_REQUEST);
+
+    ScimUser userAfter = scimUtils.getMe();
+    assertThat(userAfter.getIndigoUser(), nullValue());
   }
 }
