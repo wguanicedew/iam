@@ -61,6 +61,7 @@ spring:
     template-loader-path: ${IAM_CUSTOM_TEMPLATE_LOCATION:classpath:/email-templates}
 
 iam:
+  
   host: ${IAM_HOST:localhost}
   baseUrl: ${IAM_BASE_URL:http://${iam.host}:8080}
   issuer: ${IAM_ISSUER:http://${iam.host}:8080}
@@ -196,7 +197,6 @@ management:
       enabled: true
       show-details: when-authorized
       roles:
-      - ADMIN
       - ACTUATOR
       
     metrics:
