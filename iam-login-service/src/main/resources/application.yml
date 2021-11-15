@@ -45,6 +45,7 @@ spring:
     group:
      "h2-test": "h2,saml,registration"
      "mysql-test": "mysql,saml,registration"
+     "mysql-test-tc": "mysql-test-tc,saml,registration"
      "prod": "mysql,flyway-repair"
     
   jpa:
