@@ -17,12 +17,12 @@ package it.infn.mw.iam.test.oauth;
 
 import static it.infn.mw.iam.test.oauth.ClientRegistrationTestSupport.REGISTER_ENDPOINT;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNotNull;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
@@ -39,7 +39,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mitre.oauth2.model.ClientDetailsEntity;
 import org.mitre.openid.connect.ClientDetailsEntityJsonProcessor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.mock.web.MockHttpSession;
@@ -47,7 +46,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
@@ -60,31 +58,8 @@ import it.infn.mw.iam.test.util.annotation.IamMockMvcIntegrationTest;
 @RunWith(SpringRunner.class)
 @IamMockMvcIntegrationTest
 @SpringBootTest(classes = {IamLoginService.class}, webEnvironment = WebEnvironment.MOCK)
-public class DeviceCodeTests extends EndpointsTestUtils {
+public class DeviceCodeTests extends EndpointsTestUtils implements DeviceCodeTestsConstants {
 
-  public static final String DEVICE_CODE_ENDPOINT = "/devicecode";
-  public static final String DEVICE_CODE_USER_ENDPOINT = "/device";
-  public static final String TOKEN_ENDPOINT = "/token";
-  public static final String USERINFO_ENDPOINT = "/userinfo";
-  public static final String INTROSPECTION_ENDPOINT = "/introspect";
-
-  public static final String PUBLIC_DEVICE_CODE_CLIENT_ID = "public-dc-client";
-
-  public static final String DEVICE_CODE_CLIENT_ID = "device-code-client";
-  public static final String DEVICE_CODE_CLIENT_SECRET = "secret";
-  public static final String DEVICE_CODE_GRANT_TYPE =
-      "urn:ietf:params:oauth:grant-type:device_code";
-
-  public static final String DEVICE_USER_URL = "http://localhost:8080/device";
-  public static final String DEVICE_USER_VERIFY_URL = "http://localhost:8080/device/verify";
-  public static final String DEVICE_USER_APPROVE_URL = "http://localhost:8080/device/approve";
-
-  public static final String LOGIN_URL = "/login";
-  public static final String TEST_USERNAME = "test";
-  public static final String TEST_PASSWORD = "password";
-
-  @Autowired
-  private ObjectMapper mapper;
 
   @Test
   public void testDeviceCodeEndpointRequiresClientWithDeviceCodeGrantEnabled() throws Exception {
@@ -105,7 +80,6 @@ public class DeviceCodeTests extends EndpointsTestUtils {
           equalTo("Unauthorized grant type: " + DEVICE_CODE_GRANT_TYPE)));
 
   }
-
 
 
   @Test

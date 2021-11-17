@@ -16,11 +16,20 @@
 package it.infn.mw.iam.test.util.redis;
 
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.utility.DockerImageName;
 
 public class RedisContainer extends GenericContainer<RedisContainer> {
+  public static final String DEFAULT_REDIS_IMAGE = "redis:6-alpine";
+  public static final int DEFAULT_REDIS_PORT = 6379;
 
   public RedisContainer(String dockerImageName) {
-    super(dockerImageName);
+    super(DockerImageName.parse(dockerImageName));
+    withExposedPorts(DEFAULT_REDIS_PORT);
+  }
+
+  public RedisContainer() {
+    super(DEFAULT_REDIS_IMAGE);
+    withExposedPorts(DEFAULT_REDIS_PORT);
   }
 
 }

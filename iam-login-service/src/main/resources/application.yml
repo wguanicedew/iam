@@ -15,6 +15,10 @@
 #
 
 server:
+  servlet:
+    session:
+      timeout: ${IAM_SESSION_TIMEOUT_SECS:1800}
+        
   error:
     path: /error
     
@@ -30,11 +34,20 @@ server:
   use-forward-headers: ${IAM_USE_FORWARDED_HEADERS:false}
   
 spring:
+  redis:
+    host: ${IAM_SPRING_REDIS_HOST:localhost}
+    port: ${IAM_SPRING_REDIS_PORT:6379}
+    password: ${IAM_SPRING_REDIS_PASSWORD:}
+    
   application:
     name: INDIGO IAM
   
   session:
     timeout: ${IAM_SESSION_TIMEOUT_SECS:1800}
+    store-type: ${IAM_SPRING_SESSION_STORE_TYPE:none}
+    redis:
+      flush-mode: on-save
+      namespace: iam:session
      
   security:
     filter:
@@ -44,8 +57,10 @@ spring:
     default: h2-test
     group:
      "h2-test": "h2,saml,registration"
+     "h2-test-redis": "h2,saml,registration,redis-test"
      "mysql-test": "mysql,saml,registration"
      "mysql-test-tc": "mysql-test-tc,saml,registration"
+     "mysql-test-tc-redis": "mysql-test-tc,saml,registration,redis-test"
      "prod": "mysql,flyway-repair"
     
   jpa:
