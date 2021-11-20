@@ -15,15 +15,14 @@
  */
 package it.infn.mw.iam.test;
 
-import static com.jayway.restassured.RestAssured.given;
+import static io.restassured.RestAssured.given;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
 
-import com.jayway.restassured.response.ValidatableResponse;
-
+import io.restassured.response.ValidatableResponse;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 
 public class ScimRestUtils {

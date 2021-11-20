@@ -1,10 +1,11 @@
 package it.infn.mw.iam.test.oauth;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,17 +21,19 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.restassured.RestAssured;
 
+import io.restassured.RestAssured;
 import it.infn.mw.iam.test.TestUtils;
 import it.infn.mw.iam.test.util.redis.RedisContainer;
 
+
+
 @Testcontainers
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT,
+    properties = "spring.session.store-type=redis")
+@Disabled
 public class ExternalizedSessionDeviceCodeTests implements DeviceCodeTestsConstants {
 
-  @Container
-  static RedisContainer redis = new RedisContainer();
 
   @LocalServerPort
   private Integer iamPort;
@@ -38,21 +41,25 @@ public class ExternalizedSessionDeviceCodeTests implements DeviceCodeTestsConsta
   @Autowired
   ObjectMapper mapper;
 
+  @Container
+  private static final RedisContainer REDIS = new RedisContainer();
+
   @DynamicPropertySource
   static void redisProperties(DynamicPropertyRegistry registry) {
-    registry.add("spring.redis.port", redis::getFirstMappedPort);
-    registry.add("spring.session.store-type", () -> "redis");
-  }
+    registry.add("spring.redis.port", REDIS::getFirstMappedPort);
 
-  @BeforeAll
-  static void classSetup() {
-    TestUtils.initRestAssured();
   }
 
   @BeforeEach
   public void setup() {
+    TestUtils.initRestAssured();
     RestAssured.port = iamPort;
 
+  }
+
+  @Test
+  public void ensureRedisRunning() {
+    assertTrue(REDIS.isRunning());
   }
 
   @Test
@@ -98,5 +105,4 @@ public class ExternalizedSessionDeviceCodeTests implements DeviceCodeTestsConsta
 
 
   }
-
 }

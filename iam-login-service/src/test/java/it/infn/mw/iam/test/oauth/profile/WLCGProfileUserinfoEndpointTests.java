@@ -29,8 +29,8 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.restassured.RestAssured;
 
+import io.restassured.RestAssured;
 import it.infn.mw.iam.test.TestUtils;
 import it.infn.mw.iam.test.util.annotation.IamRandomPortIntegrationTest;
 

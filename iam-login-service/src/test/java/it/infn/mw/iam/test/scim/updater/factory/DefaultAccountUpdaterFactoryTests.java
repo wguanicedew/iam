@@ -82,7 +82,7 @@ import it.infn.mw.iam.persistence.model.IamSamlId;
 import it.infn.mw.iam.persistence.model.IamSshKey;
 import it.infn.mw.iam.persistence.model.IamUserInfo;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
-import it.infn.mw.iam.test.util.JacksonUtils;
+import it.infn.mw.iam.test.util.RestAssuredJacksonUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultAccountUpdaterFactoryTests {
@@ -93,7 +93,7 @@ public class DefaultAccountUpdaterFactoryTests {
   public static final IamOidcId OLD_ID = new IamOidcId(OLD, OLD);
   public static final IamOidcId NEW_ID = new IamOidcId(NEW, NEW);
 
-  ObjectMapper mapper = JacksonUtils.createJacksonObjectMapper();
+  ObjectMapper mapper = RestAssuredJacksonUtils.createJacksonObjectMapper();
 
   PasswordEncoder encoder = new BCryptPasswordEncoder();
 

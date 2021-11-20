@@ -196,6 +196,8 @@ clientRegistration:
 
 management:
   health:
+      redis:
+        enabled: ${IAM_HEALTH_REDIS_PROBE_ENABLED:false} 
       mail:
         enabled: ${IAM_HEALTH_MAIL_PROBE_ENABLED:false} 
   endpoints:
@@ -208,7 +210,7 @@ management:
   endpoint:
     info:
       enabled: true
-    health:
+    health: 
       show-components: always 
       enabled: true
       show-details: when-authorized

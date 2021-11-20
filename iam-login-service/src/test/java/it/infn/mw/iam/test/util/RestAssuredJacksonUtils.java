@@ -18,29 +18,24 @@ package it.infn.mw.iam.test.util;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
-import com.jayway.restassured.RestAssured;
-import com.jayway.restassured.config.ObjectMapperConfig;
-import com.jayway.restassured.config.RestAssuredConfig;
-import com.jayway.restassured.mapper.factory.Jackson2ObjectMapperFactory;
 
-public class JacksonUtils {
+import io.restassured.RestAssured;
+import io.restassured.config.ObjectMapperConfig;
+import io.restassured.config.RestAssuredConfig;
+import io.restassured.path.json.mapper.factory.Jackson2ObjectMapperFactory;
+
+
+public class RestAssuredJacksonUtils {
 
   public static void initRestAssured() {
 
     RestAssured.config = RestAssuredConfig.config().objectMapperConfig(
-	new ObjectMapperConfig().jackson2ObjectMapperFactory(JacksonUtils.getJacksonObjectMapperFactory()));
+	new ObjectMapperConfig().jackson2ObjectMapperFactory(RestAssuredJacksonUtils.getJacksonObjectMapperFactory()));
+    RestAssured.config.getLogConfig().enableLoggingOfRequestAndResponseIfValidationFails();
   }
 
   public static Jackson2ObjectMapperFactory getJacksonObjectMapperFactory() {
-
-    return new Jackson2ObjectMapperFactory() {
-
-      @Override
-      public ObjectMapper create(@SuppressWarnings("rawtypes") Class cls, String charset) {
-
-	return createJacksonObjectMapper();
-      }
-    };
+    return (t, s) -> createJacksonObjectMapper();
   }
 
   public static ObjectMapper createJacksonObjectMapper() {

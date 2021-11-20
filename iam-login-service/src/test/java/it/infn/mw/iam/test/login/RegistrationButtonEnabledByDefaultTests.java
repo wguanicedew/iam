@@ -25,8 +25,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.jayway.restassured.RestAssured;
-
+import io.restassured.RestAssured;
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.test.TestUtils;
 import it.infn.mw.iam.test.util.annotation.IamRandomPortIntegrationTest;

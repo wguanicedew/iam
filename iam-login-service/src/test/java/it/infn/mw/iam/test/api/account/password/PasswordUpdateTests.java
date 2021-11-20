@@ -29,9 +29,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.jayway.restassured.RestAssured;
-import com.jayway.restassured.response.ValidatableResponse;
-
+import io.restassured.RestAssured;
+import io.restassured.response.ValidatableResponse;
 import it.infn.mw.iam.api.account.password_reset.PasswordUpdateController;
 import it.infn.mw.iam.api.scim.model.ScimEmail;
 import it.infn.mw.iam.api.scim.model.ScimName;

@@ -15,24 +15,17 @@
  */
 package it.infn.mw.iam.test;
 
-import static com.jayway.restassured.RestAssured.given;
+import static io.restassured.RestAssured.given;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ser.FilterProvider;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
-import com.jayway.restassured.RestAssured;
-import com.jayway.restassured.config.ObjectMapperConfig;
-import com.jayway.restassured.config.RestAssuredConfig;
-import com.jayway.restassured.mapper.factory.Jackson2ObjectMapperFactory;
-import com.jayway.restassured.specification.RequestSpecification;
-
+import io.restassured.specification.RequestSpecification;
 import it.infn.mw.iam.api.scim.model.ScimMemberRef;
 import it.infn.mw.iam.api.scim.model.ScimUser;
+import it.infn.mw.iam.test.util.RestAssuredJacksonUtils;
 
 public class TestUtils {
 
@@ -42,35 +35,8 @@ public class TestUtils {
   public static final String PASSWORD_GRANT_CLIENT_ID = "password-grant";
   public static final String PASSWORD_GRANT_CLIENT_SECRET = "secret";
 
-  public static ObjectMapper createJacksonObjectMapper() {
-
-    FilterProvider filters = new SimpleFilterProvider().setFailOnUnknownId(false);
-
-    ObjectMapper mapper = new ObjectMapper();
-    mapper.setFilterProvider(filters);
-    return mapper;
-
-  }
-
-  public static Jackson2ObjectMapperFactory getJacksonObjectMapperFactory() {
-
-    return new Jackson2ObjectMapperFactory() {
-
-      @Override
-      public ObjectMapper create(@SuppressWarnings("rawtypes") Class cls, String charset) {
-
-        return createJacksonObjectMapper();
-      }
-    };
-  }
-
   public static void initRestAssured() {
-
-    RestAssured.config = RestAssuredConfig.config()
-      .objectMapperConfig(
-          new ObjectMapperConfig().jackson2ObjectMapperFactory(getJacksonObjectMapperFactory()));
-    
-    RestAssured.config.getLogConfig().enableLoggingOfRequestAndResponseIfValidationFails();
+    RestAssuredJacksonUtils.initRestAssured();
   }
 
   public static ScimMemberRef getMemberRef(ScimUser user) {
