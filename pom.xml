@@ -51,6 +51,8 @@
 
     <license-maven-plugin.version>3.0</license-maven-plugin.version>
     <jacoco-plugin.version>0.8.3</jacoco-plugin.version>
+    <jib-maven-plugin.version>3.1.4</jib-maven-plugin.version>
+
 
     <jsr250-api.version>1.0</jsr250-api.version>
     <jakarta.xml.bind-api.version>2.3.2</jakarta.xml.bind-api.version>
@@ -83,7 +85,7 @@
       <dependency>
         <groupId>org.testcontainers</groupId>
         <artifactId>junit-jupiter</artifactId>
-         <version>${testcontainers.version}</version>
+        <version>${testcontainers.version}</version>
         <scope>test</scope>
       </dependency>
 
@@ -100,7 +102,7 @@
         <version>${testcontainers.version}</version>
         <scope>runtime</scope>
       </dependency>
-      
+
       <dependency>
         <groupId>org.springframework.security.oauth</groupId>
         <artifactId>spring-security-oauth2</artifactId>
@@ -267,6 +269,11 @@
           <groupId>com.mycila</groupId>
           <artifactId>license-maven-plugin</artifactId>
           <version>${license-maven-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>com.google.cloud.tools</groupId>
+          <artifactId>jib-maven-plugin</artifactId>
+          <version>${jib-maven-plugin.version}</version>
         </plugin>
       </plugins>
     </pluginManagement>

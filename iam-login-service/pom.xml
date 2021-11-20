@@ -69,12 +69,12 @@
         </exclusion>
       </exclusions>
     </dependency>
-    
+
     <dependency>
       <groupId>org.springframework.session</groupId>
       <artifactId>spring-session-data-redis</artifactId>
     </dependency>
-    
+
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-redis</artifactId>
@@ -444,6 +444,21 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>com.google.cloud.tools</groupId>
+        <artifactId>jib-maven-plugin</artifactId>
+        <configuration>
+          <to>
+            <image>indigoiam/iam-login-service</image>
+            <tags>
+              <tag>${project.version}</tag>
+              <tag>latest</tag>
+              <tag>${git.commit.id.abbrev}</tag>
+              <tag>${git.branch}</tag>
+            </tags>
+          </to>
+        </configuration>
       </plugin>
     </plugins>
 

@@ -34,7 +34,6 @@
   <description>IAM VOMS attribute authority</description>
 
   <properties>
-    <jib-maven-plugin.version>3.1.4</jib-maven-plugin.version>
     <guava.version>31.0.1-jre</guava.version>
   </properties>
 
@@ -229,6 +228,9 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <mainClass>it.infn.mw.voms.VomsService</mainClass>
+        </configuration>
         <executions>
           <execution>
             <goals>
@@ -241,7 +243,6 @@
       <plugin>
         <groupId>com.google.cloud.tools</groupId>
         <artifactId>jib-maven-plugin</artifactId>
-        <version>${jib-maven-plugin.version}</version>
         <configuration>
           <to>
             <image>indigoiam/voms-aa</image>
