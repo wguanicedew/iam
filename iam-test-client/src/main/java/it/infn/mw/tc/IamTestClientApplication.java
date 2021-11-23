@@ -148,10 +148,9 @@ public class IamTestClientApplication extends WebSecurityConfigurerAdapter {
       try {
         auth.setAccessTokenClaims(JWTParser.parse(token.getAccessTokenValue())
           .getJWTClaimsSet()
-          .toJSONObject()
           .toString());
 
-        auth.setIdTokenClaims(token.getIdToken().getJWTClaimsSet().toJSONObject().toString());
+        auth.setIdTokenClaims(token.getIdToken().getJWTClaimsSet().toString());
       } catch (ParseException e) {
         LOG.error(e.getMessage(), e);
       }
@@ -186,7 +185,6 @@ public class IamTestClientApplication extends WebSecurityConfigurerAdapter {
         String.format("%s:%s", clientConfig.getClientId(), clientConfig.getClientSecret());
 
     String base64Creds = new String(java.util.Base64.getEncoder().encode(plainCreds.getBytes()));
-    // String base64Creds = new String(Base64.encode(plainCreds.getBytes()));
 
     HttpHeaders headers = new HttpHeaders();
     headers.add("Authorization", "Basic " + base64Creds);
@@ -195,7 +193,7 @@ public class IamTestClientApplication extends WebSecurityConfigurerAdapter {
     MultiValueMap<String, String> body = new LinkedMultiValueMap<String, String>();
     body.add("token", accessToken);
 
-    HttpEntity<?> request = new HttpEntity<Object>(body, headers);
+    HttpEntity<?> request = new HttpEntity<>(body, headers);
 
     RestTemplate rt = new RestTemplate(requestFactory);
     String iamIntrospectUrl = clientConfig.getIssuer() + "/introspect";
