@@ -31,7 +31,7 @@ server:
       directory: ${IAM_TOMCAT_ACCESS_LOG_DIRECTORY:/tmp}
       pattern: "%{X-Forwarded-For}i %l %u %t \"%r\" %s %b"
 
-  use-forward-headers: ${IAM_USE_FORWARDED_HEADERS:false}
+  forward-headers-strategy: ${IAM_FORWARD_HEADERS_STRATEGY:none}
   
 spring:
   redis:
