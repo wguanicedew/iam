@@ -82,10 +82,9 @@ public class VOMSController extends VOMSControllerSupport {
 
   @GetMapping(value = "/generate-ac", produces = "text/xml; charset=utf-8")
   @PreAuthorize("hasRole('USER') and hasRole('X509')")
-  public String generateAC(@Validated VOMSRequestDTO request,
-      @RequestHeader(name = "User-Agent", required = false) String userAgent,
-      Authentication authentication,
-      BindingResult validationResult) throws IOException {
+  public String generateAC(@RequestHeader(name = "User-Agent", required = false) String userAgent,
+      @Validated VOMSRequestDTO request, BindingResult validationResult,
+      Authentication authentication) throws IOException {
 
     if (validationResult.hasErrors()) {
       VOMSErrorMessage em =

@@ -76,6 +76,8 @@ public class TestSupport {
   public static final Instant NOW = Instant.parse("2018-01-01T00:00:00.00Z");
   public static final Instant NOW_PLUS_12_HOURS = NOW.plus(Duration.ofHours(12));
 
+  public static final Instant NOW_PLUS_1_HOUR = NOW.plus(Duration.ofHours(1));
+
   public static final IamAttribute TEST_ATTRIBUTE = IamAttribute.newInstance("test", "test");
 
   @TestConfiguration
