@@ -457,21 +457,7 @@ public class IamOIDCClientFilter extends OIDCAuthenticationFilter {
     }
   }
 
-  // @Override
-  // protected void handleError(HttpServletRequest request,
-  // HttpServletResponse response) throws IOException {
-  //
-  // String error = request.getParameter("error");
-  // String errorDescription = request.getParameter("error_description");
-  // String errorURI = request.getParameter("error_uri");
-  //
-  // RequestDispatcher dispatcher = request.getRequestDispatcher("/error");
-  // try{
-  // dispatcher.forward(request, response);
-  // }catch(ServletException e){
-  // throw new RuntimeException("Foward failed");
-  // }
-  // }
+
   public ClientHttpRequestFactory getHttpRequestFactory() {
 
     return httpRequestFactory;
@@ -482,11 +468,13 @@ public class IamOIDCClientFilter extends OIDCAuthenticationFilter {
     this.httpRequestFactory = httpRequestFactory;
   }
 
+  @Override
   public int getTimeSkewAllowance() {
 
     return timeSkewAllowance;
   }
 
+  @Override
   public void setTimeSkewAllowance(int timeSkewAllowance) {
 
     this.timeSkewAllowance = timeSkewAllowance;

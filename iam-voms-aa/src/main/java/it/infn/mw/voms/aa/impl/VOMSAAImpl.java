@@ -56,7 +56,6 @@ public class VOMSAAImpl implements AttributeAuthority {
       failResponse(context,
           VOMSErrorMessage.suspendedUser(r.getHolderSubject(), r.getHolderIssuer()));
       context.setHandled(true);
-      return;
     }
   }
 

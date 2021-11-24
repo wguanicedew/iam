@@ -40,9 +40,7 @@ public class ThreadLocalACGenerator implements ACGenerator {
 
   @Override
   public void configure(PEMCredential aaCredential) {
-    acGenerator = ThreadLocal.withInitial(() -> {
-      return new VOMSACGenerator(aaCredential);
-    });
+    acGenerator = ThreadLocal.withInitial(() -> new VOMSACGenerator(aaCredential));
   }
 
   @Override

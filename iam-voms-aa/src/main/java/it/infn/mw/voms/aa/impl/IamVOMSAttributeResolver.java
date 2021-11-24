@@ -37,11 +37,11 @@ import it.infn.mw.voms.properties.VomsProperties;
 public class IamVOMSAttributeResolver implements AttributeResolver {
   public static final Logger LOG = LoggerFactory.getLogger(IamVOMSAttributeResolver.class);
 
-  private final IamLabel VOMS_ROLE_LABEL;
+  private final IamLabel vomsRoleLabel;
   private final FQANEncoding fqanEncoding;
 
   public IamVOMSAttributeResolver(VomsProperties properties, FQANEncoding fqanEncoding) {
-    VOMS_ROLE_LABEL = IamLabel.builder().name(properties.getAa().getOptionalGroupLabel()).build();
+    vomsRoleLabel = IamLabel.builder().name(properties.getAa().getOptionalGroupLabel()).build();
     this.fqanEncoding = fqanEncoding;
   }
 
@@ -49,7 +49,7 @@ public class IamVOMSAttributeResolver implements AttributeResolver {
     final String voName = context.getVOName();
     final boolean nameMatches = g.getName().equals(voName) || g.getName().startsWith(voName + "/");
 
-    return nameMatches && !g.getLabels().contains(VOMS_ROLE_LABEL);
+    return nameMatches && !g.getLabels().contains(vomsRoleLabel);
   }
 
   protected void noSuchUserError(VOMSRequestContext context) {
@@ -71,14 +71,14 @@ public class IamVOMSAttributeResolver implements AttributeResolver {
 
 
   protected boolean iamGroupIsVomsRole(IamGroup g) {
-    return g.getLabels().contains(VOMS_ROLE_LABEL);
+    return g.getLabels().contains(vomsRoleLabel);
   }
 
   protected boolean groupMatchesFqan(IamGroup g, VOMSFqan fqan) {
     final String name = fqan.asIamGroupName();
     final boolean nameMatches = name.equals(g.getName());
     if (fqan.isRoleFqan()) {
-      return nameMatches && g.getLabels().contains(VOMS_ROLE_LABEL);
+      return nameMatches && g.getLabels().contains(vomsRoleLabel);
     } else {
       return nameMatches;
     }

@@ -28,13 +28,6 @@ public class VOMSWarningMessage {
     this.message = null;
   }
 
-  private VOMSWarningMessage(VOMSWarning warning, String vo, String message) {
-
-    this.warning = warning;
-    this.vo = vo;
-    this.message = message;
-  }
-
   /**
    * @return the vo
    */

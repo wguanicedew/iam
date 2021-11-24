@@ -20,10 +20,6 @@ import org.italiangrid.voms.VOMSGenericAttribute;
 
 public class VOMSGAImpl implements VOMSGenericAttribute {
   
-  public VOMSGAImpl() {
-
-  }
-
   @Override
   public String getName() {
     return null;

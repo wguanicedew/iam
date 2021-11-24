@@ -79,8 +79,12 @@ public class VomsConfig {
   @Bean
   PEMCredential aaCredential(VomsProperties properties)
       throws KeyStoreException, CertificateException, IOException {
-    return new PEMCredential(new FileInputStream(properties.getTls().getPrivateKeyPath()),
-        new FileInputStream(properties.getTls().getCertificatePath()), (char[]) null);
+
+    try (FileInputStream privateKey = new FileInputStream(properties.getTls().getPrivateKeyPath());
+        FileInputStream certificate =
+            new FileInputStream(properties.getTls().getCertificatePath())) {
+      return new PEMCredential(privateKey, certificate, (char[]) null);
+    }
   }
 
   @Bean
@@ -123,7 +127,7 @@ public class VomsConfig {
 
   @Bean
   FQANEncoding fqanEncoding(VomsProperties properties) {
-    if (properties.getAa().getUseLegacyFqanEncoding()) {
+    if (Boolean.TRUE.equals(properties.getAa().getUseLegacyFqanEncoding())) {
       return new LegacyFQANEncoding();
     } else {
       return new NullFQANEncoding();

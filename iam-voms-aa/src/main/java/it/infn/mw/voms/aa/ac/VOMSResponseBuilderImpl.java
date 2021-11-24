@@ -64,7 +64,6 @@ public enum VOMSResponseBuilderImpl implements VOMSResponseBuilder {
       docBuilder = factory.newDocumentBuilder();
 
     } catch (ParserConfigurationException e) {
-      log.error("Error configuring DOM document builder: " + e.getMessage(), e);
       throw new VOMSException(e);
     }
 
@@ -77,10 +76,7 @@ public enum VOMSResponseBuilderImpl implements VOMSResponseBuilder {
     try {
       transformer = transformerFactory.newTransformer();
     } catch (TransformerConfigurationException e) {
-
-      log.error("Error creating XML transformer:" + e.getMessage(), e);
       throw new VOMSException(e);
-
     }
 
     StringWriter writer = new StringWriter();
@@ -94,11 +90,6 @@ public enum VOMSResponseBuilderImpl implements VOMSResponseBuilder {
       writer.flush();
 
     } catch (TransformerException e) {
-
-      log.error("Error caught serializing XML {}", e.getMessage());
-      if (log.isDebugEnabled())
-        log.error(e.getMessage(), e);
-
       throw new VOMSException("Error caugh serializing XML", e);
 
     }

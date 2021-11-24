@@ -75,9 +75,6 @@ public class IamClientApplicationProperties {
 
   private boolean hideTokens = true;
 
-  public IamClientApplicationProperties() {
-  }
-
   public String getIssuer() { return issuer; }
 
   public void setIssuer(String issuer) { this.issuer = issuer; }

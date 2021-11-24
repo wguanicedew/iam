@@ -23,9 +23,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import it.infn.mw.iam.authn.x509.IamX509AuthenticationCredential;
@@ -80,8 +79,8 @@ public class VOMSController extends VOMSControllerSupport {
     return context;
   }
 
-  @RequestMapping(value = "/generate-ac", method = RequestMethod.GET,
-      produces = "text/xml; charset=utf-8")
+
+  @GetMapping(value = "/generate-ac", produces = "text/xml; charset=utf-8")
   @PreAuthorize("hasRole('USER') and hasRole('X509')")
   public String generateAC(@Validated VOMSRequestDTO request,
       @RequestHeader(name = "User-Agent", required = false) String userAgent,
