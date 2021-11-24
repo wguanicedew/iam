@@ -58,7 +58,7 @@ public class IamTestClientApplication extends WebSecurityConfigurerAdapter {
   OIDCAuthenticationFilter oidcFilter;
 
   @Autowired
-  IamClientConfig clientConfig;
+  IamClientApplicationProperties properties;
 
   @Autowired
   ClientHttpRequestFactory requestFactory;
@@ -139,7 +139,7 @@ public class IamTestClientApplication extends WebSecurityConfigurerAdapter {
       auth.setIssuer(token.getIssuer());
       auth.setSub(token.getSub());
 
-      if (!clientConfig.isHideTokens()) {
+      if (!properties.isHideTokens()) {
         auth.setAccessToken(token.getAccessTokenValue());
         auth.setIdToken(token.getIdToken().getParsedString());
         auth.setRefreshToken(token.getRefreshTokenValue());
@@ -182,7 +182,8 @@ public class IamTestClientApplication extends WebSecurityConfigurerAdapter {
     String accessToken = token.getAccessTokenValue();
 
     String plainCreds =
-        String.format("%s:%s", clientConfig.getClientId(), clientConfig.getClientSecret());
+        String.format("%s:%s", properties.getClient().getClientId(),
+            properties.getClient().getClientSecret());
 
     String base64Creds = new String(java.util.Base64.getEncoder().encode(plainCreds.getBytes()));
 
@@ -196,7 +197,7 @@ public class IamTestClientApplication extends WebSecurityConfigurerAdapter {
     HttpEntity<?> request = new HttpEntity<>(body, headers);
 
     RestTemplate rt = new RestTemplate(requestFactory);
-    String iamIntrospectUrl = clientConfig.getIssuer() + "/introspect";
+    String iamIntrospectUrl = properties.getIssuer() + "/introspect";
     ResponseEntity<String> response =
         rt.exchange(iamIntrospectUrl, HttpMethod.POST, request, String.class);
 

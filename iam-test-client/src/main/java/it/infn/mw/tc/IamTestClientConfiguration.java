@@ -1,5 +1,7 @@
 package it.infn.mw.tc;
 
+import static java.util.stream.Collectors.toSet;
+
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -8,6 +10,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -21,7 +24,10 @@ import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.logging.log4j.util.Strings;
 import org.italiangrid.voms.util.CertificateValidatorBuilder;
+import org.mitre.oauth2.model.ClientDetailsEntity;
+import org.mitre.oauth2.model.ClientDetailsEntity.AuthMethod;
 import org.mitre.oauth2.model.RegisteredClient;
 import org.mitre.openid.connect.client.OIDCAuthenticationFilter;
 import org.mitre.openid.connect.client.OIDCAuthenticationProvider;
@@ -43,10 +49,10 @@ import eu.emi.security.authn.x509.X509CertChainValidatorExt;
 import eu.emi.security.authn.x509.impl.SocketFactoryCreator;
 
 @Configuration
-public class IamClient {
+public class IamTestClientConfiguration {
 
   @Autowired
-  private IamClientConfig iamClientConfig;
+  private IamClientApplicationProperties iamClientConfig;
 
   @Bean
   public FilterRegistrationBean<OIDCAuthenticationFilter> disabledAutomaticOidcFilterRegistration(
@@ -110,9 +116,19 @@ public class IamClient {
 
   private StaticClientConfigurationService staticClientConfiguration() {
 
-    Map<String, RegisteredClient> clients = new LinkedHashMap<String, RegisteredClient>();
+    Map<String, RegisteredClient> clients = new LinkedHashMap<>();
 
-    clients.put(iamClientConfig.getIssuer(), iamClientConfig);
+    ClientDetailsEntity cde = new ClientDetailsEntity();
+    cde.setTokenEndpointAuthMethod(AuthMethod.SECRET_BASIC);
+    cde.setClientId(iamClientConfig.getClient().getClientId());
+    cde.setClientSecret(iamClientConfig.getClient().getClientSecret());
+
+    if (Strings.isNotBlank(iamClientConfig.getClient().getScope())) {
+      cde.setScope(
+          Stream.of(iamClientConfig.getClient().getScope().split(" ")).collect(toSet()));
+    }
+
+    clients.put(iamClientConfig.getIssuer(), new RegisteredClient(cde));
 
     StaticClientConfigurationService config = new StaticClientConfigurationService();
     config.setClients(clients);

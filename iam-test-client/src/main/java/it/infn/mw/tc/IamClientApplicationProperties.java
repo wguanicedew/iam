@@ -1,13 +1,53 @@
 package it.infn.mw.tc;
 
-import org.mitre.oauth2.model.ClientDetailsEntity.AuthMethod;
-import org.mitre.oauth2.model.RegisteredClient;
+import java.util.List;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 @Component
 @ConfigurationProperties(prefix = "iam")
-public class IamClientConfig extends RegisteredClient {
+public class IamClientApplicationProperties {
+
+  public static class OidcClientProperties {
+    String clientId;
+    String clientSecret;
+    List<String> redirectUris;
+    String scope;
+
+    public String getClientId() {
+      return clientId;
+    }
+
+    public void setClientId(String clientId) {
+      this.clientId = clientId;
+    }
+
+    public String getClientSecret() {
+      return clientSecret;
+    }
+
+    public void setClientSecret(String clientSecret) {
+      this.clientSecret = clientSecret;
+    }
+
+    public List<String> getRedirectUris() {
+      return redirectUris;
+    }
+
+    public void setRedirectUris(List<String> redirectUris) {
+      this.redirectUris = redirectUris;
+    }
+
+    public String getScope() {
+      return scope;
+    }
+
+    public void setScope(String scope) {
+      this.scope = scope;
+    }
+  }
+
 
   public static class TlsConfig {
     String version = "TLSv1.2";
@@ -26,15 +66,16 @@ public class IamClientConfig extends RegisteredClient {
     }
   }
 
-  String issuer;
-  String organizationName;
-  String extAuthnHint;
-  TlsConfig tls;
+  private String issuer;
+  private String organizationName;
+  private String extAuthnHint;
+  private TlsConfig tls;
 
-  boolean hideTokens = true;
+  private OidcClientProperties client;
 
-  public IamClientConfig() {
-    setTokenEndpointAuthMethod(AuthMethod.SECRET_BASIC);
+  private boolean hideTokens = true;
+
+  public IamClientApplicationProperties() {
   }
 
   public String getIssuer() { return issuer; }
@@ -63,5 +104,13 @@ public class IamClientConfig extends RegisteredClient {
 
   public void setHideTokens(boolean hideTokens) {
     this.hideTokens = hideTokens;
+  }
+
+  public OidcClientProperties getClient() {
+    return client;
+  }
+
+  public void setClient(OidcClientProperties client) {
+    this.client = client;
   }
 }
