@@ -41,12 +41,17 @@ public class LegacyFQANEncoding implements FQANEncoding {
   @Override
   public String decodeFQAN(String fqan) {
 
-    int index = fqan.indexOf("/" + NULL_ROLE);
+    final int index = fqan.indexOf("/" + NULL_ROLE);
 
     if (index > 0)
       return fqan.substring(0, index);
 
-    return fqan.substring(0, fqan.indexOf("/" + NULL_CAPABILITY));
+    final int capIndex = fqan.indexOf("/" + NULL_CAPABILITY);
+
+    if (capIndex > 0)
+      return fqan.substring(0, capIndex);
+
+    return fqan;
 
   }
 

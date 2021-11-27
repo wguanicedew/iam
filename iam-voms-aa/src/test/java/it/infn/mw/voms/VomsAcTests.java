@@ -58,6 +58,22 @@ public class VomsAcTests extends TestSupport {
   @Autowired
   VomsProperties properties;
 
+
+  @Test
+  public void unauthenticatedRequestGetsUnauthenticatedClientError() throws Exception {
+
+    byte[] xmlResponse = mvc.perform(get("/generate-ac"))
+      .andExpect(status().isBadRequest())
+      .andReturn()
+      .getResponse()
+      .getContentAsByteArray();
+
+    VOMSResponse response = parser.parse(new ByteArrayInputStream(xmlResponse));
+    assertThat(response.hasErrors(), is(true));
+    assertThat(response.errorMessages()[0].getMessage(),
+        containsString("Client is not authenticated"));
+  }
+
   @Test
   public void unregisteredUserGetsNoSuchUserError() throws Exception {
     byte[] xmlResponse = mvc.perform(get("/generate-ac").headers(test0VOMSHeaders()))

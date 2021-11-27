@@ -25,7 +25,6 @@ import static it.infn.mw.iam.authn.x509.DefaultX509AuthenticationCredentialExtra
 import static it.infn.mw.iam.authn.x509.DefaultX509AuthenticationCredentialExtractor.Headers.VERIFY;
 import static it.infn.mw.iam.authn.x509.DefaultX509AuthenticationCredentialExtractor.Headers.V_END;
 import static it.infn.mw.iam.authn.x509.DefaultX509AuthenticationCredentialExtractor.Headers.V_START;
-import static java.lang.String.format;
 
 import java.util.EnumSet;
 import java.util.Optional;
@@ -84,12 +83,15 @@ public class DefaultX509AuthenticationCredentialExtractor
     return request.getHeader(header.header);
   }
 
-  private void headerNamesSanityChecks(HttpServletRequest request) {
+  private boolean requiredHeadersPresent(HttpServletRequest request) {
+
     for (Headers e : HEADERS_REQUIRED) {
       if (isNullOrEmpty(request.getHeader(e.header))) {
-        throw new IllegalArgumentException(format("Required header not found: %s", e.header));
+        LOG.warn("Required header not found in: {}", e.header);
+        return false;
       }
     }
+    return true;
   }
 
   protected boolean hasProxyCertificate(HttpServletRequest request) {
@@ -130,7 +132,9 @@ public class DefaultX509AuthenticationCredentialExtractor
   public Optional<IamX509AuthenticationCredential> extractX509Credential(
       HttpServletRequest request) {
 
-    headerNamesSanityChecks(request);
+    if (!requiredHeadersPresent(request)) {
+      return Optional.empty();
+    }
 
     IamX509AuthenticationCredential.Builder credBuilder =
         new IamX509AuthenticationCredential.Builder();
