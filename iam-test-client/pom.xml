@@ -108,10 +108,17 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <mainClass>it.infn.mw.tc.IamTestClientApplication</mainClass>
+          <image>
+            <name>indigoiam/iam-test-client-bp:${iam.image.tag}</name>
+          </image>
+        </configuration>
+        
         <executions>
           <execution>
             <goals>
-              <goal>repackage</goal>
+              <goal>build-info</goal>
             </goals>
           </execution>
         </executions>

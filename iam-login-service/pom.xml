@@ -437,7 +437,11 @@
         <artifactId>spring-boot-maven-plugin</artifactId>
         <configuration>
           <mainClass>it.infn.mw.iam.IamLoginService</mainClass>
+          <image>
+            <name>indigoiam/iam-login-service-bp:${iam.image.tag}</name>
+          </image>
         </configuration>
+        
         <executions>
           <execution>
             <goals>

@@ -15,6 +15,9 @@
   <name>IAM Common Module</name>
   <description>INDIGO IAM common classes</description>
 
+  <properties>
+   <spring-boot.build-image.skip>true</spring-boot.build-image.skip>
+  </properties>
   <build>
 
     <pluginManagement>

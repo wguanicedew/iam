@@ -6,7 +6,7 @@ jobs:
   build:
     strategy:
       matrix:
-        java-version: [11]
+        java-version: [17]
 
     runs-on: ubuntu-latest
 
@@ -27,40 +27,24 @@ jobs:
         path: ~/.m2
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
+
     - name: License check
       run: mvn -B license:check
 
-    - name: Build & deploy
-      run: mvn -U -B --settings .github/.m2/settings.xml package deploy
+    - name: Build & test
+      run: mvn -U -B clean test
+
+    - name: Build docker images
+      run: mvn -DskipTests=true -U -B package spring-boot:build-image
+
+    - name: Docker login
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+    - name: Publish docker-image
+      if: startsWith(github.ref, 'refs/tags/')
       env:
-        NEXUS_USERNAME: ${{secrets.NEXUS_USERNAME}}
-        NEXUS_PASSWORD: ${{secrets.NEXUS_PASSWORD}}
-
-    - name: Copy artifact to docker dir
-      run: |
-        cp iam-login-service/target/iam-login-service.war iam-login-service/docker
-        cp iam-test-client/target/iam-test-client.jar iam-test-client/docker
-
-    - name: Build & push iam-login-service docker image
-      uses: docker/build-push-action@v1
-      with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_PASSWORD }}
-        repository: indigoiam/iam-login-service
-        tag_with_ref: true
-        tag_with_sha: true
-        dockerfile: iam-login-service/docker/Dockerfile.prod
-        path: iam-login-service/docker
-        push: ${{ matrix.java-version == '11' && startsWith(github.ref, 'refs/tags/') }}
-
-    - name: Build & push iam-test-client docker image
-      uses: docker/build-push-action@v1
-      with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_PASSWORD }}
-        repository: indigoiam/iam-test-client
-        tag_with_ref: true
-        tag_with_sha: true
-        dockerfile: iam-test-client/docker/Dockerfile.prod
-        path: iam-test-client/docker
-        push: ${{ matrix.java-version == '11' && startsWith(github.ref, 'refs/tags/') }}
+      run: utils/push-images.sh

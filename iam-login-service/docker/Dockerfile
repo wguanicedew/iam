@@ -1,4 +1,4 @@
-FROM openjdk:11
+FROM eclipse-temurin:17
 
 RUN mkdir /indigo-iam
 WORKDIR /indigo-iam

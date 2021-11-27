@@ -31,6 +31,10 @@
   <name>IAM Persistence Module</name>
   <description>The INDIGO IAM persistence classes</description>
 
+  <properties>
+    <spring-boot.build-image.skip>true</spring-boot.build-image.skip>
+  </properties>
+  
   <dependencies>
 
     <dependency>

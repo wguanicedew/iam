@@ -20,6 +20,8 @@
   <name>INDIGO Identity and Access Manager (IAM) - Parent POM</name>
 
   <properties>
+    <iam.image.tag>${project.version}-${git.commit.id.abbrev}</iam.image.tag>
+    
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
