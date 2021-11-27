@@ -53,7 +53,7 @@ pipeline {
           label "${kubeLabel}"
           cloud 'Kube mwdevel'
           defaultContainer 'runner'
-          inheritFrom 'iam-template-java11'
+          inheritFrom 'iam-template-java17'
         }
       }
 
