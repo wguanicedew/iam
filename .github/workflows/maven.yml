@@ -41,4 +41,4 @@ jobs:
 
     - name: Publish docker-image
       if: startsWith(github.ref, 'refs/tags/')
-      run: sh utils/tag-push-images.sh  ${GITHUB_REF#refs/tags/}
+      run: bash utils/tag-push-images.sh  ${GITHUB_REF#refs/tags/}
