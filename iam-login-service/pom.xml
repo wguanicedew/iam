@@ -439,6 +439,9 @@
           <mainClass>it.infn.mw.iam.IamLoginService</mainClass>
           <image>
             <name>indigoiam/iam-login-service-bp:${iam.image.tag}</name>
+            <env>
+              <BPL_SPRING_CLOUD_BINDINGS_ENABLED>false</BPL_SPRING_CLOUD_BINDINGS_ENABLED>
+            </env>
           </image>
         </configuration>
         
