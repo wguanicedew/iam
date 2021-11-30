@@ -7,12 +7,6 @@ volumes:
 
 services:
 
-  db_data:
-    image: busybox
-    volumes:
-      - db_data:/var/lib/mysql
-    command: /bin/true
-
   db:
     image: ${DB_IMAGE}
     volumes:
