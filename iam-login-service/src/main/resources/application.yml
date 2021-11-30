@@ -73,6 +73,9 @@ spring:
     username: ${IAM_MAIL_USERNAME:}
     password: ${IAM_MAIL_PASSWORD:}
 
+  flyway:
+    table: schema_version
+    
   freemarker:
     template-loader-path: ${IAM_CUSTOM_TEMPLATE_LOCATION:classpath:/email-templates}
 

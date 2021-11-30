@@ -21,6 +21,9 @@ server:
     
   
 spring:
+  flyway:
+    table: schema_version
+  
   main:
     banner-mode: "off" 
   
