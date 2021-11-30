@@ -29,7 +29,6 @@ spring:
       - classpath:db/migration/prod
   
   datasource:
-    type: org.apache.tomcat.jdbc.pool.DataSource
     url: jdbc:mysql://${IAM_DB_HOST:dev.local.io}:${IAM_DB_PORT:3306}/${IAM_DB_NAME:iam}?useSSL=${IAM_DB_USE_SSL:false}
     username: ${IAM_DB_USERNAME:iam}
     password: ${IAM_DB_PASSWORD:pwd}
@@ -37,5 +36,4 @@ spring:
     hikari:
       maximum-pool-size: ${IAM_DB_MAX_ACTIVE:50}
       minimum-idle: ${IAM_DB_MIN_IDLE:8}
-      connection-test-query: ${IAM_DB_VALIDATION_QUERY:SELECT 1}    
-
+      connection-test-query: ${IAM_DB_VALIDATION_QUERY:SELECT 1}
