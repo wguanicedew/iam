@@ -26,11 +26,14 @@ jobs:
     - name: License check
       run: mvn -B license:check
 
-    - name: Build & test
-      run: mvn -U -B clean test
+    - name: Build, test, package
+      run: mvn -U -B clean package
 
-    - name: Build docker images
-      run: mvn -DskipTests=true -U -B package spring-boot:build-image
+    - name: Copy artifacts to docker dir
+      run: mvn -DskipTests=true -U -B spring-boot:build-image
+
+    - name: Build docker images (packeto)
+      run: mvn -DskipTests=true -U -B spring-boot:build-image
 
     - name: Docker login
       if: startsWith(github.ref, 'refs/tags/')

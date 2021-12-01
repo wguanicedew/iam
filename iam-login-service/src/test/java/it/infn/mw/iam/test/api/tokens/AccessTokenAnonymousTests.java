@@ -24,12 +24,16 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.test.util.annotation.IamMockMvcIntegrationTest;
 
 @RunWith(SpringRunner.class)
 @IamMockMvcIntegrationTest
+@SpringBootTest(classes = {IamLoginService.class}, webEnvironment = WebEnvironment.MOCK)
 public class AccessTokenAnonymousTests extends TestTokensUtils {
 
   private static final int FAKE_TOKEN_ID = 12345;

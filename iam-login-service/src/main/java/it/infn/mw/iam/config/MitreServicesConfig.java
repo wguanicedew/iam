@@ -81,7 +81,7 @@ import com.google.common.collect.Sets;
 import it.infn.mw.iam.authn.oidc.RestTemplateFactory;
 import it.infn.mw.iam.core.client.ClientUserDetailsService;
 import it.infn.mw.iam.core.client.IAMClientUserDetailsService;
-import it.infn.mw.iam.core.oauth.IamJWKSetCacheService;
+import it.infn.mw.iam.core.jwk.IamJWKSetCacheService;
 import it.infn.mw.iam.core.oauth.IamOAuth2RequestFactory;
 import it.infn.mw.iam.core.oauth.profile.JWTProfileResolver;
 import it.infn.mw.iam.core.oauth.scope.IamSystemScopeService;

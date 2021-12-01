@@ -24,19 +24,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import it.infn.mw.iam.test.oauth.EndpointsTestUtils;
 import it.infn.mw.iam.test.util.annotation.IamMockMvcIntegrationTest;
 
-
 @RunWith(SpringRunner.class)
 @IamMockMvcIntegrationTest
-public class JWKEndpointTests extends EndpointsTestUtils implements JWKTestSupport {
+@TestPropertySource(properties = {"iam.jwk.keystore-location=classpath:/jwk/iam-1024-keys.jwks"})
+public class JWKKeyTests1024 extends EndpointsTestUtils implements JWKTestSupport {
+
 
   @Test
-  public void jwkEndpointReturnsKeyMaterial() throws Exception {
-
+  public void test1024bitsKeysAreSupported() throws Exception {
     // @formatter:off
     mvc.perform(get(JWK_ENDPOINT))
     .andExpect(status().isOk())
@@ -45,8 +46,8 @@ public class JWKEndpointTests extends EndpointsTestUtils implements JWKTestSuppo
     .andExpect(jsonPath("$.keys[0].kty").value("RSA"))
     .andExpect(jsonPath("$.keys[0].e").value("AQAB"))
     .andExpect(jsonPath("$.keys[0].kid").value("rsa1"))
-    .andExpect(jsonPath("$.keys[0].n").value("4GRvJuFantVV3JdjwQOAkfREnwUFp2znRBTOIJhPamyH4gf4YlI5PQT79415NV4_HrWYzgooH5AK6-7WE-TLLGEAVK5vdk4vv79bG7ukvjvBPxAjEhQn6-Amln88iXtvicEGbh--3CKbQj1jryVU5aWM6jzweaabFSeCILVEd6ZT7ofXaAqan9eLzU5IEtTPy5MfrrOvWw5Q7D2yzMqc5LksmaQSw8XtmhA8gnENnIqjAMmPtRltf93wjtmiamgVENOVPdN-93Nd5w-pnMwEyoO6Q9JqXxV6lD6qBRxI7_5t4_vmVxcbbxcZbSAMoHqA2pbSMJ4Jcw-27Hct9jesLQ"));
+    .andExpect(jsonPath("$.keys[0].n").value("l081_MZpipySxN1mfZBepohm9N8xE6xozr41todbdUGOzb8Wy0lunrauXZ7u-jDBVz-dDid9yExbE491LR3FYhu-MrqpYreSebhnp6QxjlChlDQ6bGVR8aFXGTLYZUW3-YlunghmVSTnBCTWZyzJNoc4jJvQXAb7WLNKRNF55Fk"));
     // @formatter:on
-
   }
+
 }

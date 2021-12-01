@@ -25,7 +25,6 @@ server:
   port: ${IAM_PORT:8080}
   
   tomcat:
-    
     accesslog:
       enabled: ${IAM_TOMCAT_ACCESS_LOG_ENABLED:false}
       directory: ${IAM_TOMCAT_ACCESS_LOG_DIRECTORY:/tmp}
@@ -35,6 +34,7 @@ server:
   
 spring:
   redis:
+    
     host: ${IAM_SPRING_REDIS_HOST:localhost}
     port: ${IAM_SPRING_REDIS_PORT:6379}
     password: ${IAM_SPRING_REDIS_PASSWORD:}

@@ -21,14 +21,14 @@ import static org.mockito.Mockito.when;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
-import org.mitre.jwt.signer.service.JWTSigningAndValidationService;
-import org.mitre.jwt.signer.service.impl.DefaultJWTSigningAndValidationService;
 import org.mitre.jwt.signer.service.impl.JWKSetCacheService;
 import org.mitre.openid.connect.client.service.ServerConfigurationService;
 import org.mitre.openid.connect.config.ServerConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+
+import it.infn.mw.iam.core.jwk.IamJWTSigningService;
 
 @Configuration
 public class RCAuthTestConfig extends RCAuthTestSupport {
@@ -52,8 +52,7 @@ public class RCAuthTestConfig extends RCAuthTestSupport {
   public JWKSetCacheService mockjwkSetCacheService()
       throws NoSuchAlgorithmException, InvalidKeySpecException {
 
-    JWTSigningAndValidationService signatureValidator =
-        new DefaultJWTSigningAndValidationService(rcAuthKeyStore());
+    IamJWTSigningService signatureValidator = new IamJWTSigningService(rcAuthKeyStore());
 
     JWKSetCacheService mockCacheService = mock(JWKSetCacheService.class);
     when(mockCacheService.getValidator(JWK_URI)).thenReturn(signatureValidator);

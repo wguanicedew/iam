@@ -13,16 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.core.oauth;
+package it.infn.mw.iam.core.jwk;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import org.mitre.jose.keystore.JWKSetKeyStore;
 import org.mitre.jwt.encryption.service.JWTEncryptionAndDecryptionService;
-import org.mitre.jwt.encryption.service.impl.DefaultJWTEncryptionAndDecryptionService;
 import org.mitre.jwt.signer.service.JWTSigningAndValidationService;
-import org.mitre.jwt.signer.service.impl.DefaultJWTSigningAndValidationService;
 import org.mitre.jwt.signer.service.impl.JWKSetCacheService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,7 +104,7 @@ public class IamJWKSetCacheService extends JWKSetCacheService {
 
       JWKSetKeyStore keyStore = new JWKSetKeyStore(jwkSet);
 
-      return new DefaultJWTEncryptionAndDecryptionService(keyStore);
+      return new IamJWTEncryptionService(keyStore);
     }
   }
 
@@ -129,7 +127,7 @@ public class IamJWKSetCacheService extends JWKSetCacheService {
 
       JWKSetKeyStore keyStore = new JWKSetKeyStore(jwkSet);
 
-      return new DefaultJWTSigningAndValidationService(keyStore);
+      return new IamJWTSigningService(keyStore);
     }
   }
 }
