@@ -17,9 +17,9 @@ package it.infn.mw.iam.test.api.account.search.service;
 
 import static it.infn.mw.iam.api.account.search.AccountSearchController.getSortByEmail;
 import static it.infn.mw.iam.api.account.search.AccountSearchController.getSortByName;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,11 +43,12 @@ import it.infn.mw.iam.test.util.annotation.IamMockMvcIntegrationTest;
 @SpringBootTest(classes = {IamLoginService.class}, webEnvironment = WebEnvironment.MOCK)
 public class DefaultPagedAccountsServiceTests extends AccountServiceUtils {
 
-  public final int ITEMS_PER_PAGE = 10;
-  public final long TOTAL_TEST_ACCOUNTS = 253L;
-  private final int LAST_PAGE_NUMBER = (int) Math.ceil(TOTAL_TEST_ACCOUNTS / ITEMS_PER_PAGE);
-  private final int LAST_PAGE_SIZE = (int) (long) TOTAL_TEST_ACCOUNTS % ITEMS_PER_PAGE;
-  private final int LAST_PAGE_OFFSET = (int) (long) Math.floorDiv(TOTAL_TEST_ACCOUNTS, ITEMS_PER_PAGE) * ITEMS_PER_PAGE;
+  public static final int ITEMS_PER_PAGE = 10;
+  public static final long TOTAL_TEST_ACCOUNTS = 253L;
+  private static final int LAST_PAGE_NUMBER = (int) Math.ceil(TOTAL_TEST_ACCOUNTS / ITEMS_PER_PAGE);
+  private static final int LAST_PAGE_SIZE = (int) (long) TOTAL_TEST_ACCOUNTS % ITEMS_PER_PAGE;
+  private static final int LAST_PAGE_OFFSET =
+      (int) (long) Math.floorDiv(TOTAL_TEST_ACCOUNTS, ITEMS_PER_PAGE) * ITEMS_PER_PAGE;
 
   @Autowired
   private PagedResourceService<IamAccount> accountService;
