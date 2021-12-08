@@ -30,10 +30,12 @@ jobs:
       run: mvn -U -B clean package
 
     - name: Copy artifacts to docker dir
-      run: mvn -DskipTests=true -U -B spring-boot:build-image
+      run: |
+        cp iam-login-service/target/iam-login-service.war iam-login-service/docker
+        cp iam-test-client/target/iam-test-client.jar iam-test-client/docker
 
-    - name: Build docker images (packeto)
-      run: mvn -DskipTests=true -U -B spring-boot:build-image
+    - name: Generate buildpacks
+      run: mvn -DskipTests -U -B spring-boot:build-image
 
     - name: Docker login
       if: startsWith(github.ref, 'refs/tags/')
@@ -42,6 +44,42 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-    - name: Publish docker-image
+    - name: Publish buildpacks on Dockerhub
       if: startsWith(github.ref, 'refs/tags/')
-      run: bash utils/tag-push-images.sh  ${GITHUB_REF#refs/tags/}
+      run: ./utils/tag-push-images.sh  ${GITHUB_REF#refs/tags/}
+
+    - name: Docker metainformation for iam-login-service
+      id: login-service-meta
+      uses: docker/metadata-action@v3
+      with:
+        images: indigoiam/iam-login-service
+        flavor: latest=true
+        tags: |
+          type=sha
+          type=ref,event=tag
+
+    - name: Docker metainformation for iam-test-client
+      id: test-client-meta
+      uses: docker/metadata-action@v3
+      with:
+        images: indigoiam/iam-test-client
+        flavor: latest=true
+        tags: |
+          type=sha
+          type=ref,event=tag
+
+    - name: Build & push iam-login-service docker image
+      uses: docker/build-push-action@v2
+      with:
+        tags: ${{steps.login-service-meta.output.tags}}
+        context: iam-login-service/docker/
+        file: iam-login-service/docker/Dockerfile.prod
+        push: ${{ startsWith(github.ref, 'refs/tags/') }}
+
+    - name: Build & push iam-test-client docker image
+      uses: docker/build-push-action@v2
+      with:
+        tags: ${{steps.test-client-meta.output.tags}}
+        context: iam-test-client/docker/
+        file: iam-test-client/docker/Dockerfile.prod
+        push: ${{ startsWith(github.ref, 'refs/tags/') }}
