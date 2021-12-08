@@ -27,7 +27,7 @@ jobs:
       run: mvn -B license:check
 
     - name: Build, test, package
-      run: mvn -U -B clean package
+      run: mvn -U -B clean package install
 
     - name: Copy artifacts to docker dir
       run: |
