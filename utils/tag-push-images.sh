@@ -7,17 +7,20 @@ if [[ $# -ne 1 ]]; then
   exit 1
 fi
 
+if [[ -n ${DEBUG} ]]; then
+  set -x
+fi
 
 IMAGES="indigoiam/iam-login-service-bp indigoiam/iam-test-client-bp indigoiam/voms-aa-bp"
+
 # The current script directory
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}"  )" && pwd  )"
-POM_VERSION=$(sh ${DIR}/print-pom-version.sh)
+POM_VERSION=$(${DIR}/print-pom-version.sh)
 
 TAG=$1
 
 GIT_HEAD_SHA=$(git rev-parse --short HEAD)
 GIT_COMMIT_SHA=${GIT_HEAD_SHA:0:7}
-
 
 for img in ${IMAGES}; do 
   echo "Tagging ${img}:${POM_VERSION}-${GIT_COMMIT_SHA} -> ${img}:${TAG}"

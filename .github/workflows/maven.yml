@@ -46,6 +46,8 @@ jobs:
 
     - name: Publish buildpacks on Dockerhub
       if: startsWith(github.ref, 'refs/tags/')
+      env: 
+        DEBUG: y
       run: ./utils/tag-push-images.sh  ${GITHUB_REF#refs/tags/}
 
     - name: Docker metainformation for iam-login-service
