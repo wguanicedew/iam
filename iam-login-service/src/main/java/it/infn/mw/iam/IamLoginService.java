@@ -17,6 +17,7 @@ package it.infn.mw.iam;
 
 import org.mitre.discovery.web.DiscoveryEndpoint;
 import org.mitre.oauth2.web.CorsFilter;
+import org.mitre.openid.connect.web.DynamicClientRegistrationEndpoint;
 import org.mitre.openid.connect.web.JWKSetPublishingEndpoint;
 import org.mitre.openid.connect.web.RootController;
 import org.mitre.openid.connect.web.UserInfoEndpoint;
@@ -66,6 +67,8 @@ excludeFilters = {
         value=DiscoveryEndpoint.class),
     @ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE,
         value=JWKSetPublishingEndpoint.class),
+    @ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE,
+    value=DynamicClientRegistrationEndpoint.class),
     @ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE,
     value=CorsFilter.class)
 })

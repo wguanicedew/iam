@@ -26,13 +26,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Component;
 
+import it.infn.mw.iam.authn.util.Authorities;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
 @SuppressWarnings("deprecation")
 @Component
 public class AccountUtils {
-  
   IamAccountRepository accountRepo;
 
   @Autowired
@@ -40,6 +40,21 @@ public class AccountUtils {
     this.accountRepo = accountRepo;
   }
 
+  public boolean isRegisteredUser(Authentication auth) {
+    if (auth == null || auth.getAuthorities() == null) {
+      return false;
+    }
+
+    return auth.getAuthorities().contains(Authorities.ROLE_USER);
+  }
+
+  public boolean isAdmin(Authentication auth) {
+    if (auth == null || auth.getAuthorities() == null) {
+      return false;
+    }
+
+    return auth.getAuthorities().contains(Authorities.ROLE_ADMIN);
+  }
 
   public boolean isAuthenticated() {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();

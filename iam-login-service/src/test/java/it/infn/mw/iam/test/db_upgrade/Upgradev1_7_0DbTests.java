@@ -15,6 +15,9 @@
  */
 package it.infn.mw.iam.test.db_upgrade;
 
+import java.io.IOException;
+
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
@@ -28,7 +31,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import it.infn.mw.iam.test.util.db.MySQL57TestContainer;
 
-@Testcontainers
+@Testcontainers(disabledWithoutDocker = true)
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
@@ -50,5 +53,11 @@ public class Upgradev1_7_0DbTests extends UpgradeDbTestSupport {
     registry.add("spring.datasource.url", db::getJdbcUrl);
   }
 
+  @Test
+  public void dbUpgradeFails() throws IOException {
+    
+
+
+  }
 
 }

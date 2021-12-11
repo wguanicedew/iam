@@ -193,9 +193,9 @@ task:
   approvalCleanupPeriodMsec: ${IAM_APPROVAL_CLEANUP_PERIOD_MSEC:300000}
   deviceCodeCleanupPeriodMsec: ${IAM_DEVICE_CODE_CLEANUP_PERIOD_MSEC:300000}
 
-
-clientRegistration:
+client-registration:
   allow-for: ${IAM_CLIENT_REGISTRATION_ALLOW_FOR:ANYONE}
+  enable: ${IAM_CLIENT_REGISTRATION_ENABLE:true}
 
 management:
   health:

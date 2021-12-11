@@ -177,7 +177,6 @@ public class MitreServicesConfig {
   @Bean
   @Qualifier("iamClientDetailsEntityService")
   ClientDetailsEntityService clientDetailsEntityService() {
-
     return new DefaultOAuth2ClientDetailsEntityService();
   }
 

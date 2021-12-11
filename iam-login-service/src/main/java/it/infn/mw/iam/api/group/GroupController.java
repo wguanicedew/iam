@@ -102,8 +102,7 @@ public class GroupController {
     handleValidationError(INVALID_GROUP, validationResult);
     
     IamGroup entity = groupService.findByUuid(id).orElseThrow(()->NoSuchGroupError.forUuid(id));
-    entity.setDescription(group.getDescription());
-    entity = groupService.save(entity);
+    entity = groupService.setDescription(entity, group.getDescription());
     return converter.dtoFromEntity(entity);  
   }
   

@@ -16,18 +16,18 @@
 
 -->
 <div ng-if="$ctrl.voAdmin" ng-click="$ctrl.changeDescription()">
-    <div ng-if="$ctrl.groupDescription()" class="group-description">
+    <div ng-if="$ctrl.groupDescription()" class="static-form-control">
         {{$ctrl.groupDescription()}}
     </div>
-    <div ng-if="!$ctrl.groupDescription()" class="group-description missing">
+    <div ng-if="!$ctrl.groupDescription()" class="static-form-control">
         No description
     </div>
 </div>
 <div ng-if="!$ctrl.voAdmin">
-    <div ng-if="$ctrl.groupDescription()" class="group-description">
+    <div ng-if="$ctrl.groupDescription()" class="static-form-control">
         {{$ctrl.groupDescription()}}
     </div>
-    <div ng-if="!$ctrl.groupDescription()" class="group-description missing">
+    <div ng-if="!$ctrl.groupDescription()" class="static-form-control">
         No description
     </div>
 </div>

@@ -24,7 +24,7 @@
     <script type="text/javascript" src="/webjars/angularjs/angular.min.js"></script>
     <script type="text/javascript" src="/webjars/angularjs/angular-animate.js"></script>
     <script type="text/javascript" src="/webjars/angularjs/angular-cookies.js"></script>
-    <script type="text/javascript" src="/webjars/angular-ui-bootstrap/ui-bootstrap-tpls.min.js"></script>
+    <script type="text/javascript" src="/webjars/angular-ui-bootstrap/dist/ui-bootstrap-tpls.js"></script>
     <script type="text/javascript" src="${resourcesPrefix}/iam/apps/cern-registration/registration.app.js"></script>
     <script type="text/javascript" src="${resourcesPrefix}/iam/apps/cern-registration/registration.controller.js"></script>
     <script type="text/javascript" src="${resourcesPrefix}/iam/apps/cern-registration/registration.directive.js"></script>

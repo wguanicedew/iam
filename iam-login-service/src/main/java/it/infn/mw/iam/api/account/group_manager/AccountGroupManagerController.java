@@ -34,7 +34,7 @@ import it.infn.mw.iam.api.account.authority.AuthorityAlreadyBoundError;
 import it.infn.mw.iam.api.account.group_manager.error.InvalidManagedGroupError;
 import it.infn.mw.iam.api.account.group_manager.model.AccountManagedGroupsDTO;
 import it.infn.mw.iam.api.common.ErrorDTO;
-import it.infn.mw.iam.api.common.NoSuchAccountError;
+import it.infn.mw.iam.api.common.error.NoSuchAccountError;
 import it.infn.mw.iam.api.scim.converter.UserConverter;
 import it.infn.mw.iam.api.scim.model.ScimUser;
 import it.infn.mw.iam.persistence.model.IamAccount;

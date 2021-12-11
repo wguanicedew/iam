@@ -40,8 +40,8 @@
     angular.module('dashboardApp').component('group', {
         templateUrl: '/resources/iam/apps/dashboard-app/components/group/group.component.html',
         bindings: {
-            group: '<',
-            labels: '<'
+            group: '=',
+            labels: '='
         },
         controller: [
             '$state', 'Utils', 'GroupService', GroupController

@@ -33,6 +33,7 @@
   <description>The INDIGO IAM login service</description>
 
   <properties>
+    <test-clock.version>1.0.2</test-clock.version>
     <eclipselink.version>2.7.9</eclipselink.version>
     <javax.persistence.version>2.2.1</javax.persistence.version>
 
@@ -57,6 +58,11 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-cache</artifactId>
     </dependency>
 
     <dependency>
@@ -89,7 +95,7 @@
     </dependency>
 
     <dependency>
-      <groupId>org.webjars</groupId>
+      <groupId>org.webjars.npm</groupId>
       <artifactId>angular-ui-bootstrap</artifactId>
     </dependency>
 
@@ -127,7 +133,7 @@
       <groupId>org.webjars</groupId>
       <artifactId>font-awesome</artifactId>
     </dependency>
-
+    
     <dependency>
       <groupId>org.webjars</groupId>
       <artifactId>webjars-locator-core</artifactId>
@@ -318,6 +324,13 @@
 
 
     <dependency>
+      <groupId>com.mercateo</groupId>
+      <artifactId>test-clock</artifactId>
+      <version>${test-clock.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
     </dependency>
@@ -444,7 +457,7 @@
             </env>
           </image>
         </configuration>
-        
+
         <executions>
           <execution>
             <goals>
@@ -453,7 +466,7 @@
           </execution>
         </executions>
       </plugin>
-      
+
       <plugin>
         <groupId>com.google.cloud.tools</groupId>
         <artifactId>jib-maven-plugin</artifactId>

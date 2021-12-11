@@ -41,7 +41,7 @@ import eu.emi.security.authn.x509.proxy.ProxyUtils;
 import it.infn.mw.iam.api.account.AccountUtils;
 import it.infn.mw.iam.api.account_linking.AccountLinkingService;
 import it.infn.mw.iam.api.common.ErrorDTO;
-import it.infn.mw.iam.api.common.NoSuchAccountError;
+import it.infn.mw.iam.api.common.error.NoSuchAccountError;
 import it.infn.mw.iam.api.proxy.InvalidProxyRequestError;
 import it.infn.mw.iam.api.proxy.ProxyCertificateDTO;
 import it.infn.mw.iam.authn.x509.IamX509AuthenticationCredential;

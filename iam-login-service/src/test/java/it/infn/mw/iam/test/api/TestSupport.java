@@ -36,6 +36,8 @@ public class TestSupport {
   public static final ResultMatcher UNAUTHORIZED = status().isUnauthorized();
   public static final ResultMatcher FORBIDDEN = status().isForbidden();
   public static final ResultMatcher NOT_FOUND = status().isNotFound();
+  public static final ResultMatcher CREATED = status().isCreated();
+
 
   public static final String RANDOM_UUID = UUID.randomUUID().toString();
 

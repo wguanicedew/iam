@@ -20,10 +20,10 @@ import javax.validation.constraints.Min;
 public class PaginatedRequestForm {
 
   @Min(value = 0, message = "must be >=0")
-  private Integer count;
+  private Integer count = 10;
 
   @Min(value = 1, message = "must be >=1")
-  private Integer startIndex;
+  private Integer startIndex = 1;
 
   public Integer getCount() {
     return count;

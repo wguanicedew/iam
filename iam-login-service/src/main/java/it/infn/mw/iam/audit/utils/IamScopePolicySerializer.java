@@ -56,7 +56,7 @@ public class IamScopePolicySerializer extends JsonSerializer<IamScopePolicy>{
     if (isNull(value.getGroup())) {
       gen.writeNullField("group");
     } else {
-      gen.writeObjectFieldStart("grop");
+      gen.writeObjectFieldStart("group");
       gen.writeStringField("uuid", value.getGroup().getUuid());
       gen.writeStringField("name", value.getGroup().getName());
       gen.writeEndObject();

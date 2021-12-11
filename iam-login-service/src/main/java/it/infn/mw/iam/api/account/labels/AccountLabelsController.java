@@ -43,8 +43,8 @@ import com.google.common.collect.Lists;
 import it.infn.mw.iam.api.common.ErrorDTO;
 import it.infn.mw.iam.api.common.LabelDTO;
 import it.infn.mw.iam.api.common.LabelDTOConverter;
-import it.infn.mw.iam.api.common.NoSuchAccountError;
 import it.infn.mw.iam.api.common.error.InvalidLabelError;
+import it.infn.mw.iam.api.common.error.NoSuchAccountError;
 import it.infn.mw.iam.core.user.IamAccountService;
 import it.infn.mw.iam.persistence.model.IamAccount;
 

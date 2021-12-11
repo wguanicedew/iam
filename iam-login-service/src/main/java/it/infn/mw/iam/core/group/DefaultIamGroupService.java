@@ -258,6 +258,8 @@ public class DefaultIamGroupService implements IamGroupService, ApplicationEvent
     g.getLabels().remove(l);
     g.getLabels().add(l);
     
+    touchGroup(g);
+
     groupRepo.save(g);
     
     labelSetEvent(g, l);
@@ -269,6 +271,7 @@ public class DefaultIamGroupService implements IamGroupService, ApplicationEvent
     g.getLabels().remove(l);
     
     labelRemovedEvent(g, l);
+    touchGroup(g);
     groupRepo.save(g);
     return g;
   }
@@ -276,6 +279,13 @@ public class DefaultIamGroupService implements IamGroupService, ApplicationEvent
   @Override
   public Page<IamGroup> findSubgroups(IamGroup group, Pageable page) {
     return groupRepo.findSubgroups(group, page);
+  }
+
+  @Override
+  public IamGroup setDescription(IamGroup g, String description) {
+    g.setDescription(description);
+    touchGroup(g);
+    return groupRepo.save(g);
   }
 
 }

@@ -15,13 +15,6 @@
  */
 package it.infn.mw.iam.test.db_upgrade;
 
-import static it.infn.mw.iam.test.api.account.search.service.DefaultPagedAccountsServiceTests.TOTAL_TEST_ACCOUNTS;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-
-import java.io.IOException;
-
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
@@ -38,8 +31,5 @@ public abstract class UpgradeDbTestSupport {
   @Autowired
   IamAccountRepository accountRepo;
 
-  @Test
-  public void dbUpgradeSucceeds() throws IOException {
-    assertThat(accountRepo.count(), is(TOTAL_TEST_ACCOUNTS));
-  }
+
 }

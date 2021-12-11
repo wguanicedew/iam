@@ -15,7 +15,7 @@
  */
 package it.infn.mw.iam.api.aup;
 
-import static it.infn.mw.iam.core.web.EnforceAupFilter.REQUESTING_SIGNATURE;
+import static it.infn.mw.iam.core.web.aup.EnforceAupFilter.REQUESTING_SIGNATURE;
 import static java.lang.String.format;
 import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;

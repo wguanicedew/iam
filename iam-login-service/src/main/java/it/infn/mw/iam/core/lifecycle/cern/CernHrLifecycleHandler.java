@@ -221,7 +221,7 @@ public class CernHrLifecycleHandler implements Runnable, SchedulingConfigurer {
   public void handleAccount(IamAccount account) {
     LOG.debug("Handling account: {}", account);
     Instant checkTime = clock.instant();
-    account.getLabels().add(buildTimestampLabel(checkTime));
+    accountService.setLabel(account, buildTimestampLabel(checkTime));
     Optional<IamLabel> cernPersonId = getPersonIdLabel(account);
     if (!cernPersonId.isPresent()) {
       addErrorMessage(account,

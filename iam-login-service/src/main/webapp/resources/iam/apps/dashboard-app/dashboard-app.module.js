@@ -18,9 +18,16 @@
 
     angular.module('dashboardApp', [
         'ui.router', 'ui.bootstrap', 'ui.bootstrap.tpls', 'ui.select', 'ngCookies',
-        'ngSanitize', 'relativeDate', 'ngResource', 'toaster'
+        'ngSanitize', 'relativeDate', 'ngResource', 'toaster', 'ngclipboard'
     ]);
 
+    // angular.module('dashboardApp').run(function ($rootScope, $templateCache) {
+    //     $rootScope.$on('$viewContentLoaded', function () {
+    //         if ($templateCache) {
+    //             $templateCache.removeAll();
+    //         }
+    //     });
+    // });
 
     angular.module('dashboardApp')
         .run(function (
@@ -117,10 +124,10 @@
                 $rootScope.closeOfflineDialog();
                 $state.transitionTo(
                     $state.current, $stateParams, {
-                        reload: true,
-                        inherit: false,
-                        notify: true
-                    });
+                    reload: true,
+                    inherit: false,
+                    notify: true
+                });
             };
 
             $rootScope.pendingRegistrationRequests = function (val) {

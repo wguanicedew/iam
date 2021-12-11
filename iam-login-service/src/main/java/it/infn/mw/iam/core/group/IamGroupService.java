@@ -51,6 +51,8 @@ public interface IamGroupService {
   
   IamGroup deleteLabel(IamGroup g, IamLabel l);
 
+  IamGroup setDescription(IamGroup g, String description);
+
   void touchGroup(IamGroup g);
 
 }

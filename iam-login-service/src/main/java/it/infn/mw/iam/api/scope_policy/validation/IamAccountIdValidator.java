@@ -25,21 +25,27 @@ import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 public class IamAccountIdValidator implements ConstraintValidator<IamAccountId, String>{
 
   private final IamAccountRepository accountRepo;
+  private boolean nullable;
   
   @Autowired
   public IamAccountIdValidator(IamAccountRepository accountRepo) {
-    
     this.accountRepo = accountRepo;
   }
 
   @Override
   public void initialize(IamAccountId constraintAnnotation) {
-    // empty 
+    nullable = constraintAnnotation.nullable();
   }
 
   @Override
   public boolean isValid(String value, ConstraintValidatorContext context) {
-    return value != null && accountRepo.findByUuid(value).isPresent();
+    if (nullable && value != null) {
+      return accountRepo.findByUuid(value).isPresent();
+    } else if (nullable) {
+      return true;
+    } else {
+      return value != null && accountRepo.findByUuid(value).isPresent();
+    }
   }
 
 }

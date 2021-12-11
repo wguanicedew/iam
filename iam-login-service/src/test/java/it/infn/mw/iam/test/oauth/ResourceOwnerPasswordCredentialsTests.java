@@ -20,7 +20,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertNotNull;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -93,16 +92,6 @@ public class ResourceOwnerPasswordCredentialsTests {
   public void setup() throws Exception {
     accessTokenRepo.deleteAll();
     refreshTokenRepo.deleteAll();
-  }
-
-  @Test
-  public void testDiscoveryEndpoint() throws Exception {
-
-    // @formatter:off
-    mvc.perform(get("/.well-known/openid-configuration"))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$.issuer", equalTo("http://localhost:8080/")));
-    // @formatter:on
   }
 
   @Test

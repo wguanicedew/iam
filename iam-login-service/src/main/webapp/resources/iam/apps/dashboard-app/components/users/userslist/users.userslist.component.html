@@ -114,11 +114,10 @@
                 </tbody>
             </table>
         </div>
-        <div class="text-center">
-            <ul id="users_pagination_top" uib-pagination ng-model="$ctrl.currentPage"
+        <div>
+            <ul id="users_pagination_bottom" uib-pagination ng-model="$ctrl.currentPage"
                 items-per-page="$ctrl.itemsPerPage" total-items="$ctrl.totalResults" max-size="3" rotate="true"
-                boundary-links="true" direction-links="true" ng-change="$ctrl.searchUsers($ctrl.currentPage)"
-                previous-text="&lsaquo;" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;">
+                boundary-link-numbers="true" direction-links="false" ng-change="$ctrl.searchUsers()">
             </ul>
         </div>
     </div>

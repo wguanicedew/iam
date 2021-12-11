@@ -17,7 +17,7 @@ package it.infn.mw.iam.api.account.group;
 
 import java.util.function.Supplier;
 
-import it.infn.mw.iam.api.common.NoSuchAccountError;
+import it.infn.mw.iam.api.common.error.NoSuchAccountError;
 import it.infn.mw.iam.core.group.error.NoSuchGroupError;
 
 public class ErrorSuppliers {

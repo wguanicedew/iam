@@ -49,7 +49,7 @@ import eu.emi.security.authn.x509.proxy.ProxyCertificate;
 import eu.emi.security.authn.x509.proxy.ProxyCertificateOptions;
 import eu.emi.security.authn.x509.proxy.ProxyGenerator;
 import eu.emi.security.authn.x509.proxy.ProxyType;
-import it.infn.mw.iam.api.common.NoSuchAccountError;
+import it.infn.mw.iam.api.common.error.NoSuchAccountError;
 import it.infn.mw.iam.api.proxy.DefaultProxyCertificateService;
 import it.infn.mw.iam.api.proxy.ProxyCertificateDTO;
 import it.infn.mw.iam.api.proxy.ProxyCertificateProperties;

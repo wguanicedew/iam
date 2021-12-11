@@ -41,7 +41,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import it.infn.mw.iam.api.account.AccountUtils;
 import it.infn.mw.iam.api.aup.AUPSignatureCheckService;
 import it.infn.mw.iam.authn.EnforceAupSignatureSuccessHandler;
-import it.infn.mw.iam.core.web.EnforceAupFilter;
+import it.infn.mw.iam.core.web.aup.EnforceAupFilter;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 

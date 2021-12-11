@@ -35,7 +35,7 @@ import org.springframework.security.web.authentication.Http403ForbiddenEntryPoin
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.context.SecurityContextPersistenceFilter;
 
-import it.infn.mw.iam.config.client_registration.ClientRegistrationProperties;
+import it.infn.mw.iam.api.client.registration.ClientRegistrationApiController;
 
 @SuppressWarnings("deprecation")
 @Configuration
@@ -105,38 +105,36 @@ public class MitreSecurityConfig {
   @Order(12)
   public static class RegisterEndpointAuthorizationConfig extends WebSecurityConfigurerAdapter {
 
-    public static final String REGISTER_ENDPOINT_PATTERN = "/register/**";
-    
+    public static final String REGISTER_ENDPOINT_PATTERN =
+        ClientRegistrationApiController.ENDPOINT + "/**";
+
+    public static final String LEGACY_REGISTER_ENDPOINT_PATTERN = "/register/**";
+
     @Autowired
     private OAuth2AuthenticationProcessingFilter resourceFilter;
 
     @Autowired
     private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
 
-    @Autowired
-    private ClientRegistrationProperties clientRegProps;
 
     @Override
     public void configure(final HttpSecurity http) throws Exception {
 
-      HttpSecurity registerEndpoint = http.antMatcher(REGISTER_ENDPOINT_PATTERN);
-
-      registerEndpoint.exceptionHandling()
+      HttpSecurity registerEndpoint = http.requestMatchers()
+        .antMatchers(REGISTER_ENDPOINT_PATTERN, LEGACY_REGISTER_ENDPOINT_PATTERN)
+        .and()
+        .exceptionHandling()
         .authenticationEntryPoint(authenticationEntryPoint)
         .and()
         .addFilterAfter(resourceFilter, SecurityContextPersistenceFilter.class)
         .sessionManagement()
-        .sessionCreationPolicy(STATELESS);
+        .sessionCreationPolicy(NEVER)
+        .and()
+        .authorizeRequests()
+        .antMatchers(REGISTER_ENDPOINT_PATTERN, LEGACY_REGISTER_ENDPOINT_PATTERN)
+        .permitAll()
+        .and();
 
-      if (ClientRegistrationProperties.AccessPolicy.ANYONE.equals(clientRegProps.getAllowFor())) {
-        registerEndpoint.authorizeRequests().antMatchers(REGISTER_ENDPOINT_PATTERN).permitAll();
-      } else {
-        registerEndpoint.authorizeRequests()
-          .antMatchers(REGISTER_ENDPOINT_PATTERN)
-          .hasAnyRole("USER", "ADMIN")
-          .and().sessionManagement().sessionCreationPolicy(NEVER);
-      }
-      
       registerEndpoint.csrf().disable();
     }
   }
@@ -305,5 +303,5 @@ public class MitreSecurityConfig {
       // @formatter:on
     }
   }
-  
+
 }

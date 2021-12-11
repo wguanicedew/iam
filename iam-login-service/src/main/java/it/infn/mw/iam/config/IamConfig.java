@@ -76,7 +76,7 @@ import it.infn.mw.iam.core.oauth.scope.matchers.DefaultScopeMatcherRegistry;
 import it.infn.mw.iam.core.oauth.scope.matchers.ScopeMatcherRegistry;
 import it.infn.mw.iam.core.oauth.scope.matchers.ScopeMatchersProperties;
 import it.infn.mw.iam.core.oauth.scope.matchers.ScopeMatchersPropertiesParser;
-import it.infn.mw.iam.core.web.EnforceAupFilter;
+import it.infn.mw.iam.core.web.aup.EnforceAupFilter;
 import it.infn.mw.iam.notification.NotificationProperties;
 import it.infn.mw.iam.notification.service.resolver.AddressResolutionService;
 import it.infn.mw.iam.notification.service.resolver.AdminNotificationDeliveryStrategy;

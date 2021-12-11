@@ -19,6 +19,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import org.mitre.openid.connect.web.ServerConfigInterceptor;
 import org.slf4j.Logger;
@@ -29,6 +30,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.http.CacheControl;
 import org.springframework.web.servlet.LocaleResolver;
@@ -46,7 +48,7 @@ import org.springframework.web.servlet.view.JstlView;
 
 import it.infn.mw.iam.core.userinfo.IamUserInfoInterceptor;
 import it.infn.mw.iam.core.util.PoliteJsonMessageSource;
-import it.infn.mw.iam.core.web.IamViewInfoInterceptor;
+import it.infn.mw.iam.core.web.util.IamViewInfoInterceptor;
 
 @Configuration
 public class MvcConfig implements WebMvcConfigurer {
@@ -73,6 +75,8 @@ public class MvcConfig implements WebMvcConfigurer {
   @Value("${git.commit.id.abbrev}")
   String gitCommit;
 
+  @Autowired
+  Environment env;
 
   @Override
   public void addInterceptors(final InterceptorRegistry registry) {
@@ -85,14 +89,19 @@ public class MvcConfig implements WebMvcConfigurer {
 
   @Override
   public void addResourceHandlers(final ResourceHandlerRegistry registry) {
-
-    registry.addResourceHandler("/resources/**")
+    
+    if (Stream.of(env.getActiveProfiles()).anyMatch(p -> p.equals("h2-test"))) {
+      registry.addResourceHandler("/resources/**")
+        .addResourceLocations("/resources/")
+        .setCacheControl(CacheControl.noCache());
+    } else {
+      registry.addResourceHandler("/resources/**")
       .addResourceLocations("/resources/")
       .setCacheControl(CacheControl.maxAge(30, TimeUnit.DAYS))
       .resourceChain(false)
       .addResolver(
-          new VersionResourceResolver().addFixedVersionStrategy(gitCommit, "/**"));
-
+            new VersionResourceResolver().addFixedVersionStrategy(gitCommit, "/**"));
+    }
 
     if (iamProperties.getLocalResources().isEnable()) {
       if (isNullOrEmpty(iamProperties.getLocalResources().getLocation())) {

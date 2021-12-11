@@ -42,8 +42,7 @@
         self.deleteLabel = deleteLabel;
 
         self.$onInit = function () {
-            console.log('GroupLabelsController onInit');
-            console.log('GroupLabelsController self.labels: ', self.labels);
+            console.log('GroupLabelsController.self', self);
         };
 
         function isAdmin() {
@@ -67,20 +66,20 @@
                         body: 'Label deleted'
                     });
                 }).catch(
-                function (res) {
-                    $state.reload();
-                    if (res.data) {
-                        toaster.pop({
-                            type: 'error',
-                            body: res.data.error
-                        });
-                    } else {
-                        toaster.pop({
-                            type: 'error',
-                            body: 'Error deleting label'
-                        });
-                    }
-                });
+                    function (res) {
+                        $state.reload();
+                        if (res.data) {
+                            toaster.pop({
+                                type: 'error',
+                                body: res.data.error
+                            });
+                        } else {
+                            toaster.pop({
+                                type: 'error',
+                                body: 'Error deleting label'
+                            });
+                        }
+                    });
         }
 
         function setLabel() {

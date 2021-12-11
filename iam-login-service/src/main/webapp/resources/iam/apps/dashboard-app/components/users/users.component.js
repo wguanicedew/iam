@@ -39,6 +39,11 @@
                 animation: false,
                 templateUrl: '/resources/iam/apps/dashboard-app/templates/loading-modal.html'
             });
+            self.modal.result.catch(res => {
+                if (res !== 'Cancel') {
+                    return $q.reject(res);
+                }
+            });
             return self.modal.opened;
         };
 
@@ -53,6 +58,8 @@
         };
 
         self.loadData = function () {
+
+
 
             return self.openLoadingModal()
                 .then(function () {

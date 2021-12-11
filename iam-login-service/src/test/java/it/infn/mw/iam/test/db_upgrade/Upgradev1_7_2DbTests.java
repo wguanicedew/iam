@@ -15,6 +15,13 @@
  */
 package it.infn.mw.iam.test.db_upgrade;
 
+import static it.infn.mw.iam.test.api.account.search.service.DefaultPagedAccountsServiceTests.TOTAL_TEST_ACCOUNTS;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import java.io.IOException;
+
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
@@ -28,7 +35,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import it.infn.mw.iam.test.util.db.MySQL57TestContainer;
 
-@Testcontainers
+@Testcontainers(disabledWithoutDocker = true)
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
@@ -47,6 +54,11 @@ public class Upgradev1_7_2DbTests extends UpgradeDbTestSupport {
   @DynamicPropertySource
   static void registerMysqlConnectionString(DynamicPropertyRegistry registry) {
     registry.add("spring.datasource.url", db::getJdbcUrl);
+  }
+
+  @Test
+  public void dbUpgradeSucceeds() throws IOException {
+    assertThat(accountRepo.count(), is(TOTAL_TEST_ACCOUNTS));
   }
 
 }
