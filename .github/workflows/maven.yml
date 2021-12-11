@@ -71,7 +71,7 @@ jobs:
     - name: Build & push iam-login-service docker image
       uses: docker/build-push-action@v2
       with:
-        tags: ${{ steps.ls-meta.output.tags }}
+        tags: ${{ steps.ls-meta.outputs.tags }}
         labels: ${{ steps.ls-meta.outputs.labels }}
         context: iam-login-service/docker/
         file: iam-login-service/docker/Dockerfile.prod
@@ -80,7 +80,7 @@ jobs:
     - name: Build & push iam-test-client docker image
       uses: docker/build-push-action@v2
       with:
-        tags: ${{ steps.tc-meta.output.tags }}
+        tags: ${{ steps.tc-meta.outputs.tags }}
         labels: ${{ steps.tc-meta.outputs.labels }}
         context: iam-test-client/docker/
         file: iam-test-client/docker/Dockerfile.prod
