@@ -51,21 +51,19 @@ jobs:
       run: ./utils/tag-push-images.sh  ${GITHUB_REF#refs/tags/}
 
     - name: Docker metainformation for iam-login-service
-      id: login-service-meta
+      id: ls-meta
       uses: docker/metadata-action@v3
       with:
         images: indigoiam/iam-login-service
-        flavor: latest=true
         tags: |
           type=sha
           type=ref,event=tag
 
     - name: Docker metainformation for iam-test-client
-      id: test-client-meta
+      id: tc-meta
       uses: docker/metadata-action@v3
       with:
         images: indigoiam/iam-test-client
-        flavor: latest=true
         tags: |
           type=sha
           type=ref,event=tag
@@ -73,7 +71,8 @@ jobs:
     - name: Build & push iam-login-service docker image
       uses: docker/build-push-action@v2
       with:
-        tags: ${{steps.login-service-meta.output.tags}}
+        tags: ${{ steps.ls-meta.output.tags }}
+        labels: ${{ steps.ls-meta.outputs.labels }}
         context: iam-login-service/docker/
         file: iam-login-service/docker/Dockerfile.prod
         push: ${{ startsWith(github.ref, 'refs/tags/') }}
@@ -81,7 +80,8 @@ jobs:
     - name: Build & push iam-test-client docker image
       uses: docker/build-push-action@v2
       with:
-        tags: ${{steps.test-client-meta.output.tags}}
+        tags: ${{ steps.tc-meta.output.tags }}
+        labels: ${{ steps.tc-meta.outputs.labels }}
         context: iam-test-client/docker/
         file: iam-test-client/docker/Dockerfile.prod
         push: ${{ startsWith(github.ref, 'refs/tags/') }}
