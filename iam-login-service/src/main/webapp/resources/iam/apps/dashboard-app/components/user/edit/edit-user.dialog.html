@@ -165,9 +165,9 @@
 
     <div class="modal-footer">
         <button class="btn btn-primary" type="submit" name="create" id="modal-btn-confirm"
-            ng-disabled="$ctrl.isSubmitDisabled()">Update</button>
+            ng-click="$ctrl.isSubmitDisabled()">Update</button>
         <button class="btn btn-warning" type="button" name="reset" id="modal-btn-reset" ng-click="$ctrl.reset()"
-            ng-disabled="userUpdateForm.$pristine">Reset Form</button>
+            ng-click="userUpdateForm.$pristine">Reset Form</button>
         <button class="btn btn-danger" type="button" name="dismiss" id="modal-btn-cancel"
             ng-click="$ctrl.dismiss()">Cancel</button>
     </div>
