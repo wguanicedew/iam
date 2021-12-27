@@ -152,7 +152,7 @@
                         ng-show="userUpdateForm.picture.$dirty && userUpdateForm.picture.$error.url"> This field is not
                         a valid URL </span>
                     <span class="help-block"
-                        ng-show="userUpdateForm.username.$dirty && userUpdateForm.username.$error.isImage"> This field
+                        ng-show="userUpdateForm.picture.$dirty && userUpdateForm.picture.$error.isImage"> This field
                         is not a valid image </span>
                 </div>
                 <div class="col-sm-12">
@@ -174,4 +174,5 @@
         <button class="btn btn-danger" type="button" name="dismiss" id="modal-btn-cancel"
             ng-click="$ctrl.dismiss()">Cancel</button>
     </div>
+    
 </form>
