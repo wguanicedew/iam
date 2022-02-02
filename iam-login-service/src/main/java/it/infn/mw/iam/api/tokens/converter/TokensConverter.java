@@ -89,6 +89,7 @@ public class TokensConverter {
     return ClientRef.builder()
         .id(cd.getId())
         .clientId(cd.getClientId())
+        .clientName(cd.getClientName())
         .contacts(cd.getContacts())
         .ref(cd.getClientUri())
         .build();

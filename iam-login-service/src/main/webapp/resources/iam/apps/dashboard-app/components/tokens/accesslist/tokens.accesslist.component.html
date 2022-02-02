@@ -80,7 +80,9 @@
                             <h5>{{$index + $ctrl.currentOffset}}</h5>
                         </td>
                         <td class="align-middle">
-                            <h5><a ui-sref="client({id: token.client.clientId})">{{token.client.clientId}}</a></h5>
+                            <a ui-sref="client({id: token.client.clientId})">{{token.client.clientName}}</a>
+                            <br/>
+                            <small>{{token.client.clientId}}</small>
                         </td>
                         <td class="align-middle" ng-if="token.user != null">
                             <a ui-sref="user({id: token.user.id})">{{token.user.userName}}</a>
