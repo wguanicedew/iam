@@ -18,8 +18,8 @@ package db.migration.test;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import db.migration.tasks.RemoveOrphanTokens;
 import it.infn.mw.iam.persistence.migrations.BaseFlywayJavaMigrationAdapter;
+import it.infn.mw.iam.persistence.migrations.RemoveOrphanTokens;
 
 public class V100000_3___RemoveOrphanTokens extends BaseFlywayJavaMigrationAdapter {
 

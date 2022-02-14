@@ -20,8 +20,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import db.migration.tasks.CreateGroupManagerAuthorities;
 import it.infn.mw.iam.persistence.migrations.BaseFlywayJavaMigrationAdapter;
+import it.infn.mw.iam.persistence.migrations.CreateGroupManagerAuthorities;
 
 public class V23___CreateGroupManagerAuthorities extends BaseFlywayJavaMigrationAdapter {
 

@@ -18,8 +18,8 @@ package db.migration.test;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import db.migration.tasks.CreateGroupManagerAuthorities;
 import it.infn.mw.iam.persistence.migrations.BaseFlywayJavaMigrationAdapter;
+import it.infn.mw.iam.persistence.migrations.CreateGroupManagerAuthorities;
 
 public class V100000_1___CreateGroupManagerAuthorities extends BaseFlywayJavaMigrationAdapter {
 

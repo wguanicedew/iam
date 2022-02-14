@@ -13,15 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package db.migration.tasks;
+package it.infn.mw.iam.persistence.migrations;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
-
-import it.infn.mw.iam.persistence.migrations.SpringJdbcFlywayMigration;
 
 public class CreateGroupManagerAuthorities implements SpringJdbcFlywayMigration {
 
