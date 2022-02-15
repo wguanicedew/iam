@@ -110,7 +110,9 @@ public class RegistrationAccessTokenTests extends TestSupport {
     managementService.rotateRegistrationAccessToken(getResponse.getClientId());
 
     assertThat(rotatedRatClient.getRegistrationAccessToken(), notNullValue());
-
+    
+    try {
+      
     RestAssured.given()
       .auth()
       .oauth2(registerResponse.getRegistrationAccessToken())
@@ -128,7 +130,12 @@ public class RegistrationAccessTokenTests extends TestSupport {
       .get(registerUrl + "/" + registerResponse.getClientId())
       .then()
       .statusCode(HttpStatus.OK.value());
-
+   }
+    
+   finally {
+    managementService.deleteClientByClientId(getResponse.getClientId());
+   }
+    
   }
 
   @Test
@@ -149,7 +156,7 @@ public class RegistrationAccessTokenTests extends TestSupport {
         .statusCode(HttpStatus.CREATED.value())
         .extract().body().as(RegisteredClientDTO.class);
     // @formatter:on
-
+    try {
     assertThat(registerResponse.getRegistrationAccessToken(), notNullValue());
     assertThat(registerResponse.getScope(), not(empty()));
 
@@ -204,6 +211,10 @@ public class RegistrationAccessTokenTests extends TestSupport {
       .statusCode(HttpStatus.OK.value())
       .body("totalResults", equalTo(1))
       .body("Resources[0].client_id", equalTo(registerResponse.getClientId()));
+}
+  finally {
+    managementService.deleteClientByClientId(registerResponse.getClientId());
   }
+ }
 
 }
