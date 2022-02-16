@@ -32,6 +32,9 @@
                     <input class="form-control" id="name" name="name" placeholder="First name" required type="text"
                         ng-minlength="3" ng-maxlength="64" ng-model="$ctrl.eUser.name" ng-pattern="$ctrl.pattern"
                         ng-disabled="!$ctrl.isAdmin() && !$ctrl.isUserEditableField('NAME')" />
+                    <span class="glyphicon form-control-feedback"
+                        ng-class="{'glyphicon-remove': userUpdateForm.name.$dirty && userUpdateForm.name.$invalid, 'glyphicon-ok': userUpdateForm.name.$dirty && userUpdateForm.name.$valid}"
+                        style="right: 15px"></span>
                     <span class="help-block"
                         ng-show="userUpdateForm.name.$dirty && userUpdateForm.name.$error.required"> This is a required
                         field </span>
@@ -149,7 +152,7 @@
                         ng-show="userUpdateForm.picture.$dirty && userUpdateForm.picture.$error.url"> This field is not
                         a valid URL </span>
                     <span class="help-block"
-                        ng-show="userUpdateForm.username.$dirty && userUpdateForm.username.$error.isImage"> This field
+                        ng-show="userUpdateForm.picture.$dirty && userUpdateForm.picture.$error.isImage"> This field
                         is not a valid image </span>
                 </div>
                 <div class="col-sm-12">
@@ -171,4 +174,5 @@
         <button class="btn btn-danger" type="button" name="dismiss" id="modal-btn-cancel"
             ng-click="$ctrl.dismiss()">Cancel</button>
     </div>
+    
 </form>

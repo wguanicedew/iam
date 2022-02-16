@@ -161,8 +161,8 @@
       return !self.enabled || !$scope.userUpdateForm.$dirty ||
         $scope.userUpdateForm.name.$invalid ||
         $scope.userUpdateForm.surname.$invalid ||
-        $scope.userUpdateForm.email.$invalid ||
-        $scope.userUpdateForm.username.$invalid ||
+        ($scope.userUpdateForm.email.$invalid && $scope.userUpdateForm.email.$dirty) ||
+        ($scope.userUpdateForm.username.$invalid && $scope.userUpdateForm.username.$dirty) ||
         $scope.userUpdateForm.picture.$invalid;
     }
   }
