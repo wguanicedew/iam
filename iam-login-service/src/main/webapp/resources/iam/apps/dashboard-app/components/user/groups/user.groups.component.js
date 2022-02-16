@@ -22,7 +22,15 @@
         self.$onInit = function () {
             console.log('UserGroupsController onInit');
             self.enabled = true;
-        };
+            self.userGroupLabels = {};
+            self.labelName = labelName;
+
+            angular.forEach(self.user.groups, function(g){
+                self.groupLabels(g.value).then(function(res){
+                    self.userGroupLabels[g.value] = res;
+                });
+            });  
+    };
 
         self.isVoAdmin = function () { return self.userCtrl.isVoAdmin(); };
 
@@ -35,9 +43,27 @@
                 });
             });
         };
+        
+        self.groupLabels = function(groupId){
+            
+                return scimFactory.getGroup(groupId).then(function(res){     
+                   var r = res.data;
+                   var labels = r['urn:indigo-dc:scim:schemas:IndigoGroup'].labels;
+                   return labels;
+            });
+        };
 
-        self.openAddGroupDialog = function () {
-            var modalInstance = $uibModal.open({
+
+        function labelName(label) {
+            if (label.prefix) {
+                return label.prefix + "/" + label.name;
+            }
+            return label.name;
+        }
+        
+        self.openAddGroupDialog = function() {
+
+          var modalInstance = $uibModal.open({
                 component: 'groupMembershipAdder',
                 controllerAs: '$ctrl',
                 keyboard: false,
