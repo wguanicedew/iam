@@ -115,10 +115,10 @@
 
     self.getAccessTokenList = function(startIndex, count) {
       if (self.clientSelected && self.userSelected) {
-        return TokensService.getAccessTokensFilteredByUserAndClient(startIndex, count, self.userSelected.userName, self.clientSelected.clientId);
+        return TokensService.getAccessTokensFilteredByUserAndClient(startIndex, count, self.userSelected.userName, self.clientSelected.client_id);
       } 
       if (self.clientSelected) {
-        return TokensService.getAccessTokensFilteredByClient(startIndex, count, self.clientSelected.clientId);
+        return TokensService.getAccessTokensFilteredByClient(startIndex, count, self.clientSelected.client_id);
       } 
       if (self.userSelected) {
         return TokensService.getAccessTokensFilteredByUser(startIndex, count, self.userSelected.userName);

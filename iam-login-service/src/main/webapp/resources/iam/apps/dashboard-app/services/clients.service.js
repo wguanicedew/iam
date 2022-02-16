@@ -43,10 +43,15 @@
             retrieveClientOwners: retrieveClientOwners,
             assignClientOwner: assignClientOwner,
             removeClientOwner: removeClientOwner,
-            newClient: newClient
+            newClient: newClient,
+            getClientList: getClientList
         };
 
         return service;
+        
+        function getClientList(){
+        	return $http.get(clientsEndpoint);
+        }
 
         function endpoint(clientId) {
             return clientsEndpoint + '/' + clientId;

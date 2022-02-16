@@ -22,10 +22,10 @@
         <div class="row">
             <div class="col-md-5">
                 <ui-select id="rtok_client_search_btn" ng-model="$ctrl.clientSelected" theme="bootstrap" sortable="true" close-on-select="true" input-id="rtok_client_search" style="width: 100%;" on-select="$ctrl.searchTokens(1)">
-                    <ui-select-match allow-clear="true" placeholder="Filter tokens by client...">{{$ctrl.clientSelected.clientId}}</ui-select-match>
-                    <ui-select-choices repeat="client in $ctrl.clients | filter: {clientId: $select.search}">
-                        <div ng-bind-html="client.clientId | highlight: $select.search"></div>
-                        <small> {{ client.clientName }} </small>
+                    <ui-select-match allow-clear="true" placeholder="Filter tokens by client...">{{$ctrl.clientSelected.client_name}}</ui-select-match>
+                    <ui-select-choices repeat="client in $ctrl.clients | filter: {client_name: $select.search}">
+                        <div ng-bind-html="client.client_name | highlight: $select.search"></div>
+                        <small> {{ client.client_id }} </small>
                     </ui-select-choices>
                     <ui-select-no-choice> No results found </ui-select-no-choice>
                 </ui-select>
@@ -79,7 +79,7 @@
                             <h5>{{$index + $ctrl.currentOffset}}</h5>
                         </td>
                         <td class="align-middle">
-                            <h5><a ui-sref="client({id: token.client.id})">{{token.client.clientId}}</a></h5>
+                            <h5><a ui-sref="client({id: token.client.clientId})">{{token.client.clientId}}</a></h5>
                         </td>
                         <td class="align-middle" ng-if="token.user != null">
                             <a ui-sref="user({id: token.user.id})">{{token.user.userName}}</a>

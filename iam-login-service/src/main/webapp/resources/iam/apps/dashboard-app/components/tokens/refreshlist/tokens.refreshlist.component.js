@@ -115,10 +115,10 @@
 
     self.getRefreshTokenList = function(startIndex, count) {
       if (self.clientSelected && self.userSelected) {
-        return TokensService.getRefreshTokensFilteredByUserAndClient(startIndex, count, self.userSelected.userName, self.clientSelected.clientId);
+        return TokensService.getRefreshTokensFilteredByUserAndClient(startIndex, count, self.userSelected.userName, self.clientSelected.client_id);
       } 
       if (self.clientSelected) {
-        return TokensService.getRefreshTokensFilteredByClient(startIndex, count, self.clientSelected.clientId);
+        return TokensService.getRefreshTokensFilteredByClient(startIndex, count, self.clientSelected.client_id);
       } 
       if (self.userSelected) {
         return TokensService.getRefreshTokensFilteredByUser(startIndex, count, self.userSelected.userName);

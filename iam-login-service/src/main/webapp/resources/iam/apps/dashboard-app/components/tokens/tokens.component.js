@@ -58,7 +58,9 @@
 
     self.loadClients = function() {
         return ClientsService.getClientList().then(function(r) {
-            self.clients = r.data;
+            var c = r.data;
+            self.clients = c['Resources'];
+            console.log('all clients received');
         });
     }
 
