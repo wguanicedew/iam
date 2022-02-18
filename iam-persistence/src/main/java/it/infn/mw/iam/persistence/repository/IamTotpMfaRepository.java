@@ -24,5 +24,5 @@ import it.infn.mw.iam.persistence.model.IamTotpMfa;
 public interface IamTotpMfaRepository
     extends CrudRepository<IamTotpMfa, Long>, IamTotpMfaRepositoryCustom {
 
-  Optional<IamTotpMfa> findByAccount_Id(Long id);
+  Optional<IamTotpMfa> findByAccountId(Long id);
 }
