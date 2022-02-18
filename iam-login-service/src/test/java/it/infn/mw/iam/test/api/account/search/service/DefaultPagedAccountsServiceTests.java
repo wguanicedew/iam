@@ -44,7 +44,7 @@ import it.infn.mw.iam.test.util.annotation.IamMockMvcIntegrationTest;
 public class DefaultPagedAccountsServiceTests extends AccountServiceUtils {
 
   public static final int ITEMS_PER_PAGE = 10;
-  public static final long TOTAL_TEST_ACCOUNTS = 253L;
+  public static final long TOTAL_TEST_ACCOUNTS = 254L;
   private static final int LAST_PAGE_NUMBER = (int) Math.ceil(TOTAL_TEST_ACCOUNTS / ITEMS_PER_PAGE);
   private static final int LAST_PAGE_SIZE = (int) (long) TOTAL_TEST_ACCOUNTS % ITEMS_PER_PAGE;
   private static final int LAST_PAGE_OFFSET =
@@ -139,7 +139,8 @@ public class DefaultPagedAccountsServiceTests extends AccountServiceUtils {
   @Test
   public void testGetLastPageSortByNameAsc() {
 
-    OffsetPageable op = new OffsetPageable(LAST_PAGE_OFFSET, ITEMS_PER_PAGE, getSortByName(Sort.Direction.ASC));
+    OffsetPageable op =
+        new OffsetPageable(LAST_PAGE_OFFSET, ITEMS_PER_PAGE, getSortByName(Sort.Direction.ASC));
     Page<IamAccount> page = accountService.getPage(op);
     assertSortIsByNameAsc(page.getContent());
   }
@@ -148,7 +149,8 @@ public class DefaultPagedAccountsServiceTests extends AccountServiceUtils {
   @Test
   public void testGetLastPageSortByNameDesc() {
 
-    OffsetPageable op = new OffsetPageable(LAST_PAGE_OFFSET, ITEMS_PER_PAGE, getSortByName(Sort.Direction.DESC));
+    OffsetPageable op =
+        new OffsetPageable(LAST_PAGE_OFFSET, ITEMS_PER_PAGE, getSortByName(Sort.Direction.DESC));
     Page<IamAccount> page = accountService.getPage(op);
     assertSortIsByNameDesc(page.getContent());
   }
