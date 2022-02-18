@@ -41,8 +41,8 @@ public class IamTotpMfaRepositoryTests {
   @Test
   public void testAccountIdResolutionWorksAsExpected() {
 
-    IamAccount testAccount = accountRepo.findByUsername("test")
-      .orElseThrow(() -> new AssertionError("Expected 'test' user not found"));
+    IamAccount testAccount = accountRepo.findByUsername("test-with-mfa")
+      .orElseThrow(() -> new AssertionError("Expected 'test-with-mfa' user not found"));
 
     IamTotpMfa totpMfa = totpMfaRepo.findByAccount(testAccount)
       .orElseThrow(() -> new AssertionError("Expected totp mfa secret not found"));
