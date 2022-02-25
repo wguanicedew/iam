@@ -48,7 +48,9 @@ import org.springframework.security.oauth2.provider.endpoint.RedirectResolver;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.support.SessionStatus;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
@@ -65,6 +67,7 @@ import it.infn.mw.iam.persistence.model.IamAccount;
  * @author jricher
  *
  */
+@SuppressWarnings("deprecation")
 @Controller
 @SessionAttributes("authorizationRequest")
 public class IamOAuthConfirmationController {
@@ -110,10 +113,10 @@ public class IamOAuthConfirmationController {
   }
 
   @PreAuthorize("hasRole('ROLE_USER')")
-  @RequestMapping("/oauth/confirm_access")
+  @RequestMapping(path = "/oauth/confirm_access", method = RequestMethod.GET)
   public String confimAccess(Map<String, Object> model,
       @ModelAttribute("authorizationRequest") AuthorizationRequest authRequest,
-      Authentication authUser) {
+      Authentication authUser, SessionStatus status) {
 
     // Check the "prompt" parameter to see if we need to do special processing
 
@@ -135,7 +138,7 @@ public class IamOAuthConfirmationController {
     }
 
     if (client == null) {
-      logger.error("confirmAccess: could not find client " + authRequest.getClientId());
+      logger.error("confirmAccess: could not find client %s", authRequest.getClientId());
       model.put(HttpCodeView.CODE, HttpStatus.NOT_FOUND);
       return HttpCodeView.VIEWNAME;
     }
@@ -154,6 +157,7 @@ public class IamOAuthConfirmationController {
                                                                     // one was given
         }
 
+        status.setComplete();
         return "redirect:" + uriBuilder.toString();
 
       } catch (URISyntaxException e) {
@@ -233,11 +237,8 @@ public class IamOAuthConfirmationController {
     // warning
     // instead, tag as "Generally Recognized As Safe" (gras)
     Date lastWeek = new Date(System.currentTimeMillis() - (60 * 60 * 24 * 7 * 1000));
-    if (count > 1 && client.getCreatedAt() != null && client.getCreatedAt().before(lastWeek)) {
-      model.put("gras", true);
-    } else {
-      model.put("gras", false);
-    }
+    Boolean expression = count > 1 && client.getCreatedAt() != null && client.getCreatedAt().before(lastWeek);
+    model.put("gras", expression);
 
     return "iam/approveClient";
   }
