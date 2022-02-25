@@ -138,7 +138,7 @@ public class IamOAuthConfirmationController {
     }
 
     if (client == null) {
-      logger.error("confirmAccess: could not find client %s", authRequest.getClientId());
+      logger.error("confirmAccess: could not find client {}", authRequest.getClientId());
       model.put(HttpCodeView.CODE, HttpStatus.NOT_FOUND);
       return HttpCodeView.VIEWNAME;
     }
@@ -170,9 +170,9 @@ public class IamOAuthConfirmationController {
     model.put("auth_request", authRequest);
     model.put("client", client);
 
-    String redirect_uri = authRequest.getRedirectUri();
+    String redirectUri = authRequest.getRedirectUri();
 
-    model.put("redirect_uri", redirect_uri);
+    model.put("redirect_uri", redirectUri);
 
 
     // pre-process the scopes
