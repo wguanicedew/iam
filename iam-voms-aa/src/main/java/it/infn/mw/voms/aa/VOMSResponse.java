@@ -25,7 +25,7 @@ public interface VOMSResponse {
 
   public enum Outcome {
     SUCCESS, FAILURE
-  };
+  }
 
   public Outcome getOutcome();
 

@@ -29,6 +29,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -56,7 +57,7 @@ public class IamDiscoveryEndpoint {
     this.wellKnownInfoProvider = wellKnownInfoProvider;
   }
 
-  @RequestMapping(value = {"/" + WEBFINGER_URL}, produces = MediaType.APPLICATION_JSON_VALUE)
+  @RequestMapping(value = {"/" + WEBFINGER_URL}, method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
   public String webfinger(@RequestParam("resource") String resource,
       @RequestParam(value = "rel", required = false) String rel, Model model) {
 
@@ -114,7 +115,7 @@ public class IamDiscoveryEndpoint {
     return "webfingerView";
   }
 
-  @RequestMapping("/" + OPENID_CONFIGURATION_URL)
+  @RequestMapping(value = {"/" + OPENID_CONFIGURATION_URL}, method = RequestMethod.GET)
   public String providerConfiguration(Model model) {
     model.addAttribute(JsonEntityView.ENTITY, wellKnownInfoProvider.getWellKnownInfo());
     return JsonEntityView.VIEWNAME;

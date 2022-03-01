@@ -23,7 +23,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 
@@ -31,7 +30,7 @@ public class StringAsSetOfStringsDeserializer extends JsonDeserializer<Set<Strin
 
   @Override
   public Set<String> deserialize(JsonParser p, DeserializationContext ctxt)
-      throws IOException, JsonProcessingException {
+      throws IOException {
 
     String stringValue = p.getValueAsString();
 

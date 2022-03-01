@@ -36,7 +36,7 @@ public class ClientSpecs {
   static final String CLIENT = "account";
   static final String USERNAME = "username";
 
-  public static enum SearchType {
+  public enum SearchType {
     name,
     contacts,
     scope,
