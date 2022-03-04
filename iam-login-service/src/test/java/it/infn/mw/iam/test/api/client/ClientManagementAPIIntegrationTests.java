@@ -39,7 +39,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.api.client.management.ClientManagementAPIController;
 import it.infn.mw.iam.api.common.client.RegisteredClientDTO;
-import it.infn.mw.iam.core.IamTokenService;
 import it.infn.mw.iam.test.api.TestSupport;
 import it.infn.mw.iam.test.oauth.client_registration.ClientRegistrationTestSupport.ClientJsonStringBuilder;
 import it.infn.mw.iam.test.util.annotation.IamMockMvcIntegrationTest;
@@ -54,9 +53,6 @@ public class ClientManagementAPIIntegrationTests extends TestSupport {
 
   @Autowired
   private ObjectMapper mapper;
-
-  @Autowired
-  private IamTokenService tokenService;
 
   @Test
   @WithAnonymousUser
