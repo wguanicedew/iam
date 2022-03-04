@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2019
+ * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2021
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,10 +115,10 @@
 
     self.getAccessTokenList = function(startIndex, count) {
       if (self.clientSelected && self.userSelected) {
-        return TokensService.getAccessTokensFilteredByUserAndClient(startIndex, count, self.userSelected.userName, self.clientSelected.clientId);
+        return TokensService.getAccessTokensFilteredByUserAndClient(startIndex, count, self.userSelected.userName, self.clientSelected.client_id);
       } 
       if (self.clientSelected) {
-        return TokensService.getAccessTokensFilteredByClient(startIndex, count, self.clientSelected.clientId);
+        return TokensService.getAccessTokensFilteredByClient(startIndex, count, self.clientSelected.client_id);
       } 
       if (self.userSelected) {
         return TokensService.getAccessTokensFilteredByUser(startIndex, count, self.userSelected.userName);

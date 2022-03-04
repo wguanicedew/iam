@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2019
+ * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2021
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import org.mitre.jwt.signer.service.JWTSigningAndValidationService;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.nimbusds.jose.jwk.JWK;
@@ -38,7 +38,7 @@ public class IamJWKSetPublishingEndpoint implements InitializingBean {
   @Autowired
   private JWTSigningAndValidationService jwtService;
 
-  @RequestMapping(value = "/" + URL, produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/" + URL, produces = MediaType.APPLICATION_JSON_VALUE)
   public String getJwk() {
 
     return jsonKeys;

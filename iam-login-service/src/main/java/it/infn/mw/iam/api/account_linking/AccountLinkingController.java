@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2019
+ * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2021
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,8 +49,8 @@ import it.infn.mw.iam.authn.x509.IamX509AuthenticationCredential;
 public class AccountLinkingController extends ExternalAuthenticationHandlerSupport {
   final AccountLinkingService linkingService;
 
-  @Value(ACCOUNT_LINKING_DISABLE_PROPERTY)
-  private Boolean accountLinkingDisabled;
+  @Value("${iam.account-linking.enable}")
+  private Boolean accountLinkingEnabled;
 
   @Autowired
   public AccountLinkingController(AccountLinkingService s) {
@@ -94,7 +94,7 @@ public class AccountLinkingController extends ExternalAuthenticationHandlerSuppo
 
 
   private void checkAccountLinkingEnabled(RedirectAttributes attributes) {
-    if (accountLinkingDisabled) {
+    if (!accountLinkingEnabled) {
       AccountLinkingDisabledException ex = new AccountLinkingDisabledException();
       saveAccountLinkingError(ex, attributes);
       throw ex;
@@ -123,7 +123,7 @@ public class AccountLinkingController extends ExternalAuthenticationHandlerSuppo
   @RequestMapping(value = "/{type}/done", method = {RequestMethod.GET, RequestMethod.POST})
   public String finalizeAccountLinking(@PathVariable ExternalAuthenticationType type,
       Principal principal, final RedirectAttributes redirectAttributes, HttpServletRequest request,
-      HttpServletResponse response) throws IOException {
+      HttpServletResponse response) {
 
     checkAccountLinkingEnabled(redirectAttributes);
     HttpSession session = request.getSession();
