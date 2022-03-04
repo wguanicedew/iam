@@ -176,11 +176,13 @@ INSERT INTO client_grant_type (owner_id, grant_type) VALUES
   (14, 'urn:ietf:params:oauth:grant-type:device_code');
     
 INSERT INTO iam_user_info(ID,GIVENNAME,FAMILYNAME, EMAIL, EMAILVERIFIED, BIRTHDATE, GENDER) VALUES
-(2, 'Test', 'User', 'test@iam.test', true, '1950-01-01','M');
+  (2, 'Test', 'User', 'test@iam.test', true, '1950-01-01','M'),
+  (1000, 'Test', 'MFA', 'testwithmfa@iam.test', true, '2000-01-01','F');
 
 
 INSERT INTO iam_account(id, uuid, username, password, user_info_id, creationtime, lastupdatetime, active) VALUES
-(2, '80e5fb8d-b7c8-451a-89ba-346ae278a66f', 'test', '$2a$10$UZeOZKD1.dj5oiTsZKD03OETA9FXCKGqBuuijhsxYygZpOPtWMUni', 2, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), true);
+  (2, '80e5fb8d-b7c8-451a-89ba-346ae278a66f', 'test', '$2a$10$UZeOZKD1.dj5oiTsZKD03OETA9FXCKGqBuuijhsxYygZpOPtWMUni', 2, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), true),
+  (1000, '467c882e-90da-11ec-b909-0242ac120002', 'test-with-mfa', '$2a$12$S3lUZw/ESq9lULn5he6bBu9KNGCvs7C2rWo0XdVC6t65ITwAc22w2', 1000, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), true);
 
 
 INSERT INTO iam_oidc_id(issuer, subject, account_id) VALUES
@@ -1511,5 +1513,6 @@ insert into iam_account_client(id, account_id, client_id, creation_time) VALUES
 (3, 199, 1, CURRENT_TIMESTAMP()),
 (4, 199, 2, CURRENT_TIMESTAMP());
 
-
-
+-- TOTP multi-factor secrets
+insert into iam_totp_mfa(active, secret, creation_time, last_update_time, account_id) VALUES
+(true, 'secret', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), 1000);
