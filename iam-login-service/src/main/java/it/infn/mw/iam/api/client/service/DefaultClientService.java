@@ -22,11 +22,13 @@ import java.util.function.Supplier;
 
 import org.mitre.oauth2.model.ClientDetailsEntity;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import it.infn.mw.iam.audit.events.client.ClientCreatedEvent;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamAccountClient;
 import it.infn.mw.iam.persistence.repository.client.ClientSpecs;
@@ -42,19 +44,23 @@ public class DefaultClientService implements ClientService {
   private final IamClientRepository clientRepo;
 
   private final IamAccountClientRepository accountClientRepo;
+  
+  private ApplicationEventPublisher eventPublisher;
 
   @Autowired
   public DefaultClientService(Clock clock, IamClientRepository clientRepo,
-      IamAccountClientRepository accountClientRepo) {
+      IamAccountClientRepository accountClientRepo, ApplicationEventPublisher eventPublisher) {
     this.clock = clock;
     this.clientRepo = clientRepo;
     this.accountClientRepo = accountClientRepo;
+    this.eventPublisher = eventPublisher;
   }
 
 
   @Override
   public ClientDetailsEntity saveNewClient(ClientDetailsEntity client) {
     client.setCreatedAt(Date.from(clock.instant()));
+    eventPublisher.publishEvent(new ClientCreatedEvent(this, client));
     return clientRepo.save(client);
   }
 
