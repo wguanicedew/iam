@@ -24,6 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -50,10 +51,11 @@ public class PasswordResetController {
 
   private String nullSafeValidationErrorMessage(BindingResult validationResult) {
     
-    if (validationResult.getFieldError(EMAIL_FIELD) == null) {
+    FieldError result = validationResult.getFieldError(EMAIL_FIELD);
+    if (result == null) {
       return EMAIL_VALIDATION_ERROR_MSG;
     } else {
-      return validationResult.getFieldError(EMAIL_FIELD).getDefaultMessage();
+      return result.getDefaultMessage();
     }
   }
 
