@@ -90,9 +90,9 @@ public class IamX509PreauthenticationProcessingFilter
       LOG.debug("No X.509 client credential found in request");
     }
 
+    String e = credential.get().verificationError();
     if (credential.isPresent() && credential.get().failedVerification()) {
-      LOG.warn("X.509 client credential failed verification: {}",
-          credential.get().verificationError());
+      LOG.warn("X.509 client credential failed verification: {}", e);
       return Optional.empty();
     }
 
