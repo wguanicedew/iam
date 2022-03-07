@@ -210,6 +210,7 @@ public class JWTSigningServiceTests implements JWKTestSupport {
 
     doThrow(new JOSEException("jose!")).when(mockSignedJwt).sign(ArgumentMatchers.any());
     signer.signJwt(mockSignedJwt);
+    assertThat(signer.validateSignature(mockSignedJwt), is(false));
   }
 
   @Test
