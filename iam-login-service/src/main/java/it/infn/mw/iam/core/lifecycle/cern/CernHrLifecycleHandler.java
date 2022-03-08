@@ -144,7 +144,7 @@ public class CernHrLifecycleHandler implements Runnable, SchedulingConfigurer {
     Optional<IamLabel> skipEmailSyncLabel =
         account.getLabelByPrefixAndName(LABEL_CERN_PREFIX, LABEL_SKIP_EMAIL_SYNCH);
 
-    if (skipEmailSyncLabel.isPresent()) {
+    if (skipEmailSyncLabel.isPresent() && LOG.isInfoEnabled()) {
       LOG.info(
           "Skipping email synchronization for account '{} ({})' as requested by the label '{}'",
           account.getUsername(), account.getUuid(), skipEmailSyncLabel.get().qualifiedName());

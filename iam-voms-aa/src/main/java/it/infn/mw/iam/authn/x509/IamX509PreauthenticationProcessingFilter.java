@@ -92,7 +92,7 @@ public class IamX509PreauthenticationProcessingFilter
 
     IamX509AuthenticationCredential c = credential.get();
 
-    if (c.failedVerification()) {
+    if (c.failedVerification() && LOG.isWarnEnabled()) {
       LOG.warn("X.509 client credential failed verification: {}", c.verificationError());
       return Optional.empty();
     }
