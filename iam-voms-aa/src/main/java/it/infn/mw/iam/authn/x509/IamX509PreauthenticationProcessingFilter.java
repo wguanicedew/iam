@@ -36,8 +36,7 @@ public class IamX509PreauthenticationProcessingFilter
     extends AbstractPreAuthenticatedProcessingFilter {
 
   public enum AuthenticationMode {
-    EXPLICIT,
-    IMPLICIT
+    EXPLICIT, IMPLICIT
   }
 
   public static final Logger LOG =
@@ -88,16 +87,17 @@ public class IamX509PreauthenticationProcessingFilter
 
     if (!credential.isPresent()) {
       LOG.debug("No X.509 client credential found in request");
-    }
-
-    String e = credential.get().verificationError();
-    if (credential.isPresent() && credential.get().failedVerification()) {
-      LOG.warn("X.509 client credential failed verification: {}", e);
       return Optional.empty();
     }
 
-    credential.ifPresent(c -> storeCredentialInSession(request, c));
+    IamX509AuthenticationCredential c = credential.get();
 
+    if (c.failedVerification()) {
+      LOG.warn("X.509 client credential failed verification: {}", c.verificationError());
+      return Optional.empty();
+    }
+
+    storeCredentialInSession(request, c);
     return credential;
   }
 
@@ -126,7 +126,8 @@ public class IamX509PreauthenticationProcessingFilter
   }
 
   private void handleSuccessfulAuthentication(HttpServletRequest request,
-      HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+      HttpServletResponse response, Authentication authentication)
+      throws IOException, ServletException {
 
     super.successfulAuthentication(request, response, authentication);
 
@@ -139,7 +140,8 @@ public class IamX509PreauthenticationProcessingFilter
   }
 
   protected void explicitSuccessfulAuthentication(HttpServletRequest request,
-      HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+      HttpServletResponse response, Authentication authentication)
+      throws IOException, ServletException {
     request.setAttribute(X509_CAN_LOGIN_KEY, Boolean.TRUE);
 
     if (x509AuthenticationRequested(request)) {
