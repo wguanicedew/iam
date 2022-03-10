@@ -26,12 +26,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
+import org.assertj.core.api.Assertions;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -207,5 +209,13 @@ public class IamCoreControllerTests {
     mvc.perform(get("/.well-known/webfinger").param("resource", "acct:not-found@example.org")
       .param("rel", "another.rel")).andExpect(status().isNotFound());
 
+  }
+  
+  @Test
+  public void testErrorPage() throws Exception {
+    Assertions
+        .assertThatThrownBy(
+            () -> mvc.perform(get("/error").contentType(MediaType.APPLICATION_JSON)))
+        .hasCauseInstanceOf(RuntimeException.class).hasMessageContaining("Request processing failed; nested exception is java.lang.NullPointerException");
   }
 }
