@@ -20,10 +20,6 @@ import static java.util.Objects.isNull;
 
 import java.util.Optional;
 
-import org.mitre.oauth2.model.ClientDetailsEntity;
-import org.mitre.oauth2.model.OAuth2AccessTokenEntity;
-import org.springframework.security.oauth2.provider.OAuth2Request;
-
 import com.nimbusds.jwt.JWTClaimsSet.Builder;
 
 import it.infn.mw.iam.config.IamProperties;
@@ -33,7 +29,6 @@ import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamLabel;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 
-@SuppressWarnings("deprecation")
 public abstract class BaseIdTokenCustomizer implements IDTokenCustomizer {
 
   private final IamAccountRepository accountRepo;
@@ -48,8 +43,7 @@ public abstract class BaseIdTokenCustomizer implements IDTokenCustomizer {
     return accountRepo;
   }
 
-  protected final void includeLabelsInIdToken(Builder idClaims, ClientDetailsEntity client,
-      OAuth2Request request, IamAccount account, OAuth2AccessTokenEntity accessToken) {
+  protected final void includeLabelsInIdToken(Builder idClaims, IamAccount account) {
 
     if (isNull(account)) {
       return;
