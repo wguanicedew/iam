@@ -15,6 +15,8 @@
  */
 package it.infn.mw.iam.config.security;
 
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -46,6 +48,7 @@ public class CorsConfig {
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     CorsConfiguration corsConfig = new CorsConfiguration();
     corsConfig.applyPermitDefaultValues();
+    corsConfig.setAllowedMethods(List.of(CorsConfiguration.ALL));
 
     for (String m : CORS_ENDPOINT_MATCHERS) {
       source.registerCorsConfiguration(m, corsConfig);
