@@ -111,7 +111,7 @@
                 <div class="col-sm-10">
                     <input class="form-control" id="username" name="username"
                         ng-disabled="$root.loggedUser.info.sub == $ctrl.id" type="text" ng-model="$ctrl.eUser.username"
-                        placeholder="Username" required ng-minlength="1" ng-maxlength="128"
+                        placeholder="Username" required ng-minlength="2" ng-maxlength="128"
                         iam-username-available-validator ng-pattern="$ctrl.pattern" />
                     <span class="glyphicon form-control-feedback"
                         ng-class="{'glyphicon-remove': userUpdateForm.username.$invalid && userUpdateForm.username.$dirty, 'glyphicon-ok': userUpdateForm.username.$valid && userUpdateForm.username.$dirty }"
@@ -121,7 +121,7 @@
                         This is a required field</span>
                     <span class="help-block"
                         ng-show="userUpdateForm.username.$dirty && userUpdateForm.username.$error.minlength"> Minimum
-                        length required is 1 </span>
+                        length required is 2 </span>
                     <span class="help-block"
                         ng-show="userUpdateForm.username.$dirty && userUpdateForm.username.$error.maxlength"> Maximum
                         length required is 128 </span>
