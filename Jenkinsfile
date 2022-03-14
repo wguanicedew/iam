@@ -43,6 +43,10 @@ pipeline {
   environment {
     DOCKER_REGISTRY_HOST = "${env.DOCKER_REGISTRY_HOST}"
     SONAR_USER_HOME = "${env.WORKSPACE}/.sonar"
+    SONAR_ORGANIZATION = "indigo-iam"
+    SONAR_HOST_URL = "https://sonarcloud.io"
+    SONAR_PROJECT_KEY = "indigo-iam_iam"
+    SONAR_TOKEN = credentials('sonar_token_vianello')
   }
 
   stages {
@@ -101,6 +105,18 @@ pipeline {
                 maybeArchiveJUnitReports()
               }
             }
+          }
+        }
+
+        stage('Sonar analysis') {
+          when {
+            expression {
+              return params.RUN_SONAR
+            }
+          }
+
+          steps {
+            sh "mvn -B -U install sonar:sonar -Dsonar.projectKey=${env.SONAR_PROJECT_KEY} -Dsonar.organization=${env.SONAR_ORGANIZATION} -Dsonar.login=${env.SONAR_TOKEN} -Dsonar.scm.provider=git -Dsonar.host.url=${env.SONAR_HOST_URL}"
           }
         }
 
