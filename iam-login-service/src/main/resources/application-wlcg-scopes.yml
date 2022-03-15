@@ -32,6 +32,10 @@ scope:
     type: path
     prefix: storage.create
     path: /
+  - name: storage.stage
+    type: path
+    prefix: storage.stage
+    path: /
   - name: wlcg.groups
     type: regexp
     regexp: ^wlcg\.groups(?::((?:\/[a-zA-Z0-9][a-zA-Z0-9_.-]*)+))?$
