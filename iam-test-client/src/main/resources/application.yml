@@ -8,8 +8,8 @@ server:
     context-path: /iam-test-client 
   
   port: ${IAM_CLIENT_PORT:9090}
-  
-  forward-headers-strategy: none
+
+  forward-headers-strategy: ${IAM_CLIENT_FORWARD_HEADERS_STRATEGY:none}
 
 iam:
     issuer: ${IAM_CLIENT_ISSUER:http://localhost:8080/}

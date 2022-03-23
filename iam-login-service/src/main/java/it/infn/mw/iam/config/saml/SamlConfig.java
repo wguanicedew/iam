@@ -223,14 +223,20 @@ public class SamlConfig extends WebSecurityConfigurerAdapter
   @ConfigurationProperties(prefix = "server")
   public static class ServerProperties {
 
-    private boolean useForwardHeaders;
+    private String forwardHeadersStrategy;
 
-    public boolean isUseForwardHeaders() {
-      return useForwardHeaders;
+
+    public String getForwardHeadersStrategy() {
+      return forwardHeadersStrategy;
     }
 
-    public void setUseForwardHeaders(boolean useForwardHeaders) {
-      this.useForwardHeaders = useForwardHeaders;
+    public void setForwardHeadersStrategy(String forwardHeadersStrategy) {
+      this.forwardHeadersStrategy = forwardHeadersStrategy;
+    }
+
+    public boolean isUseForwardHeaders() {
+      return "native".equals(forwardHeadersStrategy.toLowerCase())
+          || "framework".equals(forwardHeadersStrategy.toLowerCase());
     }
   }
 
