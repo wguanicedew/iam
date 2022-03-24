@@ -92,10 +92,10 @@ public class MitreSecurityConfig {
         .sessionManagement()
           .sessionCreationPolicy(STATELESS)
         .and()
-          .csrf().disable()
           .authorizeRequests()
             .antMatchers("/resource/**").permitAll()
-        .and() 
+        .and()
+          .csrf().disable()
         .cors();
       // @formatter:on
     }

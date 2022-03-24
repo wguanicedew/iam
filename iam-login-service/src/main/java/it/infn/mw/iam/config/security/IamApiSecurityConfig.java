@@ -89,10 +89,10 @@ public class IamApiSecurityConfig {
         .sessionManagement()
           .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .and()
-          .csrf().disable()
           .authorizeRequests()
-            .anyRequest().fullyAuthenticated()
-          ;
+            .anyRequest().fullyAuthenticated()            
+        .and()
+          .csrf().disable();
       // @formatter:on
     }
   }
@@ -127,7 +127,6 @@ public class IamApiSecurityConfig {
         .sessionManagement()
           .sessionCreationPolicy(SessionCreationPolicy.NEVER)
         .and()
-          .csrf().disable()
           .authorizeRequests()
             .antMatchers("/iam/password-reset/**").permitAll()
             .antMatchers(POST, "/registration/create").permitAll()
@@ -140,7 +139,9 @@ public class IamApiSecurityConfig {
             .antMatchers(GET, "/registration/submitted").permitAll()
             .antMatchers(GET, "/iam/config/**").permitAll()
             .antMatchers(GET, AUP_PATH).permitAll()
-            .anyRequest().authenticated();
+            .anyRequest().authenticated()
+        .and()
+          .csrf().disable();
       // @formatter:on
     }
   }
