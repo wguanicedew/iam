@@ -18,7 +18,6 @@ package it.infn.mw.iam.api.scim.updater;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 import org.mitre.oauth2.model.OAuth2AccessTokenEntity;
 import org.mitre.oauth2.model.OAuth2RefreshTokenEntity;
@@ -31,14 +30,6 @@ public class UsernameUpdater extends DefaultAccountUpdater<String, UsernameRepla
 
   private OAuth2TokenEntityService tokenService;
   private String oldUsername;
-
-  public UsernameUpdater(IamAccount account, UpdaterType type, Supplier<String> supplier,
-      Consumer<String> consumer, String newVal,
-      AccountEventBuilder<String, UsernameReplacedEvent> eventBuilder,
-      OAuth2TokenEntityService tokenService) {
-    super(account, type, supplier, consumer, newVal, eventBuilder);
-    this.tokenService = tokenService;
-  }
 
   public UsernameUpdater(IamAccount account, UpdaterType type, Consumer<String> consumer,
       String newVal, Predicate<String> predicate,
