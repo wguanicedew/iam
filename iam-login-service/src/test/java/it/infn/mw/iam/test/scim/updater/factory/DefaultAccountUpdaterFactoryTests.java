@@ -48,6 +48,7 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mitre.oauth2.service.OAuth2TokenEntityService;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
@@ -112,6 +113,9 @@ public class DefaultAccountUpdaterFactoryTests {
   @Mock
   IamAccountService accountService;
 
+  @Mock
+  OAuth2TokenEntityService tokenService;
+
   OidcIdConverter oidcConverter = new OidcIdConverter();
   SamlIdConverter samlConverter = new SamlIdConverter();
   SshKeyConverter sshKeyConverter = new SshKeyConverter();
@@ -123,8 +127,8 @@ public class DefaultAccountUpdaterFactoryTests {
   @Before
   public void init() {
 
-    factory = new DefaultAccountUpdaterFactory(encoder, repo, accountService, oidcConverter,
-        samlConverter, sshKeyConverter, x509Converter);
+    factory = new DefaultAccountUpdaterFactory(encoder, repo, accountService, tokenService,
+        oidcConverter, samlConverter, sshKeyConverter, x509Converter);
   }
 
   @Test

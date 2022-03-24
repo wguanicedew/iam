@@ -26,11 +26,13 @@ import static it.infn.mw.iam.api.scim.updater.UpdaterType.ACCOUNT_REPLACE_USERNA
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+import org.mitre.oauth2.service.OAuth2TokenEntityService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import it.infn.mw.iam.api.scim.exception.ScimResourceExistsException;
 import it.infn.mw.iam.api.scim.updater.AccountUpdater;
 import it.infn.mw.iam.api.scim.updater.DefaultAccountUpdater;
+import it.infn.mw.iam.api.scim.updater.UsernameUpdater;
 import it.infn.mw.iam.api.scim.updater.util.AccountFinder;
 import it.infn.mw.iam.api.scim.updater.util.IdNotBoundChecker;
 import it.infn.mw.iam.audit.events.account.ActiveReplacedEvent;
@@ -56,10 +58,13 @@ public class Replacers extends AccountBuilderSupport {
   final AccountFinder<String> findByEmail;
   final AccountFinder<String> findByUsername;
 
+  final OAuth2TokenEntityService tokenService;
+
   public Replacers(IamAccountRepository repo, IamAccountService accountService,
-      PasswordEncoder encoder, IamAccount account) {
+      PasswordEncoder encoder, IamAccount account, OAuth2TokenEntityService tokenService) {
 
     super(repo, accountService, encoder, account);
+    this.tokenService = tokenService;
     findByEmail = repo::findByEmail;
     findByUsername = repo::findByUsername;
     encodedPasswordSetter = t -> account.setPassword(encoder.encode(t));
@@ -130,9 +135,8 @@ public class Replacers extends AccountBuilderSupport {
 
   public AccountUpdater username(String newUsername) {
 
-    return new DefaultAccountUpdater<String, UsernameReplacedEvent>(account,
-        ACCOUNT_REPLACE_USERNAME, account::setUsername, newUsername, usernameAddChecks,
-        UsernameReplacedEvent::new);
+    return new UsernameUpdater(account, ACCOUNT_REPLACE_USERNAME, account::setUsername, newUsername,
+        usernameAddChecks, UsernameReplacedEvent::new, tokenService);
   }
 
   public AccountUpdater active(boolean isActive) {
