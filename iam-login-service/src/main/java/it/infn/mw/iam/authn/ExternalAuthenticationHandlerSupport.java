@@ -22,6 +22,7 @@ import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
@@ -127,7 +128,7 @@ public class ExternalAuthenticationHandlerSupport implements AccountLinkingConst
 
   protected void saveAccountLinkingError(Exception ex, RedirectAttributes attributes) {
 
-    attributes.addFlashAttribute(ACCOUNT_LINKING_DASHBOARD_ERROR_KEY, ex.getMessage());
+    attributes.addFlashAttribute(ACCOUNT_LINKING_DASHBOARD_ERROR_KEY, StringEscapeUtils.escapeHtml(ex.getMessage()));
   }
 
   protected void clearAccountLinkingError(HttpSession session) {
