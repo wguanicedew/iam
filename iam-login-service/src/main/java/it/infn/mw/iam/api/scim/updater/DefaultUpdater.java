@@ -53,8 +53,10 @@ public abstract class DefaultUpdater<T> implements Updater {
   public boolean update() {
 
     if (applyIf.test(newValue)) {
+      beforeUpdate();
       LOG.debug("{} applied for value '{}'", type, newValue);
       setter.accept(newValue);
+      afterUpdate();
       return true;
     }
 
@@ -69,5 +71,13 @@ public abstract class DefaultUpdater<T> implements Updater {
   @Override
   public UpdaterType getType() {
     return type;
+  }
+
+  @Override
+  public void beforeUpdate() {
+  }
+
+  @Override
+  public void afterUpdate() {
   }
 }

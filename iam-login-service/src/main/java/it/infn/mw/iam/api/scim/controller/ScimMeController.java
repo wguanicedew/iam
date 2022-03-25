@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
+import org.mitre.oauth2.service.OAuth2TokenEntityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
@@ -91,7 +92,7 @@ public class ScimMeController implements ApplicationEventPublisherAware {
 
   @Autowired
   public ScimMeController(IamAccountRepository accountRepository, IamAccountService accountService,
-      UserConverter userConverter,
+      OAuth2TokenEntityService tokenService, UserConverter userConverter,
       PasswordEncoder passwordEncoder, OidcIdConverter oidcIdConverter,
       SamlIdConverter samlIdConverter, SshKeyConverter sshKeyConverter,
       X509CertificateConverter x509CertificateConverter, IamProperties properties) {
@@ -99,7 +100,7 @@ public class ScimMeController implements ApplicationEventPublisherAware {
     this.iamAccountRepository = accountRepository;
     this.userConverter = userConverter;
     this.updatersFactory = new DefaultAccountUpdaterFactory(passwordEncoder, accountRepository,
-        accountService, oidcIdConverter, samlIdConverter, sshKeyConverter,
+        accountService, tokenService, oidcIdConverter, samlIdConverter, sshKeyConverter,
         x509CertificateConverter);
 
     enabledUpdaters = EnumSet.noneOf(UpdaterType.class);

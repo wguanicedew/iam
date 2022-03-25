@@ -41,5 +41,15 @@ public interface Updater {
    */
   UpdaterType getType();
 
+  /**
+   * Adds some logic before the update, in case update is done
+   */
+  void beforeUpdate();
+
+  /**
+   * Adds some logic after the update, in case update is done
+   */
+  void afterUpdate();
+
   void publishUpdateEvent(Object source, ApplicationEventPublisher publisher);
 }
