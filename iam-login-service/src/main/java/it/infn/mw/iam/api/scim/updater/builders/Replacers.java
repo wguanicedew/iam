@@ -58,13 +58,10 @@ public class Replacers extends AccountBuilderSupport {
   final AccountFinder<String> findByEmail;
   final AccountFinder<String> findByUsername;
 
-  final OAuth2TokenEntityService tokenService;
-
   public Replacers(IamAccountRepository repo, IamAccountService accountService,
       PasswordEncoder encoder, IamAccount account, OAuth2TokenEntityService tokenService) {
 
-    super(repo, accountService, encoder, account);
-    this.tokenService = tokenService;
+    super(repo, accountService, tokenService, encoder, account);
     findByEmail = repo::findByEmail;
     findByUsername = repo::findByUsername;
     encodedPasswordSetter = t -> account.setPassword(encoder.encode(t));

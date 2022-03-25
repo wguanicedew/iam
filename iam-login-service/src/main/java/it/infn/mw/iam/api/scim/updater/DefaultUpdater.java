@@ -75,11 +75,9 @@ public abstract class DefaultUpdater<T> implements Updater {
 
   @Override
   public void beforeUpdate() {
-    return;
   }
 
   @Override
   public void afterUpdate() {
-    return;
   }
 }
