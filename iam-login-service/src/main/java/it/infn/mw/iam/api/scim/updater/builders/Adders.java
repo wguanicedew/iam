@@ -27,6 +27,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+import org.mitre.oauth2.service.OAuth2TokenEntityService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.google.common.base.Strings;
@@ -65,8 +66,8 @@ public class Adders extends Replacers {
   final Consumer<Collection<IamSshKey>> linkSshKeys;
 
   public Adders(IamAccountRepository repo, IamAccountService accountService,
-      PasswordEncoder encoder, IamAccount account) {
-    super(repo, accountService, encoder, account);
+      PasswordEncoder encoder, IamAccount account, OAuth2TokenEntityService tokenService) {
+    super(repo, accountService, encoder, account, tokenService);
 
     findByOidcId = id -> repo.findByOidcId(id.getIssuer(), id.getSubject());
     findBySamlId = repo::findBySamlId;

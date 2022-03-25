@@ -34,6 +34,7 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.util.LinkedMultiValueMap;
@@ -48,6 +49,7 @@ import it.infn.mw.iam.api.common.ListResponseDTO;
 import it.infn.mw.iam.api.tokens.Constants;
 import it.infn.mw.iam.api.tokens.model.AccessToken;
 import it.infn.mw.iam.api.tokens.model.RefreshToken;
+import it.infn.mw.iam.core.user.IamAccountService;
 import it.infn.mw.iam.core.user.exception.IamAccountException;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
@@ -77,10 +79,16 @@ public class TestTokensUtils {
   protected DefaultOAuth2ProviderTokenService tokenService;
 
   @Autowired
+  protected IamAccountService accountService;
+
+  @Autowired
   private ObjectMapper mapper;
 
   @Autowired
   protected MockMvc mvc;
+
+  @Autowired
+  protected PasswordEncoder encoder;
 
   private OAuth2Authentication oauth2Authentication(ClientDetailsEntity client, String username,
       String[] scopes) {

@@ -31,6 +31,7 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mitre.oauth2.service.OAuth2TokenEntityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -97,6 +98,9 @@ public class AccountUpdatersTests extends X509TestSupport {
   private IamAccountService accountService;
 
   @Autowired
+  private OAuth2TokenEntityService tokenService;
+
+  @Autowired
   private PasswordEncoder encoder;
 
   private IamAccount account;
@@ -116,7 +120,7 @@ public class AccountUpdatersTests extends X509TestSupport {
   }
 
   private Adders accountAdders() {
-    return AccountUpdaters.adders(accountRepo, accountService, encoder, account);
+    return AccountUpdaters.adders(accountRepo, accountService, encoder, account, tokenService);
   }
 
   private Removers accountRemovers() {
@@ -124,15 +128,13 @@ public class AccountUpdatersTests extends X509TestSupport {
   }
 
   private Replacers accountReplacers() {
-    return AccountUpdaters.replacers(accountRepo, accountService, encoder, account);
+    return AccountUpdaters.replacers(accountRepo, accountService, encoder, account, tokenService);
   }
 
   @Before
   public void before() {
     account = newAccount("account");
     other = newAccount("other");
-
-
   }
 
   @Test
@@ -349,8 +351,6 @@ public class AccountUpdatersTests extends X509TestSupport {
     assertThat(account.getOidcIds(), hasSize(0));
 
   }
-
-
 
   @Test
   public void testOidcIdRemoverNoUpdateWithEmptyList2() {
