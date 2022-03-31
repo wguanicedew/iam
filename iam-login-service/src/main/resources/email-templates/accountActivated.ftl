@@ -6,7 +6,7 @@ The username for your account is:
 
 ${username}
 
-You can set your local $organisationName password by following this link:
+You can set your local ${organisationName} password by following this link:
 
 ${resetPasswordUrl}
 
