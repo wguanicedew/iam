@@ -41,7 +41,13 @@
             return AccountLifecycleService.setAccountEndTime(self.user.id, self.endTime).then(successHandler);
         };
 
-        self.endTime = self.indigoUser().endTime;
+
+        if (self.indigoUser() != undefined) {
+            self.endTime = self.indigoUser().endTime;
+        }
+        else {
+            self.endTime = undefined;
+        }
     }
 
     function UserEndTimeController(toaster, AccountLifecycleService, $uibModal, $filter) {

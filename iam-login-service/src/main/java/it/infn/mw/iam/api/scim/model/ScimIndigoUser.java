@@ -100,7 +100,7 @@ public class ScimIndigoUser {
   @JsonIgnore
   public boolean isEmpty() {
 
-    return sshKeys.isEmpty() && oidcIds.isEmpty() && samlIds.isEmpty() && certificates.isEmpty();
+    return sshKeys.isEmpty() && oidcIds.isEmpty() && samlIds.isEmpty() && certificates.isEmpty() && endTime==null;
   }
 
   public List<ScimSshKey> getSshKeys() {
