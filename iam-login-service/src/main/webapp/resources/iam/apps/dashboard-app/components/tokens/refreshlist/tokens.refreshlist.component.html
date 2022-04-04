@@ -57,11 +57,6 @@
 
         <div class="table-responsive" ng-if="$ctrl.tokens.length">
 
-            <div class="text-center">
-                <ul id="rtoken_pagination_top" uib-pagination ng-model="$ctrl.currentPage" items-per-page="$ctrl.itemsPerPage" total-items="$ctrl.totalResults" max-size="5" boundary-links="true" ng-change="$ctrl.searchTokens($ctrl.currentPage)">
-                </ul>
-            </div>
-
             <table class="table no-margin table-striped" id="refresh_token_list">
                 <thead>
                     <tr>
@@ -102,8 +97,8 @@
                 </tbody>
             </table>
 
-            <div class="text-center">
-                <ul id="rtoken_pagination_bottom" uib-pagination ng-model="$ctrl.currentPage" items-per-page="$ctrl.itemsPerPage" total-items="$ctrl.totalResults" max-size="5" boundary-links="true" ng-change="$ctrl.searchTokens($ctrl.currentPage)">
+            <div>
+                <ul id="rtoken_pagination_bottom" uib-pagination ng-model="$ctrl.currentPage" items-per-page="$ctrl.itemsPerPage" total-items="$ctrl.totalResults" max-size="5" rotate="true" boundary-link-numbers="true" direction-links="false" ng-change="$ctrl.searchTokens($ctrl.currentPage)">
                 </ul>
             </div>
         </div>

@@ -47,14 +47,13 @@
 
     var self = this;
 
-    // pagination controls
-    self.currentPage = 1;
-    self.currentOffset = 1;
-    self.itemsPerPage = 10;
-    self.totalResults = self.total;
-
     self.$onInit = function() {
       console.debug("init AccessTokensListController", self.tokens, self.currentPage, self.currentOffset, self.totalResults);
+      // pagination controls
+      self.currentPage = 1;
+      self.currentOffset = 1;
+      self.itemsPerPage = 10;
+      self.totalResults = self.total;
     };
 
     $scope.$on('refreshAccessTokensList', function(e) {
