@@ -47,11 +47,9 @@ public class CorsConfig {
   CorsFilter corsFilter() {
 
     CorsConfiguration corsConfig = new CorsConfiguration();
-    // corsConfig.applyPermitDefaultValues();
-    corsConfig.setAllowCredentials(true);
-    corsConfig.setAllowedOrigins(ImmutableList.of("*"));
     corsConfig.setAllowedMethods(
         ImmutableList.of("HEAD", "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+    corsConfig.applyPermitDefaultValues();
 
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     for (String m : CORS_ENDPOINT_MATCHERS) {
