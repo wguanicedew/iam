@@ -15,13 +15,13 @@
  */
 package it.infn.mw.iam.config.security;
 
-import java.util.List;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
+
+import com.google.common.collect.ImmutableList;
 
 @Configuration
 public class CorsConfig {
@@ -45,11 +45,15 @@ public class CorsConfig {
 
   @Bean
   CorsFilter corsFilter() {
-    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    CorsConfiguration corsConfig = new CorsConfiguration();
-    corsConfig.applyPermitDefaultValues();
-    corsConfig.setAllowedMethods(List.of(CorsConfiguration.ALL));
 
+    CorsConfiguration corsConfig = new CorsConfiguration();
+    // corsConfig.applyPermitDefaultValues();
+    corsConfig.setAllowCredentials(true);
+    corsConfig.setAllowedOrigins(ImmutableList.of("*"));
+    corsConfig.setAllowedMethods(
+        ImmutableList.of("HEAD", "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     for (String m : CORS_ENDPOINT_MATCHERS) {
       source.registerCorsConfiguration(m, corsConfig);
     }
