@@ -47,7 +47,7 @@ import it.infn.mw.iam.authn.x509.IamX509AuthenticationCredential;
 
 @Controller
 @CrossOrigin(origins = "*")
-@RequestMapping(AccountLinkingController.ACCCOUNT_LINKING_BASE_RESOURCE)
+@RequestMapping(AccountLinkingController.ACCOUNT_LINKING_BASE_RESOURCE)
 public class AccountLinkingController extends ExternalAuthenticationHandlerSupport {
   final AccountLinkingService linkingService;
 

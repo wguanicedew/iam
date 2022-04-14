@@ -41,7 +41,7 @@ import it.infn.mw.iam.authn.x509.IamX509AuthenticationCredential;
 
 public class ExternalAuthenticationHandlerSupport implements AccountLinkingConstants {
 
-  public static final String ACCCOUNT_LINKING_BASE_RESOURCE = "/iam/account-linking";
+  public static final String ACCOUNT_LINKING_BASE_RESOURCE = "/iam/account-linking";
 
   public static final String ACCOUNT_LINKING_SESSION_KEY =
       ExternalAuthenticationHandlerSupport.class.getName() + ".LINKING";
@@ -144,7 +144,7 @@ public class ExternalAuthenticationHandlerSupport implements AccountLinkingConst
   protected void setupAccountLinkingSessionKey(HttpSession session,
       ExternalAuthenticationType type) {
     session.setAttribute(ACCOUNT_LINKING_SESSION_KEY,
-        String.format("%s/%s", ACCCOUNT_LINKING_BASE_RESOURCE, type.name()));
+        String.format("%s/%s", ACCOUNT_LINKING_BASE_RESOURCE, type.name()));
   }
 
   protected void saveAuthenticationInSession(HttpSession session, Authentication authn) {
