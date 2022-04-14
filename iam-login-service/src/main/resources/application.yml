@@ -79,6 +79,9 @@ spring:
   freemarker:
     template-loader-path: ${IAM_CUSTOM_TEMPLATE_LOCATION:classpath:/email-templates}
 
+  main:
+    allow-circular-references: true
+
 iam:
   
   host: ${IAM_HOST:localhost}
