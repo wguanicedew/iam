@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 import org.mitre.jwt.signer.service.JWTSigningAndValidationService;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -43,11 +44,14 @@ public class IamJWKSetPublishingEndpoint implements InitializingBean {
 
   @Autowired
   private IamJWTSigningService jwtService;
+  
+  @Value("${spring.web.resources.cache.cachecontrol.max-age}")
+  private int maxAge;
 
   @GetMapping(value = "/" + URL, produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody
   public ResponseEntity<String> getJwk() {
-    return ResponseEntity.ok().cacheControl(CacheControl.maxAge(6, TimeUnit.HOURS).noTransform().mustRevalidate()).body(jsonKeys);
+    return ResponseEntity.ok().cacheControl(CacheControl.maxAge(maxAge, TimeUnit.SECONDS).noTransform().mustRevalidate()).body(jsonKeys);
   }
 
   /**
