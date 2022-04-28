@@ -130,6 +130,10 @@ public class AccountLinkingController extends ExternalAuthenticationHandlerSuppo
     checkAccountLinkingEnabled(redirectAttributes);
     HttpSession session = request.getSession();
 
+    if (principal == null) {
+      principal = getAccountLinkingSavedAuthentication(session);
+    }
+
     if (!hasAccountLinkingDoneKey(session)) {
       throw new IllegalArgumentException("No account linking done key found in request.");
     }
