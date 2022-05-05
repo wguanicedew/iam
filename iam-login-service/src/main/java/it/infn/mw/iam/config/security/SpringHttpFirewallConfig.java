@@ -15,23 +15,21 @@
  */
 package it.infn.mw.iam.config.security;
 
-import java.util.function.Predicate;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
 
+import com.google.common.base.Predicates;
+
 @Configuration
 public class SpringHttpFirewallConfig {
-
-  public static final Predicate<String> ANY_VALUE = s -> true;
 
   @Bean
   HttpFirewall iamHttpFirewall() {
 
     StrictHttpFirewall httpFirewall = new StrictHttpFirewall();
-    httpFirewall.setAllowedHeaderValues(ANY_VALUE);
+    httpFirewall.setAllowedHeaderValues(Predicates.alwaysTrue());
 
     return httpFirewall;
   }

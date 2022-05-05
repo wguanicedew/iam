@@ -20,12 +20,13 @@ import java.io.IOException;
 import java.security.KeyStoreException;
 import java.security.cert.CertificateException;
 import java.time.Clock;
-import java.util.function.Predicate;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
+
+import com.google.common.base.Predicates;
 
 import eu.emi.security.authn.x509.impl.PEMCredential;
 import it.infn.mw.iam.authn.x509.IamX509AuthenticationProvider;
@@ -50,13 +51,11 @@ import it.infn.mw.voms.properties.VomsProperties;
 @Configuration
 public class VomsConfig {
 
-  public static final Predicate<String> ANY_VALUE = s -> true;
-
   @Bean
   HttpFirewall allowHeadersHttpFirewall() {
 
     StrictHttpFirewall httpFirewall = new StrictHttpFirewall();
-    httpFirewall.setAllowedHeaderValues(ANY_VALUE);
+    httpFirewall.setAllowedHeaderValues(Predicates.alwaysTrue());
 
     return httpFirewall;
   }
