@@ -122,6 +122,7 @@ import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
@@ -217,6 +218,9 @@ public class SamlConfig extends WebSecurityConfigurerAdapter
 
   @Autowired
   private IamSSOProfileOptions defaultOptions;
+
+  @Autowired
+  private HttpFirewall firewall;
 
   private MultiThreadedHttpConnectionManager connectionManager;
 
@@ -870,7 +874,10 @@ public class SamlConfig extends WebSecurityConfigurerAdapter
     chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/SingleLogout/**"),
         samlLogoutProcessingFilter()));
 
-    return new FilterChainProxy(chains);
+    FilterChainProxy fcp = new FilterChainProxy(chains);
+    fcp.setFirewall(firewall);
+
+    return fcp;
   }
 
   @Override
