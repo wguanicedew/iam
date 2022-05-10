@@ -34,6 +34,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import it.infn.mw.iam.test.util.db.MySQL57TestContainer;
+import it.infn.mw.iam.test.util.db.MySQL80TestContainer;
 
 @Testcontainers(disabledWithoutDocker = true)
 @SpringBootTest
@@ -54,6 +55,17 @@ public class Upgradev1_7_2DbTests extends UpgradeDbTestSupport {
   @DynamicPropertySource
   static void registerMysqlConnectionString(DynamicPropertyRegistry registry) {
     registry.add("spring.datasource.url", db::getJdbcUrl);
+  }
+
+  @Container
+  static MySQL80TestContainer db80 =
+      new MySQL80TestContainer().withClasspathResourceMapping(
+          joinPathStrings(DB_DUMPS_DIR, DB_DUMP), joinPathStrings(INITDB_DIR, DB_DUMP),
+          BindMode.READ_ONLY);
+
+  @DynamicPropertySource
+  static void registerMysql80ConnectionString(DynamicPropertyRegistry registry) {
+    registry.add("spring.datasource.url", db80::getJdbcUrl);
   }
 
   @Test
