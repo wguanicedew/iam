@@ -36,7 +36,7 @@ public class Upgradev1_7_0DbTests extends UpgradeDbTestSupport {
   public static final String DB_DUMP = "iam-v1.7.0-mysql5.7.sql";
 
   @Container
-  static MySQL57TestContainer db =
+  static MySQL57TestContainer db57 =
       new MySQL57TestContainer().withClasspathResourceMapping(
           joinPathStrings(DB_DUMPS_DIR, DB_DUMP), joinPathStrings(INITDB_DIR, DB_DUMP),
           BindMode.READ_ONLY);
@@ -54,7 +54,7 @@ public class Upgradev1_7_0DbTests extends UpgradeDbTestSupport {
 
     BeanCreationException exception = assertThrows(BeanCreationException.class, () -> {
       iamApp.run("--spring.profiles.active=mysql-test,flyway-repair",
-          "--spring.datasource.url=" + db.getJdbcUrl());
+          "--spring.datasource.url=" + db57.getJdbcUrl());
     });
 
     assertThat(exception.getMessage(),

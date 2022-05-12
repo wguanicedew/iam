@@ -17,7 +17,8 @@ package it.infn.mw.iam.test.db_upgrade;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import it.infn.mw.iam.persistence.repository.IamAccountRepository;
+import it.infn.mw.iam.api.common.PagedResourceService;
+import it.infn.mw.iam.persistence.model.IamAccount;
 
 public abstract class UpgradeDbTestSupport {
 
@@ -29,7 +30,7 @@ public abstract class UpgradeDbTestSupport {
   }
 
   @Autowired
-  IamAccountRepository accountRepo;
+  PagedResourceService<IamAccount> accountService;
 
 
 }
