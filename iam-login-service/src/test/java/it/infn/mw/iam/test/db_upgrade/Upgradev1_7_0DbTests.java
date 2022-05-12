@@ -28,6 +28,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import it.infn.mw.iam.IamLoginService;
 import it.infn.mw.iam.test.util.db.MySQL57TestContainer;
+import it.infn.mw.iam.test.util.db.MySQL80TestContainer;
 
 @Testcontainers(disabledWithoutDocker = true)
 public class Upgradev1_7_0DbTests extends UpgradeDbTestSupport {
@@ -35,8 +36,14 @@ public class Upgradev1_7_0DbTests extends UpgradeDbTestSupport {
   public static final String DB_DUMP = "iam-v1.7.0-mysql5.7.sql";
 
   @Container
-  static MySQL57TestContainer db =
+  static MySQL57TestContainer db57 =
       new MySQL57TestContainer().withClasspathResourceMapping(
+          joinPathStrings(DB_DUMPS_DIR, DB_DUMP), joinPathStrings(INITDB_DIR, DB_DUMP),
+          BindMode.READ_ONLY);
+
+  @Container
+  static MySQL80TestContainer db80 =
+      new MySQL80TestContainer().withClasspathResourceMapping(
           joinPathStrings(DB_DUMPS_DIR, DB_DUMP), joinPathStrings(INITDB_DIR, DB_DUMP),
           BindMode.READ_ONLY);
 
@@ -47,7 +54,21 @@ public class Upgradev1_7_0DbTests extends UpgradeDbTestSupport {
 
     BeanCreationException exception = assertThrows(BeanCreationException.class, () -> {
       iamApp.run("--spring.profiles.active=mysql-test,flyway-repair",
-          "--spring.datasource.url=" + db.getJdbcUrl());
+          "--spring.datasource.url=" + db57.getJdbcUrl());
+    });
+
+    assertThat(exception.getMessage(),
+        containsString("'version_rank' doesn't have a default value"));
+  }
+
+  @Test
+  public void db80UpgradeFailsGracefully() throws Exception {
+
+    SpringApplication iamApp = new SpringApplication(IamLoginService.class);
+
+    BeanCreationException exception = assertThrows(BeanCreationException.class, () -> {
+      iamApp.run("--spring.profiles.active=mysql-test,flyway-repair",
+          "--spring.datasource.url=" + db80.getJdbcUrl());
     });
 
     assertThat(exception.getMessage(),

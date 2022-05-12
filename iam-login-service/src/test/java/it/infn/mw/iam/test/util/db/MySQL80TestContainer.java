@@ -13,24 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.test.db_upgrade;
+package it.infn.mw.iam.test.util.db;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.testcontainers.containers.MySQLContainer;
 
-import it.infn.mw.iam.api.common.PagedResourceService;
-import it.infn.mw.iam.persistence.model.IamAccount;
+public class MySQL80TestContainer extends MySQLContainer<MySQL80TestContainer> {
 
-public abstract class UpgradeDbTestSupport {
+  public static final String DEFAULT_IMAGE = "mysql:8.0";
+  public static final String DEFAULT_DATABASE_NAME = "iam";
+  public static final String DEFAULT_USERNAME = "iam";
+  public static final String DEFAULT_PASSWORD = "pwd";
 
-  public static final String INITDB_DIR = "/docker-entrypoint-initdb.d";
-  public static final String DB_DUMPS_DIR = "db-dumps";
-
-  public static String joinPathStrings(String first, String second) {
-    return String.format("%s/%s", first, second);
+  public MySQL80TestContainer() {
+    super(DEFAULT_IMAGE);
+    withDatabaseName(DEFAULT_DATABASE_NAME);
+    withPassword(DEFAULT_PASSWORD);
+    withUsername(DEFAULT_USERNAME);
   }
-
-  @Autowired
-  PagedResourceService<IamAccount> accountService;
-
 
 }
