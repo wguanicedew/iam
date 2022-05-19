@@ -25,10 +25,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.oauth2.provider.OAuth2RequestValidator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import it.infn.mw.iam.audit.events.client.ClientCreatedEvent;
+import it.infn.mw.iam.core.oauth.scope.matchers.ScopeMatcherOAuthRequestValidator;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamAccountClient;
 import it.infn.mw.iam.persistence.repository.client.ClientSpecs;
@@ -37,6 +39,7 @@ import it.infn.mw.iam.persistence.repository.client.IamClientRepository;
 
 @Service
 @Transactional
+@SuppressWarnings("deprecation")
 public class DefaultClientService implements ClientService {
 
   private final Clock clock;
@@ -44,16 +47,20 @@ public class DefaultClientService implements ClientService {
   private final IamClientRepository clientRepo;
 
   private final IamAccountClientRepository accountClientRepo;
-  
+
   private ApplicationEventPublisher eventPublisher;
+
+  private OAuth2RequestValidator requestValidator;
 
   @Autowired
   public DefaultClientService(Clock clock, IamClientRepository clientRepo,
-      IamAccountClientRepository accountClientRepo, ApplicationEventPublisher eventPublisher) {
+      IamAccountClientRepository accountClientRepo, ApplicationEventPublisher eventPublisher,
+      OAuth2RequestValidator requestValidator) {
     this.clock = clock;
     this.clientRepo = clientRepo;
     this.accountClientRepo = accountClientRepo;
     this.eventPublisher = eventPublisher;
+    this.requestValidator = requestValidator;
   }
 
 
@@ -86,14 +93,15 @@ public class DefaultClientService implements ClientService {
   @Override
   public ClientDetailsEntity unlinkClientFromAccount(ClientDetailsEntity client, IamAccount owner) {
 
-    accountClientRepo.findByAccountAndClient(owner, client)
-      .ifPresent(accountClientRepo::delete);
+    accountClientRepo.findByAccountAndClient(owner, client).ifPresent(accountClientRepo::delete);
 
     return client;
   }
 
   @Override
   public ClientDetailsEntity updateClient(ClientDetailsEntity client) {
+
+    ((ScopeMatcherOAuthRequestValidator) requestValidator).invalidateScope(client);
     return clientRepo.save(client);
   }
 

@@ -69,4 +69,7 @@ public class ScopeMatcherOAuthRequestValidator implements OAuth2RequestValidator
     validateScope(tokenRequest.getScope(), client);
   }
 
+  public void invalidateScope(ClientDetails client) {
+    scopeMatchersCache.invalidate(client);
+  }
 }
