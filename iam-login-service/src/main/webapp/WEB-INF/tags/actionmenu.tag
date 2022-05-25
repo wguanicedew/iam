@@ -13,10 +13,10 @@
 <li class="nav-header"><spring:message code="sidebar.personal.title"/></li>
 <li><a href="manage/#user/approved" data-toggle="collapse" data-target=".nav-collapse"><spring:message code="sidebar.personal.approved_sites"/></a></li>
 <li><a href="manage/#user/tokens" data-toggle="collapse" data-target=".nav-collapse"><spring:message code="sidebar.personal.active_tokens"/></a></li>
+<li><a href="/dashboard" data-toggle="collapse" data-target=".nav-collapse"><spring:message code="sidebar.personal.profile_information"/></a></li>
 <li class="divider"></li>
 <li class="nav-header"><spring:message code="sidebar.developer.title"/></li>
 <li><a href="manage/#dev/resource" data-toggle="collapse" data-target=".nav-collapse"><spring:message code="sidebar.developer.resource_registration"/></a><li>
-
 <li class="divider"></li>
 <li class="nav-header">Deprecated since IAM v1.8.0</li>
 <security:authorize access="hasRole('ROLE_ADMIN')">
