@@ -18,6 +18,7 @@ package it.infn.mw.iam.api.client.management.service;
 import static it.infn.mw.iam.api.client.util.ClientSuppliers.accountNotFound;
 import static it.infn.mw.iam.api.client.util.ClientSuppliers.clientNotFound;
 
+import java.text.ParseException;
 import java.time.Clock;
 import java.util.Date;
 import java.util.Optional;
@@ -110,7 +111,8 @@ public class DefaultClientManagementService implements ClientManagementService {
 
   @Validated(OnClientCreation.class)
   @Override
-  public RegisteredClientDTO saveNewClient(RegisteredClientDTO client) {
+  public RegisteredClientDTO saveNewClient(RegisteredClientDTO client)
+      throws ParseException {
 
     ClientDetailsEntity entity = converter.entityFromClientManagementRequest(client);
     entity.setDynamicallyRegistered(false);
@@ -134,7 +136,8 @@ public class DefaultClientManagementService implements ClientManagementService {
 
   @Validated(OnClientUpdate.class)
   @Override
-  public RegisteredClientDTO updateClient(String clientId, RegisteredClientDTO client) {
+  public RegisteredClientDTO updateClient(String clientId, RegisteredClientDTO client)
+      throws ParseException {
 
     ClientDetailsEntity oldClient = clientService.findClientByClientId(clientId)
       .orElseThrow(ClientSuppliers.clientNotFound(clientId));

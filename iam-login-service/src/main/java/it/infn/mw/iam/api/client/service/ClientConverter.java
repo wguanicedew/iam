@@ -18,6 +18,7 @@ package it.infn.mw.iam.api.client.service;
 import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.toSet;
 
+import java.text.ParseException;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -27,6 +28,8 @@ import org.mitre.oauth2.model.ClientDetailsEntity.AuthMethod;
 import org.mitre.oauth2.model.PKCEAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.nimbusds.jose.jwk.JWKSet;
 
 import it.infn.mw.iam.api.client.registration.ClientRegistrationApiController;
 import it.infn.mw.iam.api.common.client.AuthorizationGrantType;
@@ -58,7 +61,8 @@ public class ClientConverter {
   }
 
 
-  public ClientDetailsEntity entityFromClientManagementRequest(RegisteredClientDTO dto) {
+  public ClientDetailsEntity entityFromClientManagementRequest(RegisteredClientDTO dto)
+      throws ParseException {
     ClientDetailsEntity client = entityFromRegistrationRequest(dto);
 
     if (dto.getAccessTokenValiditySeconds() != null) {
@@ -98,6 +102,7 @@ public class ClientConverter {
     }
 
     client.setRequireAuthTime(Boolean.valueOf(dto.isRequireAuthTime()));
+
     return client;
   }
 
@@ -167,7 +172,8 @@ public class ClientConverter {
     return clientDTO;
   }
 
-  public ClientDetailsEntity entityFromRegistrationRequest(RegisteredClientDTO dto) {
+  public ClientDetailsEntity entityFromRegistrationRequest(RegisteredClientDTO dto)
+      throws ParseException {
 
     ClientDetailsEntity client = new ClientDetailsEntity();
 
@@ -178,7 +184,12 @@ public class ClientConverter {
 
     client.setClientUri(dto.getClientUri());
 
-    client.setJwksUri(dto.getJwksUri());
+    if (dto.getJwksUri() != null) {
+      // URI validity is checked via RegisteredClientDTO annotations
+      client.setJwksUri(dto.getJwksUri());
+    } else if (dto.getJwk() != null) {
+      client.setJwks(JWKSet.parse(dto.getJwk()));
+    }
 
     client.setLogoUri(dto.getLogoUri());
     client.setPolicyUri(dto.getPolicyUri());
