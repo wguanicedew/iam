@@ -18,6 +18,8 @@ package it.infn.mw.iam.api.client.registration;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 
+import java.text.ParseException;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolationException;
 
@@ -63,8 +65,8 @@ public class ClientRegistrationApiController {
   @PostMapping
   @ResponseStatus(code = CREATED)
   @JsonView({ClientViews.DynamicRegistration.class})
-  public RegisteredClientDTO registerClient(
-      @RequestBody RegisteredClientDTO request, Authentication authentication) {
+  public RegisteredClientDTO registerClient(@RequestBody RegisteredClientDTO request,
+      Authentication authentication) throws ParseException {
     return service.registerClient(request, authentication);
 
   }
@@ -80,7 +82,8 @@ public class ClientRegistrationApiController {
   @PutMapping("/{clientId}")
   @JsonView({ClientViews.DynamicRegistration.class})
   public RegisteredClientDTO updateClient(@PathVariable String clientId,
-      @RequestBody RegisteredClientDTO request, Authentication authentication) {
+      @RequestBody RegisteredClientDTO request, Authentication authentication)
+      throws ParseException {
 
     return service.updateClient(clientId, request, authentication);
   }
@@ -102,6 +105,12 @@ public class ClientRegistrationApiController {
   @ResponseStatus(value = HttpStatus.BAD_REQUEST)
   @ExceptionHandler(ConstraintViolationException.class)
   public ErrorDTO constraintValidationError(HttpServletRequest req, Exception ex) {
+    return ErrorDTO.fromString(ex.getMessage());
+  }
+
+  @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(ParseException.class)
+  public ErrorDTO parseExceptionError(HttpServletRequest req, Exception ex) {
     return ErrorDTO.fromString(ex.getMessage());
   }
 

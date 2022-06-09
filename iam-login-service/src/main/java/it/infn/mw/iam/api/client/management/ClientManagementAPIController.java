@@ -20,6 +20,7 @@ import static it.infn.mw.iam.api.common.PagingUtils.buildPageRequest;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 
+import java.text.ParseException;
 import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
@@ -68,7 +69,8 @@ public class ClientManagementAPIController {
 
   @PostMapping
   @ResponseStatus(CREATED)
-  public RegisteredClientDTO saveNewClient(@RequestBody RegisteredClientDTO client) {
+  public RegisteredClientDTO saveNewClient(@RequestBody RegisteredClientDTO client)
+      throws ParseException {
     return managementService.saveNewClient(client);
   }
 
@@ -126,7 +128,8 @@ public class ClientManagementAPIController {
 
   @PutMapping("/{clientId}")
   public RegisteredClientDTO updateClient(@PathVariable String clientId,
-      @RequestBody RegisteredClientDTO client) {
+      @RequestBody RegisteredClientDTO client)
+      throws ParseException {
     return managementService.updateClient(clientId, client);
   }
 
@@ -160,4 +163,9 @@ public class ClientManagementAPIController {
     return ErrorDTO.fromString(ex.getMessage());
   }
 
+  @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(ParseException.class)
+  public ErrorDTO jsonMappingError(HttpServletRequest req, Exception ex) {
+    return ErrorDTO.fromString(ex.getMessage());
+  }
 }
