@@ -29,6 +29,7 @@ import org.mitre.oauth2.model.PKCEAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Strings;
 import com.nimbusds.jose.jwk.JWKSet;
 
 import it.infn.mw.iam.api.client.registration.ClientRegistrationApiController;
@@ -184,10 +185,9 @@ public class ClientConverter {
 
     client.setClientUri(dto.getClientUri());
 
-    if (dto.getJwksUri() != null) {
-      // URI validity is checked via RegisteredClientDTO annotations
+    if (!Strings.isNullOrEmpty(dto.getJwksUri())) {
       client.setJwksUri(dto.getJwksUri());
-    } else if (dto.getJwk() != null) {
+    } else if (!Strings.isNullOrEmpty(dto.getJwk())) {
       client.setJwks(JWKSet.parse(dto.getJwk()));
     }
 
