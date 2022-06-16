@@ -35,9 +35,10 @@ public class ValidTokenEndpointAuthMethodValidator
       value.setTokenEndpointAuthMethod(TokenEndpointAuthenticationMethod.client_secret_basic);
     } else if (value.getTokenEndpointAuthMethod()
       .equals(TokenEndpointAuthenticationMethod.private_key_jwt)
-        && Strings.isNullOrEmpty(value.getJwksUri())) {
+        && (Strings.isNullOrEmpty(value.getJwksUri()) && Strings.isNullOrEmpty(value.getJwk()))) {
       context.disableDefaultConstraintViolation();
-      context.buildConstraintViolationWithTemplate("private_key_jwt requires a jwks uri")
+      context
+        .buildConstraintViolationWithTemplate("private_key_jwt requires a jwks uri or a jwk value")
         .addConstraintViolation();
       return false;
     }

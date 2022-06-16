@@ -86,14 +86,6 @@
                 });
             }
 
-            // avoid hidden validation errors
-            if (self.clientVal.jwks_opt == "uri") {
-                // clear jwk if "uri" option is selected
-                self.clientVal.jwk = "";
-            } else {
-                // clear jwk_uri if "value" option is selected
-                self.clientVal.jwks_uri = "";
-            }
             if (self.newClient) {
                 return ClientsService.createClient(self.clientVal).then(res => {
                     toaster.pop({

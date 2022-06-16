@@ -27,7 +27,6 @@
             console.debug('ClientOwnersController.self', self);
             self.currentPage = 1;
             self.itemsPerPage = 10;
-            self.totalResults = self.clientOwners.totalResults;
         };
 
         function onChangePage() {
