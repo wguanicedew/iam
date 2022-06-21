@@ -17,9 +17,3 @@
 <li class="divider"></li>
 <li class="nav-header"><spring:message code="sidebar.developer.title"/></li>
 <li><a href="manage/#dev/resource" data-toggle="collapse" data-target=".nav-collapse"><spring:message code="sidebar.developer.resource_registration"/></a><li>
-<li class="divider"></li>
-<li class="nav-header">Deprecated since IAM v1.8.0</li>
-<security:authorize access="hasRole('ROLE_ADMIN')">
-    <li><a href="manage/#admin/clients" data-toggle="collapse" data-target=".nav-collapse"><spring:message code="sidebar.administrative.manage_clients"/></a></li>
-</security:authorize>
-<li><a href="manage/#dev/dynreg" data-toggle="collapse" data-target=".nav-collapse"><spring:message code="sidebar.developer.client_registration"/></a><li>
