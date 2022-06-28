@@ -59,7 +59,6 @@ import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
     // @formatter:off
     "iam.host=example.org",
     "iam.jwt-profile.default-profile=aarc",
-    "iam.organisation.name=org",
     // @formatter:on
 })
 public class AarcProfileIntegrationTests extends EndpointsTestUtils {
@@ -69,8 +68,8 @@ public class AarcProfileIntegrationTests extends EndpointsTestUtils {
   private static final String USERNAME = "test";
   private static final String PASSWORD = "password";
 
-  private static final String URN_GROUP_ANALYSIS = "urn:example:iam:group:Analysis#example.org";
-  private static final String URN_GROUP_PRODUCTION = "urn:example:iam:group:Production#example.org";
+  private static final String URN_GROUP_ANALYSIS = "urn:geant:iam.example:group:Analysis#example.org";
+  private static final String URN_GROUP_PRODUCTION = "urn:geant:iam.example:group:Production#example.org";
 
   protected static final Set<String> BASE_SCOPES = Sets.newHashSet("openid", "profile");
   protected static final Set<String> EDUPERSON_AFFILIATION_SCOPE =
@@ -138,7 +137,7 @@ public class AarcProfileIntegrationTests extends EndpointsTestUtils {
     assertThat(token.getJWTClaimsSet().getClaim("email"), nullValue());
 
     assertThat(token.getJWTClaimsSet().getClaim(EDUPERSON_SCOPED_AFFILIATION_SCOPE),
-        equalTo("org"));
+        equalTo("member@iam.example"));
   }
 
   @Test
@@ -152,7 +151,7 @@ public class AarcProfileIntegrationTests extends EndpointsTestUtils {
     assertThat(token.getJWTClaimsSet().getClaim("email"), nullValue());
 
     assertThat(token.getJWTClaimsSet().getClaim(EDUPERSON_SCOPED_AFFILIATION_SCOPE),
-        equalTo("org"));
+        equalTo("member@iam.example"));
 
     List<String> groups = Lists
       .newArrayList(token.getJWTClaimsSet().getStringArrayClaim(EDUPERSON_ENTITLEMENT_CLAIM));
@@ -174,7 +173,7 @@ public class AarcProfileIntegrationTests extends EndpointsTestUtils {
         .param("token", token.getParsedString()))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.active", equalTo(true)))
-      .andExpect(jsonPath("$." + EDUPERSON_SCOPED_AFFILIATION_CLAIM, equalTo("org")))
+      .andExpect(jsonPath("$." + EDUPERSON_SCOPED_AFFILIATION_CLAIM, equalTo("member@iam.example")))
       .andExpect(jsonPath("$." + EDUPERSON_ENTITLEMENT_CLAIM, hasSize(equalTo(2))))
       .andExpect(jsonPath("$." + EDUPERSON_ENTITLEMENT_CLAIM, containsInAnyOrder(URN_GROUP_ANALYSIS, URN_GROUP_PRODUCTION)))
       .andExpect(jsonPath("$.name", equalTo("Test User")))
@@ -196,7 +195,7 @@ public class AarcProfileIntegrationTests extends EndpointsTestUtils {
       .andExpect(jsonPath("$.sub").exists())
       .andExpect(jsonPath("$.organisation_name").doesNotExist())
       .andExpect(jsonPath("$.groups").doesNotExist())
-      .andExpect(jsonPath("$." + EDUPERSON_SCOPED_AFFILIATION_CLAIM, equalTo("org")))
+      .andExpect(jsonPath("$." + EDUPERSON_SCOPED_AFFILIATION_CLAIM, equalTo("member@iam.example")))
       .andExpect(jsonPath("$." + EDUPERSON_ENTITLEMENT_CLAIM, hasSize(equalTo(2))))
       .andExpect(jsonPath("$." + EDUPERSON_ENTITLEMENT_CLAIM, containsInAnyOrder(URN_GROUP_ANALYSIS, URN_GROUP_PRODUCTION)))
       .andExpect(jsonPath("$.name", equalTo("Test User")))
@@ -216,7 +215,7 @@ public class AarcProfileIntegrationTests extends EndpointsTestUtils {
       .andExpect(jsonPath("$.sub").exists())
       .andExpect(jsonPath("$.organisation_name").doesNotExist())
       .andExpect(jsonPath("$.groups").doesNotExist())
-      .andExpect(jsonPath("$." + EDUPERSON_SCOPED_AFFILIATION_CLAIM, equalTo("org")))
+      .andExpect(jsonPath("$." + EDUPERSON_SCOPED_AFFILIATION_CLAIM, equalTo("member@iam.example")))
       .andExpect(jsonPath("$." + EDUPERSON_ENTITLEMENT_CLAIM, hasSize(equalTo(2))))
       .andExpect(jsonPath("$." + EDUPERSON_ENTITLEMENT_CLAIM, containsInAnyOrder(URN_GROUP_ANALYSIS, URN_GROUP_PRODUCTION)))
       .andExpect(jsonPath("$.name", equalTo("Test User")))
