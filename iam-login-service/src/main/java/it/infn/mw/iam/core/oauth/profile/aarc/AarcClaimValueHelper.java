@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Sets;
 
 import it.infn.mw.iam.persistence.model.IamGroup;
 import it.infn.mw.iam.persistence.model.IamUserInfo;
@@ -30,7 +31,7 @@ import it.infn.mw.iam.persistence.model.IamUserInfo;
 public class AarcClaimValueHelper {
 
   public static final Set<String> ADDITIONAL_CLAIMS =
-      Set.of("eduperson_scoped_affiliation", "eduperson_entitlement");
+      Set.of("eduperson_scoped_affiliation", "eduperson_entitlement", "eduperson_assurance");
 
   @Value("${iam.host}")
   String iamHost;
@@ -45,6 +46,7 @@ public class AarcClaimValueHelper {
   String urnSubnamespaces;
 
   final String URN_AFFILIATION = "member";
+  final Set<String> EDUPERSON_ASSURANCE = Sets.newHashSet("https://refeds.org/assurance/IAP/low");
 
   public Object getClaimValueFromUserInfo(String claim, IamUserInfo info) {
 
@@ -55,6 +57,9 @@ public class AarcClaimValueHelper {
 
       case "eduperson_entitlement":
         return resolveGroups(info);
+
+      case "eduperson_assurance":
+        return EDUPERSON_ASSURANCE;
 
       default:
         return null;
