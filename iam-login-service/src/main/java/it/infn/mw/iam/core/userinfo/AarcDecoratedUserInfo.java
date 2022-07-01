@@ -46,14 +46,14 @@ public class AarcDecoratedUserInfo extends DelegateUserInfoAdapter implements Aa
     json.remove("groups");
     json.remove("organisation_name");
 
-    json.add(EDUPERSON_SCOPED_AFFILIATION_CLAIM, new JsonPrimitive(scopedAffiliation));
+    json.add(EDUPERSON_SCOPED_AFFILIATION_CLAIM, new JsonPrimitive(getScopedAffiliation()));
 
     JsonArray values = new JsonArray();
-    assurance.forEach(value -> values.add(new JsonPrimitive(value)));
+    getAssurance().forEach(value -> values.add(new JsonPrimitive(value)));
     json.add(EDUPERSON_ASSURANCE_CLAIM, values);
 
     JsonArray urns = new JsonArray();
-    entitlements.forEach(urn -> urns.add(new JsonPrimitive(urn)));
+    getEntitlements().forEach(urn -> urns.add(new JsonPrimitive(urn)));
     json.add(EDUPERSON_ENTITLEMENT_CLAIM, urns);
 
     return json;

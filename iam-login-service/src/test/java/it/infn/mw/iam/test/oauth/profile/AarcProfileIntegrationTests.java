@@ -208,6 +208,29 @@ public class AarcProfileIntegrationTests extends EndpointsTestUtils {
   }
 
   @Test
+  public void testAarcProfileIntrospectWithoutScopes() throws Exception {
+
+    Set<String> scopes = Sets.newHashSet("openid", "profile", "email");
+    JWT token = JWTParser.parse(getAccessTokenForUser(scopes));
+
+    // @formatter:off
+    mvc.perform(post("/introspect")
+        .with(httpBasic(CLIENT_ID, CLIENT_SECRET))
+        .param("token", token.getParsedString()))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.active", equalTo(true)))
+      .andExpect(jsonPath("$." + EDUPERSON_SCOPED_AFFILIATION_CLAIM).doesNotExist())
+      .andExpect(jsonPath("$." + EDUPERSON_ENTITLEMENT_CLAIM).doesNotExist())
+      .andExpect(jsonPath("$." + EDUPERSON_ASSURANCE_CLAIM).doesNotExist())
+      .andExpect(jsonPath("$.name", equalTo("Test User")))
+      .andExpect(jsonPath("$.given_name", equalTo("Test")))
+      .andExpect(jsonPath("$.family_name", equalTo("User")))
+      .andExpect(jsonPath("$.email", equalTo("test@iam.test")));
+    // @formatter:on
+
+  }
+
+  @Test
   @WithMockOAuthUser(clientId = CLIENT_ID, user = USERNAME, authorities = {"ROLE_USER"},
       scopes = {"openid profile eduperson_scoped_affiliation eduperson_entitlement eduperson_assurance"})
   public void testAarcProfileUserinfo() throws Exception {
