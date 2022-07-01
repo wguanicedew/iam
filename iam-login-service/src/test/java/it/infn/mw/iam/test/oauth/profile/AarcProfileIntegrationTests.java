@@ -68,8 +68,8 @@ public class AarcProfileIntegrationTests extends EndpointsTestUtils {
   private static final String USERNAME = "test";
   private static final String PASSWORD = "password";
 
-  private static final String URN_GROUP_ANALYSIS = "urn:geant:iam.example:group:Analysis#example.org";
-  private static final String URN_GROUP_PRODUCTION = "urn:geant:iam.example:group:Production#example.org";
+  private static final String URN_GROUP_ANALYSIS = "urn:geant:iam.example:group:Analysis";
+  private static final String URN_GROUP_PRODUCTION = "urn:geant:iam.example:group:Production";
 
   private static final String ASSURANCE = "https://refeds.org/assurance/IAP/low";
 

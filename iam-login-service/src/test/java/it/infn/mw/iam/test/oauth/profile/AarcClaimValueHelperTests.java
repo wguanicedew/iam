@@ -46,7 +46,6 @@ import it.infn.mw.iam.test.util.annotation.IamMockMvcIntegrationTest;
 @IamMockMvcIntegrationTest
 @TestPropertySource(properties = {
   // @formatter:off
-  "iam.host=example.org",
   "iam.aarc-profile.urn-namespace=projectescape.eu",
   "iam.aarc-profile.urn-subnamespaces=sub mission",
   // @formatter:on
@@ -81,7 +80,7 @@ public class AarcClaimValueHelperTests {
   @Test
   public void testGroupUrnEncode() {
 
-    String s = "urn:geant:projectescape.eu:sub:mission:group:test#example.org";
+    String s = "urn:geant:projectescape.eu:sub:mission:group:test";
 
     IamGroup g = new IamGroup();
     g.setName("test");
@@ -98,9 +97,9 @@ public class AarcClaimValueHelperTests {
   @Test
   public void testGroupHierarchyUrnEncode() {
 
-    String parentUrn = "urn:geant:projectescape.eu:sub:mission:group:parent#example.org";
-    String childUrn = "urn:geant:projectescape.eu:sub:mission:group:parent:child#example.org";
-    String grandchildUrn = "urn:geant:projectescape.eu:sub:mission:group:parent:child:grandchild#example.org";
+    String parentUrn = "urn:geant:projectescape.eu:sub:mission:group:parent";
+    String childUrn = "urn:geant:projectescape.eu:sub:mission:group:parent:child";
+    String grandchildUrn = "urn:geant:projectescape.eu:sub:mission:group:parent:child:grandchild";
 
     IamGroup parent = new IamGroup();
     parent.setName("parent");
