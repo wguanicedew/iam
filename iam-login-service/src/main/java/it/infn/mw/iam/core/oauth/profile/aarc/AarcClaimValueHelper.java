@@ -33,9 +33,6 @@ public class AarcClaimValueHelper {
   public static final Set<String> ADDITIONAL_CLAIMS =
       Set.of("eduperson_scoped_affiliation", "eduperson_entitlement", "eduperson_assurance");
 
-  @Value("${iam.host}")
-  String iamHost;
-
   @Value("${iam.aarc-profile.urn-namespace}")
   String urnNamespace;
 
@@ -46,7 +43,6 @@ public class AarcClaimValueHelper {
   String urnSubnamespaces;
 
   final String URN_AFFILIATION = "member";
-  final Set<String> EDUPERSON_ASSURANCE = Sets.newHashSet("https://refeds.org/assurance/IAP/low");
 
   public Object getClaimValueFromUserInfo(String claim, IamUserInfo info) {
 
@@ -59,7 +55,7 @@ public class AarcClaimValueHelper {
         return resolveGroups(info);
 
       case "eduperson_assurance":
-        return EDUPERSON_ASSURANCE;
+        return resolveLOA();
 
       default:
         return null;
@@ -79,7 +75,12 @@ public class AarcClaimValueHelper {
     if (!Strings.isNullOrEmpty(urnSubnamespaces)) {
       encodedSubnamespace = String.format(":%s", String.join(":", urnSubnamespaces.trim().split(" ")));
     }
-    return String.format("urn:%s:%s%s:group:%s#%s", urnNid, urnNamespace, encodedSubnamespace, encodedGroupName, iamHost);
+    return String.format("urn:%s:%s%s:group:%s", urnNid, urnNamespace, encodedSubnamespace, encodedGroupName);
+  }
+
+  public Set<String> resolveLOA() {
+
+    return Sets.newHashSet("https://refeds.org/assurance/IAP/low");
   }
 
 }
