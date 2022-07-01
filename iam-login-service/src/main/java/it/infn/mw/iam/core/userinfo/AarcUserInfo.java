@@ -26,4 +26,7 @@ public interface AarcUserInfo extends UserInfo {
 
   Set<String> getEntitlements();
   void setEntitlements(Set<String> entitlements);
+
+  Set<String> getAssurance();
+  void setAssurance(Set<String> assurance);
 }
