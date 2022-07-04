@@ -16,9 +16,9 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
+<project xmlns:ns="http://maven.apache.org/POM/4.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>it.infn.mw</groupId>
@@ -36,6 +36,7 @@
     <test-clock.version>1.0.2</test-clock.version>
     <eclipselink.version>2.7.9</eclipselink.version>
     <javax.persistence.version>2.2.1</javax.persistence.version>
+    <java.version>17</java.version>
 
     <!-- Sonar Jacoco massaging -->
     <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
