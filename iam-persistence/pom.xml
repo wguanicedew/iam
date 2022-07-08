@@ -33,7 +33,6 @@
 
   <properties>
     <spring-boot.build-image.skip>true</spring-boot.build-image.skip>
-    <java.version>17</java.version>
   </properties>
 
   <dependencies>

@@ -38,7 +38,6 @@
     <!-- Sonar Jacoco massaging -->
     <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
     <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-    <java.version>17</java.version>
   </properties>
 
   <dependencies>
