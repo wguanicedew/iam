@@ -33,8 +33,11 @@ public class AarcClaimValueHelper {
   public static final Set<String> ADDITIONAL_CLAIMS =
       Set.of("eduperson_scoped_affiliation", "eduperson_entitlement", "eduperson_assurance");
 
-  @Value("${iam.aarc-profile.urn-namespace}")
-  String urnNamespace;
+  @Value("${iam.aarc-profile.affiliation-scope}")
+  String affiliationScope;
+
+  @Value("${iam.aarc-profile.urn-delegated-namespace}")
+  String urnDelegatedNamespace;
 
   @Value("${iam.aarc-profile.urn-nid}")
   String urnNid;
@@ -42,14 +45,14 @@ public class AarcClaimValueHelper {
   @Value("${iam.aarc-profile.urn-subnamespaces}")
   String urnSubnamespaces;
 
-  final String URN_AFFILIATION = "member";
+  static final String DEFAULT_AFFILIATION_TYPE = "member";
 
   public Object getClaimValueFromUserInfo(String claim, IamUserInfo info) {
 
     switch (claim) {
 
       case "eduperson_scoped_affiliation":
-        return String.format("%s@%s", URN_AFFILIATION, urnNamespace);
+        return String.format("%s@%s", DEFAULT_AFFILIATION_TYPE, affiliationScope);
 
       case "eduperson_entitlement":
         return resolveGroups(info);
@@ -75,12 +78,12 @@ public class AarcClaimValueHelper {
     if (!Strings.isNullOrEmpty(urnSubnamespaces)) {
       encodedSubnamespace = String.format(":%s", String.join(":", urnSubnamespaces.trim().split(" ")));
     }
-    return String.format("urn:%s:%s%s:group:%s", urnNid, urnNamespace, encodedSubnamespace, encodedGroupName);
+    return String.format("urn:%s:%s%s:group:%s", urnNid, urnDelegatedNamespace, encodedSubnamespace, encodedGroupName);
   }
 
   public Set<String> resolveLOA() {
 
-    return Sets.newHashSet("https://refeds.org/assurance/IAP/low");
+    return Sets.newHashSet("https://refeds.org/assurance", "https://refeds.org/assurance/IAP/low");
   }
 
 }
