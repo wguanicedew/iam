@@ -120,6 +120,7 @@ public class MvcConfig implements WebMvcConfigurer {
     registry.addViewController("/login").setViewName("login");
     registry.addViewController("/health").setViewName("forward:/actuator/health");
     registry.addViewController("/health/external").setViewName("forward:/actuator/health/externalConnectivity");
+    registry.addViewController("/health/mail").setViewName("forward:/actuator/health/mail");
   }
 
   @Override
