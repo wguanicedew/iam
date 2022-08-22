@@ -15,6 +15,7 @@
  */
 package it.infn.mw.iam.api.client.management.service;
 
+import java.text.ParseException;
 import java.util.Optional;
 
 import javax.validation.Valid;
@@ -37,10 +38,11 @@ public interface ClientManagementService {
 
   Optional<RegisteredClientDTO> retrieveClientByClientId(@NotBlank String clientId);
 
-  RegisteredClientDTO saveNewClient(@NotNull @Valid RegisteredClientDTO client);
+  RegisteredClientDTO saveNewClient(@NotNull @Valid RegisteredClientDTO client)
+      throws ParseException;
 
   RegisteredClientDTO updateClient(@NotBlank String clientId,
-      @NotNull @Valid RegisteredClientDTO client);
+      @NotNull @Valid RegisteredClientDTO client) throws ParseException;
 
   RegisteredClientDTO generateNewClientSecret(@NotBlank String clientId);
 

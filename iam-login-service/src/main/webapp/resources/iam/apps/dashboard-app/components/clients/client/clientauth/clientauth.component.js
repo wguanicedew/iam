@@ -20,11 +20,20 @@
         var self = this;
 
         self.isLimited = isLimited;
+        self.updateJwk = updateJwk;
 
         self.$onInit = function () {
             console.debug('ClientAuthController.self', self);
             initJwkOpt();
         };
+
+        function updateJwk() {
+            if (self.jwkOpt == 'uri') {
+                delete self.client.jwk
+            } else {
+                delete self.client.jwks_uri
+            }
+        }
 
         function isLimited() {
             return self.limited === 'true' | self.limited;

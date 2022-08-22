@@ -21,14 +21,18 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.mitre.oauth2.model.ClientDetailsEntity;
+import org.mitre.oauth2.model.OAuth2AccessTokenEntity;
+import org.mitre.oauth2.service.OAuth2TokenEntityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.oauth2.provider.OAuth2RequestValidator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import it.infn.mw.iam.audit.events.client.ClientCreatedEvent;
+import it.infn.mw.iam.core.oauth.scope.matchers.ScopeMatcherOAuthRequestValidator;
 import it.infn.mw.iam.persistence.model.IamAccount;
 import it.infn.mw.iam.persistence.model.IamAccountClient;
 import it.infn.mw.iam.persistence.repository.client.ClientSpecs;
@@ -37,6 +41,7 @@ import it.infn.mw.iam.persistence.repository.client.IamClientRepository;
 
 @Service
 @Transactional
+@SuppressWarnings("deprecation")
 public class DefaultClientService implements ClientService {
 
   private final Clock clock;
@@ -44,18 +49,24 @@ public class DefaultClientService implements ClientService {
   private final IamClientRepository clientRepo;
 
   private final IamAccountClientRepository accountClientRepo;
-  
+
   private ApplicationEventPublisher eventPublisher;
+
+  private OAuth2RequestValidator requestValidator;
+
+  private OAuth2TokenEntityService tokenService;
 
   @Autowired
   public DefaultClientService(Clock clock, IamClientRepository clientRepo,
-      IamAccountClientRepository accountClientRepo, ApplicationEventPublisher eventPublisher) {
+      IamAccountClientRepository accountClientRepo, ApplicationEventPublisher eventPublisher,
+      OAuth2RequestValidator requestValidator, OAuth2TokenEntityService tokenService) {
     this.clock = clock;
     this.clientRepo = clientRepo;
     this.accountClientRepo = accountClientRepo;
     this.eventPublisher = eventPublisher;
+    this.requestValidator = requestValidator;
+    this.tokenService = tokenService;
   }
-
 
   @Override
   public ClientDetailsEntity saveNewClient(ClientDetailsEntity client) {
@@ -86,14 +97,15 @@ public class DefaultClientService implements ClientService {
   @Override
   public ClientDetailsEntity unlinkClientFromAccount(ClientDetailsEntity client, IamAccount owner) {
 
-    accountClientRepo.findByAccountAndClient(owner, client)
-      .ifPresent(accountClientRepo::delete);
+    accountClientRepo.findByAccountAndClient(owner, client).ifPresent(accountClientRepo::delete);
 
     return client;
   }
 
   @Override
   public ClientDetailsEntity updateClient(ClientDetailsEntity client) {
+
+    ((ScopeMatcherOAuthRequestValidator) requestValidator).invalidateScope(client);
     return clientRepo.save(client);
   }
 
@@ -122,9 +134,28 @@ public class DefaultClientService implements ClientService {
   @Override
   public void deleteClient(ClientDetailsEntity client) {
     accountClientRepo.deleteByClientId(client.getId());
+    deleteTokensByClient(client);
     clientRepo.delete(client);
   }
 
+  private boolean isValidAccessToken(OAuth2AccessTokenEntity a) {
+    return !(a.getAuthenticationHolder().getScope().contains("registration-token")
+        || a.getAuthenticationHolder().getScope().contains("resource-token"));
+  }
+
+  private void deleteTokensByClient(ClientDetailsEntity client) {
+    // delete all valid access tokens (exclude registration and resource tokens)
+    tokenService.getAccessTokensForClient(client)
+      .stream()
+      .filter(at -> isValidAccessToken(at))
+      .forEach(at -> {
+        tokenService.revokeAccessToken(at);
+      });
+    // delete all valid refresh tokens
+    tokenService.getRefreshTokensForClient(client).forEach(rt -> {
+      tokenService.revokeRefreshToken(rt);
+    });
+  }
 
   @Override
   public Page<ClientDetailsEntity> findAll(Pageable page) {

@@ -28,8 +28,11 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
+
+import java.text.ParseException;
 
 import javax.validation.ConstraintViolationException;
 
@@ -139,7 +142,7 @@ public class ClientManagementServiceTests {
   }
 
   @Test
-  public void testClientCreationSuccess() {
+  public void testClientCreationSuccess() throws ParseException {
     RegisteredClientDTO client = new RegisteredClientDTO();
     client.setClientName("test-client-creation");
     client.setClientId("test-client-creation");
@@ -149,6 +152,70 @@ public class ClientManagementServiceTests {
     RegisteredClientDTO savedClient = managementService.saveNewClient(client);
     assertThat(savedClient.getClientId(), is(client.getClientId()));
     assertThat(savedClient.getClientSecret(), notNullValue());
+  }
+
+  @Test
+  public void testClientWithJwkValue() throws ParseException {
+
+    final String NOT_A_JSON_STRING = "This is not a JSON string";
+    final String VALID_JSON_VALUE =
+        "{\"keys\":[{\"kty\":\"RSA\",\"e\":\"AQAB\",\"use\":\"sig\",\"kid\":\"rsa1\",\"alg\":\"RS256\",\"n\":\"zTF0oJjUDvoEBK82Hb706nRRJakcqoz_w4zdCIiv0BR1oumtQE8teUoLaYK_aqf9y30wajXoIq40tJYMXKW7QIFm2GYZ3qknUKGIy8xdNFEnLA2DG-BwSisNpJTvmiG1nbjvDRk7_M7WRmNwQkpdAXri89e9lL7ctG9aOnUs6wpinCqXYX9xvJl9k1HOdj_qZKrpz6xe75bPabe2yrF2TRfSobI5SSqTBBFLg06kuaaqqzVWbzCv8hgV7NMrt1CYDlXrfS2v1Ejf3WIEtgMRSxDBav90kpkBybwFhvyy7E87hjMdyoNk-yyYuZA_uSJCPKWJwjPB_EXaw280rObZ5Q\"}]}";
+    RegisteredClientDTO client = new RegisteredClientDTO();
+    client.setClientName("test-client-creation");
+    client.setClientId("test-client-creation");
+    client.setGrantTypes(Sets.newHashSet(AuthorizationGrantType.CLIENT_CREDENTIALS));
+    client.setScope(Sets.newHashSet("test"));
+    client.setJwk(NOT_A_JSON_STRING);
+
+    ParseException e = assertThrows(ParseException.class, () -> {
+      managementService.saveNewClient(client);
+    });
+
+    String expectedMessage = "Invalid JSON: Unexpected token " + NOT_A_JSON_STRING;
+    String actualMessage = e.getMessage();
+
+    assertTrue(actualMessage.contains(expectedMessage));
+
+    client.setJwk(VALID_JSON_VALUE);
+    try {
+      RegisteredClientDTO savedClient = managementService.saveNewClient(client);
+      assertThat(savedClient.getClientId(), is(client.getClientId()));
+      assertThat(savedClient.getJwk(), is(VALID_JSON_VALUE));
+    } finally {
+      managementService.deleteClientByClientId(client.getClientId());
+    }
+  }
+
+  @Test
+  public void testClientWithJwksUri() throws ParseException {
+
+    final String NOT_A_VALID_URI = "This is not a valid URI";
+    final String VALID_URI = "https://host.domain.com/this/is/my/public-key";
+
+    RegisteredClientDTO client = new RegisteredClientDTO();
+    client.setClientName("test-client-creation");
+    client.setClientId("test-client-creation");
+    client.setGrantTypes(Sets.newHashSet(AuthorizationGrantType.CLIENT_CREDENTIALS));
+    client.setScope(Sets.newHashSet("test"));
+    client.setJwksUri(NOT_A_VALID_URI);
+
+    ConstraintViolationException e = assertThrows(ConstraintViolationException.class, () -> {
+      managementService.saveNewClient(client);
+    });
+
+    String expectedMessage = "saveNewClient.client.jwksUri:";
+    String actualMessage = e.getMessage();
+
+    assertTrue(actualMessage.contains(expectedMessage));
+
+    client.setJwksUri(VALID_URI);
+    try {
+      RegisteredClientDTO savedClient = managementService.saveNewClient(client);
+      assertThat(savedClient.getClientId(), is(client.getClientId()));
+      assertThat(savedClient.getJwksUri(), is(VALID_URI));
+    } finally {
+      managementService.deleteClientByClientId(client.getClientId());
+    }
   }
 
   @Test
@@ -175,7 +242,8 @@ public class ClientManagementServiceTests {
   }
 
   @Test
-  public void testDynamicallyRegisteredClientCanBeUpdated() {
+  public void testDynamicallyRegisteredClientCanBeUpdated()
+      throws ParseException {
 
     userAuth = Mockito.mock(UsernamePasswordAuthenticationToken.class);
     when(userAuth.getName()).thenReturn("test");
@@ -204,7 +272,7 @@ public class ClientManagementServiceTests {
   }
 
   @Test
-  public void testSecretRotation() {
+  public void testSecretRotation() throws ParseException {
 
     RegisteredClientDTO client = new RegisteredClientDTO();
     client.setClientName("test-client-creation");
@@ -226,7 +294,7 @@ public class ClientManagementServiceTests {
   }
 
   @Test
-  public void testRatRotation() {
+  public void testRatRotation() throws ParseException {
 
     RegisteredClientDTO client = new RegisteredClientDTO();
     client.setClientName("test-rat-rotation");
@@ -248,7 +316,7 @@ public class ClientManagementServiceTests {
   }
 
   @Test
-  public void testClientOwnerAssignRemove() {
+  public void testClientOwnerAssignRemove() throws ParseException {
     RegisteredClientDTO client = new RegisteredClientDTO();
     client.setClientName("test-client-creation");
     client.setClientId("test-client-creation");
@@ -332,6 +400,5 @@ public class ClientManagementServiceTests {
       });
     }
   }
-
 
 }

@@ -15,6 +15,8 @@
  */
 package it.infn.mw.iam.api.client.registration.service;
 
+import java.text.ParseException;
+
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 
@@ -25,14 +27,13 @@ import it.infn.mw.iam.api.common.client.RegisteredClientDTO;
 public interface ClientRegistrationService {
 
   RegisteredClientDTO registerClient(@Valid RegisteredClientDTO request,
-      Authentication authentication);
+      Authentication authentication) throws ParseException;
 
   RegisteredClientDTO retrieveClient(@NotBlank String clientId,
       Authentication authentication);
 
-  RegisteredClientDTO updateClient(@NotBlank String clientId,
-      @Valid RegisteredClientDTO request,
-      Authentication authentication);
+  RegisteredClientDTO updateClient(@NotBlank String clientId, @Valid RegisteredClientDTO request,
+      Authentication authentication) throws ParseException;
 
   void deleteClient(@NotBlank String clientId, Authentication authentication);
 

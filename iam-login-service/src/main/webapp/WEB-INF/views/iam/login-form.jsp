@@ -43,9 +43,9 @@
     <input id="login-submit" type="submit" class="btn btn-primary btn-block"
       value="${loginPageConfiguration.loginButtonText}" name="submit" class="form-control">
   </div>
+  <c:if test="${loginPageConfiguration.registrationEnabled}">
+    <div id="forgot-password" ng-controller="ForgotPasswordModalController">
+      <a class="btn btn-link btn-block" ng-click="open()">Forgot your password?</a>
+    </div>
+  </c:if>
 </form>
-<c:if test="${loginPageConfiguration.registrationEnabled}">
-  <div id="forgot-password" ng-controller="ForgotPasswordModalController">
-    <a class="btn btn-link btn-block" ng-click="open()">Forgot your password?</a>
-  </div>
-</c:if>

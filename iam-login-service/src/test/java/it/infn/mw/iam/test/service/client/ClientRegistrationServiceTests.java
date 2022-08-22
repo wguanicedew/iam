@@ -28,9 +28,13 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
+import java.text.ParseException;
 import java.time.Clock;
 import java.time.Duration;
 import java.util.Optional;
@@ -298,7 +302,7 @@ public class ClientRegistrationServiceTests {
   }
 
   @Test
-  public void testAllowedGrantTypeChecks() {
+  public void testAllowedGrantTypeChecks() throws ParseException {
 
     InvalidClientRegistrationRequest exception =
         Assertions.assertThrows(InvalidClientRegistrationRequest.class, () -> {
@@ -357,7 +361,12 @@ public class ClientRegistrationServiceTests {
       request.setRedirectUris(Sets.newHashSet("https://example/cb"));
       request.setScope(Sets.newHashSet(restrictedScope, "openid"));
 
-      RegisteredClientDTO response = service.registerClient(request, userAuth);
+      RegisteredClientDTO response = null;
+      try {
+        response = service.registerClient(request, userAuth);
+      } catch (ParseException e1) {
+        fail("Unexpected JSON parsing problem");
+      }
 
       ClientDetailsEntity client = clientRepo.findByClientId(response.getClientId()).orElseThrow();
 
@@ -368,14 +377,19 @@ public class ClientRegistrationServiceTests {
 
 
       response.getScope().add(restrictedScope);
-      response = service.updateClient(response.getClientId(), response, userAuth);
+      try {
+        response = service.updateClient(response.getClientId(), response, userAuth);
+      } catch (ParseException e) {
+        fail("Unexpected JSON parsing problem");
+      }
       assertThat(response.getScope(), not(hasItem(restrictedScope)));
 
     });
   }
 
   @Test
-  public void testRestrictedScopesAreFilteredOutWithMatchers() {
+  public void testRestrictedScopesAreFilteredOutWithMatchers()
+      throws ParseException {
 
     String restrictedScope1 = "storage.read:/whatever";
     String restrictedScope2 = "storage.read:/";
@@ -410,13 +424,22 @@ public class ClientRegistrationServiceTests {
       request.setRedirectUris(Sets.newHashSet("https://example/cb"));
       request.setScope(Sets.newHashSet(reservedScope, "openid"));
 
-      RegisteredClientDTO response = service.registerClient(request, userAuth);
+      RegisteredClientDTO response = null;
+      try {
+        response = service.registerClient(request, userAuth);
+      } catch (ParseException e) {
+        fail("Unexpected JSON mapping problem");
+      }
 
       assertThat(response.getScope(), hasItem("openid"));
       assertThat(response.getScope(), not(hasItem(reservedScope)));
 
       response.getScope().add(reservedScope);
-      response = service.updateClient(response.getClientId(), response, userAuth);
+      try {
+        response = service.updateClient(response.getClientId(), response, userAuth);
+      } catch (ParseException e) {
+        fail("Unexpected JSON mapping problem");
+      }
       assertThat(response.getScope(), not(hasItem(reservedScope)));
 
     });
@@ -432,8 +455,12 @@ public class ClientRegistrationServiceTests {
       request.setRedirectUris(Sets.newHashSet("https://example/cb"));
       request.setScope(Sets.newHashSet(restrictedScope, "openid"));
 
-      RegisteredClientDTO response = service.registerClient(request, adminAuth);
-
+      RegisteredClientDTO response = null;
+      try {
+        response = service.registerClient(request, adminAuth);
+      } catch (ParseException e) {
+        fail("Unexpected JSON mapping problem");
+      }
       assertThat(response.getClientName(), is("example"));
       assertThat(response.getClientId(), notNullValue());
       assertThat(response.getTokenEndpointAuthMethod(),
@@ -449,7 +476,8 @@ public class ClientRegistrationServiceTests {
   }
 
   @Test
-  public void testAnonymousRequestYeldsRegistrationAccessToken() {
+  public void testAnonymousRequestYeldsRegistrationAccessToken()
+      throws ParseException {
 
     RegisteredClientDTO request = new RegisteredClientDTO();
     request.setClientName("example");
@@ -467,7 +495,7 @@ public class ClientRegistrationServiceTests {
   }
 
   @Test
-  public void testSuccesfullRegistration() {
+  public void testSuccesfullRegistration() throws ParseException {
 
     RegisteredClientDTO request = new RegisteredClientDTO();
     request.setClientName("example");
@@ -487,7 +515,7 @@ public class ClientRegistrationServiceTests {
   }
 
   @Test
-  public void noScopeYeldsDefaultScopes() {
+  public void noScopeYeldsDefaultScopes() throws ParseException {
 
     Set<String> defaultScopes = scopeService.toStrings(scopeService.getDefaults());
 
@@ -568,7 +596,8 @@ public class ClientRegistrationServiceTests {
   }
 
   @Test
-  public void testRegisterAndRetrieveWorksForUser() {
+  public void testRegisterAndRetrieveWorksForUser()
+      throws ParseException {
 
     RegisteredClientDTO request = new RegisteredClientDTO();
     request.setClientName("example");
@@ -592,7 +621,8 @@ public class ClientRegistrationServiceTests {
 
 
   @Test
-  public void testRegisterAndRetrieveWorksForAnonymousUser() {
+  public void testRegisterAndRetrieveWorksForAnonymousUser()
+      throws ParseException {
 
     RegisteredClientDTO request = new RegisteredClientDTO();
     request.setClientName("example");
@@ -619,7 +649,8 @@ public class ClientRegistrationServiceTests {
 
 
   @Test
-  public void testRatClientIdAndScopesAreChecked() {
+  public void testRatClientIdAndScopesAreChecked()
+      throws ParseException {
 
     RegisteredClientDTO request = new RegisteredClientDTO();
     request.setClientName("example");
@@ -651,7 +682,7 @@ public class ClientRegistrationServiceTests {
 
 
   @Test
-  public void testSuccesfullDelete() {
+  public void testSuccesfullDelete() throws ParseException {
 
     RegisteredClientDTO request = new RegisteredClientDTO();
     request.setClientName("example");
@@ -676,7 +707,8 @@ public class ClientRegistrationServiceTests {
   }
 
   @Test
-  public void testAccountAuthzForClientManagement() {
+  public void testAccountAuthzForClientManagement()
+      throws ParseException {
     RegisteredClientDTO request = new RegisteredClientDTO();
     request.setClientName("example");
     request.setGrantTypes(Sets.newHashSet(AuthorizationGrantType.CLIENT_CREDENTIALS));
@@ -696,7 +728,8 @@ public class ClientRegistrationServiceTests {
   }
 
   @Test
-  public void testGranTypesAreCheckedOnUpdate() {
+  public void testGranTypesAreCheckedOnUpdate()
+      throws ParseException {
 
     RegisteredClientDTO request = new RegisteredClientDTO();
     request.setClientName("example");
@@ -716,7 +749,8 @@ public class ClientRegistrationServiceTests {
   }
 
   @Test
-  public void testRedirectUrisAreCheckedOnUpdate() {
+  public void testRedirectUrisAreCheckedOnUpdate()
+      throws ParseException {
 
     RegisteredClientDTO request = new RegisteredClientDTO();
     request.setClientName("example");
@@ -738,7 +772,7 @@ public class ClientRegistrationServiceTests {
 
 
   @Test
-  public void testRatIsUpdated() {
+  public void testRatIsUpdated() throws ParseException {
 
     TestClock testClock = (TestClock) clock;
     ClientDefaultsProperties props = new ClientDefaultsProperties();
@@ -774,7 +808,8 @@ public class ClientRegistrationServiceTests {
   }
 
   @Test
-  public void testPrivilegedGrantTypesArePreservedOnUpdate() {
+  public void testPrivilegedGrantTypesArePreservedOnUpdate()
+      throws ParseException {
 
     RegisteredClientDTO request = new RegisteredClientDTO();
     request.setClientName("example");
@@ -806,7 +841,8 @@ public class ClientRegistrationServiceTests {
   }
 
   @Test
-  public void testRestrictedScopesArePreserved() {
+  public void testRestrictedScopesArePreserved()
+      throws ParseException {
 
     RegisteredClientDTO request = new RegisteredClientDTO();
     request.setClientName("restricted-scopes-preserved");
@@ -835,7 +871,7 @@ public class ClientRegistrationServiceTests {
 
 
   @Test
-  public void testRedeemClient() {
+  public void testRedeemClient() throws ParseException {
 
     TestClock testClock = (TestClock) clock;
     ClientDefaultsProperties props = new ClientDefaultsProperties();
@@ -887,10 +923,71 @@ public class ClientRegistrationServiceTests {
     });
 
     assertThat(exception.getMessage(), containsString("Invalid registration access token"));
-
-
-
   }
 
+  @Test
+  public void testClientWithJwkValue() throws ParseException {
+
+    final String NOT_A_JSON_STRING = "This is not a JSON string";
+    final String VALID_JSON_VALUE =
+        "{\"keys\":[{\"kty\":\"RSA\",\"e\":\"AQAB\",\"use\":\"sig\",\"kid\":\"rsa1\",\"alg\":\"RS256\",\"n\":\"zTF0oJjUDvoEBK82Hb706nRRJakcqoz_w4zdCIiv0BR1oumtQE8teUoLaYK_aqf9y30wajXoIq40tJYMXKW7QIFm2GYZ3qknUKGIy8xdNFEnLA2DG-BwSisNpJTvmiG1nbjvDRk7_M7WRmNwQkpdAXri89e9lL7ctG9aOnUs6wpinCqXYX9xvJl9k1HOdj_qZKrpz6xe75bPabe2yrF2TRfSobI5SSqTBBFLg06kuaaqqzVWbzCv8hgV7NMrt1CYDlXrfS2v1Ejf3WIEtgMRSxDBav90kpkBybwFhvyy7E87hjMdyoNk-yyYuZA_uSJCPKWJwjPB_EXaw280rObZ5Q\"}]}";
+
+    RegisteredClientDTO client = new RegisteredClientDTO();
+    client.setClientName("test-client-creation");
+    client.setGrantTypes(Sets.newHashSet(AuthorizationGrantType.CLIENT_CREDENTIALS));
+    client.setScope(Sets.newHashSet("test"));
+    client.setJwk(NOT_A_JSON_STRING);
+
+    ParseException e = assertThrows(ParseException.class, () -> {
+      service.registerClient(client, userAuth);
+    });
+
+    String expectedMessage = "Invalid JSON: Unexpected token " + NOT_A_JSON_STRING;
+    String actualMessage = e.getMessage();
+
+    assertTrue(actualMessage.contains(expectedMessage));
+
+    RegisteredClientDTO savedClient = null;
+    client.setJwk(VALID_JSON_VALUE);
+    try {
+      savedClient = service.registerClient(client, userAuth);
+      assertThat(savedClient.getClientId(), is(savedClient.getClientId()));
+      assertThat(savedClient.getJwk(), is(VALID_JSON_VALUE));
+    } finally {
+      service.deleteClient(savedClient.getClientId(), userAuth);
+    }
+  }
+
+  @Test
+  public void testClientWithJwksUri() throws ParseException {
+
+    final String NOT_A_VALID_URI = "This is not a valid URI";
+    final String VALID_URI = "https://host.domain.com/this/is/my/public-key";
+
+    RegisteredClientDTO client = new RegisteredClientDTO();
+    client.setClientName("test-client-creation");
+    client.setGrantTypes(Sets.newHashSet(AuthorizationGrantType.CLIENT_CREDENTIALS));
+    client.setScope(Sets.newHashSet("test"));
+    client.setJwksUri(NOT_A_VALID_URI);
+
+    ConstraintViolationException e = assertThrows(ConstraintViolationException.class, () -> {
+      service.registerClient(client, userAuth);
+    });
+
+    String expectedMessage = "registerClient.request.jwksUri:";
+    String actualMessage = e.getMessage();
+
+    assertTrue(actualMessage.contains(expectedMessage));
+
+    RegisteredClientDTO savedClient = null;
+    client.setJwksUri(VALID_URI);
+    try {
+      savedClient = service.registerClient(client, userAuth);
+      assertThat(savedClient.getClientId(), is(savedClient.getClientId()));
+      assertThat(savedClient.getJwksUri(), is(VALID_URI));
+    } finally {
+      service.deleteClient(savedClient.getClientId(), userAuth);
+    }
+  }
 
 }

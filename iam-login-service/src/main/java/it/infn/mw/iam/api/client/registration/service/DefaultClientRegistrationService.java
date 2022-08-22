@@ -306,7 +306,7 @@ public class DefaultClientRegistrationService implements ClientRegistrationServi
   @Validated(OnDynamicClientRegistration.class)
   @Override
   public RegisteredClientDTO registerClient(RegisteredClientDTO request,
-      Authentication authentication) {
+      Authentication authentication) throws ParseException {
 
     authzChecks(authentication);
 
@@ -372,7 +372,7 @@ public class DefaultClientRegistrationService implements ClientRegistrationServi
   @Validated(OnDynamicClientUpdate.class)
   @Override
   public RegisteredClientDTO updateClient(String clientId, RegisteredClientDTO request,
-      Authentication authentication) {
+      Authentication authentication) throws ParseException {
     authzChecks(authentication);
 
     ClientDetailsEntity oldClient =
