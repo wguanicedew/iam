@@ -17,22 +17,21 @@
 -->
 <!-- Content Header (Page header) -->
 <div ng-if="$ctrl.loaded">
-    <section class="content-header" ng-cloak>
-        <h1>
-            <i class="fa fa-user"></i>&nbsp;&nbsp;Scopes
-        </h1>
-        <ol class="breadcrumb hidden-xs">
-            <li><a><i class="fa fa-user"></i> Scopes</a></li>
-        </ol>
-    </section>
+	<section class="content-header" ng-cloak>
+		<h1>
+			<i class="fa fa-user"></i>&nbsp;&nbsp;Scopes
+		</h1>
+		<ol class="breadcrumb hidden-xs">
+			<li><a><i class="fa fa-user"></i> Scopes</a></li>
+		</ol>
+	</section>
 
-    <section class="content" ng-cloak>
-        <!-- Main content -->
-        <div class="row" ng-cloak>
-            <div class="col-xs-12">
-                <scopeslist scopes="$ctrl.scopes">
-                </scopeslist>
-            </div>
-        </div>
-    </section>
+	<section class="content" ng-cloak>
+		<!-- Main content -->
+		<div class="row" ng-cloak>
+			<div class="col-xs-12">
+				<scopeslist scopes="$ctrl.scopes"> </scopeslist>
+			</div>
+		</div>
+	</section>
 </div>
