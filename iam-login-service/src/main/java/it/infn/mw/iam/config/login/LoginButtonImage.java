@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2019
+ * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2021
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@ package it.infn.mw.iam.config.login;
 
 import static it.infn.mw.iam.config.login.LoginButtonImage.Size.SMALL;
 
-import org.hibernate.validator.constraints.URL;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+import it.infn.mw.iam.config.validator.UrlOrResource;
 
 @JsonInclude(Include.NON_EMPTY)
 
@@ -32,7 +32,7 @@ public class LoginButtonImage {
     LARGE;
   }
 
-  @URL
+  @UrlOrResource
   private String url;
 
   private Size size = SMALL;

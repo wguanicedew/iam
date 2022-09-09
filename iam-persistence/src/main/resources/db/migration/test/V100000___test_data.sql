@@ -1,29 +1,38 @@
 INSERT INTO client_details (id, client_id, client_secret, client_name, dynamically_registered,
   refresh_token_validity_seconds, access_token_validity_seconds, id_token_validity_seconds, allow_introspection,
-  token_endpoint_auth_method, require_auth_time) VALUES
-  (1, 'client', 'secret', 'Test Client', false, null, 3600, 600, true, 'SECRET_BASIC',false),
-  (2, 'tasks-app', 'secret', 'Tasks App', false, null, 0, 0, true, 'SECRET_BASIC',false),
-  (3, 'post-client', 'secret', 'Post client', false, null, 3600,600, true, 'SECRET_POST',false),
-  (4, 'client-cred', 'secret', 'Client credentials', false, null, 3600, 600, true, 'SECRET_BASIC',false),
-  (5, 'password-grant', 'secret', 'Password grant client', false, null, 3600, 600, true, 'SECRET_BASIC',true),
-  (6, 'scim-client-ro', 'secret', 'SCIM client (read-only)', false, null, 3600, 600, true, 'SECRET_POST',false),
-  (7, 'scim-client-rw', 'secret', 'SCIM client (read-write)', false, null, 3600, 600, true, 'SECRET_POST',false),
-  (8, 'token-exchange-actor', 'secret', 'Token Exchange grant client actor', false, null, 3600, 600, true, 'SECRET_POST',false),
-  (9, 'token-exchange-subject', 'secret', 'Token Exchange grant client subject', false, null, 3600, 600, true, 'SECRET_POST',false),
-  (10, 'registration-client', 'secret', 'Registration service test client', false, null, 3600, 600, true, 'SECRET_POST',false),
-  (11, 'token-lookup-client', 'secret', 'Token lookup client', false, null, 3600, 600, true, 'SECRET_BASIC', false);
+  token_endpoint_auth_method, require_auth_time, created_at) VALUES
+  (1, 'client', 'secret', 'Test Client', false, null, 3600, 600, true, 'SECRET_BASIC',false, CURRENT_TIMESTAMP()),
+  (2, 'tasks-app', 'secret', 'Tasks App', false, null, 0, 0, true, 'SECRET_BASIC',false, CURRENT_TIMESTAMP()),
+  (3, 'post-client', 'secret', 'Post client', false, null, 3600,600, true, 'SECRET_POST',false, CURRENT_TIMESTAMP()),
+  (4, 'client-cred', 'secret', 'Client credentials', false, null, 3600, 600, true, 'SECRET_BASIC',false, CURRENT_TIMESTAMP()),
+  (5, 'password-grant', 'secret', 'Password grant client', false, null, 3600, 600, true, 'SECRET_BASIC',true, CURRENT_TIMESTAMP()),
+  (6, 'scim-client-ro', 'secret', 'SCIM client (read-only)', false, null, 3600, 600, true, 'SECRET_POST',false, CURRENT_TIMESTAMP()),
+  (7, 'scim-client-rw', 'secret', 'SCIM client (read-write)', false, null, 3600, 600, true, 'SECRET_POST',false, CURRENT_TIMESTAMP()),
+  (8, 'token-exchange-actor', 'secret', 'Token Exchange grant client actor', false, null, 3600, 600, true, 'SECRET_POST',false, CURRENT_TIMESTAMP()),
+  (9, 'token-exchange-subject', 'secret', 'Token Exchange grant client subject', false, null, 3600, 600, true, 'SECRET_POST',false, CURRENT_TIMESTAMP()),
+  (10, 'registration-client', 'secret', 'Registration service test client', false, null, 3600, 600, true, 'SECRET_POST',false, CURRENT_TIMESTAMP()),
+  (11, 'token-lookup-client', 'secret', 'Token lookup client', false, null, 3600, 600, true, 'SECRET_BASIC', false, CURRENT_TIMESTAMP());
   
 INSERT INTO client_details (id, client_id, client_secret, client_name, dynamically_registered,
   refresh_token_validity_seconds, access_token_validity_seconds, id_token_validity_seconds, allow_introspection,
-  token_endpoint_auth_method, require_auth_time, device_code_validity_seconds) VALUES
+  token_endpoint_auth_method, require_auth_time, device_code_validity_seconds, created_at) VALUES
   (12, 'device-code-client', 'secret', 'Device code client', false, null, 3600, 600, true, 'SECRET_BASIC', false, 
-   600);
+   600, CURRENT_TIMESTAMP());
 
 INSERT INTO client_details (id, client_id, client_secret, client_name, dynamically_registered,
   refresh_token_validity_seconds, access_token_validity_seconds, id_token_validity_seconds, device_code_validity_seconds, 
-  allow_introspection, token_endpoint_auth_method, require_auth_time) VALUES
-(13, 'implicit-flow-client', null, 'Implicit Flow client', false, null, 3600, 600, 600, false, null, false),
-(14, 'public-dc-client', null, 'Public Device Code client', false, null, 3600, 600, 600, false, null, false);
+  allow_introspection, token_endpoint_auth_method, require_auth_time, created_at) VALUES
+(13, 'implicit-flow-client', null, 'Implicit Flow client', false, null, 3600, 600, 600, false, null, false, CURRENT_TIMESTAMP()),
+(14, 'public-dc-client', null, 'Public Device Code client', false, null, 3600, 600, 600, false, null, false, CURRENT_TIMESTAMP());
+
+INSERT INTO client_details (id, client_id, client_secret, client_name, dynamically_registered,
+  refresh_token_validity_seconds, access_token_validity_seconds, id_token_validity_seconds, allow_introspection,
+  token_endpoint_auth_method, require_auth_time, token_endpoint_auth_signing_alg, jwks) VALUES
+  (15, 'jwt-auth-client_secret_jwt', 'c8e9eed0-e6e4-4a66-b16e-6f37096356a7', 'JWT Bearer Auth Client (client_secret_jwt)', 
+  false, null, 3600, 600, true, 'SECRET_JWT', false, 'HS256', null),
+  (16, 'jwt-auth-private_key_jwt', 'secret', 'JWT Bearer Auth Client (private_key_jwt)', 
+  false, null, 3600, 600, true,'PRIVATE_KEY', false, 'RS256',
+  '{"keys":[{"kty":"RSA","e":"AQAB","kid":"rsa1","n":"1y1CP181zqPNPlV1JDM7Xv0QnGswhSTHe8_XPZHxDTJkykpk_1BmgA3ovP62QRE2ORgsv5oSBI_Z_RaOc4Zx2FonjEJF2oBHtBjsAiF-pxGkM5ZPjFNgFTGp1yUUBjFDcEeIGCwPEyYSt93sQIP_0DRbViMUnpyn3xgM_a1dO5brEWR2n1Uqff1yA5NXfLS03qpl2dpH4HFY5-Zs4bvtJykpAOhoHuIQbz-hmxb9MZ3uTAwsx2HiyEJtz-suyTBHO3BM2o8UcCeyfa34ShPB8i86-sf78fOk2KeRIW1Bju3ANmdV3sxL0j29cesxKCZ06u2ZiGR3Srbft8EdLPzf-w"}]}');
 
 INSERT INTO client_scope (owner_id, scope) VALUES
   (1, 'openid'),
@@ -127,7 +136,6 @@ INSERT INTO client_scope (owner_id, scope) VALUES
   (14, 'phone');
   
   
-  
 INSERT INTO client_redirect_uri (owner_id, redirect_uri) VALUES
   (1, 'http://localhost:9090/iam-test-client/openid_connect_login'),
   (1, 'https://iam.local.io/iam-test-client/openid_connect_login'),
@@ -168,11 +176,13 @@ INSERT INTO client_grant_type (owner_id, grant_type) VALUES
   (14, 'urn:ietf:params:oauth:grant-type:device_code');
     
 INSERT INTO iam_user_info(ID,GIVENNAME,FAMILYNAME, EMAIL, EMAILVERIFIED, BIRTHDATE, GENDER) VALUES
-(2, 'Test', 'User', 'test@iam.test', true, '1950-01-01','M');
+  (2, 'Test', 'User', 'test@iam.test', true, '1950-01-01','M'),
+  (1000, 'Test', 'MFA', 'testwithmfa@iam.test', true, '2000-01-01','F');
 
 
 INSERT INTO iam_account(id, uuid, username, password, user_info_id, creationtime, lastupdatetime, active) VALUES
-(2, '80e5fb8d-b7c8-451a-89ba-346ae278a66f', 'test', '$2a$10$UZeOZKD1.dj5oiTsZKD03OETA9FXCKGqBuuijhsxYygZpOPtWMUni', 2, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), true);
+  (2, '80e5fb8d-b7c8-451a-89ba-346ae278a66f', 'test', '$2a$10$UZeOZKD1.dj5oiTsZKD03OETA9FXCKGqBuuijhsxYygZpOPtWMUni', 2, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), true),
+  (1000, '467c882e-90da-11ec-b909-0242ac120002', 'test-with-mfa', '$2a$12$S3lUZw/ESq9lULn5he6bBu9KNGCvs7C2rWo0XdVC6t65ITwAc22w2', 1000, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), true);
 
 
 INSERT INTO iam_oidc_id(issuer, subject, account_id) VALUES
@@ -219,6 +229,8 @@ INSERT INTO iam_account_group(account_id, group_id) VALUES
 
 INSERT INTO iam_account_authority(account_id, authority_id) VALUES
 (2,2);
+
+
 
 -- Other test groups
 INSERT INTO iam_group(id, name, uuid, description, creationtime, lastupdatetime) VALUES
@@ -1493,3 +1505,14 @@ INSERT INTO iam_account_group(account_id, group_id) VALUES
 (345,2),
 (346,2),
 (347,2);
+
+-- Owned clients
+insert into iam_account_client(id, account_id, client_id, creation_time) VALUES 
+(1, 200, 1, CURRENT_TIMESTAMP()),
+(2, 200, 2, CURRENT_TIMESTAMP()),
+(3, 199, 1, CURRENT_TIMESTAMP()),
+(4, 199, 2, CURRENT_TIMESTAMP());
+
+-- TOTP multi-factor secrets
+insert into iam_totp_mfa(active, secret, creation_time, last_update_time, account_id) VALUES
+(true, 'secret', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(), 1000);

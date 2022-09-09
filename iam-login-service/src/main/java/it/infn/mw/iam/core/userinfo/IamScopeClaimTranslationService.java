@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2019
+ * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2021
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import static it.infn.mw.iam.core.userinfo.UserInfoClaim.ATTR;
 import static it.infn.mw.iam.core.userinfo.UserInfoClaim.BIRTHDATE;
 import static it.infn.mw.iam.core.userinfo.UserInfoClaim.EDUPERSON_ENTITLEMENT;
 import static it.infn.mw.iam.core.userinfo.UserInfoClaim.EDUPERSON_SCOPED_AFFILIATION;
+import static it.infn.mw.iam.core.userinfo.UserInfoClaim.EDUPERSON_ASSURANCE;
 import static it.infn.mw.iam.core.userinfo.UserInfoClaim.EMAIL;
 import static it.infn.mw.iam.core.userinfo.UserInfoClaim.EMAIL_VERIFIED;
 import static it.infn.mw.iam.core.userinfo.UserInfoClaim.EXTERNAL_AUTHN;
@@ -41,6 +42,7 @@ import static it.infn.mw.iam.core.userinfo.UserInfoClaim.SSH_KEYS;
 import static it.infn.mw.iam.core.userinfo.UserInfoClaim.SUB;
 import static it.infn.mw.iam.core.userinfo.UserInfoClaim.UPDATED_AT;
 import static it.infn.mw.iam.core.userinfo.UserInfoClaim.WEBSITE;
+import static it.infn.mw.iam.core.userinfo.UserInfoClaim.WLCG_GROUPS;
 import static it.infn.mw.iam.core.userinfo.UserInfoClaim.ZONEINFO;
 
 import java.util.EnumSet;
@@ -68,8 +70,10 @@ public class IamScopeClaimTranslationService implements ScopeClaimTranslationSer
   public static final String ADDRESS_SCOPE = "address";
   public static final String EDUPERSON_SCOPED_AFFILIATION_SCOPE = "eduperson_scoped_affiliation";
   public static final String EDUPERSON_ENTITLEMENT_SCOPE = "eduperson_entitlement";
+  public static final String EDUPERSON_ASSURANCE_SCOPE = "eduperson_assurance";
   public static final String ATTR_SCOPE = "attr";
   public static final String SSH_KEYS_SCOPE = "ssh-keys";
+  public static final String WLCG_GROUPS_SCOPE = "wlcg.groups";
 
   protected static final Set<UserInfoClaim> PROFILE_CLAIMS = EnumSet.of(NAME, PREFERRED_USERNAME,
       GIVEN_NAME, FAMILY_NAME, MIDDLE_NAME, NICKNAME, PROFILE, PICTURE, WEBSITE, GENDER, ZONEINFO,
@@ -88,12 +92,14 @@ public class IamScopeClaimTranslationService implements ScopeClaimTranslationSer
     mapScopeToClaim(ADDRESS_SCOPE, ADDRESS);
     mapScopeToClaim(EDUPERSON_SCOPED_AFFILIATION_SCOPE, EDUPERSON_SCOPED_AFFILIATION);
     mapScopeToClaim(EDUPERSON_ENTITLEMENT_SCOPE, EDUPERSON_ENTITLEMENT);
+    mapScopeToClaim(EDUPERSON_ASSURANCE_SCOPE, EDUPERSON_ASSURANCE);
     mapScopeToClaim(ATTR_SCOPE, ATTR);
     mapScopeToClaim(SSH_KEYS_SCOPE, SSH_KEYS);
+    mapScopeToClaim(WLCG_GROUPS_SCOPE, WLCG_GROUPS);
   }
 
   private void mapScopeToClaim(String scope, UserInfoClaim claim) {
-    scopesToClaims.put(scope, claim.name().toLowerCase());
+    scopesToClaims.put(scope, claim.getClaimName());
   }
 
   private void mapScopeToClaim(String scope, Set<UserInfoClaim> claimSet) {

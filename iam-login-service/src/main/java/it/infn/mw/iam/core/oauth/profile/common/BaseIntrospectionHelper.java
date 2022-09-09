@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2019
+ * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2021
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,7 @@ public abstract class BaseIntrospectionHelper implements IntrospectionResultHelp
   public static final String ISSUER = "iss";
   public static final String EDUPERSON_SCOPED_AFFILIATION = "eduperson_scoped_affiliation";
   public static final String EDUPERSON_ENTITLEMENT = "eduperson_entitlement";
+  public static final String EDUPERSON_ASSURANCE = "eduperson_assurance";
 
   private final IamProperties properties;
   private final IntrospectionResultAssembler assembler;

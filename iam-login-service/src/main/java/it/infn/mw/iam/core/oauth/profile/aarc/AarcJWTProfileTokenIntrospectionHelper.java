@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2019
+ * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2021
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,6 +71,11 @@ public class AarcJWTProfileTokenIntrospectionHelper extends BaseIntrospectionHel
       if (scopes.contains(EDUPERSON_ENTITLEMENT)) {
         result.put(EDUPERSON_ENTITLEMENT,
             claimValueHelper.getClaimValueFromUserInfo(EDUPERSON_ENTITLEMENT, iamUserInfo));
+      }
+
+      if (scopes.contains(EDUPERSON_ASSURANCE)) {
+        result.put(EDUPERSON_ASSURANCE,
+            claimValueHelper.getClaimValueFromUserInfo(EDUPERSON_ASSURANCE, iamUserInfo));
       }
     }
 

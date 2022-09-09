@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2019
+ * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2021
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,11 @@ import java.util.concurrent.TimeUnit;
 
 import javax.validation.Valid;
 
-import org.hibernate.validator.constraints.NotBlank;
+import javax.validation.constraints.NotBlank;
 import org.opensaml.saml2.core.NameIDType;
 import org.opensaml.xml.signature.SignatureConstants;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
 
 import com.google.common.collect.Lists;
 
@@ -33,8 +34,10 @@ import it.infn.mw.iam.config.login.LoginButtonProperties;
 import it.infn.mw.iam.config.saml.IamSamlJITAccountProvisioningProperties.AttributeMappingProperties;
 
 @ConfigurationProperties(prefix = "saml")
+@Validated
 public class IamSamlProperties {
   
+  @Validated
   public static class IssuerValidationProperties {
     
     @NotBlank
@@ -209,7 +212,7 @@ public class IamSamlProperties {
   private int maxAuthenticationAgeSec;
 
   private long metadataRefreshPeriodSec = TimeUnit.HOURS.toSeconds(12);
-  
+
   private String idpEntityIdWhilelist;
 
   private List<IamSamlIdpMetadataProperties> idpMetadata;
@@ -217,28 +220,28 @@ public class IamSamlProperties {
   @Valid
   private List<IamSamlLoginShortcut> loginShortcuts;
 
+  @Valid
   private LoginButtonProperties wayfLoginButton;
 
   private HostnameVerificationMode hostnameVerificationMode = HostnameVerificationMode.DEFAULT;
-  
+
   private SSONameIDType nameidPolicy = SSONameIDType.TRANSIENT;
 
   private LocalMetadata localMetadata = new LocalMetadata();
-  
+
   private SignatureProperties signature = new SignatureProperties();
-  
+
   private List<ProfileProperties> customProfile = Lists.newArrayList();
- 
+
   private List<RegistrationMappingProperties> customMapping = Lists.newArrayList();
-  
+
   private ValidatorProperties defaultValidator;
-  
+
   private List<IssuerValidationProperties> validators = Lists.newArrayList();
-  
+
   private long httpClientConnectionTimeoutSecs = 5;
   private long httpClientSocketTimeoutSecs = 5;
-  
-  
+
   public List<IamSamlIdpMetadataProperties> getIdpMetadata() {
     return idpMetadata;
   }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2019
+ * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2021
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.google.common.collect.Lists;
+import com.nimbusds.jose.JWEAlgorithm;
+import com.nimbusds.jose.JWSAlgorithm;
 
 import it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo.ExternalAuthenticationType;
 import it.infn.mw.iam.config.login.LoginButtonProperties;
@@ -32,17 +34,92 @@ import it.infn.mw.iam.config.login.LoginButtonProperties;
 public class IamProperties {
 
   public enum EditableFields {
-    NAME, SURNAME, EMAIL, PICTURE
+    NAME,
+    SURNAME,
+    EMAIL,
+    PICTURE
   }
 
   public enum LocalAuthenticationAllowedUsers {
-    ALL, VO_ADMINS, NONE
+    ALL,
+    VO_ADMINS,
+    NONE
   }
 
   public enum LocalAuthenticationLoginPageMode {
-    VISIBLE, HIDDEN, HIDDEN_WITH_LINK
+    VISIBLE,
+    HIDDEN,
+    HIDDEN_WITH_LINK
   }
 
+  public static class AccountLinkingProperties {
+    boolean enable = true;
+
+    public void setEnable(boolean enable) {
+      this.enable = enable;
+    }
+
+    public boolean isEnable() {
+      return enable;
+    }
+  }
+
+  public static class ActuatorUserProperties {
+
+    String username;
+    String password;
+
+    public String getUsername() {
+      return username;
+    }
+
+    public void setUsername(String username) {
+      this.username = username;
+    }
+
+    public String getPassword() {
+      return password;
+    }
+
+    public void setPassword(String password) {
+      this.password = password;
+    }
+
+  }
+
+
+  public static class ExternalConnectivityProbeProperties {
+
+    private boolean enabled = true;
+
+    private String endpoint = "https://www.google.com";
+    private int timeoutInSecs = 10;
+
+
+    public boolean isEnabled() {
+      return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+      this.enabled = enabled;
+    }
+
+    public String getEndpoint() {
+      return endpoint;
+    }
+
+    public int getTimeoutInSecs() {
+      return timeoutInSecs;
+    }
+
+    public void setEndpoint(String endpoint) {
+      this.endpoint = endpoint;
+    }
+
+    public void setTimeoutInSecs(int timeoutInSecs) {
+      this.timeoutInSecs = timeoutInSecs;
+    }
+  }
 
   public static class VersionedStaticResourcesProperties {
     boolean enableVersioning = true;
@@ -217,6 +294,12 @@ public class IamProperties {
     String keystoreLocation;
     String defaultKeyId = "rsa1";
 
+    String defaultJwsAlgorithm = JWSAlgorithm.RS256.getName();
+    String defaultJweAlgorithm = JWEAlgorithm.RSA_OAEP_256.getName();
+
+    String defaultJweDecryptKeyId = "rsa1";
+    String defaultJweEncryptKeyId = "rsa1";
+
     public String getKeystoreLocation() {
       return keystoreLocation;
     }
@@ -228,12 +311,50 @@ public class IamProperties {
     public String getDefaultKeyId() {
       return defaultKeyId;
     }
+
+    public void setDefaultKeyId(String defaultKeyId) {
+      this.defaultKeyId = defaultKeyId;
+    }
+
+    public String getDefaultJwsAlgorithm() {
+      return defaultJwsAlgorithm;
+    }
+
+    public void setDefaultJwsAlgorithm(String defaultJwsAlgorithm) {
+      this.defaultJwsAlgorithm = defaultJwsAlgorithm;
+    }
+
+    public String getDefaultJweAlgorithm() {
+      return defaultJweAlgorithm;
+    }
+
+    public void setDefaultJweAlgorithm(String defaultJweAlgorithm) {
+      this.defaultJweAlgorithm = defaultJweAlgorithm;
+    }
+
+    public String getDefaultJweDecryptKeyId() {
+      return defaultJweDecryptKeyId;
+    }
+
+    public void setDefaultJweDecryptKeyId(String defaultJweDecryptKeyId) {
+      this.defaultJweDecryptKeyId = defaultJweDecryptKeyId;
+    }
+
+    public String getDefaultJweEncryptKeyId() {
+      return defaultJweEncryptKeyId;
+    }
+
+    public void setDefaultJweEncryptKeyId(String defaultJweEncryptKeyId) {
+      this.defaultJweEncryptKeyId = defaultJweEncryptKeyId;
+    }
   }
 
   public static class JWTProfile {
 
     public enum Profile {
-      IAM, WLCG, AARC
+      IAM,
+      WLCG,
+      AARC
     }
 
     Profile defaultProfile = Profile.IAM;
@@ -247,27 +368,6 @@ public class IamProperties {
     }
   }
 
-
-  public static class SuperUser {
-    String username;
-    String password;
-
-    public String getUsername() {
-      return username;
-    }
-
-    public void setUsername(String username) {
-      this.username = username;
-    }
-
-    public String getPassword() {
-      return password;
-    }
-
-    public void setPassword(String password) {
-      this.password = password;
-    }
-  }
   public static class PrivacyPolicy {
     String url;
     String text = "Privacy policy";
@@ -406,20 +506,6 @@ public class IamProperties {
     }
   }
 
-  public static class AarcProfileProperties {
-
-    private String urnNamespace = "example:iam";
-
-    public String getUrnNamespace() {
-      return urnNamespace;
-    }
-
-    public void setUrnNamespace(String urnNamespace) {
-      this.urnNamespace = urnNamespace;
-    }
-
-  }
-
   private String host;
 
   private String issuer;
@@ -444,7 +530,7 @@ public class IamProperties {
 
   private PrivacyPolicy privacyPolicy = new PrivacyPolicy();
 
-  private SuperUser superuser = new SuperUser();
+  private ActuatorUserProperties actuatorUser = new ActuatorUserProperties();
 
   private JWTProfile jwtProfile = new JWTProfile();
 
@@ -458,8 +544,6 @@ public class IamProperties {
 
   private UserProfileProperties userProfile = new UserProfileProperties();
 
-  private AarcProfileProperties aarcProfile = new AarcProfileProperties();
-
   private LocalAuthenticationProperties localAuthn = new LocalAuthenticationProperties();
 
   private IamTokenEnhancerProperties tokenEnhancer = new IamTokenEnhancerProperties();
@@ -468,6 +552,11 @@ public class IamProperties {
 
   private VersionedStaticResourcesProperties versionedStaticResources =
       new VersionedStaticResourcesProperties();
+
+  private ExternalConnectivityProbeProperties externalConnectivityProbe =
+      new ExternalConnectivityProbeProperties();
+
+  private AccountLinkingProperties accountLinking = new AccountLinkingProperties();
 
   public String getBaseUrl() {
     return baseUrl;
@@ -565,12 +654,12 @@ public class IamProperties {
     this.token = token;
   }
 
-  public SuperUser getSuperuser() {
-    return superuser;
+  public ActuatorUserProperties getActuatorUser() {
+    return actuatorUser;
   }
 
-  public void setSuperuser(SuperUser superuser) {
-    this.superuser = superuser;
+  public void setActuatorUser(ActuatorUserProperties actuatorUser) {
+    this.actuatorUser = actuatorUser;
   }
 
   public JWTProfile getJwtProfile() {
@@ -621,14 +710,6 @@ public class IamProperties {
     this.userProfile = userProfile;
   }
 
-  public AarcProfileProperties getAarcProfile() {
-    return aarcProfile;
-  }
-
-  public void setAarcProfile(AarcProfileProperties aarcProfile) {
-    this.aarcProfile = aarcProfile;
-  }
-
   public LocalAuthenticationProperties getLocalAuthn() {
     return localAuthn;
   }
@@ -660,6 +741,23 @@ public class IamProperties {
   public void setVersionedStaticResources(
       VersionedStaticResourcesProperties versionedStaticResources) {
     this.versionedStaticResources = versionedStaticResources;
+  }
+
+  public ExternalConnectivityProbeProperties getExternalConnectivityProbe() {
+    return externalConnectivityProbe;
+  }
+
+  public void setExternalConnectivityProbe(
+      ExternalConnectivityProbeProperties externalConnectivityProbe) {
+    this.externalConnectivityProbe = externalConnectivityProbe;
+  }
+
+  public AccountLinkingProperties getAccountLinking() {
+    return accountLinking;
+  }
+
+  public void setAccountLinking(AccountLinkingProperties accountLinking) {
+    this.accountLinking = accountLinking;
   }
 
 }

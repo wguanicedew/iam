@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2019
+ * Copyright (c) Istituto Nazionale di Fisica Nucleare (INFN). 2016-2021
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import it.infn.mw.iam.core.userinfo.AarcDecoratedUserInfo;
 import it.infn.mw.iam.persistence.model.IamUserInfo;
 import it.infn.mw.iam.persistence.repository.UserInfoAdapter;
 
+@SuppressWarnings("deprecation")
 public class AarcJWTProfileUserinfoHelper extends BaseUserinfoHelper {
 
   protected final AarcClaimValueHelper claimValueHelper;
@@ -49,8 +50,9 @@ public class AarcJWTProfileUserinfoHelper extends BaseUserinfoHelper {
     IamUserInfo iamUserInfo = ((UserInfoAdapter) ui).getUserinfo();
 
     AarcDecoratedUserInfo aui = AarcDecoratedUserInfo.forUser(ui);
-    aui.setScopedAffiliation(getProperties().getOrganisation().getName());
+    aui.setScopedAffiliation(claimValueHelper.getClaimValueFromUserInfo("eduperson_scoped_affiliation", iamUserInfo).toString());
     aui.setEntitlements(claimValueHelper.resolveGroups(iamUserInfo));
+    aui.setAssurance(claimValueHelper.resolveLOA());
 
     return aui;
   }
