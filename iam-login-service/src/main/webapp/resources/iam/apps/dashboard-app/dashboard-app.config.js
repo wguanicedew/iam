@@ -89,6 +89,18 @@ angular
                     }
                 })
                 .state(
+                    'scopes', {
+                        url: '/scopes',
+                        resolve: {
+                            scopes: loadScopes
+                        },
+                        views: {
+                            content: {
+                                component: 'scopes'
+                            }
+                        }
+                    })
+                .state(
                     'requests', {
                     url: '/requests',
                     views: {
@@ -236,6 +248,11 @@ angular
 
             function loadAup(AupService) {
                 return AupService.getAup();
+            }
+
+            function loadScopes(ScopesService) {
+                return ScopesService.getAllScopes();
+
             }
 
             function loadGroupLabels(LabelsService, $stateParams) {
