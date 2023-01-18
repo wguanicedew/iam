@@ -251,3 +251,15 @@ proxycert:
   enabled: ${IAM_PROXYCERT_ENABLED:true}
   key-size: ${IAM_PROXYCERT_KEY_SIZE:2048}
   max-lifetime-seconds: ${IAM_PROXYCERT_MAX_LIFETIME_SECONDS:43200}
+
+lifecycle:
+  account:
+    account-lifetime-days: ${IAM_LIFECYCLE_ACCOUNT_LIFETIME_DAYS:0}
+    read-only-end-time: ${IAM_LIFECYCLE_ACCOUNT_READ_ONLY_END_TIME:false}
+    expired-account-policy:
+      suspension-grace-period-days: ${IAM_LIFECYCLE_ACCOUNT_SUSPENSION_GRACE_PERIOD_DAYS:7}
+      remove-expired-accounts: ${IAM_LIFECYCLE_REMOVE_EXPIRED_ACCOUNTS:true}
+      removal-grace-period-days: ${IAM_LIFECYCLE_ACCOUNT_REMOVAL_GRACE_PERIOD_DAYS:30}
+    expired-accounts-task:
+      cron-schedule:  ${IAM_LIFECYCLE_EXPIRED_ACCOUNT_TASK_CRON_SCHEDULE:0 */5 * * * *}
+      enabled: ${IAM_LIFECYCLE_EXPIRED_ACCOUNT_TASK_ENABLED:true}
