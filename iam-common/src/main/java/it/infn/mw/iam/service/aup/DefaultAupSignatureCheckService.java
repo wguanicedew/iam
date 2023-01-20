@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.api.aup;
+package it.infn.mw.iam.service.aup;
 
 import static java.util.Objects.isNull;
 

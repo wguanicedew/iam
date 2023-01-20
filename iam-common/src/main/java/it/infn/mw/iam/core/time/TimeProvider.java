@@ -13,12 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.infn.mw.iam.api.aup;
+package it.infn.mw.iam.core.time;
 
-import it.infn.mw.iam.persistence.model.IamAccount;
-
+/**
+ * Time provider interface.
+ *
+ */
 @FunctionalInterface
-public interface AUPSignatureCheckService {
+public interface TimeProvider {
 
-  boolean needsAupSignature(IamAccount account);
+  /**
+   * Returns the current time in milliseconds
+   * 
+   * @return the difference, measured in milliseconds, between the current time and midnight,
+   * January 1, 1970 UTC.
+   * 
+   * @see System#currentTimeMillis()
+   */
+  public long currentTimeMillis();
+
 }
