@@ -97,6 +97,13 @@
             </a>
         </li>
 
+        <li>
+            <a id="nav-groups" ui-sref="managedGroups" ui-sref-opts="{reload: true}" ng-show="$root.loggedUser.isGroupManager">
+                <i class="fa fa-users"></i>
+                <span>Managed groups</span>
+            </a>
+        </li>
+
         <li ng-show="$root.loggedUser.isAdmin">
             <a id="nav-tokens" ui-sref="tokens" ui-sref-opts="{reload: true}">
                 <i class="fa fa-key"></i>

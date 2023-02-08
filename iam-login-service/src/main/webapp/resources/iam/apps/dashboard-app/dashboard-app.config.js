@@ -129,6 +129,18 @@ angular
                         }
                     }
                 })
+                .state('managedGroups', {
+                    url: '/managed-groups',
+                    resolve: {
+                        account: loadLoggedUser,
+
+                    },
+                    views: {
+                        content: {
+                            component: 'myGroups'
+                        }
+                    }
+                })
                 .state('clients', {
                     url: '/clients',
                     resolve: {
