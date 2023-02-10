@@ -49,7 +49,7 @@
                         <user-detail user="$ctrl.user" aup="$ctrl.aup"></user-detail>
                         <user-labels user="$ctrl.user" labels="$ctrl.labels"></user-labels>
                     </div>
-                    <div ng-hide="$ctrl.isGroupManager && !$ctrl.isMe()" class="box-footer">
+                    <div ng-hide="$ctrl.isGroupManager && !$ctrl.isMe() && !$ctrl.isVoAdmin()" class="box-footer">
                         <!-- Edit details button -->
                         <user-edit user="$ctrl.user"></user-edit>
 
