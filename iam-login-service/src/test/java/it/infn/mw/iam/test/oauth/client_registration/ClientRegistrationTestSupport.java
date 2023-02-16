@@ -39,8 +39,7 @@ import it.infn.mw.iam.api.client.registration.ClientRegistrationApiController;
 public class ClientRegistrationTestSupport {
 
   public static final String REGISTER_ENDPOINT = ClientRegistrationApiController.ENDPOINT;
-  public static final String LEGACY_REGISTER_ENDPOINT =
-      ClientRegistrationApiController.LEGACY_ENDPOINT;
+  public static final String LEGACY_REGISTER_ENDPOINT = "/register";
 
   public static class ClientJsonStringBuilder {
     

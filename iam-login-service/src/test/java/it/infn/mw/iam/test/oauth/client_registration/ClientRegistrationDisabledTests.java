@@ -17,7 +17,6 @@ package it.infn.mw.iam.test.oauth.client_registration;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -53,22 +52,9 @@ public class ClientRegistrationDisabledTests extends ClientRegistrationTestSuppo
       .andExpect(content().contentType(APPLICATION_JSON))
       .andExpect(jsonPath("$.error", containsString(REGISTRATION_DISABLED_MSG)));
 
-    mvc.perform(post(LEGACY_REGISTER_ENDPOINT).contentType(APPLICATION_JSON).content(jsonInString))
-      .andExpect(status().isBadRequest())
-      .andExpect(content().contentType(APPLICATION_JSON))
-      .andExpect(jsonPath("$.error", containsString(REGISTRATION_DISABLED_MSG)));
-
     mvc
       .perform(
           put(REGISTER_ENDPOINT + "/client").contentType(APPLICATION_JSON).content(jsonInString))
-      .andExpect(status().isBadRequest())
-      .andExpect(content().contentType(APPLICATION_JSON))
-      .andExpect(jsonPath("$.error", containsString(REGISTRATION_DISABLED_MSG)));
-
-    mvc
-      .perform(
-          put(LEGACY_REGISTER_ENDPOINT + "/client").contentType(APPLICATION_JSON)
-            .content(jsonInString))
       .andExpect(status().isBadRequest())
       .andExpect(content().contentType(APPLICATION_JSON))
       .andExpect(jsonPath("$.error", containsString(REGISTRATION_DISABLED_MSG)));
@@ -78,16 +64,6 @@ public class ClientRegistrationDisabledTests extends ClientRegistrationTestSuppo
       .andExpect(content().contentType(APPLICATION_JSON))
       .andExpect(jsonPath("$.error", containsString(REGISTRATION_DISABLED_MSG)));
 
-    mvc.perform(get(LEGACY_REGISTER_ENDPOINT + "/client"))
-      .andExpect(status().isBadRequest())
-      .andExpect(content().contentType(APPLICATION_JSON))
-      .andExpect(jsonPath("$.error", containsString(REGISTRATION_DISABLED_MSG)));
-
-
-    mvc.perform(delete(LEGACY_REGISTER_ENDPOINT + "/client"))
-      .andExpect(status().isBadRequest())
-      .andExpect(content().contentType(APPLICATION_JSON))
-      .andExpect(jsonPath("$.error", containsString(REGISTRATION_DISABLED_MSG)));
   }
 
 }
