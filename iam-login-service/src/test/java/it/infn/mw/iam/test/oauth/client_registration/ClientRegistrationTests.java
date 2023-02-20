@@ -79,38 +79,10 @@ public class ClientRegistrationTests extends ClientRegistrationTestSupport {
     String jsonInString = ClientJsonStringBuilder.builder().scopes("test").build();
 
     // @formatter:off
-    String response =
-        mvc.perform(post(LEGACY_REGISTER_ENDPOINT)
+    mvc.perform(post(LEGACY_REGISTER_ENDPOINT)
             .contentType(APPLICATION_JSON)
             .content(jsonInString))
-          .andExpect(status().isCreated())
-          .andExpect(content().contentType(APPLICATION_JSON))
-          .andReturn()
-          .getResponse()
-          .getContentAsString();
-    // @formatter:on
-
-    JsonNode jsonNode = mapper.readTree(response);
-
-    String rat = jsonNode.get("registration_access_token").asText();
-    String registrationUri = jsonNode.get("registration_client_uri").asText();
-
-    assertThat(rat, notNullValue());
-    assertThat(registrationUri, notNullValue());
-    assertThat(registrationUri, containsString(REGISTER_ENDPOINT));
-
-    // @formatter:off
-    mvc.perform(get(registrationUri)
-        .contentType(APPLICATION_JSON)
-        .header("Authorization", "Bearer " + rat))
-      .andExpect(status().isOk())
-      .andExpect(content().contentType(APPLICATION_JSON));
-    
-    mvc.perform(get(registrationUri)
-        .contentType(APPLICATION_JSON)
-        .header("Authorization", "Bearer " + rat))
-      .andExpect(status().isOk())
-      .andExpect(content().contentType(APPLICATION_JSON));
+          .andExpect(status().isNotFound());
     // @formatter:on
   }
 

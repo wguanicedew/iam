@@ -49,11 +49,10 @@ import it.infn.mw.iam.api.common.client.RegisteredClientDTO;
 
 @RestController
 @RequestMapping(
-    value = {ClientRegistrationApiController.ENDPOINT, ClientRegistrationApiController.LEGACY_ENDPOINT})
+    value = {ClientRegistrationApiController.ENDPOINT})
 public class ClientRegistrationApiController {
 
   public static final String ENDPOINT = "/iam/api/client-registration";
-  public static final String LEGACY_ENDPOINT = "/register";
 
   private final ClientRegistrationService service;
 
