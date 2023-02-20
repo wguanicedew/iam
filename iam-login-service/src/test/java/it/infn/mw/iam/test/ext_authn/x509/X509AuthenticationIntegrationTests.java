@@ -82,7 +82,7 @@ public class X509AuthenticationIntegrationTests extends X509TestSupport {
   public void testX509AuthenticationSuccessButNotRequestedLeadsToLoginPage() throws Exception {
 
     Instant now = Instant.now();
-    
+
     IamAccount testAccount = iamAccountRepo.findByUsername("test")
       .orElseThrow(() -> new AssertionError("Expected test user not found"));
 
@@ -90,9 +90,9 @@ public class X509AuthenticationIntegrationTests extends X509TestSupport {
 
     iamAccountRepo.save(testAccount);
 
-    IamAccount resolvedAccount =
-        iamAccountRepo.findByCertificateSubject(TEST_0_SUBJECT).orElseThrow(
-            () -> new AssertionError("Expected test user linked with subject " + TEST_0_SUBJECT));
+    IamAccount resolvedAccount = iamAccountRepo.findByCertificateSubject(TEST_0_SUBJECT)
+      .orElseThrow(
+          () -> new AssertionError("Expected test user linked with subject " + TEST_0_SUBJECT));
 
     assertThat(resolvedAccount.getUsername(), equalTo("test"));
 
@@ -101,19 +101,21 @@ public class X509AuthenticationIntegrationTests extends X509TestSupport {
       .andExpect(redirectedUrl("http://localhost/login"))
       .andExpect(request().sessionAttribute(X509_CREDENTIAL_SESSION_KEY, not(nullValue())))
       .andExpect(request().attribute(X509_CAN_LOGIN_KEY, is(TRUE)));
-    
-    mvc.perform(get("/dashboard").param(X509_AUTHN_REQUESTED_PARAM, "true").headers(test0SSLHeadersVerificationSuccess()))
-    .andExpect(status().isFound())
-    .andExpect(redirectedUrl("/dashboard"))
-    .andExpect(authenticated().withUsername("test"));
-    
-    resolvedAccount =
-        iamAccountRepo.findByCertificateSubject(TEST_0_SUBJECT).orElseThrow(
-            () -> new AssertionError("Expected test user linked with subject " + TEST_0_SUBJECT));
-    
+
+    mvc
+      .perform(get("/dashboard").param(X509_AUTHN_REQUESTED_PARAM, "true")
+        .headers(test0SSLHeadersVerificationSuccess()))
+      .andExpect(status().isFound())
+      .andExpect(redirectedUrl("/dashboard"))
+      .andExpect(authenticated().withUsername("test"));
+
+    resolvedAccount = iamAccountRepo.findByCertificateSubject(TEST_0_SUBJECT)
+      .orElseThrow(
+          () -> new AssertionError("Expected test user linked with subject " + TEST_0_SUBJECT));
+
     // Check that last login time is updated when loggin in with X.509 credentials
     assertThat(resolvedAccount.getLastLoginTime().toInstant(), greaterThan(now));
-    
+
   }
 
   @Test
@@ -126,9 +128,9 @@ public class X509AuthenticationIntegrationTests extends X509TestSupport {
 
     iamAccountRepo.save(testAccount);
 
-    IamAccount resolvedAccount =
-        iamAccountRepo.findByCertificateSubject(TEST_0_SUBJECT).orElseThrow(
-            () -> new AssertionError("Expected test user linked with subject " + TEST_0_SUBJECT));
+    IamAccount resolvedAccount = iamAccountRepo.findByCertificateSubject(TEST_0_SUBJECT)
+      .orElseThrow(
+          () -> new AssertionError("Expected test user linked with subject " + TEST_0_SUBJECT));
 
     assertThat(resolvedAccount.getUsername(), equalTo("test"));
 
@@ -254,6 +256,32 @@ public class X509AuthenticationIntegrationTests extends X509TestSupport {
         .with(csrf().asHeader()))
       .andDo(print())
       .andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  public void testx509AuthNFailsIfDisabledUser() throws Exception {
+
+    IamAccount testAccount = iamAccountRepo.findByUsername("test")
+      .orElseThrow(() -> new AssertionError("Expected test user not found"));
+
+    linkTest0CertificateToAccount(testAccount);
+
+    iamAccountRepo.save(testAccount);
+
+    IamAccount resolvedAccount = iamAccountRepo.findByCertificateSubject(TEST_0_SUBJECT)
+      .orElseThrow(
+          () -> new AssertionError("Expected test user linked with subject " + TEST_0_SUBJECT));
+
+    assertThat(resolvedAccount.getUsername(), equalTo("test"));
+
+    resolvedAccount.setActive(false);
+
+    mvc.perform(get("/dashboard").param(X509_AUTHN_REQUESTED_PARAM, "true"))
+      .andExpect(status().is3xxRedirection())
+      .andExpect(redirectedUrl("http://localhost/login"));
+
+    resolvedAccount.setActive(true);
+
   }
 
 }
