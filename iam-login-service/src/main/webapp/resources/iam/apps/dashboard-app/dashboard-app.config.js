@@ -89,6 +89,18 @@ angular
                     }
                 })
                 .state(
+                    'scopes', {
+                        url: '/scopes',
+                        resolve: {
+                            scopes: loadScopes
+                        },
+                        views: {
+                            content: {
+                                component: 'scopes'
+                            }
+                        }
+                    })
+                .state(
                     'requests', {
                     url: '/requests',
                     views: {
@@ -114,6 +126,18 @@ angular
                     views: {
                         content: {
                             component: 'aup'
+                        }
+                    }
+                })
+                .state('managedGroups', {
+                    url: '/managed-groups',
+                    resolve: {
+                        account: loadLoggedUser,
+
+                    },
+                    views: {
+                        content: {
+                            component: 'myGroups'
                         }
                     }
                 })
@@ -236,6 +260,11 @@ angular
 
             function loadAup(AupService) {
                 return AupService.getAup();
+            }
+
+            function loadScopes(ScopesService) {
+                return ScopesService.getAllScopes();
+
             }
 
             function loadGroupLabels(LabelsService, $stateParams) {

@@ -97,6 +97,13 @@
             </a>
         </li>
 
+        <li>
+            <a id="nav-groups" ui-sref="managedGroups" ui-sref-opts="{reload: true}" ng-show="$root.loggedUser.isGroupManager">
+                <i class="fa fa-users"></i>
+                <span>Managed groups</span>
+            </a>
+        </li>
+
         <li ng-show="$root.loggedUser.isAdmin">
             <a id="nav-tokens" ui-sref="tokens" ui-sref-opts="{reload: true}">
                 <i class="fa fa-key"></i>
@@ -108,7 +115,16 @@
             </a>
         </li>
 
-        <li class="header">Other</li>
+        <li>
+            <a id="nav-scopes" ui-sref="scopes" ui-sref-opts="{reload: true}" ng-show="$root.loggedUser.isAdmin">
+                <i class="fa fa-id-badge"></i>
+                <span>Scopes</span>
+                <span class="badge pull-right" ng-show="$root.scopesCount>0">{{$root.scopesCount}}</span>
+            </a>
+        </li>
+
+        <li class="header">Client management</li>
+
         <li>
             <a href="/">
                 <i class="fa fa-dashboard"></i>

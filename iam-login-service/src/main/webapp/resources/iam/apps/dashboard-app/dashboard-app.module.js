@@ -32,7 +32,7 @@
     angular.module('dashboardApp')
         .run(function (
             $window, $rootScope, $state, $stateParams, $q, $uibModal, $trace, Utils,
-            UserService, RegistrationRequestService, TokensService, GroupRequestsService, toaster) {
+            UserService, RegistrationRequestService, TokensService, GroupRequestsService, ScopesService, toaster) {
 
             $state.defaultErrorHandler(function (response) {
                 if (response.status) {
@@ -40,6 +40,13 @@
                     toaster.pop({
                         type: 'error',
                         body: response.statusText
+                    });
+                }
+                else if(response.detail.data.error == 'insufficient_scope' || response.detail.data.error == 'access_denied') {
+                    console.error(response);
+                    toaster.pop({
+                        type: 'warning',
+                        body: 'Insufficient privileges'
                     });
                 } else {
                     console.error(response);
@@ -103,6 +110,9 @@
                     }));
                     promises.push(TokensService.getRefreshTokensCount().then(function (r) {
                         $rootScope.refreshTokensCount = r.data.totalResults;
+                    }));
+                    promises.push(ScopesService.getAllScopes().then(function (r) {
+                        $rootScope.scopesCount = r.data.length;
                     }));
                 }
 

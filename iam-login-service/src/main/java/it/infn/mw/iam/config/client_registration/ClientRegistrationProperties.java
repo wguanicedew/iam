@@ -31,7 +31,7 @@ public class ClientRegistrationProperties {
     private int defaultAccessTokenValiditySeconds = (int) TimeUnit.HOURS.toSeconds(1);
     private int defaultIdTokenValiditySeconds = (int) TimeUnit.MINUTES.toSeconds(10);
     private int defaultDeviceCodeValiditySeconds = (int) TimeUnit.MINUTES.toSeconds(10);
-    private int defaultRefreshTokenValiditySeconds = -1;
+    private int defaultRefreshTokenValiditySeconds = (int) TimeUnit.DAYS.toSeconds(30);
 
     private int defaultRegistrationAccessTokenValiditySeconds = -1;
 

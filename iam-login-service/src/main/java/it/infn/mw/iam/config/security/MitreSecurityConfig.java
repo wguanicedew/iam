@@ -108,8 +108,6 @@ public class MitreSecurityConfig {
     public static final String REGISTER_ENDPOINT_PATTERN =
         ClientRegistrationApiController.ENDPOINT + "/**";
 
-    public static final String LEGACY_REGISTER_ENDPOINT_PATTERN = "/register/**";
-
     @Autowired
     private OAuth2AuthenticationProcessingFilter resourceFilter;
 
@@ -121,7 +119,7 @@ public class MitreSecurityConfig {
     public void configure(final HttpSecurity http) throws Exception {
 
       HttpSecurity registerEndpoint = http.requestMatchers()
-        .antMatchers(REGISTER_ENDPOINT_PATTERN, LEGACY_REGISTER_ENDPOINT_PATTERN)
+        .antMatchers(REGISTER_ENDPOINT_PATTERN)
         .and()
         .exceptionHandling()
         .authenticationEntryPoint(authenticationEntryPoint)
@@ -131,7 +129,7 @@ public class MitreSecurityConfig {
         .sessionCreationPolicy(NEVER)
         .and()
         .authorizeRequests()
-        .antMatchers(REGISTER_ENDPOINT_PATTERN, LEGACY_REGISTER_ENDPOINT_PATTERN)
+        .antMatchers(REGISTER_ENDPOINT_PATTERN)
         .permitAll()
         .and();
 

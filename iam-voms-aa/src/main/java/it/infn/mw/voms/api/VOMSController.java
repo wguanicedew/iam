@@ -28,6 +28,9 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import it.infn.mw.iam.authn.x509.IamX509AuthenticationCredential;
+import it.infn.mw.iam.persistence.model.IamAccount;
+import it.infn.mw.iam.persistence.repository.IamAccountRepository;
+import it.infn.mw.iam.service.aup.AUPSignatureCheckService;
 import it.infn.mw.voms.aa.AttributeAuthority;
 import it.infn.mw.voms.aa.RequestContextFactory;
 import it.infn.mw.voms.aa.VOMSErrorMessage;
@@ -47,14 +50,17 @@ public class VOMSController extends VOMSControllerSupport {
   private final AttributeAuthority aa;
   private final ACGenerator acGenerator;
   private final VOMSResponseBuilder responseBuilder;
+  private final AUPSignatureCheckService signatureCheckService;
 
   @Autowired
   public VOMSController(AttributeAuthority aa, VomsProperties props, ACGenerator acGenerator,
-      VOMSResponseBuilder responseBuilder) {
+      VOMSResponseBuilder responseBuilder, IamAccountRepository accountRepo,
+      AUPSignatureCheckService signatureCheckService) {
     this.aa = aa;
     this.vomsProperties = props;
     this.acGenerator = acGenerator;
     this.responseBuilder = responseBuilder;
+    this.signatureCheckService = signatureCheckService;
   }
 
   protected VOMSRequestContext initVomsRequestContext(IamX509AuthenticationCredential cred,
@@ -106,8 +112,12 @@ public class VOMSController extends VOMSControllerSupport {
       } else {
         return responseBuilder.createErrorResponse(em);
       }
-
     } else {
+      IamAccount user = context.getIamAccount();
+      if (signatureCheckService.needsAupSignature(user)) {
+        VOMSErrorMessage em = VOMSErrorMessage.faildToSignAup(user.getUsername());
+        return responseBuilder.createErrorResponse(em);
+      }
       byte[] acBytes = acGenerator.generateVOMSAC(context);
       return responseBuilder.createResponse(acBytes, context.getResponse().getWarnings());
     }

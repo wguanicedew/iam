@@ -151,6 +151,9 @@ public class SamlDecryptUtil {
   public SamlDecryptUtil() throws Exception {
     initializeOpenSAML();
 
+    System.setProperty("javax.xml.transform.TransformerFactory",
+        "com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl");
+
     String xmlResponsePath = System.getenv("SAML_RESPONSE_PATH");
     String ksPath = System.getenv("KS_PATH");
     String ksAlias = System.getenv("KS_ALIAS");

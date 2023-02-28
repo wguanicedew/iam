@@ -49,7 +49,6 @@ import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 import com.google.common.collect.Maps;
 
 import it.infn.mw.iam.api.account.AccountUtils;
-import it.infn.mw.iam.api.aup.AUPSignatureCheckService;
 import it.infn.mw.iam.authn.ExternalAuthenticationInfoProcessor;
 import it.infn.mw.iam.core.oauth.IamIntrospectionResultAssembler;
 import it.infn.mw.iam.core.oauth.attributes.AttributeMapHelper;
@@ -88,6 +87,8 @@ import it.infn.mw.iam.notification.service.resolver.NotifyGmStrategy;
 import it.infn.mw.iam.notification.service.resolver.NotifyGmsAndAdminsStrategy;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.persistence.repository.IamAupRepository;
+import it.infn.mw.iam.registration.validation.UsernameValidator;
+import it.infn.mw.iam.service.aup.AUPSignatureCheckService;
 
 @SuppressWarnings("deprecation")
 @Configuration
@@ -234,7 +235,7 @@ public class IamConfig {
   }
 
   @Bean
-  public PasswordEncoder passwordEncoder() {
+  PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
   }
 
@@ -261,6 +262,11 @@ public class IamConfig {
   ServletRegistrationBean<WebServlet> h2Console() {
     WebServlet h2Servlet = new WebServlet();
     return new ServletRegistrationBean<>(h2Servlet, "/h2-console/*");
+  }
+
+  @Bean
+  UsernameValidator usernameRegExpValidator() {
+    return new UsernameValidator();
   }
 
 }
