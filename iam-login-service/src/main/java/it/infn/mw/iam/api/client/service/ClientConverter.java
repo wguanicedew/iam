@@ -226,6 +226,11 @@ public class ClientConverter {
         .setTokenEndpointAuthMethod(AuthMethod.getByValue(dto.getTokenEndpointAuthMethod().name()));
     }
 
+    if (dto.getCodeChallengeMethod() != null) {
+      PKCEAlgorithm pkceAlgo = PKCEAlgorithm.parse(dto.getCodeChallengeMethod());
+      client.setCodeChallengeMethod(pkceAlgo);
+    }
+
     return client;
   }
 
