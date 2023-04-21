@@ -43,7 +43,7 @@ public class JWTBearerClientAuthenticationIntegrationTestSupport extends Endpoin
 
   public static final String CLIENT_ID_SECRET_JWT = "jwt-auth-client_secret_jwt";
   public static final String CLIENT_ID_SECRET_JWT_SECRET = "c8e9eed0-e6e4-4a66-b16e-6f37096356a7";
-  public static final String TOKEN_ENDPOINT_AUDIENCE = "http://localhost:8080/token";
+  public static final String TOKEN_ENDPOINT_AUDIENCE = "http://localhost:8443/token";
   public static final String TOKEN_ENDPOINT = "/token";
   public static final String JWT_BEARER_ASSERTION_TYPE =
       "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";

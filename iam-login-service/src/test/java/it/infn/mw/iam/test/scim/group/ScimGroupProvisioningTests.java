@@ -120,10 +120,10 @@ public class ScimGroupProvisioningTests {
       .andExpect(jsonPath("$.displayName", equalTo("Production")))
       .andExpect(jsonPath("$.meta.resourceType", equalTo("Group")))
       .andExpect(
-          jsonPath("$.meta.location", equalTo("http://localhost:8080/scim/Groups/" + groupId)))
+          jsonPath("$.meta.location", equalTo("http://localhost:8443/scim/Groups/" + groupId)))
       // FIXME
       // .andExpect(jsonPath("$.members", hasSize(equalTo(249))))
-      // .andExpect(jsonPath("$.members[0].$ref", startsWith("http://localhost:8080/scim/Users/")))
+      // .andExpect(jsonPath("$.members[0].$ref", startsWith("http://localhost:8443/scim/Users/")))
       .andExpect(jsonPath("$.schemas",
           hasItems(ScimGroup.GROUP_SCHEMA, ScimConstants.INDIGO_GROUP_SCHEMA)));
   }

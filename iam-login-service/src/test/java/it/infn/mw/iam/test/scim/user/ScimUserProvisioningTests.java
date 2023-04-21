@@ -124,13 +124,13 @@ public class ScimUserProvisioningTests extends ScimUserTestSupport {
 
     ScimGroupRef productionRef = ScimGroupRef.builder()
       .display("Production")
-      .ref("http://localhost:8080/scim/Groups/c617d586-54e6-411d-8e38-64967798fa8a")
+      .ref("http://localhost:8443/scim/Groups/c617d586-54e6-411d-8e38-64967798fa8a")
       .value("c617d586-54e6-411d-8e38-64967798fa8a")
       .build();
 
     ScimGroupRef analysisRef = ScimGroupRef.builder()
       .display("Analysis")
-      .ref("http://localhost:8080/scim/Groups/6a384bcd-d4b3-4b7f-a2fe-7d897ada0dd1")
+      .ref("http://localhost:8443/scim/Groups/6a384bcd-d4b3-4b7f-a2fe-7d897ada0dd1")
       .value("6a384bcd-d4b3-4b7f-a2fe-7d897ada0dd1")
       .build();
 
@@ -145,7 +145,7 @@ public class ScimUserProvisioningTests extends ScimUserTestSupport {
     assertThat(user.getName().getFormatted(), equalTo("Test User"));
     assertThat(user.getMeta().getResourceType(), equalTo("User"));
     assertThat(user.getMeta().getLocation(),
-        equalTo("http://localhost:8080" + getUserLocation(uuid)));
+        equalTo("http://localhost:8443" + getUserLocation(uuid)));
     assertThat(user.getEmails(), hasSize(equalTo(1)));
     assertThat(user.getEmails().get(0).getValue(), equalTo("test@iam.test"));
     assertThat(user.getEmails().get(0).getType(), equalTo(ScimEmailType.work));

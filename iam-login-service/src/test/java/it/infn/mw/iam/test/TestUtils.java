@@ -90,7 +90,7 @@ public class TestUtils {
     private String password;
     private String audience;
 
-    private int port = 8080;
+    private int port = 8443;
 
     public AccessTokenGetter(String clientId, String clientSecret) {
       this.clientId = clientId;

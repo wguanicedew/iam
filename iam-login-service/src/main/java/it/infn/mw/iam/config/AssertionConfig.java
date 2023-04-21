@@ -46,7 +46,7 @@ public class AssertionConfig {
   @Qualifier("clientAssertionValidator")
   public AssertionValidator clientAssertionValidator() {
     Map<String, String> whitelist = new LinkedHashMap<>();
-    whitelist.put("http://artemesia.local", "http://localhost:8080/jwk");
+    whitelist.put("http://artemesia.local", "http://localhost:8443/jwk");
 
     WhitelistedIssuerAssertionValidator validator = new WhitelistedIssuerAssertionValidator();
     validator.setWhitelist(whitelist);

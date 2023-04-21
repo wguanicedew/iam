@@ -122,7 +122,7 @@ public class SamlJitAccountProvisioningTests extends SamlAuthenticationTestSuppo
     AuthnRequest authnRequest = getAuthnRequestFromSession(session);
 
     assertThat(authnRequest.getAssertionConsumerServiceURL(),
-        Matchers.equalTo("http://localhost:8080/saml/SSO"));
+        Matchers.equalTo("http://localhost:8443/saml/SSO"));
 
     Response r = buildJitTest1Response(authnRequest);
 
@@ -163,7 +163,7 @@ public class SamlJitAccountProvisioningTests extends SamlAuthenticationTestSuppo
     authnRequest = getAuthnRequestFromSession(session);
 
     assertThat(authnRequest.getAssertionConsumerServiceURL(),
-        Matchers.equalTo("http://localhost:8080/saml/SSO"));
+        Matchers.equalTo("http://localhost:8443/saml/SSO"));
 
     r = buildJitTest1Response(authnRequest);
 
@@ -216,7 +216,7 @@ public class SamlJitAccountProvisioningTests extends SamlAuthenticationTestSuppo
     AuthnRequest authnRequest = getAuthnRequestFromSession(session);
 
     assertThat(authnRequest.getAssertionConsumerServiceURL(),
-        equalTo("http://localhost:8080/saml/SSO"));
+        equalTo("http://localhost:8443/saml/SSO"));
 
     Response r = buildJitTest1Response(authnRequest);
 
@@ -300,7 +300,7 @@ public class SamlJitAccountProvisioningTests extends SamlAuthenticationTestSuppo
     MockHttpSession session =
         (MockHttpSession) mvc.perform(get(authorizationEndpointUri.toUriString()))
           .andExpect(status().is3xxRedirection())
-          .andExpect(redirectedUrl("http://localhost:8080/saml/login?idp=" + DEFAULT_IDP_ID))
+          .andExpect(redirectedUrl("http://localhost:8443/saml/login?idp=" + DEFAULT_IDP_ID))
           .andReturn()
           .getRequest()
           .getSession();
@@ -314,7 +314,7 @@ public class SamlJitAccountProvisioningTests extends SamlAuthenticationTestSuppo
     AuthnRequest authnRequest = getAuthnRequestFromSession(session);
 
     assertThat(authnRequest.getAssertionConsumerServiceURL(),
-        equalTo("http://localhost:8080/saml/SSO"));
+        equalTo("http://localhost:8443/saml/SSO"));
 
     Response r = buildJitTest1Response(authnRequest);
 

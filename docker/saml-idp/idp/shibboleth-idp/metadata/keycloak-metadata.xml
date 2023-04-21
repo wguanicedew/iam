@@ -1,4 +1,4 @@
-<EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" entityID="http://iam.local.io:8080/auth/realms/master">
+<EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" entityID="http://iam.local.io:8443/auth/realms/master">
     <SPSSODescriptor AuthnRequestsSigned="true" WantAssertionSigned="true"
         protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
 
@@ -22,12 +22,12 @@ MIICmzCCAYMCBgFXcOiqTDANBgkqhkiG9w0BAQsFADARMQ8wDQYDVQQDDAZtYXN0ZXIwHhcNMTYwOTI4
             </dsig:KeyInfo>
         </KeyDescriptor>
 
-        <SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="http://iam.local.io:8080/auth/realms/master/broker/saml-idp-testbed/endpoint"/>
+        <SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="http://iam.local.io:8443/auth/realms/master/broker/saml-idp-testbed/endpoint"/>
 
         <NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified</NameIDFormat>
 
         <AssertionConsumerService
-            Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="http://iam.local.io:8080/auth/realms/master/broker/saml-idp-testbed/endpoint"
+            Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="http://iam.local.io:8443/auth/realms/master/broker/saml-idp-testbed/endpoint"
             index="1" isDefault="true" />
     </SPSSODescriptor>
 </EntityDescriptor>

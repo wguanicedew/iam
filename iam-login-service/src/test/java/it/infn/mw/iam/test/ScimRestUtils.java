@@ -48,7 +48,7 @@ public class ScimRestUtils {
 
   public <B> ValidatableResponse doPost(String location, B content, HttpStatus expectedError) {
 
-    return given().port(8080)
+    return given().port(8443)
       .auth()
       .preemptive()
       .oauth2(accessToken)
@@ -74,7 +74,7 @@ public class ScimRestUtils {
       HttpStatus expectedResponseCode) {
 
     /** @formatter:off */
-    return given().port(8080)
+    return given().port(8443)
       .auth()
       .preemptive()
       .oauth2(accessToken)
@@ -94,7 +94,7 @@ public class ScimRestUtils {
   public void doDelete(String location, HttpStatus statusExpected) {
 
     /** @formatter:off */
-    given().port(8080)
+    given().port(8443)
       .auth()
       .preemptive()
       .oauth2(accessToken)
@@ -119,7 +119,7 @@ public class ScimRestUtils {
   public ValidatableResponse doGet(String location, HttpStatus expectedStatus) {
 
     /** @formatter:off */
-    return given().port(8080)
+    return given().port(8443)
       .auth()
       .preemptive()
       .oauth2(accessToken)
@@ -136,7 +136,7 @@ public class ScimRestUtils {
   public <T> ValidatableResponse doPatch(String location, T content, HttpStatus expectedStatus) {
 
     /** @formatter:off */
-    return given().port(8080)
+    return given().port(8443)
       .auth()
       .preemptive()
       .oauth2(accessToken)

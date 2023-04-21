@@ -28,7 +28,7 @@ import it.infn.mw.iam.authn.error.InvalidExternalAuthenticationHintError;
 @RunWith(MockitoJUnitRunner.class)
 public class ExternalAuthenticationHintServiceTests {
 
-  public static final String BASE_URL = "http://localhost:8080";
+  public static final String BASE_URL = "http://localhost:8443";
 
   DefaultExternalAuthenticationHintService service =
       new DefaultExternalAuthenticationHintService(BASE_URL);
