@@ -1,6 +1,12 @@
 name: build & packaging
 
-on: [push, pull_request] 
+on: [published]
+
+env:
+  # Use docker.io for Docker Hub if empty
+  REGISTRY: ghcr.io
+  # github.repository as <account>/<repo>
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   build:
@@ -54,7 +60,7 @@ jobs:
       id: ls-meta
       uses: docker/metadata-action@v3
       with:
-        images: indigoiam/iam-login-service
+        images: ${{ env.REGISTRY }}/iam-login-service
         tags: |
           type=sha
           type=ref,event=tag
@@ -63,7 +69,7 @@ jobs:
       id: tc-meta
       uses: docker/metadata-action@v3
       with:
-        images: indigoiam/iam-test-client
+        images: ${{ env.REGISTRY }}/iam-test-client
         tags: |
           type=sha
           type=ref,event=tag
