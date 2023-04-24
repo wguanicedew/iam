@@ -94,6 +94,7 @@ iam:
   
   host: ${IAM_HOST:localhost}
   baseUrl: ${IAM_BASE_URL:http://${iam.host}:8443}
+  port: ${IAM_PORT:8443}
   issuer: ${IAM_ISSUER:http://${iam.host}:8443}
   topbarTitle: ${IAM_TOPBAR_TITLE:INDIGO IAM for ${iam.organisation.name}}
   
