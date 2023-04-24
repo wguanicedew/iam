@@ -37,6 +37,11 @@ import org.springframework.security.web.context.SecurityContextPersistenceFilter
 
 import it.infn.mw.iam.api.client.registration.ClientRegistrationApiController;
 
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+
 @SuppressWarnings("deprecation")
 @Configuration
 public class MitreSecurityConfig {
@@ -302,4 +307,24 @@ public class MitreSecurityConfig {
     }
   }
 
+  @Configuration
+  @EnableWebSecurity
+  static class HttpMapsToInLambdaConfig {
+
+        @Value("${iam.port}")
+        private Integer iamPort;
+
+        @Bean
+        SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+                // @formatter:off
+                http
+                        .portMapper((portMapper) ->
+                                portMapper
+                                        .http(8080).mapsTo(iamPort)
+                        );
+                return http.build();
+                // @formatter:on
+        }
+
+  }
 }
