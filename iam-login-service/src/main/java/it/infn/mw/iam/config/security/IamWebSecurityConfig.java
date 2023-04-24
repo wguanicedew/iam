@@ -330,7 +330,7 @@ public class IamWebSecurityConfig {
   }
 
   @Configuration
-  @EnableWebSecurity
+  // @EnableWebSecurity
   static class HttpMapsToInLambdaConfig {
 
 	@Value("${iam.port}")
