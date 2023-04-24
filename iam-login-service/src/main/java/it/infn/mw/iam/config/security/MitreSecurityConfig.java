@@ -38,6 +38,8 @@ import org.springframework.security.web.context.SecurityContextPersistenceFilter
 import it.infn.mw.iam.api.client.registration.ClientRegistrationApiController;
 
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 
 @SuppressWarnings("deprecation")
 @Configuration
