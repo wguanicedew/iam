@@ -100,7 +100,7 @@ services:
 
     environment:
       TZ: Europe/Rome
-      IAM_CLIENT_PORT: 8080
+      IAM_CLIENT_PORT: 8443
       IAM_CLIENT_JAVA_OPTS: -Djava.security.egd=file:/dev/./urandom -Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n,address=1045
       IAM_CLIENT_ISSUER: https://iam.local.io/
       IAM_CLIENT_REDIRECT_URIS: https://iam.local.io/iam-test-client/openid_connect_login
