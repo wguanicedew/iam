@@ -22,7 +22,7 @@ server:
   error:
     path: /error
     
-  port: ${IAM_PORT:8080}
+  port: ${IAM_PORT:8443}
   
   tomcat:
     accesslog:
@@ -93,8 +93,8 @@ spring:
 iam:
   
   host: ${IAM_HOST:localhost}
-  baseUrl: ${IAM_BASE_URL:http://${iam.host}:8080}
-  issuer: ${IAM_ISSUER:http://${iam.host}:8080}
+  baseUrl: ${IAM_BASE_URL:http://${iam.host}:8443}
+  issuer: ${IAM_ISSUER:http://${iam.host}:8443}
   topbarTitle: ${IAM_TOPBAR_TITLE:INDIGO IAM for ${iam.organisation.name}}
   
   jwk:
