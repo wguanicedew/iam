@@ -36,9 +36,9 @@ interface StructuredScopeTestSupportConstants {
   static final String DEVICE_CODE_CLIENT_SECRET = "secret";
   static final String DEVICE_CODE_GRANT_TYPE = "urn:ietf:params:oauth:grant-type:device_code";
 
-  static final String DEVICE_USER_URL = "http://localhost:8080/device";
-  static final String DEVICE_USER_VERIFY_URL = "http://localhost:8080/device/verify";
-  static final String DEVICE_USER_APPROVE_URL = "http://localhost:8080/device/approve";
+  static final String DEVICE_USER_URL = "http://localhost:8443/device";
+  static final String DEVICE_USER_VERIFY_URL = "http://localhost:8443/device/verify";
+  static final String DEVICE_USER_APPROVE_URL = "http://localhost:8443/device/approve";
 
   static final String LOGIN_URL = "/login";
   static final String TEST_USERNAME = "test";

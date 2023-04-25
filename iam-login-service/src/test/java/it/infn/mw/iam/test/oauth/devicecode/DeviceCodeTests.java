@@ -124,12 +124,12 @@ public class DeviceCodeTests extends EndpointsTestUtils implements DeviceCodeTes
 
     MockHttpSession session = (MockHttpSession) mvc.perform(get(DEVICE_USER_URL))
       .andExpect(status().is3xxRedirection())
-      .andExpect(redirectedUrl("http://localhost:8080/login"))
+      .andExpect(redirectedUrl("http://localhost:8443/login"))
       .andReturn()
       .getRequest()
       .getSession();
 
-    session = (MockHttpSession) mvc.perform(get("http://localhost:8080/login").session(session))
+    session = (MockHttpSession) mvc.perform(get("http://localhost:8443/login").session(session))
       .andExpect(status().isOk())
       .andExpect(view().name("iam/login"))
       .andReturn()
@@ -217,12 +217,12 @@ public class DeviceCodeTests extends EndpointsTestUtils implements DeviceCodeTes
 
     MockHttpSession session = (MockHttpSession) mvc.perform(get(DEVICE_USER_URL))
       .andExpect(status().is3xxRedirection())
-      .andExpect(redirectedUrl("http://localhost:8080/login"))
+      .andExpect(redirectedUrl("http://localhost:8443/login"))
       .andReturn()
       .getRequest()
       .getSession();
 
-    session = (MockHttpSession) mvc.perform(get("http://localhost:8080/login").session(session))
+    session = (MockHttpSession) mvc.perform(get("http://localhost:8443/login").session(session))
       .andExpect(status().isOk())
       .andExpect(view().name("iam/login"))
       .andReturn()
@@ -327,12 +327,12 @@ public class DeviceCodeTests extends EndpointsTestUtils implements DeviceCodeTes
 
     MockHttpSession session = (MockHttpSession) mvc.perform(get(DEVICE_USER_URL))
       .andExpect(status().is3xxRedirection())
-      .andExpect(redirectedUrl("http://localhost:8080/login"))
+      .andExpect(redirectedUrl("http://localhost:8443/login"))
       .andReturn()
       .getRequest()
       .getSession();
 
-    session = (MockHttpSession) mvc.perform(get("http://localhost:8080/login").session(session))
+    session = (MockHttpSession) mvc.perform(get("http://localhost:8443/login").session(session))
       .andExpect(status().isOk())
       .andExpect(view().name("iam/login"))
       .andReturn()
@@ -472,12 +472,12 @@ public class DeviceCodeTests extends EndpointsTestUtils implements DeviceCodeTes
 
     MockHttpSession session = (MockHttpSession) mvc.perform(get(DEVICE_USER_URL))
       .andExpect(status().is3xxRedirection())
-      .andExpect(redirectedUrl("http://localhost:8080/login"))
+      .andExpect(redirectedUrl("http://localhost:8443/login"))
       .andReturn()
       .getRequest()
       .getSession();
 
-    session = (MockHttpSession) mvc.perform(get("http://localhost:8080/login").session(session))
+    session = (MockHttpSession) mvc.perform(get("http://localhost:8443/login").session(session))
       .andExpect(status().isOk())
       .andExpect(view().name("iam/login"))
       .andReturn()
@@ -588,12 +588,12 @@ public class DeviceCodeTests extends EndpointsTestUtils implements DeviceCodeTes
 
     MockHttpSession session = (MockHttpSession) mvc.perform(get(DEVICE_USER_URL))
       .andExpect(status().is3xxRedirection())
-      .andExpect(redirectedUrl("http://localhost:8080/login"))
+      .andExpect(redirectedUrl("http://localhost:8443/login"))
       .andReturn()
       .getRequest()
       .getSession();
 
-    session = (MockHttpSession) mvc.perform(get("http://localhost:8080/login").session(session))
+    session = (MockHttpSession) mvc.perform(get("http://localhost:8443/login").session(session))
       .andExpect(status().isOk())
       .andExpect(view().name("iam/login"))
       .andReturn()

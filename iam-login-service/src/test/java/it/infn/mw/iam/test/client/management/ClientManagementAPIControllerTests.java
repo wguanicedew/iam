@@ -143,7 +143,7 @@ class ClientManagementAPIControllerTests {
   @WithMockUser(username = "admin", roles = "ADMIN")
   public void createClientPrivateJwtValidationException() throws JsonProcessingException, Exception {
 
-    final String URI_STRING = "http://localhost:8080/jwk";
+    final String URI_STRING = "http://localhost:8443/jwk";
     final String NOT_A_JSON_STRING = "This is not a JSON string";
 
     RegisteredClientDTO client = new RegisteredClientDTO();

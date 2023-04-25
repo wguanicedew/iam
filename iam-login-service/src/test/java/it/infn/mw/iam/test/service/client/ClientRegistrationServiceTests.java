@@ -491,7 +491,7 @@ public class ClientRegistrationServiceTests {
     assertThat(response.getGrantTypes(), hasItem(AuthorizationGrantType.CLIENT_CREDENTIALS));
     assertThat(response.getRegistrationAccessToken(), notNullValue());
     assertThat(response.getRegistrationClientUri(),
-        is("http://localhost:8080/iam/api/client-registration/" + response.getClientId()));
+        is("http://localhost:8443/iam/api/client-registration/" + response.getClientId()));
   }
 
   @Test
@@ -511,7 +511,7 @@ public class ClientRegistrationServiceTests {
     assertThat(response.getClientSecret(), notNullValue());
     assertThat(response.getContacts(), hasItem(testAccount.getUserInfo().getEmail()));
     assertThat(response.getRegistrationClientUri(),
-        is("http://localhost:8080/iam/api/client-registration/" + response.getClientId()));
+        is("http://localhost:8443/iam/api/client-registration/" + response.getClientId()));
   }
 
   @Test
@@ -615,7 +615,7 @@ public class ClientRegistrationServiceTests {
     assertThat(response.getClientSecret(), notNullValue());
     assertThat(response.getContacts(), hasItem(testAccount.getUserInfo().getEmail()));
     assertThat(response.getRegistrationClientUri(),
-        is("http://localhost:8080/iam/api/client-registration/" + response.getClientId()));
+        is("http://localhost:8443/iam/api/client-registration/" + response.getClientId()));
 
   }
 
@@ -643,7 +643,7 @@ public class ClientRegistrationServiceTests {
     assertThat(response.getGrantTypes(), hasItem(AuthorizationGrantType.CLIENT_CREDENTIALS));
     assertThat(response.getClientSecret(), notNullValue());
     assertThat(response.getRegistrationClientUri(),
-        is("http://localhost:8080/iam/api/client-registration/" + response.getClientId()));
+        is("http://localhost:8443/iam/api/client-registration/" + response.getClientId()));
 
   }
 

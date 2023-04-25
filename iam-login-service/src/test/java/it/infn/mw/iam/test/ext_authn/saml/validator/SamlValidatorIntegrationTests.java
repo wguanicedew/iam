@@ -81,7 +81,7 @@ public class SamlValidatorIntegrationTests extends SamlAuthenticationTestSupport
     AuthnRequest authnRequest = getAuthnRequestFromSession(session);
 
     assertThat(authnRequest.getAssertionConsumerServiceURL(),
-        Matchers.equalTo("http://localhost:8080/saml/SSO"));
+        Matchers.equalTo("http://localhost:8443/saml/SSO"));
 
     Response r = buildTest1Response(authnRequest);
     

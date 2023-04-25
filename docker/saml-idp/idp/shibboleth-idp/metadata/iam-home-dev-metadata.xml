@@ -50,11 +50,11 @@
 
     <md:SingleLogoutService
       Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
-      Location="http://wilco.local.io:8080/saml/SingleLogout"/>
+      Location="http://wilco.local.io:8443/saml/SingleLogout"/>
 
     <md:SingleLogoutService
       Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
-      Location="http://wilco.local.io:8080/saml/SingleLogout"/>
+      Location="http://wilco.local.io:8443/saml/SingleLogout"/>
 
     <md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress</md:NameIDFormat>
     <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</md:NameIDFormat>
@@ -64,10 +64,10 @@
 
     <md:AssertionConsumerService
       Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
-      Location="http://wilco.local.io:8080/saml/SSO" index="0"
+      Location="http://wilco.local.io:8443/saml/SSO" index="0"
       isDefault="true"/><md:AssertionConsumerService
       Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact"
-      Location="http://wilco.local.io:8080/saml/SSO" index="1"/>
+      Location="http://wilco.local.io:8443/saml/SSO" index="1"/>
 
   </md:SPSSODescriptor> 
 </md:EntityDescriptor>

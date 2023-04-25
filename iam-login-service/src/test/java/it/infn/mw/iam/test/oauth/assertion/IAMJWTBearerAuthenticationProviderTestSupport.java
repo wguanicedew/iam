@@ -34,10 +34,10 @@ import com.nimbusds.jwt.SignedJWT;
 public interface IAMJWTBearerAuthenticationProviderTestSupport {
 
   String JWT_AUTH_NAME = "jwt-bearer-client";
-  String ISSUER = "http://localhost:8080/";
-  String ISSUER_NO_TRAILING_SLASH = "http://localhost:8080/";
+  String ISSUER = "http://localhost:8443/";
+  String ISSUER_NO_TRAILING_SLASH = "http://localhost:8443/";
 
-  String ISSUER_TOKEN_ENDPOINT = "http://localhost:8080/token";
+  String ISSUER_TOKEN_ENDPOINT = "http://localhost:8443/token";
 
   String CLIENT_SECRET = "bf4a39e1-43df-4e6f-b9b8-9a359108ac91";
 

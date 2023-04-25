@@ -104,7 +104,7 @@ public class WellKnownConfigurationEndpointTests {
   public void testIssuerEndsWithSlash() throws Exception {
     mvc.perform(get(endpoint))
       .andExpect(status().isOk())
-      .andExpect(jsonPath("$.issuer", is("http://localhost:8080/")));
+      .andExpect(jsonPath("$.issuer", is("http://localhost:8443/")));
   }
 
   @Test
@@ -113,15 +113,15 @@ public class WellKnownConfigurationEndpointTests {
     mvc.perform(get(endpoint))
       .andExpect(status().isOk())
       .andExpect(
-          jsonPath("$.device_authorization_endpoint", is("http://localhost:8080/devicecode")))
-      .andExpect(jsonPath("$.token_endpoint", is("http://localhost:8080/token")))
-      .andExpect(jsonPath("$.authorization_endpoint", is("http://localhost:8080/authorize")))
+          jsonPath("$.device_authorization_endpoint", is("http://localhost:8443/devicecode")))
+      .andExpect(jsonPath("$.token_endpoint", is("http://localhost:8443/token")))
+      .andExpect(jsonPath("$.authorization_endpoint", is("http://localhost:8443/authorize")))
       .andExpect(jsonPath("$.registration_endpoint",
-          is("http://localhost:8080/iam/api/client-registration")))
-      .andExpect(jsonPath("$.introspection_endpoint", is("http://localhost:8080/introspect")))
-      .andExpect(jsonPath("$.revocation_endpoint", is("http://localhost:8080/revoke")))
-      .andExpect(jsonPath("$.userinfo_endpoint", is("http://localhost:8080/userinfo")))
-      .andExpect(jsonPath("$.jwks_uri", is("http://localhost:8080/jwk")));
+          is("http://localhost:8443/iam/api/client-registration")))
+      .andExpect(jsonPath("$.introspection_endpoint", is("http://localhost:8443/introspect")))
+      .andExpect(jsonPath("$.revocation_endpoint", is("http://localhost:8443/revoke")))
+      .andExpect(jsonPath("$.userinfo_endpoint", is("http://localhost:8443/userinfo")))
+      .andExpect(jsonPath("$.jwks_uri", is("http://localhost:8443/jwk")));
   }
 
   @Test
