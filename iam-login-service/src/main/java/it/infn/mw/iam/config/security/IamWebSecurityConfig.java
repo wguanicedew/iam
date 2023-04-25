@@ -64,6 +64,8 @@ import it.infn.mw.iam.core.IamLocalAuthenticationProvider;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.service.aup.AUPSignatureCheckService;
 
+import org.springframework.security.web.SecurityFilterChain;
+
 @SuppressWarnings("deprecation")
 @Configuration
 @EnableWebSecurity
@@ -74,6 +76,13 @@ public class IamWebSecurityConfig {
   @Bean
   public SecurityEvaluationContextExtension contextExtension() {
     return new SecurityEvaluationContextExtension();
+  }
+
+  @Bean
+  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http.portMapper((portMapper) ->
+      portMapper.http(8080).mapsTo(8443));
+    return http.build();
   }
 
   @Configuration
