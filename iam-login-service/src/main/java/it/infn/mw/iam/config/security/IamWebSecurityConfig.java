@@ -78,13 +78,6 @@ public class IamWebSecurityConfig {
     return new SecurityEvaluationContextExtension();
   }
 
-  @Bean
-  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    http.portMapper((portMapper) ->
-      portMapper.http(8080).mapsTo(8443));
-    return http.build();
-  }
-
   @Configuration
   @Order(100)
   public static class UserLoginConfig extends WebSecurityConfigurerAdapter {
@@ -205,6 +198,13 @@ public class IamWebSecurityConfig {
 
       return new EnforceAupSignatureSuccessHandler(delegate, aupSignatureCheckService, accountUtils,
           accountRepo);
+    }
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+      http.portMapper((portMapper) ->
+        portMapper.http(8080).mapsTo(8443));
+      return http.build();
     }
   }
 
