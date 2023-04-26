@@ -220,8 +220,11 @@ public class IamWebSecurityConfig {
     }
 
     public AuthenticationSuccessHandler successHandler() {
+      HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
+      requestCache.setPortResolver(portResolver());
+
       AuthenticationSuccessHandler delegate =
-          new RootIsDashboardSuccessHandler(iamBaseUrl, new HttpSessionRequestCache());
+          new RootIsDashboardSuccessHandler(iamBaseUrl, requestCache);
 
       return new EnforceAupSignatureSuccessHandler(delegate, aupSignatureCheckService, accountUtils,
           accountRepo);
