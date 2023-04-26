@@ -25,7 +25,12 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
 public class HintAwareAuthenticationEntryPoint implements AuthenticationEntryPoint {
+  public static final Logger LOG = LoggerFactory.getLogger(HintAwareAuthenticationEntryPoint.class);
 
   public static final String EXT_AUTHN_HINT_PARAM = "ext_authn_hint";
 
@@ -50,6 +55,9 @@ public class HintAwareAuthenticationEntryPoint implements AuthenticationEntryPoi
       HttpServletResponse response) throws IOException {
 
     String redirectUrl = hintService.resolve(request.getParameter(EXT_AUTHN_HINT_PARAM));
+    LOG.info("hintService redirectUrl: {}", redirectUrl);
+    redirectUrl.replace("8080", "8443");
+    LOG.info("hintService redirectUrl: {}", redirectUrl);
     response.sendRedirect(redirectUrl);
   }
 
