@@ -156,6 +156,7 @@ public class IamWebSecurityConfig {
         Map<String, String> mappings = new HashMap<>();
         //mappings.put(Integer.toString(serverPort), Integer.toString(sslRedirectPort));
         mappings.put("8080", "8443");
+	mappings.put("8443", "8080");
         portMapper.setPortMappings(mappings);
         return portMapper;
     }
