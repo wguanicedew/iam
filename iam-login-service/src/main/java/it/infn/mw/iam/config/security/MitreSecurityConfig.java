@@ -288,6 +288,7 @@ public class MitreSecurityConfig {
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
       http.portMapper().http(8080).mapsTo(8443);
+      http.portMapper().http(8443).mapsTo(8080);
 
       // @formatter:off
       http
