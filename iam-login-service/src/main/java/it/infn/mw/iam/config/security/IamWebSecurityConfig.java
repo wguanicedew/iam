@@ -152,6 +152,7 @@ public class IamWebSecurityConfig {
 
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
+      http.portMapper().http(8080).mapsTo(8443);
 
       // @formatter:off
       http.requestMatchers()
@@ -200,12 +201,12 @@ public class IamWebSecurityConfig {
           accountRepo);
     }
 
-    @Bean
+    /*@Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
       http.portMapper((portMapper) ->
         portMapper.http(8080).mapsTo(8443));
       return http.build();
-    }
+    }*/
   }
 
   @Configuration
