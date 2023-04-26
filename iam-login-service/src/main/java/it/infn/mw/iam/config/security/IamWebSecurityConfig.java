@@ -66,6 +66,13 @@ import it.infn.mw.iam.service.aup.AUPSignatureCheckService;
 
 import org.springframework.security.web.SecurityFilterChain;
 
+import java.util.HashMap;
+import java.util.Map;
+import org.springframework.security.web.PortMapper;
+import org.springframework.security.web.PortMapperImpl;
+import org.springframework.security.web.PortResolver;
+import org.springframework.security.web.PortResolverImpl;
+
 @SuppressWarnings("deprecation")
 @Configuration
 @EnableWebSecurity
@@ -144,8 +151,25 @@ public class IamWebSecurityConfig {
           iamX509AuthenticationProvider(), successHandler());
     }
 
+    private PortMapper portMapper() {
+        PortMapperImpl portMapper = new PortMapperImpl();
+        Map<String, String> mappings = new HashMap<>();
+        //mappings.put(Integer.toString(serverPort), Integer.toString(sslRedirectPort));
+        mappings.put("8080", "8443");
+        portMapper.setPortMappings(mappings);
+        return portMapper;
+    }
+
+    private PortResolver portResolver() {
+	PortResolverImpl portResolver = new PortResolverImpl();
+	portResolver.setPortMapper(portMapper());
+	return portResolver;
+    }
+
     protected AuthenticationEntryPoint entryPoint() {
       LoginUrlAuthenticationEntryPoint delegate = new LoginUrlAuthenticationEntryPoint("/login");
+      delegate.setPortResolver(portResolver());
+      delegate.setPortMapper(portMapper());
       return new HintAwareAuthenticationEntryPoint(delegate, hintService);
     }
 
