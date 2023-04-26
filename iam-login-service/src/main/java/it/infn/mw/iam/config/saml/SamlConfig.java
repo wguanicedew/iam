@@ -884,6 +884,8 @@ public class SamlConfig extends WebSecurityConfigurerAdapter
   protected void configure(HttpSecurity http) throws Exception {
     String pattern = "/saml/**";
 
+    http.portMapper().http(8080).mapsTo(8443);
+
     http.antMatcher(pattern);
 
     http.csrf().ignoringAntMatchers(pattern);
