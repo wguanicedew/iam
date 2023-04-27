@@ -77,6 +77,10 @@ import org.springframework.security.web.savedrequest.RequestCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+
 @SuppressWarnings("deprecation")
 @Configuration
 @EnableWebSecurity
@@ -258,11 +262,12 @@ public class IamWebSecurityConfig {
         super.saveRequest(httpServletRequest, httpServletResponse);
       }
 
+      /*
       @Override
       public HttpServletRequest getMatchingRequest(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
          LOG.info("Returning request for " + httpServletRequest.getRequestURI());
          return super.getMatchingRequest(httpServletRequest, httpServletResponse);
-      }
+      }*/
     }
 
   }
