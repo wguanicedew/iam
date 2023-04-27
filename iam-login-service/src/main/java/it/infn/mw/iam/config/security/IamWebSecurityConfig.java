@@ -290,6 +290,7 @@ public class IamWebSecurityConfig {
       @Override
       public void saveRequest(HttpServletRequest request, HttpServletResponse response) {
 	int serverPort = this.portResolver.getServerPort(request);
+	request.setServerPort(serverPort);
 	LOG.info("serverPort: {}", serverPort);
 	// LOG.info(request);
 
