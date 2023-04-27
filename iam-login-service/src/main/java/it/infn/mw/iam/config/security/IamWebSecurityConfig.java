@@ -294,8 +294,8 @@ public class IamWebSecurityConfig {
 	LOG.info("serverPort: {}", serverPort);
 	// LOG.info(request);
 
-	LOG.info("Saving request to " + httpServletRequest.getRequestURI());
-	LOG.info("Saving request to " + httpServletRequest.getRequestURL());
+	LOG.info("Saving request to " + request.getRequestURI());
+	LOG.info("Saving request to " + request.getRequestURL());
         super.saveRequest(request, response);
       }
 
