@@ -15,6 +15,9 @@
  */
 package it.infn.mw.iam.config.security;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport.EXT_AUTHN_UNREGISTERED_USER_AUTH;
 import static it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo.ExternalAuthenticationType.OIDC;
 
@@ -40,10 +43,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.data.repository.query.SecurityEvaluationContextExtension;
 import org.springframework.security.oauth2.provider.expression.OAuth2WebSecurityExpressionHandler;
 import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.PortMapper;
+import org.springframework.security.web.PortMapperImpl;
+import org.springframework.security.web.PortResolver;
+import org.springframework.security.web.PortResolverImpl;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.context.SecurityContextPersistenceFilter;
+import org.springframework.security.web.savedrequest.RequestCache;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.filter.GenericFilterBean;
@@ -63,6 +71,8 @@ import it.infn.mw.iam.config.IamProperties;
 import it.infn.mw.iam.core.IamLocalAuthenticationProvider;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.service.aup.AUPSignatureCheckService;
+
+
 
 @SuppressWarnings("deprecation")
 @Configuration
@@ -148,9 +158,28 @@ public class IamWebSecurityConfig {
     }
 
 
+    private PortMapper portMapper() {
+        PortMapperImpl portMapper = new PortMapperImpl();
+        Map<String, String> mappings = new HashMap<>();
+        //mappings.put(Integer.toString(serverPort), Integer.toString(sslRedirectPort));
+        mappings.put("8443", "8080");
+        portMapper.setPortMappings(mappings);
+        return portMapper;
+    }
+
+    private RequestCache requestCache() {
+        HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
+        PortResolverImpl portResolver = new PortResolverImpl();
+        portResolver.setPortMapper(portMapper());
+        requestCache.setPortResolver(portResolver);
+        return requestCache;
+    }
+
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
       http.portMapper().http(8443).mapsTo(8080);
+
+      http.requestCache().requestCache(requestCache());
 
       // @formatter:off
       http.requestMatchers()
