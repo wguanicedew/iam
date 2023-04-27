@@ -268,7 +268,7 @@ public class IamWebSecurityConfig {
 	serverPort = this.portResolver.getServerPort(request);
 
 	LOG.info("serverPort: %s", serverPort);
-	LOG.info(request)
+	LOG.info(request);
 	if (!this.requestMatcher.matches(request)) {
 	  if (LOG.isTraceEnabled()) {
 		LOG.trace(
