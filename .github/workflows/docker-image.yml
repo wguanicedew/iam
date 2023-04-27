@@ -88,4 +88,4 @@ jobs:
         labels: ${{ steps.tc-meta.outputs.labels }}
         context: iam-test-client/docker/
         file: iam-test-client/docker/Dockerfile.prod
-        push:${{ github.event_name != 'pull_request' }}
+        push: ${{ github.event_name != 'pull_request' }}
