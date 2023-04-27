@@ -55,7 +55,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Publish buildpacks on Dockerhub
-      if: github.event_name != 'pull_request'
+      if: startsWith(github.ref, 'refs/tags/')
       env: 
         DEBUG: y
       run: ./utils/tag-push-images.sh  ${GITHUB_REF#refs/tags/}
