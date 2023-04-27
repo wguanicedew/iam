@@ -171,14 +171,14 @@ public class IamWebSecurityConfig {
     }
 
     private PortResolver portResolver() {
-	PortResolverImpl portResolver = new PortResolverImpl();
+	PortResolverImpl portResolver = new CustomPortResolver();
 	portResolver.setPortMapper(portMapper());
 	return portResolver;
     }
 
     private RequestCache requestCache() {
         CustomRequestCache requestCache = new CustomRequestCache();
-        PortResolverImpl portResolver = new PortResolverImpl();
+        PortResolverImpl portResolver = new CustomPortResolver;
         portResolver.setPortMapper(portMapper());
         requestCache.setPortResolver(portResolver);
         return requestCache;
@@ -256,6 +256,18 @@ public class IamWebSecurityConfig {
       return http.build();
     }*/
 
+    public class CustomPortResolver extends PortResolverImpl {
+        @Override
+	public int getServerPort(ServletRequest request) {
+		int serverPort = request.getServerPort();
+		LOG.info("request serverPort: {}", serverPort);
+		String scheme = request.getScheme().toLowerCase();
+		Integer mappedPort = getMappedPort(serverPort, scheme);
+		LOG.info("request mappedPort: {}", mappedPort;
+		return (mappedPort != null) ? mappedPort : serverPort;
+	}
+    }
+
     public class CustomRequestCache extends HttpSessionRequestCache {
       private PortResolver portResolver = portResolver();
 
@@ -270,7 +282,7 @@ public class IamWebSecurityConfig {
       }
 
       private PortResolver portResolver() {
-        PortResolverImpl portResolver = new PortResolverImpl();
+        PortResolverImpl portResolver = new CustomPortResolver();
         portResolver.setPortMapper(portMapper());
         return portResolver;
       }
