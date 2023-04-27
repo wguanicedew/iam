@@ -76,6 +76,7 @@ import org.springframework.security.web.savedrequest.RequestCache;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.log.LogMessage;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -260,6 +261,36 @@ public class IamWebSecurityConfig {
       public void saveRequest(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         LOG.info("Saving request to " + httpServletRequest.getRequestURI());
         super.saveRequest(httpServletRequest, httpServletResponse);
+      }
+
+      @Override
+      public void saveRequest(HttpServletRequest request, HttpServletResponse response) {
+	serverPort = this.portResolver.getServerPort(request);
+
+	LOG.info("serverPort: %s", serverPort);
+	LOG.info(request)
+	if (!this.requestMatcher.matches(request)) {
+	  if (LOG.isTraceEnabled()) {
+		LOG.trace(
+		  LogMessage.format("Did not save request since it did not match [%s]", this.requestMatcher));
+	  }
+			return;
+	}
+
+	if (this.createSessionAllowed || request.getSession(false) != null) {
+	  // Store the HTTP request itself. Used by
+	  // AbstractAuthenticationProcessingFilter
+	  // for redirection after successful authentication (SEC-29)
+	  DefaultSavedRequest savedRequest = new DefaultSavedRequest(request, this.portResolver,
+	    this.matchingRequestParameterName);
+	  request.getSession().setAttribute(this.sessionAttrName, savedRequest);
+	  if (LOG.isDebugEnabled()) {
+	    LOG.debug(LogMessage.format("Saved request %s to session", savedRequest.getRedirectUrl()));
+	  }
+	}
+	else {
+	  LOG.trace("Did not save request since there's no session and createSessionAllowed is false");
+	}
       }
 
       /*
