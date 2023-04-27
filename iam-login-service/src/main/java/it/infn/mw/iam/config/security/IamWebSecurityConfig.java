@@ -263,7 +263,7 @@ public class IamWebSecurityConfig {
 		LOG.info("request serverPort: {}", serverPort);
 		String scheme = request.getScheme().toLowerCase();
 		Integer mappedPort = getMappedPort(serverPort, scheme);
-		LOG.info("request mappedPort: {}", mappedPort;
+		LOG.info("request mappedPort: {}", mappedPort);
 		return (mappedPort != null) ? mappedPort : serverPort;
 	}
     }
