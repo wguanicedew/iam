@@ -265,10 +265,11 @@ public class IamWebSecurityConfig {
 		int serverPort = request.getServerPort();
 		LOG.info("request serverPort: {}", serverPort);
 		String scheme = request.getScheme().toLowerCase();
-		Integer mappedPort = super.getMappedPort(serverPort, scheme);
+		Integer mappedPort = super.getServerPort(request);
 		LOG.info("request mappedPort: {}", mappedPort);
 		return (mappedPort != null) ? mappedPort : serverPort;
 	}
+
     }
 
     public class CustomRequestCache extends HttpSessionRequestCache {
