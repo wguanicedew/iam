@@ -1,6 +1,8 @@
-name: build & packaging
+name: docker
 
-on: [push, pull_request] 
+on:
+  release:
+    types: [published]
 
 env:
   # Use docker.io for Docker Hub if empty
