@@ -177,7 +177,7 @@ public class IamWebSecurityConfig {
 
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
-      // http.portMapper().http(8443).mapsTo(8080);
+      http.portMapper().http(8443).mapsTo(8080);
 
       http.requestCache().requestCache(requestCache());
 
