@@ -178,7 +178,7 @@ public class IamWebSecurityConfig {
 
     private RequestCache requestCache() {
         CustomRequestCache requestCache = new CustomRequestCache();
-        PortResolverImpl portResolver = new CustomPortResolver;
+        PortResolverImpl portResolver = new CustomPortResolver();
         portResolver.setPortMapper(portMapper());
         requestCache.setPortResolver(portResolver);
         return requestCache;
