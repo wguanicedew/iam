@@ -74,11 +74,14 @@ import org.springframework.security.web.PortResolver;
 import org.springframework.security.web.PortResolverImpl;
 import org.springframework.security.web.savedrequest.RequestCache;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @SuppressWarnings("deprecation")
 @Configuration
 @EnableWebSecurity
 public class IamWebSecurityConfig {
-  
+  public static final Logger LOG = LoggerFactory.getLogger(IamWebSecurityConfig.class);
   
 
   @Bean
@@ -169,7 +172,7 @@ public class IamWebSecurityConfig {
     }
 
     private RequestCache requestCache() {
-        HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
+        CustomRequestCache requestCache = new CustomRequestCache();
         PortResolverImpl portResolver = new PortResolverImpl();
         portResolver.setPortMapper(portMapper());
         requestCache.setPortResolver(portResolver);
@@ -247,6 +250,21 @@ public class IamWebSecurityConfig {
         portMapper.http(8080).mapsTo(8443));
       return http.build();
     }*/
+
+    public class CustomRequestCache extends HttpSessionRequestCache {
+      @Override
+      public void saveRequest(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+        LOG.info("Saving request to " + httpServletRequest.getRequestURI());
+        super.saveRequest(httpServletRequest, httpServletResponse);
+      }
+
+      @Override
+      public HttpServletRequest getMatchingRequest(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+         LOG.info("Returning request for " + httpServletRequest.getRequestURI());
+         return super.getMatchingRequest(httpServletRequest, httpServletResponse);
+      }
+    }
+
   }
 
   @Configuration
