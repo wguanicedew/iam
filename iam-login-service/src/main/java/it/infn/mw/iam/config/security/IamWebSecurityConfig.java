@@ -72,6 +72,7 @@ import org.springframework.security.web.PortMapper;
 import org.springframework.security.web.PortMapperImpl;
 import org.springframework.security.web.PortResolver;
 import org.springframework.security.web.PortResolverImpl;
+import org.springframework.security.web.savedrequest.RequestCache;
 
 @SuppressWarnings("deprecation")
 @Configuration
@@ -167,6 +168,14 @@ public class IamWebSecurityConfig {
 	return portResolver;
     }
 
+    private RequestCache requestCache() {
+        HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
+        PortResolverImpl portResolver = new PortResolverImpl();
+        portResolver.setPortMapper(portMapper());
+        requestCache.setPortResolver(portResolver);
+        return requestCache;
+    }
+
     protected AuthenticationEntryPoint entryPoint() {
       LoginUrlAuthenticationEntryPoint delegate = new LoginUrlAuthenticationEntryPoint("/login");
       delegate.setPortResolver(portResolver());
@@ -179,6 +188,8 @@ public class IamWebSecurityConfig {
     protected void configure(final HttpSecurity http) throws Exception {
       http.portMapper().http(8080).mapsTo(8443);
       http.portMapper().http(8443).mapsTo(8080);
+
+      http.requestCache().requestCache(requestCache());
 
       // @formatter:off
       http.requestMatchers()
