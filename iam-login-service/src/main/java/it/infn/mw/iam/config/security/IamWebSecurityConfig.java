@@ -177,7 +177,7 @@ public class IamWebSecurityConfig {
 
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
-      http.portMapper().http(8443).mapsTo(8080);
+      // http.portMapper().http(8443).mapsTo(8080);
 
       http.requestCache().requestCache(requestCache());
 
@@ -261,7 +261,7 @@ public class IamWebSecurityConfig {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-      http.portMapper().http(8443).mapsTo(8080);
+      // http.portMapper().http(8443).mapsTo(8080);
 
       http.requestMatchers()
         .antMatchers(START_REGISTRATION_ENDPOINT)
@@ -315,7 +315,7 @@ public class IamWebSecurityConfig {
 
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
-      http.portMapper().http(8443).mapsTo(8080);
+      // http.portMapper().http(8443).mapsTo(8080);
 
       // @formatter:off
       http
@@ -341,7 +341,7 @@ public class IamWebSecurityConfig {
 
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
-      http.portMapper().http(8443).mapsTo(8080);
+      // http.portMapper().http(8443).mapsTo(8080);
 
       HttpSecurity h2Console = http.requestMatchers()
         .antMatchers("/h2-console", "/h2-console/**")
