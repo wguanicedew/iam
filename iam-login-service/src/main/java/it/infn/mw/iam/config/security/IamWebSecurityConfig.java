@@ -167,8 +167,8 @@ public class IamWebSecurityConfig {
         PortMapperImpl portMapper = new PortMapperImpl();
         Map<String, String> mappings = new HashMap<>();
         //mappings.put(Integer.toString(serverPort), Integer.toString(sslRedirectPort));
-        mappings.put("8080", "8443");
-	// mappings.put("8443", "8080");
+        //mappings.put("8080", "8443");
+	mappings.put("8443", "8080");
         portMapper.setPortMappings(mappings);
         return portMapper;
     }
@@ -197,8 +197,8 @@ public class IamWebSecurityConfig {
 
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
-      http.portMapper().http(8080).mapsTo(8443);
-      // http.portMapper().http(8443).mapsTo(8080);
+      // http.portMapper().http(8080).mapsTo(8443);
+      http.portMapper().http(8443).mapsTo(8080);
 
       http.requestCache().requestCache(requestCache());
 
@@ -279,8 +279,8 @@ public class IamWebSecurityConfig {
         PortMapperImpl portMapper = new PortMapperImpl();
         Map<String, String> mappings = new HashMap<>();
         //mappings.put(Integer.toString(serverPort), Integer.toString(sslRedirectPort));
-        mappings.put("8080", "8443");
-        // mappings.put("8443", "8080");
+        //mappings.put("8080", "8443");
+        mappings.put("8443", "8080");
         portMapper.setPortMappings(mappings);
         return portMapper;
       }
@@ -305,7 +305,9 @@ public class IamWebSecurityConfig {
 
       @Override
       public void saveRequest(HttpServletRequest request, HttpServletResponse response) {
-	int serverPort = this.portResolver.getServerPort(request);
+	int serverPort = request.getServerPort();
+	LOG.info("serverPort: {}", serverPort);
+	serverPort = this.portResolver.getServerPort(request);
 	// request.setServerPort(serverPort);
 	LOG.info("serverPort: {}", serverPort);
 	// LOG.info(request);
