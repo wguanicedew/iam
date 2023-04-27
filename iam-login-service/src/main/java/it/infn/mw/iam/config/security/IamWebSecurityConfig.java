@@ -257,7 +257,29 @@ public class IamWebSecurityConfig {
     }*/
 
     public class CustomRequestCache extends HttpSessionRequestCache {
-      
+      private PortResolver portResolver = portResolver();
+
+      private PortMapper portMapper() {
+        PortMapperImpl portMapper = new PortMapperImpl();
+        Map<String, String> mappings = new HashMap<>();
+        //mappings.put(Integer.toString(serverPort), Integer.toString(sslRedirectPort));
+        mappings.put("8080", "8443");
+        mappings.put("8443", "8080");
+        portMapper.setPortMappings(mappings);
+        return portMapper;
+      }
+
+      private PortResolver portResolver() {
+        PortResolverImpl portResolver = new PortResolverImpl();
+        portResolver.setPortMapper(portMapper());
+        return portResolver;
+      }
+
+      public void setPortResolver(PortResolver portResolver) {
+	this.portResolver = portResolver;
+	super.setPortResolver(portResolver);
+      }
+
      /*
       @Override
       public void saveRequest(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
