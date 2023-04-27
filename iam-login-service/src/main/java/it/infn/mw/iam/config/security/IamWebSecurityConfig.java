@@ -64,32 +64,11 @@ import it.infn.mw.iam.core.IamLocalAuthenticationProvider;
 import it.infn.mw.iam.persistence.repository.IamAccountRepository;
 import it.infn.mw.iam.service.aup.AUPSignatureCheckService;
 
-import org.springframework.security.web.SecurityFilterChain;
-
-import java.util.HashMap;
-import java.util.Map;
-import org.springframework.security.web.PortMapper;
-import org.springframework.security.web.PortMapperImpl;
-import org.springframework.security.web.PortResolver;
-import org.springframework.security.web.PortResolverImpl;
-import org.springframework.security.web.savedrequest.RequestCache;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.core.log.LogMessage;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletRequest;
-//import jakarta.servlet.http.HttpServletRequest;
-//import jakarta.servlet.http.HttpServletResponse;
-//import jakarta.servlet.ServletRequest;
-
 @SuppressWarnings("deprecation")
 @Configuration
 @EnableWebSecurity
 public class IamWebSecurityConfig {
-  public static final Logger LOG = LoggerFactory.getLogger(IamWebSecurityConfig.class);
+  
   
 
   @Bean
@@ -163,44 +142,15 @@ public class IamWebSecurityConfig {
           iamX509AuthenticationProvider(), successHandler());
     }
 
-    private PortMapper portMapper() {
-        PortMapperImpl portMapper = new PortMapperImpl();
-        Map<String, String> mappings = new HashMap<>();
-        //mappings.put(Integer.toString(serverPort), Integer.toString(sslRedirectPort));
-        //mappings.put("8080", "8443");
-	mappings.put("8443", "8080");
-        portMapper.setPortMappings(mappings);
-        return portMapper;
-    }
-
-    private PortResolver portResolver() {
-	PortResolverImpl portResolver = new CustomPortResolver();
-	portResolver.setPortMapper(portMapper());
-	return portResolver;
-    }
-
-    private RequestCache requestCache() {
-        CustomRequestCache requestCache = new CustomRequestCache();
-        PortResolverImpl portResolver = new CustomPortResolver();
-        portResolver.setPortMapper(portMapper());
-        requestCache.setPortResolver(portResolver);
-        return requestCache;
-    }
-
     protected AuthenticationEntryPoint entryPoint() {
       LoginUrlAuthenticationEntryPoint delegate = new LoginUrlAuthenticationEntryPoint("/login");
-      delegate.setPortResolver(portResolver());
-      delegate.setPortMapper(portMapper());
       return new HintAwareAuthenticationEntryPoint(delegate, hintService);
     }
 
 
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
-      // http.portMapper().http(8080).mapsTo(8443);
       http.portMapper().http(8443).mapsTo(8080);
-
-      http.requestCache().requestCache(requestCache());
 
       // @formatter:off
       http.requestMatchers()
@@ -242,89 +192,12 @@ public class IamWebSecurityConfig {
     }
 
     public AuthenticationSuccessHandler successHandler() {
-      HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
-      requestCache.setPortResolver(portResolver());
-
       AuthenticationSuccessHandler delegate =
-          new RootIsDashboardSuccessHandler(iamBaseUrl, requestCache);
+          new RootIsDashboardSuccessHandler(iamBaseUrl, new HttpSessionRequestCache());
 
       return new EnforceAupSignatureSuccessHandler(delegate, aupSignatureCheckService, accountUtils,
           accountRepo);
     }
-
-    /*@Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-      http.portMapper((portMapper) ->
-        portMapper.http(8080).mapsTo(8443));
-      return http.build();
-    }*/
-
-    public class CustomPortResolver extends PortResolverImpl {
-        @Override
-	public int getServerPort(ServletRequest request) {
-		int serverPort = request.getServerPort();
-		String scheme = request.getScheme().toLowerCase();
-		LOG.info("request serverPort: {}, sheme: {}", serverPort, scheme);
-		Integer mappedPort = super.getServerPort(request);
-		LOG.info("request mappedPort: {}", mappedPort);
-		return (mappedPort != null) ? mappedPort : serverPort;
-	}
-
-    }
-
-    public class CustomRequestCache extends HttpSessionRequestCache {
-      private PortResolver portResolver = portResolver();
-
-      private PortMapper portMapper() {
-        PortMapperImpl portMapper = new PortMapperImpl();
-        Map<String, String> mappings = new HashMap<>();
-        //mappings.put(Integer.toString(serverPort), Integer.toString(sslRedirectPort));
-        //mappings.put("8080", "8443");
-        mappings.put("8443", "8080");
-        portMapper.setPortMappings(mappings);
-        return portMapper;
-      }
-
-      private PortResolver portResolver() {
-        PortResolverImpl portResolver = new CustomPortResolver();
-        portResolver.setPortMapper(portMapper());
-        return portResolver;
-      }
-
-      public void setPortResolver(PortResolver portResolver) {
-	this.portResolver = portResolver;
-	super.setPortResolver(portResolver);
-      }
-
-     /*
-      @Override
-      public void saveRequest(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
-        LOG.info("Saving request to " + httpServletRequest.getRequestURI());
-        super.saveRequest(httpServletRequest, httpServletResponse);
-      }*/
-
-      @Override
-      public void saveRequest(HttpServletRequest request, HttpServletResponse response) {
-	int serverPort = request.getServerPort();
-	LOG.info("serverPort: {}", serverPort);
-	serverPort = this.portResolver.getServerPort(request);
-	// request.setServerPort(serverPort);
-	LOG.info("serverPort: {}", serverPort);
-	// LOG.info(request);
-
-	LOG.info("Saving request to " + request.getRequestURI());
-	LOG.info("Saving request to " + request.getRequestURL());
-        super.saveRequest(request, response);
-      }
-
-      /*
-      @Override
-      public HttpServletRequest getMatchingRequest(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
-         LOG.info("Returning request for " + httpServletRequest.getRequestURI());
-         return super.getMatchingRequest(httpServletRequest, httpServletResponse);
-      }*/
-    }
-
   }
 
   @Configuration
@@ -359,6 +232,7 @@ public class IamWebSecurityConfig {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+      http.portMapper().http(8443).mapsTo(8080);
 
       http.requestMatchers()
         .antMatchers(START_REGISTRATION_ENDPOINT)
@@ -412,6 +286,8 @@ public class IamWebSecurityConfig {
 
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
+      http.portMapper().http(8443).mapsTo(8080);
+
       // @formatter:off
       http
         .antMatcher("/openid_connect_login**")
@@ -436,6 +312,7 @@ public class IamWebSecurityConfig {
 
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
+      http.portMapper().http(8443).mapsTo(8080);
 
       HttpSecurity h2Console = http.requestMatchers()
         .antMatchers("/h2-console", "/h2-console/**")
