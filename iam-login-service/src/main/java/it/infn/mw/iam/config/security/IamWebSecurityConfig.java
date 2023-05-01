@@ -516,6 +516,10 @@ public class IamWebSecurityConfig {
 
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
+      http.portMapper().http(8443).mapsTo(8080);
+
+      http.requestCache().requestCache(requestCache());
+
       // @formatter:off
       http
         .antMatcher("/openid_connect_login**")
@@ -531,6 +535,60 @@ public class IamWebSecurityConfig {
             .sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
       // @formatter:on
     }
+
+    public class CustomPortResolver extends PortResolverImpl {
+        @Override
+        public int getServerPort(ServletRequest request) {
+                int serverPort = request.getServerPort();
+                String scheme = request.getScheme().toLowerCase();
+                LOG.info("request serverPort: {}, sheme: {}", serverPort, scheme);
+                Integer mappedPort = super.getServerPort(request);
+                LOG.info("request mappedPort: {}", mappedPort);
+                return (mappedPort != null) ? mappedPort : serverPort;
+        }
+
+    }
+
+    public class CustomRequestCache extends HttpSessionRequestCache {
+      private PortResolver portResolver = portResolver();
+
+      private PortMapper portMapper() {
+        PortMapperImpl portMapper = new PortMapperImpl();
+        Map<String, String> mappings = new HashMap<>();
+        //mappings.put(Integer.toString(serverPort), Integer.toString(sslRedirectPort));
+        //mappings.put("8080", "8443");
+        mappings.put("8443", "8080");
+        portMapper.setPortMappings(mappings);
+        return portMapper;
+      }
+
+      private PortResolver portResolver() {
+        PortResolverImpl portResolver = new CustomPortResolver();
+        portResolver.setPortMapper(portMapper());
+        return portResolver;
+      }
+
+      public void setPortResolver(PortResolver portResolver) {
+        this.portResolver = portResolver;
+        super.setPortResolver(portResolver);
+      }
+
+      @Override
+      public void saveRequest(HttpServletRequest request, HttpServletResponse response) {
+        int serverPort = request.getServerPort();
+        LOG.info("serverPort: {}", serverPort);
+        serverPort = this.portResolver.getServerPort(request);
+        // request.setServerPort(serverPort);
+        LOG.info("serverPort: {}", serverPort);
+        // LOG.info(request);
+
+        LOG.info("Saving request to " + request.getRequestURI());
+        LOG.info("Saving request to " + request.getRequestURL());
+        super.saveRequest(request, response);
+      }
+
+    }
+
   }
 
   @Configuration
