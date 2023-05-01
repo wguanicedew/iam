@@ -354,7 +354,10 @@ public class IamWebSecurityConfig {
         discoveryId =
             String.format("/saml/login?idp=%s", iamProperties.getRegistration().getSamlEntityId());
       }
-      return new LoginUrlAuthenticationEntryPoint(discoveryId);
+      LoginUrlAuthenticationEntryPoint loginEntryPoint = new LoginUrlAuthenticationEntryPoint(discoveryId);
+      loginEntryPoint.setPortResolver(portResolver());
+      loginEntryPoint.setPortMapper(portMapper());
+      return loginEntryPoint;
     }
 
     private PortMapper portMapper() {
@@ -483,8 +486,27 @@ public class IamWebSecurityConfig {
       return oidcAuthManager;
     }
 
+    private PortMapper portMapper() {
+        PortMapperImpl portMapper = new PortMapperImpl();
+        Map<String, String> mappings = new HashMap<>();
+        //mappings.put(Integer.toString(serverPort), Integer.toString(sslRedirectPort));
+        //mappings.put("8080", "8443");
+        mappings.put("8443", "8080");
+        portMapper.setPortMappings(mappings);
+        return portMapper;
+    }
+
+    private PortResolver portResolver() {
+        PortResolverImpl portResolver = new CustomPortResolver();
+        portResolver.setPortMapper(portMapper());
+        return portResolver;
+    }
+
     public LoginUrlAuthenticationEntryPoint authenticationEntryPoint() {
-      return new LoginUrlAuthenticationEntryPoint("/openid_connect_login");
+      LoginUrlAuthenticationEntryPoint loginEntryPoint = new LoginUrlAuthenticationEntryPoint("/openid_connect_login");
+      loginEntryPoint.setPortResolver(portResolver());
+      loginEntryPoint.setPortMapper(portMapper());
+      return loginEntryPoint;
     }
 
     @Override
