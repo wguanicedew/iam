@@ -502,6 +502,14 @@ public class IamWebSecurityConfig {
         return portResolver;
     }
 
+    private RequestCache requestCache() {
+        CustomRequestCache requestCache = new CustomRequestCache();
+        PortResolverImpl portResolver = new CustomPortResolver();
+        portResolver.setPortMapper(portMapper());
+        requestCache.setPortResolver(portResolver);
+        return requestCache;
+    }
+
     public LoginUrlAuthenticationEntryPoint authenticationEntryPoint() {
       LoginUrlAuthenticationEntryPoint loginEntryPoint = new LoginUrlAuthenticationEntryPoint("/openid_connect_login");
       loginEntryPoint.setPortResolver(portResolver());
