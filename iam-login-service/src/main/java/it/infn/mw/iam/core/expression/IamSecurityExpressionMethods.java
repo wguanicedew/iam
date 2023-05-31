@@ -21,7 +21,6 @@ import java.util.Collection;
 import java.util.Optional;
 
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.common.exceptions.InsufficientScopeException;
@@ -125,7 +124,7 @@ public class IamSecurityExpressionMethods {
 
   public boolean isRequestWithoutToken() {
 
-    return authentication instanceof UsernamePasswordAuthenticationToken;
+    return !(authentication instanceof OAuth2Authentication);
   }
 
   public boolean hasAnyDashboardRole(Role... roles) {
