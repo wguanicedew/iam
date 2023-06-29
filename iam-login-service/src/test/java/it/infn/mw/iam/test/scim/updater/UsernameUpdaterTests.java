@@ -51,7 +51,7 @@ import it.infn.mw.iam.test.util.oauth.MockOAuth2Filter;
 
 @RunWith(SpringRunner.class)
 @IamMockMvcIntegrationTest
-@WithMockOAuthUser(user = "admin", authorities = {"ROLE_ADMIN"})
+@WithMockOAuthUser(user = "admin", authorities = {"ROLE_ADMIN"}, scopes = "iam:admin.read")
 public class UsernameUpdaterTests extends TestTokensUtils {
 
   public static final String OLD = "oldusername";

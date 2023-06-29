@@ -17,10 +17,12 @@ package it.infn.mw.iam.core.expression;
 
 import static it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport.EXT_AUTHN_UNREGISTERED_USER_AUTH;
 
+import java.util.Collection;
 import java.util.Optional;
 
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.common.exceptions.InsufficientScopeException;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
@@ -36,6 +38,8 @@ import it.infn.mw.iam.persistence.model.IamGroupRequest;
 
 @SuppressWarnings("deprecation")
 public class IamSecurityExpressionMethods {
+
+  private static final String ROLE_GM = "ROLE_GM:";
 
   private final Authentication authentication;
   private final AccountUtils accountUtils;
@@ -62,21 +66,21 @@ public class IamSecurityExpressionMethods {
     return false;
   }
 
-  public boolean isAGroupManager() {
-    return authentication.getAuthorities()
-      .stream()
-      .anyMatch(a -> a.getAuthority().startsWith("ROLE_GM:"));
+  public enum Role {
+    ROLE_ADMIN, ROLE_GM, ROLE_USER
   }
 
   public boolean isGroupManager(String groupUuid) {
-    return authentication.getAuthorities()
+    boolean groupManager = authentication.getAuthorities()
       .stream()
-      .anyMatch(a -> a.getAuthority().equals("ROLE_GM:" + groupUuid));
+      .anyMatch(a -> a.getAuthority().equals(ROLE_GM + groupUuid));
+    return groupManager && isRequestWithoutToken();
   }
 
   public boolean isUser(String userUuid) {
     Optional<IamAccount> account = accountUtils.getAuthenticatedUserAccount();
-    return account.isPresent() && account.get().getUuid().equals(userUuid);
+    return account.isPresent() && account.get().getUuid().equals(userUuid)
+        && isRequestWithoutToken();
   }
 
   public boolean canManageGroupRequest(String requestId) {
@@ -116,5 +120,28 @@ public class IamSecurityExpressionMethods {
       return result;
     } else
       return false;
+  }
+
+  public boolean isRequestWithoutToken() {
+
+    return !(authentication instanceof OAuth2Authentication);
+  }
+
+  public boolean hasAnyDashboardRole(Role... roles) {
+    Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+    for (Role r : roles) {
+      if (authorities.stream().anyMatch(a -> a.getAuthority().contains(r.name()))) {
+        return isRequestWithoutToken();
+      }
+    }
+    return false;
+  }
+
+  public boolean hasDashboardRole(Role role) {
+    return hasAnyDashboardRole(role);
+  }
+
+  public boolean hasAdminOrGMDashboardRoleOfGroup(String gid) {
+    return (hasDashboardRole(Role.ROLE_ADMIN) || isGroupManager(gid));
   }
 }

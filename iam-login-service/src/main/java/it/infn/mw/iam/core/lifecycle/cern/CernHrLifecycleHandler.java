@@ -184,6 +184,7 @@ public class CernHrLifecycleHandler implements Runnable, SchedulingConfigurer {
         account.getUsername());
 
     accountService.restoreAccount(account);
+    accountService.setAccountEndTime(account, null);
 
     accountService.setLabel(account, buildStatusLabel(OK));
     accountService.setLabel(account, buildActionLabel(RESTORE_ACCOUNT));
