@@ -29,6 +29,7 @@ public class HintAwareAuthenticationEntryPoint implements AuthenticationEntryPoi
 
   public static final String EXT_AUTHN_HINT_PARAM = "ext_authn_hint";
 
+  private int serverPort;
   private final AuthenticationEntryPoint delegate;
   private final ExternalAuthenticationHintService hintService;
 
@@ -36,6 +37,10 @@ public class HintAwareAuthenticationEntryPoint implements AuthenticationEntryPoi
       ExternalAuthenticationHintService service) {
     this.delegate = delegate;
     this.hintService = service;
+  }
+
+  public void setServerPort(int port) {
+    this.serverPort = port;
   }
 
   protected boolean isOAuthAuthorizationRequestWithHint(HttpServletRequest request) {
@@ -50,6 +55,7 @@ public class HintAwareAuthenticationEntryPoint implements AuthenticationEntryPoi
       HttpServletResponse response) throws IOException {
 
     String redirectUrl = hintService.resolve(request.getParameter(EXT_AUTHN_HINT_PARAM));
+    redirectUrl.replace("8080", (this.serverPort.toString()));
     response.sendRedirect(redirectUrl);
   }
 
