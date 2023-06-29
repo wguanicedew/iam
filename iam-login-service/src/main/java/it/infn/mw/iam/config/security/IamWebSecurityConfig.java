@@ -18,7 +18,13 @@ package it.infn.mw.iam.config.security;
 import static it.infn.mw.iam.authn.ExternalAuthenticationHandlerSupport.EXT_AUTHN_UNREGISTERED_USER_AUTH;
 import static it.infn.mw.iam.authn.ExternalAuthenticationRegistrationInfo.ExternalAuthenticationType.OIDC;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -44,6 +50,11 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.context.SecurityContextPersistenceFilter;
+import org.springframework.security.web.PortMapper;
+import org.springframework.security.web.PortMapperImpl;
+import org.springframework.security.web.PortResolver;
+import org.springframework.security.web.PortResolverImpl;
+import org.springframework.security.web.savedrequest.RequestCache;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.filter.GenericFilterBean;
@@ -69,7 +80,88 @@ import it.infn.mw.iam.service.aup.AUPSignatureCheckService;
 @EnableWebSecurity
 public class IamWebSecurityConfig {
   
+  public class IamWebSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
+
+    public int getServerPort() {
+      return 8080;
+    }
   
+    public PortMapper portMapper() {
+        PortMapperImpl portMapper = new PortMapperImpl();
+        Map<String, String> mappings = new HashMap<>();
+	mappings.put(getServerPort(), "8080");
+        portMapper.setPortMappings(mappings);
+        return portMapper;
+    }
+
+    public PortResolver portResolver() {
+	PortResolverImpl portResolver = new CustomPortResolver();
+	portResolver.setPortMapper(portMapper());
+	return portResolver;
+    }
+
+    public RequestCache requestCache() {
+        CustomRequestCache requestCache = new CustomRequestCache();
+        PortResolverImpl portResolver = new CustomPortResolver();
+        portResolver.setPortMapper(portMapper());
+        requestCache.setPortResolver(portResolver);
+        return requestCache;
+    }
+
+    public class CustomPortResolver extends PortResolverImpl {
+        @Override
+	public int getServerPort(ServletRequest request) {
+		int serverPort = request.getServerPort();
+		String scheme = request.getScheme().toLowerCase();
+		Integer mappedPort = super.getServerPort(request);
+		return (mappedPort != null) ? mappedPort : serverPort;
+	}
+
+    }
+
+    public class CustomRequestCache extends HttpSessionRequestCache {
+      private int serverPort;
+      private PortResolver portResolver = portResolver();
+
+      public void setServerPort(int port) {
+        this.serverPort = port;
+      }
+
+      private PortMapper portMapper() {
+        PortMapperImpl portMapper = new PortMapperImpl();
+        Map<String, String> mappings = new HashMap<>();
+        mappings.put(this.serverPort, "8080");
+        portMapper.setPortMappings(mappings);
+        return portMapper;
+      }
+
+      private PortResolver portResolver() {
+        PortResolverImpl portResolver = new CustomPortResolver();
+        portResolver.setPortMapper(portMapper());
+        return portResolver;
+      }
+
+      public void setPortResolver(PortResolver portResolver) {
+	this.portResolver = portResolver;
+	super.setPortResolver(portResolver);
+      }
+
+      @Override
+      public void saveRequest(HttpServletRequest request, HttpServletResponse response) {
+	int serverPort = request.getServerPort();
+	serverPort = this.portResolver.getServerPort(request);
+        
+        super.saveRequest(request, response);
+      }
+
+      /*
+      @Override
+      public HttpServletRequest getMatchingRequest(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+         LOG.info("Returning request for " + httpServletRequest.getRequestURI());
+         return super.getMatchingRequest(httpServletRequest, httpServletResponse);
+      }*/
+    }
+  }
 
   @Bean
   public SecurityEvaluationContextExtension contextExtension() {
@@ -78,7 +170,10 @@ public class IamWebSecurityConfig {
 
   @Configuration
   @Order(100)
-  public static class UserLoginConfig extends WebSecurityConfigurerAdapter {
+  public static class UserLoginConfig extends IamWebSecurityConfigurerAdapter {
+
+    @Value("${server.port}")
+    private int serverPort;
 
     @Value("${iam.baseUrl}")
     private String iamBaseUrl;
@@ -118,6 +213,10 @@ public class IamWebSecurityConfig {
     @Autowired
     private IamProperties iamProperties;
 
+    public int getServerPort() {
+      return this.serverPort;
+    }
+
     @Autowired
     public void configureGlobal(final AuthenticationManagerBuilder auth) throws Exception {
       // @formatter:off
@@ -144,12 +243,20 @@ public class IamWebSecurityConfig {
 
     protected AuthenticationEntryPoint entryPoint() {
       LoginUrlAuthenticationEntryPoint delegate = new LoginUrlAuthenticationEntryPoint("/login");
-      return new HintAwareAuthenticationEntryPoint(delegate, hintService);
+      delegate.setPortResolver(portResolver());
+      delegate.setPortMapper(portMapper());
+      HintAwareAuthenticationEntryPoint entryPoint = new HintAwareAuthenticationEntryPoint(delegate, hintService);
+      entryPoint.setServerPort(getServerPort());
+      return entryPoint;
     }
 
 
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
+
+      http.portMapper().http(getServerPort()).mapsTo(8080);
+
+      http.requestCache().requestCache(requestCache());
 
       // @formatter:off
       http.requestMatchers()
@@ -191,8 +298,11 @@ public class IamWebSecurityConfig {
     }
 
     public AuthenticationSuccessHandler successHandler() {
+      HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
+      requestCache.setPortResolver(portResolver());
+
       AuthenticationSuccessHandler delegate =
-          new RootIsDashboardSuccessHandler(iamBaseUrl, new HttpSessionRequestCache());
+          new RootIsDashboardSuccessHandler(iamBaseUrl, requestCache);
 
       return new EnforceAupSignatureSuccessHandler(delegate, aupSignatureCheckService, accountUtils,
           accountRepo);
@@ -201,12 +311,19 @@ public class IamWebSecurityConfig {
 
   @Configuration
   @Order(101)
-  public static class RegistrationConfig extends WebSecurityConfigurerAdapter {
+  public static class RegistrationConfig extends IamWebSecurityConfigurerAdapter {
     
     public static final String START_REGISTRATION_ENDPOINT = "/start-registration";
 
     @Autowired
     IamProperties iamProperties;
+
+    @Value("${server.port}")
+    private int serverPort;
+
+    public int getServerPort() {
+      return this.serverPort;
+    }
 
     AccessDeniedHandler accessDeniedHandler() {
       return (request, response, authError) -> {
@@ -226,11 +343,19 @@ public class IamWebSecurityConfig {
         discoveryId =
             String.format("/saml/login?idp=%s", iamProperties.getRegistration().getSamlEntityId());
       }
-      return new LoginUrlAuthenticationEntryPoint(discoveryId);
+
+      LoginUrlAuthenticationEntryPoint loginEntryPoint = new LoginUrlAuthenticationEntryPoint(discoveryId);
+      loginEntryPoint.setPortResolver(portResolver());
+      loginEntryPoint.setPortMapper(portMapper());
+      return loginEntryPoint;
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+
+      http.portMapper().http(getServerPort()).mapsTo(8080);
+
+      http.requestCache().requestCache(requestCache());
 
       http.requestMatchers()
         .antMatchers(START_REGISTRATION_ENDPOINT)
@@ -254,7 +379,7 @@ public class IamWebSecurityConfig {
 
   @Configuration
   @Order(105)
-  public static class ExternalOidcLogin extends WebSecurityConfigurerAdapter {
+  public static class ExternalOidcLogin extends IamWebSecurityConfigurerAdapter {
 
     @Autowired
     @Qualifier("OIDCAuthenticationManager")
@@ -267,6 +392,13 @@ public class IamWebSecurityConfig {
     @Qualifier("OIDCAuthenticationFilter")
     private OidcClientFilter oidcFilter;
 
+    @Value("${server.port}")
+    private int serverPort;
+
+    public int getServerPort() {
+      return this.serverPort;
+    }
+
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {
 
@@ -274,7 +406,10 @@ public class IamWebSecurityConfig {
     }
 
     public LoginUrlAuthenticationEntryPoint authenticationEntryPoint() {
-      return new LoginUrlAuthenticationEntryPoint("/openid_connect_login");
+      LoginUrlAuthenticationEntryPoint loginEntryPoint = new LoginUrlAuthenticationEntryPoint("/openid_connect_login");
+      loginEntryPoint.setPortResolver(portResolver());
+      loginEntryPoint.setPortMapper(portMapper());
+      return loginEntryPoint;
     }
 
     @Override
@@ -284,6 +419,10 @@ public class IamWebSecurityConfig {
 
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
+      http.portMapper().http(getServerPort()).mapsTo(8080);
+
+      http.requestCache().requestCache(requestCache());
+
       // @formatter:off
       http
         .antMatcher("/openid_connect_login**")
