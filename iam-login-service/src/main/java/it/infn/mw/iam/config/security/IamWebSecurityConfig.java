@@ -172,7 +172,7 @@ public class IamWebSecurityConfig {
   @Order(100)
   public static class UserLoginConfig extends IamWebSecurityConfigurerAdapter {
 
-    @Value("${server.port}")
+    @Value("${server.port:8080}")
     private int serverPort;
 
     @Value("${iam.baseUrl}")
@@ -214,10 +214,7 @@ public class IamWebSecurityConfig {
     private IamProperties iamProperties;
 
     public int getServerPort() {
-      if (this.serverPort != null && this.serverPort) {
           return this.serverPort;
-      }
-      return 8080;
     }
 
     @Autowired
@@ -321,14 +318,11 @@ public class IamWebSecurityConfig {
     @Autowired
     IamProperties iamProperties;
 
-    @Value("${server.port}")
+    @Value("${server.port:8080}")
     private int serverPort;
 
     public int getServerPort() {
-      if (this.serverPort != null && this.serverPort) {
           return this.serverPort;
-      }
-      return 8080;
     }
 
     AccessDeniedHandler accessDeniedHandler() {
@@ -398,14 +392,11 @@ public class IamWebSecurityConfig {
     @Qualifier("OIDCAuthenticationFilter")
     private OidcClientFilter oidcFilter;
 
-    @Value("${server.port}")
+    @Value("${server.port:8080}")
     private int serverPort;
 
     public int getServerPort() {
-      if (this.serverPort != null && this.serverPort) {
           return this.serverPort;
-      }
-      return 8080;
     }
 
     @Override
