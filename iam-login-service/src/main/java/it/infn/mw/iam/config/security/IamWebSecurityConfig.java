@@ -214,7 +214,8 @@ public class IamWebSecurityConfig {
     private IamProperties iamProperties;
 
     public int getServerPort() {
-          return this.serverPort;
+	  return 8080;
+          // return this.serverPort;
     }
 
     @Autowired
@@ -322,7 +323,8 @@ public class IamWebSecurityConfig {
     private int serverPort;
 
     public int getServerPort() {
-          return this.serverPort;
+	  return 8080;
+          // return this.serverPort;
     }
 
     AccessDeniedHandler accessDeniedHandler() {
@@ -396,7 +398,8 @@ public class IamWebSecurityConfig {
     private int serverPort;
 
     public int getServerPort() {
-          return this.serverPort;
+	  return 8080;
+          // return this.serverPort;
     }
 
     @Override
