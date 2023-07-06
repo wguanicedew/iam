@@ -80,7 +80,7 @@ import it.infn.mw.iam.service.aup.AUPSignatureCheckService;
 @EnableWebSecurity
 public class IamWebSecurityConfig {
   
-  public class IamWebSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
+  public static class IamWebSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
 
     public int getServerPort() {
       return 8080;
