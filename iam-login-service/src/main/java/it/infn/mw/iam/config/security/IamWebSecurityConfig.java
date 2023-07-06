@@ -130,7 +130,7 @@ public class IamWebSecurityConfig {
       private PortMapper portMapper() {
         PortMapperImpl portMapper = new PortMapperImpl();
         Map<String, String> mappings = new HashMap<>();
-        mappings.put(this.serverPort, "8080");
+        mappings.put(Integer.toString(this.serverPort), "8080");
         portMapper.setPortMappings(mappings);
         return portMapper;
       }
