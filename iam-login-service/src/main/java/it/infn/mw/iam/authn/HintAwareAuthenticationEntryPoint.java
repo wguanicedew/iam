@@ -55,7 +55,7 @@ public class HintAwareAuthenticationEntryPoint implements AuthenticationEntryPoi
       HttpServletResponse response) throws IOException {
 
     String redirectUrl = hintService.resolve(request.getParameter(EXT_AUTHN_HINT_PARAM));
-    redirectUrl.replace("8080", (this.serverPort.toString()));
+    redirectUrl.replace("8080", Integer.toString(this.serverPort));
     response.sendRedirect(redirectUrl);
   }
 
